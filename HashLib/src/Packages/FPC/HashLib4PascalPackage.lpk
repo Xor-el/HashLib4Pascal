@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <PathDelim Value="\"/>
+    <Name Value="HashLib4PascalPackage"/>
+    <Type Value="RunTimeOnly"/>
+    <Author Value="Xor-el (Ugochukwu Mmaduekwe)"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="..\..\.."/>
+        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils"/>
+        <UnitOutputDirectory Value="C:\bin\FPC\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="4"/>
+        </Optimizations>
+      </CodeGeneration>
+    </CompilerOptions>
+    <Description Value="HashLib4Pascal is a Delphi/FPC compatible library that provides an easy to use interface for computing hashes and checksums of strings (with a specified encoding), files, streams, byte arrays and untyped data to mention but a few.
+"/>
+    <License Value="MIT License"/>
+    <Version Major="1"/>
+    <Files Count="86">
+      <Item1>
+        <Filename Value="..\..\Base\uConverters.pas"/>
+        <UnitName Value="uConverters"/>
+      </Item1>
+      <Item2>
+        <Filename Value="..\..\Base\uHash.pas"/>
+        <UnitName Value="uHash"/>
+      </Item2>
+      <Item3>
+        <Filename Value="..\..\Base\uHashBuffer.pas"/>
+        <UnitName Value="uHashBuffer"/>
+      </Item3>
+      <Item4>
+        <Filename Value="..\..\Base\uHashCryptoNotBuildIn.pas"/>
+        <UnitName Value="uHashCryptoNotBuildIn"/>
+      </Item4>
+      <Item5>
+        <Filename Value="..\..\Base\uHashFactory.pas"/>
+        <UnitName Value="uHashFactory"/>
+      </Item5>
+      <Item6>
+        <Filename Value="..\..\Base\uHashResult.pas"/>
+        <UnitName Value="uHashResult"/>
+      </Item6>
+      <Item7>
+        <Filename Value="..\..\Base\uHashRounds.pas"/>
+        <UnitName Value="uHashRounds"/>
+      </Item7>
+      <Item8>
+        <Filename Value="..\..\Base\uHashSize.pas"/>
+        <UnitName Value="uHashSize"/>
+      </Item8>
+      <Item9>
+        <Filename Value="..\..\Base\uHMACNotBuildInAdapter.pas"/>
+        <UnitName Value="uHMACNotBuildInAdapter"/>
+      </Item9>
+      <Item10>
+        <Filename Value="..\..\Base\uMultipleTransformNonBlock.pas"/>
+        <UnitName Value="uMultipleTransformNonBlock"/>
+      </Item10>
+      <Item11>
+        <Filename Value="..\..\Checksum\uAdler32.pas"/>
+        <UnitName Value="uAdler32"/>
+      </Item11>
+      <Item12>
+        <Filename Value="..\..\Checksum\uCRC.pas"/>
+        <UnitName Value="uCRC"/>
+      </Item12>
+      <Item13>
+        <Filename Value="..\..\Checksum\uCRC16.pas"/>
+        <UnitName Value="uCRC16"/>
+      </Item13>
+      <Item14>
+        <Filename Value="..\..\Checksum\uCRC32.pas"/>
+        <UnitName Value="uCRC32"/>
+      </Item14>
+      <Item15>
+        <Filename Value="..\..\Checksum\uCRC64.pas"/>
+        <UnitName Value="uCRC64"/>
+      </Item15>
+      <Item16>
+        <Filename Value="..\..\Crypto\uGost.pas"/>
+        <UnitName Value="uGost"/>
+      </Item16>
+      <Item17>
+        <Filename Value="..\..\Crypto\uGrindahl256.pas"/>
+        <UnitName Value="uGrindahl256"/>
+      </Item17>
+      <Item18>
+        <Filename Value="..\..\Crypto\uGrindahl512.pas"/>
+        <UnitName Value="uGrindahl512"/>
+      </Item18>
+      <Item19>
+        <Filename Value="..\..\Crypto\uHAS160.pas"/>
+        <UnitName Value="uHAS160"/>
+      </Item19>
+      <Item20>
+        <Filename Value="..\..\Crypto\uHaval.pas"/>
+        <UnitName Value="uHaval"/>
+      </Item20>
+      <Item21>
+        <Filename Value="..\..\Crypto\uMD2.pas"/>
+        <UnitName Value="uMD2"/>
+      </Item21>
+      <Item22>
+        <Filename Value="..\..\Crypto\uMD4.pas"/>
+        <UnitName Value="uMD4"/>
+      </Item22>
+      <Item23>
+        <Filename Value="..\..\Crypto\uMD5.pas"/>
+        <UnitName Value="uMD5"/>
+      </Item23>
+      <Item24>
+        <Filename Value="..\..\Crypto\uMDBase.pas"/>
+        <UnitName Value="uMDBase"/>
+      </Item24>
+      <Item25>
+        <Filename Value="..\..\Crypto\uPanama.pas"/>
+        <UnitName Value="uPanama"/>
+      </Item25>
+      <Item26>
+        <Filename Value="..\..\Crypto\uRadioGatun32.pas"/>
+        <UnitName Value="uRadioGatun32"/>
+      </Item26>
+      <Item27>
+        <Filename Value="..\..\Crypto\uRadioGatun64.pas"/>
+        <UnitName Value="uRadioGatun64"/>
+      </Item27>
+      <Item28>
+        <Filename Value="..\..\Crypto\uRIPEMD.pas"/>
+        <UnitName Value="uRIPEMD"/>
+      </Item28>
+      <Item29>
+        <Filename Value="..\..\Crypto\uRIPEMD128.pas"/>
+        <UnitName Value="uRIPEMD128"/>
+      </Item29>
+      <Item30>
+        <Filename Value="..\..\Crypto\uRIPEMD160.pas"/>
+        <UnitName Value="uRIPEMD160"/>
+      </Item30>
+      <Item31>
+        <Filename Value="..\..\Crypto\uRIPEMD256.pas"/>
+        <UnitName Value="uRIPEMD256"/>
+      </Item31>
+      <Item32>
+        <Filename Value="..\..\Crypto\uRIPEMD320.pas"/>
+        <UnitName Value="uRIPEMD320"/>
+      </Item32>
+      <Item33>
+        <Filename Value="..\..\Crypto\uSHA0.pas"/>
+        <UnitName Value="uSHA0"/>
+      </Item33>
+      <Item34>
+        <Filename Value="..\..\Crypto\uSHA1.pas"/>
+        <UnitName Value="uSHA1"/>
+      </Item34>
+      <Item35>
+        <Filename Value="..\..\Crypto\uSHA2_224.pas"/>
+        <UnitName Value="uSHA2_224"/>
+      </Item35>
+      <Item36>
+        <Filename Value="..\..\Crypto\uSHA2_256.pas"/>
+        <UnitName Value="uSHA2_256"/>
+      </Item36>
+      <Item37>
+        <Filename Value="..\..\Crypto\uSHA2_256Base.pas"/>
+        <UnitName Value="uSHA2_256Base"/>
+      </Item37>
+      <Item38>
+        <Filename Value="..\..\Crypto\uSHA2_384.pas"/>
+        <UnitName Value="uSHA2_384"/>
+      </Item38>
+      <Item39>
+        <Filename Value="..\..\Crypto\uSHA2_512.pas"/>
+        <UnitName Value="uSHA2_512"/>
+      </Item39>
+      <Item40>
+        <Filename Value="..\..\Crypto\uSHA2_512Base.pas"/>
+        <UnitName Value="uSHA2_512Base"/>
+      </Item40>
+      <Item41>
+        <Filename Value="..\..\Crypto\uSHA2_512_224.pas"/>
+        <UnitName Value="uSHA2_512_224"/>
+      </Item41>
+      <Item42>
+        <Filename Value="..\..\Crypto\uSHA2_512_256.pas"/>
+        <UnitName Value="uSHA2_512_256"/>
+      </Item42>
+      <Item43>
+        <Filename Value="..\..\Crypto\uSHA3.pas"/>
+        <UnitName Value="uSHA3"/>
+      </Item43>
+      <Item44>
+        <Filename Value="..\..\Crypto\uSnefru.pas"/>
+        <UnitName Value="uSnefru"/>
+      </Item44>
+      <Item45>
+        <Filename Value="..\..\Crypto\uTiger.pas"/>
+        <UnitName Value="uTiger"/>
+      </Item45>
+      <Item46>
+        <Filename Value="..\..\Crypto\uTiger2.pas"/>
+        <UnitName Value="uTiger2"/>
+      </Item46>
+      <Item47>
+        <Filename Value="..\..\Crypto\uWhirlPool_512.pas"/>
+        <UnitName Value="uWhirlPool_512"/>
+      </Item47>
+      <Item48>
+        <Filename Value="..\..\Hash128\uMurmurHash3_x64_128.pas"/>
+        <UnitName Value="uMurmurHash3_x64_128"/>
+      </Item48>
+      <Item49>
+        <Filename Value="..\..\Hash32\uAP.pas"/>
+        <UnitName Value="uAP"/>
+      </Item49>
+      <Item50>
+        <Filename Value="..\..\Hash32\uBernstein.pas"/>
+        <UnitName Value="uBernstein"/>
+      </Item50>
+      <Item51>
+        <Filename Value="..\..\Hash32\uBernstein1.pas"/>
+        <UnitName Value="uBernstein1"/>
+      </Item51>
+      <Item52>
+        <Filename Value="..\..\Hash32\uBKDR.pas"/>
+        <UnitName Value="uBKDR"/>
+      </Item52>
+      <Item53>
+        <Filename Value="..\..\Hash32\uDEK.pas"/>
+        <UnitName Value="uDEK"/>
+      </Item53>
+      <Item54>
+        <Filename Value="..\..\Hash32\uDJB.pas"/>
+        <UnitName Value="uDJB"/>
+      </Item54>
+      <Item55>
+        <Filename Value="..\..\Hash32\uELF.pas"/>
+        <UnitName Value="uELF"/>
+      </Item55>
+      <Item56>
+        <Filename Value="..\..\Hash32\uFNV.pas"/>
+        <UnitName Value="uFNV"/>
+      </Item56>
+      <Item57>
+        <Filename Value="..\..\Hash32\uFNV1a.pas"/>
+        <UnitName Value="uFNV1a"/>
+      </Item57>
+      <Item58>
+        <Filename Value="..\..\Hash32\uJenkins3.pas"/>
+        <UnitName Value="uJenkins3"/>
+      </Item58>
+      <Item59>
+        <Filename Value="..\..\Hash32\uJS.pas"/>
+        <UnitName Value="uJS"/>
+      </Item59>
+      <Item60>
+        <Filename Value="..\..\Hash32\uMurmur2.pas"/>
+        <UnitName Value="uMurmur2"/>
+      </Item60>
+      <Item61>
+        <Filename Value="..\..\Hash32\uMurmurHash3_x86_128.pas"/>
+        <UnitName Value="uMurmurHash3_x86_128"/>
+      </Item61>
+      <Item62>
+        <Filename Value="..\..\Hash32\uMurmurHash3_x86_32.pas"/>
+        <UnitName Value="uMurmurHash3_x86_32"/>
+      </Item62>
+      <Item63>
+        <Filename Value="..\..\Hash32\uOneAtTime.pas"/>
+        <UnitName Value="uOneAtTime"/>
+      </Item63>
+      <Item64>
+        <Filename Value="..\..\Hash32\uPJW.pas"/>
+        <UnitName Value="uPJW"/>
+      </Item64>
+      <Item65>
+        <Filename Value="..\..\Hash32\uRotating.pas"/>
+        <UnitName Value="uRotating"/>
+      </Item65>
+      <Item66>
+        <Filename Value="..\..\Hash32\uRS.pas"/>
+        <UnitName Value="uRS"/>
+      </Item66>
+      <Item67>
+        <Filename Value="..\..\Hash32\uSDBM.pas"/>
+        <UnitName Value="uSDBM"/>
+      </Item67>
+      <Item68>
+        <Filename Value="..\..\Hash32\uShiftAndXor.pas"/>
+        <UnitName Value="uShiftAndXor"/>
+      </Item68>
+      <Item69>
+        <Filename Value="..\..\Hash32\uSuperFast.pas"/>
+        <UnitName Value="uSuperFast"/>
+      </Item69>
+      <Item70>
+        <Filename Value="..\..\Hash32\uXXHash32.pas"/>
+        <UnitName Value="uXXHash32"/>
+      </Item70>
+      <Item71>
+        <Filename Value="..\..\Hash64\uFNV1a64.pas"/>
+        <UnitName Value="uFNV1a64"/>
+      </Item71>
+      <Item72>
+        <Filename Value="..\..\Hash64\uFNV64.pas"/>
+        <UnitName Value="uFNV64"/>
+      </Item72>
+      <Item73>
+        <Filename Value="..\..\Hash64\uMurmur2_64.pas"/>
+        <UnitName Value="uMurmur2_64"/>
+      </Item73>
+      <Item74>
+        <Filename Value="..\..\Hash64\uSipHash2_4.pas"/>
+        <UnitName Value="uSipHash2_4"/>
+      </Item74>
+      <Item75>
+        <Filename Value="..\..\Hash64\uXXHash64.pas"/>
+        <UnitName Value="uXXHash64"/>
+      </Item75>
+      <Item76>
+        <Filename Value="..\..\Include\HashLib.inc"/>
+        <Type Value="Include"/>
+      </Item76>
+      <Item77>
+        <Filename Value="..\..\Include\Helper.inc"/>
+        <Type Value="Include"/>
+      </Item77>
+      <Item78>
+        <Filename Value="..\..\Interfaces\uIHash.pas"/>
+        <UnitName Value="uIHash"/>
+      </Item78>
+      <Item79>
+        <Filename Value="..\..\Interfaces\uIHashBuffer.pas"/>
+        <UnitName Value="uIHashBuffer"/>
+      </Item79>
+      <Item80>
+        <Filename Value="..\..\Interfaces\uIHashInfo.pas"/>
+        <UnitName Value="uIHashInfo"/>
+      </Item80>
+      <Item81>
+        <Filename Value="..\..\Interfaces\uIHashResult.pas"/>
+        <UnitName Value="uIHashResult"/>
+      </Item81>
+      <Item82>
+        <Filename Value="..\..\Nullable\uNullable.pas"/>
+        <UnitName Value="uNullable"/>
+      </Item82>
+      <Item83>
+        <Filename Value="..\..\Utils\uArrayExtensions.pas"/>
+        <UnitName Value="uArrayExtensions"/>
+      </Item83>
+      <Item84>
+        <Filename Value="..\..\Utils\uBitConverter.pas"/>
+        <UnitName Value="uBitConverter"/>
+      </Item84>
+      <Item85>
+        <Filename Value="..\..\Utils\uBits.pas"/>
+        <UnitName Value="uBits"/>
+      </Item85>
+      <Item86>
+        <Filename Value="..\..\Utils\uHashLibTypes.pas"/>
+        <UnitName Value="uHashLibTypes"/>
+      </Item86>
+    </Files>
+    <LazDoc PackageName="(default)"/>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
