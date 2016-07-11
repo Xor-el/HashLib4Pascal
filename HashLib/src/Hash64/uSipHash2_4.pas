@@ -1,6 +1,6 @@
 unit uSipHash2_4;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 // compression rounds c = 2,
 // finalization rounds d = 4
 

@@ -3,7 +3,7 @@ unit uCRC;
 // A vast majority if not all of the parameters for these CRC standards
 // were gotten from http://reveng.sourceforge.net/crc-catalogue/.
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

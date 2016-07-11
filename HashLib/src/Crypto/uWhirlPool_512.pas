@@ -1,6 +1,6 @@
 unit uWhirlPool_512;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

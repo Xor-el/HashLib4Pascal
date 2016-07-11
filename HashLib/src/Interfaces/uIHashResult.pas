@@ -1,6 +1,6 @@
 unit uIHashResult;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

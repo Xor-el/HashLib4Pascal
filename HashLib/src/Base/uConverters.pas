@@ -1,6 +1,6 @@
 unit uConverters;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 
@@ -26,9 +26,9 @@ uses
 type
   TConverters = class sealed(TObject)
 
+{$IFDEF DEBUG}
   strict private
 
-{$IFDEF DEBUG}
     class procedure Check<I>(a_in: TArray<I>; a_in_size, a_out_size: Int32);
       overload; static;
 

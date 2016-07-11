@@ -1,6 +1,6 @@
 unit uSHA3;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

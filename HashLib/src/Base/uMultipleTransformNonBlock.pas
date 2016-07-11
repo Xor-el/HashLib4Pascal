@@ -1,6 +1,6 @@
 unit uMultipleTransformNonBlock;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

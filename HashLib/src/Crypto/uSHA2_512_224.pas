@@ -1,6 +1,6 @@
 unit uSHA2_512_224;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 

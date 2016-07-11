@@ -1,6 +1,6 @@
 unit uMurmurHash3_x64_128;
 
-{$I src\Include\HashLib.inc}
+{$I ..\..\Include\HashLib.inc}
 
 interface
 
