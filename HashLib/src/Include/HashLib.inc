@@ -22,7 +22,7 @@
 // It does not affect the binary size or generated code
 {$DEFINITIONINFO ON}
 
- // Delphi 2010
+ // 2010 only
 {$IF CompilerVersion = 21.0}
 {$DEFINE DELPHI2010}
 {$IFEND}
@@ -30,6 +30,11 @@
   // 2010 and Above
 {$IF CompilerVersion >= 21.0}
 {$DEFINE DELPHI2010_UP}
+{$IFEND}
+
+  // XE and Above
+{$IF CompilerVersion >= 22.0}
+{$DEFINE DELPHIXE_UP}
 {$IFEND}
 
   // XE2 and Above

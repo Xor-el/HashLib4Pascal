@@ -41,7 +41,7 @@ type
   /// </summary>
   THashLibMatrixGenericArray<T> = array of THashLibGenericArray<T>;
 
-{$IFDEF DELPHI2010_UP}
+{$IFDEF DELPHIXE_UP}
   /// <summary>
   /// Represents a dynamic array of UInt32.
   /// </summary>
@@ -102,7 +102,7 @@ type
   /// Represents a dynamic array of array of UInt64.
   /// </summary>
   THashLibMatrixUInt64Array = array of THashLibUInt64Array;
-{$ENDIF DELPHI2010_UP}
+{$ENDIF DELPHIXE_UP}
 
 implementation
 
