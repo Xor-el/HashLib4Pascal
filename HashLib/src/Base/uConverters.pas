@@ -27,8 +27,33 @@ type
   TConverters = class sealed(TObject)
 
 {$IFDEF DEBUG}
-  strict private
+    // although the visibility level below is meant to be "strict private",
+    // older versions of Delphi (2010 and XE) keeps complaining about some
+    // unused methods even though this Hint is false.
+  protected
+{$IFDEF DELPHI2010}
+    // To Bypass a Bug in Delphi 2010 Generics.
+    class procedure Check(a_in: THashLibByteArray;
+      a_in_size, a_out_size: Int32); overload; static;
 
+    class procedure Check(a_in: THashLibByteArray;
+      a_in_size, a_out_size, a_index, a_length: Int32); overload; static;
+
+    class procedure Check(a_in: THashLibUInt32Array;
+      a_in_size, a_out_size, a_index, a_length: Int32); overload; static;
+
+    class procedure Check(a_in: THashLibUInt64Array;
+      a_in_size, a_out_size, a_index, a_length: Int32); overload; static;
+
+    class procedure Check(a_in: THashLibByteArray; a_in_size: Int32;
+      a_result: THashLibUInt32Array; a_out_size, a_index_in, a_length,
+      a_index_out: Int32); overload; static;
+
+    class procedure Check(a_in: THashLibByteArray; a_in_size: Int32;
+      a_result: THashLibUInt64Array; a_out_size, a_index_in, a_length,
+      a_index_out: Int32); overload; static;
+
+{$ELSE}
     class procedure Check<I>(a_in: TArray<I>; a_in_size, a_out_size: Int32);
       overload; static;
 
@@ -38,7 +63,7 @@ type
     class procedure Check<I, O>(a_in: TArray<I>; a_in_size: Int32;
       a_result: TArray<O>; a_out_size, a_index_in, a_length,
       a_index_out: Int32); overload; static;
-
+{$ENDIF DELPHI2010}
 {$ENDIF}
   public
 
@@ -147,6 +172,119 @@ implementation
 { TConverters }
 
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+
+class procedure TConverters.Check(a_in: THashLibByteArray; a_in_size: Int32;
+  a_result: THashLibUInt32Array; a_out_size, a_index_in, a_length,
+  a_index_out: Int32);
+begin
+  System.Assert(((a_length * a_in_size) mod a_out_size) = 0);
+
+  if (a_out_size > a_in_size) then
+    System.Assert((a_length mod (a_out_size div a_in_size)) = 0);
+
+  System.Assert(a_index_in >= 0);
+
+  if (a_length > 0) then
+    System.Assert(a_index_in < System.Length(a_in));
+
+  System.Assert(a_length >= 0);
+  System.Assert((a_index_in + a_length) <= System.Length(a_in));
+  System.Assert((a_index_in + a_length) <= System.Length(a_in));
+
+  System.Assert((a_index_out + System.Length(a_result)) >=
+    (a_length div a_out_size));
+end;
+
+class procedure TConverters.Check(a_in: THashLibByteArray; a_in_size: Int32;
+  a_result: THashLibUInt64Array; a_out_size, a_index_in, a_length,
+  a_index_out: Int32);
+begin
+  System.Assert(((a_length * a_in_size) mod a_out_size) = 0);
+
+  if (a_out_size > a_in_size) then
+    System.Assert((a_length mod (a_out_size div a_in_size)) = 0);
+
+  System.Assert(a_index_in >= 0);
+
+  if (a_length > 0) then
+    System.Assert(a_index_in < System.Length(a_in));
+
+  System.Assert(a_length >= 0);
+  System.Assert((a_index_in + a_length) <= System.Length(a_in));
+  System.Assert((a_index_in + a_length) <= System.Length(a_in));
+
+  System.Assert((a_index_out + System.Length(a_result)) >=
+    (a_length div a_out_size));
+end;
+
+class procedure TConverters.Check(a_in: THashLibByteArray;
+  a_in_size, a_out_size: Int32);
+begin
+  System.Assert(((System.Length(a_in) * a_in_size) mod a_out_size) = 0);
+end;
+
+class procedure TConverters.Check(a_in: THashLibByteArray;
+  a_in_size, a_out_size, a_index, a_length: Int32);
+begin
+  System.Assert(((a_length * a_in_size) mod a_out_size) = 0);
+
+  if (a_out_size > a_in_size) then
+    System.Assert((a_length mod (a_out_size div a_in_size)) = 0)
+  else
+    System.Assert((a_in_size mod a_out_size) = 0);
+
+  System.Assert(a_index >= 0);
+
+  if (a_length > 0) then
+    System.Assert(a_index < System.Length(a_in));
+
+  System.Assert(a_length >= 0);
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+end;
+
+class procedure TConverters.Check(a_in: THashLibUInt32Array;
+  a_in_size, a_out_size, a_index, a_length: Int32);
+begin
+  System.Assert(((a_length * a_in_size) mod a_out_size) = 0);
+
+  if (a_out_size > a_in_size) then
+    System.Assert((a_length mod (a_out_size div a_in_size)) = 0)
+  else
+    System.Assert((a_in_size mod a_out_size) = 0);
+
+  System.Assert(a_index >= 0);
+
+  if (a_length > 0) then
+    System.Assert(a_index < System.Length(a_in));
+
+  System.Assert(a_length >= 0);
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+end;
+
+class procedure TConverters.Check(a_in: THashLibUInt64Array;
+  a_in_size, a_out_size, a_index, a_length: Int32);
+begin
+  System.Assert(((a_length * a_in_size) mod a_out_size) = 0);
+
+  if (a_out_size > a_in_size) then
+    System.Assert((a_length mod (a_out_size div a_in_size)) = 0)
+  else
+    System.Assert((a_in_size mod a_out_size) = 0);
+
+  System.Assert(a_index >= 0);
+
+  if (a_length > 0) then
+    System.Assert(a_index < System.Length(a_in));
+
+  System.Assert(a_length >= 0);
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+  System.Assert((a_index + a_length) <= System.Length(a_in));
+end;
+
+{$ELSE}
 
 class procedure TConverters.Check<I, O>(a_in: TArray<I>; a_in_size: Int32;
   a_result: TArray<O>; a_out_size, a_index_in, a_length, a_index_out: Int32);
@@ -195,6 +333,7 @@ begin
   System.Assert((a_index + a_length) <= System.Length(a_in));
 end;
 
+{$ENDIF DELPHI2010}
 {$ENDIF}
 
 class function TConverters.ConvertBytesToHexString(a_in: THashLibByteArray;
@@ -223,7 +362,11 @@ begin
   if (a_group) then
   begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+    Check(a_in, 1, 4);
+{$ELSE}
     Check<Byte>(a_in, 1, 4);
+{$ENDIF DELPHI2010}
 {$ENDIF}
     StringList := TStringList.Create();
     StringList.StrictDelimiter := True;
@@ -263,7 +406,11 @@ begin
   if (a_length = -1) then
     a_length := System.Length(a_in);
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 4, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 4, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length div 4);
 
@@ -275,7 +422,11 @@ class procedure TConverters.ConvertBytesToUInt32(a_in: THashLibByteArray;
   a_index, a_length: Int32; a_out: THashLibUInt32Array);
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 4, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 4, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.Move(a_in[a_index], a_out[0], a_length);
 end;
@@ -331,7 +482,11 @@ var
   b1: Byte;
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, a_result, 4, a_index, a_length, a_index_out);
+{$ELSE}
   Check<Byte, UInt32>(a_in, 1, a_result, 4, a_index, a_length, a_index_out);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   I := a_index_out;
   while a_length > 0 do
@@ -357,7 +512,11 @@ class function TConverters.ConvertBytesToUInt32SwapOrder
   (a_in: THashLibByteArray; a_index, a_length: Int32): THashLibUInt32Array;
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 4, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 4, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length div 4);
   ConvertBytesToUInt32SwapOrder(a_in, a_index, a_length, result, 0);
@@ -380,7 +539,11 @@ begin
     a_length := System.Length(a_in);
 
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 8, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 8, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length div 8);
   ConvertBytesToUInt64(a_in, a_index, a_length, result, 0);
@@ -391,7 +554,11 @@ class procedure TConverters.ConvertBytesToUInt64(a_in: THashLibByteArray;
   a_index_in, a_length: Int32; a_out: THashLibUInt64Array; a_index_out: Int32);
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, a_out, 8, a_index_in, a_length, a_index_out);
+{$ELSE}
   Check<Byte, UInt64>(a_in, 1, a_out, 8, a_index_in, a_length, a_index_out);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.Move(a_in[a_index_in], a_out[a_index_out * 8], a_length);
 end;
@@ -400,7 +567,11 @@ class function TConverters.ConvertBytesToUInt64SwapOrder
   (a_in: THashLibByteArray; a_index, a_length: Int32): THashLibUInt64Array;
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 8, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 8, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length div 8);
   ConvertBytesToUInt64SwapOrder(a_in, a_index, a_length, result);
@@ -414,7 +585,11 @@ var
   u1, u2, u3, u4, u5, u6, u7, u8: UInt64;
 begin
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 1, 8, a_index, a_length);
+{$ELSE}
   Check<Byte>(a_in, 1, 8, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   I := 0;
   while a_length > 0 do
@@ -555,7 +730,11 @@ begin
     a_length := System.Length(a_in);
 
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 4, 1, a_index, a_length);
+{$ELSE}
   Check<UInt32>(a_in, 4, 1, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length * 4);
   System.Move(a_in[a_index], result[0], a_length * System.SizeOf(UInt32));
@@ -569,7 +748,11 @@ begin
   if (a_length = -1) then
     a_length := System.Length(a_in);
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 4, 1, a_index, a_length);
+{$ELSE}
   Check<UInt32>(a_in, 4, 1, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length * 4);
   j := 0;
@@ -598,7 +781,11 @@ begin
     a_length := System.Length(a_in);
 
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 8, 1, a_index, a_length);
+{$ELSE}
   Check<UInt64>(a_in, 8, 1, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length * 8);
   System.Move(a_in[a_index], result[0], a_length * System.SizeOf(UInt64));
@@ -628,7 +815,11 @@ begin
   if (a_length = -1) then
     a_length := System.Length(a_in);
 {$IFDEF DEBUG}
+{$IFDEF DELPHI2010}
+  Check(a_in, 8, 1, a_index, a_length);
+{$ELSE}
   Check<UInt64>(a_in, 8, 1, a_index, a_length);
+{$ENDIF DELPHI2010}
 {$ENDIF}
   System.SetLength(result, a_length * 8);
   j := 0;
