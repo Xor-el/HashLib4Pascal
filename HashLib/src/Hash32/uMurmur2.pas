@@ -1,5 +1,7 @@
 unit uMurmur2;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
@@ -22,7 +24,7 @@ type
       Fm_key, Fm_working_key, Fm_h: UInt32;
 
   const
-    CKEY = UInt32($C58F1A7B);
+   CKEY = UInt32($0);
     M = UInt32($5BD1E995);
     R = Int32(24);
 

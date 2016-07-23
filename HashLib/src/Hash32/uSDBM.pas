@@ -1,5 +1,7 @@
 unit uSDBM;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

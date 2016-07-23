@@ -1,6 +1,6 @@
 unit uHashResult;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -67,7 +67,7 @@ type
     function GetUInt32(): UInt32;
     function GetInt32(): Int32;
     function GetUInt64(): UInt64;
-    function ToString(a_group: Boolean = true): String; reintroduce;
+    function ToString(a_group: Boolean = false): String; reintroduce;
     function Equals(a_hashResult: IHashResult): Boolean; reintroduce;
     function GetHashCode(): {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
 {$ENDIF DELPHI}override;

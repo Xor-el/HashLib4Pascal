@@ -1,10 +1,13 @@
 unit uXXHash64;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
 uses
+{$IFDEF DELPHI}
+  uBitConverter,
+{$ENDIF DELPHI}
   uHashLibTypes,
   uHash,
   uConverters,

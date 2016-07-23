@@ -12,6 +12,8 @@
 {$IFDEF FPC}
 {$UNDEF DELPHI}
 {$MODE delphi}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
 {$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$ENDIF FPC}
 

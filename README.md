@@ -1,2 +1,86 @@
 # HashLib4Pascal
-HashLib4Pascal is a Delphi/FPC compatible library that provides an easy to use interface for computing hashes and checksums of strings (with a specified encoding), files, streams, byte arrays and untyped data to mention but a few.
+HashLib4Pascal is a Delphi/FreePascal compatible library that provides an easy to use interface for computing hashes and checksums of strings (with a specified encoding), files, streams, byte arrays and untyped data to mention but a few.
+It also supports Incremental Hashing.
+
+**Supported Algorithms:**
+
+    non-cryptographic 32-bits hash algorithms: AP, BKDR, Bernstein, Bernstein1, DEK, DJB, 
+    ELF, FNV, FNV1a, JS, Jenkins3, Murmur2, MurmurHash3_x86_32, OneAtTime, PJW, RS, 
+    Rotating, SDBM, ShiftAndXor, SuperFast, XXHash32.
+
+    non-cryptographic 64-bits algorithms: FNV, FNV1a, Murmur2_64, SipHash2_4, XXHash64.
+
+    non-cryptographic 128-bits algorithms: MurmurHash3_x86_128, MurmurHash3_x64_128. 
+
+    checksum algorithms: Adler32, All CRC Variants from CRC3 to CRC64. 
+
+    cryptographic algorithms: GOST, Grindahl, HAS160, Haval, MD2, MD4, MD5, Panama, 
+    RadioGatun, RIPEMD, RIPEMD128, RIPEMD160, RIPEMD256, RIPEMD320, SHA0, SHA1, SHA2-224,
+    SHA2-256, SHA2-384, SHA2-512, SHA2-512-224, SHA2-512-256, SHA3-224, SHA3-256, SHA3-384, 
+    SHA3-512,Snefru128, Snefru256, Tiger, Tiger2, Whirlpool512.
+
+    HMAC for any of the above.
+
+**Supported Compilers**
+ 
+    FreePascal 3.0.0 and Above.
+    
+    Delphi 2010 and Above.
+
+**Installing the Library.**
+
+**Method One:**
+
+ Use the Provided Packages in the "Packages" Folder.
+
+**Method Two:**
+
+ Add the Library Path and Sub Path to your Project Search Path.
+
+**Usage Examples.**
+
+    Coming Soon.
+    But in the mean time, you can poke around the sources and Unit Tests.
+
+ **Unit Tests.**
+
+To Run Unit Tests,
+
+**For FPC 3.0.0 and above**
+
+
+    Simply compile and run "HashLib.Tests" project in "FreePascal.Tests" Folder.
+
+**For Delphi 2010 and above**
+
+   **Method One (Using DUnit Test Runner)**
+
+     To Build and Run the Unit Tests For Delphi 10 Seattle (should be similar for 
+     other versions)
+    
+    1). Open Project Options of Unit Test (HashLib.Tests) in "Delphi.Tests" Folder.
+    
+    2). Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
+    
+    3). In Output directory add ".\$(Platform)\$(Config)" without the quotes.
+    
+    4). In Search path add "$(BDS)\Source\DUnit\src" without the quotes.
+    
+    5). In Unit output directory add "." without the quotes.
+    
+    6). In Unit scope names (If Available), Delete "DUnitX" from the List.
+    
+    Press Ok and save, then build and run.
+    
+ **Method Two (Using TestInsight) (Preferred).**
+
+    1). Download and Install TestInsight.
+    
+    2). To Use TestInsight, Just Open (HashLib.Tests.TestInsight) in "Delphi.Tests" Folder, 
+    right-click on the project, then select "Enable for TestInsight" 
+    or "TestInsight Project".
+    Save Project then Build and Run Test Project through TestInsight.  
+
+###License
+
+This "Software" is Licensed Under  **`MIT License (MIT)`** .

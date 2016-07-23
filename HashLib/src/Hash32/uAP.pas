@@ -1,5 +1,7 @@
 unit uAP;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
@@ -36,7 +38,7 @@ end;
 
 procedure TAP.Initialize;
 begin
-  Fm_hash := 0;
+  Fm_hash := $AAAAAAAA;
   Fm_index := 0;
 end;
 
@@ -55,7 +57,7 @@ begin
   begin
 
     if (Fm_index and 1) = 0 then
-      Fm_hash := Fm_hash xor ((Fm_hash shl 7) xor a_data[i] xor (Fm_hash shr 3))
+      Fm_hash := Fm_hash xor ((Fm_hash shl 7) xor a_data[i] * (Fm_hash shr 3))
 
     else
 

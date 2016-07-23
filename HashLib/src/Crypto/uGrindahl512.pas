@@ -1,6 +1,6 @@
 unit uGrindahl512;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

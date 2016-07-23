@@ -1,6 +1,6 @@
 unit uTiger2;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -12,6 +12,9 @@ uses
   TypInfo,
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
+{$IFDEF DELPHI}
+  uBitConverter,
+{$ENDIF DELPHI}
   uHashLibTypes,
   uArrayExtensions,
   uConverters,
@@ -870,4 +873,3 @@ begin
 end;
 
 end.
-

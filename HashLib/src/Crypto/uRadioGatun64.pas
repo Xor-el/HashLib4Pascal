@@ -1,6 +1,6 @@
 unit uRadioGatun64;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

@@ -1,5 +1,7 @@
 unit uOneAtTime;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

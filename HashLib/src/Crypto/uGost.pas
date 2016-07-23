@@ -1,6 +1,6 @@
 unit uGost;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

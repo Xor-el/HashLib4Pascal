@@ -1,5 +1,7 @@
 unit uRS;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

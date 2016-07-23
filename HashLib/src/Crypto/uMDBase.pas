@@ -1,5 +1,7 @@
 unit uMDBase;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

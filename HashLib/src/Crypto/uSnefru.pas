@@ -1,6 +1,6 @@
 unit uSnefru;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -81,7 +81,10 @@ var
   pad: THashLibByteArray;
 begin
   bits := Fm_processed_bytes * 8;
-  padindex := 2 * BlockSize - Fm_buffer.Pos - 8;
+  if Fm_buffer.Pos > 0 then
+    padindex := 2 * BlockSize - Fm_buffer.Pos - 8
+  else
+    padindex := BlockSize - Fm_buffer.Pos - 8;
 
   System.SetLength(pad, padindex + 8);
 
@@ -121,7 +124,7 @@ begin
   while i < Fm_security_level do
 
   begin
-    sbox0 := Fs_boxes[i * 2];
+    sbox0 := Fs_boxes[i * 2 + 0];
     sbox1 := Fs_boxes[i * 2 + 1];
 
     j := 0;

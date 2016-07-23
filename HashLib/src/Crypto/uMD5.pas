@@ -1,5 +1,7 @@
 unit uMD5;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

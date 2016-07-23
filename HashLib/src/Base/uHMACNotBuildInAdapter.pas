@@ -1,6 +1,6 @@
 unit uHMACNotBuildInAdapter;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -24,8 +24,8 @@ type
 
   strict private
 
-    // Fm_opad, Fm_ipad, Fm_key: THashLibByteArray;
     Fm_hash: IHash;
+    Fm_opad, Fm_ipad, Fm_key: THashLibByteArray;
 
   strict protected
 
@@ -37,8 +37,6 @@ type
     procedure UpdatePads();
 
   public
-
-    Fm_opad, Fm_ipad, Fm_key: THashLibByteArray;
 
     constructor Create(a_underlyingHash: IHash);
     procedure Initialize(); override;
@@ -109,7 +107,7 @@ begin
   end;
 
   Idx := 0;
-  while Idx < System.Length(LKey) do
+  while (Idx < System.Length(LKey)) and (Idx < Fm_hash.BlockSize) do
   begin
     Fm_ipad[Idx] := Fm_ipad[Idx] xor LKey[Idx];
     Fm_opad[Idx] := Fm_opad[Idx] xor LKey[Idx];
@@ -132,6 +130,7 @@ begin
   Fm_hash.TransformBytes(result.GetBytes());
   result := Fm_hash.TransformFinal();
   Initialize();
+
 end;
 
 procedure THMACNotBuildInAdapter.TransformBytes(a_data: THashLibByteArray;

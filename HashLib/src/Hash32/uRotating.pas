@@ -1,5 +1,7 @@
 unit uRotating;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

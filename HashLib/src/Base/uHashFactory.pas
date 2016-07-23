@@ -1,6 +1,6 @@
 unit uHashFactory;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

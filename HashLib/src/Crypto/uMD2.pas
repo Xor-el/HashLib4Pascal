@@ -1,6 +1,6 @@
 unit uMD2;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

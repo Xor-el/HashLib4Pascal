@@ -265,108 +265,108 @@
         <UnitName Value="uMurmur2"/>
       </Item60>
       <Item61>
-        <Filename Value="..\..\Hash32\uMurmurHash3_x86_128.pas"/>
-        <UnitName Value="uMurmurHash3_x86_128"/>
-      </Item61>
-      <Item62>
         <Filename Value="..\..\Hash32\uMurmurHash3_x86_32.pas"/>
         <UnitName Value="uMurmurHash3_x86_32"/>
-      </Item62>
-      <Item63>
+      </Item61>
+      <Item62>
         <Filename Value="..\..\Hash32\uOneAtTime.pas"/>
         <UnitName Value="uOneAtTime"/>
-      </Item63>
-      <Item64>
+      </Item62>
+      <Item63>
         <Filename Value="..\..\Hash32\uPJW.pas"/>
         <UnitName Value="uPJW"/>
-      </Item64>
-      <Item65>
+      </Item63>
+      <Item64>
         <Filename Value="..\..\Hash32\uRotating.pas"/>
         <UnitName Value="uRotating"/>
-      </Item65>
-      <Item66>
+      </Item64>
+      <Item65>
         <Filename Value="..\..\Hash32\uRS.pas"/>
         <UnitName Value="uRS"/>
-      </Item66>
-      <Item67>
+      </Item65>
+      <Item66>
         <Filename Value="..\..\Hash32\uSDBM.pas"/>
         <UnitName Value="uSDBM"/>
-      </Item67>
-      <Item68>
+      </Item66>
+      <Item67>
         <Filename Value="..\..\Hash32\uShiftAndXor.pas"/>
         <UnitName Value="uShiftAndXor"/>
-      </Item68>
-      <Item69>
+      </Item67>
+      <Item68>
         <Filename Value="..\..\Hash32\uSuperFast.pas"/>
         <UnitName Value="uSuperFast"/>
-      </Item69>
-      <Item70>
+      </Item68>
+      <Item69>
         <Filename Value="..\..\Hash32\uXXHash32.pas"/>
         <UnitName Value="uXXHash32"/>
-      </Item70>
-      <Item71>
+      </Item69>
+      <Item70>
         <Filename Value="..\..\Hash64\uFNV1a64.pas"/>
         <UnitName Value="uFNV1a64"/>
-      </Item71>
-      <Item72>
+      </Item70>
+      <Item71>
         <Filename Value="..\..\Hash64\uFNV64.pas"/>
         <UnitName Value="uFNV64"/>
-      </Item72>
-      <Item73>
+      </Item71>
+      <Item72>
         <Filename Value="..\..\Hash64\uMurmur2_64.pas"/>
         <UnitName Value="uMurmur2_64"/>
-      </Item73>
-      <Item74>
+      </Item72>
+      <Item73>
         <Filename Value="..\..\Hash64\uSipHash2_4.pas"/>
         <UnitName Value="uSipHash2_4"/>
-      </Item74>
-      <Item75>
+      </Item73>
+      <Item74>
         <Filename Value="..\..\Hash64\uXXHash64.pas"/>
         <UnitName Value="uXXHash64"/>
+      </Item74>
+      <Item75>
+        <Filename Value="..\..\Include\HashLib.inc"/>
+        <Type Value="Include"/>
       </Item75>
       <Item76>
-        <Filename Value="..\..\Include\HashLib.inc"/>
+        <Filename Value="..\..\Include\Helper.inc"/>
         <Type Value="Include"/>
       </Item76>
       <Item77>
-        <Filename Value="..\..\Include\Helper.inc"/>
-        <Type Value="Include"/>
-      </Item77>
-      <Item78>
         <Filename Value="..\..\Interfaces\uIHash.pas"/>
         <UnitName Value="uIHash"/>
-      </Item78>
-      <Item79>
+      </Item77>
+      <Item78>
         <Filename Value="..\..\Interfaces\uIHashBuffer.pas"/>
         <UnitName Value="uIHashBuffer"/>
-      </Item79>
-      <Item80>
+      </Item78>
+      <Item79>
         <Filename Value="..\..\Interfaces\uIHashInfo.pas"/>
         <UnitName Value="uIHashInfo"/>
-      </Item80>
-      <Item81>
+      </Item79>
+      <Item80>
         <Filename Value="..\..\Interfaces\uIHashResult.pas"/>
         <UnitName Value="uIHashResult"/>
-      </Item81>
-      <Item82>
+      </Item80>
+      <Item81>
         <Filename Value="..\..\Nullable\uNullable.pas"/>
         <UnitName Value="uNullable"/>
-      </Item82>
-      <Item83>
+      </Item81>
+      <Item82>
         <Filename Value="..\..\Utils\uArrayExtensions.pas"/>
         <UnitName Value="uArrayExtensions"/>
-      </Item83>
-      <Item84>
+      </Item82>
+      <Item83>
         <Filename Value="..\..\Utils\uBitConverter.pas"/>
         <UnitName Value="uBitConverter"/>
-      </Item84>
-      <Item85>
+      </Item83>
+      <Item84>
         <Filename Value="..\..\Utils\uBits.pas"/>
         <UnitName Value="uBits"/>
-      </Item85>
-      <Item86>
+      </Item84>
+      <Item85>
         <Filename Value="..\..\Utils\uHashLibTypes.pas"/>
         <UnitName Value="uHashLibTypes"/>
+      </Item85>
+      <Item86>
+        <Filename Value="..\..\Hash128\uMurmurHash3_x86_128.pas"/>
+        <UnitName Value="uMurmurHash3_x86_128"/>
       </Item86>
     </Files>
     <LazDoc PackageName="(default)"/>

@@ -1,5 +1,7 @@
 unit uDJB;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

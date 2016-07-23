@@ -1,5 +1,7 @@
 unit uBKDR;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

@@ -1,5 +1,7 @@
 unit uBernstein1;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

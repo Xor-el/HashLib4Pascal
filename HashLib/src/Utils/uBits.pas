@@ -1,5 +1,7 @@
 unit uBits;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 type

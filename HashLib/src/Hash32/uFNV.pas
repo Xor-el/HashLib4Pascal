@@ -1,5 +1,7 @@
 unit uFNV;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
@@ -35,7 +37,7 @@ end;
 
 procedure TFNV.Initialize;
 begin
-  Fm_hash := 2166136261;
+  Fm_hash := 0;
 end;
 
 procedure TFNV.TransformBytes(a_data: THashLibByteArray;

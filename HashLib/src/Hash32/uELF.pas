@@ -1,5 +1,7 @@
 unit uELF;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
@@ -55,7 +57,7 @@ begin
     g := Fm_hash and $F0000000;
 
     if (g <> 0) then
-      Fm_hash := (Fm_hash xor g) shr 24;
+      Fm_hash := Fm_hash xor (g shr 24);
 
     Fm_hash := Fm_hash and (not g);
     System.Inc(i);

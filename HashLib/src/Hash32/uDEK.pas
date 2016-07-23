@@ -1,5 +1,7 @@
 unit uDEK;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

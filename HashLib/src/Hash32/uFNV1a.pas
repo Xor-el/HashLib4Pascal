@@ -1,5 +1,7 @@
 unit uFNV1a;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

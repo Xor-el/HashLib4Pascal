@@ -1,5 +1,7 @@
 unit uHAS160;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

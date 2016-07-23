@@ -1,5 +1,7 @@
 unit uPJW;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

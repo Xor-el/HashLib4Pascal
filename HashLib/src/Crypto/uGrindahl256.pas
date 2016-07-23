@@ -1,6 +1,6 @@
 unit uGrindahl256;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -179,8 +179,10 @@ end;
 
 procedure TGrindahl256.Initialize;
 begin
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state), UInt32(0));
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_temp), UInt32(0));
+  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state),
+    UInt32(0));
+  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_temp),
+    UInt32(0));
 
   Inherited Initialize();
 

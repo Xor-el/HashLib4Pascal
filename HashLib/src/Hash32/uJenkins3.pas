@@ -1,5 +1,7 @@
 unit uJenkins3;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

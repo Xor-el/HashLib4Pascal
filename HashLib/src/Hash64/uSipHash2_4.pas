@@ -1,6 +1,6 @@
 unit uSipHash2_4;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 // compression rounds c = 2,
 // finalization rounds d = 4
 
@@ -13,7 +13,8 @@ uses
   uHashCryptoNotBuildIn,
   uNullable
 {$IFDEF DELPHI}
-    , uBits
+    , uBitConverter,
+  uBits
 {$ENDIF DELPHI};
 
 type

@@ -1,6 +1,6 @@
 unit uHashBuffer;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

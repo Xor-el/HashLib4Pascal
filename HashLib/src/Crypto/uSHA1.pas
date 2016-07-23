@@ -1,5 +1,7 @@
 unit uSHA1;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

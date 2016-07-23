@@ -1,6 +1,6 @@
 unit uArrayExtensions;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

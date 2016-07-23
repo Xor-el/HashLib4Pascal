@@ -1,6 +1,6 @@
 unit uMurmurHash3_x86_32;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 

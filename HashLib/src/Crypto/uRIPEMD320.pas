@@ -1,5 +1,7 @@
 unit uRIPEMD320;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

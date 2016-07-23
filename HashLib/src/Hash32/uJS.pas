@@ -1,5 +1,7 @@
 unit uJS;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

@@ -1,6 +1,6 @@
 unit uBitConverter;
 
-{$I ..\..\Include\HashLib.inc}
+{$I ..\Include\HashLib.inc}
 
 interface
 
@@ -224,46 +224,196 @@ end;
 class function TBitConverter.ToChar(value: THashLibByteArray;
   StartIndex: Int32): Char;
 begin
-  result := PChar(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 2 = 0) then // data is aligned
+  begin
+    result := PChar(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+    if (IsLittleEndian) then
+    begin
+      result := Char(value[StartIndex] or (value[StartIndex + 1] shl 8));
+      Exit;
+    end
+    else
+    begin
+
+      result := Char((value[StartIndex] shl 8) or value[StartIndex + 1]);
+      Exit;
+    end;
+  end;
+
 end;
 
 class function TBitConverter.ToDouble(value: THashLibByteArray;
   StartIndex: Int32): Double;
+var
+  i1, i2: Int32;
+  val: Int64;
 begin
-  result := PDouble(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 8 = 0) then // data is aligned
+  begin
+    result := PDouble(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+      i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
+        (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
+      val := UInt32(i1) or (Int64(i2) shl 32);
+      result := PDouble(@val)^;
+      Exit;
+    end
+    else
+    begin
+
+      i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+      i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
+        (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
+      val := UInt32(i2) or (Int64(i1) shl 32);
+      result := PDouble(@val)^;
+      Exit;
+    end;
+  end;
 
 end;
 
 class function TBitConverter.ToInt16(value: THashLibByteArray;
   StartIndex: Int32): Int16;
 begin
-  result := PSmallInt(@value[StartIndex])^;
+
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+  if (StartIndex mod 2 = 0) then // data is aligned
+  begin
+    result := PSmallInt(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+    if (IsLittleEndian) then
+    begin
+      result := SmallInt(value[StartIndex] or (value[StartIndex + 1] shl 8));
+      Exit;
+    end
+    else
+    begin
+
+      result := SmallInt((value[StartIndex] shl 8) or value[StartIndex + 1]);
+      Exit;
+    end;
+  end;
 
 end;
 
 class function TBitConverter.ToInt32(value: THashLibByteArray;
   StartIndex: Int32): Int32;
 begin
-  result := PInteger(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 4 = 0) then // data is aligned
+  begin
+    result := PInteger(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      result := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+      Exit;
+    end
+    else
+    begin
+
+      result := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+      Exit;
+    end;
+  end;
 
 end;
 
 class function TBitConverter.ToInt64(value: THashLibByteArray;
   StartIndex: Int32): Int64;
+var
+  i1, i2: Int32;
 begin
-  result := PInt64(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 8 = 0) then // data is aligned
+  begin
+    result := PInt64(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+      i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
+        (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
+      result := UInt32(i1) or (Int64(i2) shl 32);
+      Exit;
+    end
+    else
+    begin
+
+      i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+      i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
+        (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
+      result := UInt32(i2) or (Int64(i1) shl 32);
+      Exit;
+    end;
+  end;
 end;
 
 class function TBitConverter.ToSingle(value: THashLibByteArray;
   StartIndex: Int32): Single;
+var
+  val: Int32;
 begin
-  result := PSingle(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 4 = 0) then // data is aligned
+  begin
+    result := PSingle(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      val := (value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24));
+      result := PSingle(@val)^;
+      Exit;
+    end
+    else
+    begin
+      val := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+      result := PSingle(@val)^;
+      Exit;
+    end;
+  end;
+
 end;
 
 class function TBitConverter.ToString(value: THashLibByteArray): String;
@@ -332,22 +482,94 @@ end;
 class function TBitConverter.ToUInt16(value: THashLibByteArray;
   StartIndex: Int32): UInt16;
 begin
-  result := PWord(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 2 = 0) then // data is aligned
+  begin
+    result := PWord(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+    if (IsLittleEndian) then
+    begin
+      result := Word(value[StartIndex] or (value[StartIndex + 1] shl 8));
+      Exit;
+    end
+    else
+    begin
+
+      result := Word((value[StartIndex] shl 8) or value[StartIndex + 1]);
+      Exit;
+    end;
+  end;
 end;
 
 class function TBitConverter.ToUInt32(value: THashLibByteArray;
   StartIndex: Int32): UInt32;
 begin
-  result := PCardinal(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 4 = 0) then // data is aligned
+  begin
+    result := PCardinal(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      result := UInt32(value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24));
+      Exit;
+    end
+    else
+    begin
+
+      result := UInt32((value[StartIndex] shl 24) or
+        (value[StartIndex + 1] shl 16) or (value[StartIndex + 2] shl 8) or
+        (value[StartIndex + 3]));
+      Exit;
+    end;
+  end;
 end;
 
 class function TBitConverter.ToUInt64(value: THashLibByteArray;
   StartIndex: Int32): UInt64;
+var
+  i1, i2: Int32;
 begin
-  result := PUInt64(@value[StartIndex])^;
   // System.Move(value[StartIndex], result, System.SizeOf(result));
+
+  if (StartIndex mod 8 = 0) then // data is aligned
+  begin
+    result := PUInt64(@value[StartIndex])^;
+    Exit;
+  end
+  else
+  begin
+
+    if (IsLittleEndian) then
+    begin
+      i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+      i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
+        (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
+      result := UInt64(UInt32(i1) or (Int64(i2) shl 32));
+      Exit;
+    end
+    else
+    begin
+
+      i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+      i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
+        (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
+      result := UInt64(UInt32(i2) or (Int64(i1) shl 32));
+      Exit;
+    end;
+  end;
 end;
 
 end.

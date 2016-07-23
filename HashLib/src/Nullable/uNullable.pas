@@ -1,10 +1,9 @@
 unit uNullable;
 
+{$I ..\Include\HashLib.inc}
 { /*  The "Nullable Types" found in this Unit were extracted from
   https://github.com/jpluimers/Conferences/blob/master/2009/DelphiLive.2009/Nullable-types-in-Delphi-Win32/Delphi-generic/src/NullableTypes.pas
   */ with some little modifications by me. }
-
-{$I ..\..\Include\HashLib.inc}
 
 interface
 

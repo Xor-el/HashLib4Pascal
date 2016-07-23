@@ -1,5 +1,7 @@
 unit uMurmur2_64;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
@@ -21,7 +23,7 @@ type
     Fm_key, Fm_working_key: UInt32;
 
   const
-    CKEY = UInt32($C58F1A7B);
+    CKEY = UInt32($0);
 {$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
 {$WARNINGS OFF}

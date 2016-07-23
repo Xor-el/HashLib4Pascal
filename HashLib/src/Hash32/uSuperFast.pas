@@ -1,5 +1,7 @@
 unit uSuperFast;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

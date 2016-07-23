@@ -1,5 +1,7 @@
 unit uSHA2_512;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
