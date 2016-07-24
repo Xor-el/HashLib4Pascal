@@ -1,4 +1,4 @@
-program HashLib.Tests;
+program HashLib.Tests.TestInsight;
 {
 
   Delphi DUnit Test Project
@@ -16,7 +16,6 @@ program HashLib.Tests;
 {$ENDIF}
 
 uses
-  Forms,
   TestInsight.DUnit,
   uConverters in '..\..\HashLib\src\Base\uConverters.pas',
   uHash in '..\..\HashLib\src\Base\uHash.pas',

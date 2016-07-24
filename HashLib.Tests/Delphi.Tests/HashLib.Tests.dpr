@@ -108,8 +108,6 @@ uses
   HashLibTests in '..\src\HashLibTests.pas',
   BitConverterTests in '..\src\BitConverterTests.pas';
 
-{$R *.RES}
-
 begin
 
   Application.Initialize;

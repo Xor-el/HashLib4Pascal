@@ -76,10 +76,16 @@ To Run Unit Tests,
 
     1). Download and Install TestInsight.
     
-    2). To Use TestInsight, Just Open (HashLib.Tests.TestInsight) in "Delphi.Tests" Folder, 
-    right-click on the project, then select "Enable for TestInsight" 
-    or "TestInsight Project".
-    Save Project then Build and Run Test Project through TestInsight.  
+    2). Open Project Options of Unit Test (HashLib.Tests.TestInsight) in "Delphi.Tests" 
+        Folder. 
+
+    3). Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
+
+    4). In Unit scope names (If Available), Delete "DUnitX" from the List.
+
+    5). To Use TestInsight, right-click on the project, then select 
+		"Enable for TestInsight" or "TestInsight Project".
+        Save Project then Build and Run Test Project through TestInsight. 
 
 ###License
 
