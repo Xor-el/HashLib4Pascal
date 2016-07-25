@@ -209,8 +209,8 @@
         <UnitName Value="uTiger2"/>
       </Item46>
       <Item47>
-        <Filename Value="..\..\Crypto\uWhirlPool_512.pas"/>
-        <UnitName Value="uWhirlPool_512"/>
+        <Filename Value="..\..\Crypto\uWhirlPool.pas"/>
+        <UnitName Value="uWhirlPool"/>
       </Item47>
       <Item48>
         <Filename Value="..\..\Hash128\uMurmurHash3_x64_128.pas"/>

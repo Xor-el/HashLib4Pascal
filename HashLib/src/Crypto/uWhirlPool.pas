@@ -1,4 +1,4 @@
-unit uWhirlPool_512;
+unit uWhirlPool;
 
 {$I ..\Include\HashLib.inc}
 
@@ -19,7 +19,7 @@ uses
   uHashCryptoNotBuildIn;
 
 type
-  TWhirlpool_512 = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
+  TWhirlPool = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
 
@@ -57,7 +57,7 @@ type
       $ED, $CC, $42, $98, $A4, $28, $5C, $F8, $86);
 
 {$ENDREGION}
-    class constructor WhirlPool_512;
+    class constructor WhirlPool;
 
     class function packIntoUInt64(b7, b6, b5, b4, b3, b2, b1, b0: UInt32)
       : UInt64; static;
@@ -77,16 +77,16 @@ type
 
 implementation
 
-{ TWhirlpool_512 }
+{ TWhirlPool }
 
-constructor TWhirlpool_512.Create;
+constructor TWhirlPool.Create;
 begin
   Inherited Create(64, 64);
 
   System.SetLength(Fm_hash, 8);
 end;
 
-procedure TWhirlpool_512.Finish;
+procedure TWhirlPool.Finish;
 var
   bits: UInt64;
   padindex: Int32;
@@ -110,19 +110,19 @@ begin
 
 end;
 
-function TWhirlpool_512.GetResult: THashLibByteArray;
+function TWhirlPool.GetResult: THashLibByteArray;
 begin
   result := TConverters.ConvertUInt64ToBytesSwapOrder(Fm_hash);
 end;
 
-procedure TWhirlpool_512.Initialize;
+procedure TWhirlPool.Initialize;
 begin
   THashLibArrayHelper<UInt64>.Clear(THashLibGenericArray<UInt64>(Fm_hash),
     UInt64(0));
   Inherited Initialize();
 end;
 
-class function TWhirlpool_512.maskWithReductionPolynomial
+class function TWhirlPool.maskWithReductionPolynomial
   (input: UInt32): UInt32;
 begin
   if (input >= $100) then
@@ -130,7 +130,7 @@ begin
   result := input;
 end;
 
-class function TWhirlpool_512.packIntoUInt64(b7, b6, b5, b4, b3, b2, b1,
+class function TWhirlPool.packIntoUInt64(b7, b6, b5, b4, b3, b2, b1,
   b0: UInt32): UInt64;
 begin
   result := (UInt64(b7) shl 56) xor (UInt64(b6) shl 48) xor (UInt64(b5) shl 40)
@@ -138,7 +138,7 @@ begin
     xor (UInt64(b1) shl 8) xor b0;
 end;
 
-procedure TWhirlpool_512.TransformBlock(a_data: THashLibByteArray;
+procedure TWhirlPool.TransformBlock(a_data: THashLibByteArray;
   a_index: Int32);
 var
   k, m, temp, data: THashLibUInt64Array;
@@ -224,7 +224,7 @@ begin
 
 end;
 
-class constructor TWhirlpool_512.WhirlPool_512;
+class constructor TWhirlPool.WhirlPool;
 var
   i, r: Int32;
   v1, v2, v4, v5, v8, v9: UInt32;

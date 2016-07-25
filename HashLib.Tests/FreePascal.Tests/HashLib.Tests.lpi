@@ -139,7 +139,7 @@
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="..\..\HashLib\src\Crypto\uWhirlPool_512.pas"/>
+        <Filename Value="..\..\HashLib\src\Crypto\uWhirlPool.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>

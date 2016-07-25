@@ -84,7 +84,7 @@ contains
   uSnefru in '..\..\Crypto\uSnefru.pas',
   uTiger in '..\..\Crypto\uTiger.pas',
   uTiger2 in '..\..\Crypto\uTiger2.pas',
-  uWhirlPool_512 in '..\..\Crypto\uWhirlPool_512.pas',
+  uWhirlPool in '..\..\Crypto\uWhirlPool.pas',
   uAP in '..\..\Hash32\uAP.pas',
   uBernstein in '..\..\Hash32\uBernstein.pas',
   uBernstein1 in '..\..\Hash32\uBernstein1.pas',

@@ -3061,11 +3061,11 @@ type
 
 type
 
-  TTestWhirlpool_512 = class(THashLibAlgorithmTestCase)
+  TTestWhirlPool = class(THashLibAlgorithmTestCase)
 
   private
 
-    FWhirlpool_512: IHash;
+    FWhirlPool: IHash;
 
   const
     FExpectedHashOfEmptyData =
@@ -12770,48 +12770,48 @@ begin
     [FExpectedString, FActualString]));
 end;
 
-{ TTestWhirlpool_512 }
+{ TTestWhirlPool }
 
-procedure TTestWhirlpool_512.SetUp;
+procedure TTestWhirlPool.SetUp;
 begin
   inherited;
-  FWhirlpool_512 := THashFactory.TCrypto.CreateWhirlpool_512();
+  FWhirlPool := THashFactory.TCrypto.CreateWhirlPool();
 end;
 
-procedure TTestWhirlpool_512.TearDown;
+procedure TTestWhirlPool.TearDown;
 begin
-  FWhirlpool_512 := Nil;
+  FWhirlPool := Nil;
   inherited;
 end;
 
-procedure TTestWhirlpool_512.TestBytesabcde;
+procedure TTestWhirlPool.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
   SetLength(LBuffer, SizeOf(FBytesabcde));
   Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
-  FActualString := FWhirlpool_512.ComputeBytes(LBuffer).ToString();
+  FActualString := FWhirlPool.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestDefaultData;
+procedure TTestWhirlPool.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FActualString := FWhirlpool_512.ComputeString(FDefaultData, TEncoding.UTF8)
+  FActualString := FWhirlPool.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestHMACWithDefaultDataAndLongKey;
+procedure TTestWhirlPool.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithHMACWithLongKey;
   LHMAC := THashFactory.THMAC.CreateHMAC
-    (THashFactory.TCrypto.CreateWhirlpool_512);
+    (THashFactory.TCrypto.CreateWhirlPool);
 
   LHMAC.Key := TConverters.ConvertStringToBytes(FHMACLongStringKey,
     TEncoding.UTF8);
@@ -12820,13 +12820,13 @@ begin
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestHMACWithDefaultDataAndShortKey;
+procedure TTestWhirlPool.TestHMACWithDefaultDataAndShortKey;
 var
   LHMAC: IHMAC;
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithHMACWithShortKey;
   LHMAC := THashFactory.THMAC.CreateHMAC
-    (THashFactory.TCrypto.CreateWhirlpool_512);
+    (THashFactory.TCrypto.CreateWhirlPool);
   LHMAC.Key := TConverters.ConvertStringToBytes(FHMACShortStringKey,
     TEncoding.UTF8);
   FActualString := LHMAC.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
@@ -12834,14 +12834,14 @@ begin
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestEmptyStream;
+procedure TTestWhirlPool.TestEmptyStream;
 var
   stream: TStream;
 begin
   stream := TMemoryStream.Create;
   try
     FExpectedString := FExpectedHashOfEmptyData;
-    FActualString := FWhirlpool_512.ComputeStream(stream).ToString();
+    FActualString := FWhirlPool.ComputeStream(stream).ToString();
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   finally
@@ -12849,19 +12849,19 @@ begin
   end;
 end;
 
-procedure TTestWhirlpool_512.TestEmptyString;
+procedure TTestWhirlPool.TestEmptyString;
 begin
   FExpectedString := FExpectedHashOfEmptyData;
-  FActualString := FWhirlpool_512.ComputeString(FEmptyData, TEncoding.UTF8)
+  FActualString := FWhirlPool.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestIncrementalHash;
+procedure TTestWhirlPool.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FHash := THashFactory.TCrypto.CreateWhirlpool_512();
+  FHash := THashFactory.TCrypto.CreateWhirlPool();
 
   FHash.Initialize();
   FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
@@ -12875,10 +12875,10 @@ begin
     [FExpectedString, FActualString]));
 end;
 
-procedure TTestWhirlpool_512.TestOnetoNine;
+procedure TTestWhirlPool.TestOnetoNine;
 begin
   FExpectedString := FExpectedHashOfOnetoNine;
-  FActualString := FWhirlpool_512.ComputeString(FOnetoNine, TEncoding.UTF8)
+  FActualString := FWhirlPool.ComputeString(FOnetoNine, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
@@ -12986,7 +12986,7 @@ RegisterTest(TTestTiger2_5_160);
 RegisterTest(TTestTiger2_3_192);
 RegisterTest(TTestTiger2_4_192);
 RegisterTest(TTestTiger2_5_192);
-RegisterTest(TTestWhirlpool_512);
+RegisterTest(TTestWhirlPool);
 {$ELSE}
 // CheckSum
 RegisterTest(TTestCRCModel.Suite);
@@ -13085,7 +13085,7 @@ RegisterTest(TTestTiger2_5_160.Suite);
 RegisterTest(TTestTiger2_3_192.Suite);
 RegisterTest(TTestTiger2_4_192.Suite);
 RegisterTest(TTestTiger2_5_192.Suite);
-RegisterTest(TTestWhirlpool_512.Suite);
+RegisterTest(TTestWhirlPool.Suite);
 {$ENDIF FPC}
 
 end.

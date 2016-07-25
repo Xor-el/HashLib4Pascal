@@ -69,7 +69,7 @@ uses
   uGrindahl256,
   uGrindahl512,
   uPanama,
-  uWhirlPool_512,
+  uWhirlPool,
   uRadioGatun32,
   uRadioGatun64,
   uSnefru,
@@ -280,7 +280,7 @@ type
 
       class function CreatePanama(): IHash; static;
 
-      class function CreateWhirlpool_512(): IHash; static;
+      class function CreateWhirlPool(): IHash; static;
 
       class function CreateRadioGatun32(): IHash; static;
       class function CreateRadioGatun64(): IHash; static;
@@ -909,9 +909,9 @@ begin
   result := TTiger_192.CreateRound5();
 end;
 
-class function THashFactory.TCrypto.CreateWhirlpool_512: IHash;
+class function THashFactory.TCrypto.CreateWhirlPool: IHash;
 begin
-  result := TWhirlpool_512.Create();
+  result := TWhirlPool.Create();
 end;
 
 class function THashFactory.TCrypto.CreateTiger(a_hash_size: Int32;

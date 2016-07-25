@@ -67,7 +67,7 @@ uses
   uSnefru in '..\..\HashLib\src\Crypto\uSnefru.pas',
   uTiger in '..\..\HashLib\src\Crypto\uTiger.pas',
   uTiger2 in '..\..\HashLib\src\Crypto\uTiger2.pas',
-  uWhirlPool_512 in '..\..\HashLib\src\Crypto\uWhirlPool_512.pas',
+  uWhirlPool in '..\..\HashLib\src\Crypto\uWhirlPool.pas',
   uAP in '..\..\HashLib\src\Hash32\uAP.pas',
   uBernstein in '..\..\HashLib\src\Hash32\uBernstein.pas',
   uBernstein1 in '..\..\HashLib\src\Hash32\uBernstein1.pas',
