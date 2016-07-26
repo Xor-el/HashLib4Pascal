@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="1"/>
-    <Files Count="86">
+    <Files Count="87">
       <Item1>
         <Filename Value="..\..\Base\uConverters.pas"/>
         <UnitName Value="uConverters"/>
@@ -368,6 +368,10 @@
         <Filename Value="..\..\Hash128\uMurmurHash3_x86_128.pas"/>
         <UnitName Value="uMurmurHash3_x86_128"/>
       </Item86>
+      <Item87>
+        <Filename Value="..\..\Base\uPBKDF2_HMACNotBuildInAdapter.pas"/>
+        <UnitName Value="uPBKDF2_HMACNotBuildInAdapter"/>
+      </Item87>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">

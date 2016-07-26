@@ -25,6 +25,8 @@ uses
   uHashResult in '..\..\HashLib\src\Base\uHashResult.pas',
   uHashRounds in '..\..\HashLib\src\Base\uHashRounds.pas',
   uHashSize in '..\..\HashLib\src\Base\uHashSize.pas',
+  uPBKDF2_HMACNotBuildInAdapter
+    in '..\..\HashLib\src\Base\uPBKDF2_HMACNotBuildInAdapter.pas',
   uHMACNotBuildInAdapter in '..\..\HashLib\src\Base\uHMACNotBuildInAdapter.pas',
   uMultipleTransformNonBlock
     in '..\..\HashLib\src\Base\uMultipleTransformNonBlock.pas',
@@ -103,7 +105,8 @@ uses
   uBits in '..\..\HashLib\src\Utils\uBits.pas',
   uHashLibTypes in '..\..\HashLib\src\Utils\uHashLibTypes.pas',
   HashLibTests in '..\src\HashLibTests.pas',
-  BitConverterTests in '..\src\BitConverterTests.pas';
+  BitConverterTests in '..\src\BitConverterTests.pas',
+  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas';
 
 begin
 

@@ -83,7 +83,9 @@ uses
   uRIPEMD320,
   uSHA3,
   // HMAC Unit
-  uHMACNotBuildInAdapter;
+  uHMACNotBuildInAdapter,
+  // PBKDF2_HMAC Unit
+  uPBKDF2_HMACNotBuildInAdapter;
 
 type
   THashFactory = class sealed(TObject)
@@ -352,6 +354,29 @@ type
       class function CreateHMAC(a_hash: IHash): IHMAC; static;
 
     end;
+
+  end;
+
+  // ====================== TPBKDF2_HMAC ====================== //
+
+type
+  TPBKDF2_HMAC = class sealed(TObject)
+
+  public
+
+    /// <summary>
+    /// Initializes a new interface instance of the TPBKDF2_HMAC class using a password, a salt, a number of iterations and an Instance of an "IHash" to be used as an "IHMAC" hashing implementation to derive the key.
+    /// </summary>
+    /// <param name="a_hash">The name of the "IHash" implementation to be transformed to an "IHMAC" Instance so it can be used to derive the key.</param>
+    /// <param name="password">The password to derive the key for.</param>
+    /// <param name="salt">The salt to use to derive the key.</param>
+    /// <param name="iterations">The number of iterations to use to derive the key.</param>
+    /// <exception cref="EArgumentNilException">The password, salt or algorithm is Nil.</exception>
+    /// <exception cref="EArgumentException">The salt size is less than 8 or the iterations is less than 1.</exception>
+
+    class function CreatePBKDF2_HMAC(a_hash: IHash;
+      a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
+      : IPBKDF2_HMAC; static;
 
   end;
 
@@ -993,6 +1018,28 @@ begin
     Exit;
   end;
 
+end;
+
+{ TPBKDF2_HMAC }
+
+class function TPBKDF2_HMAC.CreatePBKDF2_HMAC(a_hash: IHash;
+  a_password, a_salt: THashLibByteArray; a_iterations: UInt32): IPBKDF2_HMAC;
+begin
+
+  if not(System.Assigned(a_hash)) then
+    raise EArgumentNilException.CreateRes(@SUninitializedInstance);
+
+  if (a_password = Nil) then
+    raise EArgumentNilException.CreateRes(@SEmptyPassword);
+
+  if (a_salt = Nil) then
+    raise EArgumentNilException.CreateRes(@SEmptySalt);
+
+  if (a_iterations < 1) then
+    raise EArgumentException.CreateRes(@SIterationtooSmall);
+
+  result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
+    a_iterations);
 end;
 
 end.

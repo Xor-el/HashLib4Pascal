@@ -77,6 +77,23 @@ type
 
   end;
 
+  IPBKDF2_HMAC = Interface(IInterface)
+    ['{0D409BA8-7F98-4417-858F-3C1EBA11B7E1}']
+    /// <summary>
+    /// Returns the pseudo-random bytes for this object.
+    /// </summary>
+    /// <param name="bc">The number of pseudo-random key bytes to generate.</param>
+    /// <returns>A byte array filled with pseudo-random key bytes.</returns>
+    /// <exception cref="EArgumentOutOfRangeException">bc must be greater than zero.</exception>
+    /// <exception cref="EArgumentException">invalid start index or end index of internal buffer.</exception>
+    function GetBytes(bc: Int32): THashLibByteArray;
+  end;
+
+  IPBKDF2_HMACNotBuildIn = Interface(IPBKDF2_HMAC)
+    ['{D7E23DFB-036D-44AD-AA0C-FB83C9970565}']
+
+  end;
+
   IHMAC = Interface(IWithKey)
     ['{A6D4DCC6-F6C3-4110-8CA2-FBE85227676E}']
   end;

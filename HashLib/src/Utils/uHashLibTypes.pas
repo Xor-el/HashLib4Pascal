@@ -18,6 +18,13 @@ type
   PUInt64 = ^UInt64;
 {$ENDIF FPC}
   EInvalidOperationException = class(Exception);
+  EIndexOutOfRangeException = class(Exception);
+  EndOfStreamException = class(Exception);
+  EArgumentException = class(Exception);
+  EArgumentNilException = class(Exception);
+  EArgumentOutOfRangeException = class(Exception);
+  ENullReference = class(Exception);
+  EUnsupportedType = class(Exception);
 
 {$IFDEF HAS_UNITSCOPE}
   /// <summary>

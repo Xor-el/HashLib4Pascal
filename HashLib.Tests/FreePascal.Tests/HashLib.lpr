@@ -4,7 +4,7 @@ program HashLib.Tests;
 
 uses
   Interfaces, Forms, GuiTestRunner, fpcunittestrunner, HashLibTests,
-  BitConverterTests;
+  BitConverterTests, PBKDF2_HMACTests;
 
 {$R *.res}
 

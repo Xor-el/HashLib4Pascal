@@ -117,6 +117,8 @@ contains
   uIHashBuffer in '..\..\Interfaces\uIHashBuffer.pas',
   uIHashInfo in '..\..\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\Interfaces\uIHashResult.pas',
-  uNullable in '..\..\Nullable\uNullable.pas';
+  uNullable in '..\..\Nullable\uNullable.pas',
+  uPBKDF2_HMACNotBuildInAdapter
+    in '..\..\Base\uPBKDF2_HMACNotBuildInAdapter.pas';
 
 end.

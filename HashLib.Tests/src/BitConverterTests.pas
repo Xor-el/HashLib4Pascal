@@ -10,8 +10,7 @@ uses
 {$ELSE}
   TestFramework,
 {$ENDIF FPC}
-  uBitConverter,
-  uHashLibTypes;
+  uBitConverter;
 
 type
 
@@ -23,7 +22,7 @@ type
 
   TBitConverterTestCase = class abstract(THashLibTestCase)
   protected
-    FBuffer: THashLibByteArray;
+    FBuffer: TBytes;
 
   end;
 

@@ -19,19 +19,10 @@ uses
 
 resourcestring
   SCannotAssignPointerToNullable =
-    'Cannot assigned non-null pointer to nullable type.';
+    'Cannot assign non-null pointer to nullable type.';
   SUnsupportedType =
     'Unsupported Type: Only supports Integers, Int64, Floats and Strings.';
   SGetNullValue = 'Attempted to get a null value.';
-
-type
-
-  ENullReference = class(Exception)
-  end;
-
-  EUnsupportedType = class(Exception)
-
-  end;
 
 type
 
@@ -136,7 +127,7 @@ end;
 
 class operator Nullable<T>.Implicit(a: Pointer): Nullable<T>;
 begin
-  if not Assigned(a) then
+  if not System.Assigned(a) then
     Result.ClearValue
   else
     raise EInvalidOperationException.CreateRes(@SCannotAssignPointerToNullable);

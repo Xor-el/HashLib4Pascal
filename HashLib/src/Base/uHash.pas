@@ -30,11 +30,6 @@ resourcestring
   SEndOfStream = 'Cannot Access Outside Stream Boundaries';
 
 type
-
-  EIndexOutOfRangeException = class(Exception);
-  EndOfStreamException = class(Exception);
-
-type
   THash = class abstract(TInterfacedObject, IHash)
 
   strict private

@@ -20,6 +20,8 @@ It also supports Incremental Hashing.
     SHA3-512,Snefru128, Snefru256, Tiger, Tiger2, WhirlPool.
 
     HMAC for any of the above.
+    
+    PBKDF2_HMAC for any of the above.
 
 **Supported Compilers**
  
