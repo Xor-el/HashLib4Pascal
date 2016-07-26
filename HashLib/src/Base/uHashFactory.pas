@@ -372,7 +372,7 @@ type
     /// <param name="salt">The salt to use to derive the key.</param>
     /// <param name="iterations">The number of iterations to use to derive the key.</param>
     /// <exception cref="EArgumentNilException">The password, salt or algorithm is Nil.</exception>
-    /// <exception cref="EArgumentException">The salt size is less than 8 or the iterations is less than 1.</exception>
+    /// <exception cref="EArgumentException">The iteration is less than 1.</exception>
 
     class function CreatePBKDF2_HMAC(a_hash: IHash;
       a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
