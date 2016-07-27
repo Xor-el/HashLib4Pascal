@@ -24,7 +24,7 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src"/>
+            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -68,7 +68,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="91">
+    <Units Count="93">
       <Unit0>
         <Filename Value="HashLib.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -431,9 +431,17 @@
         <IsPartOfProject Value="True"/>
       </Unit89>
       <Unit90>
-        <Filename Value="..\..\HashLib\src\Base\uPBKDF2_HMACNotBuildInAdapter.pas"/>
+        <Filename Value="..\..\HashLib\src\KDF\uPBKDF2_HMACNotBuildInAdapter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit90>
+      <Unit91>
+        <Filename Value="..\..\HashLib\src\Base\uKDF.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="..\..\HashLib\src\Interfaces\uIKDF.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit92>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -441,7 +449,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src"/>
+      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF"/>
     </SearchPaths>
   </CompilerOptions>
   <Debugging>

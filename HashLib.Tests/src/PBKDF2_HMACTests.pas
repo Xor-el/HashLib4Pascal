@@ -66,7 +66,7 @@ begin
   Password := TBytes.Create($70, $61, $73, $73, $77, $6F, $72, $64);
   Salt := TBytes.Create($78, $57, $8E, $5A, $5D, $63, $CB, $06);
   Hash := THashFactory.TCrypto.CreateSHA1();
-  PBKDF2 := TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 2048);
+  PBKDF2 := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 2048);
   Key := PBKDF2.GetBytes(24);
 
   FActualString := TConverters.ConvertBytesToHexString(Key, False);
@@ -87,7 +87,7 @@ begin
   Password := TEncoding.UTF8.GetBytes('password');
   Salt := TEncoding.UTF8.GetBytes('salt');
   Hash := THashFactory.TCrypto.CreateSHA2_256();
-  Key := TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 100000)
+  Key := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 100000)
     .GetBytes(32);
 
   FActualString := TConverters.ConvertBytesToHexString(Key, False);

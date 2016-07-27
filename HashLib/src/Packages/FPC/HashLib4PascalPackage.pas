@@ -20,7 +20,7 @@ uses
   uShiftAndXor, uSuperFast, uXXHash32, uFNV1a64, uFNV64, uMurmur2_64, 
   uSipHash2_4, uXXHash64, uIHash, uIHashBuffer, uIHashInfo, uIHashResult, 
   uNullable, uArrayExtensions, uBitConverter, uBits, uHashLibTypes, 
-  uMurmurHash3_x86_128, uPBKDF2_HMACNotBuildInAdapter;
+  uMurmurHash3_x86_128, uPBKDF2_HMACNotBuildInAdapter, uIKDF, uKDF;
 
 implementation
 

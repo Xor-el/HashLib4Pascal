@@ -48,6 +48,7 @@ contains
   uHashSize in '..\..\Base\uHashSize.pas',
   uHMACNotBuildInAdapter in '..\..\Base\uHMACNotBuildInAdapter.pas',
   uMultipleTransformNonBlock in '..\..\Base\uMultipleTransformNonBlock.pas',
+  uKDF in '..\..\Base\uKDF.pas',
   uAdler32 in '..\..\Checksum\uAdler32.pas',
   uCRC in '..\..\Checksum\uCRC.pas',
   uCRC16 in '..\..\Checksum\uCRC16.pas',
@@ -117,8 +118,9 @@ contains
   uIHashBuffer in '..\..\Interfaces\uIHashBuffer.pas',
   uIHashInfo in '..\..\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\Interfaces\uIHashResult.pas',
-  uNullable in '..\..\Nullable\uNullable.pas',
+  uIKDF in '..\..\Interfaces\uIKDF.pas',
   uPBKDF2_HMACNotBuildInAdapter
-    in '..\..\Base\uPBKDF2_HMACNotBuildInAdapter.pas';
+    in '..\..\KDF\uPBKDF2_HMACNotBuildInAdapter.pas',
+  uNullable in '..\..\Nullable\uNullable.pas';
 
 end.

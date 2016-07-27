@@ -22,6 +22,7 @@ uses
   TextTestRunner,
   uConverters in '..\..\HashLib\src\Base\uConverters.pas',
   uHash in '..\..\HashLib\src\Base\uHash.pas',
+  uKDF in '..\..\HashLib\src\Base\uKDF.pas',
   uHashBuffer in '..\..\HashLib\src\Base\uHashBuffer.pas',
   uHashCryptoNotBuildIn in '..\..\HashLib\src\Base\uHashCryptoNotBuildIn.pas',
   uHashFactory in '..\..\HashLib\src\Base\uHashFactory.pas',
@@ -29,8 +30,6 @@ uses
   uHashRounds in '..\..\HashLib\src\Base\uHashRounds.pas',
   uHashSize in '..\..\HashLib\src\Base\uHashSize.pas',
   uHMACNotBuildInAdapter in '..\..\HashLib\src\Base\uHMACNotBuildInAdapter.pas',
-  uPBKDF2_HMACNotBuildInAdapter
-    in '..\..\HashLib\src\Base\uPBKDF2_HMACNotBuildInAdapter.pas',
   uMultipleTransformNonBlock
     in '..\..\HashLib\src\Base\uMultipleTransformNonBlock.pas',
   uAdler32 in '..\..\HashLib\src\Checksum\uAdler32.pas',
@@ -99,9 +98,12 @@ uses
   uMurmurHash3_x86_128 in '..\..\HashLib\src\Hash128\uMurmurHash3_x86_128.pas',
   uMurmurHash3_x64_128 in '..\..\HashLib\src\Hash128\uMurmurHash3_x64_128.pas',
   uIHash in '..\..\HashLib\src\Interfaces\uIHash.pas',
+  uIKDF in '..\..\HashLib\src\Interfaces\uIKDF.pas',
   uIHashBuffer in '..\..\HashLib\src\Interfaces\uIHashBuffer.pas',
   uIHashInfo in '..\..\HashLib\src\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\HashLib\src\Interfaces\uIHashResult.pas',
+  uPBKDF2_HMACNotBuildInAdapter
+    in '..\..\HashLib\src\KDF\uPBKDF2_HMACNotBuildInAdapter.pas',
   uNullable in '..\..\HashLib\src\Nullable\uNullable.pas',
   uArrayExtensions in '..\..\HashLib\src\Utils\uArrayExtensions.pas',
   uBitConverter in '..\..\HashLib\src\Utils\uBitConverter.pas',

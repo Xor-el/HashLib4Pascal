@@ -10,7 +10,7 @@
       <PathDelim Value="\"/>
       <SearchPaths>
         <IncludeFiles Value="..\..\.."/>
-        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils"/>
+        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF"/>
         <UnitOutputDirectory Value="C:\bin\FPC\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="1"/>
-    <Files Count="87">
+    <Files Count="89">
       <Item1>
         <Filename Value="..\..\Base\uConverters.pas"/>
         <UnitName Value="uConverters"/>
@@ -369,9 +369,17 @@
         <UnitName Value="uMurmurHash3_x86_128"/>
       </Item86>
       <Item87>
-        <Filename Value="..\..\Base\uPBKDF2_HMACNotBuildInAdapter.pas"/>
+        <Filename Value="..\..\KDF\uPBKDF2_HMACNotBuildInAdapter.pas"/>
         <UnitName Value="uPBKDF2_HMACNotBuildInAdapter"/>
       </Item87>
+      <Item88>
+        <Filename Value="..\..\Interfaces\uIKDF.pas"/>
+        <UnitName Value="uIKDF"/>
+      </Item88>
+      <Item89>
+        <Filename Value="..\..\Base\uKDF.pas"/>
+        <UnitName Value="uKDF"/>
+      </Item89>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">
