@@ -4,6 +4,7 @@ interface
 
 uses
   uHashLibTypes,
+  uIKDF,
   uIHash,
   uNullable;
 
@@ -77,7 +78,9 @@ type
 
   end;
 
-  IPBKDF2_HMAC = Interface(IInterface)
+  {$WARNINGS OFF}
+
+  IPBKDF2_HMAC = Interface(IKDF)
     ['{0D409BA8-7F98-4417-858F-3C1EBA11B7E1}']
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
@@ -88,6 +91,8 @@ type
     /// <exception cref="EArgumentException">invalid start index or end index of internal buffer.</exception>
     function GetBytes(bc: Int32): THashLibByteArray;
   end;
+
+  {$WARNINGS ON}
 
   IPBKDF2_HMACNotBuildIn = Interface(IPBKDF2_HMAC)
     ['{D7E23DFB-036D-44AD-AA0C-FB83C9970565}']
