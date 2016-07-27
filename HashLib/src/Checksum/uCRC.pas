@@ -11,7 +11,8 @@ uses
   uHashLibTypes,
   uConverters,
   uHashCryptoNotBuildIn,
-  uIHashInfo
+  uIHashInfo,
+  uICRC
 {$IFDEF DELPHI}
     , uBits
 {$ENDIF DELPHI};

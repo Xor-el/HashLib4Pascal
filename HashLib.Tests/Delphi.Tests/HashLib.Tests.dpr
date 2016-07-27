@@ -99,6 +99,7 @@ uses
   uMurmurHash3_x64_128 in '..\..\HashLib\src\Hash128\uMurmurHash3_x64_128.pas',
   uIHash in '..\..\HashLib\src\Interfaces\uIHash.pas',
   uIKDF in '..\..\HashLib\src\Interfaces\uIKDF.pas',
+  uICRC in '..\..\HashLib\src\Interfaces\uICRC.pas',
   uIHashBuffer in '..\..\HashLib\src\Interfaces\uIHashBuffer.pas',
   uIHashInfo in '..\..\HashLib\src\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\HashLib\src\Interfaces\uIHashResult.pas',

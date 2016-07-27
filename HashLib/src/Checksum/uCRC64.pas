@@ -5,6 +5,7 @@ interface
 uses
   uHashLibTypes,
   uHash,
+  uICRC,
   uIHashResult,
   uIHashInfo,
   uCRC;

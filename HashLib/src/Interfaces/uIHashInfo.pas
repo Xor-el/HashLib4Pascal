@@ -32,33 +32,6 @@ type
     ['{EF0885C5-D331-44D8-89CA-05409E20F76E}']
   end;
 
-{$WARNINGS OFF}
-
-  ICRC = Interface(IBlockHash)
-    ['{44A105E5-6716-43C0-BE69-AE80F87FDC39}']
-
-    procedure Initialize();
-    function GetNames: THashLibStringArray;
-    property Names: THashLibStringArray read GetNames;
-    function GetWidth: Int32;
-    property Width: Int32 read GetWidth;
-    function GetPolynomial: UInt64;
-    property Polynomial: UInt64 read GetPolynomial;
-    function GetInit: UInt64;
-    property Init: UInt64 read GetInit;
-    function GetReflectIn: Boolean;
-    property ReflectIn: Boolean read GetReflectIn;
-    function GetReflectOut: Boolean;
-    property ReflectOut: Boolean read GetReflectOut;
-    function GetXOROut: UInt64;
-    property XOROut: UInt64 read GetXOROut;
-    function GetCheckValue: UInt64;
-    property CheckValue: UInt64 read GetCheckValue;
-
-  end;
-
-{$WARNINGS ON}
-
   ICrypto = Interface(IBlockHash)
     ['{5C669048-644C-4E96-B411-9FEA603D7086}']
   end;
@@ -78,7 +51,7 @@ type
 
   end;
 
-  {$WARNINGS OFF}
+{$WARNINGS OFF}
 
   IPBKDF2_HMAC = Interface(IKDF)
     ['{0D409BA8-7F98-4417-858F-3C1EBA11B7E1}']
@@ -92,7 +65,7 @@ type
     function GetBytes(bc: Int32): THashLibByteArray;
   end;
 
-  {$WARNINGS ON}
+{$WARNINGS ON}
 
   IPBKDF2_HMACNotBuildIn = Interface(IPBKDF2_HMAC)
     ['{D7E23DFB-036D-44AD-AA0C-FB83C9970565}']

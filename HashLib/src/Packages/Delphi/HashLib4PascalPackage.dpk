@@ -119,6 +119,7 @@ contains
   uIHashInfo in '..\..\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\Interfaces\uIHashResult.pas',
   uIKDF in '..\..\Interfaces\uIKDF.pas',
+  uICRC in '..\..\Interfaces\uICRC.pas',
   uPBKDF2_HMACNotBuildInAdapter
     in '..\..\KDF\uPBKDF2_HMACNotBuildInAdapter.pas',
   uNullable in '..\..\Nullable\uNullable.pas';

@@ -99,6 +99,7 @@ uses
   uIHashInfo in '..\..\HashLib\src\Interfaces\uIHashInfo.pas',
   uIHashResult in '..\..\HashLib\src\Interfaces\uIHashResult.pas',
   uIKDF in '..\..\HashLib\src\Interfaces\uIKDF.pas',
+  uICRC in '..\..\HashLib\src\Interfaces\uICRC.pas',
   uPBKDF2_HMACNotBuildInAdapter
     in '..\..\HashLib\src\KDF\uPBKDF2_HMACNotBuildInAdapter.pas',
   uNullable in '..\..\HashLib\src\Nullable\uNullable.pas',

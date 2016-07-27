@@ -68,7 +68,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="93">
+    <Units Count="94">
       <Unit0>
         <Filename Value="HashLib.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -442,6 +442,10 @@
         <Filename Value="..\..\HashLib\src\Interfaces\uIKDF.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit92>
+      <Unit93>
+        <Filename Value="..\..\HashLib\src\Interfaces\uICRC.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit93>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

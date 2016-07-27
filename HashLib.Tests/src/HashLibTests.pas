@@ -12,6 +12,7 @@ uses
   TestFramework,
 {$ENDIF FPC}
   uCRC,
+  uICRC,
   uIHashInfo,
   uHashFactory,
   uIHash,
@@ -12810,8 +12811,7 @@ var
   LHMAC: IHMAC;
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithHMACWithLongKey;
-  LHMAC := THashFactory.THMAC.CreateHMAC
-    (THashFactory.TCrypto.CreateWhirlPool);
+  LHMAC := THashFactory.THMAC.CreateHMAC(THashFactory.TCrypto.CreateWhirlPool);
 
   LHMAC.Key := TConverters.ConvertStringToBytes(FHMACLongStringKey,
     TEncoding.UTF8);
@@ -12825,8 +12825,7 @@ var
   LHMAC: IHMAC;
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithHMACWithShortKey;
-  LHMAC := THashFactory.THMAC.CreateHMAC
-    (THashFactory.TCrypto.CreateWhirlPool);
+  LHMAC := THashFactory.THMAC.CreateHMAC(THashFactory.TCrypto.CreateWhirlPool);
   LHMAC.Key := TConverters.ConvertStringToBytes(FHMACShortStringKey,
     TEncoding.UTF8);
   FActualString := LHMAC.ComputeString(FDefaultData, TEncoding.UTF8).ToString();

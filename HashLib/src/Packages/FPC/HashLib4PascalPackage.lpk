@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="1"/>
-    <Files Count="89">
+    <Files Count="90">
       <Item1>
         <Filename Value="..\..\Base\uConverters.pas"/>
         <UnitName Value="uConverters"/>
@@ -380,6 +380,10 @@
         <Filename Value="..\..\Base\uKDF.pas"/>
         <UnitName Value="uKDF"/>
       </Item89>
+      <Item90>
+        <Filename Value="..\..\Interfaces\uICRC.pas"/>
+        <UnitName Value="uICRC"/>
+      </Item90>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">
