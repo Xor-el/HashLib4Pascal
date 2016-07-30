@@ -11,7 +11,7 @@ uses
   uHashCryptoNotBuildIn;
 
 type
-  TSHA2_512Base = class(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
+  TSHA2_512Base = class abstract(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
 {$REGION 'Consts'}
   strict private

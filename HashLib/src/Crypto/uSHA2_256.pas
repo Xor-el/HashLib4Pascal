@@ -10,7 +10,7 @@ uses
   uConverters;
 
 type
-  TSHA2_256 = class(TSHA2_256Base)
+  TSHA2_256 = class sealed(TSHA2_256Base)
 
   strict protected
     function GetResult(): THashLibByteArray; override;

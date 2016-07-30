@@ -9,7 +9,7 @@ uses
   uSHA0;
 
 type
-  TSHA1 = class(TSHA0)
+  TSHA1 = class sealed(TSHA0)
 
   strict protected
     procedure Expand(a_data: THashLibUInt32Array); override;

@@ -20,7 +20,7 @@ uses
   uHashLibTypes;
 
 type
-  TSHA3 = class(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
+  TSHA3 = class abstract(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
     Fm_state: THashLibUInt64Array;

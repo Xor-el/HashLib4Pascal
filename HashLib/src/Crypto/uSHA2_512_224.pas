@@ -18,7 +18,7 @@ uses
   uConverters;
 
 type
-  TSHA2_512_224 = class(TSHA2_512Base)
+  TSHA2_512_224 = class sealed(TSHA2_512Base)
 
   strict protected
     function GetResult(): THashLibByteArray; override;

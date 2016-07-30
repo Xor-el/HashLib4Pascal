@@ -27,7 +27,7 @@ resourcestring
 
 type
 
-  TSnefru = class(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
+  TSnefru = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
 
