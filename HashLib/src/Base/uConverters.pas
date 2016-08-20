@@ -26,11 +26,14 @@ uses
 type
   TConverters = class sealed(TObject)
 
+  strict private
+{$IFDEF DELPHI}
+    // lifted from DUnitX.Utils.
+    class function SplitString(const S, Delimiters: string)
+      : THashLibStringArray; static;
+
+{$ENDIF DELPHI}
 {$IFDEF DEBUG}
-    // although the visibility level below is meant to be "strict private",
-    // older versions of Delphi (2010 and XE) keeps complaining about some
-    // unused methods even though this Hint is false.
-  protected
 {$IFDEF DELPHI2010}
     // To Bypass a Bug in Delphi 2010 Generics.
     class procedure Check(a_in: THashLibByteArray;
@@ -339,10 +342,13 @@ end;
 class function TConverters.ConvertBytesToHexString(a_in: THashLibByteArray;
   a_group: Boolean): String;
 var
-  I, LowVal: Int32;
+  I: Int32;
   hex, StrtoProcess: String;
   ar: THashLibStringArray;
+{$IFNDEF DELPHI}
   StringList: TStringList;
+  LowVal: Int32;
+{$ENDIF DELPHI}
 begin
 
   hex := AnsiUpperCase(TBitConverter.ToString(a_in));
@@ -368,10 +374,11 @@ begin
     Check<Byte>(a_in, 1, 4);
 {$ENDIF DELPHI2010}
 {$ENDIF}
+    StrtoProcess := AnsiUpperCase(TBitConverter.ToString(a_in));
+{$IFNDEF DELPHI}
     StringList := TStringList.Create();
     StringList.StrictDelimiter := True;
     try
-      StrtoProcess := AnsiUpperCase(TBitConverter.ToString(a_in));
       StringList.Delimiter := '-';
       StringList.DelimitedText := StrtoProcess;
       System.SetLength(ar, StringList.Count);
@@ -381,6 +388,10 @@ begin
       StringList.Free;
     end;
 
+{$ELSE}
+    ar := TConverters.SplitString(StrtoProcess, '-');
+
+{$ENDIF DELPHI}
     hex := '';
     I := 0;
     while I < (System.Length(ar) div 4) do
@@ -661,14 +672,11 @@ begin
 
 end;
 
-{$WARNINGS OFF}
-
 class function TConverters.ConvertStringToBytes(const a_in: String;
   a_encoding: TEncoding): THashLibByteArray;
 begin
   result := a_encoding.GetBytes(a_in);
 end;
-{$WARNINGS ON}
 
 class procedure TConverters.ConvertUInt8ToBytes(a_in: UInt8;
   a_out: THashLibByteArray; a_index: Int32);
@@ -871,5 +879,78 @@ begin
   a_out[a_index] := (Byte(a_in));
 
 end;
+
+{$IFDEF DELPHI}
+
+class function TConverters.SplitString(const S, Delimiters: string)
+  : THashLibStringArray;
+var
+  StartIdx: Integer;
+  FoundIdx: Integer;
+  SplitPoints: Integer;
+  CurrentSplit: Integer;
+  I: Integer;
+begin
+  result := nil;
+
+{$IFNDEF NEXTGEN}
+  if S <> '' then
+  begin
+    { Determine the length of the resulting array }
+    SplitPoints := 0;
+    for I := 1 to Length(S) do
+      if IsDelimiter(Delimiters, S, I) then
+        Inc(SplitPoints);
+
+    SetLength(result, SplitPoints + 1);
+
+    { Split the string and fill the resulting array }
+    StartIdx := 1;
+    CurrentSplit := 0;
+    repeat
+      FoundIdx := FindDelimiter(Delimiters, S, StartIdx);
+      if FoundIdx <> 0 then
+      begin
+        result[CurrentSplit] := Copy(S, StartIdx, FoundIdx - StartIdx);
+        Inc(CurrentSplit);
+        StartIdx := FoundIdx + 1;
+      end;
+    until CurrentSplit = SplitPoints;
+
+    // copy the remaining part in case the string does not end in a delimiter
+    result[SplitPoints] := Copy(S, StartIdx, Length(S) - StartIdx + 1);
+  end;
+{$ELSE}
+  if S <> string.Empty then
+  begin
+    { Determine the length of the resulting array }
+    SplitPoints := 0;
+    for I := 0 to S.Length - 1 do
+      if S.IsDelimiter(Delimiters, I) then
+        Inc(SplitPoints);
+
+    SetLength(result, SplitPoints + 1);
+
+    { Split the string and fill the resulting array }
+    StartIdx := 0;
+    CurrentSplit := 0;
+    repeat
+      FoundIdx := S.IndexOfAny(Delimiters.ToCharArray, StartIdx);
+      if FoundIdx <> -1 then
+      begin
+        result[CurrentSplit] := S.SubString(StartIdx, FoundIdx - StartIdx);
+        Inc(CurrentSplit);
+        StartIdx := FoundIdx + 1;
+      end;
+    until CurrentSplit = SplitPoints;
+
+    // copy the remaining part in case the string does not end in a delimiter
+    result[SplitPoints] := S.SubString(StartIdx, S.Length - StartIdx + 1);
+  end;
+
+{$ENDIF NEXTGEN}
+end;
+
+{$ENDIF DELPHI}
 
 end.

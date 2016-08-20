@@ -39,8 +39,8 @@ type
 
     C1 = UInt64($A5A5A5A5A5A5A5A5);
     C2 = UInt64($0123456789ABCDEF);
-{$WARNINGS OFF}
-{$R-}
+
+
     s_T1: array [0 .. 255] of UInt64 = ($02AAB17CF7E90C5E, $AC424B03E243A8EC,
       $72CD5BE30DD5FCD3, $6D019B93F6F97F3A, $CD9978FFD21F9193,
       $7573A1C9708029E2, $B164326B922A83C3, $46883EEE04915870,
@@ -388,15 +388,15 @@ type
       $BF6C70E5F776CBB1, $411218F2EF552BED, $CB0C0708705A36A3,
       $E74D14754F986044, $CD56D9430EA8280E, $C12591D7535F5065,
       $C83223F1720AEF96, $C3A0396F7363A51F);
-{$R+}
-{$WARNINGS ON}
+
+
 {$ENDREGION}
-{$WARNINGS OFF}
+
   strict protected
     Fm_hash: THashLibUInt64Array;
 
     constructor Create(a_hash_size: Int32; a_rounds: THashRounds);
-{$WARNINGS ON}
+
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
     procedure TransformBlock(a_data: THashLibByteArray;
@@ -491,13 +491,13 @@ end;
 
 procedure TTiger2.Initialize;
 begin
-{$WARNINGS OFF}
-{$R-}
+
+
   Fm_hash[0] := $0123456789ABCDEF;
   Fm_hash[1] := $FEDCBA9876543210;
   Fm_hash[2] := $F096A5B4C3B2E187;
-{$R+}
-{$WARNINGS ON}
+
+
   Inherited Initialize();
 
 end;

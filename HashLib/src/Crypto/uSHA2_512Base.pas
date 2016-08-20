@@ -16,8 +16,8 @@ type
 {$REGION 'Consts'}
   strict private
   const
-{$WARNINGS OFF}
-{$R-}
+
+
     s_K: array [0 .. 79] of UInt64 = ($428A2F98D728AE22, $7137449123EF65CD,
       $B5C0FBCFEC4D3B2F, $E9B5DBA58189DBBC, $3956C25BF348B538,
       $59F111F1B605D019, $923F82A4AF194F9B, $AB1C5ED5DA6D8118,
@@ -45,15 +45,15 @@ type
       $1B710B35131C471B, $28DB77F523047D84, $32CAAB7B40C72493,
       $3C9EBE0A15C9BEBC, $431D67C49C100D4C, $4CC5D4BECB3E42B6,
       $597F299CFC657E2A, $5FCB6FAB3AD6FAEC, $6C44198C4A475817);
-  {$R+}
-{$WARNINGS ON}
+  
+
 {$ENDREGION}
-{$WARNINGS OFF}
+
   strict protected
     Fm_state: THashLibUInt64Array;
 
     constructor Create(a_hash_size: Int32);
-{$WARNINGS ON}
+
     procedure Finish(); override;
     procedure TransformBlock(a_data: THashLibByteArray;
       a_index: Int32); override;

@@ -64,8 +64,6 @@ begin
   TransformBlock(Fm_buffer.GetBytes(), 0);
 end;
 
-{$HINTS OFF}
-
 procedure TBlockHash.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
 begin
@@ -95,7 +93,6 @@ begin
     Fm_buffer.Feed(a_data, a_index, a_length, Fm_processed_bytes);
   end;
 end;
-{$HINTS ON}
 
 function TBlockHash.TransformFinal: IHashResult;
 var

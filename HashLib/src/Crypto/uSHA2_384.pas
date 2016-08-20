@@ -37,8 +37,8 @@ end;
 
 procedure TSHA2_384.Initialize;
 begin
-{$WARNINGS OFF}
-{$R-}
+
+
   Fm_state[0] := $CBBB9D5DC1059ED8;
   Fm_state[1] := $629A292A367CD507;
   Fm_state[2] := $9159015A3070DD17;
@@ -47,8 +47,8 @@ begin
   Fm_state[5] := $8EB44A8768581511;
   Fm_state[6] := $DB0C2E0D64F98FA7;
   Fm_state[7] := $47B5481DBEFA4FA4;
-{$R+}
-{$WARNINGS ON}
+
+
   Inherited Initialize();
 
 end;

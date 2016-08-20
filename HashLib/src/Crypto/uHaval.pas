@@ -26,13 +26,13 @@ type
     HAVAL_VERSION = Int32(1);
 
     procedure TailorDigestBits();
-{$WARNINGS OFF}
+
   strict protected
     Fm_rounds: Int32;
     Fm_hash: THashLibUInt32Array;
 
     constructor Create(a_rounds: THashRounds; a_hash_size: THashSize);
-{$WARNINGS ON}
+
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
 

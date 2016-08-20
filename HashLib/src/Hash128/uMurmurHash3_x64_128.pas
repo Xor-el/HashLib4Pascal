@@ -30,15 +30,15 @@ type
 
 {$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
-{$WARNINGS OFF}
-{$R-}
+
+
     C1: UInt64 = ($87C37B91114253D5);
     C2: UInt64 = ($4CF5AD432745937F);
 
     C5: UInt64 = ($FF51AFD7ED558CCD);
     C6: UInt64 = ($C4CEB9FE1A85EC53);
-{$R+}
-{$WARNINGS ON}
+
+
 {$ELSE}
     C1 = UInt64($87C37B91114253D5);
     C2 = UInt64($4CF5AD432745937F);

@@ -13,7 +13,7 @@ uses
 type
   TMDBase = class abstract(TBlockHash, ICryptoNotBuildIn)
 
-{$WARNINGS OFF}
+
   strict protected
     Fm_state: THashLibUInt32Array;
 
@@ -29,7 +29,7 @@ type
     C8 = UInt32($A953FD4E);
 
     constructor Create(a_state_length, a_hash_size: Int32);
-{$WARNINGS ON}
+
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
 

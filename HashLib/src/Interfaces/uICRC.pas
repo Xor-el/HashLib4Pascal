@@ -8,7 +8,7 @@ uses
 
 type
 
-{$WARNINGS OFF}
+
   ICRC = Interface(IBlockHash)
     ['{44A105E5-6716-43C0-BE69-AE80F87FDC39}']
 
@@ -32,7 +32,7 @@ type
 
   end;
 
-{$WARNINGS ON}
+
 
 implementation
 

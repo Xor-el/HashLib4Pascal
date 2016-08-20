@@ -619,8 +619,8 @@ begin
 
 end;
 
-{$WARNINGS OFF}
-{$R-}
+
+
 {$REGION 'CRC Standards Implementation'}
 
 class function TCRC.CreateCRCObject(a_value: TCRCStandard): ICRC;
@@ -969,8 +969,8 @@ begin
 end;
 
 {$ENDREGION}
-{$R+}
-{$WARNINGS ON}
+
+
 
 procedure TCRC.GenerateTable;
 var

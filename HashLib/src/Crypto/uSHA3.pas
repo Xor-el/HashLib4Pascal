@@ -28,8 +28,8 @@ type
 {$REGION 'Consts'}
   strict protected
   const
-{$WARNINGS OFF}
-{$R-}
+
+
     RC: array [0 .. 23] of UInt64 = ($0000000000000001, $0000000000008082,
       $800000000000808A, $8000000080008000, $000000000000808B,
       $0000000080000001, $8000000080008081, $8000000000008009,
@@ -39,11 +39,11 @@ type
       $8000000000000080, $000000000000800A, $800000008000000A,
       $8000000080008081, $8000000000008080, $0000000080000001,
       $8000000080008008);
-{$R+}
+
 {$ENDREGION}
   strict protected
     constructor Create(a_hash_size: THashSize);
-{$WARNINGS ON}
+
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
     procedure TransformBlock(a_data: THashLibByteArray;

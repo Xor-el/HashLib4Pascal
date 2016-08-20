@@ -31,12 +31,12 @@ type
       $C67178F2);
 
 {$ENDREGION}
-{$WARNINGS OFF}
+
   strict protected
     Fm_state: THashLibUInt32Array;
 
     constructor Create(a_hash_size: Int32);
-    {$WARNINGS ON}
+    
     procedure Finish(); override;
     procedure TransformBlock(a_data: THashLibByteArray;
       a_index: Int32); override;

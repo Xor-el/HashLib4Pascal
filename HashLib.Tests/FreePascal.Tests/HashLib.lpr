@@ -3,8 +3,13 @@ program HashLib.Tests;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, GuiTestRunner, fpcunittestrunner, HashLibTests,
-  BitConverterTests, PBKDF2_HMACTests;
+  Interfaces,
+  Forms,
+  GuiTestRunner,
+ // fpcunittestrunner,
+  HashLibTests,
+  BitConverterTests,
+  PBKDF2_HMACTests;
 
 {$R *.res}
 

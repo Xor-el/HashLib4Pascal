@@ -154,7 +154,7 @@ begin
   result := Fm_hash;
 end;
 
-{$WARNINGS OFF}
+
 
 function THashResult.GetHashCode: {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
 {$ENDIF DELPHI}
@@ -223,7 +223,7 @@ begin
 
   result := LResult;
 end;
-{$WARNINGS ON}
+
 
 function THashResult.GetInt32: Int32;
 begin

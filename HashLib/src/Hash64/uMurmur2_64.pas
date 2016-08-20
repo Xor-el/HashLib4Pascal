@@ -26,11 +26,11 @@ type
     CKEY = UInt32($0);
 {$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
-{$WARNINGS OFF}
-{$R-}
+
+
     M: UInt64 = ($C6A4A7935BD1E995);
-{$R+}
-{$WARNINGS ON}
+
+
 {$ELSE}
     M = UInt64($C6A4A7935BD1E995);
 {$ENDIF FPC}

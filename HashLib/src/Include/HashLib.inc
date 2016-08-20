@@ -14,6 +14,7 @@
 {$MODE delphi}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
+{$WARNINGS OFF}
 {$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$ENDIF FPC}
 
@@ -23,6 +24,13 @@
 // This option is needed to enable code browsing (aka Ctrl+Click)
 // It does not affect the binary size or generated code
 {$DEFINITIONINFO ON}
+
+// Disable Overflow and RangeChecks.
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+
+// Disable String Checks
+{$STRINGCHECKS OFF}
 
  // 2010 only
 {$IF CompilerVersion = 21.0}
@@ -49,6 +57,7 @@
 {$IF CompilerVersion >= 24.0}
 {$DEFINE DELPHIXE3_UP}
 {$LEGACYIFEND ON}
+{$ZEROBASEDSTRINGS OFF}
 {$IFEND}
 
   // XE7 and Above
