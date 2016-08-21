@@ -11,7 +11,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\.."/>
         <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF"/>
-        <UnitOutputDirectory Value="C:\bin\FPC\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Optimizations>

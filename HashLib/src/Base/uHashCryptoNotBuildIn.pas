@@ -1,5 +1,7 @@
 unit uHashCryptoNotBuildIn;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

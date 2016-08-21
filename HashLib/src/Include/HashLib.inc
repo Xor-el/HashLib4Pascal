@@ -15,6 +15,7 @@
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$WARNINGS OFF}
+{$HINTS OFF}  
 {$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$ENDIF FPC}
 
