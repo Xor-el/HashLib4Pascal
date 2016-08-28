@@ -12,7 +12,6 @@ type
   ICRC = Interface(IBlockHash)
     ['{44A105E5-6716-43C0-BE69-AE80F87FDC39}']
 
-    procedure Initialize();
     function GetNames: THashLibStringArray;
     property Names: THashLibStringArray read GetNames;
     function GetWidth: Int32;
