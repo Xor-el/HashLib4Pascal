@@ -139,7 +139,7 @@ begin
       begin
         u1 := a_data[current_index];
         System.Inc(current_index);
-        Fm_h := Fm_h xor (u1 or (a_data[current_index] shl 8));
+        Fm_h := Fm_h xor (Byte(u1) or (a_data[current_index] shl 8));
         System.Inc(current_index);
         Fm_h := Fm_h xor UInt32(a_data[current_index] shl 16);
 
@@ -150,7 +150,7 @@ begin
       begin
         u1 := a_data[current_index];
         System.Inc(current_index);
-        Fm_h := Fm_h xor (u1 or (a_data[current_index] shl 8));
+        Fm_h := Fm_h xor (Byte(u1) or (a_data[current_index] shl 8));
 
         Fm_h := Fm_h * M;
       end;

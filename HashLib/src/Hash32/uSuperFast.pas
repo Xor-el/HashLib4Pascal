@@ -60,7 +60,7 @@ begin
     hash := UInt16(hash + UInt32(i1 or i2));
     u1 := UInt32(a_data[currentIndex]);
     System.Inc(currentIndex);
-    tmp := UInt32((u1 or a_data[currentIndex] shl 8) shl 11) xor hash;
+    tmp := UInt32((Byte(u1) or a_data[currentIndex] shl 8) shl 11) xor hash;
     System.Inc(currentIndex);
     hash := (hash shl 16) xor tmp;
     hash := hash + (hash shr 11);

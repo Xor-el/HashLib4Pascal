@@ -31,7 +31,7 @@ type
     FHMAC: IHMAC;
     FPassword, FSalt, Fbuffer: THashLibByteArray;
     FIterationCount, FBlock: UInt32;
-    FBlockSize, FstartIndex, FendIndex, Fstate: Int32;
+    FBlockSize, FstartIndex, FendIndex: Int32;
 
     // initializes the state of the operation.
     procedure Initialize();
@@ -136,8 +136,6 @@ begin
   if (bc <= 0) then
     raise EArgumentOutOfRangeException.CreateRes(@SInvalidArgument);
 
-  Fstate := 1;
-
   System.SetLength(LKey, bc);
 
   LOffset := 0;
@@ -200,7 +198,6 @@ begin
   FBlock := 1;
   FstartIndex := 0;
   FendIndex := 0;
-  Fstate := 0;
 end;
 
 end.
