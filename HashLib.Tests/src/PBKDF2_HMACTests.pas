@@ -10,10 +10,10 @@ uses
 {$ELSE}
   TestFramework,
 {$ENDIF FPC}
-  uIHash,
-  uIHashInfo,
-  uHashFactory,
-  uConverters;
+  HlpIHash,
+  HlpIHashInfo,
+  HlpHashFactory,
+  HlpConverters;
 
 type
 

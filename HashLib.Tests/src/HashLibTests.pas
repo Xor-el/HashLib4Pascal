@@ -11,13 +11,13 @@ uses
 {$ELSE}
   TestFramework,
 {$ENDIF FPC}
-  uCRC,
-  uICRC,
-  uIHashInfo,
-  uHashFactory,
-  uIHash,
-  uIHashResult,
-  uConverters;
+  HlpCRC,
+  HlpICRC,
+  HlpIHashInfo,
+  HlpHashFactory,
+  HlpIHash,
+  HlpIHashResult,
+  HlpConverters;
 
 type
 

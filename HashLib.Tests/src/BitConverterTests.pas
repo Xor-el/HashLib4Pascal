@@ -10,7 +10,7 @@ uses
 {$ELSE}
   TestFramework,
 {$ENDIF FPC}
-  uBitConverter;
+  HlpBitConverter;
 
 type
 
