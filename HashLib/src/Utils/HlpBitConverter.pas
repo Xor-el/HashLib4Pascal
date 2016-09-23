@@ -226,7 +226,8 @@ class function TBitConverter.ToChar(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 2 = 0) then // data is aligned
+  // if (StartIndex mod 2 = 0) then // data is aligned
+  if (StartIndex and 1 = 0) then // data is aligned
   begin
     result := PChar(@value[StartIndex])^;
     Exit;
@@ -256,7 +257,8 @@ var
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 8 = 0) then // data is aligned
+  // if (StartIndex mod 8 = 0) then // data is aligned
+  if (StartIndex and 7 = 0) then // data is aligned
   begin
     result := PDouble(@value[StartIndex])^;
     Exit;
@@ -294,7 +296,8 @@ class function TBitConverter.ToInt16(value: THashLibByteArray;
 begin
 
   // System.Move(value[StartIndex], result, System.SizeOf(result));
-  if (StartIndex mod 2 = 0) then // data is aligned
+  // if (StartIndex mod 2 = 0) then // data is aligned
+  if (StartIndex and 1 = 0) then // data is aligned
   begin
     result := PSmallInt(@value[StartIndex])^;
     Exit;
@@ -321,7 +324,8 @@ class function TBitConverter.ToInt32(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 4 = 0) then // data is aligned
+  // if (StartIndex mod 4 = 0) then // data is aligned
+  if (StartIndex and 3 = 0) then // data is aligned
   begin
     result := PInteger(@value[StartIndex])^;
     Exit;
@@ -353,7 +357,8 @@ var
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 8 = 0) then // data is aligned
+  // if (StartIndex mod 8 = 0) then // data is aligned
+  if (StartIndex and 7 = 0) then // data is aligned
   begin
     result := PInt64(@value[StartIndex])^;
     Exit;
@@ -390,7 +395,8 @@ var
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 4 = 0) then // data is aligned
+  // if (StartIndex mod 4 = 0) then // data is aligned
+  if (StartIndex and 3 = 0) then // data is aligned
   begin
     result := PSingle(@value[StartIndex])^;
     Exit;
@@ -456,8 +462,10 @@ begin
     b := value[Index];
     System.Inc(Index);
 
-    chArray[Idx] := GetHexValue(b div 16);
-    chArray[Idx + 1] := GetHexValue(b mod 16);
+    // chArray[Idx] := GetHexValue(b div 16);
+    // chArray[Idx + 1] := GetHexValue(b mod 16);
+    chArray[Idx] := GetHexValue(b shr 4);
+    chArray[Idx + 1] := GetHexValue(b and 15);
     chArray[Idx + 2] := '-';
 
     System.Inc(Idx, 3);
@@ -484,7 +492,8 @@ class function TBitConverter.ToUInt16(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 2 = 0) then // data is aligned
+  // if (StartIndex mod 2 = 0) then // data is aligned
+  if (StartIndex and 1 = 0) then // data is aligned
   begin
     result := PWord(@value[StartIndex])^;
     Exit;
@@ -510,7 +519,8 @@ class function TBitConverter.ToUInt32(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 4 = 0) then // data is aligned
+  // if (StartIndex mod 4 = 0) then // data is aligned
+  if (StartIndex and 3 = 0) then // data is aligned
   begin
     result := PCardinal(@value[StartIndex])^;
     Exit;
@@ -542,7 +552,8 @@ var
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  if (StartIndex mod 8 = 0) then // data is aligned
+  // if (StartIndex mod 8 = 0) then // data is aligned
+  if (StartIndex and 7 = 0) then // data is aligned
   begin
     result := PUInt64(@value[StartIndex])^;
     Exit;

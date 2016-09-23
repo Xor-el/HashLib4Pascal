@@ -11,11 +11,9 @@ uses
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
-  HlpNullable
-{$IFDEF DELPHI}
-    , HlpBitConverter,
-  HlpBits
-{$ENDIF DELPHI};
+  HlpNullable,
+  HlpBitConverter,
+  HlpBits;
 
 type
   /// <summary>
@@ -197,14 +195,9 @@ var
   b: UInt64;
 begin
   b := Fm_v0 xor Fm_v1 xor Fm_v2 xor Fm_v3;
-{$IFDEF FPC}
-  b := BEtoN(b);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
+
   b := TBits.ReverseBytesUInt64(b);
-{$ENDIF DELPHI}
+
   result := TConverters.ConvertUInt64ToBytes(b);
 end;
 

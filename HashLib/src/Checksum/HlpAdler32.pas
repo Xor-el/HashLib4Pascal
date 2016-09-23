@@ -6,9 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
-{$IFDEF DELPHI}
   HlpBits,
-{$ENDIF DELPHI}
   HlpConverters,
   HlpHashCryptoNotBuildIn,
   HlpIHashInfo;
@@ -67,14 +65,8 @@ end;
 
 function TAdler32.GetResult: THashLibByteArray;
 begin
-{$IFDEF FPC}
-  Fm_res := BEtoN(Fm_res);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
+
   Fm_res := TBits.ReverseBytesUInt32(Fm_res);
-{$ENDIF DELPHI}
   result := TConverters.ConvertUInt32ToBytes(Fm_res);
 end;
 

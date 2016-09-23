@@ -161,7 +161,8 @@ var
 begin
   data := TConverters.ConvertBytesToUInt64(a_data, a_index, BlockSize);
   j := 0;
-  while j < (BlockSize div 8) do
+  // while j < (BlockSize div 8) do
+  while j < (BlockSize shr 3) do
   begin
     Fm_state[j] := Fm_state[j] xor data[j];
     System.Inc(j);

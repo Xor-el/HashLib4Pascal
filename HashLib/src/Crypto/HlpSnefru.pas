@@ -70,7 +70,8 @@ begin
 
   Inherited Create(Int32(a_hash_size), 64 - (Int32(a_hash_size)));
   Fm_security_level := Int32(a_security_level);
-  System.SetLength(Fm_state, HashSize div 4);
+  // System.SetLength(Fm_state, HashSize div 4);
+  System.SetLength(Fm_state, HashSize shr 2);
 
 end;
 

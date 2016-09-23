@@ -12,10 +12,8 @@ uses
   HlpConverters,
   HlpHashCryptoNotBuildIn,
   HlpIHashInfo,
-  HlpICRC
-{$IFDEF DELPHI}
-    , HlpBits
-{$ENDIF DELPHI};
+  HlpICRC,
+  HlpBits;
 
 {$REGION 'CRC Standards'}
 
@@ -1156,7 +1154,8 @@ begin
 
   result := TConverters.ConvertUInt64ToBytes(Fm_hash);
 
-  case Width div 8 of
+  // case Width div 8 of
+  case Width shr 3 of
     0:
       begin
         LUInt8 := UInt8(Fm_hash);
@@ -1167,41 +1166,20 @@ begin
     1 .. 2:
       begin
         LUInt16 := UInt16(Fm_hash);
-{$IFDEF FPC}
-        LUInt16 := BEtoN(LUInt16);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-        // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-        // Little Endian and Swap.
         LUInt16 := TBits.ReverseBytesUInt16(LUInt16);
-{$ENDIF DELPHI}
         result := TConverters.ConvertUInt16ToBytes(LUInt16);
       end;
 
     3 .. 4:
       begin
         LUInt32 := UInt32(Fm_hash);
-{$IFDEF FPC}
-        LUInt32 := BEtoN(LUInt32);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-        // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-        // Little Endian and Swap.
         LUInt32 := TBits.ReverseBytesUInt32(LUInt32);
-{$ENDIF DELPHI}
         result := TConverters.ConvertUInt32ToBytes(LUInt32);
       end
   else
     begin
       LUInt64 := (Fm_hash);
-{$IFDEF FPC}
-      LUInt64 := BEtoN(LUInt64);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-      // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-      // Little Endian and Swap.
       LUInt64 := TBits.ReverseBytesUInt64(LUInt64);
-{$ENDIF DELPHI}
       result := TConverters.ConvertUInt64ToBytes(LUInt64);
     end;
   end;

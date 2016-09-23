@@ -257,7 +257,8 @@ function THaval.GetResult: THashLibByteArray;
 begin
   TailorDigestBits();
 
-  Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, HashSize div 4);
+  // Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, HashSize div 4);
+  Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, HashSize shr 2);
 end;
 
 procedure THaval.Initialize;

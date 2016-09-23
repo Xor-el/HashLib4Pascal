@@ -100,8 +100,6 @@ begin
   inherited Initialize();
 end;
 
-{$OVERFLOWCHECKS OFF}
-
 function TMurmur2.InternalComputeBytes(a_data: THashLibByteArray): Int32;
 var
   &length, current_index: Int32;
@@ -171,8 +169,6 @@ begin
   result := Int32(Fm_h);
 end;
 
-{$OVERFLOWCHECKS ON}
-
 function TMurmur2.ComputeAggregatedBytes(a_data: THashLibByteArray)
   : IHashResult;
 
@@ -186,8 +182,6 @@ begin
 
   result := InternalComputeBytes(a_data);
 end;
-
-{$OVERFLOWCHECKS OFF}
 
 function TMurmur2.ComputeStringFast(const a_data: String): Int32;
 var
@@ -233,7 +227,5 @@ begin
 
   result := Int32(Fm_h);
 end;
-
-{$OVERFLOWCHECKS ON}
 
 end.

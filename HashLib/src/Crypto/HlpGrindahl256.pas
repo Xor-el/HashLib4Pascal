@@ -114,8 +114,10 @@ end;
 constructor TGrindahl256.Create;
 begin
   Inherited Create(32, 4);
-  System.SetLength(Fm_state, ROWS * COLUMNS div 4);
-  System.SetLength(Fm_temp, ROWS * COLUMNS div 4);
+  // System.SetLength(Fm_state, ROWS * COLUMNS div 4);
+  // System.SetLength(Fm_temp, ROWS * COLUMNS div 4);
+  System.SetLength(Fm_state, (ROWS * COLUMNS) shr 2);
+  System.SetLength(Fm_temp, (ROWS * COLUMNS) shr 2);
 end;
 
 procedure TGrindahl256.Finish;
@@ -151,8 +153,10 @@ end;
 
 function TGrindahl256.GetResult: THashLibByteArray;
 begin
+  // result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state,
+  // COLUMNS - HashSize div ROWS, HashSize div ROWS);
   result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state,
-    COLUMNS - HashSize div ROWS, HashSize div ROWS);
+    COLUMNS - (HashSize shr 2), (HashSize shr 2));
 end;
 
 class constructor TGrindahl256.Grindahl256;
@@ -192,8 +196,10 @@ procedure TGrindahl256.InjectMsg(a_full_process: Boolean);
 var
   u: THashLibUInt32Array;
 begin
-  Fm_state[ROWS * COLUMNS div 4 - 1] :=
-    Fm_state[ROWS * COLUMNS div 4 - 1] xor $01;
+  // Fm_state[ROWS * COLUMNS div 4 - 1] :=
+  // Fm_state[ROWS * COLUMNS div 4 - 1] xor $01;
+  Fm_state[((ROWS * COLUMNS) shr 2) - 1] :=
+    Fm_state[((ROWS * COLUMNS) shr 2) - 1] xor $01;
 
   if (a_full_process) then
   begin

@@ -95,10 +95,12 @@ var
   tempRes: THashLibUInt32Array;
   i: Int32;
 begin
-  System.SetLength(tempRes, HashSize div 4);
+  // System.SetLength(tempRes, HashSize div 4);
+  System.SetLength(tempRes, HashSize shr 2);
   i := 0;
 
-  while i < (HashSize div 8) do
+  // while i < (HashSize div 8) do
+  while i < (HashSize shr 3) do
   begin
     RoundFunction();
 
@@ -167,8 +169,10 @@ begin
   i := 0;
   while i < MILL_SIZE do
   begin
+    // Fm_mill[i] := TBits.RotateRight32(a[(7 * i) mod MILL_SIZE],
+    // i * (i + 1) div 2);
     Fm_mill[i] := TBits.RotateRight32(a[(7 * i) mod MILL_SIZE],
-      i * (i + 1) div 2);
+      (i * (i + 1)) shr 1);
     System.Inc(i);
   end;
 

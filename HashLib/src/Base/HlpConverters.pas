@@ -394,7 +394,8 @@ begin
 {$ENDIF DELPHI}
     hex := '';
     I := 0;
-    while I < (System.Length(ar) div 4) do
+    // while I < (System.Length(ar) div 4) do
+    while I < (System.Length(ar) shr 2) do
     begin
       if (I <> 0) then
         hex := hex + '-';
@@ -423,7 +424,8 @@ begin
   Check<Byte>(a_in, 1, 4, a_index, a_length);
 {$ENDIF DELPHI2010}
 {$ENDIF}
-  System.SetLength(result, a_length div 4);
+  // System.SetLength(result, a_length div 4);
+  System.SetLength(result, a_length shr 2);
 
   ConvertBytesToUInt32(a_in, a_index, a_length, result);
 
@@ -529,7 +531,8 @@ begin
   Check<Byte>(a_in, 1, 4, a_index, a_length);
 {$ENDIF DELPHI2010}
 {$ENDIF}
-  System.SetLength(result, a_length div 4);
+  // System.SetLength(result, a_length div 4);
+  System.SetLength(result, a_length shr 2);
   ConvertBytesToUInt32SwapOrder(a_in, a_index, a_length, result, 0);
 end;
 
@@ -556,7 +559,8 @@ begin
   Check<Byte>(a_in, 1, 8, a_index, a_length);
 {$ENDIF DELPHI2010}
 {$ENDIF}
-  System.SetLength(result, a_length div 8);
+  // System.SetLength(result, a_length div 8);
+  System.SetLength(result, a_length shr 3);
   ConvertBytesToUInt64(a_in, a_index, a_length, result, 0);
 
 end;
@@ -584,7 +588,8 @@ begin
   Check<Byte>(a_in, 1, 8, a_index, a_length);
 {$ENDIF DELPHI2010}
 {$ENDIF}
-  System.SetLength(result, a_length div 8);
+  // System.SetLength(result, a_length div 8);
+  System.SetLength(result, a_length shr 3);
   ConvertBytesToUInt64SwapOrder(a_in, a_index, a_length, result);
 end;
 
@@ -667,7 +672,8 @@ begin
 {$IFDEF DEBUG}
   System.Assert(System.Length(a_in) mod 2 = 0);
 {$ENDIF}
-  System.SetLength(result, System.Length(a_in) div 2);
+  // System.SetLength(result, System.Length(a_in) div 2);
+  System.SetLength(result, System.Length(a_in) shr 1);
   HexToBin(PChar(a_in), @result[0], System.Length(result));
 
 end;

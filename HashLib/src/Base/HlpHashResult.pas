@@ -24,9 +24,7 @@ uses
   base64,
 {$ENDIF FPC}
 {$ENDIF HAS_UNITSCOPE}
-{$IFDEF DELPHI}
   HlpBits,
-{$ENDIF DELPHI}
   HlpHashLibTypes,
   HlpIHashResult,
   HlpConverters,
@@ -81,14 +79,7 @@ implementation
 
 constructor THashResult.Create(a_hash: UInt64);
 begin
-{$IFDEF FPC}
-  a_hash := BEtoN(a_hash);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   a_hash := TBits.ReverseBytesUInt64(a_hash);
-{$ENDIF DELPHI}
   Fm_hash := TBitConverter.GetBytes(a_hash);
 end;
 
@@ -100,14 +91,7 @@ end;
 
 constructor THashResult.Create(a_hash: UInt32);
 begin
-{$IFDEF FPC}
-  a_hash := BEtoN(a_hash);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   a_hash := TBits.ReverseBytesUInt32(a_hash);
-{$ENDIF DELPHI}
   Fm_hash := TBitConverter.GetBytes(a_hash);
 end;
 
@@ -118,27 +102,14 @@ end;
 
 constructor THashResult.Create(a_hash: UInt16);
 begin
-{$IFDEF FPC}
-  a_hash := BEtoN(a_hash);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   a_hash := TBits.ReverseBytesUInt16(a_hash);
-{$ENDIF DELPHI}
   Fm_hash := TBitConverter.GetBytes(a_hash);
 end;
 
 constructor THashResult.Create(a_hash: Int32);
 begin
-{$IFDEF FPC}
-  a_hash := BEtoN(a_hash);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
+
   a_hash := TBits.ReverseBytesInt32(a_hash);
-{$ENDIF DELPHI}
   Fm_hash := TBitConverter.GetBytes(a_hash);
 end;
 
@@ -227,14 +198,7 @@ begin
     raise EInvalidOperationException.CreateRes(@SImpossibleRepresentationInt32);
 
   result := TBitConverter.ToInt32(Fm_hash, 0);
-{$IFDEF FPC}
-  result := BEtoN(result);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := TBits.ReverseBytesInt32(result);
-{$ENDIF DELPHI}
 end;
 
 function THashResult.GetUInt8: UInt8;
@@ -252,14 +216,7 @@ begin
       (@SImpossibleRepresentationUInt16);
 
   result := TBitConverter.ToUInt16(Fm_hash, 0);
-{$IFDEF FPC}
-  result := BEtoN(result);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := TBits.ReverseBytesUInt16(result);
-{$ENDIF DELPHI}
 end;
 
 function THashResult.GetUInt32: UInt32;
@@ -269,14 +226,7 @@ begin
       (@SImpossibleRepresentationUInt32);
 
   result := TBitConverter.ToUInt32(Fm_hash, 0);
-{$IFDEF FPC}
-  result := BEtoN(result);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := TBits.ReverseBytesUInt32(result);
-{$ENDIF DELPHI}
 end;
 
 function THashResult.GetUInt64: UInt64;
@@ -286,14 +236,7 @@ begin
       (@SImpossibleRepresentationUInt64);
 
   result := TBitConverter.ToUInt64(Fm_hash, 0);
-{$IFDEF FPC}
-  result := BEtoN(result);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := TBits.ReverseBytesUInt64(result);
-{$ENDIF DELPHI}
 end;
 
 class function THashResult.SameArrays(a_ar1, a_ar2: THashLibByteArray): Boolean;

@@ -9,10 +9,8 @@ uses
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
-  HlpNullable
-{$IFDEF DELPHI}
-    , HlpBits
-{$ENDIF DELPHI};
+  HlpNullable,
+  HlpBits;
 
 type
 
@@ -148,14 +146,9 @@ end;
 function TMurmurHash3_x86_32.GetResult: THashLibByteArray;
 begin
   System.SetLength(result, 4);
-{$IFDEF FPC}
-  Fm_h := BEtoN(Fm_h);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
+
   Fm_h := TBits.ReverseBytesUInt32(Fm_h);
-{$ENDIF DELPHI}
+
   result[0] := Byte(Fm_h);
   result[1] := Byte(Fm_h shr 8);
   result[2] := Byte(Fm_h shr 16);
@@ -201,8 +194,6 @@ begin
   Fm_h := (Fm_h shl 13) or (Fm_h shr 19);
   Fm_h := Fm_h * 5 + C3;
 end;
-
-{$OVERFLOWCHECKS OFF}
 
 function TMurmurHash3_x86_32.ComputeBytesFast(a_data: THashLibByteArray): Int32;
 var
@@ -281,9 +272,6 @@ begin
 
 end;
 
-{$OVERFLOWCHECKS ON}
-{$OVERFLOWCHECKS OFF}
-
 function TMurmurHash3_x86_32.ComputeStringFast(const a_data: String): Int32;
 var
   &length, current_index: Int32;
@@ -326,7 +314,5 @@ begin
   Initialize();
 
 end;
-
-{$OVERFLOWCHECKS ON}
 
 end.

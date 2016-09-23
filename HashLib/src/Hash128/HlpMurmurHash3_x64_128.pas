@@ -9,10 +9,8 @@ uses
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
-  HlpNullable
-{$IFDEF DELPHI}
-    , HlpBits
-{$ENDIF DELPHI};
+  HlpNullable,
+  HlpBits;
 
 type
   TMurmurHash3_x64_128 = class sealed(TBlockHash, IHash128, IHashWithKey,
@@ -317,16 +315,9 @@ function TMurmurHash3_x64_128.GetResult: THashLibByteArray;
 begin
   System.SetLength(result, 16);
 
-{$IFDEF FPC}
-  Fm_h1 := BEtoN(Fm_h1);
-  Fm_h2 := BEtoN(Fm_h2);
-{$ENDIF FPC}
-{$IFDEF DELPHI}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   Fm_h1 := TBits.ReverseBytesUInt64(Fm_h1);
   Fm_h2 := TBits.ReverseBytesUInt64(Fm_h2);
-{$ENDIF DELPHI}
+
   TConverters.ConvertUInt64ToBytes(Fm_h1, result, 0);
   TConverters.ConvertUInt64ToBytes(Fm_h2, result, 8);
 end;
