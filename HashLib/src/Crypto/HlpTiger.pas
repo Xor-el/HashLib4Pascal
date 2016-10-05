@@ -5,6 +5,9 @@ unit HlpTiger;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
 {$IFNDEF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.TypInfo,
@@ -16,7 +19,6 @@ uses
   HlpBitConverter,
 {$ENDIF DELPHI}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpConverters,
   HlpHashRounds,
   HlpIHashInfo,
@@ -480,10 +482,13 @@ begin
 end;
 
 function TTiger.GetResult: THashLibByteArray;
+var
+  tempResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt64ToBytes(Fm_hash);
-  result := THashLibByteArray(THashLibArrayHelper<Byte>.SubArray
-    (THashLibGenericArray<Byte>(result), 0, HashSize));
+
+  tempResult := TConverters.ConvertUInt64ToBytes(Fm_hash);
+  System.SetLength(result, HashSize);
+  System.Move(tempResult[0], result[0], HashSize * System.SizeOf(Byte));
 end;
 
 procedure TTiger.Initialize;

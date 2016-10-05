@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="1"/>
-    <Files Count="90">
+    <Files Count="89">
       <Item1>
         <Filename Value="..\..\Base\HlpConverters.pas"/>
         <UnitName Value="HlpConverters"/>
@@ -349,41 +349,37 @@
         <UnitName Value="HlpNullable"/>
       </Item81>
       <Item82>
-        <Filename Value="..\..\Utils\HlpArrayExtensions.pas"/>
-        <UnitName Value="HlpArrayExtensions"/>
-      </Item82>
-      <Item83>
         <Filename Value="..\..\Utils\HlpBitConverter.pas"/>
         <UnitName Value="HlpBitConverter"/>
-      </Item83>
-      <Item84>
+      </Item82>
+      <Item83>
         <Filename Value="..\..\Utils\HlpBits.pas"/>
         <UnitName Value="HlpBits"/>
-      </Item84>
-      <Item85>
+      </Item83>
+      <Item84>
         <Filename Value="..\..\Utils\HlpHashLibTypes.pas"/>
         <UnitName Value="HlpHashLibTypes"/>
-      </Item85>
-      <Item86>
+      </Item84>
+      <Item85>
         <Filename Value="..\..\Hash128\HlpMurmurHash3_x86_128.pas"/>
         <UnitName Value="HlpMurmurHash3_x86_128"/>
-      </Item86>
-      <Item87>
+      </Item85>
+      <Item86>
         <Filename Value="..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas"/>
         <UnitName Value="HlpPBKDF2_HMACNotBuildInAdapter"/>
-      </Item87>
-      <Item88>
+      </Item86>
+      <Item87>
         <Filename Value="..\..\Interfaces\HlpIKDF.pas"/>
         <UnitName Value="HlpIKDF"/>
-      </Item88>
-      <Item89>
+      </Item87>
+      <Item88>
         <Filename Value="..\..\Base\HlpKDF.pas"/>
         <UnitName Value="HlpKDF"/>
-      </Item89>
-      <Item90>
+      </Item88>
+      <Item89>
         <Filename Value="..\..\Interfaces\HlpICRC.pas"/>
         <UnitName Value="HlpICRC"/>
-      </Item90>
+      </Item89>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">

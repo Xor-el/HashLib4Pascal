@@ -5,6 +5,9 @@ unit HlpWhirlPool;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
 {$IFNDEF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.TypInfo,
@@ -13,7 +16,6 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -60,8 +62,9 @@ type
     class constructor WhirlPool;
 
     class function packIntoUInt64(b7, b6, b5, b4, b3, b2, b1, b0: UInt32)
-      : UInt64; static;
-    class function maskWithReductionPolynomial(input: UInt32): UInt32; static;
+      : UInt64; static; inline;
+    class function maskWithReductionPolynomial(input: UInt32): UInt32;
+      static; inline;
 
   strict protected
     function GetResult(): THashLibByteArray; override;
@@ -117,7 +120,8 @@ end;
 
 procedure TWhirlPool.Initialize;
 begin
-  THashLibArrayHelper<UInt64>.Clear(THashLibGenericArray<UInt64>(Fm_hash),
+
+  System.FillChar(Fm_hash[0], System.Length(Fm_hash) * System.SizeOf(UInt64),
     UInt64(0));
   Inherited Initialize();
 end;
@@ -180,8 +184,7 @@ begin
       System.Inc(i);
     end;
 
-    THashLibArrayHelper<UInt64>.Copy(THashLibGenericArray<UInt64>(m), 0,
-      THashLibGenericArray<UInt64>(k), 0, System.Length(k));
+    System.Move(m[0], k[0], System.Length(k) * System.SizeOf(UInt64));
 
     k[0] := k[0] xor Fs_rc[round];
 
@@ -204,8 +207,7 @@ begin
       System.Inc(i);
     end;
 
-    THashLibArrayHelper<UInt64>.Copy(THashLibGenericArray<UInt64>(m), 0,
-      THashLibGenericArray<UInt64>(temp), 0, System.Length(temp));
+    System.Move(m[0], temp[0], System.Length(temp) * System.SizeOf(UInt64));
 
     System.Inc(round);
 

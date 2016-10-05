@@ -8,7 +8,6 @@ uses
   HlpIHash,
   HlpKDF,
   HlpIHashInfo,
-  HlpArrayExtensions,
   HlpBitConverter,
   HlpHashLibTypes;
 
@@ -187,8 +186,8 @@ end;
 procedure TPBKDF2_HMACNotBuildInAdapter.Initialize;
 begin
   if (Fbuffer <> Nil) then
-    THashLibArrayHelper<Byte>.Clear
-      (THashLibGenericArray<Byte>(Fbuffer), Byte(0));
+    System.FillChar(Fbuffer[0], System.Length(Fbuffer) *
+      System.SizeOf(Byte), Byte(0));
 
   FHMAC := THashFactory.THMAC.CreateHMAC(FHash);
 

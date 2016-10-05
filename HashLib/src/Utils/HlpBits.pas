@@ -154,7 +154,7 @@ begin
     // if you don't want to cast ($FFFFFFFF) to an Int32,
     // simply replace it with (-1) to avoid range check error.
     result := result or (Int32($FFFFFFFF) shl (32 - ShiftBits));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 class function TBits.Asr64(value: Int64; ShiftBits: Int32): Int64;
@@ -165,84 +165,84 @@ begin
   result := value shr ShiftBits;
   if (value and $8000000000000000) > 0 then
     result := result or ($FFFFFFFFFFFFFFFF shl (64 - ShiftBits));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 class function TBits.RotateLeft32(a_value: UInt32; a_n: Int32): UInt32;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_n >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
 {$IFDEF FPC}
   result := RolDWord(a_value, a_n);
 {$ELSE}
   // a_n := a_n mod 32;
   a_n := a_n and 31;
-  if a_n = 0 then
-  begin
+  { if a_n = 0 then
+    begin
     result := a_value;
     Exit;
-  end;
+    end; }
 
   result := (a_value shl a_n) or (a_value shr (32 - a_n));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 class function TBits.RotateLeft64(a_value: UInt64; a_n: Int32): UInt64;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_n >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
 {$IFDEF FPC}
   result := RolQWord(a_value, a_n);
 {$ELSE}
   // a_n := a_n mod 64;
   a_n := a_n and 63;
-  if a_n = 0 then
-  begin
+  { if a_n = 0 then
+    begin
     result := a_value;
     Exit;
-  end;
+    end; }
   result := (a_value shl a_n) or (a_value shr (64 - a_n));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 class function TBits.RotateRight32(a_value: UInt32; a_n: Int32): UInt32;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_n >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
 {$IFDEF FPC}
   result := RorDWord(a_value, a_n);
 {$ELSE}
   // a_n := a_n mod 32;
   a_n := a_n and 31;
-  if a_n = 0 then
-  begin
+  { if a_n = 0 then
+    begin
     result := a_value;
     Exit;
-  end;
+    end; }
   result := (a_value shr a_n) or (a_value shl (32 - a_n));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 class function TBits.RotateRight64(a_value: UInt64; a_n: Int32): UInt64;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_n >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
 {$IFDEF FPC}
   result := RorQWord(a_value, a_n);
 {$ELSE}
   // a_n := a_n mod 64;
   a_n := a_n and 63;
-  if a_n = 0 then
-  begin
+  { if a_n = 0 then
+    begin
     result := a_value;
     Exit;
-  end;
+    end; }
   result := (a_value shr a_n) or (a_value shl (64 - a_n));
-{$ENDIF}
+{$ENDIF FPC}
 end;
 
 end.

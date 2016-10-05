@@ -6,6 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
+  HlpBits,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
@@ -40,7 +41,8 @@ begin
   hash := UInt32(System.Length(a_data));
   for i := 0 to System.Length(a_data) - 1 do
   begin
-    hash := ((hash shl 5) xor (hash shr 27)) xor a_data[i];
+
+    hash := TBits.RotateLeft32(hash, 5) xor a_data[i];
   end;
 
   result := THashResult.Create(hash);

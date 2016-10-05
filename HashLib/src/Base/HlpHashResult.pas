@@ -86,7 +86,6 @@ end;
 constructor THashResult.Create(a_hash: THashLibByteArray);
 begin
   Fm_hash := a_hash;
-
 end;
 
 constructor THashResult.Create(a_hash: UInt32);
@@ -108,7 +107,6 @@ end;
 
 constructor THashResult.Create(a_hash: Int32);
 begin
-
   a_hash := TBits.ReverseBytesInt32(a_hash);
   Fm_hash := TBitConverter.GetBytes(a_hash);
 end;
@@ -169,9 +167,6 @@ begin
 {$IFDEF FPC}
   Temp := TempHolder;
 {$ENDIF FPC}
-  // Used HashNameMBCS function
-  // Lifted from Delphi's "GetHashCode" function for "TStringHelper" with
-  // little modifications.
   Temp := AnsiUpperCase(Temp);
 
   LResult := 0;
@@ -184,7 +179,8 @@ begin
 {$ENDIF DELPHIXE3_UP}
   while I <= Top do
   begin
-    LResult := (LResult shl 5) or (LResult shr 27); // ROL Result, 5
+
+    LResult := TBits.RotateLeft32(LResult, 5);
     LResult := LResult xor UInt32(Temp[I]);
     System.Inc(I);
   end;

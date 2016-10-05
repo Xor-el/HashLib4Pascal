@@ -110,7 +110,6 @@ uses
   HlpPBKDF2_HMACNotBuildInAdapter
     in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpNullable in '..\..\HashLib\src\Nullable\HlpNullable.pas',
-  HlpArrayExtensions in '..\..\HashLib\src\Utils\HlpArrayExtensions.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',

@@ -6,6 +6,9 @@ interface
 
 uses
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashResult,

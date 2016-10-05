@@ -6,6 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
+  HlpBits,
   HlpHash,
   HlpIHashInfo,
   HlpHashResult,
@@ -52,7 +53,8 @@ begin
   i := a_index;
   while a_length > 0 do
   begin
-    Fm_hash := (Fm_hash shl 4) xor (Fm_hash shr 28) xor a_data[i];
+
+    Fm_hash := TBits.RotateLeft32(Fm_hash, 4) xor a_data[i];
     System.Inc(i);
     System.Dec(a_length);
   end;

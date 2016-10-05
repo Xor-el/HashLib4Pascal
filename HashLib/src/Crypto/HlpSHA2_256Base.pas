@@ -5,7 +5,11 @@ unit HlpSHA2_256Base;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
+  HlpBits,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -100,9 +104,9 @@ begin
   begin
     T := data[r - 2];
     T2 := data[r - 15];
-    data[r] := (((T shr 17) or (T shl 15)) xor ((T shr 19) or (T shl 13))
+    data[r] := ((TBits.RotateRight32(T, 17)) xor (TBits.RotateRight32(T, 19))
       xor (T shr 10)) + data[r - 7] +
-      (((T2 shr 7) or (T2 shl 25)) xor ((T2 shr 18) or (T2 shl 14))
+      ((TBits.RotateRight32(T2, 7)) xor (TBits.RotateRight32(T2, 18))
       xor (T2 shr 3)) + data[r - 16];
     System.Inc(r);
   end;
@@ -113,10 +117,11 @@ begin
   begin
 
     T := s_K[r] + data[r] + H +
-      (((E shr 6) or (E shl 26)) xor ((E shr 11) or (E shl 21))
-      xor ((E shr 25) or (E shl 7))) + ((E and F) xor (not E and G));
-    T2 := (((A shr 2) or (A shl 30)) xor ((A shr 13) or (A shl 19))
-      xor ((A shr 22) or (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+      ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+      xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
+    T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+      xor (TBits.RotateRight32(A, 22))) +
+      ((A and B) xor (A and C) xor (B and C));
 
     H := G;
     G := F;

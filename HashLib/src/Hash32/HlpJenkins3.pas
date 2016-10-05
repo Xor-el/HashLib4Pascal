@@ -6,6 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
+  HlpBits,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
@@ -85,22 +86,22 @@ begin
     c := c + UInt32(i1 or i2 or i3 or i4);
 
     a := a - c;
-    a := a xor ((c shl 4) or (c shr (32 - 4)));
+    a := a xor TBits.RotateLeft32(c, 4);
     c := c + b;
     b := b - a;
-    b := b xor ((a shl 6) or (a shr (32 - 6)));
+    b := b xor TBits.RotateLeft32(a, 6);
     a := a + c;
     c := c - b;
-    c := c xor ((b shl 8) or (b shr (32 - 8)));
+    c := c xor TBits.RotateLeft32(b, 8);
     b := b + a;
     a := a - c;
-    a := a xor ((c shl 16) or (c shr (32 - 16)));
+    a := a xor TBits.RotateLeft32(c, 16);
     c := c + b;
     b := b - a;
-    b := b xor ((a shl 19) or (a shr (32 - 19)));
+    b := b xor TBits.RotateLeft32(a, 19);
     a := a + c;
     c := c - b;
-    c := c xor ((b shl 4) or (b shr (32 - 4)));
+    c := c xor TBits.RotateLeft32(b, 4);
     b := b + a;
 
     System.Dec(length, 12);
@@ -373,19 +374,19 @@ begin
   end;
 
   c := c xor b;
-  c := c - ((b shl 14) or (b shr (32 - 14)));
+  c := c - TBits.RotateLeft32(b, 14);
   a := a xor c;
-  a := a - ((c shl 11) or (c shr (32 - 11)));
+  a := a - TBits.RotateLeft32(c, 11);
   b := b xor a;
-  b := b - ((a shl 25) or (a shr (32 - 25)));
+  b := b - TBits.RotateLeft32(a, 25);
   c := c xor b;
-  c := c - ((b shl 16) or (b shr (32 - 16)));
+  c := c - TBits.RotateLeft32(b, 16);
   a := a xor c;
-  a := a - ((c shl 4) or (c shr (32 - 4)));
+  a := a - TBits.RotateLeft32(c, 4);
   b := b xor a;
-  b := b - ((a shl 14) or (a shr (32 - 14)));
+  b := b - TBits.RotateLeft32(a, 14);
   c := c xor b;
-  c := c - ((b shl 24) or (b shr (32 - 24)));
+  c := c - TBits.RotateLeft32(b, 24);
 
   result := THashResult.Create(c);
 

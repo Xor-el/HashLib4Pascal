@@ -5,6 +5,9 @@ unit HlpSHA2_512_256;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
 {$IFNDEF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.TypInfo,
@@ -13,7 +16,6 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpSHA2_512Base,
   HlpConverters;
 
@@ -39,10 +41,13 @@ begin
 end;
 
 function TSHA2_512_256.GetResult: THashLibByteArray;
+var
+  tempResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt64ToBytesSwapOrder(Fm_state);
-  result := THashLibByteArray(THashLibArrayHelper<Byte>.SubArray
-    (THashLibGenericArray<Byte>(result), 0, HashSize));
+  tempResult := TConverters.ConvertUInt64ToBytesSwapOrder(Fm_state);
+
+  System.SetLength(result, HashSize);
+  System.Move(tempResult[0], result[0], HashSize * System.SizeOf(Byte));
 end;
 
 procedure TSHA2_512_256.Initialize;

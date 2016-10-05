@@ -38,7 +38,6 @@ contains
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\Utils\HlpBits.pas',
   HlpConverters in '..\..\Base\HlpConverters.pas',
-  HlpArrayExtensions in '..\..\Utils\HlpArrayExtensions.pas',
   HlpHash in '..\..\Base\HlpHash.pas',
   HlpHashBuffer in '..\..\Base\HlpHashBuffer.pas',
   HlpHashCryptoNotBuildIn in '..\..\Base\HlpHashCryptoNotBuildIn.pas',

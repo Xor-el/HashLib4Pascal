@@ -13,7 +13,6 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
 
@@ -114,10 +113,12 @@ end;
 
 procedure TMD2.Initialize;
 begin
-  THashLibArrayHelper<Byte>.Clear(THashLibGenericArray<Byte>(Fm_state),
-    Byte(0));
-  THashLibArrayHelper<Byte>.Clear
-    (THashLibGenericArray<Byte>(Fm_checksum), Byte(0));
+
+  System.FillChar(Fm_state[0], System.Length(Fm_state) *
+    System.SizeOf(Byte), Byte(0));
+
+  System.FillChar(Fm_checksum[0], System.Length(Fm_checksum) *
+    System.SizeOf(Byte), Byte(0));
 
   Inherited Initialize();
 
@@ -126,15 +127,17 @@ end;
 procedure TMD2.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
 var
   temp: THashLibByteArray;
-  i, j: Int32;
+  i, j, LBlockSize: Int32;
   t: UInt32;
 begin
   System.SetLength(temp, 48);
 
-  THashLibArrayHelper<Byte>.Copy(THashLibGenericArray<Byte>(Fm_state), 0,
-    THashLibGenericArray<Byte>(temp), 0, 16);
-  THashLibArrayHelper<Byte>.Copy(THashLibGenericArray<Byte>(a_data), a_index,
-    THashLibGenericArray<Byte>(temp), 16, 16);
+  System.Move(Fm_state[0], temp[0], 16);
+
+  System.Move(a_data[a_index], temp[16], 16);
+
+  LBlockSize := BlockSize;
+
   i := 0;
   while i < 16 do
   begin
@@ -160,12 +163,11 @@ begin
     System.Inc(i);
   end;
 
-  THashLibArrayHelper<Byte>.Copy(THashLibGenericArray<Byte>(temp), 0,
-    THashLibGenericArray<Byte>(Fm_state), 0, 16);
+  System.Move(temp[0], Fm_state[0], 16);
 
   t := Fm_checksum[15];
   i := 0;
-  while i < BlockSize do
+  while i < LBlockSize do
   begin
 
     Fm_checksum[i] := Fm_checksum[i] xor (s_pi[a_data[i + a_index] xor t]);

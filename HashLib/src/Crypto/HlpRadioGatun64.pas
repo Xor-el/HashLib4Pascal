@@ -13,7 +13,6 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpBits,
   HlpConverters,
   HlpIHashInfo,
@@ -104,8 +103,7 @@ begin
   begin
     RoundFunction();
 
-    THashLibArrayHelper<UInt64>.Copy(THashLibGenericArray<UInt64>(Fm_mill), 1,
-      THashLibGenericArray<UInt64>(tempRes), i * 2, 2);
+    System.Move(Fm_mill[1], tempRes[i * 2], 2 * System.SizeOf(UInt64));
     System.Inc(i);
   end;
 
@@ -116,15 +114,16 @@ procedure TRadioGatun64.Initialize;
 var
   i: Int32;
 begin
-  THashLibArrayHelper<UInt64>.Clear(THashLibGenericArray<UInt64>(Fm_mill),
+
+  System.FillChar(Fm_mill[0], System.Length(Fm_mill) * System.SizeOf(UInt64),
     UInt64(0));
 
   i := 0;
   while i < BELT_LENGTH do
   begin
 
-    THashLibArrayHelper<UInt64>.Clear(THashLibGenericArray<UInt64>(Fm_belt[i]),
-      UInt64(0));
+    System.FillChar(Fm_belt[i][0], System.Length(Fm_belt[i]) *
+      System.SizeOf(UInt64), UInt64(0));
     System.Inc(i);
   end;
 

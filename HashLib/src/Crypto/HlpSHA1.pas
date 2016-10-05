@@ -5,6 +5,8 @@ unit HlpSHA1;
 interface
 
 uses
+
+  HlpBits,
   HlpHashLibTypes,
   HlpSHA0;
 
@@ -40,7 +42,7 @@ begin
   while i < 80 do
   begin
     T := a_data[i - 3] xor a_data[i - 8] xor a_data[i - 14] xor a_data[i - 16];
-    a_data[i] := ((T shl 1) or (T shr 31));
+    a_data[i] := TBits.RotateLeft32(T, 1);
     System.Inc(i);
   end;
 

@@ -3,7 +3,7 @@ unit HlpNullable;
 {$I ..\Include\HashLib.inc}
 { /*  The "Nullable Types" found in this Unit were extracted from
   https://github.com/jpluimers/Conferences/blob/master/2009/DelphiLive.2009/Nullable-types-in-Delphi-Win32/Delphi-generic/src/NullableTypes.pas
-  */ with some little modifications by me. }
+  with some little modifications by me. */ }
 
 interface
 
@@ -71,9 +71,9 @@ type
   end;
 
   /// <summary>
-  /// Represents a nullable integer.
+  /// Represents a Nullable Integer.
   /// </summary>
-  TNullableInteger = Nullable<Integer>;
+  TNullableInteger = Nullable<Int32>;
 
 implementation
 
@@ -165,9 +165,9 @@ end;
 
 class function Nullable<T>.NewAddInt(const aInt, bInt): T;
 var
-  Value: Integer;
+  Value: Int32;
 begin
-  Value := Integer(aInt) + Integer(bInt);
+  Value := Int32(aInt) + Int32(bInt);
   Result := CastBack(Value);
 end;
 

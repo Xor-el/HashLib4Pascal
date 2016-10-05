@@ -10,13 +10,23 @@
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 {$IFDEF FPC}
+{$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$UNDEF DELPHI}
 {$MODE delphi}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$WARNINGS OFF}
-{$HINTS OFF}  
-{$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
+{$HINTS OFF}
+// Optimizations
+{$OPTIMIZATION LEVEL3}
+{$OPTIMIZATION PEEPHOLE}
+{$OPTIMIZATION REGVAR}
+{$IFDEF CPUI386}
+{$OPTIMIZATION USEEBP}
+{$ENDIF}
+{$IFDEF CPUX86_64}
+{$OPTIMIZATION USERBP}
+{$ENDIF}
 {$ENDIF FPC}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)

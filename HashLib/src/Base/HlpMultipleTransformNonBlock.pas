@@ -25,8 +25,7 @@ uses
   HlpHashLibTypes,
   HlpHash,
   HlpIHashInfo,
-  HlpIHashResult,
-  HlpArrayExtensions;
+  HlpIHashResult;
 
 type
 
@@ -75,8 +74,8 @@ begin
   for arr in Fm_list do
 
   begin
-    THashLibArrayHelper<Byte>.Copy(THashLibGenericArray<Byte>(arr), 0,
-      THashLibGenericArray<Byte>(result), index, System.Length(arr));
+    System.Move(arr[0], result[index], System.Length(arr) *
+      System.SizeOf(Byte));
     index := index + System.Length(arr);
   end;
 

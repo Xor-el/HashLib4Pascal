@@ -6,7 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
-  HlpArrayExtensions,
+  HlpBits,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -391,7 +391,7 @@ begin
     ax := Fsbox[1, a] shl 15;
     bx := Fsbox[3, a] shl 23;
     cx := Fsbox[5, a];
-    cx := (cx shr 1) or (cx shl 31);
+    cx := TBits.RotateRight32(cx, 1);
     dx := Fsbox[7, a] shl 7;
 
     b := 0;
@@ -413,9 +413,10 @@ end;
 
 procedure TGost.Initialize;
 begin
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state),
+
+  System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt32),
     UInt32(0));
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_hash),
+  System.FillChar(Fm_hash[0], System.Length(Fm_hash) * System.SizeOf(UInt32),
     UInt32(0));
 
   Inherited Initialize();

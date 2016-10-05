@@ -6,6 +6,9 @@ interface
 
 uses
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -96,7 +99,7 @@ begin
         k2 := k2 xor (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -110,7 +113,7 @@ begin
         k2 := k2 xor (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -123,7 +126,7 @@ begin
         k2 := k2 xor (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -135,7 +138,7 @@ begin
         k2 := k2 xor (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -146,7 +149,7 @@ begin
         k2 := k2 xor (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -156,7 +159,7 @@ begin
         k2 := (UInt64(data[9]) shl 8);
         k2 := k2 xor (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -165,7 +168,7 @@ begin
       begin
         k2 := (UInt64(data[8]) shl 0);
         k2 := k2 * C2;
-        k2 := (k2 shl 33) or (k2 shr 31);
+        k2 := TBits.RotateLeft64(k2, 33);
         k2 := k2 * C1;
         Fm_h2 := Fm_h2 xor k2;
       end;
@@ -187,7 +190,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -202,7 +205,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -216,7 +219,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -229,7 +232,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -241,7 +244,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -252,7 +255,7 @@ begin
         k1 := k1 xor UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -262,7 +265,7 @@ begin
         k1 := UInt64(data[1]) shl 8;
         k1 := k1 xor UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -271,7 +274,7 @@ begin
       begin
         k1 := UInt64(data[0]) shl 0;
         k1 := k1 * C1;
-        k1 := (k1 shl 31) or (k1 shr 33);
+        k1 := TBits.RotateLeft64(k1, 31);
         k1 := k1 * C2;
         Fm_h1 := Fm_h1 xor k1;
       end;
@@ -381,7 +384,7 @@ begin
   k1 := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
 
   k1 := k1 * C1;
-  k1 := (k1 shl 31) or (k1 shr 33);
+  k1 := TBits.RotateLeft64(k1, 31);
   k1 := k1 * C2;
   Fm_h1 := Fm_h1 xor k1;
 
@@ -415,11 +418,11 @@ begin
   k2 := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
 
   k2 := k2 * C2;
-  k2 := (k2 shl 33) or (k2 shr 31);
+  k2 := TBits.RotateLeft64(k2, 33);
   k2 := k2 * C1;
   Fm_h2 := Fm_h2 xor k2;
 
-  Fm_h2 := (Fm_h2 shl 31) or (Fm_h2 shr 33);
+  Fm_h2 := TBits.RotateLeft64(Fm_h2, 31);
   Fm_h2 := Fm_h2 + Fm_h1;
   Fm_h2 := Fm_h2 * 5 + C4;
 

@@ -5,12 +5,12 @@ unit HlpXXHash64;
 interface
 
 uses
-{$IFDEF DELPHI}
-  HlpBitConverter,
-{$ENDIF DELPHI}
   HlpHashLibTypes,
   HlpHash,
   HlpConverters,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,

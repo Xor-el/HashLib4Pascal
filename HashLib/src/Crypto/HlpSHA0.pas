@@ -5,7 +5,10 @@ unit HlpSHA0;
 interface
 
 uses
-
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
+  HlpBits,
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
@@ -127,327 +130,288 @@ begin
 
   r := 0;
 
-  T1 := data[r] + C1 + ((A shl 5) or (A shr (32 - 5))) +
+  T1 := data[r] + C1 + TBits.RotateLeft32(A, 5) +
     ((B and C) or (not B and D)) + E;
   System.Inc(r);
-  X7 := ((B shl 30) or (B shr (32 - 30)));
-  T2 := data[r] + C1 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(B, 30);
+  T2 := data[r] + C1 + TBits.RotateLeft32(T1, 5) +
     ((A and X7) or (not A and C)) + D;
   System.Inc(r);
-  X8 := ((A shl 30) or (A shr (32 - 30)));
-  T3 := data[r] + C1 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(A, 30);
+  T3 := data[r] + C1 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (not T1 and X7)) + C;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C1 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C1 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (not T2 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C1 + ((T4 shl 5) or (T4 shr (32 - 5))) +
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C1 + TBits.RotateLeft32(T4, 5) +
     ((T3 and X2) or (not T3 and X1)) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C1 + ((T5 shl 5) or (T5 shr (32 - 5))) +
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C1 + TBits.RotateLeft32(T5, 5) +
     ((T4 and X3) or (not T4 and X2)) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C1 + ((T6 shl 5) or (T6 shr (32 - 5))) +
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C1 + TBits.RotateLeft32(T6, 5) +
     ((T5 and X4) or (not T5 and X3)) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C1 + ((T7 shl 5) or (T7 shr (32 - 5))) +
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C1 + TBits.RotateLeft32(T7, 5) +
     ((T6 and X5) or (not T6 and X4)) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C1 + ((T8 shl 5) or (T8 shr (32 - 5))) +
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C1 + TBits.RotateLeft32(T8, 5) +
     ((T7 and X6) or (not T7 and X5)) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C1 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C1 + TBits.RotateLeft32(T1, 5) +
     ((T8 and X7) or (not T8 and X6)) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C1 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C1 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (not T1 and X7)) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C1 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C1 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (not T2 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C1 + ((T4 shl 5) or (T4 shr (32 - 5))) +
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C1 + TBits.RotateLeft32(T4, 5) +
     ((T3 and X2) or (not T3 and X1)) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C1 + ((T5 shl 5) or (T5 shr (32 - 5))) +
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C1 + TBits.RotateLeft32(T5, 5) +
     ((T4 and X3) or (not T4 and X2)) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C1 + ((T6 shl 5) or (T6 shr (32 - 5))) +
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C1 + TBits.RotateLeft32(T6, 5) +
     ((T5 and X4) or (not T5 and X3)) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C1 + ((T7 shl 5) or (T7 shr (32 - 5))) +
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C1 + TBits.RotateLeft32(T7, 5) +
     ((T6 and X5) or (not T6 and X4)) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C1 + ((T8 shl 5) or (T8 shr (32 - 5))) +
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C1 + TBits.RotateLeft32(T8, 5) +
     ((T7 and X6) or (not T7 and X5)) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C1 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C1 + TBits.RotateLeft32(T1, 5) +
     ((T8 and X7) or (not T8 and X6)) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C1 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C1 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (not T1 and X7)) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C1 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C1 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (not T2 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C2 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C2 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C2 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C2 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C2 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C2 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C2 + ((T7 shl 5) or (T7 shr (32 - 5))) +
-    (T6 xor X5 xor X4) + X3;
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C2 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C2 + ((T8 shl 5) or (T8 shr (32 - 5))) +
-    (T7 xor X6 xor X5) + X4;
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C2 + TBits.RotateLeft32(T8, 5) + (T7 xor X6 xor X5) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C2 + ((T1 shl 5) or (T1 shr (32 - 5))) +
-    (T8 xor X7 xor X6) + X5;
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C2 + TBits.RotateLeft32(T1, 5) + (T8 xor X7 xor X6) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C2 + ((T2 shl 5) or (T2 shr (32 - 5))) +
-    (T1 xor X8 xor X7) + X6;
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C2 + TBits.RotateLeft32(T2, 5) + (T1 xor X8 xor X7) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C2 + ((T3 shl 5) or (T3 shr (32 - 5))) +
-    (T2 xor X1 xor X8) + X7;
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C2 + TBits.RotateLeft32(T3, 5) + (T2 xor X1 xor X8) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C2 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C2 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C2 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C2 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C2 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C2 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C2 + ((T7 shl 5) or (T7 shr (32 - 5))) +
-    (T6 xor X5 xor X4) + X3;
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C2 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C2 + ((T8 shl 5) or (T8 shr (32 - 5))) +
-    (T7 xor X6 xor X5) + X4;
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C2 + TBits.RotateLeft32(T8, 5) + (T7 xor X6 xor X5) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C2 + ((T1 shl 5) or (T1 shr (32 - 5))) +
-    (T8 xor X7 xor X6) + X5;
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C2 + TBits.RotateLeft32(T1, 5) + (T8 xor X7 xor X6) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C2 + ((T2 shl 5) or (T2 shr (32 - 5))) +
-    (T1 xor X8 xor X7) + X6;
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C2 + TBits.RotateLeft32(T2, 5) + (T1 xor X8 xor X7) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C2 + ((T3 shl 5) or (T3 shr (32 - 5))) +
-    (T2 xor X1 xor X8) + X7;
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C2 + TBits.RotateLeft32(T3, 5) + (T2 xor X1 xor X8) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C2 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C2 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C2 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C2 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C2 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C2 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C2 + ((T7 shl 5) or (T7 shr (32 - 5))) +
-    (T6 xor X5 xor X4) + X3;
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C2 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C3 + ((T8 shl 5) or (T8 shr (32 - 5))) +
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C3 + TBits.RotateLeft32(T8, 5) +
     ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C3 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C3 + TBits.RotateLeft32(T1, 5) +
     ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C3 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C3 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C3 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C3 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C3 + ((T4 shl 5) or (T4 shr (32 - 5))) +
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C3 + TBits.RotateLeft32(T4, 5) +
     ((T3 and X2) or (T3 and X1) or (X2 and X1)) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C3 + ((T5 shl 5) or (T5 shr (32 - 5))) +
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C3 + TBits.RotateLeft32(T5, 5) +
     ((T4 and X3) or (T4 and X2) or (X3 and X2)) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C3 + ((T6 shl 5) or (T6 shr (32 - 5))) +
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C3 + TBits.RotateLeft32(T6, 5) +
     ((T5 and X4) or (T5 and X3) or (X4 and X3)) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C3 + ((T7 shl 5) or (T7 shr (32 - 5))) +
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C3 + TBits.RotateLeft32(T7, 5) +
     ((T6 and X5) or (T6 and X4) or (X5 and X4)) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C3 + ((T8 shl 5) or (T8 shr (32 - 5))) +
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C3 + TBits.RotateLeft32(T8, 5) +
     ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C3 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C3 + TBits.RotateLeft32(T1, 5) +
     ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C3 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C3 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C3 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C3 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C3 + ((T4 shl 5) or (T4 shr (32 - 5))) +
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C3 + TBits.RotateLeft32(T4, 5) +
     ((T3 and X2) or (T3 and X1) or (X2 and X1)) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C3 + ((T5 shl 5) or (T5 shr (32 - 5))) +
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C3 + TBits.RotateLeft32(T5, 5) +
     ((T4 and X3) or (T4 and X2) or (X3 and X2)) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C3 + ((T6 shl 5) or (T6 shr (32 - 5))) +
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C3 + TBits.RotateLeft32(T6, 5) +
     ((T5 and X4) or (T5 and X3) or (X4 and X3)) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C3 + ((T7 shl 5) or (T7 shr (32 - 5))) +
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C3 + TBits.RotateLeft32(T7, 5) +
     ((T6 and X5) or (T6 and X4) or (X5 and X4)) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C3 + ((T8 shl 5) or (T8 shr (32 - 5))) +
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C3 + TBits.RotateLeft32(T8, 5) +
     ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C3 + ((T1 shl 5) or (T1 shr (32 - 5))) +
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C3 + TBits.RotateLeft32(T1, 5) +
     ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C3 + ((T2 shl 5) or (T2 shr (32 - 5))) +
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C3 + TBits.RotateLeft32(T2, 5) +
     ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C3 + ((T3 shl 5) or (T3 shr (32 - 5))) +
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C3 + TBits.RotateLeft32(T3, 5) +
     ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C4 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C4 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C4 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C4 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C4 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C4 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C4 + ((T7 shl 5) or (T7 shr (32 - 5))) +
-    (T6 xor X5 xor X4) + X3;
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C4 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C4 + ((T8 shl 5) or (T8 shr (32 - 5))) +
-    (T7 xor X6 xor X5) + X4;
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C4 + TBits.RotateLeft32(T8, 5) + (T7 xor X6 xor X5) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C4 + ((T1 shl 5) or (T1 shr (32 - 5))) +
-    (T8 xor X7 xor X6) + X5;
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C4 + TBits.RotateLeft32(T1, 5) + (T8 xor X7 xor X6) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C4 + ((T2 shl 5) or (T2 shr (32 - 5))) +
-    (T1 xor X8 xor X7) + X6;
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C4 + TBits.RotateLeft32(T2, 5) + (T1 xor X8 xor X7) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C4 + ((T3 shl 5) or (T3 shr (32 - 5))) +
-    (T2 xor X1 xor X8) + X7;
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C4 + TBits.RotateLeft32(T3, 5) + (T2 xor X1 xor X8) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C4 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C4 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C4 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C4 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C4 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C4 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
-  T8 := data[r] + C4 + ((T7 shl 5) or (T7 shr (32 - 5))) +
-    (T6 xor X5 xor X4) + X3;
+  X5 := TBits.RotateLeft32(T5, 30);
+  T8 := data[r] + C4 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3;
   System.Inc(r);
-  X6 := ((T6 shl 30) or (T6 shr (32 - 30)));
-  T1 := data[r] + C4 + ((T8 shl 5) or (T8 shr (32 - 5))) +
-    (T7 xor X6 xor X5) + X4;
+  X6 := TBits.RotateLeft32(T6, 30);
+  T1 := data[r] + C4 + TBits.RotateLeft32(T8, 5) + (T7 xor X6 xor X5) + X4;
   System.Inc(r);
-  X7 := ((T7 shl 30) or (T7 shr (32 - 30)));
-  T2 := data[r] + C4 + ((T1 shl 5) or (T1 shr (32 - 5))) +
-    (T8 xor X7 xor X6) + X5;
+  X7 := TBits.RotateLeft32(T7, 30);
+  T2 := data[r] + C4 + TBits.RotateLeft32(T1, 5) + (T8 xor X7 xor X6) + X5;
   System.Inc(r);
-  X8 := ((T8 shl 30) or (T8 shr (32 - 30)));
-  T3 := data[r] + C4 + ((T2 shl 5) or (T2 shr (32 - 5))) +
-    (T1 xor X8 xor X7) + X6;
+  X8 := TBits.RotateLeft32(T8, 30);
+  T3 := data[r] + C4 + TBits.RotateLeft32(T2, 5) + (T1 xor X8 xor X7) + X6;
   System.Inc(r);
-  X1 := ((T1 shl 30) or (T1 shr (32 - 30)));
-  T4 := data[r] + C4 + ((T3 shl 5) or (T3 shr (32 - 5))) +
-    (T2 xor X1 xor X8) + X7;
+  X1 := TBits.RotateLeft32(T1, 30);
+  T4 := data[r] + C4 + TBits.RotateLeft32(T3, 5) + (T2 xor X1 xor X8) + X7;
   System.Inc(r);
-  X2 := ((T2 shl 30) or (T2 shr (32 - 30)));
-  T5 := data[r] + C4 + ((T4 shl 5) or (T4 shr (32 - 5))) +
-    (T3 xor X2 xor X1) + X8;
+  X2 := TBits.RotateLeft32(T2, 30);
+  T5 := data[r] + C4 + TBits.RotateLeft32(T4, 5) + (T3 xor X2 xor X1) + X8;
   System.Inc(r);
-  X3 := ((T3 shl 30) or (T3 shr (32 - 30)));
-  T6 := data[r] + C4 + ((T5 shl 5) or (T5 shr (32 - 5))) +
-    (T4 xor X3 xor X2) + X1;
+  X3 := TBits.RotateLeft32(T3, 30);
+  T6 := data[r] + C4 + TBits.RotateLeft32(T5, 5) + (T4 xor X3 xor X2) + X1;
   System.Inc(r);
-  X4 := ((T4 shl 30) or (T4 shr (32 - 30)));
-  T7 := data[r] + C4 + ((T6 shl 5) or (T6 shr (32 - 5))) +
-    (T5 xor X4 xor X3) + X2;
+  X4 := TBits.RotateLeft32(T4, 30);
+  T7 := data[r] + C4 + TBits.RotateLeft32(T6, 5) + (T5 xor X4 xor X3) + X2;
   System.Inc(r);
-  X5 := ((T5 shl 30) or (T5 shr (32 - 30)));
+  X5 := TBits.RotateLeft32(T5, 30);
 
-  Fm_state[0] := Fm_state[0] + (data[r] + C4 + ((T7 shl 5) or (T7 shr (32 - 5)))
-    + (T6 xor X5 xor X4) + X3);
+  Fm_state[0] := Fm_state[0] + (data[r] + C4 + TBits.RotateLeft32(T7, 5) +
+    (T6 xor X5 xor X4) + X3);
   Fm_state[1] := Fm_state[1] + T7;
-  Fm_state[2] := Fm_state[2] + ((T6 shl 30) or (T6 shr (32 - 30)));
+  Fm_state[2] := Fm_state[2] + TBits.RotateLeft32(T6, 30);
   Fm_state[3] := Fm_state[3] + X5;
   Fm_state[4] := Fm_state[4] + X4;
 

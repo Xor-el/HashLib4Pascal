@@ -5,8 +5,10 @@ unit HlpGrindahl256;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -183,9 +185,10 @@ end;
 
 procedure TGrindahl256.Initialize;
 begin
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state),
+
+  System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt32),
     UInt32(0));
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_temp),
+  System.FillChar(Fm_temp[0], System.Length(Fm_temp) * System.SizeOf(UInt32),
     UInt32(0));
 
   Inherited Initialize();

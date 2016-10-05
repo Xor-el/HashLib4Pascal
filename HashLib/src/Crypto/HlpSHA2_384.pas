@@ -5,6 +5,9 @@ unit HlpSHA2_384;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
   HlpSHA2_512Base,
   HlpConverters;

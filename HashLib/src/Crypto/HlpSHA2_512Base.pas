@@ -5,7 +5,11 @@ unit HlpSHA2_512Base;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
+  HlpBits,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -109,9 +113,9 @@ begin
   begin
     T0 := data[i - 15];
     T1 := data[i - 2];
-    data[i] := (((T1 shl 45) or (T1 shr 19)) xor ((T1 shl 3) or (T1 shr 61))
+    data[i] := ((TBits.RotateLeft64(T1, 45)) xor (TBits.RotateLeft64(T1, 3))
       xor (T1 shr 6)) + data[i - 7] +
-      (((T0 shl 63) or (T0 shr 1)) xor ((T0 shl 56) or (T0 shr 8))
+      ((TBits.RotateLeft64(T0, 63)) xor (TBits.RotateLeft64(T0, 56))
       xor (T0 shr 7)) + data[i - 16];
     System.Inc(i);
   end;
@@ -131,76 +135,76 @@ begin
   while i < 10 do
   begin
 
-    h := h + (s_K[t] + data[t] + (((e shl 50) or (e shr 14)) xor ((e shl 46) or
-      (e shr 18)) xor ((e shl 23) or (e shr 41))) +
+    h := h + (s_K[t] + data[t] + ((TBits.RotateLeft64(e, 50))
+      xor (TBits.RotateLeft64(e, 46)) xor (TBits.RotateLeft64(e, 23))) +
       ((e and f) xor (not e and g)));
     System.Inc(t);
     d := d + h;
-    h := h + ((((a shl 36) or (a shr 28)) xor ((a shl 30) or (a shr 34))
-      xor ((a shl 25) or (a shr 39))) + ((a and b) xor (a and c)
+    h := h + (((TBits.RotateLeft64(a, 36)) xor (TBits.RotateLeft64(a, 30))
+      xor (TBits.RotateLeft64(a, 25))) + ((a and b) xor (a and c)
       xor (b and c)));
 
-    g := g + (s_K[t] + data[t] + (((d shl 50) or (d shr 14)) xor ((d shl 46) or
-      (d shr 18)) xor ((d shl 23) or (d shr 41))) +
+    g := g + (s_K[t] + data[t] + ((TBits.RotateLeft64(d, 50))
+      xor (TBits.RotateLeft64(d, 46)) xor (TBits.RotateLeft64(d, 23))) +
       ((d and e) xor (not d and f)));
     System.Inc(t);
     c := c + g;
-    g := g + ((((h shl 36) or (h shr 28)) xor ((h shl 30) or (h shr 34))
-      xor ((h shl 25) or (h shr 39))) + ((h and a) xor (h and b)
+    g := g + (((TBits.RotateLeft64(h, 36)) xor (TBits.RotateLeft64(h, 30))
+      xor (TBits.RotateLeft64(h, 25))) + ((h and a) xor (h and b)
       xor (a and b)));
 
-    f := f + (s_K[t] + data[t] + (((c shl 50) or (c shr 14)) xor ((c shl 46) or
-      (c shr 18)) xor ((c shl 23) or (c shr 41))) +
+    f := f + (s_K[t] + data[t] + ((TBits.RotateLeft64(c, 50))
+      xor (TBits.RotateLeft64(c, 46)) xor (TBits.RotateLeft64(c, 23))) +
       ((c and d) xor (not c and e)));
     System.Inc(t);
     b := b + f;
-    f := f + ((((g shl 36) or (g shr 28)) xor ((g shl 30) or (g shr 34))
-      xor ((g shl 25) or (g shr 39))) + ((g and h) xor (g and a)
+    f := f + (((TBits.RotateLeft64(g, 36)) xor (TBits.RotateLeft64(g, 30))
+      xor (TBits.RotateLeft64(g, 25))) + ((g and h) xor (g and a)
       xor (h and a)));
 
-    e := e + (s_K[t] + data[t] + (((b shl 50) or (b shr 14)) xor ((b shl 46) or
-      (b shr 18)) xor ((b shl 23) or (b shr 41))) +
+    e := e + (s_K[t] + data[t] + ((TBits.RotateLeft64(b, 50))
+      xor (TBits.RotateLeft64(b, 46)) xor (TBits.RotateLeft64(b, 23))) +
       ((b and c) xor (not b and d)));
     System.Inc(t);
     a := a + e;
-    e := e + ((((f shl 36) or (f shr 28)) xor ((f shl 30) or (f shr 34))
-      xor ((f shl 25) or (f shr 39))) + ((f and g) xor (f and h)
+    e := e + (((TBits.RotateLeft64(f, 36)) xor (TBits.RotateLeft64(f, 30))
+      xor (TBits.RotateLeft64(f, 25))) + ((f and g) xor (f and h)
       xor (g and h)));
 
-    d := d + (s_K[t] + data[t] + (((a shl 50) or (a shr 14)) xor ((a shl 46) or
-      (a shr 18)) xor ((a shl 23) or (a shr 41))) +
+    d := d + (s_K[t] + data[t] + ((TBits.RotateLeft64(a, 50))
+      xor (TBits.RotateLeft64(a, 46)) xor (TBits.RotateLeft64(a, 23))) +
       ((a and b) xor (not a and c)));
     System.Inc(t);
     h := h + d;
-    d := d + ((((e shl 36) or (e shr 28)) xor ((e shl 30) or (e shr 34))
-      xor ((e shl 25) or (e shr 39))) + ((e and f) xor (e and g)
+    d := d + (((TBits.RotateLeft64(e, 36)) xor (TBits.RotateLeft64(e, 30))
+      xor (TBits.RotateLeft64(e, 25))) + ((e and f) xor (e and g)
       xor (f and g)));
 
-    c := c + (s_K[t] + data[t] + (((h shl 50) or (h shr 14)) xor ((h shl 46) or
-      (h shr 18)) xor ((h shl 23) or (h shr 41))) +
+    c := c + (s_K[t] + data[t] + ((TBits.RotateLeft64(h, 50))
+      xor (TBits.RotateLeft64(h, 46)) xor (TBits.RotateLeft64(h, 23))) +
       ((h and a) xor (not h and b)));
     System.Inc(t);
     g := g + c;
-    c := c + ((((d shl 36) or (d shr 28)) xor ((d shl 30) or (d shr 34))
-      xor ((d shl 25) or (d shr 39))) + ((d and e) xor (d and f)
+    c := c + (((TBits.RotateLeft64(d, 36)) xor (TBits.RotateLeft64(d, 30))
+      xor (TBits.RotateLeft64(d, 25))) + ((d and e) xor (d and f)
       xor (e and f)));
 
-    b := b + (s_K[t] + data[t] + (((g shl 50) or (g shr 14)) xor ((g shl 46) or
-      (g shr 18)) xor ((g shl 23) or (g shr 41))) +
+    b := b + (s_K[t] + data[t] + ((TBits.RotateLeft64(g, 50))
+      xor (TBits.RotateLeft64(g, 46)) xor (TBits.RotateLeft64(g, 23))) +
       ((g and h) xor (not g and a)));
     System.Inc(t);
     f := f + b;
-    b := b + ((((c shl 36) or (c shr 28)) xor ((c shl 30) or (c shr 34))
-      xor ((c shl 25) or (c shr 39))) + ((c and d) xor (c and e)
+    b := b + (((TBits.RotateLeft64(c, 36)) xor (TBits.RotateLeft64(c, 30))
+      xor (TBits.RotateLeft64(c, 25))) + ((c and d) xor (c and e)
       xor (d and e)));
 
-    a := a + (s_K[t] + data[t] + (((f shl 50) or (f shr 14)) xor ((f shl 46) or
-      (f shr 18)) xor ((f shl 23) or (f shr 41))) +
+    a := a + (s_K[t] + data[t] + ((TBits.RotateLeft64(f, 50))
+      xor (TBits.RotateLeft64(f, 46)) xor (TBits.RotateLeft64(f, 23))) +
       ((f and g) xor (not f and h)));
     System.Inc(t);
     e := e + a;
-    a := a + ((((b shl 36) or (b shr 28)) xor ((b shl 30) or (b shr 34))
-      xor ((b shl 25) or (b shr 39))) + ((b and c) xor (b and d)
+    a := a + (((TBits.RotateLeft64(b, 36)) xor (TBits.RotateLeft64(b, 30))
+      xor (TBits.RotateLeft64(b, 25))) + ((b and c) xor (b and d)
       xor (c and d)));
 
     System.Inc(i);

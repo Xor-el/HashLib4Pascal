@@ -7,12 +7,17 @@ unit HlpSipHash2_4;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
   HlpNullable,
+{$IFDEF DELPHI}
   HlpBitConverter,
+{$ENDIF DELPHI}
   HlpBits;
 
 type
@@ -80,97 +85,97 @@ begin
   Fm_v3 := Fm_v3 xor b;
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 xor b;
   Fm_v2 := Fm_v2 xor $FF;
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 end;
 
 function TSipHash2_4.GetKey: THashLibByteArray;
@@ -239,39 +244,40 @@ procedure TSipHash2_4.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
 var
   m: UInt64;
 begin
+
   m := TConverters.ConvertBytesToUInt64a2(a_data, a_index);
 
   Fm_v3 := Fm_v3 xor m;
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 13) or (Fm_v1 shr (64 - 13));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 13);
   Fm_v1 := Fm_v1 xor Fm_v0;
-  Fm_v0 := (Fm_v0 shl 32) or (Fm_v0 shr (64 - 32));
+  Fm_v0 := TBits.RotateLeft64(Fm_v0, 32);
   Fm_v2 := Fm_v2 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 16) or (Fm_v3 shr (64 - 16));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 16);
   Fm_v3 := Fm_v3 xor Fm_v2;
   Fm_v0 := Fm_v0 + Fm_v3;
-  Fm_v3 := (Fm_v3 shl 21) or (Fm_v3 shr (64 - 21));
+  Fm_v3 := TBits.RotateLeft64(Fm_v3, 21);
   Fm_v3 := Fm_v3 xor Fm_v0;
   Fm_v2 := Fm_v2 + Fm_v1;
-  Fm_v1 := (Fm_v1 shl 17) or (Fm_v1 shr (64 - 17));
+  Fm_v1 := TBits.RotateLeft64(Fm_v1, 17);
   Fm_v1 := Fm_v1 xor Fm_v2;
-  Fm_v2 := (Fm_v2 shl 32) or (Fm_v2 shr (64 - 32));
+  Fm_v2 := TBits.RotateLeft64(Fm_v2, 32);
 
   Fm_v0 := Fm_v0 xor m;
 

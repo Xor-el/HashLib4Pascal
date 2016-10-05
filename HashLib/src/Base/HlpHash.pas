@@ -20,14 +20,14 @@ uses
   SysUtils,
 {$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
-  HlpArrayExtensions,
   HlpConverters,
   HlpIHash,
   HlpIHashResult;
 
 resourcestring
   SIndexOutOfRange = 'Current Index Is Out Of Range';
-  SEndOfStream = 'Cannot Access Outside Stream Boundaries';
+  SInvalidBufferSize = '"BufferSize" Must Be Greater Than Zero';
+  SUnAssignedStream = 'Input Stream Is UnAssigned';
 
 type
   THash = class abstract(TInterfacedObject, IHash)
@@ -88,7 +88,7 @@ begin
 {$IFDEF DEBUG}
   System.Assert((a_block_size > 0) or (a_block_size = -1));
   System.Assert(a_hash_size > 0);
-{$ENDIF}
+{$ENDIF DEBUG}
   Fm_block_size := a_block_size;
   Fm_hash_size := a_hash_size;
   Fm_buffer_size := BUFFER_SIZE;
@@ -106,7 +106,14 @@ end;
 
 procedure THash.SetBufferSize(value: Int32);
 begin
-  Fm_buffer_size := value;
+  if value > 0 then
+  begin
+    Fm_buffer_size := value;
+  end
+  else
+  begin
+    raise EArgumentException.CreateRes(@SInvalidBufferSize);
+  end;
 end;
 
 function THash.GetBlockSize: Int32;
@@ -208,24 +215,23 @@ var
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
   Length := System.Length(a_data) - a_index;
 
 {$IFDEF DEBUG}
   System.Assert(Length >= 0);
-{$ENDIF}
+{$ENDIF DEBUG}
   TransformBytes(a_data, a_index, Length);
 end;
 
 procedure THash.TransformStream(a_stream: TStream; a_length: Int64);
 var
   data: THashLibByteArray;
-  total: Int64;
-  readed: Int32;
+  readed, LBufferSize: Int32;
 begin
 {$IFDEF DEBUG}
   System.Assert((a_length = -1) or (a_length > 0));
-{$ENDIF}
+{$ENDIF DEBUG}
   if (a_stream <> Nil) then
   begin
     if (a_length > -1) then
@@ -237,33 +243,33 @@ begin
 
     if (a_stream.Position >= a_stream.Size) then
       Exit;
+  end
+  else
+  begin
+    raise EArgumentNilException.CreateRes(@SUnAssignedStream);
   end;
 
-  total := 0;
-  System.SetLength(data, BufferSize);
+  if BufferSize > a_stream.Size then // Sanity Check
+  begin
+    BufferSize := BUFFER_SIZE;
+  end;
+  LBufferSize := BufferSize;
+
+  System.SetLength(data, LBufferSize);
+
   while True do
   begin
-    readed := a_stream.Read(data[0], System.Length(data));
-    if ((a_length = -1) and (readed <> BufferSize)) then
-      data := THashLibByteArray(THashLibArrayHelper<Byte>.SubArray
-        (THashLibGenericArray<Byte>(data), 0, readed))
-
-    else if ((a_length <> -1) and (total + readed >= a_length)) then
-      data := THashLibByteArray(THashLibArrayHelper<Byte>.SubArray
-        (THashLibGenericArray<Byte>(data), 0, Int32(a_length - total)));
-
-    total := total + System.Length(data);
-
-    TransformBytes(data, 0, System.Length(data));
-    if (a_length = -1) then
+    readed := a_stream.Read(data[0], LBufferSize);
+    if readed < LBufferSize then
     begin
-      if (readed <> BufferSize) then
-        break;
+      TransformBytes(data, 0, readed);
+      break;
     end
-    else if (a_length = total) then
-      break
-    else if (readed <> BufferSize) then
-      raise EndOfStreamException.CreateRes(@SEndOfStream);
+    else
+    begin
+      TransformBytes(data, 0, LBufferSize);
+    end;
+
   end;
 
 end;
@@ -277,7 +283,7 @@ begin
   System.Assert(FileExists(a_file_name));
   System.Assert(a_from >= 0);
   System.Assert((a_length = -1) or (a_length > 0));
-{$ENDIF}
+{$ENDIF DEBUG}
   MyFileStream := TFileStream.Create(a_file_name, fmOpenRead or
     fmShareDenyWrite);
 

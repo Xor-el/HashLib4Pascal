@@ -6,6 +6,9 @@ interface
 
 uses
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -33,7 +36,7 @@ type
     function GetKeyLength(): TNullableInteger;
     function GetKey: THashLibByteArray;
     procedure SetKey(value: THashLibByteArray);
-    procedure TransformUInt32Fast(a_data: UInt32);
+    procedure TransformUInt32Fast(a_data: UInt32); inline;
 
   strict protected
     procedure TransformBlock(a_data: THashLibByteArray;
@@ -81,7 +84,7 @@ begin
           k := UInt32(buffer[2]) shl 16 or (UInt32(buffer[1]) shl 8) or
             UInt32(buffer[0]);
           k := k * C1;
-          k := (k shl 15) or (k shr 17);
+          k := TBits.RotateLeft32(k, 15);
           k := k * C2;
           Fm_h := Fm_h xor k;
 
@@ -91,7 +94,7 @@ begin
 
           k := (UInt32(buffer[1]) shl 8) or UInt32(buffer[0]);
           k := k * C1;
-          k := (k shl 15) or (k shr 17);
+          k := TBits.RotateLeft32(k, 15);
           k := k * C2;
           Fm_h := Fm_h xor k;
 
@@ -101,7 +104,7 @@ begin
 
           k := UInt32(buffer[0]);
           k := k * C1;
-          k := (k shl 15) or (k shr 17);
+          k := TBits.RotateLeft32(k, 15);
           k := k * C2;
           Fm_h := Fm_h xor k;
 
@@ -187,12 +190,12 @@ begin
   k := a_data;
 
   k := k * C1;
-  k := (k shl 15) or (k shr 17);
+  k := TBits.RotateLeft32(k, 15);
   k := k * C2;
 
   Fm_h := Fm_h xor k;
-  Fm_h := (Fm_h shl 13) or (Fm_h shr 19);
-  Fm_h := Fm_h * 5 + C3;
+  Fm_h := TBits.RotateLeft32(Fm_h, 13);
+  Fm_h := (Fm_h * 5) + C3;
 end;
 
 function TMurmurHash3_x86_32.ComputeBytesFast(a_data: THashLibByteArray): Int32;
@@ -213,11 +216,11 @@ begin
       (UInt32(a_data[current_index + 3]) shl 24);
 
     k := k * C1;
-    k := (k shl 15) or (k shr 17);
+    k := TBits.RotateLeft32(k, 15);
     k := k * C2;
 
     Fm_h := Fm_h xor k;
-    Fm_h := (Fm_h shl 13) or (Fm_h shr 19);
+    Fm_h := TBits.RotateLeft32(Fm_h, 13);
     Fm_h := Fm_h * 5 + C3;
 
     current_index := current_index + 4;
@@ -231,7 +234,7 @@ begin
           (UInt32(a_data[current_index + 1]) shl 8) or
           UInt32(a_data[current_index]);
         k := k * C1;
-        k := (k shl 15) or (k shr 17);
+        k := TBits.RotateLeft32(k, 15);
         k := k * C2;
         Fm_h := Fm_h xor k;
 
@@ -242,7 +245,7 @@ begin
         k := (UInt32(a_data[current_index + 1]) shl 8) or
           UInt32(a_data[current_index]);
         k := k * C1;
-        k := (k shl 15) or (k shr 17);
+        k := TBits.RotateLeft32(k, 15);
         k := k * C2;
         Fm_h := Fm_h xor k;
 
@@ -252,7 +255,7 @@ begin
 
         k := UInt32(a_data[current_index]);
         k := k * C1;
-        k := (k shl 15) or (k shr 17);
+        k := TBits.RotateLeft32(k, 15);
         k := k * C2;
         Fm_h := Fm_h xor k;
 
@@ -297,7 +300,7 @@ begin
   begin
     k := UInt32(System.Ord(a_data[current_index]));
     k := k * C1;
-    k := (k shl 15) or (k shr 17);
+    k := TBits.RotateLeft32(k, 15);
     k := k * C2;
     Fm_h := Fm_h xor k;
   end;

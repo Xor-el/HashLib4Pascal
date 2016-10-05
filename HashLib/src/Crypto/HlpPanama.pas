@@ -7,7 +7,6 @@ interface
 uses
   HlpHashLibTypes,
   HlpBits,
-  HlpArrayExtensions,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -196,11 +195,18 @@ begin
 end;
 
 procedure TPanama.Initialize;
+var
+  i: Int32;
 begin
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state),
+  System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt32),
     UInt32(0));
-  THashLibArrayHelper<UInt32>.Clear(THashLibMatrixGenericArray<UInt32>
-    (Fm_stages), UInt32(0));
+
+  for i := System.Low(Fm_stages) to System.High(Fm_stages) do
+  begin
+    System.FillChar(Fm_stages[i, 0], System.Length(Fm_stages[i]) *
+      System.SizeOf(UInt32), UInt32(0));
+
+  end;
 
   Inherited Initialize();
 

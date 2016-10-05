@@ -5,6 +5,9 @@ unit HlpSnefru;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
 {$IFNDEF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.TypInfo,
@@ -13,7 +16,7 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
-  HlpArrayExtensions,
+  HlpBits,
   HlpHashSize,
   HlpConverters,
   HlpIHashInfo,
@@ -103,7 +106,8 @@ end;
 
 procedure TSnefru.Initialize;
 begin
-  THashLibArrayHelper<UInt32>.Clear(THashLibGenericArray<UInt32>(Fm_state),
+
+  System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt32),
     UInt32(0));
   Inherited Initialize();
 end;
@@ -114,8 +118,9 @@ var
   i, j, k, shift: Int32;
 begin
   System.SetLength(work, 16);
-  THashLibArrayHelper<UInt32>.Copy(THashLibGenericArray<UInt32>(Fm_state), 0,
-    THashLibGenericArray<UInt32>(work), 0, System.Length(Fm_state));
+
+  System.Move(Fm_state[0], work[0], System.Length(Fm_state) *
+    System.SizeOf(UInt32));
 
   TConverters.ConvertBytesToUInt32SwapOrder(a_data, a_index, BlockSize, work,
     System.Length(Fm_state));
@@ -172,8 +177,7 @@ begin
 
       while k < System.Length(work) do
       begin
-        // RotateRight32
-        work[k] := (work[k] shr shift) or (work[k] shl (32 - shift));
+        work[k] := TBits.RotateRight32(work[k], shift);
         System.Inc(k);
       end;
 

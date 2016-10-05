@@ -5,7 +5,13 @@ unit HlpMurmur2;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashResult,
@@ -19,9 +25,8 @@ type
     IHashWithKey, ITransformBlock)
 
   strict private
-    class var
 
-      Fm_key, Fm_working_key, Fm_h: UInt32;
+    Fm_key, Fm_working_key, Fm_h: UInt32;
 
   const
     CKEY = UInt32($0);
@@ -29,7 +34,7 @@ type
     R = Int32(24);
 
     function InternalComputeBytes(a_data: THashLibByteArray): Int32;
-    procedure TransformUInt32Fast(a_data: UInt32);
+    procedure TransformUInt32Fast(a_data: UInt32); inline;
     function GetKeyLength(): TNullableInteger;
     function GetKey: THashLibByteArray;
     procedure SetKey(value: THashLibByteArray);
@@ -190,7 +195,8 @@ var
 begin
   Initialize();
 
-  Length := System.Length(a_data) * 2;
+  // Length := System.Length(a_data) * 2;
+  Length := System.Length(a_data) * System.SizeOf(Char);
 
   if (Length = 0) then
   begin
