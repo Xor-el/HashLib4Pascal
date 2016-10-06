@@ -371,23 +371,11 @@ end;
 
 class function TConverters.ConvertBytesToUInt32a2(a_in: THashLibByteArray;
   a_index: Int32): UInt32;
-// var
-// u1, u2, u3, u4: UInt32;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
   System.Assert(a_index + 4 <= System.Length(a_in));
 {$ENDIF DEBUG}
-  (* u1 := (UInt32(a_in[a_index]));
-    System.Inc(a_index);
-    u2 := (UInt32(a_in[a_index]) shl 8);
-    System.Inc(a_index);
-    u3 := (UInt32(a_in[a_index]) shl 16);
-    System.Inc(a_index);
-    u4 := (UInt32(a_in[a_index]) shl 24);
-
-    result := u1 or u2 or u3 or u4; *)
-
   result := TBitConverter.ToUInt32(a_in, a_index);
 
 end;

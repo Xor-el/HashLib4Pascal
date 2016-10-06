@@ -178,11 +178,6 @@ begin
 {$ELSE}
   // a_n := a_n mod 32;
   a_n := a_n and 31;
-  { if a_n = 0 then
-    begin
-    result := a_value;
-    Exit;
-    end; }
 
   result := (a_value shl a_n) or (a_value shr (32 - a_n));
 {$ENDIF FPC}
@@ -198,11 +193,7 @@ begin
 {$ELSE}
   // a_n := a_n mod 64;
   a_n := a_n and 63;
-  { if a_n = 0 then
-    begin
-    result := a_value;
-    Exit;
-    end; }
+
   result := (a_value shl a_n) or (a_value shr (64 - a_n));
 {$ENDIF FPC}
 end;
@@ -217,11 +208,7 @@ begin
 {$ELSE}
   // a_n := a_n mod 32;
   a_n := a_n and 31;
-  { if a_n = 0 then
-    begin
-    result := a_value;
-    Exit;
-    end; }
+
   result := (a_value shr a_n) or (a_value shl (32 - a_n));
 {$ENDIF FPC}
 end;
@@ -236,11 +223,7 @@ begin
 {$ELSE}
   // a_n := a_n mod 64;
   a_n := a_n and 63;
-  { if a_n = 0 then
-    begin
-    result := a_value;
-    Exit;
-    end; }
+
   result := (a_value shr a_n) or (a_value shl (64 - a_n));
 {$ENDIF FPC}
 end;

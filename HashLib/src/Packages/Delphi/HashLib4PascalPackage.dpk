@@ -1,6 +1,6 @@
 package HashLib4PascalPackage;
 
-{$WARNINGS OFF}
+{$WARN DUPLICATE_CTOR_DTOR OFF}
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
