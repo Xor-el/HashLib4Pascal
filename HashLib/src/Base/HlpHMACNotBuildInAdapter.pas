@@ -98,13 +98,9 @@ begin
   begin
     LKey := Key;
   end;
-  Idx := 0;
-  while Idx < Fm_hash.BlockSize do
-  begin
-    Fm_ipad[Idx] := $36;
-    Fm_opad[Idx] := $5C;
-    System.Inc(Idx);
-  end;
+
+  System.FillChar(Fm_ipad[0], Fm_hash.BlockSize * System.SizeOf(Byte), $36);
+  System.FillChar(Fm_opad[0], Fm_hash.BlockSize * System.SizeOf(Byte), $5C);
 
   Idx := 0;
   while (Idx < System.Length(LKey)) and (Idx < Fm_hash.BlockSize) do

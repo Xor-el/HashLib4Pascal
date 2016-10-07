@@ -43,6 +43,9 @@
 // Disable String Checks
 {$STRINGCHECKS OFF}
 
+// Disable Duplicate Constructor Warnings
+{$WARN DUPLICATE_CTOR_DTOR OFF}
+
  // 2010 only
 {$IF CompilerVersion = 21.0}
 {$DEFINE DELPHI2010}
