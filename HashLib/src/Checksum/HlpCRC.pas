@@ -9,11 +9,11 @@ interface
 
 uses
   HlpHashLibTypes,
-  HlpConverters,
-  HlpHashCryptoNotBuildIn,
+  HlpHash,
   HlpIHashInfo,
-  HlpICRC,
-  HlpBits;
+  HlpHashResult,
+  HlpIHashResult,
+  HlpICRC;
 
 {$REGION 'CRC Standards'}
 
@@ -435,7 +435,7 @@ type
 {$ENDREGION}
 
 type
-  TCRC = class sealed(TBlockHash, IChecksum, ICRC, ITransformBlock)
+  TCRC = class sealed(THash, IChecksum, ICRC, ITransformBlock)
 
   strict private
 
@@ -469,13 +469,16 @@ type
 
     procedure GenerateTable();
     // tables work only for 8, 16, 24, 32 bit CRC
-    procedure CalculateCRCbyTable(a_data: THashLibByteArray; a_index: Int32);
+    procedure CalculateCRCbyTable(a_data: THashLibByteArray;
+      a_index: Int32); inline;
     // fast bit by bit algorithm without augmented zero bytes.
     // does not use lookup table, suited for polynomial orders between 1...32.
-    procedure CalculateCRCdirect(a_data: THashLibByteArray; a_index: Int32);
+    procedure CalculateCRCdirect(a_data: THashLibByteArray;
+      a_index: Int32); inline;
 
     // reflects the lower 'width' bits of 'value'
-    class function Reflect(a_value: UInt64; a_width: Int32): UInt64; static;
+    class function Reflect(a_value: UInt64; a_width: Int32): UInt64;
+      static; inline;
 
     property Names: THashLibStringArray read GetNames write SetNames;
     property Width: Int32 read GetWidth write SetWidth;
@@ -486,22 +489,18 @@ type
     property XOROut: UInt64 read GetXOROut write SetXOROut;
     property CheckValue: UInt64 read GetCheckValue write SetCheckValue;
 
-  strict protected
-
-    procedure TransformBlock(a_data: THashLibByteArray;
-      a_index: Int32); override;
-    procedure Finish(); override;
-    function GetResult(): THashLibByteArray; override;
-
   public
 
     constructor Create(_Width: Int32; _poly, _Init: UInt64;
       _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
       _Names: THashLibStringArray);
 
-    class function CreateCRCObject(a_value: TCRCStandard): ICRC; static;
-
     procedure Initialize(); override;
+    procedure TransformBytes(a_data: THashLibByteArray;
+      a_index, a_length: Int32); override;
+    function TransformFinal(): IHashResult; override;
+
+    class function CreateCRCObject(a_value: TCRCStandard): ICRC; static;
 
   end;
 
@@ -563,6 +562,7 @@ constructor TCRC.Create(_Width: Int32; _poly, _Init: UInt64;
 var
   UseTable: Boolean;
 begin
+
   UseTable := False;
 
   case _Width of
@@ -1044,8 +1044,7 @@ end;
 
 procedure TCRC.Initialize;
 begin
-  Inherited Initialize();
-
+  // nothing yet.
 end;
 
 class function TCRC.Reflect(a_value: UInt64; a_width: Int32): UInt64;
@@ -1107,21 +1106,45 @@ begin
   FXorOut := value;
 end;
 
-procedure TCRC.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TCRC.TransformBytes(a_data: THashLibByteArray;
+  a_index, a_length: Int32);
+var
+  i: Int32;
 begin
+{$IFDEF DEBUG}
+  System.Assert(a_index >= 0);
+  System.Assert(a_length >= 0);
+  System.Assert(a_index + a_length <= System.Length(a_data));
+{$ENDIF DEBUG}
 
   // table driven CRC reportedly only works for 8, 16, 24, 32 bits
   // HOWEVER, it seems to work for everything > 7 bits, so use it
   // accordingly
 
-  if (Width > Delta) then
-    CalculateCRCbyTable(a_data, a_index)
-  else
-    CalculateCRCdirect(a_data, a_index);
+  i := a_index;
+  while a_length > 0 do
+  begin
+    if (Width > Delta) then
+    begin
+      CalculateCRCbyTable(a_data, i)
+    end
+    else
+    begin
+      CalculateCRCdirect(a_data, i);
+    end;
+    System.Inc(i);
+    System.Dec(a_length);
+  end;
 
 end;
 
-procedure TCRC.Finish;
+function TCRC.TransformFinal: IHashResult;
+var
+  LUInt64: UInt64;
+  LUInt32: UInt32;
+  LUInt16: UInt16;
+  LUInt8: UInt8;
+
 begin
 
   if Width > Delta then
@@ -1142,47 +1165,34 @@ begin
   Fm_hash := Fm_hash xor XOROut;
   Fm_hash := Fm_hash and Fm_CRCMask;
 
-end;
-
-function TCRC.GetResult: THashLibByteArray;
-var
-  LUInt64: UInt64;
-  LUInt32: UInt32;
-  LUInt16: UInt16;
-  LUInt8: UInt8;
-begin
-
-  result := TConverters.ConvertUInt64ToBytes(Fm_hash);
-
   // case Width div 8 of
   case Width shr 3 of
     0:
       begin
         LUInt8 := UInt8(Fm_hash);
-        result := TConverters.ConvertUInt8ToBytes(LUInt8);
+        result := THashResult.Create(LUInt8);
 
       end;
 
     1 .. 2:
       begin
         LUInt16 := UInt16(Fm_hash);
-        LUInt16 := TBits.ReverseBytesUInt16(LUInt16);
-        result := TConverters.ConvertUInt16ToBytes(LUInt16);
+        result := THashResult.Create(LUInt16);
       end;
 
     3 .. 4:
       begin
         LUInt32 := UInt32(Fm_hash);
-        LUInt32 := TBits.ReverseBytesUInt32(LUInt32);
-        result := TConverters.ConvertUInt32ToBytes(LUInt32);
+        result := THashResult.Create(LUInt32);
       end
   else
     begin
       LUInt64 := (Fm_hash);
-      LUInt64 := TBits.ReverseBytesUInt64(LUInt64);
-      result := TConverters.ConvertUInt64ToBytes(LUInt64);
+      result := THashResult.Create(LUInt64);
     end;
   end;
+
+  Initialize();
 
 end;
 

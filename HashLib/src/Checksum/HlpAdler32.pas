@@ -6,30 +6,28 @@ interface
 
 uses
   HlpHashLibTypes,
-  HlpBits,
-  HlpConverters,
-  HlpHashCryptoNotBuildIn,
-  HlpIHashInfo;
+  HlpIHashInfo,
+  HlpHash,
+  HlpHashResult,
+  HlpIHashResult;
 
 type
-  TAdler32 = class sealed(TBlockHash, IChecksum, IHash32, ITransformBlock)
+  TAdler32 = class sealed(THash, IChecksum, IBlockHash, IHash32,
+    ITransformBlock)
 
   strict private
 
-    Fm_a, Fm_b, Fm_res: UInt32;
+    Fm_a, Fm_b: UInt32;
 
   const
     MOD_ADLER = UInt32(65521);
 
-  strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
-      a_index: Int32); override;
-    procedure Finish(); override;
-    function GetResult(): THashLibByteArray; override;
-
   public
     constructor Create();
     procedure Initialize(); override;
+    procedure TransformBytes(a_data: THashLibByteArray;
+      a_index, a_length: Int32); override;
+    function TransformFinal: IHashResult; override;
 
   end;
 
@@ -45,29 +43,35 @@ end;
 
 procedure TAdler32.Initialize;
 begin
-  Inherited Initialize();
   Fm_a := 1;
   Fm_b := 0;
 
 end;
 
-procedure TAdler32.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
-
+procedure TAdler32.TransformBytes(a_data: THashLibByteArray;
+  a_index, a_length: Int32);
+var
+  i: Int32;
 begin
-  Fm_a := (Fm_a + a_data[a_index]) mod MOD_ADLER;
-  Fm_b := (Fm_b + Fm_a) mod MOD_ADLER;
+{$IFDEF DEBUG}
+  System.Assert(a_index >= 0);
+  System.Assert(a_length >= 0);
+  System.Assert(a_index + a_length <= System.Length(a_data));
+{$ENDIF DEBUG}
+  i := a_index;
+  while a_length > 0 do
+  begin
+    Fm_a := (Fm_a + a_data[i]) mod MOD_ADLER;
+    Fm_b := (Fm_b + Fm_a) mod MOD_ADLER;
+    System.Inc(i);
+    System.Dec(a_length);
+  end;
 end;
 
-procedure TAdler32.Finish;
+function TAdler32.TransformFinal: IHashResult;
 begin
-  Fm_res := UInt32((Fm_b shl 16) or Fm_a);
-end;
-
-function TAdler32.GetResult: THashLibByteArray;
-begin
-
-  Fm_res := TBits.ReverseBytesUInt32(Fm_res);
-  result := TConverters.ConvertUInt32ToBytes(Fm_res);
+  result := THashResult.Create(UInt32((Fm_b shl 16) or Fm_a));
+  Initialize();
 end;
 
 end.

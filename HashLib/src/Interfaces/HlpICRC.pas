@@ -3,12 +3,12 @@ unit HlpICRC;
 interface
 
 uses
-  HlpIHashInfo,
+  HlpIHash,
   HlpHashLibTypes;
 
 type
 
-  ICRC = Interface(IBlockHash)
+  ICRC = Interface(IHash)
     ['{44A105E5-6716-43C0-BE69-AE80F87FDC39}']
 
     function GetNames: THashLibStringArray;

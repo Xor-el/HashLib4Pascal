@@ -3123,7 +3123,7 @@ begin
 
     tmp := FCRC.ComputeString(FOnetoNine, TEncoding.UTF8).ToString();
 
-    FActualString := StringOfChar('0', 16 - Length(tmp)) + tmp;
+    FActualString := System.StringOfChar('0', 16 - Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
@@ -3142,6 +3142,8 @@ begin
   begin
     FCRC := THashFactory.TChecksum.CreateCRC(Idx);
 
+    FCRC.Initialize();
+
     FExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
 
     FCRC.TransformString(Copy(FOnetoNine, 1, 3), TEncoding.UTF8);
@@ -3152,7 +3154,7 @@ begin
 
     tmp := FHashResult.ToString();
 
-    FActualString := StringOfChar('0', 16 - Length(tmp)) + tmp;
+    FActualString := System.StringOfChar('0', 16 - Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
