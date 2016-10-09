@@ -112,12 +112,6 @@ var
 begin
   Length := System.Length(a_data);
 
-  if (Length = 0) then
-  begin
-    result := 0;
-    Exit;
-  end;
-
   Fm_h := Fm_working_key xor UInt32(Length);
   current_index := 0;
 
@@ -197,12 +191,6 @@ begin
 
   // Length := System.Length(a_data) * 2;
   Length := System.Length(a_data) * System.SizeOf(Char);
-
-  if (Length = 0) then
-  begin
-    result := 0;
-    Exit;
-  end;
 
   Fm_h := Fm_working_key xor UInt32(Length);
   current_index := 0;
