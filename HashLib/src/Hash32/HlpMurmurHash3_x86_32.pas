@@ -11,16 +11,14 @@ uses
 {$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
-  HlpHashResult,
-  HlpIHashResult,
-  HlpMultipleTransformNonBlock,
+  HlpHashCryptoNotBuildIn,
   HlpNullable,
   HlpBits;
 
 type
 
-  TMurmurHash3_x86_32 = class sealed(TMultipleTransformNonBlock, IHash32,
-    IFastHash32, IHashWithKey, ITransformBlock)
+  TMurmurHash3_x86_32 = class sealed(TBlockHash, IHash32, IFastHash32,
+    IHashWithKey, ITransformBlock)
 
   strict private
 
@@ -39,12 +37,12 @@ type
     function GetKey: THashLibByteArray;
     procedure SetKey(value: THashLibByteArray);
     procedure TransformUInt32Fast(a_data: UInt32); inline;
-    function InternalComputeBytes(a_data: THashLibByteArray): Int32;
 
   strict protected
-
-    function ComputeAggregatedBytes(a_data: THashLibByteArray)
-      : IHashResult; override;
+    procedure TransformBlock(a_data: THashLibByteArray;
+      a_index: Int32); override;
+    procedure Finish(); override;
+    function GetResult(): THashLibByteArray; override;
 
   public
     constructor Create();
@@ -65,6 +63,62 @@ begin
   Inherited Create(4, 4);
   Fm_key := CKEY;
 
+end;
+
+procedure TMurmurHash3_x86_32.Finish;
+var
+  left: UInt64;
+  buffer: THashLibByteArray;
+  k: UInt32;
+begin
+  left := Fm_processed_bytes mod UInt64(BlockSize);
+
+  if (left <> 0) then
+  begin
+    buffer := Fm_buffer.GetBytesZeroPadded();
+
+    case (left) of
+
+      3:
+        begin
+          k := UInt32(buffer[2]) shl 16 or (UInt32(buffer[1]) shl 8) or
+            UInt32(buffer[0]);
+          k := k * C1;
+          k := TBits.RotateLeft32(k, 15);
+          k := k * C2;
+          Fm_h := Fm_h xor k;
+
+        end;
+      2:
+        begin
+
+          k := (UInt32(buffer[1]) shl 8) or UInt32(buffer[0]);
+          k := k * C1;
+          k := TBits.RotateLeft32(k, 15);
+          k := k * C2;
+          Fm_h := Fm_h xor k;
+
+        end;
+      1:
+        begin
+
+          k := UInt32(buffer[0]);
+          k := k * C1;
+          k := TBits.RotateLeft32(k, 15);
+          k := k * C2;
+          Fm_h := Fm_h xor k;
+
+        end;
+    end;
+  end;
+
+  Fm_h := Fm_h xor UInt32(Fm_processed_bytes);
+
+  Fm_h := Fm_h xor (Fm_h shr 16);
+  Fm_h := Fm_h * C4;
+  Fm_h := Fm_h xor (Fm_h shr 13);
+  Fm_h := Fm_h * C5;
+  Fm_h := Fm_h xor (Fm_h shr 16);
 end;
 
 function TMurmurHash3_x86_32.GetKey: THashLibByteArray;
@@ -92,86 +146,41 @@ begin
   result := 4;
 end;
 
+function TMurmurHash3_x86_32.GetResult: THashLibByteArray;
+begin
+  System.SetLength(result, 4);
+
+  Fm_h := TBits.ReverseBytesUInt32(Fm_h);
+
+  result[0] := Byte(Fm_h);
+  result[1] := Byte(Fm_h shr 8);
+  result[2] := Byte(Fm_h shr 16);
+  result[3] := Byte(Fm_h shr 24);
+
+end;
+
 procedure TMurmurHash3_x86_32.Initialize;
 begin
   Fm_h := Fm_key;
   inherited Initialize();
 end;
 
-function TMurmurHash3_x86_32.InternalComputeBytes
-  (a_data: THashLibByteArray): Int32;
+procedure TMurmurHash3_x86_32.TransformBlock(a_data: THashLibByteArray;
+  a_index: Int32);
 var
-  &length, current_index: Int32;
-  k: UInt32;
+  k, u1, u2, u3, u4: UInt32;
+
 begin
+  u1 := a_data[a_index];
+  System.Inc(a_index);
+  u2 := UInt32(a_data[a_index]) shl 8;
+  System.Inc(a_index);
+  u3 := UInt32(a_data[a_index]) shl 16;
+  System.Inc(a_index);
+  u4 := UInt32(a_data[a_index]) shl 24;
+  k := u1 or u2 or u3 or u4;
 
-  current_index := 0;
-  Length := System.Length(a_data);
-
-  while (Length >= 4) do
-  begin
-    k := UInt32(a_data[current_index]) or
-      (UInt32(a_data[current_index + 1]) shl 8) or
-      (UInt32(a_data[current_index + 2]) shl 16) or
-      (UInt32(a_data[current_index + 3]) shl 24);
-
-    k := k * C1;
-    k := TBits.RotateLeft32(k, 15);
-    k := k * C2;
-
-    Fm_h := Fm_h xor k;
-    Fm_h := TBits.RotateLeft32(Fm_h, 13);
-    Fm_h := Fm_h * 5 + C3;
-
-    current_index := current_index + 4;
-    System.Dec(Length, 4);
-  end;
-
-  case (Length) of
-    3:
-      begin
-        k := UInt32(a_data[current_index + 2]) shl 16 or
-          (UInt32(a_data[current_index + 1]) shl 8) or
-          UInt32(a_data[current_index]);
-        k := k * C1;
-        k := TBits.RotateLeft32(k, 15);
-        k := k * C2;
-        Fm_h := Fm_h xor k;
-
-      end;
-    2:
-      begin
-
-        k := (UInt32(a_data[current_index + 1]) shl 8) or
-          UInt32(a_data[current_index]);
-        k := k * C1;
-        k := TBits.RotateLeft32(k, 15);
-        k := k * C2;
-        Fm_h := Fm_h xor k;
-
-      end;
-    1:
-      begin
-
-        k := UInt32(a_data[current_index]);
-        k := k * C1;
-        k := TBits.RotateLeft32(k, 15);
-        k := k * C2;
-        Fm_h := Fm_h xor k;
-
-      end;
-  end;
-
-  Fm_h := Fm_h xor UInt32(System.Length(a_data));
-
-  Fm_h := Fm_h xor (Fm_h shr 16);
-  Fm_h := Fm_h * C4;
-  Fm_h := Fm_h xor (Fm_h shr 13);
-  Fm_h := Fm_h * C5;
-  Fm_h := Fm_h xor (Fm_h shr 16);
-
-  result := Int32(Fm_h);
-
+  TransformUInt32Fast(k);
 end;
 
 procedure TMurmurHash3_x86_32.TransformUInt32Fast(a_data: UInt32);
@@ -187,12 +196,6 @@ begin
   Fm_h := Fm_h xor k;
   Fm_h := TBits.RotateLeft32(Fm_h, 13);
   Fm_h := (Fm_h * 5) + C3;
-end;
-
-function TMurmurHash3_x86_32.ComputeAggregatedBytes(a_data: THashLibByteArray)
-  : IHashResult;
-begin
-  result := THashResult.Create(InternalComputeBytes(a_data));
 end;
 
 function TMurmurHash3_x86_32.ComputeBytesFast(a_data: THashLibByteArray): Int32;

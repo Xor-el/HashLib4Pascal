@@ -66,6 +66,12 @@ begin
 
   length := System.length(a_data);
 
+  if (length = 0) then
+  begin
+    result := THashResult.Create(UInt64(0));
+    Exit;
+  end;
+
   h := Fm_working_key xor UInt64(length);
   current_index := 0;
 
