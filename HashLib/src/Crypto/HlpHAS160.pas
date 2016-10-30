@@ -8,6 +8,7 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
+  HlpHashBuffer,
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
@@ -18,7 +19,8 @@ type
 
   strict private
 
-    Fm_hash: THashLibUInt32Array;
+    Fm_hash, Fdata: THashLibUInt32Array;
+    Fptr_Fdata, Fptr_Fm_hash: PCardinal;
 
 {$REGION 'Consts'}
 
@@ -40,7 +42,7 @@ type
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -56,6 +58,9 @@ constructor THAS160.Create;
 begin
   Inherited Create(20, 64);
   System.SetLength(Fm_hash, 5);
+  Fptr_Fm_hash := PCardinal(Fm_hash);
+  System.SetLength(Fdata, 20);
+  Fptr_Fdata := PCardinal(Fdata);
 end;
 
 procedure THAS160.Finish;
@@ -88,40 +93,42 @@ end;
 
 procedure THAS160.Initialize;
 begin
-  Fm_hash[0] := $67452301;
-  Fm_hash[1] := $EFCDAB89;
-  Fm_hash[2] := $98BADCFE;
-  Fm_hash[3] := $10325476;
-  Fm_hash[4] := $C3D2E1F0;
+  Fptr_Fm_hash[0] := $67452301;
+  Fptr_Fm_hash[1] := $EFCDAB89;
+  Fptr_Fm_hash[2] := $98BADCFE;
+  Fptr_Fm_hash[3] := $10325476;
+  Fptr_Fm_hash[4] := $C3D2E1F0;
 
   Inherited Initialize();
 end;
 
-procedure THAS160.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure THAS160.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   A, B, C, D, E, T: UInt32;
-  data: THashLibUInt32Array;
   r: Int32;
 begin
-  A := Fm_hash[0];
-  B := Fm_hash[1];
-  C := Fm_hash[2];
-  D := Fm_hash[3];
-  E := Fm_hash[4];
+  A := Fptr_Fm_hash[0];
+  B := Fptr_Fm_hash[1];
+  C := Fptr_Fm_hash[2];
+  D := Fptr_Fm_hash[3];
+  E := Fptr_Fm_hash[4];
 
-  System.SetLength(data, 20);
+  TConverters.ConvertBytesToUInt32(a_data, a_index, 64, Fdata);
 
-  TConverters.ConvertBytesToUInt32(a_data, a_index, BlockSize, data);
-
-  data[16] := data[0] xor data[1] xor data[2] xor data[3];
-  data[17] := data[4] xor data[5] xor data[6] xor data[7];
-  data[18] := data[8] xor data[9] xor data[10] xor data[11];
-  data[19] := data[12] xor data[13] xor data[14] xor data[15];
+  Fptr_Fdata[16] := Fptr_Fdata[0] xor Fptr_Fdata[1] xor Fptr_Fdata[2]
+    xor Fptr_Fdata[3];
+  Fptr_Fdata[17] := Fptr_Fdata[4] xor Fptr_Fdata[5] xor Fptr_Fdata[6]
+    xor Fptr_Fdata[7];
+  Fptr_Fdata[18] := Fptr_Fdata[8] xor Fptr_Fdata[9] xor Fptr_Fdata[10]
+    xor Fptr_Fdata[11];
+  Fptr_Fdata[19] := Fptr_Fdata[12] xor Fptr_Fdata[13] xor Fptr_Fdata[14]
+    xor Fptr_Fdata[15];
 
   r := 0;
   while r < 20 do
   begin
-    T := data[s_index[r]] + (A shl s_rot[r] or A shr s_tor[r]) +
+    T := Fptr_Fdata[s_index[r]] + (A shl s_rot[r] or A shr s_tor[r]) +
       ((B and C) or (not B and D)) + E;
     E := D;
     D := C;
@@ -131,15 +138,19 @@ begin
     System.Inc(r);
   end;
 
-  data[16] := data[3] xor data[6] xor data[9] xor data[12];
-  data[17] := data[2] xor data[5] xor data[8] xor data[15];
-  data[18] := data[1] xor data[4] xor data[11] xor data[14];
-  data[19] := data[0] xor data[7] xor data[10] xor data[13];
+  Fptr_Fdata[16] := Fptr_Fdata[3] xor Fptr_Fdata[6] xor Fptr_Fdata[9]
+    xor Fptr_Fdata[12];
+  Fptr_Fdata[17] := Fptr_Fdata[2] xor Fptr_Fdata[5] xor Fptr_Fdata[8]
+    xor Fptr_Fdata[15];
+  Fptr_Fdata[18] := Fptr_Fdata[1] xor Fptr_Fdata[4] xor Fptr_Fdata[11]
+    xor Fptr_Fdata[14];
+  Fptr_Fdata[19] := Fptr_Fdata[0] xor Fptr_Fdata[7] xor Fptr_Fdata[10]
+    xor Fptr_Fdata[13];
 
   r := 20;
   while r < 40 do
   begin
-    T := data[s_index[r]] + $5A827999 +
+    T := Fptr_Fdata[s_index[r]] + $5A827999 +
       (A shl s_rot[r - 20] or A shr s_tor[r - 20]) + (B xor C xor D) + E;
     E := D;
     D := C;
@@ -149,15 +160,19 @@ begin
     System.Inc(r);
   end;
 
-  data[16] := data[5] xor data[7] xor data[12] xor data[14];
-  data[17] := data[0] xor data[2] xor data[9] xor data[11];
-  data[18] := data[4] xor data[6] xor data[13] xor data[15];
-  data[19] := data[1] xor data[3] xor data[8] xor data[10];
+  Fptr_Fdata[16] := Fptr_Fdata[5] xor Fptr_Fdata[7] xor Fptr_Fdata[12]
+    xor Fptr_Fdata[14];
+  Fptr_Fdata[17] := Fptr_Fdata[0] xor Fptr_Fdata[2] xor Fptr_Fdata[9]
+    xor Fptr_Fdata[11];
+  Fptr_Fdata[18] := Fptr_Fdata[4] xor Fptr_Fdata[6] xor Fptr_Fdata[13]
+    xor Fptr_Fdata[15];
+  Fptr_Fdata[19] := Fptr_Fdata[1] xor Fptr_Fdata[3] xor Fptr_Fdata[8]
+    xor Fptr_Fdata[10];
 
   r := 40;
   while r < 60 do
   begin
-    T := data[s_index[r]] + $6ED9EBA1 +
+    T := Fptr_Fdata[s_index[r]] + $6ED9EBA1 +
       (A shl s_rot[r - 40] or A shr s_tor[r - 40]) + (C xor (B or not D)) + E;
     E := D;
     D := C;
@@ -167,15 +182,19 @@ begin
     System.Inc(r);
   end;
 
-  data[16] := data[2] xor data[7] xor data[8] xor data[13];
-  data[17] := data[3] xor data[4] xor data[9] xor data[14];
-  data[18] := data[0] xor data[5] xor data[10] xor data[15];
-  data[19] := data[1] xor data[6] xor data[11] xor data[12];
+  Fptr_Fdata[16] := Fptr_Fdata[2] xor Fptr_Fdata[7] xor Fptr_Fdata[8]
+    xor Fptr_Fdata[13];
+  Fptr_Fdata[17] := Fptr_Fdata[3] xor Fptr_Fdata[4] xor Fptr_Fdata[9]
+    xor Fptr_Fdata[14];
+  Fptr_Fdata[18] := Fptr_Fdata[0] xor Fptr_Fdata[5] xor Fptr_Fdata[10]
+    xor Fptr_Fdata[15];
+  Fptr_Fdata[19] := Fptr_Fdata[1] xor Fptr_Fdata[6] xor Fptr_Fdata[11]
+    xor Fptr_Fdata[12];
 
   r := 60;
   while r < 80 do
   begin
-    T := data[s_index[r]] + $8F1BBCDC +
+    T := Fptr_Fdata[s_index[r]] + $8F1BBCDC +
       (A shl s_rot[r - 60] or A shr s_tor[r - 60]) + (B xor C xor D) + E;
     E := D;
     D := C;
@@ -185,11 +204,11 @@ begin
     System.Inc(r);
   end;
 
-  Fm_hash[0] := Fm_hash[0] + A;
-  Fm_hash[1] := Fm_hash[1] + B;
-  Fm_hash[2] := Fm_hash[2] + C;
-  Fm_hash[3] := Fm_hash[3] + D;
-  Fm_hash[4] := Fm_hash[4] + E;
+  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + A;
+  Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + B;
+  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + C;
+  Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + D;
+  Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + E;
 
 end;
 

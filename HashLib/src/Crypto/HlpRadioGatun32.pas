@@ -23,9 +23,13 @@ type
 
   strict private
 
-    Fm_mill: THashLibUInt32Array;
+    Fm_mill, Fa: THashLibUInt32Array;
+
+    Fptr_Fm_mill, Fptr_Fa: PCardinal;
 
     Fm_belt: THashLibMatrixUInt32Array;
+
+    FBlockSize: Int32;
 
   const
     MILL_SIZE = Int32(19);
@@ -38,7 +42,7 @@ type
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -58,6 +62,7 @@ begin
 
   Inherited Create(32, 4 * BELT_WIDTH);
   System.SetLength(Fm_mill, MILL_SIZE);
+  Fptr_Fm_mill := PCardinal(Fm_mill);
 
   System.SetLength(Fm_belt, BELT_LENGTH);
   i := 0;
@@ -68,6 +73,11 @@ begin
     System.Inc(i);
   end;
 
+  System.SetLength(Fa, MILL_SIZE);
+  Fptr_Fa := PCardinal(Fa);
+
+  FBlockSize := BlockSize;
+
 end;
 
 procedure TRadioGatun32.Finish;
@@ -75,7 +85,7 @@ var
   padding_size, i: Int32;
   pad: THashLibByteArray;
 begin
-  padding_size := BlockSize - ((Int32(Fm_processed_bytes)) mod BlockSize);
+  padding_size := FBlockSize - ((Int32(Fm_processed_bytes)) mod FBlockSize);
 
   System.SetLength(pad, padding_size);
   pad[0] := $01;
@@ -133,7 +143,7 @@ end;
 
 procedure TRadioGatun32.RoundFunction;
 var
-  q, a: THashLibUInt32Array;
+  q: THashLibUInt32Array;
   i: Int32;
 begin
 
@@ -151,17 +161,15 @@ begin
   while i < 12 do
   begin
     Fm_belt[i + 1][i mod BELT_WIDTH] := Fm_belt[i + 1][i mod BELT_WIDTH]
-      xor Fm_mill[i + 1];
+      xor Fptr_Fm_mill[i + 1];
     System.Inc(i);
   end;
-
-  System.SetLength(a, MILL_SIZE);
 
   i := 0;
   while i < MILL_SIZE do
   begin
-    a[i] := Fm_mill[i] xor (Fm_mill[(i + 1) mod MILL_SIZE] or
-      not Fm_mill[(i + 2) mod MILL_SIZE]);
+    Fptr_Fa[i] := Fptr_Fm_mill[i] xor (Fptr_Fm_mill[(i + 1) mod MILL_SIZE] or
+      not Fptr_Fm_mill[(i + 2) mod MILL_SIZE]);
     System.Inc(i);
   end;
 
@@ -170,7 +178,7 @@ begin
   begin
     // Fm_mill[i] := TBits.RotateRight32(a[(7 * i) mod MILL_SIZE],
     // i * (i + 1) div 2);
-    Fm_mill[i] := TBits.RotateRight32(a[(7 * i) mod MILL_SIZE],
+    Fptr_Fm_mill[i] := TBits.RotateRight32(Fptr_Fa[(7 * i) mod MILL_SIZE],
       (i * (i + 1)) shr 1);
     System.Inc(i);
   end;
@@ -178,41 +186,44 @@ begin
   i := 0;
   while i < MILL_SIZE do
   begin
-    a[i] := Fm_mill[i] xor Fm_mill[(i + 1) mod MILL_SIZE] xor Fm_mill
-      [(i + 4) mod MILL_SIZE];
+    Fptr_Fa[i] := Fptr_Fm_mill[i] xor Fptr_Fm_mill[(i + 1) mod MILL_SIZE]
+      xor Fptr_Fm_mill[(i + 4) mod MILL_SIZE];
     System.Inc(i);
   end;
 
-  a[0] := a[0] xor 1;
+  Fptr_Fa[0] := Fptr_Fa[0] xor 1;
 
   i := 0;
   while i < MILL_SIZE do
   begin
-    Fm_mill[i] := a[i];
+    Fptr_Fm_mill[i] := Fptr_Fa[i];
     System.Inc(i);
   end;
 
   i := 0;
   while i < BELT_WIDTH do
   begin
-    Fm_mill[i + 13] := Fm_mill[i + 13] xor q[i];
+    Fptr_Fm_mill[i + 13] := Fptr_Fm_mill[i + 13] xor q[i];
     System.Inc(i);
   end;
 
 end;
 
-procedure TRadioGatun32.TransformBlock(a_data: THashLibByteArray;
+procedure TRadioGatun32.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
   data: THashLibUInt32Array;
+  ptr_data: PCardinal;
   i: Int32;
 begin
-  data := TConverters.ConvertBytesToUInt32(a_data, a_index, BlockSize);
+  data := TConverters.ConvertBytesToUInt32(a_data, a_data_length, a_index,
+    FBlockSize);
+  ptr_data := PCardinal(data);
   i := 0;
   while i < BELT_WIDTH do
   begin
-    Fm_mill[i + 16] := Fm_mill[i + 16] xor data[i];
-    Fm_belt[0][i] := Fm_belt[0][i] xor data[i];
+    Fptr_Fm_mill[i + 16] := Fptr_Fm_mill[i + 16] xor ptr_data[i];
+    Fm_belt[0][i] := Fm_belt[0][i] xor ptr_data[i];
 
     System.Inc(i);
   end;

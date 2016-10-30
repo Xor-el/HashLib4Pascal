@@ -10,20 +10,20 @@ uses
   HlpHashBuffer,
   HlpIHashInfo,
   HlpHashResult,
-  HlpIHashBuffer,
   HlpIHashResult;
 
 type
   TBlockHash = class abstract(THash, IBlockHash)
   strict protected
 
-    Fm_buffer: IHashBuffer;
+    // Fm_buffer: IHashBuffer;
+    Fm_buffer: THashBuffer;
     Fm_processed_bytes: UInt64;
 
-    procedure TransformBuffer();
+    procedure TransformBuffer(); inline;
     procedure Finish(); virtual; abstract;
-    procedure TransformBlock(a_data: THashLibByteArray; a_index: Int32);
-      virtual; abstract;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
+      a_index: Int32); virtual; abstract;
     function GetResult(): THashLibByteArray; virtual; abstract;
 
   public
@@ -62,8 +62,8 @@ procedure TBlockHash.TransformBuffer;
 begin
 {$IFDEF DEBUG}
   System.Assert(Fm_buffer.IsFull);
-{$ENDIF}
-  TransformBlock(Fm_buffer.GetBytes(), 0);
+{$ENDIF DEBUG}
+  TransformBlock(PByte(Fm_buffer.GetBytes()), Fm_buffer.Length, 0);
 end;
 
 procedure TBlockHash.TransformBytes(a_data: THashLibByteArray;
@@ -73,10 +73,11 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
-{$ENDIF}
+{$ENDIF DEBUG}
   if (not Fm_buffer.IsEmpty) then
   begin
-    if (Fm_buffer.Feed(a_data, a_index, a_length, Fm_processed_bytes)) then
+    if (Fm_buffer.Feed(PByte(a_data), System.Length(a_data), a_index, a_length,
+      Fm_processed_bytes)) then
     begin
       TransformBuffer();
     end;
@@ -85,14 +86,15 @@ begin
   while (a_length >= (Fm_buffer.Length)) do
   begin
     Fm_processed_bytes := Fm_processed_bytes + UInt64(Fm_buffer.Length);
-    TransformBlock(a_data, a_index);
+    TransformBlock(PByte(a_data), System.Length(a_data), a_index);
     a_index := a_index + (Fm_buffer.Length);
     a_length := a_length - (Fm_buffer.Length);
   end;
 
   if (a_length > 0) then
   begin
-    Fm_buffer.Feed(a_data, a_index, a_length, Fm_processed_bytes);
+    Fm_buffer.Feed(PByte(a_data), System.Length(a_data), a_index, a_length,
+      Fm_processed_bytes);
   end;
 end;
 
@@ -104,11 +106,11 @@ begin
 
 {$IFDEF DEBUG}
   System.Assert(Fm_buffer.IsEmpty);
-{$ENDIF}
+{$ENDIF DEBUG}
   tempresult := GetResult();
 {$IFDEF DEBUG}
   System.Assert(System.Length(tempresult) = HashSize);
-{$ENDIF}
+{$ENDIF DEBUG}
   Initialize();
 
   result := THashResult.Create(tempresult);

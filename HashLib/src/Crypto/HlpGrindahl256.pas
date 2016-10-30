@@ -86,7 +86,7 @@ type
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -265,7 +265,7 @@ begin
 
 end;
 
-procedure TGrindahl256.TransformBlock(a_data: THashLibByteArray;
+procedure TGrindahl256.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 begin
   Fm_state[0] := TConverters.ConvertBytesToUInt32SwapOrder(a_data, a_index);

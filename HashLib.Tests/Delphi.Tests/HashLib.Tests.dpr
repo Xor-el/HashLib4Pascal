@@ -104,7 +104,6 @@ uses
   HlpIHash in '..\..\HashLib\src\Interfaces\HlpIHash.pas',
   HlpIKDF in '..\..\HashLib\src\Interfaces\HlpIKDF.pas',
   HlpICRC in '..\..\HashLib\src\Interfaces\HlpICRC.pas',
-  HlpIHashBuffer in '..\..\HashLib\src\Interfaces\HlpIHashBuffer.pas',
   HlpIHashInfo in '..\..\HashLib\src\Interfaces\HlpIHashInfo.pas',
   HlpIHashResult in '..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
   HlpPBKDF2_HMACNotBuildInAdapter

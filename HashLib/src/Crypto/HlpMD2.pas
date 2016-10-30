@@ -13,6 +13,7 @@ uses
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
+  HlpHashBuffer,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
 
@@ -20,7 +21,8 @@ type
   TMD2 = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
-    Fm_state, Fm_checksum: THashLibByteArray;
+    Fm_state, Fm_checksum, Ftemp: THashLibByteArray;
+    Fptr_Fm_state, Fptr_Fm_checksum, Fptr_Ftemp: PByte;
 
 {$REGION 'Consts'}
 
@@ -66,7 +68,7 @@ type
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -84,6 +86,10 @@ begin
   Inherited Create(16, 16);
   System.SetLength(Fm_state, 16);
   System.SetLength(Fm_checksum, 16);
+  Fptr_Fm_state := PByte(Fm_state);
+  Fptr_Fm_checksum := PByte(Fm_checksum);
+  System.SetLength(Ftemp, 48);
+  Fptr_Ftemp := PByte(Ftemp);
 
 end;
 
@@ -124,55 +130,46 @@ begin
 
 end;
 
-procedure TMD2.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TMD2.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
-  temp: THashLibByteArray;
-  i, j, LBlockSize: Int32;
+  i, j: Int32;
   t: UInt32;
 begin
-  System.SetLength(temp, 48);
 
-  System.Move(Fm_state[0], temp[0], 16);
+  System.Move(Fm_state[0], Ftemp[0], 16);
 
-  System.Move(a_data[a_index], temp[16], 16);
+  System.Move(a_data[a_index], Ftemp[16], 16);
 
-  LBlockSize := BlockSize;
-
-  i := 0;
-  while i < 16 do
+  for i := 0 to 15 do
   begin
-    temp[i + 32] := Byte(Fm_state[i] xor a_data[i + a_index]);
-    System.Inc(i);
+    Fptr_Ftemp[i + 32] := Byte(Fptr_Fm_state[i] xor a_data[i + a_index]);
   end;
 
   t := 0;
 
-  i := 0;
-
-  while i < 18 do
+  for i := 0 to 17 do
   begin
-    j := 0;
-    while j < 48 do
+
+    for j := 0 to 47 do
     begin
-      temp[j] := Byte(temp[j] xor s_pi[t]);
-      t := temp[j];
-      System.Inc(j);
+      Fptr_Ftemp[j] := Byte(Fptr_Ftemp[j] xor s_pi[t]);
+      t := Fptr_Ftemp[j];
     end;
 
     t := Byte(t + UInt32(i));
-    System.Inc(i);
   end;
 
-  System.Move(temp[0], Fm_state[0], 16);
+  System.Move(Ftemp[0], Fm_state[0], 16);
 
-  t := Fm_checksum[15];
-  i := 0;
-  while i < LBlockSize do
+  t := Fptr_Fm_checksum[15];
+
+  for i := 0 to 15 do
   begin
 
-    Fm_checksum[i] := Fm_checksum[i] xor (s_pi[a_data[i + a_index] xor t]);
-    t := Fm_checksum[i];
-    System.Inc(i);
+    Fptr_Fm_checksum[i] := Fptr_Fm_checksum[i]
+      xor (s_pi[a_data[i + a_index] xor t]);
+    t := Fptr_Fm_checksum[i];
   end;
 
 end;

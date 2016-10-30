@@ -9,6 +9,7 @@ uses
 {$IFDEF DELPHI}
   HlpBitConverter,
 {$ENDIF DELPHI}
+  HlpHashBuffer,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -43,12 +44,12 @@ type
 
 {$ENDREGION}
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   strict protected
 
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
@@ -371,25 +372,15 @@ begin
   end;
 end;
 
-procedure TMurmurHash3_x86_128.TransformBlock(a_data: THashLibByteArray;
-  a_index: Int32);
+procedure TMurmurHash3_x86_128.TransformBlock(a_data: PByte;
+  a_data_length: Int32; a_index: Int32);
 var
-  k1, k2, k3, k4, u1, u2, u3, u4: UInt32;
+  k1, k2, k3, k4: UInt32;
 begin
 
-  u1 := UInt32(a_data[a_index]);
-  System.Inc(a_index);
+  k1 := TConverters.ConvertBytesToUInt32a2(a_data, a_index);
 
-  u2 := UInt32(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt32(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt32(a_data[a_index]) shl 24;
-  System.Inc(a_index);
-
-  k1 := u1 or u2 or u3 or u4;
+  System.Inc(a_index, 4);
 
   k1 := k1 * C1;
   k1 := TBits.RotateLeft32(k1, 15);
@@ -401,19 +392,9 @@ begin
   Fm_h1 := Fm_h1 + Fm_h2;
   Fm_h1 := Fm_h1 * 5 + C7;
 
-  u1 := UInt32(a_data[a_index]);
-  System.Inc(a_index);
+  k2 := TConverters.ConvertBytesToUInt32a2(a_data, a_index);
 
-  u2 := UInt32(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt32(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt32(a_data[a_index]) shl 24;
-  System.Inc(a_index);
-
-  k2 := u1 or u2 or u3 or u4;
+  System.Inc(a_index, 4);
 
   k2 := k2 * C2;
   k2 := TBits.RotateLeft32(k2, 16);
@@ -425,19 +406,9 @@ begin
   Fm_h2 := Fm_h2 + Fm_h3;
   Fm_h2 := Fm_h2 * 5 + C8;
 
-  u1 := UInt32(a_data[a_index]);
-  System.Inc(a_index);
+  k3 := TConverters.ConvertBytesToUInt32a2(a_data, a_index);
 
-  u2 := UInt32(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt32(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt32(a_data[a_index]) shl 24;
-  System.Inc(a_index);
-
-  k3 := u1 or u2 or u3 or u4;
+  System.Inc(a_index, 4);
 
   k3 := k3 * C3;
   k3 := TBits.RotateLeft32(k3, 17);
@@ -449,18 +420,7 @@ begin
   Fm_h3 := Fm_h3 + Fm_h4;
   Fm_h3 := Fm_h3 * 5 + C9;
 
-  u1 := UInt32(a_data[a_index]);
-  System.Inc(a_index);
-
-  u2 := UInt32(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt32(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt32(a_data[a_index]) shl 24;
-
-  k4 := u1 or u2 or u3 or u4;
+  k4 := TConverters.ConvertBytesToUInt32a2(a_data, a_index);
 
   k4 := k4 * C4;
   k4 := TBits.RotateLeft32(k4, 18);

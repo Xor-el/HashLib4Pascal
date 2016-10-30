@@ -9,6 +9,7 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpHashLibTypes,
+  HlpHashBuffer,
   HlpBits,
   HlpHashSize,
   HlpHashRounds,
@@ -32,8 +33,9 @@ type
     procedure TailorDigestBits();
 
   strict protected
-    Fm_rounds: Int32;
+    Fm_rounds, FHashSize: Int32;
     Fm_hash: THashLibUInt32Array;
+    Fptr_Fm_hash: PCardinal;
 
     constructor Create(a_rounds: THashRounds; a_hash_size: THashSize);
 
@@ -49,7 +51,7 @@ type
   THaval3 = class abstract(THaval)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -62,7 +64,7 @@ type
   THaval4 = class abstract(THaval)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -75,7 +77,7 @@ type
   THaval5 = class abstract(THaval)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -225,7 +227,9 @@ implementation
 constructor THaval.Create(a_rounds: THashRounds; a_hash_size: THashSize);
 begin
   inherited Create(Int32(a_hash_size), 128);
+  FHashSize := HashSize;
   System.SetLength(Fm_hash, 8);
+  Fptr_Fm_hash := PCardinal(Fm_hash);
   Fm_rounds := Int32(a_rounds);
 
 end;
@@ -247,7 +251,7 @@ begin
 
   pad[padindex] := byte((Fm_rounds shl 3) or (HAVAL_VERSION and $07));
   System.Inc(padindex);
-  pad[padindex] := byte(HashSize shl 1);
+  pad[padindex] := byte(FHashSize shl 1);
   System.Inc(padindex);
 
   TConverters.ConvertUInt64ToBytes(bits, pad, padindex);
@@ -262,19 +266,19 @@ begin
   TailorDigestBits();
 
   // Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, HashSize div 4);
-  Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, HashSize shr 2);
+  Result := TConverters.ConvertUInt32ToBytes(Fm_hash, 0, FHashSize shr 2);
 end;
 
 procedure THaval.Initialize;
 begin
-  Fm_hash[0] := $243F6A88;
-  Fm_hash[1] := $85A308D3;
-  Fm_hash[2] := $13198A2E;
-  Fm_hash[3] := $03707344;
-  Fm_hash[4] := $A4093822;
-  Fm_hash[5] := $299F31D0;
-  Fm_hash[6] := $082EFA98;
-  Fm_hash[7] := $EC4E6C89;
+  Fptr_Fm_hash[0] := $243F6A88;
+  Fptr_Fm_hash[1] := $85A308D3;
+  Fptr_Fm_hash[2] := $13198A2E;
+  Fptr_Fm_hash[3] := $03707344;
+  Fptr_Fm_hash[4] := $A4093822;
+  Fptr_Fm_hash[5] := $299F31D0;
+  Fptr_Fm_hash[6] := $082EFA98;
+  Fptr_Fm_hash[7] := $EC4E6C89;
 
   inherited Initialize();
 
@@ -285,70 +289,77 @@ var
   t: UInt32;
 begin
 
-  case HashSize of
+  case FHashSize of
 
     16:
       begin
-        t := (Fm_hash[7] and $000000FF) or (Fm_hash[6] and $FF000000) or
-          (Fm_hash[5] and $00FF0000) or (Fm_hash[4] and $0000FF00);
-        Fm_hash[0] := Fm_hash[0] + TBits.RotateRight32(t, 8);
-        t := (Fm_hash[7] and $0000FF00) or (Fm_hash[6] and $000000FF) or
-          (Fm_hash[5] and $FF000000) or (Fm_hash[4] and $00FF0000);
-        Fm_hash[1] := Fm_hash[1] + TBits.RotateRight32(t, 16);
-        t := (Fm_hash[7] and $00FF0000) or (Fm_hash[6] and $0000FF00) or
-          (Fm_hash[5] and $000000FF) or (Fm_hash[4] and $FF000000);
-        Fm_hash[2] := Fm_hash[2] + TBits.RotateRight32(t, 24);
-        t := (Fm_hash[7] and $FF000000) or (Fm_hash[6] and $00FF0000) or
-          (Fm_hash[5] and $0000FF00) or (Fm_hash[4] and $000000FF);
-        Fm_hash[3] := Fm_hash[3] + t;
+        t := (Fptr_Fm_hash[7] and $000000FF) or (Fptr_Fm_hash[6] and $FF000000)
+          or (Fptr_Fm_hash[5] and $00FF0000) or (Fptr_Fm_hash[4] and $0000FF00);
+        Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + TBits.RotateRight32(t, 8);
+        t := (Fptr_Fm_hash[7] and $0000FF00) or (Fptr_Fm_hash[6] and $000000FF)
+          or (Fptr_Fm_hash[5] and $FF000000) or (Fptr_Fm_hash[4] and $00FF0000);
+        Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + TBits.RotateRight32(t, 16);
+        t := (Fptr_Fm_hash[7] and $00FF0000) or (Fptr_Fm_hash[6] and $0000FF00)
+          or (Fptr_Fm_hash[5] and $000000FF) or (Fptr_Fm_hash[4] and $FF000000);
+        Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + TBits.RotateRight32(t, 24);
+        t := (Fptr_Fm_hash[7] and $FF000000) or (Fptr_Fm_hash[6] and $00FF0000)
+          or (Fptr_Fm_hash[5] and $0000FF00) or (Fptr_Fm_hash[4] and $000000FF);
+        Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + t;
       end;
 
     20:
       begin
-        t := UInt32(Fm_hash[7] and $3F) or UInt32(Fm_hash[6] and ($7F shl 25))
-          or UInt32(Fm_hash[5] and ($3F shl 19));
-        Fm_hash[0] := Fm_hash[0] + TBits.RotateRight32(t, 19);
-        t := UInt32(Fm_hash[7] and ($3F shl 6)) or UInt32(Fm_hash[6] and $3F) or
-          UInt32(Fm_hash[5] and ($7F shl 25));
-        Fm_hash[1] := Fm_hash[1] + TBits.RotateRight32(t, 25);
-        t := (Fm_hash[7] and ($7F shl 12)) or (Fm_hash[6] and ($3F shl 6)) or
-          (Fm_hash[5] and $3F);
-        Fm_hash[2] := Fm_hash[2] + t;
-        t := (Fm_hash[7] and ($3F shl 19)) or (Fm_hash[6] and ($7F shl 12)) or
-          (Fm_hash[5] and ($3F shl 6));
-        Fm_hash[3] := Fm_hash[3] + (t shr 6);
-        t := (Fm_hash[7] and (UInt32($7F) shl 25)) or
-          UInt32(Fm_hash[6] and ($3F shl 19)) or
-          UInt32(Fm_hash[5] and ($7F shl 12));
-        Fm_hash[4] := Fm_hash[4] + (t shr 12);
+        t := UInt32(Fptr_Fm_hash[7] and $3F) or
+          UInt32(Fptr_Fm_hash[6] and ($7F shl 25)) or
+          UInt32(Fptr_Fm_hash[5] and ($3F shl 19));
+        Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + TBits.RotateRight32(t, 19);
+        t := UInt32(Fptr_Fm_hash[7] and ($3F shl 6)) or
+          UInt32(Fptr_Fm_hash[6] and $3F) or
+          UInt32(Fptr_Fm_hash[5] and ($7F shl 25));
+        Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + TBits.RotateRight32(t, 25);
+        t := (Fptr_Fm_hash[7] and ($7F shl 12)) or
+          (Fptr_Fm_hash[6] and ($3F shl 6)) or (Fptr_Fm_hash[5] and $3F);
+        Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + t;
+        t := (Fptr_Fm_hash[7] and ($3F shl 19)) or
+          (Fptr_Fm_hash[6] and ($7F shl 12)) or
+          (Fptr_Fm_hash[5] and ($3F shl 6));
+        Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + (t shr 6);
+        t := (Fptr_Fm_hash[7] and (UInt32($7F) shl 25)) or
+          UInt32(Fptr_Fm_hash[6] and ($3F shl 19)) or
+          UInt32(Fptr_Fm_hash[5] and ($7F shl 12));
+        Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + (t shr 12);
       end;
 
     24:
       begin
-        t := UInt32(Fm_hash[7] and $1F) or UInt32(Fm_hash[6] and ($3F shl 26));
-        Fm_hash[0] := Fm_hash[0] + TBits.RotateRight32(t, 26);
-        t := (Fm_hash[7] and ($1F shl 5)) or (Fm_hash[6] and $1F);
-        Fm_hash[1] := Fm_hash[1] + t;
-        t := (Fm_hash[7] and ($3F shl 10)) or (Fm_hash[6] and ($1F shl 5));
-        Fm_hash[2] := Fm_hash[2] + (t shr 5);
-        t := (Fm_hash[7] and ($1F shl 16)) or (Fm_hash[6] and ($3F shl 10));
-        Fm_hash[3] := Fm_hash[3] + (t shr 10);
-        t := (Fm_hash[7] and ($1F shl 21)) or (Fm_hash[6] and ($1F shl 16));
-        Fm_hash[4] := Fm_hash[4] + (t shr 16);
-        t := UInt32(Fm_hash[7] and ($3F shl 26)) or
-          UInt32(Fm_hash[6] and ($1F shl 21));
-        Fm_hash[5] := Fm_hash[5] + (t shr 21);
+        t := UInt32(Fptr_Fm_hash[7] and $1F) or
+          UInt32(Fptr_Fm_hash[6] and ($3F shl 26));
+        Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + TBits.RotateRight32(t, 26);
+        t := (Fptr_Fm_hash[7] and ($1F shl 5)) or (Fptr_Fm_hash[6] and $1F);
+        Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + t;
+        t := (Fptr_Fm_hash[7] and ($3F shl 10)) or
+          (Fptr_Fm_hash[6] and ($1F shl 5));
+        Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + (t shr 5);
+        t := (Fptr_Fm_hash[7] and ($1F shl 16)) or
+          (Fptr_Fm_hash[6] and ($3F shl 10));
+        Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + (t shr 10);
+        t := (Fptr_Fm_hash[7] and ($1F shl 21)) or
+          (Fptr_Fm_hash[6] and ($1F shl 16));
+        Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + (t shr 16);
+        t := UInt32(Fptr_Fm_hash[7] and ($3F shl 26)) or
+          UInt32(Fptr_Fm_hash[6] and ($1F shl 21));
+        Fptr_Fm_hash[5] := Fptr_Fm_hash[5] + (t shr 21);
       end;
 
     28:
       begin
-        Fm_hash[0] := Fm_hash[0] + ((Fm_hash[7] shr 27) and $1F);
-        Fm_hash[1] := Fm_hash[1] + ((Fm_hash[7] shr 22) and $1F);
-        Fm_hash[2] := Fm_hash[2] + ((Fm_hash[7] shr 18) and $0F);
-        Fm_hash[3] := Fm_hash[3] + ((Fm_hash[7] shr 13) and $1F);
-        Fm_hash[4] := Fm_hash[4] + ((Fm_hash[7] shr 9) and $0F);
-        Fm_hash[5] := Fm_hash[5] + ((Fm_hash[7] shr 4) and $1F);
-        Fm_hash[6] := Fm_hash[6] + (Fm_hash[7] and $0F);
+        Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + ((Fptr_Fm_hash[7] shr 27) and $1F);
+        Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + ((Fptr_Fm_hash[7] shr 22) and $1F);
+        Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + ((Fptr_Fm_hash[7] shr 18) and $0F);
+        Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + ((Fptr_Fm_hash[7] shr 13) and $1F);
+        Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + ((Fptr_Fm_hash[7] shr 9) and $0F);
+        Fptr_Fm_hash[5] := Fptr_Fm_hash[5] + ((Fptr_Fm_hash[7] shr 4) and $1F);
+        Fptr_Fm_hash[6] := Fptr_Fm_hash[6] + (Fptr_Fm_hash[7] and $0F);
       end;
 
   end;
@@ -362,21 +373,22 @@ begin
   inherited Create(THashRounds.hrRounds3, a_hash_size);
 end;
 
-procedure THaval3.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure THaval3.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   temp: THashLibUInt32Array;
   a, b, c, d, e, f, g, h, t: UInt32;
 begin
-  temp := TConverters.ConvertBytesToUInt32(a_data, a_index, BlockSize);
+  temp := TConverters.ConvertBytesToUInt32(a_data, a_data_length, a_index, 128);
 
-  a := Fm_hash[0];
-  b := Fm_hash[1];
-  c := Fm_hash[2];
-  d := Fm_hash[3];
-  e := Fm_hash[4];
-  f := Fm_hash[5];
-  g := Fm_hash[6];
-  h := Fm_hash[7];
+  a := Fptr_Fm_hash[0];
+  b := Fptr_Fm_hash[1];
+  c := Fptr_Fm_hash[2];
+  d := Fptr_Fm_hash[3];
+  e := Fptr_Fm_hash[4];
+  f := Fptr_Fm_hash[5];
+  g := Fptr_Fm_hash[6];
+  h := Fptr_Fm_hash[7];
 
   t := c and (e xor d) xor g and a xor f and b xor e;
   h := temp[0] + TBits.RotateRight32(t, 7) + TBits.RotateRight32(h, 11);
@@ -762,14 +774,14 @@ begin
   a := temp[2] + $6C24CF5C + TBits.RotateRight32(t, 7) +
     TBits.RotateRight32(a, 11);
 
-  Fm_hash[0] := Fm_hash[0] + a;
-  Fm_hash[1] := Fm_hash[1] + b;
-  Fm_hash[2] := Fm_hash[2] + c;
-  Fm_hash[3] := Fm_hash[3] + d;
-  Fm_hash[4] := Fm_hash[4] + e;
-  Fm_hash[5] := Fm_hash[5] + f;
-  Fm_hash[6] := Fm_hash[6] + g;
-  Fm_hash[7] := Fm_hash[7] + h;
+  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + a;
+  Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + b;
+  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + c;
+  Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + d;
+  Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + e;
+  Fptr_Fm_hash[5] := Fptr_Fm_hash[5] + f;
+  Fptr_Fm_hash[6] := Fptr_Fm_hash[6] + g;
+  Fptr_Fm_hash[7] := Fptr_Fm_hash[7] + h;
 
 end;
 
@@ -780,21 +792,22 @@ begin
   inherited Create(THashRounds.hrRounds4, a_hash_size);
 end;
 
-procedure THaval4.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure THaval4.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   temp: THashLibUInt32Array;
   a, b, c, d, e, f, g, h, t: UInt32;
 begin
-  temp := TConverters.ConvertBytesToUInt32(a_data, a_index, BlockSize);
+  temp := TConverters.ConvertBytesToUInt32(a_data, a_data_length, a_index, 128);
 
-  a := Fm_hash[0];
-  b := Fm_hash[1];
-  c := Fm_hash[2];
-  d := Fm_hash[3];
-  e := Fm_hash[4];
-  f := Fm_hash[5];
-  g := Fm_hash[6];
-  h := Fm_hash[7];
+  a := Fptr_Fm_hash[0];
+  b := Fptr_Fm_hash[1];
+  c := Fptr_Fm_hash[2];
+  d := Fptr_Fm_hash[3];
+  e := Fptr_Fm_hash[4];
+  f := Fptr_Fm_hash[5];
+  g := Fptr_Fm_hash[6];
+  h := Fptr_Fm_hash[7];
 
   t := d and (a xor b) xor f and g xor e and c xor a;
   h := temp[0] + TBits.RotateRight32(t, 7) + TBits.RotateRight32(h, 11);
@@ -1340,14 +1353,14 @@ begin
   a := temp[13] + $137A3BE4 + TBits.RotateRight32(t, 7) +
     TBits.RotateRight32(a, 11);
 
-  Fm_hash[0] := Fm_hash[0] + a;
-  Fm_hash[1] := Fm_hash[1] + b;
-  Fm_hash[2] := Fm_hash[2] + c;
-  Fm_hash[3] := Fm_hash[3] + d;
-  Fm_hash[4] := Fm_hash[4] + e;
-  Fm_hash[5] := Fm_hash[5] + f;
-  Fm_hash[6] := Fm_hash[6] + g;
-  Fm_hash[7] := Fm_hash[7] + h;
+  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + a;
+  Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + b;
+  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + c;
+  Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + d;
+  Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + e;
+  Fptr_Fm_hash[5] := Fptr_Fm_hash[5] + f;
+  Fptr_Fm_hash[6] := Fptr_Fm_hash[6] + g;
+  Fptr_Fm_hash[7] := Fptr_Fm_hash[7] + h;
 
 end;
 
@@ -1358,21 +1371,22 @@ begin
   inherited Create(THashRounds.hrRounds5, a_hash_size);
 end;
 
-procedure THaval5.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure THaval5.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   temp: THashLibUInt32Array;
   a, b, c, d, e, f, g, h, t: UInt32;
 begin
-  temp := TConverters.ConvertBytesToUInt32(a_data, a_index, BlockSize);
+  temp := TConverters.ConvertBytesToUInt32(a_data, a_data_length, a_index, 128);
 
-  a := Fm_hash[0];
-  b := Fm_hash[1];
-  c := Fm_hash[2];
-  d := Fm_hash[3];
-  e := Fm_hash[4];
-  f := Fm_hash[5];
-  g := Fm_hash[6];
-  h := Fm_hash[7];
+  a := Fptr_Fm_hash[0];
+  b := Fptr_Fm_hash[1];
+  c := Fptr_Fm_hash[2];
+  d := Fptr_Fm_hash[3];
+  e := Fptr_Fm_hash[4];
+  f := Fptr_Fm_hash[5];
+  g := Fptr_Fm_hash[6];
+  h := Fptr_Fm_hash[7];
 
   t := c and (g xor b) xor f and e xor a and d xor g;
   h := temp[0] + TBits.RotateRight32(t, 7) + TBits.RotateRight32(h, 11);
@@ -2045,14 +2059,14 @@ begin
   a := temp[15] + $409F60C4 + TBits.RotateRight32(t, 7) +
     TBits.RotateRight32(a, 11);
 
-  Fm_hash[0] := Fm_hash[0] + a;
-  Fm_hash[1] := Fm_hash[1] + b;
-  Fm_hash[2] := Fm_hash[2] + c;
-  Fm_hash[3] := Fm_hash[3] + d;
-  Fm_hash[4] := Fm_hash[4] + e;
-  Fm_hash[5] := Fm_hash[5] + f;
-  Fm_hash[6] := Fm_hash[6] + g;
-  Fm_hash[7] := Fm_hash[7] + h;
+  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + a;
+  Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + b;
+  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + c;
+  Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + d;
+  Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + e;
+  Fptr_Fm_hash[5] := Fptr_Fm_hash[5] + f;
+  Fptr_Fm_hash[6] := Fptr_Fm_hash[6] + g;
+  Fptr_Fm_hash[7] := Fptr_Fm_hash[7] + h;
 
 end;
 

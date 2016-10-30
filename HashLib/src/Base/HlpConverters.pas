@@ -60,11 +60,22 @@ type
       a_index: Int32 = 0; a_length: Int32 = -1): THashLibUInt32Array; overload;
       static; inline;
 
+    class function ConvertBytesToUInt32(a_in: PByte; a_in_length: Int32 = -1;
+      a_index: Int32 = 0; a_length: Int32 = -1): THashLibUInt32Array; overload;
+      static; inline;
+
     class procedure ConvertBytesToUInt32(a_in: THashLibByteArray;
       a_index: Int32; a_length: Int32; a_out: THashLibUInt32Array); overload;
       static; inline;
 
+    class procedure ConvertBytesToUInt32(a_in: PByte; a_index: Int32;
+      a_length: Int32; a_out: THashLibUInt32Array); overload; static; inline;
+
     class function ConvertBytesToUInt64(a_in: THashLibByteArray;
+      a_index: Int32 = 0; a_length: Int32 = -1): THashLibUInt64Array; overload;
+      static; inline;
+
+    class function ConvertBytesToUInt64(a_in: PByte; a_in_length: Int32 = -1;
       a_index: Int32 = 0; a_length: Int32 = -1): THashLibUInt64Array; overload;
       static; inline;
 
@@ -72,15 +83,26 @@ type
       a_index_in: Int32; a_length: Int32; a_out: THashLibUInt64Array;
       a_index_out: Int32); overload; static; inline;
 
+    class procedure ConvertBytesToUInt64(a_in: PByte; a_index_in: Int32;
+      a_length: Int32; a_out: THashLibUInt64Array; a_index_out: Int32);
+      overload; static; inline;
+
     class function ConvertBytesToUInt32SwapOrder(a_in: THashLibByteArray;
       a_index, a_length: Int32): THashLibUInt32Array; overload; static; inline;
 
     class procedure ConvertBytesToUInt32SwapOrder(a_in: THashLibByteArray;
       a_index: Int32; a_length: Int32; a_result: THashLibUInt32Array;
-      a_index_out: Int32); overload; static; inline;
+      a_index_out: Int32); overload; static;
+
+    class procedure ConvertBytesToUInt32SwapOrder(a_in: PByte; a_index: Int32;
+      a_length: Int32; a_result: PCardinal; a_index_out: Int32);
+      overload; static;
 
     class function ConvertBytesToUInt64SwapOrder(a_in: THashLibByteArray;
       a_index: Int32): UInt64; overload; static; inline;
+
+    class function ConvertBytesToUInt64SwapOrder(a_in: PByte; a_index: Int32)
+      : UInt64; overload; static;
 
     // In order to bypass a compiler error of "Ambiguous overloaded call",
     // I had to rename this method to "ConvertBytesToUInt64a2" where "a2" means
@@ -88,25 +110,44 @@ type
     class function ConvertBytesToUInt64a2(a_in: THashLibByteArray;
       a_index: Int32 = 0): UInt64; overload; static; inline;
 
+    // In order to bypass a compiler error of "Ambiguous overloaded call",
+    // I had to rename this method to "ConvertBytesToUInt64a2" where "a2" means
+    // that only a maximum of 2 arguments are accepted by the method.
+    class function ConvertBytesToUInt64a2(a_in: PByte; a_index: Int32 = 0)
+      : UInt64; overload; static; inline;
+
     class function ConvertBytesToUInt32SwapOrder(a_in: THashLibByteArray;
       a_index: Int32): UInt32; overload; static; inline;
+
+    class function ConvertBytesToUInt32SwapOrder(a_in: PByte; a_index: Int32)
+      : UInt32; overload; static;
 
     // In order to bypass a compiler error of "Ambiguous overloaded call",
     // I had to rename this method to "ConvertBytesToUInt32a2" where "a2" means
     // that only a maximum of 2 arguments are accepted by the method.
     class function ConvertBytesToUInt32a2(a_in: THashLibByteArray;
-      a_index: Int32 = 0): UInt32; static; inline;
+      a_index: Int32 = 0): UInt32; overload; static; inline;
+
+    // In order to bypass a compiler error of "Ambiguous overloaded call",
+    // I had to rename this method to "ConvertBytesToUInt32a2" where "a2" means
+    // that only a maximum of 2 arguments are accepted by the method.
+    class function ConvertBytesToUInt32a2(a_in: PByte; a_index: Int32 = 0)
+      : UInt32; overload; static; inline;
 
     class function ConvertBytesToUInt64SwapOrder(a_in: THashLibByteArray;
       a_index, a_length: Int32): THashLibUInt64Array; overload; static; inline;
 
+    class function ConvertBytesToUInt64SwapOrder(a_in: PByte;
+      a_index, a_length: Int32): THashLibUInt64Array; overload; static; inline;
+
     class procedure ConvertBytesToUInt64SwapOrder(a_in: THashLibByteArray;
-      a_index, a_length: Int32; a_out: THashLibUInt64Array); overload;
-      static; inline;
+      a_index, a_length: Int32; a_out: THashLibUInt64Array); overload; static;
+
+    class procedure ConvertBytesToUInt64SwapOrder(a_in: PByte;
+      a_index, a_length: Int32; a_out: PUInt64); overload; static;
 
     class function ConvertUInt32ToBytesSwapOrder(a_in: THashLibUInt32Array;
-      a_index: Int32 = 0; a_length: Int32 = -1): THashLibByteArray;
-      static; inline;
+      a_index: Int32 = 0; a_length: Int32 = -1): THashLibByteArray; static;
 
     class function ConvertUInt32ToBytes(a_in: THashLibUInt32Array;
       a_index: Int32 = 0; a_length: Int32 = -1): THashLibByteArray; overload;
@@ -117,8 +158,8 @@ type
       static; inline;
 
     class function ConvertUInt64ToBytesSwapOrder(a_in: THashLibUInt64Array;
-      a_index: Int32 = 0; a_length: Int32 = -1): THashLibByteArray; overload;
-      static; inline;
+      a_index: Int32 = 0; a_length: Int32 = -1): THashLibByteArray;
+      overload; static;
 
     class function ConvertUInt8ToBytes(a_in: UInt8): THashLibByteArray;
       overload; static; inline;
@@ -360,12 +401,31 @@ begin
 
 end;
 
+class function TConverters.ConvertBytesToUInt32(a_in: PByte;
+  a_in_length, a_index, a_length: Int32): THashLibUInt32Array;
+begin
+  if (a_length = -1) then
+    a_length := a_in_length;
+
+  // System.SetLength(result, a_length div 4);
+  System.SetLength(result, a_length shr 2);
+
+  ConvertBytesToUInt32(a_in, a_index, a_length, result);
+
+end;
+
 class procedure TConverters.ConvertBytesToUInt32(a_in: THashLibByteArray;
   a_index, a_length: Int32; a_out: THashLibUInt32Array);
 begin
 {$IFDEF DEBUG}
   Check(a_in, 1, 4, a_index, a_length);
 {$ENDIF DEBUG}
+  System.Move(a_in[a_index], a_out[0], a_length);
+end;
+
+class procedure TConverters.ConvertBytesToUInt32(a_in: PByte;
+  a_index, a_length: Int32; a_out: THashLibUInt32Array);
+begin
   System.Move(a_in[a_index], a_out[0], a_length);
 end;
 
@@ -380,6 +440,12 @@ begin
 
 end;
 
+class function TConverters.ConvertBytesToUInt32a2(a_in: PByte;
+  a_index: Int32): UInt32;
+begin
+  result := TBitConverter.ToUInt32(a_in, a_index);
+end;
+
 class function TConverters.ConvertBytesToUInt32SwapOrder
   (a_in: THashLibByteArray; a_index: Int32): UInt32;
 var
@@ -390,6 +456,24 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_index + 4 <= System.Length(a_in));
 {$ENDIF DEBUG}
+  u1 := (UInt32(a_in[a_index]) shl 24);
+  System.Inc(a_index);
+  u2 := (UInt32(a_in[a_index]) shl 16);
+  System.Inc(a_index);
+  u3 := (UInt32(a_in[a_index]) shl 8);
+  System.Inc(a_index);
+  b1 := (a_in[a_index]);
+  result := u1 or u2 or u3 or b1;
+
+end;
+
+class function TConverters.ConvertBytesToUInt32SwapOrder(a_in: PByte;
+  a_index: Int32): UInt32;
+var
+  u1, u2, u3: UInt32;
+  b1: Byte;
+begin
+
   u1 := (UInt32(a_in[a_index]) shl 24);
   System.Inc(a_index);
   u2 := (UInt32(a_in[a_index]) shl 16);
@@ -432,6 +516,34 @@ begin
 
 end;
 
+class procedure TConverters.ConvertBytesToUInt32SwapOrder(a_in: PByte;
+  a_index, a_length: Int32; a_result: PCardinal; a_index_out: Int32);
+var
+  I: Int32;
+  u1, u2, u3: UInt32;
+  b1: Byte;
+begin
+
+  I := a_index_out;
+  while a_length > 0 do
+  begin
+    u1 := (UInt32(a_in[a_index]) shl 24);
+    System.Inc(a_index);
+    u2 := (UInt32(a_in[a_index]) shl 16);
+    System.Inc(a_index);
+    u3 := (UInt32(a_in[a_index]) shl 8);
+    System.Inc(a_index);
+    b1 := (a_in[a_index]);
+    System.Inc(a_index);
+    a_result[I] := u1 or u2 or u3 or b1;
+
+    System.Inc(I);
+
+    System.Dec(a_length, 4);
+  end;
+
+end;
+
 class function TConverters.ConvertBytesToUInt32SwapOrder
   (a_in: THashLibByteArray; a_index, a_length: Int32): THashLibUInt32Array;
 begin
@@ -451,6 +563,24 @@ begin
   System.Assert(a_index + 8 <= System.Length(a_in));
 {$ENDIF DEBUG}
   result := TBitConverter.ToUInt64(a_in, a_index);
+end;
+
+class function TConverters.ConvertBytesToUInt64a2(a_in: PByte;
+  a_index: Int32): UInt64;
+begin
+  result := TBitConverter.ToUInt64(a_in, a_index);
+end;
+
+class function TConverters.ConvertBytesToUInt64(a_in: PByte;
+  a_in_length, a_index, a_length: Int32): THashLibUInt64Array;
+begin
+  if (a_length = -1) then
+    a_length := a_in_length;
+
+  // System.SetLength(result, a_length div 8);
+  System.SetLength(result, a_length shr 3);
+  ConvertBytesToUInt64(a_in, a_index, a_length, result, 0);
+
 end;
 
 class function TConverters.ConvertBytesToUInt64(a_in: THashLibByteArray;
@@ -477,6 +607,12 @@ begin
   System.Move(a_in[a_index_in], a_out[a_index_out * 8], a_length);
 end;
 
+class procedure TConverters.ConvertBytesToUInt64(a_in: PByte;
+  a_index_in, a_length: Int32; a_out: THashLibUInt64Array; a_index_out: Int32);
+begin
+  System.Move(a_in[a_index_in], a_out[a_index_out * 8], a_length);
+end;
+
 class function TConverters.ConvertBytesToUInt64SwapOrder
   (a_in: THashLibByteArray; a_index, a_length: Int32): THashLibUInt64Array;
 begin
@@ -486,6 +622,14 @@ begin
   // System.SetLength(result, a_length div 8);
   System.SetLength(result, a_length shr 3);
   ConvertBytesToUInt64SwapOrder(a_in, a_index, a_length, result);
+end;
+
+class function TConverters.ConvertBytesToUInt64SwapOrder(a_in: PByte;
+  a_index, a_length: Int32): THashLibUInt64Array;
+begin
+  // System.SetLength(result, a_length div 8);
+  System.SetLength(result, a_length shr 3);
+  ConvertBytesToUInt64SwapOrder(a_in, a_index, a_length, PUInt64(result));
 end;
 
 class procedure TConverters.ConvertBytesToUInt64SwapOrder
@@ -526,6 +670,41 @@ begin
 
 end;
 
+class procedure TConverters.ConvertBytesToUInt64SwapOrder(a_in: PByte;
+  a_index, a_length: Int32; a_out: PUInt64);
+var
+  I: Int32;
+  u1, u2, u3, u4, u5, u6, u7, u8: UInt64;
+begin
+
+  I := 0;
+  while a_length > 0 do
+  begin
+    u1 := (UInt64(a_in[a_index]) shl 56);
+    System.Inc(a_index);
+    u2 := (UInt64(a_in[a_index]) shl 48);
+    System.Inc(a_index);
+    u3 := (UInt64(a_in[a_index]) shl 40);
+    System.Inc(a_index);
+    u4 := (UInt64(a_in[a_index]) shl 32);
+    System.Inc(a_index);
+    u5 := (UInt64(a_in[a_index]) shl 24);
+    System.Inc(a_index);
+    u6 := (UInt64(a_in[a_index]) shl 16);
+    System.Inc(a_index);
+    u7 := (UInt64(a_in[a_index]) shl 8);
+    System.Inc(a_index);
+    u8 := (UInt64(a_in[a_index]));
+    System.Inc(a_index);
+    a_out[I] := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
+
+    System.Inc(I);
+
+    System.Dec(a_length, 8);
+  end;
+
+end;
+
 class function TConverters.ConvertBytesToUInt64SwapOrder
   (a_in: THashLibByteArray; a_index: Int32): UInt64;
 var
@@ -536,6 +715,32 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_index + 8 <= System.Length(a_in));
 {$ENDIF DEBUG}
+  u1 := (UInt64(a_in[a_index]) shl 56);
+  System.Inc(a_index);
+  u2 := (UInt64(a_in[a_index]) shl 48);
+  System.Inc(a_index);
+  u3 := (UInt64(a_in[a_index]) shl 40);
+  System.Inc(a_index);
+  u4 := (UInt64(a_in[a_index]) shl 32);
+  System.Inc(a_index);
+  u5 := (UInt64(a_in[a_index]) shl 24);
+  System.Inc(a_index);
+  u6 := (UInt64(a_in[a_index]) shl 16);
+  System.Inc(a_index);
+  u7 := (UInt64(a_in[a_index]) shl 8);
+  System.Inc(a_index);
+  b1 := (a_in[a_index]);
+  result := u1 or u2 or u3 or u4 or u5 or u6 or u7 or b1;
+
+end;
+
+class function TConverters.ConvertBytesToUInt64SwapOrder(a_in: PByte;
+  a_index: Int32): UInt64;
+var
+  u1, u2, u3, u4, u5, u6, u7: UInt64;
+  b1: Byte;
+begin
+
   u1 := (UInt64(a_in[a_index]) shl 56);
   System.Inc(a_index);
   u2 := (UInt64(a_in[a_index]) shl 48);

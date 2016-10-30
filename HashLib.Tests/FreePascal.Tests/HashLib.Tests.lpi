@@ -68,7 +68,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="93">
+    <Units Count="92">
       <Unit0>
         <Filename Value="HashLib.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -387,61 +387,57 @@
         <IsPartOfProject Value="True"/>
       </Unit78>
       <Unit79>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashBuffer.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashInfo.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit79>
       <Unit80>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashInfo.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashResult.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit80>
       <Unit81>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashResult.pas"/>
+        <Filename Value="..\..\HashLib\src\Nullable\HlpNullable.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit81>
       <Unit82>
-        <Filename Value="..\..\HashLib\src\Nullable\HlpNullable.pas"/>
+        <Filename Value="..\..\HashLib\src\Utils\HlpBitConverter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit82>
       <Unit83>
-        <Filename Value="..\..\HashLib\src\Utils\HlpBitConverter.pas"/>
+        <Filename Value="..\..\HashLib\src\Utils\HlpBits.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit83>
       <Unit84>
-        <Filename Value="..\..\HashLib\src\Utils\HlpBits.pas"/>
+        <Filename Value="..\..\HashLib\src\Utils\HlpHashLibTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit84>
       <Unit85>
-        <Filename Value="..\..\HashLib\src\Utils\HlpHashLibTypes.pas"/>
+        <Filename Value="..\src\HashLibTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit85>
       <Unit86>
-        <Filename Value="..\src\HashLibTests.pas"/>
+        <Filename Value="..\src\BitConverterTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit86>
       <Unit87>
-        <Filename Value="..\src\BitConverterTests.pas"/>
+        <Filename Value="..\src\PBKDF2_HMACTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit87>
       <Unit88>
-        <Filename Value="..\src\PBKDF2_HMACTests.pas"/>
+        <Filename Value="..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit88>
       <Unit89>
-        <Filename Value="..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas"/>
+        <Filename Value="..\..\HashLib\src\Base\HlpKDF.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit89>
       <Unit90>
-        <Filename Value="..\..\HashLib\src\Base\HlpKDF.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\HlpIKDF.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit90>
       <Unit91>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIKDF.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit91>
-      <Unit92>
         <Filename Value="..\..\HashLib\src\Interfaces\HlpICRC.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit92>
+      </Unit91>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

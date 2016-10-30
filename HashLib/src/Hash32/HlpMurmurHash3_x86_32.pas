@@ -9,6 +9,7 @@ uses
 {$IFDEF DELPHI}
   HlpBitConverter,
 {$ENDIF DELPHI}
+  HlpHashBuffer,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -34,12 +35,12 @@ type
     C5 = UInt32($C2B2AE35);
 
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
     procedure TransformUInt32Fast(a_data: UInt32); inline;
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
@@ -71,7 +72,9 @@ var
   buffer: THashLibByteArray;
   k: UInt32;
 begin
-  left := Fm_processed_bytes mod UInt64(BlockSize);
+
+  // left := Fm_processed_bytes mod UInt64(BlockSize);
+  left := Fm_processed_bytes and UInt64(3);
 
   if (left <> 0) then
   begin
@@ -165,20 +168,14 @@ begin
   inherited Initialize();
 end;
 
-procedure TMurmurHash3_x86_32.TransformBlock(a_data: THashLibByteArray;
-  a_index: Int32);
+procedure TMurmurHash3_x86_32.TransformBlock(a_data: PByte;
+  a_data_length: Int32; a_index: Int32);
 var
-  k, u1, u2, u3, u4: UInt32;
+  k: UInt32;
 
 begin
-  u1 := a_data[a_index];
-  System.Inc(a_index);
-  u2 := UInt32(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-  u3 := UInt32(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-  u4 := UInt32(a_data[a_index]) shl 24;
-  k := u1 or u2 or u3 or u4;
+
+  k := TConverters.ConvertBytesToUInt32a2(a_data, a_index);
 
   TransformUInt32Fast(k);
 end;

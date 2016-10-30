@@ -49,6 +49,8 @@ type
 
     Fm_hash: THashLibByteArray;
 
+    class function SlowEquals(a_ar1, a_ar2: THashLibByteArray): Boolean;
+
   public
 
     constructor Create(a_hash: Int32); overload;
@@ -68,8 +70,6 @@ type
     function Equals(a_hashResult: IHashResult): Boolean; reintroduce;
     function GetHashCode(): {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
 {$ENDIF DELPHI}override;
-
-    class function SameArrays(a_ar1, a_ar2: THashLibByteArray): Boolean;
 
   end;
 
@@ -114,7 +114,7 @@ end;
 function THashResult.Equals(a_hashResult: IHashResult): Boolean;
 
 begin
-  result := THashResult.SameArrays(a_hashResult.GetBytes(), Fm_hash);
+  result := THashResult.SlowEquals(a_hashResult.GetBytes(), Fm_hash);
 end;
 
 function THashResult.GetBytes: THashLibByteArray;
@@ -235,18 +235,28 @@ begin
   result := TBits.ReverseBytesUInt64(result);
 end;
 
-class function THashResult.SameArrays(a_ar1, a_ar2: THashLibByteArray): Boolean;
+{$B+}
+
+class function THashResult.SlowEquals(a_ar1, a_ar2: THashLibByteArray): Boolean;
+var
+  I: Int32;
+  diff: UInt32;
+
 begin
-  if System.Length(a_ar1) <> System.Length(a_ar2) then
+  diff := UInt32(System.Length(a_ar1)) xor UInt32(System.Length(a_ar2));
+
+  I := 0;
+
+  while (I <= System.High(a_ar1)) and (I <= System.High(a_ar2)) do
   begin
-    result := false;
-    Exit;
+    diff := diff or (UInt32(a_ar1[I] xor a_ar2[I]));
+    System.Inc(I);
   end;
 
-  result := CompareMem(Pointer(a_ar1), Pointer(a_ar2),
-    System.Length(a_ar1) * System.SizeOf(Byte));
-
+  result := diff = 0;
 end;
+
+{$B-}
 
 function THashResult.ToString(a_group: Boolean): String;
 begin

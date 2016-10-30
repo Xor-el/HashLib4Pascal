@@ -13,14 +13,24 @@
 {$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$UNDEF DELPHI}
 {$MODE delphi}
+
+// Disable Overflow and RangeChecks.
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
+
+// Enable Pointer Math
+{$POINTERMATH ON}
+
+// Disable Warnings and Hints.
 {$WARNINGS OFF}
 {$HINTS OFF}
+
 // Optimizations
 {$OPTIMIZATION LEVEL3}
 {$OPTIMIZATION PEEPHOLE}
 {$OPTIMIZATION REGVAR}
+{$OPTIMIZATION LOOPUNROLL}
+{$OPTIMIZATION STRENGTH}
 {$IFDEF CPUI386}
 {$OPTIMIZATION USEEBP}
 {$ENDIF}
@@ -39,6 +49,9 @@
 // Disable Overflow and RangeChecks.
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
+
+ // Enable Pointer Math
+{$POINTERMATH ON}
 
 // Disable String Checks
 {$STRINGCHECKS OFF}

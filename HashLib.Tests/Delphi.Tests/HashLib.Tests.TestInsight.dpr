@@ -21,12 +21,14 @@ uses
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
-  HlpHashCryptoNotBuildIn in '..\..\HashLib\src\Base\HlpHashCryptoNotBuildIn.pas',
+  HlpHashCryptoNotBuildIn
+    in '..\..\HashLib\src\Base\HlpHashCryptoNotBuildIn.pas',
   HlpHashFactory in '..\..\HashLib\src\Base\HlpHashFactory.pas',
   HlpHashResult in '..\..\HashLib\src\Base\HlpHashResult.pas',
   HlpHashRounds in '..\..\HashLib\src\Base\HlpHashRounds.pas',
   HlpHashSize in '..\..\HashLib\src\Base\HlpHashSize.pas',
-  HlpHMACNotBuildInAdapter in '..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
+  HlpHMACNotBuildInAdapter
+    in '..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
   HlpMultipleTransformNonBlock
     in '..\..\HashLib\src\Base\HlpMultipleTransformNonBlock.pas',
   HlpAdler32 in '..\..\HashLib\src\Checksum\HlpAdler32.pas',
@@ -92,10 +94,11 @@ uses
   HlpMurmur2_64 in '..\..\HashLib\src\Hash64\HlpMurmur2_64.pas',
   HlpSipHash2_4 in '..\..\HashLib\src\Hash64\HlpSipHash2_4.pas',
   HlpXXHash64 in '..\..\HashLib\src\Hash64\HlpXXHash64.pas',
-  HlpMurmurHash3_x86_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas',
-  HlpMurmurHash3_x64_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x64_128.pas',
+  HlpMurmurHash3_x86_128
+    in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas',
+  HlpMurmurHash3_x64_128
+    in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x64_128.pas',
   HlpIHash in '..\..\HashLib\src\Interfaces\HlpIHash.pas',
-  HlpIHashBuffer in '..\..\HashLib\src\Interfaces\HlpIHashBuffer.pas',
   HlpIHashInfo in '..\..\HashLib\src\Interfaces\HlpIHashInfo.pas',
   HlpIHashResult in '..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
   HlpIKDF in '..\..\HashLib\src\Interfaces\HlpIKDF.pas',

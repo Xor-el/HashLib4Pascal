@@ -38,8 +38,8 @@ type
     R = Int32(47);
 
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   strict protected
     function ComputeAggregatedBytes(a_data: THashLibByteArray)

@@ -446,39 +446,37 @@ type
     FReflectIn, FReflectOut: Boolean;
 
     Fm_CRCTable: THashLibUInt64Array;
+    Fptr_Fm_CRCTable: PUInt64;
 
   const
     Delta = Int32(7);
 
-    function GetNames: THashLibStringArray;
-    procedure SetNames(value: THashLibStringArray);
-    function GetWidth: Int32;
-    procedure SetWidth(value: Int32);
-    function GetPolynomial: UInt64;
-    procedure SetPolynomial(value: UInt64);
-    function GetInit: UInt64;
-    procedure SetInit(value: UInt64);
-    function GetReflectIn: Boolean;
-    procedure SetReflectIn(value: Boolean);
-    function GetReflectOut: Boolean;
-    procedure SetReflectOut(value: Boolean);
-    function GetXOROut: UInt64;
-    procedure SetXOROut(value: UInt64);
-    function GetCheckValue: UInt64;
-    procedure SetCheckValue(value: UInt64);
+    function GetNames: THashLibStringArray; inline;
+    procedure SetNames(value: THashLibStringArray); inline;
+    function GetWidth: Int32; inline;
+    procedure SetWidth(value: Int32); inline;
+    function GetPolynomial: UInt64; inline;
+    procedure SetPolynomial(value: UInt64); inline;
+    function GetInit: UInt64; inline;
+    procedure SetInit(value: UInt64); inline;
+    function GetReflectIn: Boolean; inline;
+    procedure SetReflectIn(value: Boolean); inline;
+    function GetReflectOut: Boolean; inline;
+    procedure SetReflectOut(value: Boolean); inline;
+    function GetXOROut: UInt64; inline;
+    procedure SetXOROut(value: UInt64); inline;
+    function GetCheckValue: UInt64; inline;
+    procedure SetCheckValue(value: UInt64); inline;
 
     procedure GenerateTable();
     // tables work only for 8, 16, 24, 32 bit CRC
-    procedure CalculateCRCbyTable(a_data: THashLibByteArray;
-      a_index: Int32); inline;
+    procedure CalculateCRCbyTable(a_data: PByte; a_data_length, a_index: Int32);
     // fast bit by bit algorithm without augmented zero bytes.
     // does not use lookup table, suited for polynomial orders between 1...32.
-    procedure CalculateCRCdirect(a_data: THashLibByteArray;
-      a_index: Int32); inline;
+    procedure CalculateCRCdirect(a_data: PByte; a_data_length, a_index: Int32);
 
     // reflects the lower 'width' bits of 'value'
-    class function Reflect(a_value: UInt64; a_width: Int32): UInt64;
-      static; inline;
+    class function Reflect(a_value: UInt64; a_width: Int32): UInt64; static;
 
     property Names: THashLibStringArray read GetNames write SetNames;
     property Width: Int32 read GetWidth write SetWidth;
@@ -508,50 +506,72 @@ implementation
 
 { TCRC }
 
-procedure TCRC.CalculateCRCbyTable(a_data: THashLibByteArray; a_index: Int32);
-
+procedure TCRC.CalculateCRCbyTable(a_data: PByte;
+  a_data_length, a_index: Int32);
+var
+  &Length, i: Int32;
 begin
+
+  &Length := a_data_length;
+  i := a_index;
 
   if (ReflectIn) then
   begin
-    // the "Fm_hash and $FF" is similar to casting Fm_hash to a byte "Byte(Fm_hash)"
-    Fm_hash := (Fm_hash shr 8) xor Fm_CRCTable
-      [(Fm_hash and $FF) xor a_data[a_index]];
+    while Length > 0 do
+    begin
+      // the "Fm_hash and $FF" is similar to casting Fm_hash to a byte "Byte(Fm_hash)"
+      Fm_hash := (Fm_hash shr 8) xor Fptr_Fm_CRCTable
+        [(Fm_hash and $FF) xor a_data[i]];
+      System.Inc(i);
+      System.Dec(Length);
+    end;
 
   end
   else
   begin
 
-    // the "Fm_hash and $FF" is similar to casting Fm_hash to a byte "Byte(Fm_hash)"
-    Fm_hash := (Fm_hash shl 8) xor Fm_CRCTable
-      [((Fm_hash shr (Width - 8)) and $FF) xor a_data[a_index]];
+    while Length > 0 do
+    begin
+
+      Fm_hash := (Fm_hash shl 8) xor Fptr_Fm_CRCTable
+        [((Fm_hash shr (Width - 8)) and $FF) xor a_data[i]];
+      System.Inc(i);
+      System.Dec(Length);
+    end;
 
   end;
 
 end;
 
-procedure TCRC.CalculateCRCdirect(a_data: THashLibByteArray; a_index: Int32);
+procedure TCRC.CalculateCRCdirect(a_data: PByte; a_data_length, a_index: Int32);
 var
+  &Length, i: Int32;
   c, bit, j: UInt64;
-
 begin
 
-  c := UInt64(a_data[a_index]);
-  if (ReflectIn) then
+  &Length := a_data_length;
+  i := a_index;
+  while Length > 0 do
   begin
-    c := Reflect(c, 8);
-  end;
+    c := UInt64(a_data[i]);
+    if (ReflectIn) then
+    begin
+      c := Reflect(c, 8);
+    end;
 
-  j := $80;
-  while j > 0 do
-  begin
-    bit := Fm_hash and Fm_CRCHighBitMask;
-    Fm_hash := Fm_hash shl 1;
-    if ((c and j) > 0) then
-      bit := bit xor Fm_CRCHighBitMask;
-    if (bit > 0) then
-      Fm_hash := Fm_hash xor Polynomial;
-    j := j shr 1;
+    j := $80;
+    while j > 0 do
+    begin
+      bit := Fm_hash and Fm_CRCHighBitMask;
+      Fm_hash := Fm_hash shl 1;
+      if ((c and j) > 0) then
+        bit := bit xor Fm_CRCHighBitMask;
+      if (bit > 0) then
+        Fm_hash := Fm_hash xor Polynomial;
+      j := j shr 1;
+    end;
+    System.Inc(i);
+    System.Dec(Length);
   end;
 
 end;
@@ -559,11 +579,7 @@ end;
 constructor TCRC.Create(_Width: Int32; _poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   _Names: THashLibStringArray);
-var
-  UseTable: Boolean;
 begin
-
-  UseTable := False;
 
   case _Width of
     0 .. 7:
@@ -602,15 +618,10 @@ begin
   Fm_CRCHighBitMask := UInt64(1) shl (Width - 1);
   Fm_hash := Init;
 
-  if (Width > Delta) then
+  if (Width > Delta) then // then use table
   begin
 
     GenerateTable();
-    UseTable := True;
-  end;
-
-  if UseTable then
-  begin
     if (ReflectIn) then
       Fm_hash := Reflect(Fm_hash, Width);
   end;
@@ -972,6 +983,7 @@ var
   i, j: Int32;
 begin
   System.SetLength(Fm_CRCTable, 256);
+  Fptr_Fm_CRCTable := PUInt64(Fm_CRCTable);
   i := 0;
   while i < 256 do
   begin
@@ -997,7 +1009,7 @@ begin
       crc := Reflect(crc, Width);
     end;
     crc := crc and Fm_CRCMask;
-    Fm_CRCTable[i] := crc;
+    Fptr_Fm_CRCTable[i] := crc;
     System.Inc(i);
   end;
 end;
@@ -1110,6 +1122,7 @@ procedure TCRC.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
 var
   i: Int32;
+  ptr_a_data: PByte;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
@@ -1122,18 +1135,15 @@ begin
   // accordingly
 
   i := a_index;
-  while a_length > 0 do
+  ptr_a_data := PByte(a_data);
+
+  if (Width > Delta) then
   begin
-    if (Width > Delta) then
-    begin
-      CalculateCRCbyTable(a_data, i)
-    end
-    else
-    begin
-      CalculateCRCdirect(a_data, i);
-    end;
-    System.Inc(i);
-    System.Dec(a_length);
+    CalculateCRCbyTable(ptr_a_data, a_length, i);
+  end
+  else
+  begin
+    CalculateCRCdirect(ptr_a_data, a_length, i);
   end;
 
 end;

@@ -42,8 +42,8 @@ type
     function GetBlockSize: Int32; virtual;
     function GetHashSize: Int32; virtual;
 
-    function GetBufferSize: Int32;
-    procedure SetBufferSize(value: Int32);
+    function GetBufferSize: Int32; inline;
+    procedure SetBufferSize(value: Int32); inline;
 
   strict protected
 

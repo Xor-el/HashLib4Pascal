@@ -44,13 +44,13 @@ type
 
   var
     fInitDefault: string;
-    procedure SetValue(const aValue: T);
-    function GetValue: T;
-    function GetIsNull: Boolean;
-    procedure CheckValue;
-    procedure CheckType;
-    function GetHasValue: Boolean;
-    function GetHasDefault: Boolean;
+    procedure SetValue(const aValue: T); inline;
+    function GetValue: T; inline;
+    function GetIsNull: Boolean; inline;
+    procedure CheckValue; inline;
+    procedure CheckType; inline;
+    function GetHasValue: Boolean; inline;
+    function GetHasDefault: Boolean; inline;
   public
     property Value: T read GetValue write SetValue;
     property IsNull: Boolean read GetIsNull;

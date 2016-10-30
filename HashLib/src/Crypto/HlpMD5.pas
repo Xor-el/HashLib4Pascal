@@ -8,7 +8,6 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-  HlpHashLibTypes,
   HlpBits,
   HlpMDBase,
 {$IFDEF DELPHI}
@@ -21,7 +20,7 @@ type
   TMD5 = class sealed(TMDBase, ITransformBlock)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -38,11 +37,13 @@ begin
   Inherited Create(4, 16);
 end;
 
-procedure TMD5.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TMD5.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
     data11, data12, data13, data14, data15, A, B, C, D: UInt32;
 begin
+
   data0 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 0);
   data1 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 1);
   data2 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 2);
@@ -60,10 +61,10 @@ begin
   data14 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 14);
   data15 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 15);
 
-  A := Fm_state[0];
-  B := Fm_state[1];
-  C := Fm_state[2];
-  D := Fm_state[3];
+  A := Fptr_Fm_state[0];
+  B := Fptr_Fm_state[1];
+  C := Fptr_Fm_state[2];
+  D := Fptr_Fm_state[3];
 
   A := data0 + $D76AA478 + A + ((B and C) or (not B and D));
   A := TBits.RotateLeft32(A, 7) + B;
@@ -197,10 +198,10 @@ begin
   B := data9 + $EB86D391 + B + (D xor (C or not A));
   B := TBits.RotateLeft32(B, 21) + C;
 
-  Fm_state[0] := Fm_state[0] + A;
-  Fm_state[1] := Fm_state[1] + B;
-  Fm_state[2] := Fm_state[2] + C;
-  Fm_state[3] := Fm_state[3] + D;
+  Fptr_Fm_state[0] := Fptr_Fm_state[0] + A;
+  Fptr_Fm_state[1] := Fptr_Fm_state[1] + B;
+  Fptr_Fm_state[2] := Fptr_Fm_state[2] + C;
+  Fptr_Fm_state[3] := Fptr_Fm_state[3] + D;
 end;
 
 end.

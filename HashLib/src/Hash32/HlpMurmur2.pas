@@ -36,8 +36,8 @@ type
     function InternalComputeBytes(a_data: THashLibByteArray): Int32;
     procedure TransformUInt32Fast(a_data: UInt32); inline;
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   strict protected
     function ComputeAggregatedBytes(a_data: THashLibByteArray)

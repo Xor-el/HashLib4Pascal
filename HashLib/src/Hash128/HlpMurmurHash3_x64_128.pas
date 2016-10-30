@@ -9,6 +9,7 @@ uses
 {$IFDEF DELPHI}
   HlpBitConverter,
 {$ENDIF DELPHI}
+  HlpHashBuffer,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -50,12 +51,12 @@ type
 
 {$ENDREGION}
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   strict protected
 
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
@@ -351,37 +352,15 @@ begin
   end;
 end;
 
-procedure TMurmurHash3_x64_128.TransformBlock(a_data: THashLibByteArray;
-  a_index: Int32);
+procedure TMurmurHash3_x64_128.TransformBlock(a_data: PByte;
+  a_data_length: Int32; a_index: Int32);
 var
-  k1, k2, u1, u2, u3, u4, u5, u6, u7, u8: UInt64;
+  k1, k2: UInt64;
 begin
 
-  u1 := UInt64(a_data[a_index]);
-  System.Inc(a_index);
+  k1 := TConverters.ConvertBytesToUInt64a2(a_data, a_index);
 
-  u2 := UInt64(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt64(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt64(a_data[a_index]) shl 24;
-  System.Inc(a_index);
-
-  u5 := UInt64(a_data[a_index]) shl 32;
-  System.Inc(a_index);
-
-  u6 := UInt64(a_data[a_index]) shl 40;
-  System.Inc(a_index);
-
-  u7 := UInt64(a_data[a_index]) shl 48;
-  System.Inc(a_index);
-
-  u8 := UInt64(a_data[a_index]) shl 56;
-  System.Inc(a_index);
-
-  k1 := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
+  System.Inc(a_index, 8);
 
   k1 := k1 * C1;
   k1 := TBits.RotateLeft64(k1, 31);
@@ -392,30 +371,7 @@ begin
   Fm_h1 := Fm_h1 + Fm_h2;
   Fm_h1 := Fm_h1 * 5 + C3;
 
-  u1 := UInt64(a_data[a_index]);
-  System.Inc(a_index);
-
-  u2 := UInt64(a_data[a_index]) shl 8;
-  System.Inc(a_index);
-
-  u3 := UInt64(a_data[a_index]) shl 16;
-  System.Inc(a_index);
-
-  u4 := UInt64(a_data[a_index]) shl 24;
-  System.Inc(a_index);
-
-  u5 := UInt64(a_data[a_index]) shl 32;
-  System.Inc(a_index);
-
-  u6 := UInt64(a_data[a_index]) shl 40;
-  System.Inc(a_index);
-
-  u7 := UInt64(a_data[a_index]) shl 48;
-  System.Inc(a_index);
-
-  u8 := UInt64(a_data[a_index]) shl 56;
-
-  k2 := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
+  k2 := TConverters.ConvertBytesToUInt64a2(a_data, a_index);
 
   k2 := k2 * C2;
   k2 := TBits.RotateLeft64(k2, 33);

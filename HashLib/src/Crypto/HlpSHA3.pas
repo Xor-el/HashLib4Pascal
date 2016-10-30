@@ -5,6 +5,9 @@ unit HlpSHA3;
 interface
 
 uses
+{$IFDEF DELPHI2010}
+  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
+{$ENDIF DELPHI2010}
 {$IFNDEF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.TypInfo,
@@ -12,6 +15,7 @@ uses
   TypInfo,
 {$ENDIF HAS_UNITSCOPE}
 {$ENDIF DELPHIXE7_UP}
+  HlpHashBuffer,
   HlpBits,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -24,12 +28,18 @@ type
 
   strict private
     Fm_state: THashLibUInt64Array;
+    Fptr_Fm_state: PUInt64;
 
-{$REGION 'Consts'}
   strict protected
-  const
 
-    RC: array [0 .. 23] of UInt64 = ($0000000000000001, $0000000000008082,
+    FHashSize, FBlockSize: Int32;
+
+    (*
+      {$REGION 'Consts'}
+
+      const
+
+      RC: array [0 .. 23] of UInt64 = ($0000000000000001, $0000000000008082,
       $800000000000808A, $8000000080008000, $000000000000808B,
       $0000000080000001, $8000000080008081, $8000000000008009,
       $000000000000008A, $0000000000000088, $0000000080008009,
@@ -39,13 +49,13 @@ type
       $8000000080008081, $8000000000008080, $0000000080000001,
       $8000000080008008);
 
-{$ENDREGION}
-  strict protected
+      {$ENDREGION}
+    *)
     constructor Create(a_hash_size: THashSize);
 
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -97,7 +107,12 @@ constructor TSHA3.Create(a_hash_size: THashSize);
 begin
   Inherited Create(Int32(a_hash_size), 200 - (Int32(a_hash_size) * 2));
 
+  FHashSize := HashSize;
+  FBlockSize := BlockSize;
+
   System.SetLength(Fm_state, 25);
+
+  Fptr_Fm_state := PUInt64(Fm_state);
 
 end;
 
@@ -110,15 +125,15 @@ begin
   block := Fm_buffer.GetBytesZeroPadded();
 
   block[buffer_pos] := $6;
-  block[BlockSize - 1] := block[BlockSize - 1] or $80;
+  block[FBlockSize - 1] := block[FBlockSize - 1] or $80;
 
-  TransformBlock(block, 0);
+  TransformBlock(PByte(block), System.Length(block), 0);
 
-  Fm_state[1] := not Fm_state[1];
-  Fm_state[2] := not Fm_state[2];
-  Fm_state[8] := not Fm_state[8];
-  Fm_state[12] := not Fm_state[12];
-  Fm_state[17] := not Fm_state[17];
+  Fptr_Fm_state[1] := not Fptr_Fm_state[1];
+  Fptr_Fm_state[2] := not Fptr_Fm_state[2];
+  Fptr_Fm_state[8] := not Fptr_Fm_state[8];
+  Fptr_Fm_state[12] := not Fptr_Fm_state[12];
+  Fptr_Fm_state[17] := not Fptr_Fm_state[17];
 
 end;
 
@@ -128,8 +143,8 @@ var
 begin
   tempResult := TConverters.ConvertUInt64ToBytes(Fm_state);
 
-  System.SetLength(result, HashSize);
-  System.Move(tempResult[0], result[0], HashSize * System.SizeOf(Byte));
+  System.SetLength(result, FHashSize);
+  System.Move(tempResult[0], result[0], FHashSize * System.SizeOf(Byte));
 end;
 
 procedure TSHA3.Initialize;
@@ -138,18 +153,19 @@ begin
   System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt64),
     UInt64(0));
 
-  Fm_state[1] := System.High(UInt64);
-  Fm_state[2] := System.High(UInt64);
-  Fm_state[8] := System.High(UInt64);
-  Fm_state[12] := System.High(UInt64);
-  Fm_state[17] := System.High(UInt64);
-  Fm_state[20] := System.High(UInt64);
+  Fptr_Fm_state[1] := System.High(UInt64);
+  Fptr_Fm_state[2] := System.High(UInt64);
+  Fptr_Fm_state[8] := System.High(UInt64);
+  Fptr_Fm_state[12] := System.High(UInt64);
+  Fptr_Fm_state[17] := System.High(UInt64);
+  Fptr_Fm_state[20] := System.High(UInt64);
 
   Inherited Initialize();
 
 end;
 
-procedure TSHA3.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TSHA3.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   Aba, Abe, Abi, Abo, Abu, Aga, Age, Agi, Ago, Agu, Aka, Ake, Aki, Ako, Aku,
     Ama, Ame, Ami, Amo, Amu, Asa, Ase, Asi, Aso, Asu, Bba, Bbe, Bbi, Bbo, Bbu,
@@ -158,42 +174,47 @@ var
     Ebi, Ebo, Ebu, Ega, Ege, Egi, Ego, Egu, Eka, Eke, Eki, Eko, Eku, Ema, Eme,
     Emi, Emo, Emu, Esa, Ese, Esi, Eso, Esu: UInt64;
   data: THashLibUInt64Array;
+  ptr_data: PUInt64;
   j: Int32;
 begin
-  data := TConverters.ConvertBytesToUInt64(a_data, a_index, BlockSize);
+  data := TConverters.ConvertBytesToUInt64(a_data, a_data_length, a_index,
+    FBlockSize);
+
+  ptr_data := PUInt64(data);
   j := 0;
+
   // while j < (BlockSize div 8) do
-  while j < (BlockSize shr 3) do
+  while j < (FBlockSize shr 3) do
   begin
-    Fm_state[j] := Fm_state[j] xor data[j];
+    Fptr_Fm_state[j] := Fptr_Fm_state[j] xor ptr_data[j];
     System.Inc(j);
   end;
 
-  Aba := Fm_state[0];
-  Abe := Fm_state[1];
-  Abi := Fm_state[2];
-  Abo := Fm_state[3];
-  Abu := Fm_state[4];
-  Aga := Fm_state[5];
-  Age := Fm_state[6];
-  Agi := Fm_state[7];
-  Ago := Fm_state[8];
-  Agu := Fm_state[9];
-  Aka := Fm_state[10];
-  Ake := Fm_state[11];
-  Aki := Fm_state[12];
-  Ako := Fm_state[13];
-  Aku := Fm_state[14];
-  Ama := Fm_state[15];
-  Ame := Fm_state[16];
-  Ami := Fm_state[17];
-  Amo := Fm_state[18];
-  Amu := Fm_state[19];
-  Asa := Fm_state[20];
-  Ase := Fm_state[21];
-  Asi := Fm_state[22];
-  Aso := Fm_state[23];
-  Asu := Fm_state[24];
+  Aba := Fptr_Fm_state[0];
+  Abe := Fptr_Fm_state[1];
+  Abi := Fptr_Fm_state[2];
+  Abo := Fptr_Fm_state[3];
+  Abu := Fptr_Fm_state[4];
+  Aga := Fptr_Fm_state[5];
+  Age := Fptr_Fm_state[6];
+  Agi := Fptr_Fm_state[7];
+  Ago := Fptr_Fm_state[8];
+  Agu := Fptr_Fm_state[9];
+  Aka := Fptr_Fm_state[10];
+  Ake := Fptr_Fm_state[11];
+  Aki := Fptr_Fm_state[12];
+  Ako := Fptr_Fm_state[13];
+  Aku := Fptr_Fm_state[14];
+  Ama := Fptr_Fm_state[15];
+  Ame := Fptr_Fm_state[16];
+  Ami := Fptr_Fm_state[17];
+  Amo := Fptr_Fm_state[18];
+  Amu := Fptr_Fm_state[19];
+  Asa := Fptr_Fm_state[20];
+  Ase := Fptr_Fm_state[21];
+  Asi := Fptr_Fm_state[22];
+  Aso := Fptr_Fm_state[23];
+  Asu := Fptr_Fm_state[24];
 
   Ca := Aba xor Aga xor Aka xor Ama xor Asa;
   Ce := Abe xor Age xor Ake xor Ame xor Ase;
@@ -216,7 +237,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[0];
+  // Eba := Eba xor RC[0];
+  Eba := Eba xor $0000000000000001;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -322,7 +344,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[1];
+  // Aba := Aba xor RC[1];
+  Aba := Aba xor $0000000000008082;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -428,7 +451,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[2];
+  // Eba := Eba xor RC[2];
+  Eba := Eba xor $800000000000808A;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -534,7 +558,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[3];
+  // Aba := Aba xor RC[3];
+  Aba := Aba xor $8000000080008000;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -640,7 +665,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[4];
+  // Eba := Eba xor RC[4];
+  Eba := Eba xor $000000000000808B;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -746,7 +772,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[5];
+  // Aba := Aba xor RC[5];
+  Aba := Aba xor $0000000080000001;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -852,7 +879,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[6];
+  // Eba := Eba xor RC[6];
+  Eba := Eba xor $8000000080008081;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -958,7 +986,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[7];
+  // Aba := Aba xor RC[7];
+  Aba := Aba xor $8000000000008009;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -1064,7 +1093,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[8];
+  // Eba := Eba xor RC[8];
+  Eba := Eba xor $000000000000008A;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -1170,7 +1200,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[9];
+  // Aba := Aba xor RC[9];
+  Aba := Aba xor $0000000000000088;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -1276,7 +1307,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[10];
+  // Eba := Eba xor RC[10];
+  Eba := Eba xor $0000000080008009;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -1382,7 +1414,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[11];
+  // Aba := Aba xor RC[11];
+  Aba := Aba xor $000000008000000A;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -1488,7 +1521,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[12];
+  // Eba := Eba xor RC[12];
+  Eba := Eba xor $000000008000808B;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -1594,7 +1628,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[13];
+  // Aba := Aba xor RC[13];
+  Aba := Aba xor $800000000000008B;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -1700,7 +1735,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[14];
+  // Eba := Eba xor RC[14];
+  Eba := Eba xor $8000000000008089;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -1806,7 +1842,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[15];
+  // Aba := Aba xor RC[15];
+  Aba := Aba xor $8000000000008003;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -1912,7 +1949,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[16];
+  // Eba := Eba xor RC[16];
+  Eba := Eba xor $8000000000008002;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -2018,7 +2056,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[17];
+  // Aba := Aba xor RC[17];
+  Aba := Aba xor $8000000000000080;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -2124,7 +2163,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[18];
+  // Eba := Eba xor RC[18];
+  Eba := Eba xor $000000000000800A;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -2230,7 +2270,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[19];
+  // Aba := Aba xor RC[19];
+  Aba := Aba xor $800000008000000A;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -2336,7 +2377,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[20];
+  // Eba := Eba xor RC[20];
+  Eba := Eba xor $8000000080008081;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -2442,7 +2484,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[21];
+  // Aba := Aba xor RC[21];
+  Aba := Aba xor $8000000000008080;
   Ca := Aba;
   Abe := Bbe xor (not Bbi or Bbo);
   Ce := Abe;
@@ -2548,7 +2591,8 @@ begin
   Asu := Asu xor Du;
   Bbu := TBits.RotateLeft64(Asu, 14);
   Eba := Bba xor (Bbe or Bbi);
-  Eba := Eba xor RC[22];
+  // Eba := Eba xor RC[22];
+  Eba := Eba xor $0000000080000001;
   Ca := Eba;
   Ebe := Bbe xor (not Bbi or Bbo);
   Ce := Ebe;
@@ -2654,7 +2698,8 @@ begin
   Esu := Esu xor Du;
   Bbu := TBits.RotateLeft64(Esu, 14);
   Aba := Bba xor (Bbe or Bbi);
-  Aba := Aba xor RC[23];
+  // Aba := Aba xor RC[23];
+  Aba := Aba xor $8000000080008008;
   Abe := Bbe xor (not Bbi or Bbo);
   Abi := Bbi xor (Bbo and Bbu);
   Abo := Bbo xor (Bbu or Bba);
@@ -2720,31 +2765,31 @@ begin
   Aso := Bso xor (Bsu or Bsa);
   Asu := Bsu xor (Bsa and Bse);
 
-  Fm_state[0] := Aba;
-  Fm_state[1] := Abe;
-  Fm_state[2] := Abi;
-  Fm_state[3] := Abo;
-  Fm_state[4] := Abu;
-  Fm_state[5] := Aga;
-  Fm_state[6] := Age;
-  Fm_state[7] := Agi;
-  Fm_state[8] := Ago;
-  Fm_state[9] := Agu;
-  Fm_state[10] := Aka;
-  Fm_state[11] := Ake;
-  Fm_state[12] := Aki;
-  Fm_state[13] := Ako;
-  Fm_state[14] := Aku;
-  Fm_state[15] := Ama;
-  Fm_state[16] := Ame;
-  Fm_state[17] := Ami;
-  Fm_state[18] := Amo;
-  Fm_state[19] := Amu;
-  Fm_state[20] := Asa;
-  Fm_state[21] := Ase;
-  Fm_state[22] := Asi;
-  Fm_state[23] := Aso;
-  Fm_state[24] := Asu;
+  Fptr_Fm_state[0] := Aba;
+  Fptr_Fm_state[1] := Abe;
+  Fptr_Fm_state[2] := Abi;
+  Fptr_Fm_state[3] := Abo;
+  Fptr_Fm_state[4] := Abu;
+  Fptr_Fm_state[5] := Aga;
+  Fptr_Fm_state[6] := Age;
+  Fptr_Fm_state[7] := Agi;
+  Fptr_Fm_state[8] := Ago;
+  Fptr_Fm_state[9] := Agu;
+  Fptr_Fm_state[10] := Aka;
+  Fptr_Fm_state[11] := Ake;
+  Fptr_Fm_state[12] := Aki;
+  Fptr_Fm_state[13] := Ako;
+  Fptr_Fm_state[14] := Aku;
+  Fptr_Fm_state[15] := Ama;
+  Fptr_Fm_state[16] := Ame;
+  Fptr_Fm_state[17] := Ami;
+  Fptr_Fm_state[18] := Amo;
+  Fptr_Fm_state[19] := Amu;
+  Fptr_Fm_state[20] := Asa;
+  Fptr_Fm_state[21] := Ase;
+  Fptr_Fm_state[22] := Asi;
+  Fptr_Fm_state[23] := Aso;
+  Fptr_Fm_state[24] := Asu;
 
 end;
 

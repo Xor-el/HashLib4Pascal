@@ -45,12 +45,12 @@ type
     PRIME64_5 = UInt64(2870177450012600261);
 {$ENDIF FPC}
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   type
 
-    TXXH_State = Record
+    TXXH_State = record
 
     private
 

@@ -37,12 +37,12 @@ type
     PRIME32_5 = UInt32(374761393);
 
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   type
 
-    TXXH_State = Record
+    TXXH_State = record
 
     private
 

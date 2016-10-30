@@ -23,8 +23,8 @@ type
     /// <param name="Dest">Pointer to Destination Array.</param>
     /// <param name="Size">Size of the Array to Reverse.</param>
 
-    class procedure ReverseByteArray(Source, Dest: Pointer; Size: Int64);
-      static; inline;
+    class procedure ReverseByteArray(Source, Dest: Pointer;
+      Size: Int64); static;
 
     /// <summary>
     /// Calculates Arithmetic shift right.

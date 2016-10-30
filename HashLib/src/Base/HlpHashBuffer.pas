@@ -10,32 +10,32 @@ uses
 {$ELSE}
   SysUtils,
 {$ENDIF HAS_UNITSCOPE}
-  HlpHashLibTypes,
-  HlpIHashBuffer;
+  HlpHashLibTypes;
 
 type
-  THashBuffer = class sealed(TInterfacedObject, IHashBuffer)
+  THashBuffer = record
 
   strict private
 
     Fm_data: THashLibByteArray;
     Fm_pos: Int32;
 
-    function GetIsEmpty: Boolean;
-    function GetIsFull: Boolean;
-    function GetPos: Int32;
-    function GetLength: Int32;
+    function GetIsEmpty: Boolean; inline;
+    function GetIsFull: Boolean; inline;
+    function GetPos: Int32; inline;
+    function GetLength: Int32; inline;
 
   public
     constructor Create(a_length: Int32);
     procedure Initialize();
-    function GetBytes(): THashLibByteArray;
-    function GetBytesZeroPadded(): THashLibByteArray;
-    function Feed(a_data: THashLibByteArray; var a_start_index: Int32;
-      var a_length: Int32; var a_processed_bytes: UInt64): Boolean; overload;
-    function Feed(a_data: THashLibByteArray; a_length: Int32): Boolean;
-      overload;
-    function ToString(): String; override;
+    function GetBytes(): THashLibByteArray; inline;
+    function GetBytesZeroPadded(): THashLibByteArray; inline;
+    function Feed(a_data: PByte; a_length_a_data: Int32;
+      var a_start_index: Int32; var a_length: Int32;
+      var a_processed_bytes: UInt64): Boolean; overload;
+    function Feed(a_data: PByte; a_length_a_data: Int32; a_length: Int32)
+      : Boolean; overload;
+    function ToString(): String;
 
     property IsEmpty: Boolean read GetIsEmpty;
     property IsFull: Boolean read GetIsFull;
@@ -57,16 +57,17 @@ begin
 
 end;
 
-function THashBuffer.Feed(a_data: THashLibByteArray; a_length: Int32): Boolean;
+function THashBuffer.Feed(a_data: PByte; a_length_a_data: Int32;
+  a_length: Int32): Boolean;
 var
   &Length: Int32;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_length >= 0);
-  System.Assert(a_length <= System.Length(a_data));
+  System.Assert(a_length <= a_length_a_data);
   System.Assert(not IsFull);
 {$ENDIF}
-  if (System.Length(a_data) = 0) then
+  if (a_length_a_data = 0) then
   begin
     result := false;
     Exit;
@@ -90,7 +91,7 @@ begin
   result := IsFull;
 end;
 
-function THashBuffer.Feed(a_data: THashLibByteArray;
+function THashBuffer.Feed(a_data: PByte; a_length_a_data: Int32;
   var a_start_index, a_length: Int32; var a_processed_bytes: UInt64): Boolean;
 var
   &Length: Int32;
@@ -98,10 +99,10 @@ begin
 {$IFDEF DEBUG}
   System.Assert(a_start_index >= 0);
   System.Assert(a_length >= 0);
-  System.Assert((a_start_index + a_length) <= System.Length(a_data));
+  System.Assert((a_start_index + a_length) <= a_length_a_data);
   System.Assert(not IsFull);
 {$ENDIF}
-  if (System.Length(a_data) = 0) then
+  if (a_length_a_data = 0) then
   begin
     result := false;
     Exit;
@@ -170,6 +171,7 @@ end;
 procedure THashBuffer.Initialize;
 begin
   Fm_pos := 0;
+  System.FillChar(Fm_data[0], System.Length(Fm_data) * System.SizeOf(Byte), 0);
 end;
 
 function THashBuffer.ToString: String;

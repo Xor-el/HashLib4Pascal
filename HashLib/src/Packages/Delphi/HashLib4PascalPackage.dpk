@@ -114,7 +114,6 @@ contains
   HlpMurmurHash3_x86_128 in '..\..\Hash128\HlpMurmurHash3_x86_128.pas',
   HlpMurmurHash3_x64_128 in '..\..\Hash128\HlpMurmurHash3_x64_128.pas',
   HlpIHash in '..\..\Interfaces\HlpIHash.pas',
-  HlpIHashBuffer in '..\..\Interfaces\HlpIHashBuffer.pas',
   HlpIHashInfo in '..\..\Interfaces\HlpIHashInfo.pas',
   HlpIHashResult in '..\..\Interfaces\HlpIHashResult.pas',
   HlpIKDF in '..\..\Interfaces\HlpIKDF.pas',

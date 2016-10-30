@@ -11,6 +11,7 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpHashLibTypes,
+  HlpHashBuffer,
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -42,12 +43,12 @@ type
 
 {$ENDREGION}
     function GetKeyLength(): TNullableInteger;
-    function GetKey: THashLibByteArray;
-    procedure SetKey(value: THashLibByteArray);
+    function GetKey: THashLibByteArray; inline;
+    procedure SetKey(value: THashLibByteArray); inline;
 
   strict protected
 
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
@@ -240,7 +241,8 @@ begin
   end;
 end;
 
-procedure TSipHash2_4.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TSipHash2_4.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   m: UInt64;
 begin

@@ -19,6 +19,7 @@ uses
   HlpBitConverter,
 {$ENDIF DELPHI}
   HlpHashLibTypes,
+  HlpHashBuffer,
   HlpConverters,
   HlpHashRounds,
   HlpIHashInfo,
@@ -393,12 +394,13 @@ type
 {$ENDREGION}
   strict protected
     Fm_hash: THashLibUInt64Array;
+    Fptr_Fm_hash: PUInt64;
 
     constructor Create(a_hash_size: Int32; a_rounds: THashRounds);
 
     function GetResult(): THashLibByteArray; override;
     procedure Finish(); override;
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -455,6 +457,7 @@ constructor TTiger.Create(a_hash_size: Int32; a_rounds: THashRounds);
 begin
   Inherited Create(a_hash_size, 64);
   System.SetLength(Fm_hash, 3);
+  Fptr_Fm_hash := PUInt64(Fm_hash);
   Fm_rounds := Int32(a_rounds);
 end;
 
@@ -494,23 +497,24 @@ end;
 procedure TTiger.Initialize;
 begin
 
-  Fm_hash[0] := $0123456789ABCDEF;
-  Fm_hash[1] := $FEDCBA9876543210;
-  Fm_hash[2] := $F096A5B4C3B2E187;
+  Fptr_Fm_hash[0] := $0123456789ABCDEF;
+  Fptr_Fm_hash[1] := $FEDCBA9876543210;
+  Fptr_Fm_hash[2] := $F096A5B4C3B2E187;
 
   Inherited Initialize();
 
 end;
 
-procedure TTiger.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TTiger.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   data0, data1, data2, data3, data4, data5, data6, data7, a, b, c,
     temp_a: UInt64;
   rounds: Int32;
 begin
-  a := Fm_hash[0];
-  b := Fm_hash[1];
-  c := Fm_hash[2];
+  a := Fptr_Fm_hash[0];
+  b := Fptr_Fm_hash[1];
+  c := Fptr_Fm_hash[2];
 
   data0 := TConverters.ConvertBytesToUInt64a2(a_data, a_index + 8 * 0);
   data1 := TConverters.ConvertBytesToUInt64a2(a_data, a_index + 8 * 1);
@@ -808,9 +812,9 @@ begin
     System.Inc(rounds);
   end;
 
-  Fm_hash[0] := Fm_hash[0] xor a;
-  Fm_hash[1] := b - Fm_hash[1];
-  Fm_hash[2] := Fm_hash[2] + c;
+  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] xor a;
+  Fptr_Fm_hash[1] := b - Fptr_Fm_hash[1];
+  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + c;
 
 end;
 

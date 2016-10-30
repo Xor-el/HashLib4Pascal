@@ -8,7 +8,6 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-  HlpHashLibTypes,
   HlpMDBase,
 {$IFDEF DELPHI}
   HlpBitConverter,
@@ -21,7 +20,7 @@ type
   TRIPEMD320 = class sealed(TMDBase, ITransformBlock)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -41,23 +40,25 @@ end;
 
 procedure TRIPEMD320.Initialize;
 begin
-  Fm_state[4] := $C3D2E1F0;
-  Fm_state[5] := $76543210;
-  Fm_state[6] := $FEDCBA98;
-  Fm_state[7] := $89ABCDEF;
-  Fm_state[8] := $01234567;
-  Fm_state[9] := $3C2D1E0F;
+  Fptr_Fm_state[4] := $C3D2E1F0;
+  Fptr_Fm_state[5] := $76543210;
+  Fptr_Fm_state[6] := $FEDCBA98;
+  Fptr_Fm_state[7] := $89ABCDEF;
+  Fptr_Fm_state[8] := $01234567;
+  Fptr_Fm_state[9] := $3C2D1E0F;
 
   Inherited Initialize();
 
 end;
 
-procedure TRIPEMD320.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TRIPEMD320.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
     data11, data12, data13, data14, data15, a, b, c, d, e, aa, bb, cc, dd,
     ee: UInt32;
 begin
+
   data0 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 0);
   data1 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 1);
   data2 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 2);
@@ -75,16 +76,16 @@ begin
   data14 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 14);
   data15 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 15);
 
-  a := Fm_state[0];
-  b := Fm_state[1];
-  c := Fm_state[2];
-  d := Fm_state[3];
-  e := Fm_state[4];
-  aa := Fm_state[5];
-  bb := Fm_state[6];
-  cc := Fm_state[7];
-  dd := Fm_state[8];
-  ee := Fm_state[9];
+  a := Fptr_Fm_state[0];
+  b := Fptr_Fm_state[1];
+  c := Fptr_Fm_state[2];
+  d := Fptr_Fm_state[3];
+  e := Fptr_Fm_state[4];
+  aa := Fptr_Fm_state[5];
+  bb := Fptr_Fm_state[6];
+  cc := Fptr_Fm_state[7];
+  dd := Fptr_Fm_state[8];
+  ee := Fptr_Fm_state[9];
 
   a := a + (data0 + (b xor c xor d));
   a := TBits.RotateLeft32(a, 11) + e;
@@ -576,16 +577,16 @@ begin
   b := TBits.RotateLeft32(b, 11) + a;
   d := TBits.RotateLeft32(d, 10);
 
-  Fm_state[0] := Fm_state[0] + aa;
-  Fm_state[1] := Fm_state[1] + bb;
-  Fm_state[2] := Fm_state[2] + cc;
-  Fm_state[3] := Fm_state[3] + dd;
-  Fm_state[4] := Fm_state[4] + ee;
-  Fm_state[5] := Fm_state[5] + a;
-  Fm_state[6] := Fm_state[6] + b;
-  Fm_state[7] := Fm_state[7] + c;
-  Fm_state[8] := Fm_state[8] + d;
-  Fm_state[9] := Fm_state[9] + e;
+  Fptr_Fm_state[0] := Fptr_Fm_state[0] + aa;
+  Fptr_Fm_state[1] := Fptr_Fm_state[1] + bb;
+  Fptr_Fm_state[2] := Fptr_Fm_state[2] + cc;
+  Fptr_Fm_state[3] := Fptr_Fm_state[3] + dd;
+  Fptr_Fm_state[4] := Fptr_Fm_state[4] + ee;
+  Fptr_Fm_state[5] := Fptr_Fm_state[5] + a;
+  Fptr_Fm_state[6] := Fptr_Fm_state[6] + b;
+  Fptr_Fm_state[7] := Fptr_Fm_state[7] + c;
+  Fptr_Fm_state[8] := Fptr_Fm_state[8] + d;
+  Fptr_Fm_state[9] := Fptr_Fm_state[9] + e;
 
 end;
 

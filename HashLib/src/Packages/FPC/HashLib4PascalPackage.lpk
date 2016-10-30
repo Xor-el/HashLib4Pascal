@@ -22,8 +22,8 @@
     <Description Value="HashLib4Pascal is a Delphi/FPC compatible library that provides an easy to use interface for computing hashes and checksums of strings (with a specified encoding), files, streams, byte arrays and untyped data to mention but a few.
 "/>
     <License Value="MIT License"/>
-    <Version Major="1"/>
-    <Files Count="89">
+    <Version Major="1" Minor="1"/>
+    <Files Count="88">
       <Item1>
         <Filename Value="..\..\Base\HlpConverters.pas"/>
         <UnitName Value="HlpConverters"/>
@@ -333,53 +333,49 @@
         <UnitName Value="HlpIHash"/>
       </Item77>
       <Item78>
-        <Filename Value="..\..\Interfaces\HlpIHashBuffer.pas"/>
-        <UnitName Value="HlpIHashBuffer"/>
-      </Item78>
-      <Item79>
         <Filename Value="..\..\Interfaces\HlpIHashInfo.pas"/>
         <UnitName Value="HlpIHashInfo"/>
-      </Item79>
-      <Item80>
+      </Item78>
+      <Item79>
         <Filename Value="..\..\Interfaces\HlpIHashResult.pas"/>
         <UnitName Value="HlpIHashResult"/>
-      </Item80>
-      <Item81>
+      </Item79>
+      <Item80>
         <Filename Value="..\..\Nullable\HlpNullable.pas"/>
         <UnitName Value="HlpNullable"/>
-      </Item81>
-      <Item82>
+      </Item80>
+      <Item81>
         <Filename Value="..\..\Utils\HlpBitConverter.pas"/>
         <UnitName Value="HlpBitConverter"/>
-      </Item82>
-      <Item83>
+      </Item81>
+      <Item82>
         <Filename Value="..\..\Utils\HlpBits.pas"/>
         <UnitName Value="HlpBits"/>
-      </Item83>
-      <Item84>
+      </Item82>
+      <Item83>
         <Filename Value="..\..\Utils\HlpHashLibTypes.pas"/>
         <UnitName Value="HlpHashLibTypes"/>
-      </Item84>
-      <Item85>
+      </Item83>
+      <Item84>
         <Filename Value="..\..\Hash128\HlpMurmurHash3_x86_128.pas"/>
         <UnitName Value="HlpMurmurHash3_x86_128"/>
-      </Item85>
-      <Item86>
+      </Item84>
+      <Item85>
         <Filename Value="..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas"/>
         <UnitName Value="HlpPBKDF2_HMACNotBuildInAdapter"/>
-      </Item86>
-      <Item87>
+      </Item85>
+      <Item86>
         <Filename Value="..\..\Interfaces\HlpIKDF.pas"/>
         <UnitName Value="HlpIKDF"/>
-      </Item87>
-      <Item88>
+      </Item86>
+      <Item87>
         <Filename Value="..\..\Base\HlpKDF.pas"/>
         <UnitName Value="HlpKDF"/>
-      </Item88>
-      <Item89>
+      </Item87>
+      <Item88>
         <Filename Value="..\..\Interfaces\HlpICRC.pas"/>
         <UnitName Value="HlpICRC"/>
-      </Item89>
+      </Item88>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">

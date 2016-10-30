@@ -8,7 +8,6 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-  HlpHashLibTypes,
   HlpMDBase,
 {$IFDEF DELPHI}
   HlpBitConverter,
@@ -21,7 +20,7 @@ type
   TRIPEMD160 = class sealed(TMDBase, ITransformBlock)
 
   strict protected
-    procedure TransformBlock(a_data: THashLibByteArray;
+    procedure TransformBlock(a_data: PByte; a_data_length: Int32;
       a_index: Int32); override;
 
   public
@@ -41,18 +40,20 @@ end;
 
 procedure TRIPEMD160.Initialize;
 begin
-  Fm_state[4] := $C3D2E1F0;
+  Fptr_Fm_state[4] := $C3D2E1F0;
 
   Inherited Initialize();
 
 end;
 
-procedure TRIPEMD160.TransformBlock(a_data: THashLibByteArray; a_index: Int32);
+procedure TRIPEMD160.TransformBlock(a_data: PByte; a_data_length: Int32;
+  a_index: Int32);
 var
   data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
     data11, data12, data13, data14, data15, a, b, c, d, e, aa, bb, cc, dd,
     ee: UInt32;
 begin
+
   data0 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 0);
   data1 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 1);
   data2 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 2);
@@ -70,11 +71,11 @@ begin
   data14 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 14);
   data15 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 15);
 
-  a := Fm_state[0];
-  b := Fm_state[1];
-  c := Fm_state[2];
-  d := Fm_state[3];
-  e := Fm_state[4];
+  a := Fptr_Fm_state[0];
+  b := Fptr_Fm_state[1];
+  c := Fptr_Fm_state[2];
+  d := Fptr_Fm_state[3];
+  e := Fptr_Fm_state[4];
   aa := a;
   bb := b;
   cc := c;
@@ -571,12 +572,12 @@ begin
   bb := TBits.RotateLeft32(bb, 11) + aa;
   dd := TBits.RotateLeft32(dd, 10);
 
-  dd := dd + c + Fm_state[1];
-  Fm_state[1] := Fm_state[2] + d + ee;
-  Fm_state[2] := Fm_state[3] + e + aa;
-  Fm_state[3] := Fm_state[4] + a + bb;
-  Fm_state[4] := Fm_state[0] + b + cc;
-  Fm_state[0] := dd;
+  dd := dd + c + Fptr_Fm_state[1];
+  Fptr_Fm_state[1] := Fptr_Fm_state[2] + d + ee;
+  Fptr_Fm_state[2] := Fptr_Fm_state[3] + e + aa;
+  Fptr_Fm_state[3] := Fptr_Fm_state[4] + a + bb;
+  Fptr_Fm_state[4] := Fptr_Fm_state[0] + b + cc;
+  Fptr_Fm_state[0] := dd;
 
 end;
 
