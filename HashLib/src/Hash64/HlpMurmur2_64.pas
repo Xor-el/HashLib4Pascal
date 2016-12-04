@@ -16,6 +16,9 @@ uses
   HlpMultipleTransformNonBlock,
   HlpNullable;
 
+resourcestring
+  SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
+
 type
 
   TMurmur2_64 = class sealed(TMultipleTransformNonBlock, IHash64, IHashWithKey,
@@ -61,10 +64,12 @@ function TMurmur2_64.ComputeAggregatedBytes(a_data: THashLibByteArray)
   : IHashResult;
 var
   &length, current_index: Int32;
-  h, k, u1, u2, u3, u4, u5, u6, u7, u8: UInt64;
+  h, k: UInt64;
+  ptr_a_data: PByte;
 begin
 
   length := System.length(a_data);
+  ptr_a_data := PByte(a_data);
 
   if (length = 0) then
   begin
@@ -77,31 +82,8 @@ begin
 
   while (length >= 8) do
   begin
-    u1 := UInt64(a_data[current_index]);
-    System.Inc(current_index);
 
-    u2 := UInt64(a_data[current_index]) shl 8;
-    System.Inc(current_index);
-
-    u3 := UInt64(a_data[current_index]) shl 16;
-    System.Inc(current_index);
-
-    u4 := UInt64(a_data[current_index]) shl 24;
-    System.Inc(current_index);
-
-    u5 := UInt64(a_data[current_index]) shl 32;
-    System.Inc(current_index);
-
-    u6 := UInt64(a_data[current_index]) shl 40;
-    System.Inc(current_index);
-
-    u7 := UInt64(a_data[current_index]) shl 48;
-    System.Inc(current_index);
-
-    u8 := UInt64(a_data[current_index]) shl 56;
-    System.Inc(current_index);
-
-    k := u1 or u2 or u3 or u4 or u5 or u6 or u7 or u8;
+    k := TConverters.ReadBytesAsUInt64LE(ptr_a_data, current_index);
 
     k := k * M;
     k := k xor (k shr R);
@@ -110,6 +92,7 @@ begin
     h := h xor k;
     h := h * M;
 
+    System.Inc(current_index, 8);
     System.Dec(length, 8);
 
   end;
@@ -117,126 +100,117 @@ begin
   case length of
     7:
       begin
-        u1 := UInt64(a_data[current_index]) shl 48;
+
+        h := h xor ((UInt64(a_data[current_index]) shl 48));
         System.Inc(current_index);
 
-        u2 := UInt64(a_data[current_index]) shl 40;
+        h := h xor (UInt64(a_data[current_index]) shl 40);
         System.Inc(current_index);
 
-        u3 := UInt64(a_data[current_index]) shl 32;
+        h := h xor (UInt64(a_data[current_index]) shl 32);
         System.Inc(current_index);
 
-        u4 := UInt64(a_data[current_index]) shl 24;
+        h := h xor (UInt64(a_data[current_index]) shl 24);
         System.Inc(current_index);
 
-        u5 := UInt64(a_data[current_index]) shl 16;
+        h := h xor (UInt64(a_data[current_index]) shl 16);
         System.Inc(current_index);
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
+        h := h xor UInt64(a_data[current_index]);
 
-        h := h xor (u1 or u2 or u3 or u4 or u5 or u6 or u7);
         h := h * M;
       end;
 
     6:
       begin
 
-        u2 := UInt64(a_data[current_index]) shl 40;
+        h := h xor (UInt64(a_data[current_index]) shl 40);
         System.Inc(current_index);
 
-        u3 := UInt64(a_data[current_index]) shl 32;
+        h := h xor (UInt64(a_data[current_index]) shl 32);
         System.Inc(current_index);
 
-        u4 := UInt64(a_data[current_index]) shl 24;
+        h := h xor (UInt64(a_data[current_index]) shl 24);
         System.Inc(current_index);
 
-        u5 := UInt64(a_data[current_index]) shl 16;
+        h := h xor (UInt64(a_data[current_index]) shl 16);
         System.Inc(current_index);
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
+        h := h xor UInt64(a_data[current_index]);
 
-        h := h xor (u2 or u3 or u4 or u5 or u6 or u7);
         h := h * M;
       end;
 
     5:
       begin
 
-        u3 := UInt64(a_data[current_index]) shl 32;
+        h := h xor (UInt64(a_data[current_index]) shl 32);
         System.Inc(current_index);
 
-        u4 := UInt64(a_data[current_index]) shl 24;
+        h := h xor (UInt64(a_data[current_index]) shl 24);
         System.Inc(current_index);
 
-        u5 := UInt64(a_data[current_index]) shl 16;
+        h := h xor (UInt64(a_data[current_index]) shl 16);
         System.Inc(current_index);
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
-
-        h := h xor (u3 or u4 or u5 or u6 or u7);
+        h := h xor UInt64(a_data[current_index]);
         h := h * M;
       end;
 
     4:
       begin
 
-        u4 := UInt64(a_data[current_index]) shl 24;
+        h := h xor (UInt64(a_data[current_index]) shl 24);
         System.Inc(current_index);
 
-        u5 := UInt64(a_data[current_index]) shl 16;
+        h := h xor (UInt64(a_data[current_index]) shl 16);
         System.Inc(current_index);
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
-
-        h := h xor (u4 or u5 or u6 or u7);
+        h := h xor UInt64(a_data[current_index]);
         h := h * M;
       end;
 
     3:
       begin
 
-        u5 := UInt64(a_data[current_index]) shl 16;
+        h := h xor (UInt64(a_data[current_index]) shl 16);
         System.Inc(current_index);
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
-
-        h := h xor (u5 or u6 or u7);
+        h := h xor UInt64(a_data[current_index]);
         h := h * M;
       end;
 
     2:
       begin
 
-        u6 := UInt64(a_data[current_index]) shl 8;
+        h := h xor (UInt64(a_data[current_index]) shl 8);
         System.Inc(current_index);
 
-        u7 := UInt64(a_data[current_index]);
+        h := h xor UInt64(a_data[current_index]);
 
-        h := h xor (u6 or u7);
         h := h * M;
       end;
 
     1:
       begin
 
-        u7 := UInt64(a_data[current_index]);
+        h := h xor UInt64(a_data[current_index]);
 
-        h := h xor (u7);
         h := h * M;
       end;
 
@@ -259,7 +233,7 @@ end;
 
 function TMurmur2_64.GetKey: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytes(Fm_key);
+  result := TConverters.ReadUInt32AsBytesLE(Fm_key);
 end;
 
 function TMurmur2_64.GetKeyLength: TNullableInteger;
@@ -283,10 +257,10 @@ begin
   end
   else
   begin
-{$IFDEF DEBUG}
-    System.Assert(System.length(value) = KeyLength.value);
-{$ENDIF}
-    Fm_key := TConverters.ConvertBytesToUInt32a2(value);
+    if System.length(value) <> KeyLength.value then
+      raise EArgumentException.CreateResFmt(@SInvalidKeyLength,
+        [KeyLength.value]);
+    Fm_key := TConverters.ReadBytesAsUInt32LE(PByte(value), 0);
   end;
 
 end;

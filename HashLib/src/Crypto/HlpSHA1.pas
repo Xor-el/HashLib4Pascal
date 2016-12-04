@@ -34,16 +34,13 @@ end;
 
 procedure TSHA1.Expand(a_data: PCardinal);
 var
-  // i: Int32;
+{$IFNDEF USE_UNROLLED_VARIANT}
+  i: Int32;
+{$ENDIF USE_UNROLLED_VARIANT}
   T: UInt32;
 begin
 
-  { for i := 16 to 79 do
-    begin
-    T := a_data[i - 3] xor a_data[i - 8] xor a_data[i - 14] xor a_data[i - 16];
-    a_data[i] := TBits.RotateLeft32(T, 1);
-    end; }
-
+{$IFDEF USE_UNROLLED_VARIANT}
   T := a_data[16 - 3] xor a_data[16 - 8] xor a_data[16 - 14] xor a_data
     [16 - 16];
   a_data[16] := TBits.RotateLeft32(T, 1);
@@ -237,6 +234,13 @@ begin
     [79 - 16];
   a_data[79] := TBits.RotateLeft32(T, 1);
 
+{$ELSE}
+  for i := 16 to 79 do
+  begin
+    T := a_data[i - 3] xor a_data[i - 8] xor a_data[i - 14] xor a_data[i - 16];
+    a_data[i] := TBits.RotateLeft32(T, 1);
+  end;
+{$ENDIF USE_UNROLLED_VARIANT}
 end;
 
 end.

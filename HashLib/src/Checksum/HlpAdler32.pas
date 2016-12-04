@@ -45,13 +45,13 @@ procedure TAdler32.Initialize;
 begin
   Fm_a := 1;
   Fm_b := 0;
-
 end;
 
 procedure TAdler32.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
 var
-  i: Int32;
+  i, n: Int32;
+
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
@@ -59,13 +59,41 @@ begin
   System.Assert(a_index + a_length <= System.Length(a_data));
 {$ENDIF DEBUG}
   i := a_index;
-  while a_length > 0 do
-  begin
+
+  { while a_length > 0 do
+    begin
     Fm_a := (Fm_a + a_data[i]) mod MOD_ADLER;
     Fm_b := (Fm_b + Fm_a) mod MOD_ADLER;
     System.Inc(i);
     System.Dec(a_length);
+    end; }
+
+  // lifted from PngEncoder Adler32.cs
+
+  while a_length > 0 do
+  begin
+    // We can defer the modulo operation:
+    // Fm_a maximally grows from 65521 to 65521 + 255 * 3800
+    // Fm_b maximally grows by3800 * median(Fm_a) = 2090079800 < 2^31
+    n := 3800;
+    if (n > a_length) then
+    begin
+      n := a_length;
+    end;
+    a_length := a_length - n;
+
+    while (n - 1) >= 0 do
+    begin
+      Fm_a := (Fm_a + a_data[i]);
+      Fm_b := (Fm_b + Fm_a);
+      System.Inc(i);
+      System.Dec(n);
+    end;
+    Fm_a := Fm_a mod MOD_ADLER;
+    Fm_b := Fm_b mod MOD_ADLER;
+
   end;
+
 end;
 
 function TAdler32.TransformFinal: IHashResult;

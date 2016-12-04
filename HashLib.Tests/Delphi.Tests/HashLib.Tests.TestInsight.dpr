@@ -92,7 +92,7 @@ uses
   HlpFNV1a64 in '..\..\HashLib\src\Hash64\HlpFNV1a64.pas',
   HlpFNV64 in '..\..\HashLib\src\Hash64\HlpFNV64.pas',
   HlpMurmur2_64 in '..\..\HashLib\src\Hash64\HlpMurmur2_64.pas',
-  HlpSipHash2_4 in '..\..\HashLib\src\Hash64\HlpSipHash2_4.pas',
+  HlpSipHash in '..\..\HashLib\src\Hash64\HlpSipHash.pas',
   HlpXXHash64 in '..\..\HashLib\src\Hash64\HlpXXHash64.pas',
   HlpMurmurHash3_x86_128
     in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas',

@@ -29,8 +29,8 @@ type
     procedure SetBufferSize(value: Int32);
     property BufferSize: Int32 read GetBufferSize write SetBufferSize;
 
-    function ComputeString(const a_data: String; a_encoding: TEncoding)
-      : IHashResult;
+    function ComputeString(const a_data: {$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding): IHashResult;
     function ComputeBytes(a_data: THashLibByteArray): IHashResult;
     function ComputeUntyped(const a_data; a_length: Int64): IHashResult;
     function ComputeStream(a_stream: TStream; a_length: Int64 = -1)
@@ -49,7 +49,9 @@ type
 
     function TransformFinal(): IHashResult;
 
-    procedure TransformString(const a_data: String; a_encoding: TEncoding);
+    procedure TransformString(const a_data:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding);
     procedure TransformStream(a_stream: TStream; a_length: Int64 = -1);
     procedure TransformFile(const a_file_name: String; a_from: Int64 = 0;
       a_length: Int64 = -1);

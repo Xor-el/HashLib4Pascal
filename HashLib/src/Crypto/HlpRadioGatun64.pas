@@ -5,14 +5,10 @@ unit HlpRadioGatun64;
 interface
 
 uses
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpBits,
   HlpConverters,
   HlpIHashInfo,
@@ -23,19 +19,11 @@ type
 
   strict private
 
-    Fm_mill, Fa: THashLibUInt64Array;
+    Fm_mill: THashLibUInt64Array;
 
-    Fptr_Fm_mill, Fptr_Fa: PUInt64;
+    Fptr_Fm_mill: PUInt64;
 
     Fm_belt: THashLibMatrixUInt64Array;
-
-    FBlockSize: Int32;
-
-  const
-    MILL_SIZE = Int32(19);
-    BELT_WIDTH = Int32(3);
-    BELT_LENGTH = Int32(13);
-    NUMBER_OF_BLANK_ITERATIONS = Int32(16);
 
     procedure RoundFunction();
 
@@ -60,24 +48,19 @@ var
   i: Int32;
 begin
 
-  Inherited Create(32, 8 * BELT_WIDTH);
-  System.SetLength(Fm_mill, MILL_SIZE);
+  Inherited Create(32, 24);
+  System.SetLength(Fm_mill, 19);
 
   Fptr_Fm_mill := PUInt64(Fm_mill);
 
-  System.SetLength(Fm_belt, BELT_LENGTH);
+  System.SetLength(Fm_belt, 13);
   i := 0;
-  while i < BELT_LENGTH do
+  while i < 13 do
   begin
-    System.SetLength(Fm_belt[i], BELT_WIDTH);
+    System.SetLength(Fm_belt[i], 3);
 
     System.Inc(i);
   end;
-
-  System.SetLength(Fa, MILL_SIZE);
-  Fptr_Fa := PUInt64(Fa);
-
-  FBlockSize := BlockSize;
 
 end;
 
@@ -86,13 +69,13 @@ var
   padding_size, i: Int32;
   pad: THashLibByteArray;
 begin
-  padding_size := FBlockSize - ((Int32(Fm_processed_bytes)) mod FBlockSize);
+  padding_size := 24 - ((Int32(Fm_processed_bytes)) mod 24);
 
   System.SetLength(pad, padding_size);
   pad[0] := $01;
   TransformBytes(pad, 0, padding_size);
   i := 0;
-  while i < NUMBER_OF_BLANK_ITERATIONS do
+  while i < 16 do
   begin
     RoundFunction();
     System.Inc(i);
@@ -105,12 +88,12 @@ var
   tempRes: THashLibUInt64Array;
   i: Int32;
 begin
-  // System.SetLength(tempRes, HashSize div 8);
-  System.SetLength(tempRes, HashSize shr 3);
+  System.SetLength(tempRes, 4);
+
+  System.SetLength(result, System.Length(tempRes) * System.SizeOf(UInt64));
   i := 0;
 
-  // while i < (HashSize div 16) do
-  while i < (HashSize shr 4) do
+  while i < 2 do
   begin
     RoundFunction();
 
@@ -118,7 +101,8 @@ begin
     System.Inc(i);
   end;
 
-  result := TConverters.ConvertUInt64ToBytes(tempRes);
+  TConverters.le64_copy(PCardinal(tempRes), 0, PByte(result), 0,
+    System.Length(result));
 end;
 
 procedure TRadioGatun64.Initialize;
@@ -130,7 +114,7 @@ begin
     UInt64(0));
 
   i := 0;
-  while i < BELT_LENGTH do
+  while i < 13 do
   begin
 
     System.FillChar(Fm_belt[i][0], System.Length(Fm_belt[i]) *
@@ -145,11 +129,14 @@ end;
 procedure TRadioGatun64.RoundFunction;
 var
   q: THashLibUInt64Array;
+  a: array [0 .. 18] of UInt64;
+  ptr_a: PUInt64;
   i: Int32;
 begin
 
-  q := Fm_belt[BELT_LENGTH - 1];
-  i := BELT_LENGTH - 1;
+  ptr_a := @(a[0]);
+  q := Fm_belt[12];
+  i := 12;
   while i > 0 do
   begin
     Fm_belt[i] := Fm_belt[i - 1];
@@ -161,48 +148,45 @@ begin
   i := 0;
   while i < 12 do
   begin
-    Fm_belt[i + 1][i mod BELT_WIDTH] := Fm_belt[i + 1][i mod BELT_WIDTH]
-      xor Fptr_Fm_mill[i + 1];
+    Fm_belt[i + 1][i mod 3] := Fm_belt[i + 1][i mod 3] xor Fptr_Fm_mill[i + 1];
     System.Inc(i);
   end;
 
   i := 0;
-  while i < MILL_SIZE do
+  while i < 19 do
   begin
-    Fptr_Fa[i] := Fptr_Fm_mill[i] xor (Fptr_Fm_mill[(i + 1) mod MILL_SIZE] or
-      not Fptr_Fm_mill[(i + 2) mod MILL_SIZE]);
+    ptr_a[i] := Fptr_Fm_mill[i] xor (Fptr_Fm_mill[(i + 1) mod 19] or
+      not Fptr_Fm_mill[(i + 2) mod 19]);
     System.Inc(i);
   end;
 
   i := 0;
-  while i < MILL_SIZE do
+  while i < 19 do
   begin
-    // Fm_mill[i] := TBits.RotateRight64(a[(7 * i) mod MILL_SIZE],
-    // i * (i + 1) div 2);
-    Fptr_Fm_mill[i] := TBits.RotateRight64(Fptr_Fa[(7 * i) mod MILL_SIZE],
+    Fptr_Fm_mill[i] := TBits.RotateRight64(ptr_a[(7 * i) mod 19],
       (i * (i + 1)) shr 1);
     System.Inc(i);
   end;
 
   i := 0;
-  while i < MILL_SIZE do
+  while i < 19 do
   begin
-    Fptr_Fa[i] := Fptr_Fm_mill[i] xor Fptr_Fm_mill[(i + 1) mod MILL_SIZE]
-      xor Fptr_Fm_mill[(i + 4) mod MILL_SIZE];
+    ptr_a[i] := Fptr_Fm_mill[i] xor Fptr_Fm_mill[(i + 1) mod 19]
+      xor Fptr_Fm_mill[(i + 4) mod 19];
     System.Inc(i);
   end;
 
-  Fptr_Fa[0] := Fptr_Fa[0] xor 1;
+  ptr_a[0] := ptr_a[0] xor 1;
 
   i := 0;
-  while i < MILL_SIZE do
+  while i < 19 do
   begin
-    Fptr_Fm_mill[i] := Fptr_Fa[i];
+    Fptr_Fm_mill[i] := ptr_a[i];
     System.Inc(i);
   end;
 
   i := 0;
-  while i < BELT_WIDTH do
+  while i < 3 do
   begin
     Fptr_Fm_mill[i + 13] := Fptr_Fm_mill[i + 13] xor q[i];
     System.Inc(i);
@@ -213,15 +197,15 @@ end;
 procedure TRadioGatun64.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data: THashLibUInt64Array;
+  data: array [0 .. 2] of UInt64;
   ptr_data: PUInt64;
   i: Int32;
 begin
-  data := TConverters.ConvertBytesToUInt64(a_data, a_data_length, a_index,
-    FBlockSize);
-  ptr_data := PUInt64(data);
+
+  ptr_data := @(data[0]);
+  TConverters.le64_copy(a_data, a_index, ptr_data, 0, 24);
   i := 0;
-  while i < BELT_WIDTH do
+  while i < 3 do
   begin
     Fptr_Fm_mill[i + 16] := Fptr_Fm_mill[i + 16] xor ptr_data[i];
     Fm_belt[0][i] := Fm_belt[0][i] xor ptr_data[i];
@@ -230,6 +214,8 @@ begin
   end;
 
   RoundFunction();
+
+  System.FillChar(data, System.SizeOf(data), 0);
 end;
 
 end.

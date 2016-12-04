@@ -27,8 +27,7 @@ uses
   HlpBits,
   HlpHashLibTypes,
   HlpIHashResult,
-  HlpConverters,
-  HlpBitConverter;
+  HlpConverters;
 
 resourcestring
   SImpossibleRepresentationInt32 =
@@ -79,8 +78,10 @@ implementation
 
 constructor THashResult.Create(a_hash: UInt64);
 begin
-  a_hash := TBits.ReverseBytesUInt64(a_hash);
-  Fm_hash := TBitConverter.GetBytes(a_hash);
+
+  Fm_hash := THashLibByteArray.Create(Byte(a_hash shr 56), Byte(a_hash shr 48),
+    Byte(a_hash shr 40), Byte(a_hash shr 32), Byte(a_hash shr 24),
+    Byte(a_hash shr 16), Byte(a_hash shr 8), Byte(a_hash));
 end;
 
 constructor THashResult.Create(a_hash: THashLibByteArray);
@@ -90,25 +91,24 @@ end;
 
 constructor THashResult.Create(a_hash: UInt32);
 begin
-  a_hash := TBits.ReverseBytesUInt32(a_hash);
-  Fm_hash := TBitConverter.GetBytes(a_hash);
+  Fm_hash := THashLibByteArray.Create(Byte(a_hash shr 24), Byte(a_hash shr 16),
+    Byte(a_hash shr 8), Byte(a_hash));
 end;
 
 constructor THashResult.Create(a_hash: UInt8);
 begin
-  Fm_hash := TBitConverter.GetBytes(a_hash);
+  Fm_hash := THashLibByteArray.Create(a_hash);
 end;
 
 constructor THashResult.Create(a_hash: UInt16);
 begin
-  a_hash := TBits.ReverseBytesUInt16(a_hash);
-  Fm_hash := TBitConverter.GetBytes(a_hash);
+  Fm_hash := THashLibByteArray.Create(Byte(a_hash shr 8), Byte(a_hash));
 end;
 
 constructor THashResult.Create(a_hash: Int32);
 begin
-  a_hash := TBits.ReverseBytesInt32(a_hash);
-  Fm_hash := TBitConverter.GetBytes(a_hash);
+  Fm_hash := THashLibByteArray.Create(Byte(TBits.Asr32(a_hash, 24)),
+    Byte(TBits.Asr32(a_hash, 16)), Byte(TBits.Asr32(a_hash, 8)), Byte(a_hash));
 end;
 
 function THashResult.Equals(a_hashResult: IHashResult): Boolean;
@@ -149,7 +149,8 @@ begin
 {$ENDIF DELPHI}
 {$ENDIF DELPHIXE7_UP}
 {$IFDEF FPC}
-  TempHolder := EncodeStringBase64(TEncoding.UTF8.GetString(Self.Fm_hash));
+  TempHolder := EncodeStringBase64
+    (String(TEncoding.UTF8.GetString(Self.Fm_hash)));
 {$ENDIF FPC}
 {$IFDEF DELPHIXE7_UP}
   Temp := StringReplace(TNetEncoding.base64.EncodeBytesToString(TempHolder),
@@ -193,8 +194,9 @@ begin
   if (System.Length(Fm_hash) <> 4) then
     raise EInvalidOperationException.CreateRes(@SImpossibleRepresentationInt32);
 
-  result := TBitConverter.ToInt32(Fm_hash, 0);
-  result := TBits.ReverseBytesInt32(result);
+  result := Int32((Int32(Fm_hash[0]) shl 24) or (Int32(Fm_hash[1]) shl 16) or
+    (Int32(Fm_hash[2]) shl 8) or (Int32(Fm_hash[3])));
+
 end;
 
 function THashResult.GetUInt8: UInt8;
@@ -202,7 +204,7 @@ begin
   if (System.Length(Fm_hash) <> 1) then
     raise EInvalidOperationException.CreateRes(@SImpossibleRepresentationUInt8);
 
-  result := TBitConverter.ToUInt8(Fm_hash, 0);
+  result := (UInt8(Fm_hash[0]));
 end;
 
 function THashResult.GetUInt16: UInt16;
@@ -211,8 +213,8 @@ begin
     raise EInvalidOperationException.CreateRes
       (@SImpossibleRepresentationUInt16);
 
-  result := TBitConverter.ToUInt16(Fm_hash, 0);
-  result := TBits.ReverseBytesUInt16(result);
+  result := (UInt16(Fm_hash[0]) shl 8) or (UInt16(Fm_hash[1]));
+
 end;
 
 function THashResult.GetUInt32: UInt32;
@@ -221,8 +223,9 @@ begin
     raise EInvalidOperationException.CreateRes
       (@SImpossibleRepresentationUInt32);
 
-  result := TBitConverter.ToUInt32(Fm_hash, 0);
-  result := TBits.ReverseBytesUInt32(result);
+  result := (UInt32(Fm_hash[0]) shl 24) or (UInt32(Fm_hash[1]) shl 16) or
+    (UInt32(Fm_hash[2]) shl 8) or (UInt32(Fm_hash[3]));
+
 end;
 
 function THashResult.GetUInt64: UInt64;
@@ -231,8 +234,11 @@ begin
     raise EInvalidOperationException.CreateRes
       (@SImpossibleRepresentationUInt64);
 
-  result := TBitConverter.ToUInt64(Fm_hash, 0);
-  result := TBits.ReverseBytesUInt64(result);
+  result := (UInt64(Fm_hash[0]) shl 56) or (UInt64(Fm_hash[1]) shl 48) or
+    (UInt64(Fm_hash[2]) shl 40) or (UInt64(Fm_hash[3]) shl 32) or
+    (UInt64(Fm_hash[4]) shl 24) or (UInt64(Fm_hash[5]) shl 16) or
+    (UInt64(Fm_hash[6]) shl 8) or (UInt64(Fm_hash[7]));
+
 end;
 
 {$B+}

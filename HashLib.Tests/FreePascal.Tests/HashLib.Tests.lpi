@@ -359,7 +359,7 @@
         <IsPartOfProject Value="True"/>
       </Unit71>
       <Unit72>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpSipHash2_4.pas"/>
+        <Filename Value="..\..\HashLib\src\Hash64\HlpSipHash.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit72>
       <Unit73>

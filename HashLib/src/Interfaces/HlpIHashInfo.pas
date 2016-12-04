@@ -10,12 +10,6 @@ uses
 
 type
 
-  IFastHash32 = Interface(IInterface)
-    ['{BA8F0056-E1E0-4C47-8E67-B95886FF0232}']
-    function ComputeStringFast(const a_data: String): Int32;
-    function ComputeBytesFast(a_data: THashLibByteArray): Int32;
-  end;
-
   ITransformBlock = Interface(IInterface)
     ['{0C375CFF-B379-41B8-955F-A32E22991651}']
   end;

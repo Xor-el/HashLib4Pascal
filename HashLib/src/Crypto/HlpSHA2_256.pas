@@ -9,6 +9,9 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpSHA2_256Base,
   HlpConverters;
 
@@ -35,7 +38,11 @@ end;
 
 function TSHA2_256.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state);
+
+  System.SetLength(result, 8 * System.SizeOf(UInt32));
+  TConverters.be32_copy(PCardinal(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
+
 end;
 
 procedure TSHA2_256.Initialize;

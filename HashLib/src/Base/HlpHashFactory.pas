@@ -47,7 +47,7 @@ uses
   HlpFNV64,
   HlpFNV1a64,
   HlpMurmur2_64,
-  HlpSipHash2_4,
+  HlpSipHash,
   HlpXXHash64,
   // Hash128 Units //
   HlpMurmurHash3_x86_128,

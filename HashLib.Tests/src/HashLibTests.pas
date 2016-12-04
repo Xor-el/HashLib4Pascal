@@ -759,7 +759,6 @@ type
   end;
 
 type
-
   TTestSipHash2_4 = class(THashLibAlgorithmTestCase)
 
   private
@@ -3115,7 +3114,7 @@ var
   Idx: TCRCStandard;
   tmp: String;
 begin
-  for Idx := Low(TCRCStandard) to High(TCRCStandard) do
+  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
     FCRC := THashFactory.TChecksum.CreateCRC(Idx);
 
@@ -3123,7 +3122,7 @@ begin
 
     tmp := FCRC.ComputeString(FOnetoNine, TEncoding.UTF8).ToString();
 
-    FActualString := System.StringOfChar('0', 16 - Length(tmp)) + tmp;
+    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
@@ -3138,7 +3137,7 @@ var
   Idx: TCRCStandard;
   tmp: String;
 begin
-  for Idx := Low(TCRCStandard) to High(TCRCStandard) do
+  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
     FCRC := THashFactory.TChecksum.CreateCRC(Idx);
 
@@ -3146,15 +3145,15 @@ begin
 
     FExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
 
-    FCRC.TransformString(Copy(FOnetoNine, 1, 3), TEncoding.UTF8);
-    FCRC.TransformString(Copy(FOnetoNine, 4, 3), TEncoding.UTF8);
-    FCRC.TransformString(Copy(FOnetoNine, 7, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(FOnetoNine, 1, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(FOnetoNine, 4, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(FOnetoNine, 7, 3), TEncoding.UTF8);
 
     FHashResult := FCRC.TransformFinal();
 
     tmp := FHashResult.ToString();
 
-    FActualString := System.StringOfChar('0', 16 - Length(tmp)) + tmp;
+    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
@@ -3182,8 +3181,8 @@ procedure TTestAlder32.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FAdler32.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3229,11 +3228,11 @@ begin
   FHash := THashFactory.TChecksum.CreateAdler32();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3269,8 +3268,8 @@ procedure TTestAP.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FAP.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3314,11 +3313,11 @@ begin
   FHash := THashFactory.THash32.CreateAP();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3351,8 +3350,8 @@ procedure TTestBernstein.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FBernstein.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3398,11 +3397,11 @@ begin
   FHash := THashFactory.THash32.CreateBernstein();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3436,8 +3435,8 @@ procedure TTestBernstein1.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FBernstein1.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3483,11 +3482,11 @@ begin
   FHash := THashFactory.THash32.CreateBernstein1();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3521,8 +3520,8 @@ procedure TTestBKDR.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FBKDR.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3566,11 +3565,11 @@ begin
   FHash := THashFactory.THash32.CreateBKDR();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3603,8 +3602,8 @@ procedure TTestDEK.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FDEK.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3648,11 +3647,11 @@ begin
   FHash := THashFactory.THash32.CreateDEK();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3685,8 +3684,8 @@ procedure TTestDJB.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FDJB.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3730,11 +3729,11 @@ begin
   FHash := THashFactory.THash32.CreateDJB();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3767,8 +3766,8 @@ procedure TTestELF.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FELF.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3812,11 +3811,11 @@ begin
   FHash := THashFactory.THash32.CreateELF();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3849,8 +3848,8 @@ procedure TTestFNV.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FFNV.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3894,11 +3893,11 @@ begin
   FHash := THashFactory.THash32.CreateFNV();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3931,8 +3930,8 @@ procedure TTestFNV1a.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FFNV1a.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -3977,11 +3976,11 @@ begin
   FHash := THashFactory.THash32.CreateFNV1a();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4014,8 +4013,8 @@ procedure TTestJenkins3.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FJenkins3.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4061,11 +4060,11 @@ begin
   FHash := THashFactory.THash32.CreateJenkins3();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4099,8 +4098,8 @@ procedure TTestJS.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FJS.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4144,11 +4143,11 @@ begin
   FHash := THashFactory.THash32.CreateJS();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4181,8 +4180,8 @@ procedure TTestMurmur2.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FMurmur2.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4228,11 +4227,11 @@ begin
   FHash := THashFactory.THash32.CreateMurmur2();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4254,7 +4253,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FMurmur2 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4315,11 +4314,11 @@ begin
   FHash := THashFactory.THash32.CreateMurmurHash3_x86_32();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4341,7 +4340,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FMurmurHash3_x86_32 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4354,7 +4353,7 @@ var
 begin
   FExpectedString := FExpectedHashOfEmptyDataWithOneAsKey;
   LIHashWithKey := (FMurmurHash3_x86_32 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(UInt32(1));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(UInt32(1));
   FActualString := LIHashWithKey.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4388,8 +4387,8 @@ procedure TTestOneAtTime.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FOneAtTime.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4435,11 +4434,11 @@ begin
   FHash := THashFactory.THash32.CreateOneAtTime();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4473,8 +4472,8 @@ procedure TTestPJW.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FPJW.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4518,11 +4517,11 @@ begin
   FHash := THashFactory.THash32.CreatePJW();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4555,8 +4554,8 @@ procedure TTestRotating.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRotating.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4602,11 +4601,11 @@ begin
   FHash := THashFactory.THash32.CreateRotating();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4640,8 +4639,8 @@ procedure TTestRS.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRS.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4685,11 +4684,11 @@ begin
   FHash := THashFactory.THash32.CreateRS();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4722,8 +4721,8 @@ procedure TTestSDBM.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSDBM.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4767,11 +4766,11 @@ begin
   FHash := THashFactory.THash32.CreateSDBM();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4804,8 +4803,8 @@ procedure TTestShiftAndXor.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FShiftAndXor.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4851,11 +4850,11 @@ begin
   FHash := THashFactory.THash32.CreateShiftAndXor();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4889,8 +4888,8 @@ procedure TTestSuperFast.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSuperFast.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -4936,11 +4935,11 @@ begin
   FHash := THashFactory.THash32.CreateSuperFast();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5000,6 +4999,7 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FXXHash32.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -5010,11 +5010,11 @@ begin
   FHash := THashFactory.THash32.CreateXXHash32();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5036,7 +5036,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FXXHash32 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5049,7 +5049,7 @@ var
 begin
   FExpectedString := FExpectedHashOfEmptyDataWithOneAsKey;
   LIHashWithKey := (FXXHash32 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(UInt32(1));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(UInt32(1));
   FActualString := LIHashWithKey.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5085,8 +5085,8 @@ procedure TTestFNV64.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FFNV64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5131,11 +5131,11 @@ begin
   FHash := THashFactory.THash64.CreateFNV;
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5168,8 +5168,8 @@ procedure TTestFNV1a64.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FFNV1a64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5215,11 +5215,11 @@ begin
   FHash := THashFactory.THash64.CreateFNV1a();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5253,8 +5253,8 @@ procedure TTestMurmur2_64.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FMurmur2_64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5300,11 +5300,11 @@ begin
   FHash := THashFactory.THash64.CreateMurmur2();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5326,7 +5326,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FMurmur2_64 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5351,8 +5351,8 @@ procedure TTestSipHash2_4.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSipHash2_4.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5398,11 +5398,11 @@ begin
   FHash := THashFactory.THash64.CreateSipHash2_4();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5494,11 +5494,11 @@ begin
   FHash := THashFactory.THash64.CreateXXHash64();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5520,7 +5520,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt64AsKey;
   LIHashWithKey := (FXXHash64 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt64ToBytes(High(UInt64));
+  LIHashWithKey.Key := TConverters.ReadUInt64AsBytesLE(System.High(UInt64));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5533,7 +5533,7 @@ var
 begin
   FExpectedString := FExpectedHashOfEmptyDataWithOneAsKey;
   LIHashWithKey := (FXXHash64 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt64ToBytes(UInt64(1));
+  LIHashWithKey.Key := TConverters.ReadUInt64AsBytesLE(UInt64(1));
   FActualString := LIHashWithKey.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5606,11 +5606,11 @@ begin
   FHash := THashFactory.THash128.CreateMurmurHash3_x86_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5632,7 +5632,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FMurmurHash3_x86_128 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5645,7 +5645,7 @@ var
 begin
   FExpectedString := FExpectedHashOfEmptyDataWithOneAsKey;
   LIHashWithKey := (FMurmurHash3_x86_128 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(UInt32(1));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(UInt32(1));
   FActualString := LIHashWithKey.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5715,11 +5715,11 @@ begin
   FHash := THashFactory.THash128.CreateMurmurHash3_x64_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5741,7 +5741,7 @@ var
 begin
   FExpectedString := FExpectedHashOfDefaultDataWithMaxUInt32AsKey;
   LIHashWithKey := (FMurmurHash3_x64_128 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(High(UInt32));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   FActualString := LIHashWithKey.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5754,7 +5754,7 @@ var
 begin
   FExpectedString := FExpectedHashOfEmptyDataWithOneAsKey;
   LIHashWithKey := (FMurmurHash3_x64_128 as IHashWithKey);
-  LIHashWithKey.Key := TConverters.ConvertUInt32ToBytes(UInt32(1));
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(UInt32(1));
   FActualString := LIHashWithKey.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5790,8 +5790,8 @@ procedure TTestGost.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FGost.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5861,11 +5861,11 @@ begin
   FHash := THashFactory.TCrypto.CreateGost();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5898,8 +5898,8 @@ procedure TTestGrindahl256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FGrindahl256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -5974,11 +5974,11 @@ begin
   FHash := THashFactory.TCrypto.CreateGrindahl256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6012,8 +6012,8 @@ procedure TTestGrindahl512.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FGrindahl512.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6088,11 +6088,11 @@ begin
   FHash := THashFactory.TCrypto.CreateGrindahl512();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6126,8 +6126,8 @@ procedure TTestHAS160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHAS160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6199,11 +6199,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHAS160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6236,8 +6236,8 @@ procedure TTestHaval_3_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_3_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6312,11 +6312,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_3_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6350,8 +6350,8 @@ procedure TTestHaval_4_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_4_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6426,11 +6426,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_4_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6464,8 +6464,8 @@ procedure TTestHaval_5_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_5_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6540,11 +6540,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_5_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6578,8 +6578,8 @@ procedure TTestHaval_3_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_3_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6654,11 +6654,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_3_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6692,8 +6692,8 @@ procedure TTestHaval_4_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_4_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6768,11 +6768,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_4_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6806,8 +6806,8 @@ procedure TTestHaval_5_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_5_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6882,11 +6882,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_5_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6920,8 +6920,8 @@ procedure TTestHaval_3_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_3_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -6996,11 +6996,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_3_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7034,8 +7034,8 @@ procedure TTestHaval_4_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_4_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7110,11 +7110,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_4_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7148,8 +7148,8 @@ procedure TTestHaval_5_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_5_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7224,11 +7224,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_5_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7262,8 +7262,8 @@ procedure TTestHaval_3_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_3_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7338,11 +7338,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_3_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7376,8 +7376,8 @@ procedure TTestHaval_4_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_4_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7452,11 +7452,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_4_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7490,8 +7490,8 @@ procedure TTestHaval_5_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_5_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7566,11 +7566,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_5_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7604,8 +7604,8 @@ procedure TTestHaval_3_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_3_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7680,11 +7680,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_3_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7718,8 +7718,8 @@ procedure TTestHaval_4_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_4_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7794,11 +7794,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_4_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7832,8 +7832,8 @@ procedure TTestHaval_5_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FHaval_5_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7908,11 +7908,11 @@ begin
   FHash := THashFactory.TCrypto.CreateHaval_5_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -7946,8 +7946,8 @@ procedure TTestMD2.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FMD2.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8018,11 +8018,11 @@ begin
   FHash := THashFactory.TCrypto.CreateMD2();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8055,8 +8055,8 @@ procedure TTestMD4.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FMD4.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8127,11 +8127,11 @@ begin
   FHash := THashFactory.TCrypto.CreateMD4();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8164,8 +8164,8 @@ procedure TTestMD5.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FMD5.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8236,11 +8236,11 @@ begin
   FHash := THashFactory.TCrypto.CreateMD5();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8273,8 +8273,8 @@ procedure TTestPanama.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FPanama.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8346,11 +8346,11 @@ begin
   FHash := THashFactory.TCrypto.CreatePanama();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8383,8 +8383,8 @@ procedure TTestRadioGatun32.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRadioGatun32.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8459,11 +8459,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRadioGatun32();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8497,8 +8497,8 @@ procedure TTestRadioGatun64.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRadioGatun64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8573,11 +8573,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRadioGatun64();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8611,8 +8611,8 @@ procedure TTestRIPEMD.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRIPEMD.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8684,11 +8684,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRIPEMD();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8721,8 +8721,8 @@ procedure TTestRIPEMD128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRIPEMD128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8795,11 +8795,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRIPEMD128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8833,8 +8833,8 @@ procedure TTestRIPEMD160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRIPEMD160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8907,11 +8907,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRIPEMD160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -8945,8 +8945,8 @@ procedure TTestRIPEMD256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRIPEMD256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9019,11 +9019,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRIPEMD256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9057,8 +9057,8 @@ procedure TTestRIPEMD320.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FRIPEMD320.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9131,11 +9131,11 @@ begin
   FHash := THashFactory.TCrypto.CreateRIPEMD320();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9169,8 +9169,8 @@ procedure TTestSHA0.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA0.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9241,11 +9241,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA0();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9278,8 +9278,8 @@ procedure TTestSHA1.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA1.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9350,11 +9350,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA1();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9387,8 +9387,8 @@ procedure TTestSHA2_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9461,11 +9461,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9499,8 +9499,8 @@ procedure TTestSHA2_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9573,11 +9573,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9611,8 +9611,8 @@ procedure TTestSHA2_384.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_384.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9685,11 +9685,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_384();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9723,8 +9723,8 @@ procedure TTestSHA2_512.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_512.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9797,11 +9797,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_512();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9835,8 +9835,8 @@ procedure TTestSHA2_512_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_512_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9911,11 +9911,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_512_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -9949,8 +9949,8 @@ procedure TTestSHA2_512_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA2_512_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10025,11 +10025,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA2_512_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10063,8 +10063,8 @@ procedure TTestSHA3_224.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA3_224.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10137,11 +10137,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA3_224();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10175,8 +10175,8 @@ procedure TTestSHA3_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA3_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10249,11 +10249,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA3_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10287,8 +10287,8 @@ procedure TTestSHA3_384.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA3_384.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10361,11 +10361,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA3_384();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10399,8 +10399,8 @@ procedure TTestSHA3_512.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSHA3_512.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10473,11 +10473,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSHA3_512();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10511,8 +10511,8 @@ procedure TTestSnefru_8_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSnefru_8_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10587,11 +10587,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSnefru_8_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10625,8 +10625,8 @@ procedure TTestSnefru_8_256.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FSnefru_8_256.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10701,11 +10701,11 @@ begin
   FHash := THashFactory.TCrypto.CreateSnefru_8_256();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10739,8 +10739,8 @@ procedure TTestTiger_3_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_3_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10815,11 +10815,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_3_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10853,8 +10853,8 @@ procedure TTestTiger_4_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_4_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10929,11 +10929,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_4_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -10967,8 +10967,8 @@ procedure TTestTiger_5_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_5_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11043,11 +11043,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_5_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11081,8 +11081,8 @@ procedure TTestTiger_3_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_3_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11157,11 +11157,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_3_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11195,8 +11195,8 @@ procedure TTestTiger_4_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_4_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11271,11 +11271,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_4_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11309,8 +11309,8 @@ procedure TTestTiger_5_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_5_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11385,11 +11385,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_5_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11423,8 +11423,8 @@ procedure TTestTiger_3_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_3_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11499,11 +11499,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_3_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11537,8 +11537,8 @@ procedure TTestTiger_4_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_4_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11613,11 +11613,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_4_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11651,8 +11651,8 @@ procedure TTestTiger_5_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger_5_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11727,11 +11727,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger_5_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11765,8 +11765,8 @@ procedure TTestTiger2_3_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_3_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11841,11 +11841,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_3_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11879,8 +11879,8 @@ procedure TTestTiger2_4_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_4_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11955,11 +11955,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_4_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -11993,8 +11993,8 @@ procedure TTestTiger2_5_128.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_5_128.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12069,11 +12069,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_5_128();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12107,8 +12107,8 @@ procedure TTestTiger2_3_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_3_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12183,11 +12183,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_3_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12221,8 +12221,8 @@ procedure TTestTiger2_4_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_4_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12297,11 +12297,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_4_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12335,8 +12335,8 @@ procedure TTestTiger2_5_160.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_5_160.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12411,11 +12411,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_5_160();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12449,8 +12449,8 @@ procedure TTestTiger2_3_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_3_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12525,11 +12525,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_3_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12563,8 +12563,8 @@ procedure TTestTiger2_4_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_4_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12639,11 +12639,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_4_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12677,8 +12677,8 @@ procedure TTestTiger2_5_192.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FTiger2_5_192.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12753,11 +12753,11 @@ begin
   FHash := THashFactory.TCrypto.CreateTiger2_5_192();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12791,8 +12791,8 @@ procedure TTestWhirlPool.TestBytesabcde;
 var
   LBuffer: TBytes;
 begin
-  SetLength(LBuffer, SizeOf(FBytesabcde));
-  Move(FBytesabcde, Pointer(LBuffer)^, SizeOf(FBytesabcde));
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FWhirlPool.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
@@ -12865,11 +12865,11 @@ begin
   FHash := THashFactory.TCrypto.CreateWhirlPool();
 
   FHash.Initialize();
-  FHash.TransformString(Copy(FDefaultData, 1, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 4, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 7, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 10, 3), TEncoding.UTF8);
-  FHash.TransformString(Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
   FHashResult := FHash.TransformFinal();
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',

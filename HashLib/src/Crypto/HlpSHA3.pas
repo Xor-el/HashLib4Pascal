@@ -8,15 +8,11 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
-  HlpHashBuffer,
   HlpBits,
+{$IFDEF DELPHI}
+  HlpHashBuffer,
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
   HlpConverters,
@@ -125,7 +121,7 @@ begin
   block := Fm_buffer.GetBytesZeroPadded();
 
   block[buffer_pos] := $6;
-  block[FBlockSize - 1] := block[FBlockSize - 1] or $80;
+  block[FBlockSize - 1] := block[FBlockSize - 1] xor $80;
 
   TransformBlock(PByte(block), System.Length(block), 0);
 
@@ -138,13 +134,13 @@ begin
 end;
 
 function TSHA3.GetResult: THashLibByteArray;
-var
-  tempResult: THashLibByteArray;
 begin
-  tempResult := TConverters.ConvertUInt64ToBytes(Fm_state);
 
   System.SetLength(result, FHashSize);
-  System.Move(tempResult[0], result[0], FHashSize * System.SizeOf(Byte));
+
+  TConverters.le64_copy(PUInt64(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
+
 end;
 
 procedure TSHA3.Initialize;
@@ -173,17 +169,15 @@ var
     Bsa, Bse, Bsi, Bso, Bsu, Ca, Ce, Ci, Co, Cu, Da, De, Di, &Do, Du, Eba, Ebe,
     Ebi, Ebo, Ebu, Ega, Ege, Egi, Ego, Egu, Eka, Eke, Eki, Eko, Eku, Ema, Eme,
     Emi, Emo, Emu, Esa, Ese, Esi, Eso, Esu: UInt64;
-  data: THashLibUInt64Array;
+  data: array [0 .. 17] of UInt64;
   ptr_data: PUInt64;
   j: Int32;
 begin
-  data := TConverters.ConvertBytesToUInt64(a_data, a_data_length, a_index,
-    FBlockSize);
+  ptr_data := @(data[0]);
+  TConverters.le64_copy(a_data, a_index, ptr_data, 0, FBlockSize);
 
-  ptr_data := PUInt64(data);
   j := 0;
 
-  // while j < (BlockSize div 8) do
   while j < (FBlockSize shr 3) do
   begin
     Fptr_Fm_state[j] := Fptr_Fm_state[j] xor ptr_data[j];
@@ -2791,6 +2785,7 @@ begin
   Fptr_Fm_state[23] := Aso;
   Fptr_Fm_state[24] := Asu;
 
+  System.FillChar(data, System.SizeOf(data), 0);
 end;
 
 { TSHA3_224 }

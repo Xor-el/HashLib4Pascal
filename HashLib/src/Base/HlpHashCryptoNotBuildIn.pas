@@ -16,7 +16,6 @@ type
   TBlockHash = class abstract(THash, IBlockHash)
   strict protected
 
-    // Fm_buffer: IHashBuffer;
     Fm_buffer: THashBuffer;
     Fm_processed_bytes: UInt64;
 
@@ -68,15 +67,19 @@ end;
 
 procedure TBlockHash.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
+var
+  ptr_a_data: PByte;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
 {$ENDIF DEBUG}
+  ptr_a_data := PByte(a_data);
+
   if (not Fm_buffer.IsEmpty) then
   begin
-    if (Fm_buffer.Feed(PByte(a_data), System.Length(a_data), a_index, a_length,
+    if (Fm_buffer.Feed(ptr_a_data, System.Length(a_data), a_index, a_length,
       Fm_processed_bytes)) then
     begin
       TransformBuffer();
@@ -86,14 +89,14 @@ begin
   while (a_length >= (Fm_buffer.Length)) do
   begin
     Fm_processed_bytes := Fm_processed_bytes + UInt64(Fm_buffer.Length);
-    TransformBlock(PByte(a_data), System.Length(a_data), a_index);
+    TransformBlock(ptr_a_data, System.Length(a_data), a_index);
     a_index := a_index + (Fm_buffer.Length);
     a_length := a_length - (Fm_buffer.Length);
   end;
 
   if (a_length > 0) then
   begin
-    Fm_buffer.Feed(PByte(a_data), System.Length(a_data), a_index, a_length,
+    Fm_buffer.Feed(ptr_a_data, System.Length(a_data), a_index, a_length,
       Fm_processed_bytes);
   end;
 end;

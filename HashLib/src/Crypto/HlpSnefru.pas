@@ -8,15 +8,11 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
   HlpHashBuffer,
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpBits,
   HlpHashSize,
   HlpConverters,
@@ -35,9 +31,9 @@ type
 
   strict private
 
-    Fm_state, Fwork: THashLibUInt32Array;
+    Fm_state: THashLibUInt32Array;
     Fm_security_level, FHashSize, FBlockSize: Int32;
-    Fptr_Fwork, Fptr_Fm_state: PCardinal;
+    Fptr_Fm_state: PCardinal;
 
   const
     s_shifts: array [0 .. 3] of Int32 = (16, 8, 16, 24);
@@ -77,11 +73,8 @@ begin
   Fm_security_level := Int32(a_security_level);
   FHashSize := HashSize;
   FBlockSize := BlockSize;
-  // System.SetLength(Fm_state, HashSize div 4);
   System.SetLength(Fm_state, FHashSize shr 2);
   Fptr_Fm_state := PCardinal(Fm_state);
-  System.SetLength(Fwork, 16);
-  Fptr_Fwork := PCardinal(Fwork);
 
 end;
 
@@ -93,13 +86,16 @@ var
 begin
   bits := Fm_processed_bytes * 8;
   if Fm_buffer.Pos > 0 then
-    padindex := 2 * BlockSize - Fm_buffer.Pos - 8
+    padindex := 2 * FBlockSize - Fm_buffer.Pos - 8
   else
-    padindex := BlockSize - Fm_buffer.Pos - 8;
+    padindex := FBlockSize - Fm_buffer.Pos - 8;
 
   System.SetLength(pad, padindex + 8);
 
-  TConverters.ConvertUInt64ToBytesSwapOrder(bits, pad, padindex);
+  bits := TConverters.be2me_64(bits);
+
+  TConverters.ReadUInt64AsBytesLE(bits, pad, padindex);
+
   padindex := padindex + 8;
 
   TransformBytes(pad, 0, padindex);
@@ -108,7 +104,9 @@ end;
 
 function TSnefru.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state);
+  System.SetLength(result, System.Length(Fm_state) * System.SizeOf(UInt32));
+  TConverters.be32_copy(PCardinal(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
 end;
 
 procedure TSnefru.Initialize;
@@ -124,13 +122,16 @@ procedure TSnefru.TransformBlock(a_data: PByte; a_data_length: Int32;
 var
   sbox0, sbox1: THashLibUInt32Array;
   i, j, k, shift: Int32;
+  work: array [0 .. 15] of UInt32;
+  ptr_work: PCardinal;
 begin
 
-  System.Move(Fm_state[0], Fptr_Fwork[0], System.Length(Fm_state) *
+  ptr_work := @(work[0]);
+  System.Move(Fm_state[0], ptr_work[0], System.Length(Fm_state) *
     System.SizeOf(UInt32));
 
-  TConverters.ConvertBytesToUInt32SwapOrder(a_data, a_index, FBlockSize,
-    Fptr_Fwork, System.Length(Fm_state));
+  TConverters.be32_copy(a_data, a_index, ptr_work + System.Length(Fm_state), 0,
+    FBlockSize);
 
   i := 0;
 
@@ -145,38 +146,38 @@ begin
 
     begin
 
-      Fptr_Fwork[15] := Fptr_Fwork[15] xor sbox0[Byte(Fptr_Fwork[0])];
-      Fptr_Fwork[1] := Fptr_Fwork[1] xor sbox0[Byte(Fptr_Fwork[0])];
-      Fptr_Fwork[0] := Fptr_Fwork[0] xor sbox0[Byte(Fptr_Fwork[1])];
-      Fptr_Fwork[2] := Fptr_Fwork[2] xor sbox0[Byte(Fptr_Fwork[1])];
-      Fptr_Fwork[1] := Fptr_Fwork[1] xor sbox1[Byte(Fptr_Fwork[2])];
-      Fptr_Fwork[3] := Fptr_Fwork[3] xor sbox1[Byte(Fptr_Fwork[2])];
-      Fptr_Fwork[2] := Fptr_Fwork[2] xor sbox1[Byte(Fptr_Fwork[3])];
-      Fptr_Fwork[4] := Fptr_Fwork[4] xor sbox1[Byte(Fptr_Fwork[3])];
-      Fptr_Fwork[3] := Fptr_Fwork[3] xor sbox0[Byte(Fptr_Fwork[4])];
-      Fptr_Fwork[5] := Fptr_Fwork[5] xor sbox0[Byte(Fptr_Fwork[4])];
-      Fptr_Fwork[4] := Fptr_Fwork[4] xor sbox0[Byte(Fptr_Fwork[5])];
-      Fptr_Fwork[6] := Fptr_Fwork[6] xor sbox0[Byte(Fptr_Fwork[5])];
-      Fptr_Fwork[5] := Fptr_Fwork[5] xor sbox1[Byte(Fptr_Fwork[6])];
-      Fptr_Fwork[7] := Fptr_Fwork[7] xor sbox1[Byte(Fptr_Fwork[6])];
-      Fptr_Fwork[6] := Fptr_Fwork[6] xor sbox1[Byte(Fptr_Fwork[7])];
-      Fptr_Fwork[8] := Fptr_Fwork[8] xor sbox1[Byte(Fptr_Fwork[7])];
-      Fptr_Fwork[7] := Fptr_Fwork[7] xor sbox0[Byte(Fptr_Fwork[8])];
-      Fptr_Fwork[9] := Fptr_Fwork[9] xor sbox0[Byte(Fptr_Fwork[8])];
-      Fptr_Fwork[8] := Fptr_Fwork[8] xor sbox0[Byte(Fptr_Fwork[9])];
-      Fptr_Fwork[10] := Fptr_Fwork[10] xor sbox0[Byte(Fptr_Fwork[9])];
-      Fptr_Fwork[9] := Fptr_Fwork[9] xor sbox1[Byte(Fptr_Fwork[10])];
-      Fptr_Fwork[11] := Fptr_Fwork[11] xor sbox1[Byte(Fptr_Fwork[10])];
-      Fptr_Fwork[10] := Fptr_Fwork[10] xor sbox1[Byte(Fptr_Fwork[11])];
-      Fptr_Fwork[12] := Fptr_Fwork[12] xor sbox1[Byte(Fptr_Fwork[11])];
-      Fptr_Fwork[11] := Fptr_Fwork[11] xor sbox0[Byte(Fptr_Fwork[12])];
-      Fptr_Fwork[13] := Fptr_Fwork[13] xor sbox0[Byte(Fptr_Fwork[12])];
-      Fptr_Fwork[12] := Fptr_Fwork[12] xor sbox0[Byte(Fptr_Fwork[13])];
-      Fptr_Fwork[14] := Fptr_Fwork[14] xor sbox0[Byte(Fptr_Fwork[13])];
-      Fptr_Fwork[13] := Fptr_Fwork[13] xor sbox1[Byte(Fptr_Fwork[14])];
-      Fptr_Fwork[15] := Fptr_Fwork[15] xor sbox1[Byte(Fptr_Fwork[14])];
-      Fptr_Fwork[14] := Fptr_Fwork[14] xor sbox1[Byte(Fptr_Fwork[15])];
-      Fptr_Fwork[0] := Fptr_Fwork[0] xor sbox1[Byte(Fptr_Fwork[15])];
+      ptr_work[15] := ptr_work[15] xor sbox0[Byte(ptr_work[0])];
+      ptr_work[1] := ptr_work[1] xor sbox0[Byte(ptr_work[0])];
+      ptr_work[0] := ptr_work[0] xor sbox0[Byte(ptr_work[1])];
+      ptr_work[2] := ptr_work[2] xor sbox0[Byte(ptr_work[1])];
+      ptr_work[1] := ptr_work[1] xor sbox1[Byte(ptr_work[2])];
+      ptr_work[3] := ptr_work[3] xor sbox1[Byte(ptr_work[2])];
+      ptr_work[2] := ptr_work[2] xor sbox1[Byte(ptr_work[3])];
+      ptr_work[4] := ptr_work[4] xor sbox1[Byte(ptr_work[3])];
+      ptr_work[3] := ptr_work[3] xor sbox0[Byte(ptr_work[4])];
+      ptr_work[5] := ptr_work[5] xor sbox0[Byte(ptr_work[4])];
+      ptr_work[4] := ptr_work[4] xor sbox0[Byte(ptr_work[5])];
+      ptr_work[6] := ptr_work[6] xor sbox0[Byte(ptr_work[5])];
+      ptr_work[5] := ptr_work[5] xor sbox1[Byte(ptr_work[6])];
+      ptr_work[7] := ptr_work[7] xor sbox1[Byte(ptr_work[6])];
+      ptr_work[6] := ptr_work[6] xor sbox1[Byte(ptr_work[7])];
+      ptr_work[8] := ptr_work[8] xor sbox1[Byte(ptr_work[7])];
+      ptr_work[7] := ptr_work[7] xor sbox0[Byte(ptr_work[8])];
+      ptr_work[9] := ptr_work[9] xor sbox0[Byte(ptr_work[8])];
+      ptr_work[8] := ptr_work[8] xor sbox0[Byte(ptr_work[9])];
+      ptr_work[10] := ptr_work[10] xor sbox0[Byte(ptr_work[9])];
+      ptr_work[9] := ptr_work[9] xor sbox1[Byte(ptr_work[10])];
+      ptr_work[11] := ptr_work[11] xor sbox1[Byte(ptr_work[10])];
+      ptr_work[10] := ptr_work[10] xor sbox1[Byte(ptr_work[11])];
+      ptr_work[12] := ptr_work[12] xor sbox1[Byte(ptr_work[11])];
+      ptr_work[11] := ptr_work[11] xor sbox0[Byte(ptr_work[12])];
+      ptr_work[13] := ptr_work[13] xor sbox0[Byte(ptr_work[12])];
+      ptr_work[12] := ptr_work[12] xor sbox0[Byte(ptr_work[13])];
+      ptr_work[14] := ptr_work[14] xor sbox0[Byte(ptr_work[13])];
+      ptr_work[13] := ptr_work[13] xor sbox1[Byte(ptr_work[14])];
+      ptr_work[15] := ptr_work[15] xor sbox1[Byte(ptr_work[14])];
+      ptr_work[14] := ptr_work[14] xor sbox1[Byte(ptr_work[15])];
+      ptr_work[0] := ptr_work[0] xor sbox1[Byte(ptr_work[15])];
 
       shift := s_shifts[j];
 
@@ -184,7 +185,7 @@ begin
 
       while k < 16 do
       begin
-        Fptr_Fwork[k] := TBits.RotateRight32(Fptr_Fwork[k], shift);
+        ptr_work[k] := TBits.RotateRight32(ptr_work[k], shift);
         System.Inc(k);
       end;
 
@@ -194,18 +195,20 @@ begin
     System.Inc(i);
   end;
 
-  Fptr_Fm_state[0] := Fptr_Fm_state[0] xor Fptr_Fwork[15];
-  Fptr_Fm_state[1] := Fptr_Fm_state[1] xor Fptr_Fwork[14];
-  Fptr_Fm_state[2] := Fptr_Fm_state[2] xor Fptr_Fwork[13];
-  Fptr_Fm_state[3] := Fptr_Fm_state[3] xor Fptr_Fwork[12];
+  Fptr_Fm_state[0] := Fptr_Fm_state[0] xor ptr_work[15];
+  Fptr_Fm_state[1] := Fptr_Fm_state[1] xor ptr_work[14];
+  Fptr_Fm_state[2] := Fptr_Fm_state[2] xor ptr_work[13];
+  Fptr_Fm_state[3] := Fptr_Fm_state[3] xor ptr_work[12];
 
   if (FHashSize = 32) then
   begin
-    Fptr_Fm_state[4] := Fptr_Fm_state[4] xor Fptr_Fwork[11];
-    Fptr_Fm_state[5] := Fptr_Fm_state[5] xor Fptr_Fwork[10];
-    Fptr_Fm_state[6] := Fptr_Fm_state[6] xor Fptr_Fwork[9];
-    Fptr_Fm_state[7] := Fptr_Fm_state[7] xor Fptr_Fwork[8];
+    Fptr_Fm_state[4] := Fptr_Fm_state[4] xor ptr_work[11];
+    Fptr_Fm_state[5] := Fptr_Fm_state[5] xor ptr_work[10];
+    Fptr_Fm_state[6] := Fptr_Fm_state[6] xor ptr_work[9];
+    Fptr_Fm_state[7] := Fptr_Fm_state[7] xor ptr_work[8];
   end;
+
+  System.FillChar(work, System.SizeOf(work), 0);
 
 end;
 

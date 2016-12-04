@@ -20,7 +20,7 @@ uses
   HlpDJB, HlpELF, HlpFNV, HlpFNV1a, HlpJenkins3, HlpJS, HlpMurmur2, 
   HlpMurmurHash3_x86_32, HlpOneAtTime, HlpPJW, HlpRotating, HlpRS, HlpSDBM, 
   HlpShiftAndXor, HlpSuperFast, HlpXXHash32, HlpFNV1a64, HlpFNV64, 
-  HlpMurmur2_64, HlpSipHash2_4, HlpXXHash64, HlpIHash, HlpIHashBuffer, 
+  HlpMurmur2_64, HlpSipHash, HlpXXHash64, HlpIHash, HlpIHashBuffer, 
   HlpIHashInfo, HlpIHashResult, HlpNullable, HlpBitConverter, HlpBits, 
   HlpHashLibTypes, HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, 
   HlpIKDF, HlpKDF, HlpICRC;

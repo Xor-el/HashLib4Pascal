@@ -8,15 +8,11 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
-  HlpHashBuffer,
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+  HlpHashBuffer,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -27,7 +23,6 @@ type
   strict private
 
     Fm_hash, Fk, Fm, Ftemp: THashLibUInt64Array;
-    FBlockSize: Int32;
     Fptr_Fm_hash, Fptr_Fk, Fptr_Fm, Fptr_Ftemp: PUInt64;
 
   class var
@@ -92,8 +87,6 @@ constructor TWhirlPool.Create;
 begin
   Inherited Create(64, 64);
 
-  FBlockSize := 64;
-
   System.SetLength(Fm_hash, 8);
   Fptr_Fm_hash := PUInt64(Fm_hash);
 
@@ -124,7 +117,10 @@ begin
 
   pad[0] := $80;
 
-  TConverters.ConvertUInt64ToBytesSwapOrder(bits, pad, padindex);
+  bits := TConverters.be2me_64(bits);
+
+  TConverters.ReadUInt64AsBytesLE(bits, pad, padindex);
+
   padindex := padindex + 8;
 
   TransformBytes(pad, 0, padindex);
@@ -133,7 +129,9 @@ end;
 
 function TWhirlPool.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt64ToBytesSwapOrder(Fm_hash);
+  System.SetLength(result, System.Length(Fm_hash) * System.SizeOf(UInt64));
+  TConverters.be64_copy(PUInt64(Fm_hash), 0, PByte(result), 0,
+    System.Length(result));
 end;
 
 procedure TWhirlPool.Initialize;
@@ -162,16 +160,15 @@ end;
 procedure TWhirlPool.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data: THashLibUInt64Array;
+  data: array [0 .. 7] of UInt64;
   i, round: Int32;
   ptr_data: PUInt64;
 
 begin
 
-  data := TConverters.ConvertBytesToUInt64SwapOrder(a_data, a_index,
-    FBlockSize);
+  ptr_data := @(data[0]);
 
-  ptr_data := PUInt64(data);
+  TConverters.be64_copy(a_data, a_index, ptr_data, 0, 64);
 
   i := 0;
   while i < 8 do
@@ -248,6 +245,8 @@ begin
 
     System.Inc(i);
   end;
+
+  System.FillChar(data, System.SizeOf(data), 0);
 
 end;
 

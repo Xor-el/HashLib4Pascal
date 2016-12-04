@@ -10,11 +10,9 @@ interface
 uses
   HlpHashLibTypes,
 {$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-  System.SysUtils
+  System.TypInfo
 {$ELSE}
-  TypInfo,
-  SysUtils
+  TypInfo
 {$ENDIF HAS_UNITSCOPE};
 
 resourcestring

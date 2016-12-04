@@ -111,100 +111,100 @@ end;
 class function TBitConverter.GetBytes(value: Int16): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PSmallInt(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PSmallInt(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: Int32): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PInteger(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PInteger(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 
 end;
 
 class function TBitConverter.GetBytes(value: Double): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PDouble(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PDouble(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: Boolean): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PBoolean(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PBoolean(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: Char): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PChar(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PChar(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: UInt8): THashLibByteArray;
 begin
-  System.SetLength(result, System.SizeOf(value));
-  PByte(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PByte(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: UInt16): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PWord(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PWord(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: Int64): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PInt64(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PInt64(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: Single): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PSingle(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PSingle(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: UInt32): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PCardinal(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PCardinal(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 class function TBitConverter.GetBytes(value: UInt64): THashLibByteArray;
 begin
 
-  System.SetLength(result, System.SizeOf(value));
-  PUInt64(@result[0])^ := value;
   // System.SetLength(result, System.SizeOf(value));
-  // System.Move(value, result[0], System.SizeOf(value));
+  // PUInt64(@result[0])^ := value;
+  System.SetLength(result, System.SizeOf(value));
+  System.Move(value, result[0], System.SizeOf(value));
 end;
 
 { ==================================================================== }
@@ -227,8 +227,8 @@ end;
 class function TBitConverter.ToBoolean(value: THashLibByteArray;
   StartIndex: Int32): Boolean;
 begin
-  result := PBoolean(@value[StartIndex])^;
-  // System.Move(value[StartIndex], result, System.SizeOf(result));
+  // result := PBoolean(@value[StartIndex])^;
+  System.Move(value[StartIndex], result, System.SizeOf(result));
 
 end;
 
@@ -237,25 +237,16 @@ class function TBitConverter.ToChar(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  // if (StartIndex mod 2 = 0) then // data is aligned
-  if (StartIndex and 1 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PChar(@value[StartIndex])^;
+    result := Char(value[StartIndex] or (value[StartIndex + 1] shl 8));
     Exit;
   end
   else
   begin
-    if (IsLittleEndian) then
-    begin
-      result := Char(value[StartIndex] or (value[StartIndex + 1] shl 8));
-      Exit;
-    end
-    else
-    begin
 
-      result := Char((value[StartIndex] shl 8) or value[StartIndex + 1]);
-      Exit;
-    end;
+    result := Char((value[StartIndex] shl 8) or value[StartIndex + 1]);
+    Exit;
   end;
 
 end;
@@ -268,36 +259,26 @@ var
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  // if (StartIndex mod 8 = 0) then // data is aligned
-  if (StartIndex and 7 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PDouble(@value[StartIndex])^;
+    i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+      (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+    i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
+      (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
+    val := UInt32(i1) or (Int64(i2) shl 32);
+    result := PDouble(@val)^;
     Exit;
   end
   else
   begin
 
-    if (IsLittleEndian) then
-    begin
-      i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
-        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
-      i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
-        (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
-      val := UInt32(i1) or (Int64(i2) shl 32);
-      result := PDouble(@val)^;
-      Exit;
-    end
-    else
-    begin
-
-      i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
-        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
-      i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
-        (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
-      val := UInt32(i2) or (Int64(i1) shl 32);
-      result := PDouble(@val)^;
-      Exit;
-    end;
+    i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+      (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+    i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
+      (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
+    val := UInt32(i2) or (Int64(i1) shl 32);
+    result := PDouble(@val)^;
+    Exit;
   end;
 
 end;
@@ -307,25 +288,17 @@ class function TBitConverter.ToInt16(value: THashLibByteArray;
 begin
 
   // System.Move(value[StartIndex], result, System.SizeOf(result));
-  // if (StartIndex mod 2 = 0) then // data is aligned
-  if (StartIndex and 1 = 0) then // data is aligned
+
+  if (IsLittleEndian) then
   begin
-    result := PSmallInt(@value[StartIndex])^;
+    result := SmallInt(value[StartIndex] or (value[StartIndex + 1] shl 8));
     Exit;
   end
   else
   begin
-    if (IsLittleEndian) then
-    begin
-      result := SmallInt(value[StartIndex] or (value[StartIndex + 1] shl 8));
-      Exit;
-    end
-    else
-    begin
 
-      result := SmallInt((value[StartIndex] shl 8) or value[StartIndex + 1]);
-      Exit;
-    end;
+    result := SmallInt((value[StartIndex] shl 8) or value[StartIndex + 1]);
+    Exit;
   end;
 
 end;
@@ -335,28 +308,18 @@ class function TBitConverter.ToInt32(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  // if (StartIndex mod 4 = 0) then // data is aligned
-  if (StartIndex and 3 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PInteger(@value[StartIndex])^;
+    result := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+      (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
     Exit;
   end
   else
   begin
 
-    if (IsLittleEndian) then
-    begin
-      result := value[StartIndex] or (value[StartIndex + 1] shl 8) or
-        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
-      Exit;
-    end
-    else
-    begin
-
-      result := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
-        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
-      Exit;
-    end;
+    result := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+      (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+    Exit;
   end;
 
 end;
@@ -367,35 +330,24 @@ var
   i1, i2: Int32;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
-
-  // if (StartIndex mod 8 = 0) then // data is aligned
-  if (StartIndex and 7 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PInt64(@value[StartIndex])^;
+    i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
+      (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
+    i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
+      (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
+    result := UInt32(i1) or (Int64(i2) shl 32);
     Exit;
   end
   else
   begin
 
-    if (IsLittleEndian) then
-    begin
-      i1 := value[StartIndex] or (value[StartIndex + 1] shl 8) or
-        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24);
-      i2 := (value[StartIndex + 4]) or (value[StartIndex + 5] shl 8) or
-        (value[StartIndex + 6] shl 16) or (value[StartIndex + 7] shl 24);
-      result := UInt32(i1) or (Int64(i2) shl 32);
-      Exit;
-    end
-    else
-    begin
-
-      i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
-        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
-      i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
-        (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
-      result := UInt32(i2) or (Int64(i1) shl 32);
-      Exit;
-    end;
+    i1 := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+      (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+    i2 := (value[StartIndex + 4] shl 24) or (value[StartIndex + 5] shl 16) or
+      (value[StartIndex + 6] shl 8) or (value[StartIndex + 7]);
+    result := UInt32(i2) or (Int64(i1) shl 32);
+    Exit;
   end;
 end;
 
@@ -405,30 +357,19 @@ var
   val: Int32;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
-
-  // if (StartIndex mod 4 = 0) then // data is aligned
-  if (StartIndex and 3 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PSingle(@value[StartIndex])^;
+    val := (value[StartIndex] or (value[StartIndex + 1] shl 8) or
+      (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24));
+    result := PSingle(@val)^;
     Exit;
   end
   else
   begin
-
-    if (IsLittleEndian) then
-    begin
-      val := (value[StartIndex] or (value[StartIndex + 1] shl 8) or
-        (value[StartIndex + 2] shl 16) or (value[StartIndex + 3] shl 24));
-      result := PSingle(@val)^;
-      Exit;
-    end
-    else
-    begin
-      val := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
-        (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
-      result := PSingle(@val)^;
-      Exit;
-    end;
+    val := (value[StartIndex] shl 24) or (value[StartIndex + 1] shl 16) or
+      (value[StartIndex + 2] shl 8) or (value[StartIndex + 3]);
+    result := PSingle(@val)^;
+    Exit;
   end;
 
 end;
@@ -494,8 +435,8 @@ end;
 class function TBitConverter.ToUInt8(value: THashLibByteArray;
   StartIndex: Int32): UInt8;
 begin
-  result := PByte(@value[StartIndex])^;
-  // System.Move(value[StartIndex], result, System.SizeOf(result));
+  // result := PByte(@value[StartIndex])^;
+  System.Move(value[StartIndex], result, System.SizeOf(result));
 end;
 
 class function TBitConverter.ToUInt16(value: THashLibByteArray;
@@ -503,31 +444,24 @@ class function TBitConverter.ToUInt16(value: THashLibByteArray;
 begin
   // System.Move(value[StartIndex], result, System.SizeOf(result));
 
-  // if (StartIndex mod 2 = 0) then // data is aligned
-  if (StartIndex and 1 = 0) then // data is aligned
+  if (IsLittleEndian) then
   begin
-    result := PWord(@value[StartIndex])^;
+    result := Word(value[StartIndex] or (value[StartIndex + 1] shl 8));
     Exit;
   end
   else
   begin
-    if (IsLittleEndian) then
-    begin
-      result := Word(value[StartIndex] or (value[StartIndex + 1] shl 8));
-      Exit;
-    end
-    else
-    begin
 
-      result := Word((value[StartIndex] shl 8) or value[StartIndex + 1]);
-      Exit;
-    end;
+    result := Word((value[StartIndex] shl 8) or value[StartIndex + 1]);
+    Exit;
   end;
 end;
 
 class function TBitConverter.ToUInt32(value: THashLibByteArray;
   StartIndex: Int32): UInt32;
 begin
+  // System.Move(value[StartIndex], result, System.SizeOf(result));
+
   if (IsLittleEndian) then
   begin
     result := UInt32(value[StartIndex] or (value[StartIndex + 1] shl 8) or
@@ -569,6 +503,8 @@ class function TBitConverter.ToUInt64(value: THashLibByteArray;
 var
   i1, i2: Int32;
 begin
+
+  // System.Move(value[StartIndex], result, System.SizeOf(result));
 
   if (IsLittleEndian) then
   begin

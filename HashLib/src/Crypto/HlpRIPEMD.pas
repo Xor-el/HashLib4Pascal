@@ -9,10 +9,10 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpBits,
-  HlpMDBase,
 {$IFDEF DELPHI}
   HlpBitConverter,
 {$ENDIF DELPHI}
+  HlpMDBase,
   HlpConverters,
   HlpIHashInfo;
 
@@ -60,26 +60,13 @@ end;
 procedure TRIPEMD.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
-    data11, data12, data13, data14, data15, a, b, c, d, aa, bb, cc, dd: UInt32;
+  a, b, c, d, aa, bb, cc, dd: UInt32;
+  data: array [0 .. 15] of UInt32;
+  ptr_data: PCardinal;
 begin
 
-  data0 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 0);
-  data1 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 1);
-  data2 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 2);
-  data3 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 3);
-  data4 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 4);
-  data5 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 5);
-  data6 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 6);
-  data7 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 7);
-  data8 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 8);
-  data9 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 9);
-  data10 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 10);
-  data11 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 11);
-  data12 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 12);
-  data13 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 13);
-  data14 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 14);
-  data15 := TConverters.ConvertBytesToUInt32a2(a_data, a_index + 4 * 15);
+  ptr_data := @(data[0]);
+  TConverters.le32_copy(a_data, a_index, ptr_data, 0, 64);
 
   a := Fptr_Fm_state[0];
   b := Fptr_Fm_state[1];
@@ -90,113 +77,115 @@ begin
   cc := c;
   dd := d;
 
-  a := TBits.RotateLeft32(P1(b, c, d) + a + data0, 11);
-  d := TBits.RotateLeft32(P1(a, b, c) + d + data1, 14);
-  c := TBits.RotateLeft32(P1(d, a, b) + c + data2, 15);
-  b := TBits.RotateLeft32(P1(c, d, a) + b + data3, 12);
-  a := TBits.RotateLeft32(P1(b, c, d) + a + data4, 5);
-  d := TBits.RotateLeft32(P1(a, b, c) + d + data5, 8);
-  c := TBits.RotateLeft32(P1(d, a, b) + c + data6, 7);
-  b := TBits.RotateLeft32(P1(c, d, a) + b + data7, 9);
-  a := TBits.RotateLeft32(P1(b, c, d) + a + data8, 11);
-  d := TBits.RotateLeft32(P1(a, b, c) + d + data9, 13);
-  c := TBits.RotateLeft32(P1(d, a, b) + c + data10, 14);
-  b := TBits.RotateLeft32(P1(c, d, a) + b + data11, 15);
-  a := TBits.RotateLeft32(P1(b, c, d) + a + data12, 6);
-  d := TBits.RotateLeft32(P1(a, b, c) + d + data13, 7);
-  c := TBits.RotateLeft32(P1(d, a, b) + c + data14, 9);
-  b := TBits.RotateLeft32(P1(c, d, a) + b + data15, 8);
+  a := TBits.RotateLeft32(P1(b, c, d) + a + ptr_data[0], 11);
+  d := TBits.RotateLeft32(P1(a, b, c) + d + ptr_data[1], 14);
+  c := TBits.RotateLeft32(P1(d, a, b) + c + ptr_data[2], 15);
+  b := TBits.RotateLeft32(P1(c, d, a) + b + ptr_data[3], 12);
+  a := TBits.RotateLeft32(P1(b, c, d) + a + ptr_data[4], 5);
+  d := TBits.RotateLeft32(P1(a, b, c) + d + ptr_data[5], 8);
+  c := TBits.RotateLeft32(P1(d, a, b) + c + ptr_data[6], 7);
+  b := TBits.RotateLeft32(P1(c, d, a) + b + ptr_data[7], 9);
+  a := TBits.RotateLeft32(P1(b, c, d) + a + ptr_data[8], 11);
+  d := TBits.RotateLeft32(P1(a, b, c) + d + ptr_data[9], 13);
+  c := TBits.RotateLeft32(P1(d, a, b) + c + ptr_data[10], 14);
+  b := TBits.RotateLeft32(P1(c, d, a) + b + ptr_data[11], 15);
+  a := TBits.RotateLeft32(P1(b, c, d) + a + ptr_data[12], 6);
+  d := TBits.RotateLeft32(P1(a, b, c) + d + ptr_data[13], 7);
+  c := TBits.RotateLeft32(P1(d, a, b) + c + ptr_data[14], 9);
+  b := TBits.RotateLeft32(P1(c, d, a) + b + ptr_data[15], 8);
 
-  a := TBits.RotateLeft32(P2(b, c, d) + a + data7 + C2, 7);
-  d := TBits.RotateLeft32(P2(a, b, c) + d + data4 + C2, 6);
-  c := TBits.RotateLeft32(P2(d, a, b) + c + data13 + C2, 8);
-  b := TBits.RotateLeft32(P2(c, d, a) + b + data1 + C2, 13);
-  a := TBits.RotateLeft32(P2(b, c, d) + a + data10 + C2, 11);
-  d := TBits.RotateLeft32(P2(a, b, c) + d + data6 + C2, 9);
-  c := TBits.RotateLeft32(P2(d, a, b) + c + data15 + C2, 7);
-  b := TBits.RotateLeft32(P2(c, d, a) + b + data3 + C2, 15);
-  a := TBits.RotateLeft32(P2(b, c, d) + a + data12 + C2, 7);
-  d := TBits.RotateLeft32(P2(a, b, c) + d + data0 + C2, 12);
-  c := TBits.RotateLeft32(P2(d, a, b) + c + data9 + C2, 15);
-  b := TBits.RotateLeft32(P2(c, d, a) + b + data5 + C2, 9);
-  a := TBits.RotateLeft32(P2(b, c, d) + a + data14 + C2, 7);
-  d := TBits.RotateLeft32(P2(a, b, c) + d + data2 + C2, 11);
-  c := TBits.RotateLeft32(P2(d, a, b) + c + data11 + C2, 13);
-  b := TBits.RotateLeft32(P2(c, d, a) + b + data8 + C2, 12);
+  a := TBits.RotateLeft32(P2(b, c, d) + a + ptr_data[7] + C2, 7);
+  d := TBits.RotateLeft32(P2(a, b, c) + d + ptr_data[4] + C2, 6);
+  c := TBits.RotateLeft32(P2(d, a, b) + c + ptr_data[13] + C2, 8);
+  b := TBits.RotateLeft32(P2(c, d, a) + b + ptr_data[1] + C2, 13);
+  a := TBits.RotateLeft32(P2(b, c, d) + a + ptr_data[10] + C2, 11);
+  d := TBits.RotateLeft32(P2(a, b, c) + d + ptr_data[6] + C2, 9);
+  c := TBits.RotateLeft32(P2(d, a, b) + c + ptr_data[15] + C2, 7);
+  b := TBits.RotateLeft32(P2(c, d, a) + b + ptr_data[3] + C2, 15);
+  a := TBits.RotateLeft32(P2(b, c, d) + a + ptr_data[12] + C2, 7);
+  d := TBits.RotateLeft32(P2(a, b, c) + d + ptr_data[0] + C2, 12);
+  c := TBits.RotateLeft32(P2(d, a, b) + c + ptr_data[9] + C2, 15);
+  b := TBits.RotateLeft32(P2(c, d, a) + b + ptr_data[5] + C2, 9);
+  a := TBits.RotateLeft32(P2(b, c, d) + a + ptr_data[14] + C2, 7);
+  d := TBits.RotateLeft32(P2(a, b, c) + d + ptr_data[2] + C2, 11);
+  c := TBits.RotateLeft32(P2(d, a, b) + c + ptr_data[11] + C2, 13);
+  b := TBits.RotateLeft32(P2(c, d, a) + b + ptr_data[8] + C2, 12);
 
-  a := TBits.RotateLeft32(P3(b, c, d) + a + data3 + C4, 11);
-  d := TBits.RotateLeft32(P3(a, b, c) + d + data10 + C4, 13);
-  c := TBits.RotateLeft32(P3(d, a, b) + c + data2 + C4, 14);
-  b := TBits.RotateLeft32(P3(c, d, a) + b + data4 + C4, 7);
-  a := TBits.RotateLeft32(P3(b, c, d) + a + data9 + C4, 14);
-  d := TBits.RotateLeft32(P3(a, b, c) + d + data15 + C4, 9);
-  c := TBits.RotateLeft32(P3(d, a, b) + c + data8 + C4, 13);
-  b := TBits.RotateLeft32(P3(c, d, a) + b + data1 + C4, 15);
-  a := TBits.RotateLeft32(P3(b, c, d) + a + data14 + C4, 6);
-  d := TBits.RotateLeft32(P3(a, b, c) + d + data7 + C4, 8);
-  c := TBits.RotateLeft32(P3(d, a, b) + c + data0 + C4, 13);
-  b := TBits.RotateLeft32(P3(c, d, a) + b + data6 + C4, 6);
-  a := TBits.RotateLeft32(P3(b, c, d) + a + data11 + C4, 12);
-  d := TBits.RotateLeft32(P3(a, b, c) + d + data13 + C4, 5);
-  c := TBits.RotateLeft32(P3(d, a, b) + c + data5 + C4, 7);
-  b := TBits.RotateLeft32(P3(c, d, a) + b + data12 + C4, 5);
+  a := TBits.RotateLeft32(P3(b, c, d) + a + ptr_data[3] + C4, 11);
+  d := TBits.RotateLeft32(P3(a, b, c) + d + ptr_data[10] + C4, 13);
+  c := TBits.RotateLeft32(P3(d, a, b) + c + ptr_data[2] + C4, 14);
+  b := TBits.RotateLeft32(P3(c, d, a) + b + ptr_data[4] + C4, 7);
+  a := TBits.RotateLeft32(P3(b, c, d) + a + ptr_data[9] + C4, 14);
+  d := TBits.RotateLeft32(P3(a, b, c) + d + ptr_data[15] + C4, 9);
+  c := TBits.RotateLeft32(P3(d, a, b) + c + ptr_data[8] + C4, 13);
+  b := TBits.RotateLeft32(P3(c, d, a) + b + ptr_data[1] + C4, 15);
+  a := TBits.RotateLeft32(P3(b, c, d) + a + ptr_data[14] + C4, 6);
+  d := TBits.RotateLeft32(P3(a, b, c) + d + ptr_data[7] + C4, 8);
+  c := TBits.RotateLeft32(P3(d, a, b) + c + ptr_data[0] + C4, 13);
+  b := TBits.RotateLeft32(P3(c, d, a) + b + ptr_data[6] + C4, 6);
+  a := TBits.RotateLeft32(P3(b, c, d) + a + ptr_data[11] + C4, 12);
+  d := TBits.RotateLeft32(P3(a, b, c) + d + ptr_data[13] + C4, 5);
+  c := TBits.RotateLeft32(P3(d, a, b) + c + ptr_data[5] + C4, 7);
+  b := TBits.RotateLeft32(P3(c, d, a) + b + ptr_data[12] + C4, 5);
 
-  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + data0 + C1, 11);
-  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + data1 + C1, 14);
-  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + data2 + C1, 15);
-  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + data3 + C1, 12);
-  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + data4 + C1, 5);
-  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + data5 + C1, 8);
-  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + data6 + C1, 7);
-  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + data7 + C1, 9);
-  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + data8 + C1, 11);
-  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + data9 + C1, 13);
-  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + data10 + C1, 14);
-  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + data11 + C1, 15);
-  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + data12 + C1, 6);
-  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + data13 + C1, 7);
-  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + data14 + C1, 9);
-  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + data15 + C1, 8);
+  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + ptr_data[0] + C1, 11);
+  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + ptr_data[1] + C1, 14);
+  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + ptr_data[2] + C1, 15);
+  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + ptr_data[3] + C1, 12);
+  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + ptr_data[4] + C1, 5);
+  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + ptr_data[5] + C1, 8);
+  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + ptr_data[6] + C1, 7);
+  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + ptr_data[7] + C1, 9);
+  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + ptr_data[8] + C1, 11);
+  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + ptr_data[9] + C1, 13);
+  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + ptr_data[10] + C1, 14);
+  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + ptr_data[11] + C1, 15);
+  aa := TBits.RotateLeft32(P1(bb, cc, dd) + aa + ptr_data[12] + C1, 6);
+  dd := TBits.RotateLeft32(P1(aa, bb, cc) + dd + ptr_data[13] + C1, 7);
+  cc := TBits.RotateLeft32(P1(dd, aa, bb) + cc + ptr_data[14] + C1, 9);
+  bb := TBits.RotateLeft32(P1(cc, dd, aa) + bb + ptr_data[15] + C1, 8);
 
-  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + data7, 7);
-  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + data4, 6);
-  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + data13, 8);
-  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + data1, 13);
-  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + data10, 11);
-  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + data6, 9);
-  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + data15, 7);
-  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + data3, 15);
-  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + data12, 7);
-  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + data0, 12);
-  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + data9, 15);
-  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + data5, 9);
-  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + data14, 7);
-  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + data2, 11);
-  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + data11, 13);
-  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + data8, 12);
+  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + ptr_data[7], 7);
+  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + ptr_data[4], 6);
+  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + ptr_data[13], 8);
+  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + ptr_data[1], 13);
+  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + ptr_data[10], 11);
+  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + ptr_data[6], 9);
+  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + ptr_data[15], 7);
+  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + ptr_data[3], 15);
+  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + ptr_data[12], 7);
+  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + ptr_data[0], 12);
+  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + ptr_data[9], 15);
+  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + ptr_data[5], 9);
+  aa := TBits.RotateLeft32(P2(bb, cc, dd) + aa + ptr_data[14], 7);
+  dd := TBits.RotateLeft32(P2(aa, bb, cc) + dd + ptr_data[2], 11);
+  cc := TBits.RotateLeft32(P2(dd, aa, bb) + cc + ptr_data[11], 13);
+  bb := TBits.RotateLeft32(P2(cc, dd, aa) + bb + ptr_data[8], 12);
 
-  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + data3 + C3, 11);
-  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + data10 + C3, 13);
-  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + data2 + C3, 14);
-  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + data4 + C3, 7);
-  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + data9 + C3, 14);
-  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + data15 + C3, 9);
-  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + data8 + C3, 13);
-  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + data1 + C3, 15);
-  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + data14 + C3, 6);
-  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + data7 + C3, 8);
-  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + data0 + C3, 13);
-  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + data6 + C3, 6);
-  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + data11 + C3, 12);
-  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + data13 + C3, 5);
-  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + data5 + C3, 7);
-  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + data12 + C3, 5);
+  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + ptr_data[3] + C3, 11);
+  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + ptr_data[10] + C3, 13);
+  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + ptr_data[2] + C3, 14);
+  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + ptr_data[4] + C3, 7);
+  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + ptr_data[9] + C3, 14);
+  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + ptr_data[15] + C3, 9);
+  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + ptr_data[8] + C3, 13);
+  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + ptr_data[1] + C3, 15);
+  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + ptr_data[14] + C3, 6);
+  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + ptr_data[7] + C3, 8);
+  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + ptr_data[0] + C3, 13);
+  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + ptr_data[6] + C3, 6);
+  aa := TBits.RotateLeft32(P3(bb, cc, dd) + aa + ptr_data[11] + C3, 12);
+  dd := TBits.RotateLeft32(P3(aa, bb, cc) + dd + ptr_data[13] + C3, 5);
+  cc := TBits.RotateLeft32(P3(dd, aa, bb) + cc + ptr_data[5] + C3, 7);
+  bb := TBits.RotateLeft32(P3(cc, dd, aa) + bb + ptr_data[12] + C3, 5);
 
   cc := cc + Fptr_Fm_state[0] + b;
   Fptr_Fm_state[0] := Fptr_Fm_state[1] + c + dd;
   Fptr_Fm_state[1] := Fptr_Fm_state[2] + d + aa;
   Fptr_Fm_state[2] := Fptr_Fm_state[3] + a + bb;
   Fptr_Fm_state[3] := cc;
+
+  System.FillChar(data, System.SizeOf(data), 0);
 
 end;
 

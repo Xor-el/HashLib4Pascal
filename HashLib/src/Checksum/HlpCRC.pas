@@ -443,7 +443,7 @@ type
     FWidth: Int32;
     FPolynomial, FInit, FXorOut, FCheckValue, Fm_CRCMask, Fm_CRCHighBitMask,
       Fm_hash: UInt64;
-    FReflectIn, FReflectOut: Boolean;
+    FReflectIn, FReflectOut, FIsTableGenerated: Boolean;
 
     Fm_CRCTable: THashLibUInt64Array;
     Fptr_Fm_CRCTable: PUInt64;
@@ -510,18 +510,18 @@ procedure TCRC.CalculateCRCbyTable(a_data: PByte;
   a_data_length, a_index: Int32);
 var
   &Length, i: Int32;
+  tmp: UInt64;
 begin
 
   &Length := a_data_length;
   i := a_index;
+  tmp := Fm_hash;
 
   if (ReflectIn) then
   begin
     while Length > 0 do
     begin
-      // the "Fm_hash and $FF" is similar to casting Fm_hash to a byte "Byte(Fm_hash)"
-      Fm_hash := (Fm_hash shr 8) xor Fptr_Fm_CRCTable
-        [(Fm_hash and $FF) xor a_data[i]];
+      tmp := (tmp shr 8) xor Fptr_Fm_CRCTable[Byte(tmp xor a_data[i])];
       System.Inc(i);
       System.Dec(Length);
     end;
@@ -532,14 +532,15 @@ begin
 
     while Length > 0 do
     begin
-
-      Fm_hash := (Fm_hash shl 8) xor Fptr_Fm_CRCTable
-        [((Fm_hash shr (Width - 8)) and $FF) xor a_data[i]];
+      tmp := (tmp shl 8) xor Fptr_Fm_CRCTable
+        [Byte((tmp shr (Width - 8)) xor a_data[i])];
       System.Inc(i);
       System.Dec(Length);
     end;
 
   end;
+
+  Fm_hash := tmp;
 
 end;
 
@@ -581,6 +582,8 @@ constructor TCRC.Create(_Width: Int32; _poly, _Init: UInt64;
   _Names: THashLibStringArray);
 begin
 
+  FIsTableGenerated := False;
+
   case _Width of
     0 .. 7:
       begin
@@ -612,19 +615,6 @@ begin
   ReflectOut := _refOut;
   XOROut := _XorOut;
   CheckValue := _check;
-
-  // initialize some bitmasks
-  Fm_CRCMask := (((UInt64(1) shl (Width - 1)) - 1) shl 1) or 1;
-  Fm_CRCHighBitMask := UInt64(1) shl (Width - 1);
-  Fm_hash := Init;
-
-  if (Width > Delta) then // then use table
-  begin
-
-    GenerateTable();
-    if (ReflectIn) then
-      Fm_hash := Reflect(Fm_hash, Width);
-  end;
 
 end;
 
@@ -963,13 +953,13 @@ begin
         THashLibStringArray.Create('CRC-64'));
 
     TCRCStandard.CRC64_WE:
-      result := TCRC.Create(64, $42F0E1EBA9EA3693, $FFFFFFFFFFFFFFFF, False,
-        False, $FFFFFFFFFFFFFFFF, $62EC59E3F1A4F00A,
+      result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
+        False, False, UInt64($FFFFFFFFFFFFFFFF), $62EC59E3F1A4F00A,
         THashLibStringArray.Create('CRC-64/WE'));
 
     TCRCStandard.CRC64_XZ:
-      result := TCRC.Create(64, $42F0E1EBA9EA3693, $FFFFFFFFFFFFFFFF, True,
-        True, $FFFFFFFFFFFFFFFF, $995DC9BBDF1939FA,
+      result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
+        True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($995DC9BBDF1939FA),
         THashLibStringArray.Create('CRC-64/XZ'));
 
   end;
@@ -1012,6 +1002,8 @@ begin
     Fptr_Fm_CRCTable[i] := crc;
     System.Inc(i);
   end;
+
+  FIsTableGenerated := True;
 end;
 
 function TCRC.GetCheckValue: UInt64;
@@ -1056,7 +1048,21 @@ end;
 
 procedure TCRC.Initialize;
 begin
-  // nothing yet.
+  // initialize some bitmasks
+  Fm_CRCMask := (((UInt64(1) shl (Width - 1)) - 1) shl 1) or 1;
+  Fm_CRCHighBitMask := UInt64(1) shl (Width - 1);
+  Fm_hash := Init;
+
+  if (Width > Delta) then // then use table
+  begin
+
+    if not FIsTableGenerated then
+    begin
+      GenerateTable();
+    end;
+    if (ReflectIn) then
+      Fm_hash := Reflect(Fm_hash, Width);
+  end;
 end;
 
 class function TCRC.Reflect(a_value: UInt64; a_width: Int32): UInt64;
@@ -1135,6 +1141,7 @@ begin
   // accordingly
 
   i := a_index;
+
   ptr_a_data := PByte(a_data);
 
   if (Width > Delta) then
@@ -1175,7 +1182,6 @@ begin
   Fm_hash := Fm_hash xor XOROut;
   Fm_hash := Fm_hash and Fm_CRCMask;
 
-  // case Width div 8 of
   case Width shr 3 of
     0:
       begin
@@ -1187,17 +1193,20 @@ begin
     1 .. 2:
       begin
         LUInt16 := UInt16(Fm_hash);
+
         result := THashResult.Create(LUInt16);
       end;
 
     3 .. 4:
       begin
         LUInt32 := UInt32(Fm_hash);
+
         result := THashResult.Create(LUInt32);
       end
   else
     begin
       LUInt64 := (Fm_hash);
+
       result := THashResult.Create(LUInt64);
     end;
   end;

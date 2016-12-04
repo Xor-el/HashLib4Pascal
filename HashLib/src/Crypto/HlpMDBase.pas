@@ -9,7 +9,10 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
   HlpHashBuffer,
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
   HlpConverters;
@@ -68,7 +71,10 @@ begin
 
   pad[0] := $80;
 
-  TConverters.ConvertUInt64ToBytes(bits, pad, padindex);
+  bits := TConverters.le2me_64(bits);
+
+  TConverters.ReadUInt64AsBytesLE(bits, pad, padindex);
+
   padindex := padindex + 8;
 
   TransformBytes(pad, 0, padindex);
@@ -77,7 +83,12 @@ end;
 
 function TMDBase.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytes(Fm_state);
+
+  System.SetLength(result, System.Length(Fm_state) * System.SizeOf(UInt32));
+
+  TConverters.le32_copy(PCardinal(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
+
 end;
 
 procedure TMDBase.Initialize;

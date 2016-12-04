@@ -5,13 +5,6 @@ unit HlpHash;
 interface
 
 uses
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
 {$IFDEF HAS_UNITSCOPE}
   System.Classes,
   System.SysUtils,
@@ -27,7 +20,8 @@ uses
 resourcestring
   SIndexOutOfRange = 'Current Index Is Out Of Range';
   SInvalidBufferSize = '"BufferSize" Must Be Greater Than Zero';
-  SUnAssignedStream = 'Input Stream Is UnAssigned';
+  SUnAssignedStream = 'Input Stream Is Unassigned';
+  SFileNotExist = 'Specified File Not Found';
 
 type
   THash = class abstract(TInterfacedObject, IHash)
@@ -55,15 +49,17 @@ type
     property Name: String read GetName;
     property BlockSize: Int32 read GetBlockSize;
     property HashSize: Int32 read GetHashSize;
-    function ComputeString(const a_data: String; a_encoding: TEncoding)
-      : IHashResult; virtual;
+    function ComputeString(const a_data: {$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding): IHashResult; virtual;
     function ComputeBytes(a_data: THashLibByteArray): IHashResult; virtual;
     function ComputeUntyped(const a_data; a_length: Int64): IHashResult;
     function ComputeStream(a_stream: TStream; a_length: Int64 = -1)
       : IHashResult;
     function ComputeFile(const a_file_name: String; a_from: Int64 = 0;
       a_length: Int64 = -1): IHashResult;
-    procedure TransformString(const a_data: String; a_encoding: TEncoding);
+    procedure TransformString(const a_data:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding);
     procedure TransformBytes(a_data: THashLibByteArray); overload;
     procedure TransformBytes(a_data: THashLibByteArray;
       a_index: Int32); overload;
@@ -126,8 +122,9 @@ begin
   result := Fm_hash_size;
 end;
 
-function THash.ComputeString(const a_data: String; a_encoding: TEncoding)
-  : IHashResult;
+function THash.ComputeString(const a_data:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding): IHashResult;
 begin
   result := ComputeBytes(TConverters.ConvertStringToBytes(a_data, a_encoding));
 end;
@@ -146,29 +143,33 @@ procedure THash.TransformUntyped(const a_data; a_length: Int64);
 var
   PtrBuffer, PtrEnd: PByte;
   ArrBuffer: THashLibByteArray;
+  LBufferSize: Int32;
 begin
   PtrBuffer := @a_data;
+  LBufferSize := BufferSize;
+
   if PtrBuffer <> Nil then
   begin
-    System.SetLength(ArrBuffer, BufferSize);
+    System.SetLength(ArrBuffer, LBufferSize);
     PtrEnd := (PtrBuffer) + a_length;
 
-    while PtrBuffer <= PtrEnd do
+    while PtrBuffer < PtrEnd do
     begin
 
-      if (PtrEnd - PtrBuffer) >= BufferSize then
+      if (PtrEnd - PtrBuffer) >= LBufferSize then
       begin
-        System.Move(PtrBuffer^, ArrBuffer[0], BufferSize);
+        System.Move(PtrBuffer^, ArrBuffer[0], LBufferSize);
         TransformBytes(ArrBuffer);
-
+        System.Inc(PtrBuffer, LBufferSize);
       end
       else
       begin
         System.SetLength(ArrBuffer, PtrEnd - PtrBuffer);
         System.Move(PtrBuffer^, ArrBuffer[0], System.Length(ArrBuffer));
         TransformBytes(ArrBuffer);
+        break;
       end;
-      System.Inc(PtrBuffer, BufferSize);
+
     end;
 
   end;
@@ -199,7 +200,9 @@ begin
 
 end;
 
-procedure THash.TransformString(const a_data: String; a_encoding: TEncoding);
+procedure THash.TransformString(const a_data:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_encoding: TEncoding);
 begin
   TransformBytes(TConverters.ConvertStringToBytes(a_data, a_encoding));
 end;
@@ -228,10 +231,12 @@ procedure THash.TransformStream(a_stream: TStream; a_length: Int64);
 var
   data: THashLibByteArray;
   readed, LBufferSize: Int32;
+  total: Int64;
 begin
 {$IFDEF DEBUG}
   System.Assert((a_length = -1) or (a_length > 0));
 {$ENDIF DEBUG}
+  total := 0;
   if (a_stream <> Nil) then
   begin
     if (a_length > -1) then
@@ -257,18 +262,45 @@ begin
 
   System.SetLength(data, LBufferSize);
 
-  while True do
+  if (a_length = -1) then
   begin
-    readed := a_stream.Read(data[0], LBufferSize);
-    if readed < LBufferSize then
+
+    while true do
     begin
-      TransformBytes(data, 0, readed);
-      break;
+
+      readed := a_stream.Read(data[0], LBufferSize);
+
+      if (readed <> LBufferSize) then
+      begin
+        TransformBytes(data, 0, readed);
+        break;
+      end
+      else
+      begin
+        TransformBytes(data, 0, readed);
+        total := total + readed;
+      end;
     end
-    else
+
+  end
+  else
+  begin
+    while true do
     begin
-      TransformBytes(data, 0, LBufferSize);
-    end;
+
+      readed := a_stream.Read(data[0], LBufferSize);
+
+      if ((total + Int64(readed)) >= a_length) then
+      begin
+        TransformBytes(data, 0, Int32(a_length - total));
+        break;
+      end
+      else
+      begin
+        TransformBytes(data, 0, readed);
+        total := total + readed;
+      end;
+    end
 
   end;
 
@@ -280,10 +312,12 @@ var
   MyFileStream: TFileStream;
 begin
 {$IFDEF DEBUG}
-  System.Assert(FileExists(a_file_name));
   System.Assert(a_from >= 0);
   System.Assert((a_length = -1) or (a_length > 0));
 {$ENDIF DEBUG}
+  if not FileExists(a_file_name) then
+    raise EArgumentException.CreateRes(@SFileNotExist);
+
   MyFileStream := TFileStream.Create(a_file_name, fmOpenRead or
     fmShareDenyWrite);
 

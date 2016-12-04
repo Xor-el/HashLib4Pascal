@@ -5,15 +5,10 @@ unit HlpMD2;
 interface
 
 uses
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
   HlpHashBuffer,
+{$ENDIF DELPHI}
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
 
@@ -21,8 +16,8 @@ type
   TMD2 = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
-    Fm_state, Fm_checksum, Ftemp: THashLibByteArray;
-    Fptr_Fm_state, Fptr_Fm_checksum, Fptr_Ftemp: PByte;
+    Fm_state, Fm_checksum: THashLibByteArray;
+    Fptr_Fm_state, Fptr_Fm_checksum: PByte;
 
 {$REGION 'Consts'}
 
@@ -85,11 +80,9 @@ constructor TMD2.Create;
 begin
   Inherited Create(16, 16);
   System.SetLength(Fm_state, 16);
-  System.SetLength(Fm_checksum, 16);
   Fptr_Fm_state := PByte(Fm_state);
+  System.SetLength(Fm_checksum, 16);
   Fptr_Fm_checksum := PByte(Fm_checksum);
-  System.SetLength(Ftemp, 48);
-  Fptr_Ftemp := PByte(Ftemp);
 
 end;
 
@@ -135,15 +128,19 @@ procedure TMD2.TransformBlock(a_data: PByte; a_data_length: Int32;
 var
   i, j: Int32;
   t: UInt32;
+  temp: array [0 .. 47] of Byte;
+  ptr_temp: PByte;
+
 begin
 
-  System.Move(Fm_state[0], Ftemp[0], 16);
+  ptr_temp := @(temp[0]);
+  System.Move(Fm_state[0], temp[0], 16);
 
-  System.Move(a_data[a_index], Ftemp[16], 16);
+  System.Move(a_data[a_index], temp[16], 16);
 
   for i := 0 to 15 do
   begin
-    Fptr_Ftemp[i + 32] := Byte(Fptr_Fm_state[i] xor a_data[i + a_index]);
+    ptr_temp[i + 32] := Byte(Fptr_Fm_state[i] xor a_data[i + a_index]);
   end;
 
   t := 0;
@@ -153,14 +150,14 @@ begin
 
     for j := 0 to 47 do
     begin
-      Fptr_Ftemp[j] := Byte(Fptr_Ftemp[j] xor s_pi[t]);
-      t := Fptr_Ftemp[j];
+      ptr_temp[j] := Byte(ptr_temp[j] xor s_pi[t]);
+      t := ptr_temp[j];
     end;
 
     t := Byte(t + UInt32(i));
   end;
 
-  System.Move(Ftemp[0], Fm_state[0], 16);
+  System.Move(temp[0], Fm_state[0], 16);
 
   t := Fptr_Fm_checksum[15];
 
@@ -171,6 +168,8 @@ begin
       xor (s_pi[a_data[i + a_index] xor t]);
     t := Fptr_Fm_checksum[i];
   end;
+
+  System.FillChar(temp, System.SizeOf(temp), 0);
 
 end;
 

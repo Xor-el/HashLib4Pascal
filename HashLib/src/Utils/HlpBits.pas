@@ -61,13 +61,17 @@ implementation
 { TBits }
 
 class procedure TBits.ReverseByteArray(Source, Dest: Pointer; Size: Int64);
+var
+  ptr_src, ptr_dest: PByte;
 begin
-  Dest := PByte(NativeUInt(Dest) + Size - 1);
+  ptr_src := PByte(Source);
+  ptr_dest := PByte(Dest);
+  System.Inc(ptr_dest, Size - 1);
   while Size > 0 do
   begin
-    PByte(Dest)^ := PByte(Source)^;
-    System.Inc(PByte(Source));
-    System.Dec(PByte(Dest));
+    ptr_dest^ := ptr_src^;
+    System.Inc(ptr_src);
+    System.Dec(ptr_dest);
     System.Dec(Size);
   end;
 end;
@@ -79,10 +83,8 @@ var
 {$ENDIF FPC}
 begin
 {$IFDEF FPC}
-  result := BEtoN(value);
+  result := SwapEndian(value);
 {$ELSE}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   i1 := value and $FF;
   i2 := TBits.Asr32(value, 8) and $FF;
   i3 := TBits.Asr32(value, 16) and $FF;
@@ -103,10 +105,8 @@ end;
 class function TBits.ReverseBytesUInt16(value: UInt16): UInt16;
 begin
 {$IFDEF FPC}
-  result := BEtoN(value);
+  result := SwapEndian(value);
 {$ELSE}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := UInt16((value and UInt32($FF)) shl 8 or
     (value and UInt32($FF00)) shr 8);
 {$ENDIF FPC}
@@ -115,10 +115,8 @@ end;
 class function TBits.ReverseBytesUInt32(value: UInt32): UInt32;
 begin
 {$IFDEF FPC}
-  result := BEtoN(value);
+  result := SwapEndian(value);
 {$ELSE}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := (value and UInt32($000000FF)) shl 24 or (value and UInt32($0000FF00)
     ) shl 8 or (value and UInt32($00FF0000)) shr 8 or
     (value and UInt32($FF000000)) shr 24;
@@ -128,10 +126,8 @@ end;
 class function TBits.ReverseBytesUInt64(value: UInt64): UInt64;
 begin
 {$IFDEF FPC}
-  result := BEtoN(value);
+  result := SwapEndian(value);
 {$ELSE}
-  // since Delphi compiles to just Little Endian CPU'S, we can blindly assume
-  // Little Endian and Swap.
   result := (value and UInt64($00000000000000FF)) shl 56 or
     (value and UInt64($000000000000FF00)) shl 40 or
     (value and UInt64($0000000000FF0000)) shl 24 or
@@ -176,7 +172,6 @@ begin
 {$IFDEF FPC}
   result := RolDWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n mod 32;
   a_n := a_n and 31;
 
   result := (a_value shl a_n) or (a_value shr (32 - a_n));
@@ -191,7 +186,6 @@ begin
 {$IFDEF FPC}
   result := RolQWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n mod 64;
   a_n := a_n and 63;
 
   result := (a_value shl a_n) or (a_value shr (64 - a_n));
@@ -206,7 +200,6 @@ begin
 {$IFDEF FPC}
   result := RorDWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n mod 32;
   a_n := a_n and 31;
 
   result := (a_value shr a_n) or (a_value shl (32 - a_n));
@@ -221,7 +214,6 @@ begin
 {$IFDEF FPC}
   result := RorQWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n mod 64;
   a_n := a_n and 63;
 
   result := (a_value shr a_n) or (a_value shl (64 - a_n));

@@ -6,7 +6,10 @@ interface
 
 uses
   HlpHashLibTypes,
+{$IFDEF DELPHI}
   HlpHashBuffer,
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpBits,
   HlpConverters,
   HlpIHashInfo,
@@ -18,13 +21,15 @@ type
 
   strict private
 
-    Fm_state, Fm_hash, Fs, Fm: THashLibUInt32Array;
-    Fptr_Fm_state, Fptr_Fm_hash, Fptr_Fs, Fptr_Fm: PCardinal;
+    Fm_state, Fm_hash: THashLibUInt32Array;
+    Fptr_Fm_state, Fptr_Fm_hash: PCardinal;
 
   class var
 
     Fs_sbox1, Fs_sbox2, Fs_sbox3, Fs_sbox4: THashLibUInt32Array;
-    Fptr_Fs_sbox1, Fptr_Fs_sbox2, Fptr_Fs_sbox3, Fptr_Fs_sbox4: PCardinal;
+    Fs, Fm: array [0 .. 7] of UInt32;
+    Fptr_Fs_sbox1, Fptr_Fs_sbox2, Fptr_Fs_sbox3, Fptr_Fs_sbox4, Fptr_Fs,
+      Fptr_Fm: PCardinal;
 
     procedure Compress(a_m: PCardinal);
     class constructor Gost();
@@ -338,10 +343,9 @@ begin
   Fptr_Fm_state := PCardinal(Fm_state);
   System.SetLength(Fm_hash, 8);
   Fptr_Fm_hash := PCardinal(Fm_hash);
-  System.SetLength(Fs, 8);
-  Fptr_Fs := PCardinal(Fs);
-  System.SetLength(Fm, 8);
-  Fptr_Fm := PCardinal(Fm);
+
+  Fptr_Fm := @(Fm[0]);
+  Fptr_Fs := @(Fs[0]);
 end;
 
 procedure TGost.Finish;
@@ -369,7 +373,9 @@ end;
 
 function TGost.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytes(Fm_hash);
+  System.SetLength(result, 8 * System.SizeOf(UInt32));
+  TConverters.le32_copy(PCardinal(Fm_hash), 0, PByte(result), 0,
+    System.Length(result));
 end;
 
 class constructor TGost.Gost;
@@ -439,20 +445,21 @@ end;
 procedure TGost.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data: THashLibUInt32Array;
-  ptrdata: PCardinal;
+  data: array [0 .. 7] of UInt32;
+  ptr_data: PCardinal;
   c, a, b: UInt32;
   i: Int32;
 begin
 
   c := 0;
 
-  data := TConverters.ConvertBytesToUInt32(a_data, a_data_length, a_index, 32);
-  ptrdata := PCardinal(data);
+  ptr_data := @(data[0]);
+
+  TConverters.le32_copy(a_data, a_index, ptr_data, 0, 32);
 
   for i := 0 to 7 do
   begin
-    a := ptrdata[i];
+    a := ptr_data[i];
     Fptr_Fm[i] := a;
     b := Fm_state[i];
     c := a + c + Fm_state[i];
@@ -466,6 +473,8 @@ begin
   end;
 
   Compress(Fptr_Fm);
+
+  System.FillChar(data, System.SizeOf(data), 0);
 
 end;
 

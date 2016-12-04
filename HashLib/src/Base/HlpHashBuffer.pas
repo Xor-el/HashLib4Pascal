@@ -51,7 +51,7 @@ constructor THashBuffer.Create(a_length: Int32);
 begin
 {$IFDEF DEBUG}
   System.Assert(a_length > 0);
-{$ENDIF}
+{$ENDIF DEBUG}
   System.SetLength(Fm_data, a_length);
   Initialize();
 
@@ -66,7 +66,7 @@ begin
   System.Assert(a_length >= 0);
   System.Assert(a_length <= a_length_a_data);
   System.Assert(not IsFull);
-{$ENDIF}
+{$ENDIF DEBUG}
   if (a_length_a_data = 0) then
   begin
     result := false;
@@ -101,7 +101,7 @@ begin
   System.Assert(a_length >= 0);
   System.Assert((a_start_index + a_length) <= a_length_a_data);
   System.Assert(not IsFull);
-{$ENDIF}
+{$ENDIF DEBUG}
   if (a_length_a_data = 0) then
   begin
     result := false;
@@ -135,7 +135,7 @@ function THashBuffer.GetBytes: THashLibByteArray;
 begin
 {$IFDEF DEBUG}
   System.Assert(IsFull);
-{$ENDIF}
+{$ENDIF DEBUG}
   Fm_pos := 0;
   result := Fm_data;
 end;

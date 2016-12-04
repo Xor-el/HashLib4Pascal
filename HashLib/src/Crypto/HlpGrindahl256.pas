@@ -9,6 +9,9 @@ uses
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -27,9 +30,6 @@ type
 {$REGION 'Consts'}
 
   const
-    ROWS = Int32(4);
-    COLUMNS = Int32(13);
-    BLANK_ROUNDS = Int32(8);
 
     s_master_table: array [0 .. 255] of UInt32 = ($C66363A5, $F87C7C84,
       $EE777799, $F67B7B8D, $FFF2F20D, $D66B6BBD, $DE6F6FB1, $91C5C554,
@@ -116,10 +116,8 @@ end;
 constructor TGrindahl256.Create;
 begin
   Inherited Create(32, 4);
-  // System.SetLength(Fm_state, ROWS * COLUMNS div 4);
-  // System.SetLength(Fm_temp, ROWS * COLUMNS div 4);
-  System.SetLength(Fm_state, (ROWS * COLUMNS) shr 2);
-  System.SetLength(Fm_temp, (ROWS * COLUMNS) shr 2);
+  System.SetLength(Fm_state, 13);
+  System.SetLength(Fm_temp, 13);
 end;
 
 procedure TGrindahl256.Finish;
@@ -128,24 +126,29 @@ var
   msg_length: UInt64;
   pad: THashLibByteArray;
 begin
-  padding_size := 3 * BlockSize -
-    Int32(Fm_processed_bytes mod UInt32(BlockSize));
-  msg_length := (Fm_processed_bytes div UInt64(ROWS)) + 1;
+
+  padding_size := 12 - Int32(Fm_processed_bytes and UInt32(3));
+  msg_length := (Fm_processed_bytes shr UInt64(2)) + 1;
 
   System.SetLength(pad, padding_size);
 
   pad[0] := $80;
 
-  TConverters.ConvertUInt64ToBytesSwapOrder(msg_length, pad, padding_size - 8);
-  TransformBytes(pad, 0, padding_size - BlockSize);
+  msg_length := TConverters.be2me_64(msg_length);
 
-  Fm_state[0] := TConverters.ConvertBytesToUInt32SwapOrder(pad,
-    padding_size - BlockSize);
+  TConverters.ReadUInt64AsBytesLE(msg_length, pad, padding_size - 8);
+
+  TransformBytes(pad, 0, padding_size - 4);
+
+  Fm_state[0] := TConverters.ReadBytesAsUInt32LE(PByte(pad), padding_size - 4);
+
+  Fm_state[0] := TConverters.be2me_32(Fm_state[0]);
+
   InjectMsg(true);
 
   i := 0;
 
-  while i < BLANK_ROUNDS do
+  while i < 8 do
   begin
     InjectMsg(true);
     System.Inc(i);
@@ -155,10 +158,12 @@ end;
 
 function TGrindahl256.GetResult: THashLibByteArray;
 begin
-  // result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state,
-  // COLUMNS - HashSize div ROWS, HashSize div ROWS);
-  result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state,
-    COLUMNS - (HashSize shr 2), (HashSize shr 2));
+
+  System.SetLength(result, 8 * System.SizeOf(UInt32));
+
+  TConverters.be32_copy(PCardinal(Fm_state) + 5, 0, PByte(result), 0,
+    System.Length(result));
+
 end;
 
 class constructor TGrindahl256.Grindahl256;
@@ -199,10 +204,8 @@ procedure TGrindahl256.InjectMsg(a_full_process: Boolean);
 var
   u: THashLibUInt32Array;
 begin
-  // Fm_state[ROWS * COLUMNS div 4 - 1] :=
-  // Fm_state[ROWS * COLUMNS div 4 - 1] xor $01;
-  Fm_state[((ROWS * COLUMNS) shr 2) - 1] :=
-    Fm_state[((ROWS * COLUMNS) shr 2) - 1] xor $01;
+
+  Fm_state[12] := Fm_state[12] xor $01;
 
   if (a_full_process) then
   begin
@@ -268,7 +271,11 @@ end;
 procedure TGrindahl256.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 begin
-  Fm_state[0] := TConverters.ConvertBytesToUInt32SwapOrder(a_data, a_index);
+
+  Fm_state[0] := TConverters.ReadBytesAsUInt32LE(a_data, a_index);
+
+  Fm_state[0] := TConverters.be2me_32(Fm_state[0]);
+
   InjectMsg(false);
 
 end;

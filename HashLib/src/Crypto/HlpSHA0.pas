@@ -8,8 +8,11 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-  HlpHashBuffer,
   HlpBits,
+{$IFDEF DELPHI}
+  HlpHashBuffer,
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
@@ -20,8 +23,8 @@ type
 
   strict protected
 
-    Fm_state, Fdata: THashLibUInt32Array;
-    Fptr_Fm_state, Fptr_Fdata: PCardinal;
+    Fm_state: THashLibUInt32Array;
+    Fptr_Fm_state: PCardinal;
 
 {$REGION 'Consts'}
 
@@ -54,22 +57,16 @@ begin
   Inherited Create(20, 64);
   System.SetLength(Fm_state, 5);
   Fptr_Fm_state := PCardinal(Fm_state);
-  System.SetLength(Fdata, 80);
-  Fptr_Fdata := PCardinal(Fdata);
 end;
 
 procedure TSHA0.Expand(a_data: PCardinal);
-// var
-// j: Int32;
+{$IFNDEF USE_UNROLLED_VARIANT}
+var
+  j: Int32;
+{$ENDIF USE_UNROLLED_VARIANT}
 begin
-  {
-    for j := 16 to 79 do
-    begin
-    a_data[j] := ((a_data[j - 3] xor a_data[j - 8]) xor a_data[j - 14])
-    xor a_data[j - 16];
 
-    end; }
-
+{$IFDEF USE_UNROLLED_VARIANT}
   a_data[16] := ((a_data[16 - 3] xor a_data[16 - 8]) xor a_data[16 - 14])
     xor a_data[16 - 16];
   a_data[17] := ((a_data[17 - 3] xor a_data[17 - 8]) xor a_data[17 - 14])
@@ -199,6 +196,13 @@ begin
   a_data[79] := ((a_data[79 - 3] xor a_data[79 - 8]) xor a_data[79 - 14])
     xor a_data[79 - 16];
 
+{$ELSE}
+  for j := 16 to 79 do
+  begin
+    a_data[j] := ((a_data[j - 3] xor a_data[j - 8]) xor a_data[j - 14])
+      xor a_data[j - 16];
+  end;
+{$ENDIF USE_UNROLLED_VARIANT}
 end;
 
 procedure TSHA0.Finish;
@@ -218,7 +222,10 @@ begin
 
   pad[0] := $80;
 
-  TConverters.ConvertUInt64ToBytesSwapOrder(bits, pad, padindex);
+  bits := TConverters.be2me_64(bits);
+
+  TConverters.ReadUInt64AsBytesLE(bits, pad, padindex);
+
   padindex := padindex + 8;
 
   TransformBytes(pad, 0, padindex);
@@ -227,7 +234,11 @@ end;
 
 function TSHA0.GetResult: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytesSwapOrder(Fm_state);
+
+  System.SetLength(result, 5 * System.SizeOf(UInt32));
+  TConverters.be32_copy(PCardinal(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
+
 end;
 
 procedure TSHA0.Initialize;
@@ -246,13 +257,16 @@ end;
 procedure TSHA0.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  A, B, C, D, E, T1, X7, T2, X8, T3, X1, T4, X2, T5, X3, T6, X4, T7, X5, T8,
-    X6: UInt32;
-
+  A, B, C, D, E: UInt32;
+  data: array [0 .. 79] of UInt32;
+  ptr_data: PCardinal;
 begin
-  TConverters.ConvertBytesToUInt32SwapOrder(a_data, a_index, 64, Fptr_Fdata, 0);
 
-  Expand(Fptr_Fdata);
+  ptr_data := @(data[0]);
+
+  TConverters.be32_copy(a_data, a_index, ptr_data, 0, 64);
+
+  Expand(ptr_data);
 
   A := Fptr_Fm_state[0];
   B := Fptr_Fm_state[1];
@@ -260,329 +274,294 @@ begin
   D := Fptr_Fm_state[3];
   E := Fptr_Fm_state[4];
 
-  T1 := Fptr_Fdata[0] + C1 + TBits.RotateLeft32(A, 5) +
-    ((B and C) or (not B and D)) + E;
-
-  X7 := TBits.RotateLeft32(B, 30);
-  T2 := Fptr_Fdata[1] + C1 + TBits.RotateLeft32(T1, 5) +
-    ((A and X7) or (not A and C)) + D;
-
-  X8 := TBits.RotateLeft32(A, 30);
-  T3 := Fptr_Fdata[2] + C1 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (not T1 and X7)) + C;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[3] + C1 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (not T2 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[4] + C1 + TBits.RotateLeft32(T4, 5) +
-    ((T3 and X2) or (not T3 and X1)) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[5] + C1 + TBits.RotateLeft32(T5, 5) +
-    ((T4 and X3) or (not T4 and X2)) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[6] + C1 + TBits.RotateLeft32(T6, 5) +
-    ((T5 and X4) or (not T5 and X3)) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[7] + C1 + TBits.RotateLeft32(T7, 5) +
-    ((T6 and X5) or (not T6 and X4)) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[8] + C1 + TBits.RotateLeft32(T8, 5) +
-    ((T7 and X6) or (not T7 and X5)) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[9] + C1 + TBits.RotateLeft32(T1, 5) +
-    ((T8 and X7) or (not T8 and X6)) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[10] + C1 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (not T1 and X7)) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[11] + C1 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (not T2 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[12] + C1 + TBits.RotateLeft32(T4, 5) +
-    ((T3 and X2) or (not T3 and X1)) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[13] + C1 + TBits.RotateLeft32(T5, 5) +
-    ((T4 and X3) or (not T4 and X2)) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[14] + C1 + TBits.RotateLeft32(T6, 5) +
-    ((T5 and X4) or (not T5 and X3)) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[15] + C1 + TBits.RotateLeft32(T7, 5) +
-    ((T6 and X5) or (not T6 and X4)) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[16] + C1 + TBits.RotateLeft32(T8, 5) +
-    ((T7 and X6) or (not T7 and X5)) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[17] + C1 + TBits.RotateLeft32(T1, 5) +
-    ((T8 and X7) or (not T8 and X6)) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[18] + C1 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (not T1 and X7)) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[19] + C1 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (not T2 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[20] + C2 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[21] + C2 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[22] + C2 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[23] + C2 + TBits.RotateLeft32(T7, 5) +
-    (T6 xor X5 xor X4) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[24] + C2 + TBits.RotateLeft32(T8, 5) +
-    (T7 xor X6 xor X5) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[25] + C2 + TBits.RotateLeft32(T1, 5) +
-    (T8 xor X7 xor X6) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[26] + C2 + TBits.RotateLeft32(T2, 5) +
-    (T1 xor X8 xor X7) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[27] + C2 + TBits.RotateLeft32(T3, 5) +
-    (T2 xor X1 xor X8) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[28] + C2 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[29] + C2 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[30] + C2 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[31] + C2 + TBits.RotateLeft32(T7, 5) +
-    (T6 xor X5 xor X4) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[32] + C2 + TBits.RotateLeft32(T8, 5) +
-    (T7 xor X6 xor X5) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[33] + C2 + TBits.RotateLeft32(T1, 5) +
-    (T8 xor X7 xor X6) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[34] + C2 + TBits.RotateLeft32(T2, 5) +
-    (T1 xor X8 xor X7) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[35] + C2 + TBits.RotateLeft32(T3, 5) +
-    (T2 xor X1 xor X8) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[36] + C2 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[37] + C2 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[38] + C2 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[39] + C2 + TBits.RotateLeft32(T7, 5) +
-    (T6 xor X5 xor X4) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[40] + C3 + TBits.RotateLeft32(T8, 5) +
-    ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[41] + C3 + TBits.RotateLeft32(T1, 5) +
-    ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[42] + C3 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[43] + C3 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[44] + C3 + TBits.RotateLeft32(T4, 5) +
-    ((T3 and X2) or (T3 and X1) or (X2 and X1)) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[45] + C3 + TBits.RotateLeft32(T5, 5) +
-    ((T4 and X3) or (T4 and X2) or (X3 and X2)) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[46] + C3 + TBits.RotateLeft32(T6, 5) +
-    ((T5 and X4) or (T5 and X3) or (X4 and X3)) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[47] + C3 + TBits.RotateLeft32(T7, 5) +
-    ((T6 and X5) or (T6 and X4) or (X5 and X4)) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[48] + C3 + TBits.RotateLeft32(T8, 5) +
-    ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[49] + C3 + TBits.RotateLeft32(T1, 5) +
-    ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[50] + C3 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[51] + C3 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[52] + C3 + TBits.RotateLeft32(T4, 5) +
-    ((T3 and X2) or (T3 and X1) or (X2 and X1)) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[53] + C3 + TBits.RotateLeft32(T5, 5) +
-    ((T4 and X3) or (T4 and X2) or (X3 and X2)) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[54] + C3 + TBits.RotateLeft32(T6, 5) +
-    ((T5 and X4) or (T5 and X3) or (X4 and X3)) + X2;
+  E := (ptr_data[0] + C1 + TBits.RotateLeft32(A, 5) +
+    (D xor (B and (C xor D)))) + E;
 
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[55] + C3 + TBits.RotateLeft32(T7, 5) +
-    ((T6 and X5) or (T6 and X4) or (X5 and X4)) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[56] + C3 + TBits.RotateLeft32(T8, 5) +
-    ((T7 and X6) or (T7 and X5) or (X6 and X5)) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[57] + C3 + TBits.RotateLeft32(T1, 5) +
-    ((T8 and X7) or (T8 and X6) or (X7 and X6)) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[58] + C3 + TBits.RotateLeft32(T2, 5) +
-    ((T1 and X8) or (T1 and X7) or (X8 and X7)) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[59] + C3 + TBits.RotateLeft32(T3, 5) +
-    ((T2 and X1) or (T2 and X8) or (X1 and X8)) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[60] + C4 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[61] + C4 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[62] + C4 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[63] + C4 + TBits.RotateLeft32(T7, 5) +
-    (T6 xor X5 xor X4) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[64] + C4 + TBits.RotateLeft32(T8, 5) +
-    (T7 xor X6 xor X5) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[65] + C4 + TBits.RotateLeft32(T1, 5) +
-    (T8 xor X7 xor X6) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[66] + C4 + TBits.RotateLeft32(T2, 5) +
-    (T1 xor X8 xor X7) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[67] + C4 + TBits.RotateLeft32(T3, 5) +
-    (T2 xor X1 xor X8) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[68] + C4 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[69] + C4 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[70] + C4 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-  T8 := Fptr_Fdata[71] + C4 + TBits.RotateLeft32(T7, 5) +
-    (T6 xor X5 xor X4) + X3;
-
-  X6 := TBits.RotateLeft32(T6, 30);
-  T1 := Fptr_Fdata[72] + C4 + TBits.RotateLeft32(T8, 5) +
-    (T7 xor X6 xor X5) + X4;
-
-  X7 := TBits.RotateLeft32(T7, 30);
-  T2 := Fptr_Fdata[73] + C4 + TBits.RotateLeft32(T1, 5) +
-    (T8 xor X7 xor X6) + X5;
-
-  X8 := TBits.RotateLeft32(T8, 30);
-  T3 := Fptr_Fdata[74] + C4 + TBits.RotateLeft32(T2, 5) +
-    (T1 xor X8 xor X7) + X6;
-
-  X1 := TBits.RotateLeft32(T1, 30);
-  T4 := Fptr_Fdata[75] + C4 + TBits.RotateLeft32(T3, 5) +
-    (T2 xor X1 xor X8) + X7;
-
-  X2 := TBits.RotateLeft32(T2, 30);
-  T5 := Fptr_Fdata[76] + C4 + TBits.RotateLeft32(T4, 5) +
-    (T3 xor X2 xor X1) + X8;
-
-  X3 := TBits.RotateLeft32(T3, 30);
-  T6 := Fptr_Fdata[77] + C4 + TBits.RotateLeft32(T5, 5) +
-    (T4 xor X3 xor X2) + X1;
-
-  X4 := TBits.RotateLeft32(T4, 30);
-  T7 := Fptr_Fdata[78] + C4 + TBits.RotateLeft32(T6, 5) +
-    (T5 xor X4 xor X3) + X2;
-
-  X5 := TBits.RotateLeft32(T5, 30);
-
-  Fptr_Fm_state[0] := Fptr_Fm_state[0] +
-    (Fptr_Fdata[79] + C4 + TBits.RotateLeft32(T7, 5) + (T6 xor X5 xor X4) + X3);
-  Fptr_Fm_state[1] := Fptr_Fm_state[1] + T7;
-  Fptr_Fm_state[2] := Fptr_Fm_state[2] + TBits.RotateLeft32(T6, 30);
-  Fptr_Fm_state[3] := Fptr_Fm_state[3] + X5;
-  Fptr_Fm_state[4] := Fptr_Fm_state[4] + X4;
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[1] + C1 + TBits.RotateLeft32(E, 5) +
+    (C xor (A and (B xor C)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[2] + C1 + TBits.RotateLeft32(D, 5) +
+    (B xor (E and (A xor B)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[3] + C1 + TBits.RotateLeft32(C, 5) +
+    (A xor (D and (E xor A)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[4] + C1 + TBits.RotateLeft32(B, 5) +
+    (E xor (C and (D xor E)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[5] + C1 + TBits.RotateLeft32(A, 5) +
+    (D xor (B and (C xor D)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[6] + C1 + TBits.RotateLeft32(E, 5) +
+    (C xor (A and (B xor C)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[7] + C1 + TBits.RotateLeft32(D, 5) +
+    (B xor (E and (A xor B)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[8] + C1 + TBits.RotateLeft32(C, 5) +
+    (A xor (D and (E xor A)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[9] + C1 + TBits.RotateLeft32(B, 5) +
+    (E xor (C and (D xor E)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[10] + C1 + TBits.RotateLeft32(A, 5) +
+    (D xor (B and (C xor D)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[11] + C1 + TBits.RotateLeft32(E, 5) +
+    (C xor (A and (B xor C)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[12] + C1 + TBits.RotateLeft32(D, 5) +
+    (B xor (E and (A xor B)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[13] + C1 + TBits.RotateLeft32(C, 5) +
+    (A xor (D and (E xor A)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[14] + C1 + TBits.RotateLeft32(B, 5) +
+    (E xor (C and (D xor E)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[15] + C1 + TBits.RotateLeft32(A, 5) +
+    (D xor (B and (C xor D)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[16] + C1 + TBits.RotateLeft32(E, 5) +
+    (C xor (A and (B xor C)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[17] + C1 + TBits.RotateLeft32(D, 5) +
+    (B xor (E and (A xor B)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[18] + C1 + TBits.RotateLeft32(C, 5) +
+    (A xor (D and (E xor A)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[19] + C1 + TBits.RotateLeft32(B, 5) +
+    (E xor (C and (D xor E)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[20] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[21] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[22] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[23] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[24] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[25] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[26] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[27] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[28] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[29] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[30] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[31] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[32] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[33] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[34] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[35] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[36] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[37] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[38] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[39] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[40] + C3 + TBits.RotateLeft32(A, 5) +
+    ((B and C) or (D and (B or C)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[41] + C3 + TBits.RotateLeft32(E, 5) +
+    ((A and B) or (C and (A or B)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[42] + C3 + TBits.RotateLeft32(D, 5) +
+    ((E and A) or (B and (E or A)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[43] + C3 + TBits.RotateLeft32(C, 5) +
+    ((D and E) or (A and (D or E)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[44] + C3 + TBits.RotateLeft32(B, 5) +
+    ((C and D) or (E and (C or D)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[45] + C3 + TBits.RotateLeft32(A, 5) +
+    ((B and C) or (D and (B or C)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[46] + C3 + TBits.RotateLeft32(E, 5) +
+    ((A and B) or (C and (A or B)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[47] + C3 + TBits.RotateLeft32(D, 5) +
+    ((E and A) or (B and (E or A)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[48] + C3 + TBits.RotateLeft32(C, 5) +
+    ((D and E) or (A and (D or E)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[49] + C3 + TBits.RotateLeft32(B, 5) +
+    ((C and D) or (E and (C or D)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[50] + C3 + TBits.RotateLeft32(A, 5) +
+    ((B and C) or (D and (B or C)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[51] + C3 + TBits.RotateLeft32(E, 5) +
+    ((A and B) or (C and (A or B)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[52] + C3 + TBits.RotateLeft32(D, 5) +
+    ((E and A) or (B and (E or A)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[53] + C3 + TBits.RotateLeft32(C, 5) +
+    ((D and E) or (A and (D or E)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[54] + C3 + TBits.RotateLeft32(B, 5) +
+    ((C and D) or (E and (C or D)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[55] + C3 + TBits.RotateLeft32(A, 5) +
+    ((B and C) or (D and (B or C)))) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[56] + C3 + TBits.RotateLeft32(E, 5) +
+    ((A and B) or (C and (A or B)))) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[57] + C3 + TBits.RotateLeft32(D, 5) +
+    ((E and A) or (B and (E or A)))) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[58] + C3 + TBits.RotateLeft32(C, 5) +
+    ((D and E) or (A and (D or E)))) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[59] + C3 + TBits.RotateLeft32(B, 5) +
+    ((C and D) or (E and (C or D)))) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[60] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[61] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[62] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[63] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[64] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[65] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[66] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[67] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[68] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[69] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[70] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[71] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[72] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[73] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[74] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+  E := (ptr_data[75] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+
+  B := TBits.RotateLeft32(B, 30);
+  D := (ptr_data[76] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+
+  A := TBits.RotateLeft32(A, 30);
+  C := (ptr_data[77] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+
+  E := TBits.RotateLeft32(E, 30);
+  B := (ptr_data[78] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+
+  D := TBits.RotateLeft32(D, 30);
+  A := (ptr_data[79] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+
+  C := TBits.RotateLeft32(C, 30);
+
+  Fptr_Fm_state[0] := Fptr_Fm_state[0] + A;
+  Fptr_Fm_state[1] := Fptr_Fm_state[1] + B;
+  Fptr_Fm_state[2] := Fptr_Fm_state[2] + C;
+  Fptr_Fm_state[3] := Fptr_Fm_state[3] + D;
+  Fptr_Fm_state[4] := Fptr_Fm_state[4] + E;
+
+  System.FillChar(data, System.SizeOf(data), 0);
 
 end;
 

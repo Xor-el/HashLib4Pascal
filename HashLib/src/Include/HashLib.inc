@@ -14,6 +14,8 @@
 {$UNDEF DELPHI}
 {$MODE delphi}
 
+{$DEFINE USE_UNROLLED_VARIANT}
+
 // Disable Overflow and RangeChecks.
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
@@ -31,6 +33,8 @@
 {$OPTIMIZATION REGVAR}
 {$OPTIMIZATION LOOPUNROLL}
 {$OPTIMIZATION STRENGTH}
+{$OPTIMIZATION CSE}
+{$OPTIMIZATION DFA}
 {$IFDEF CPUI386}
 {$OPTIMIZATION USEEBP}
 {$ENDIF}
@@ -42,6 +46,9 @@
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
 {$IFDEF DELPHI}
+
+{.$DEFINE USE_UNROLLED_VARIANT}
+
 // This option is needed to enable code browsing (aka Ctrl+Click)
 // It does not affect the binary size or generated code
 {$DEFINITIONINFO ON}

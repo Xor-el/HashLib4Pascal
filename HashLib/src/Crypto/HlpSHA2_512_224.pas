@@ -8,14 +8,10 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
   HlpHashLibTypes,
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpSHA2_512Base,
   HlpConverters;
 
@@ -41,18 +37,19 @@ begin
 end;
 
 function TSHA2_512_224.GetResult: THashLibByteArray;
-var
-  tempResult: THashLibByteArray;
 begin
-  tempResult := TConverters.ConvertUInt64ToBytesSwapOrder(Fm_state);
-  System.SetLength(result, HashSize);
-  System.Move(tempResult[0], result[0], HashSize * System.SizeOf(Byte));
+
+  System.SetLength(result, 4 * System.SizeOf(UInt64));
+  TConverters.be64_copy(PUInt64(Fm_state), 0, PByte(result), 0,
+    System.Length(result));
+  System.SetLength(result, HashSize * System.SizeOf(Byte));
+
 end;
 
 procedure TSHA2_512_224.Initialize;
 begin
 
-  Fptr_Fm_state[0] := $8C3D37C819544DA2;
+  Fptr_Fm_state[0] := UInt64($8C3D37C819544DA2);
   Fptr_Fm_state[1] := $73E1996689DCD4D6;
   Fptr_Fm_state[2] := $1DFAB7AE32FF9C82;
   Fptr_Fm_state[3] := $679DD514582F9FCF;

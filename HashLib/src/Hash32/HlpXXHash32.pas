@@ -17,6 +17,9 @@ uses
   HlpNullable,
   HlpBits;
 
+resourcestring
+  SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
+
 type
 
   TXXHash32 = class sealed(THash, IHash32, IBlockHash, IHashWithKey,
@@ -24,8 +27,7 @@ type
 
   strict private
 
-    Fm_key, Fm_hash, Fv1, Fv2, Fv3, Fv4: UInt32;
-    FptrLimit, FptrEnd, FptrBuffer, FptrTemp: Pointer;
+    Fm_key, Fm_hash: UInt32;
 
   const
     CKEY = UInt32(0);
@@ -74,12 +76,13 @@ constructor TXXHash32.Create;
 begin
   Inherited Create(4, 16);
   Fm_key := CKEY;
+  System.SetLength(F_state.memory, 16);
 
 end;
 
 function TXXHash32.GetKey: THashLibByteArray;
 begin
-  result := TConverters.ConvertUInt32ToBytes(Fm_key);
+  result := TConverters.ReadUInt32AsBytesLE(Fm_key);
 end;
 
 function TXXHash32.GetKeyLength: TNullableInteger;
@@ -96,7 +99,6 @@ begin
   F_state.v4 := Fm_key - PRIME32_1;
   F_state.total_len := 0;
   F_state.memsize := 0;
-  System.SetLength(F_state.memory, 16);
 
 end;
 
@@ -108,93 +110,99 @@ begin
   end
   else
   begin
-{$IFDEF DEBUG}
-    System.Assert(System.Length(value) = KeyLength.value);
-{$ENDIF}
-    Fm_key := TConverters.ConvertBytesToUInt32a2(value);
+    if System.Length(value) <> KeyLength.value then
+      raise EArgumentException.CreateResFmt(@SInvalidKeyLength,
+        [KeyLength.value]);
+    Fm_key := TConverters.ReadBytesAsUInt32LE(PByte(value), 0);
   end;
 end;
 
 procedure TXXHash32.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
+var
+  v1, v2, v3, v4: UInt32;
+  ptrLimit, ptrEnd, ptrBuffer, ptrTemp, ptrMemory: PByte;
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
 {$ENDIF}
-  FptrBuffer := @a_data[a_index];
+  ptrBuffer := @a_data[a_index];
+  ptrMemory := PByte(F_state.memory);
   F_state.total_len := F_state.total_len + UInt64(a_length);
 
   if ((F_state.memsize + UInt32(a_length)) < UInt32(16)) then
   begin
 
-    FptrTemp := Pointer(NativeUInt(F_state.memory) + F_state.memsize);
+    ptrTemp := PByte(F_state.memory) + F_state.memsize;
 
-    System.Move(FptrBuffer^, FptrTemp^, a_length);
+    System.Move(ptrBuffer^, ptrTemp^, a_length);
 
     F_state.memsize := F_state.memsize + UInt32(a_length);
 
     Exit;
   end;
 
-  FptrEnd := Pointer(NativeUInt(FptrBuffer) + UInt32(a_length));
+  ptrEnd := ptrBuffer + UInt32(a_length);
 
   if F_state.memsize > 0 then
   begin
-    FptrTemp := Pointer(NativeUInt(F_state.memory) + F_state.memsize);
-    System.Move(FptrBuffer^, FptrTemp^, 16 - F_state.memsize);
+    ptrTemp := PByte(F_state.memory) + F_state.memsize;
+    System.Move(ptrBuffer^, ptrTemp^, 16 - F_state.memsize);
 
     F_state.v1 := PRIME32_1 * TBits.RotateLeft32(F_state.v1 + PRIME32_2 *
-      PCardinal(F_state.memory)^, 13);
+      TConverters.ReadBytesAsUInt32LE(ptrMemory, 0), 13);
     F_state.v2 := PRIME32_1 * TBits.RotateLeft32(F_state.v2 + PRIME32_2 *
-      PCardinal(NativeUInt(F_state.memory) + 4)^, 13);
+      TConverters.ReadBytesAsUInt32LE(ptrMemory, 4), 13);
     F_state.v3 := PRIME32_1 * TBits.RotateLeft32(F_state.v3 + PRIME32_2 *
-      PCardinal(NativeUInt(F_state.memory) + 8)^, 13);
+      TConverters.ReadBytesAsUInt32LE(ptrMemory, 8), 13);
     F_state.v4 := PRIME32_1 * TBits.RotateLeft32(F_state.v4 + PRIME32_2 *
-      PCardinal(NativeUInt(F_state.memory) + 12)^, 13);
+      TConverters.ReadBytesAsUInt32LE(ptrMemory, 12), 13);
 
-    FptrBuffer := Pointer(NativeUInt(FptrBuffer) + (16 - F_state.memsize));
+    ptrBuffer := ptrBuffer + (16 - F_state.memsize);
     F_state.memsize := 0;
   end;
 
-  if NativeUInt(FptrBuffer) <= (NativeUInt(FptrEnd) - 16) then
+  if ptrBuffer <= (ptrEnd - 16) then
   begin
-    Fv1 := F_state.v1;
-    Fv2 := F_state.v2;
-    Fv3 := F_state.v3;
-    Fv4 := F_state.v4;
+    v1 := F_state.v1;
+    v2 := F_state.v2;
+    v3 := F_state.v3;
+    v4 := F_state.v4;
 
-    FptrLimit := Pointer(NativeUInt(FptrEnd) - 16);
+    ptrLimit := ptrEnd - 16;
     repeat
-      Fv1 := PRIME32_1 * TBits.RotateLeft32
-        (Fv1 + PRIME32_2 * PCardinal(FptrBuffer)^, 13);
-      Fv2 := PRIME32_1 * TBits.RotateLeft32
-        (Fv2 + PRIME32_2 * PCardinal(NativeUInt(FptrBuffer) + 4)^, 13);
-      Fv3 := PRIME32_1 * TBits.RotateLeft32
-        (Fv3 + PRIME32_2 * PCardinal(NativeUInt(FptrBuffer) + 8)^, 13);
-      Fv4 := PRIME32_1 * TBits.RotateLeft32
-        (Fv4 + PRIME32_2 * PCardinal(NativeUInt(FptrBuffer) + 12)^, 13);
-      System.Inc(NativeUInt(FptrBuffer), 16);
-    until not(NativeUInt(FptrBuffer) <= NativeUInt(FptrLimit));
 
-    F_state.v1 := Fv1;
-    F_state.v2 := Fv2;
-    F_state.v3 := Fv3;
-    F_state.v4 := Fv4;
+      v1 := PRIME32_1 * TBits.RotateLeft32
+        (v1 + PRIME32_2 * TConverters.ReadBytesAsUInt32LE(ptrBuffer, 0), 13);
+      v2 := PRIME32_1 * TBits.RotateLeft32
+        (v2 + PRIME32_2 * TConverters.ReadBytesAsUInt32LE(ptrBuffer, 4), 13);
+      v3 := PRIME32_1 * TBits.RotateLeft32
+        (v3 + PRIME32_2 * TConverters.ReadBytesAsUInt32LE(ptrBuffer, 8), 13);
+      v4 := PRIME32_1 * TBits.RotateLeft32
+        (v4 + PRIME32_2 * TConverters.ReadBytesAsUInt32LE(ptrBuffer, 12), 13);
+      System.Inc(ptrBuffer, 16);
+    until not(ptrBuffer <= ptrLimit);
+
+    F_state.v1 := v1;
+    F_state.v2 := v2;
+    F_state.v3 := v3;
+    F_state.v4 := v4;
   end;
 
-  if NativeUInt(FptrBuffer) < NativeUInt(FptrEnd) then
+  if ptrBuffer < ptrEnd then
   begin
-    FptrTemp := F_state.memory;
-    System.Move(FptrBuffer^, FptrTemp^, NativeUInt(FptrEnd) -
-      NativeUInt(FptrBuffer));
-    F_state.memsize := NativeUInt(FptrEnd) - NativeUInt(FptrBuffer);
+    ptrTemp := PByte(F_state.memory);
+    System.Move(ptrBuffer^, ptrTemp^, ptrEnd - ptrBuffer);
+    F_state.memsize := ptrEnd - ptrBuffer;
   end;
 
 end;
 
 function TXXHash32.TransformFinal: IHashResult;
+var
+  ptrEnd, ptrBuffer: PByte;
 begin
 
   if F_state.total_len >= UInt64(16) then
@@ -205,20 +213,22 @@ begin
     Fm_hash := Fm_key + PRIME32_5;
   System.Inc(Fm_hash, F_state.total_len);
 
-  FptrBuffer := F_state.memory;
-  FptrEnd := Pointer(NativeUInt(FptrBuffer) + F_state.memsize);
-  while (NativeUInt(FptrBuffer) + 4) <= (NativeUInt(FptrEnd)) do
+  ptrBuffer := PByte(F_state.memory);
+
+  ptrEnd := ptrBuffer + F_state.memsize;
+  while ((ptrBuffer + 4) <= ptrEnd) do
   begin
-    Fm_hash := Fm_hash + PCardinal(FptrBuffer)^ * PRIME32_3;
+    Fm_hash := Fm_hash + TConverters.ReadBytesAsUInt32LE(ptrBuffer, 0) *
+      PRIME32_3;
     Fm_hash := TBits.RotateLeft32(Fm_hash, 17) * PRIME32_4;
-    System.Inc(NativeUInt(FptrBuffer), 4);
+    System.Inc(ptrBuffer, 4);
   end;
 
-  while NativeUInt(FptrBuffer) < NativeUInt(FptrEnd) do
+  while ptrBuffer < ptrEnd do
   begin
-    Fm_hash := Fm_hash + PByte(FptrBuffer)^ * PRIME32_5;
+    Fm_hash := Fm_hash + ptrBuffer^ * PRIME32_5;
     Fm_hash := TBits.RotateLeft32(Fm_hash, 11) * PRIME32_1;
-    System.Inc(NativeUInt(FptrBuffer));
+    System.Inc(ptrBuffer);
   end;
 
   Fm_hash := Fm_hash xor (Fm_hash shr 15);

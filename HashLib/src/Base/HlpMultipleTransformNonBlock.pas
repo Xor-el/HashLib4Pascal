@@ -5,23 +5,17 @@ unit HlpMultipleTransformNonBlock;
 interface
 
 uses
-{$IFNDEF DELPHIXE7_UP}
-{$IFDEF HAS_UNITSCOPE}
-  System.TypInfo,
-{$ELSE}
-  TypInfo,
-{$ENDIF HAS_UNITSCOPE}
-{$ENDIF DELPHIXE7_UP}
+{$IFDEF DELPHI}
 {$IFDEF HAS_UNITSCOPE}
   System.Generics.Collections,
+{$ELSE}
+  Generics.Collections,
+{$ENDIF HAS_UNITSCOPE}
 {$ELSE}
 {$IFDEF FPC}
   fgl,
 {$ENDIF FPC}
-{$IFDEF DELPHI}
-  Generics.Collections,
 {$ENDIF DELPHI}
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpHash,
   HlpIHashInfo,
@@ -34,7 +28,7 @@ type
   strict private
 
     Fm_list: {$IFDEF DELPHI} TList<THashLibByteArray>
-{$ELSE} TFPGList<THashLibByteArray> {$ENDIF};
+{$ELSE} TFPGList<THashLibByteArray> {$ENDIF DELPHI};
 
     function Aggregate(): THashLibByteArray;
 
@@ -85,7 +79,7 @@ constructor TMultipleTransformNonBlock.Create(a_hash_size, a_block_size: Int32);
 begin
   Inherited Create(a_hash_size, a_block_size);
   Fm_list := {$IFDEF DELPHI} TList<THashLibByteArray>
-{$ELSE} TFPGList<THashLibByteArray> {$ENDIF}.Create();
+{$ELSE} TFPGList<THashLibByteArray> {$ENDIF DELPHI}.Create();
 end;
 
 destructor TMultipleTransformNonBlock.Destroy;
@@ -107,7 +101,7 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
-{$ENDIF}
+{$ENDIF DEBUG}
   Fm_list.Add(System.Copy(a_data, a_index, a_length));
 
 end;

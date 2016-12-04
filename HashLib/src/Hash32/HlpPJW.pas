@@ -20,8 +20,6 @@ type
   const
     UInt32MaxValue = UInt32(4294967295);
     BitsInUnsignedInt = Int32(System.SizeOf(UInt32) * 8);
-    // ThreeQuarters = Int32(BitsInUnsignedInt * 3) div 4;
-    // OneEighth = Int32(BitsInUnsignedInt div 8);
     ThreeQuarters = Int32(BitsInUnsignedInt * 3) shr 2;
     OneEighth = Int32(BitsInUnsignedInt shr 3);
     HighBits = UInt32(UInt32MaxValue shl (BitsInUnsignedInt - OneEighth));
