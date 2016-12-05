@@ -26,6 +26,7 @@ type
 
     Fm_hash: IHash;
     Fm_opad, Fm_ipad, Fm_key: THashLibByteArray;
+    Fm_blocksize: Int32;
 
   strict protected
 
@@ -57,9 +58,10 @@ constructor THMACNotBuildInAdapter.Create(a_underlyingHash: IHash);
 begin
   Inherited Create(a_underlyingHash.HashSize, a_underlyingHash.BlockSize);
   Fm_hash := a_underlyingHash;
+  Fm_blocksize := Fm_hash.BlockSize;
   System.SetLength(Fm_key, 0);
-  System.SetLength(Fm_ipad, Fm_hash.BlockSize);
-  System.SetLength(Fm_opad, Fm_hash.BlockSize);
+  System.SetLength(Fm_ipad, Fm_blocksize);
+  System.SetLength(Fm_opad, Fm_blocksize);
 end;
 
 function THMACNotBuildInAdapter.GetKey: THashLibByteArray;
@@ -88,9 +90,10 @@ end;
 procedure THMACNotBuildInAdapter.UpdatePads;
 var
   LKey: THashLibByteArray;
-  Idx: Int32;
+  Idx, LBlockSize: Int32;
 begin
-  if (System.Length(Key) > Fm_hash.BlockSize) then
+  LBlockSize := Fm_hash.BlockSize;
+  if (System.Length(Key) > LBlockSize) then
   begin
     LKey := Fm_hash.ComputeBytes(Key).GetBytes();
   end
@@ -99,11 +102,11 @@ begin
     LKey := Key;
   end;
 
-  System.FillChar(Fm_ipad[0], Fm_hash.BlockSize * System.SizeOf(Byte), $36);
-  System.FillChar(Fm_opad[0], Fm_hash.BlockSize * System.SizeOf(Byte), $5C);
+  System.FillChar(Fm_ipad[0], LBlockSize * System.SizeOf(Byte), $36);
+  System.FillChar(Fm_opad[0], LBlockSize * System.SizeOf(Byte), $5C);
 
   Idx := 0;
-  while (Idx < System.Length(LKey)) and (Idx < Fm_hash.BlockSize) do
+  while (Idx < System.Length(LKey)) and (Idx < LBlockSize) do
   begin
     Fm_ipad[Idx] := Fm_ipad[Idx] xor LKey[Idx];
     Fm_opad[Idx] := Fm_opad[Idx] xor LKey[Idx];
