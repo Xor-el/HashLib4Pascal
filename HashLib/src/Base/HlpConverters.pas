@@ -7,9 +7,11 @@ interface
 uses
 {$IFDEF HAS_UNITSCOPE}
   System.Classes,
+  System.StrUtils,
   System.SysUtils,
 {$ELSE}
   Classes,
+  StrUtils,
   SysUtils,
 {$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
@@ -20,16 +22,12 @@ type
   TConverters = class sealed(TObject)
 
   strict private
-{$IFDEF DELPHI}
-    // lifted from DUnitX.Utils.
-    class function SplitString(const S, Delimiters: string)
+    class function SplitString(const S: String; Delimiter: Char)
       : THashLibStringArray; static;
 
-{$ENDIF DELPHI}
 {$IFDEF DEBUG}
     class procedure Check(a_in: THashLibByteArray;
       a_in_size, a_out_size: Int32); overload; static;
-
 {$ENDIF DEBUG}
     class procedure swap_copy_str_to_u32(src: Pointer; src_index: Int32;
       dest: Pointer; dest_index: Int32; length: Int32); static;
@@ -319,12 +317,8 @@ class function TConverters.ConvertBytesToHexString(a_in: THashLibByteArray;
   a_group: Boolean): String;
 var
   I: Int32;
-  hex, StrtoProcess: String;
+  hex, workstring: String;
   ar: THashLibStringArray;
-{$IFNDEF DELPHI}
-  StringList: TStringList;
-  LowVal: Int32;
-{$ENDIF DELPHI}
 begin
 
   hex := AnsiUpperCase(TBitConverter.ToString(a_in));
@@ -346,24 +340,9 @@ begin
 {$IFDEF DEBUG}
     Check(a_in, 1, 4);
 {$ENDIF DEBUG}
-    StrtoProcess := AnsiUpperCase(TBitConverter.ToString(a_in));
-{$IFNDEF DELPHI}
-    StringList := TStringList.Create();
-    StringList.StrictDelimiter := True;
-    try
-      StringList.Delimiter := '-';
-      StringList.DelimitedText := StrtoProcess;
-      System.SetLength(ar, StringList.Count);
-      for LowVal := 0 to StringList.Count - 1 do
-        ar[LowVal] := StringList.Strings[LowVal];
-    finally
-      StringList.Free;
-    end;
+    workstring := AnsiUpperCase(TBitConverter.ToString(a_in));
 
-{$ELSE}
-    ar := TConverters.SplitString(StrtoProcess, '-');
-
-{$ENDIF DELPHI}
+    ar := TConverters.SplitString(workstring, '-');
     hex := '';
     I := 0;
 
@@ -404,74 +383,39 @@ begin
   result := a_encoding.GetBytes(a_in);
 end;
 
-{$IFDEF DELPHI}
-
-class function TConverters.SplitString(const S, Delimiters: string)
+class function TConverters.SplitString(const S: String; Delimiter: Char)
   : THashLibStringArray;
 var
-  StartIdx, FoundIdx, SplitPoints, CurrentSplit, I: Int32;
+  PosStart, PosDel, SplitPoints, I, Len: Int32;
 begin
   result := Nil;
-
-{$IFNDEF NEXTGEN}
   if S <> '' then
   begin
     { Determine the length of the resulting array }
     SplitPoints := 0;
     for I := 1 to System.length(S) do
-      if IsDelimiter(Delimiters, S, I) then
+    begin
+      if (Delimiter = S[I]) then
         System.Inc(SplitPoints);
+    end;
 
     System.SetLength(result, SplitPoints + 1);
 
     { Split the string and fill the resulting array }
-    StartIdx := 1;
-    CurrentSplit := 0;
-    repeat
-      FoundIdx := FindDelimiter(Delimiters, S, StartIdx);
-      if FoundIdx <> 0 then
-      begin
-        result[CurrentSplit] := System.Copy(S, StartIdx, FoundIdx - StartIdx);
-        System.Inc(CurrentSplit);
-        StartIdx := FoundIdx + 1;
-      end;
-    until CurrentSplit = SplitPoints;
 
-    // copy the remaining part in case the string does not end in a delimiter
-    result[SplitPoints] := System.Copy(S, StartIdx,
-      System.length(S) - StartIdx + 1);
+    I := 0;
+    Len := System.length(Delimiter);
+    PosStart := 1;
+    PosDel := System.Pos(Delimiter, S);
+    while PosDel > 0 do
+    begin
+      result[I] := System.Copy(S, PosStart, PosDel - PosStart);
+      PosStart := PosDel + Len;
+      PosDel := PosEx(Delimiter, S, PosStart);
+      System.Inc(I);
+    end;
+    result[I] := System.Copy(S, PosStart, System.length(S));
   end;
-{$ELSE}
-  if S <> string.Empty then
-  begin
-    { Determine the length of the resulting array }
-    SplitPoints := 0;
-    for I := 0 to S.length - 1 do
-      if S.IsDelimiter(Delimiters, I) then
-        Inc(SplitPoints);
-
-    System.SetLength(result, SplitPoints + 1);
-
-    { Split the string and fill the resulting array }
-    StartIdx := 0;
-    CurrentSplit := 0;
-    repeat
-      FoundIdx := S.IndexOfAny(Delimiters.ToCharArray, StartIdx);
-      if FoundIdx <> -1 then
-      begin
-        result[CurrentSplit] := S.SubString(StartIdx, FoundIdx - StartIdx);
-        Inc(CurrentSplit);
-        StartIdx := FoundIdx + 1;
-      end;
-    until CurrentSplit = SplitPoints;
-
-    // copy the remaining part in case the string does not end in a delimiter
-    result[SplitPoints] := S.SubString(StartIdx, S.length - StartIdx + 1);
-  end;
-
-{$ENDIF NEXTGEN}
 end;
-
-{$ENDIF DELPHI}
 
 end.
