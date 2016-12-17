@@ -457,6 +457,11 @@ var
   k1, k2, k3, k4: UInt32;
   ptr_a_data: PByte;
 begin
+{$IFDEF DEBUG}
+  System.Assert(a_index >= 0);
+  System.Assert(a_length >= 0);
+  System.Assert(a_index + a_length <= System.Length(a_data));
+{$ENDIF DEBUG}
   len := a_length;
   i := a_index;
   lIdx := 0;

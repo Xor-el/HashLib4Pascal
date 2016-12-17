@@ -137,7 +137,7 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
-{$ENDIF}
+{$ENDIF DEBUG}
   ptrBuffer := @a_data[a_index];
   ptrMemory := PByte(F_state.memory);
   F_state.total_len := F_state.total_len + UInt64(a_length);

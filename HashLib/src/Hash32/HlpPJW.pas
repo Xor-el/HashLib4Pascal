@@ -56,7 +56,7 @@ begin
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
-{$ENDIF}
+{$ENDIF DEBUG}
   i := a_index;
   while a_length > 0 do
   begin
