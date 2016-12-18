@@ -402,7 +402,7 @@ begin
   else
   begin
     if System.length(value) <> KeyLength.value then
-      raise EArgumentException.CreateResFmt(@SInvalidKeyLength,
+      raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength.value]);
 
     Fm_key := TConverters.ReadBytesAsUInt32LE(PByte(value), 0);
@@ -420,7 +420,7 @@ begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
-  System.Assert(a_index + a_length <= System.Length(a_data));
+  System.Assert(a_index + a_length <= System.length(a_data));
 {$ENDIF DEBUG}
   len := a_length;
   i := a_index;

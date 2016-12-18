@@ -56,8 +56,8 @@ type
     /// </summary>
     /// <param name="bc">The number of pseudo-random key bytes to generate.</param>
     /// <returns>A byte array filled with pseudo-random key bytes.</returns>
-    /// <exception cref="EArgumentOutOfRangeException">bc must be greater than zero.</exception>
-    /// <exception cref="EArgumentException">invalid start index or end index of internal buffer.</exception>
+    /// <exception cref="EArgumentOutOfRangeHashLibException">bc must be greater than zero.</exception>
+    /// <exception cref="EArgumentHashLibException">invalid start index or end index of internal buffer.</exception>
     function GetBytes(bc: Int32): THashLibByteArray; override;
 
   end;
@@ -133,7 +133,7 @@ var
 begin
 
   if (bc <= 0) then
-    raise EArgumentOutOfRangeException.CreateRes(@SInvalidArgument);
+    raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidArgument);
 
   System.SetLength(LKey, bc);
 
@@ -158,7 +158,7 @@ begin
   end;
 
   if ((FstartIndex <> 0) and (FendIndex <> 0)) then
-    raise EArgumentException.CreateRes(@SInvalidIndex);
+    raise EArgumentHashLibException.CreateRes(@SInvalidIndex);
 
   while (LOffset < bc) do
   begin

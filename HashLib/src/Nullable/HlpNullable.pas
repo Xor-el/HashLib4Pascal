@@ -128,7 +128,8 @@ begin
   if not System.Assigned(a) then
     Result.ClearValue
   else
-    raise EInvalidOperationException.CreateRes(@SCannotAssignPointerToNullable);
+    raise EInvalidOperationHashLibException.CreateRes
+      (@SCannotAssignPointerToNullable);
 end;
 
 // got the idea from Andreas Hausladen
@@ -208,7 +209,7 @@ begin
     tkUString:
       ;
   else
-    Raise EUnsupportedType.CreateRes(@SUnsupportedType);
+    Raise EUnsupportedTypeHashLibException.CreateRes(@SUnsupportedType);
   end;
 end;
 
@@ -218,7 +219,7 @@ begin
     if HasDefault then
       fValue := fDefault
     else
-      raise ENullReference.CreateRes(@SGetNullValue);
+      raise ENullReferenceHashLibException.CreateRes(@SGetNullValue);
 end;
 
 procedure Nullable<T>.ClearValue;

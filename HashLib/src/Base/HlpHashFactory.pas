@@ -374,8 +374,8 @@ type
       /// <param name="password">The password to derive the key for.</param>
       /// <param name="salt">The salt to use to derive the key.</param>
       /// <param name="iterations">The number of iterations to use to derive the key.</param>
-      /// <exception cref="EArgumentNilException">The password, salt or algorithm is Nil.</exception>
-      /// <exception cref="EArgumentException">The iteration is less than 1.</exception>
+      /// <exception cref="EArgumentNilHashLibException">The password, salt or algorithm is Nil.</exception>
+      /// <exception cref="EArgumentHashLibException">The iteration is less than 1.</exception>
 
       class function CreatePBKDF2_HMAC(a_hash: IHash;
         a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
@@ -636,7 +636,7 @@ begin
         hsHashSize256:
           result := CreateHaval_3_256();
       else
-        raise EArgumentException.CreateRes(@SInvalidHavalHashSize);
+        raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
 
     hrRounds4:
@@ -652,7 +652,7 @@ begin
         hsHashSize256:
           result := CreateHaval_4_256();
       else
-        raise EArgumentException.CreateRes(@SInvalidHavalHashSize);
+        raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
 
     hrRounds5:
@@ -668,11 +668,11 @@ begin
         hsHashSize256:
           result := CreateHaval_5_256();
       else
-        raise EArgumentException.CreateRes(@SInvalidHavalHashSize);
+        raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
 
   else
-    raise EArgumentException.CreateRes(@SInvalidHavalRound);
+    raise EArgumentHashLibException.CreateRes(@SInvalidHavalRound);
   end;
 end;
 
@@ -870,7 +870,7 @@ class function THashFactory.TCrypto.CreateSnefru(a_security_level: Int32;
   a_hash_size: THashSize): IHash;
 begin
   if a_security_level < Int32(1) then
-    raise EArgumentException.CreateRes(@SInvalidSnefruLevel);
+    raise EArgumentHashLibException.CreateRes(@SInvalidSnefruLevel);
 
   if ((a_hash_size = THashSize.hsHashSize128) or
     (a_hash_size = THashSize.hsHashSize256)) then
@@ -879,7 +879,7 @@ begin
   end
   else
   begin
-    raise EArgumentException.CreateRes(@SInvalidSnefruHashSize);
+    raise EArgumentHashLibException.CreateRes(@SInvalidSnefruHashSize);
   end
 
 end;
@@ -948,7 +948,7 @@ class function THashFactory.TCrypto.CreateTiger(a_hash_size: Int32;
   a_rounds: THashRounds): IHash;
 begin
   if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
-    raise EArgumentException.CreateRes(@SInvalidTigerHashSize);
+    raise EArgumentHashLibException.CreateRes(@SInvalidTigerHashSize);
 
   result := TTiger_Base.Create(a_hash_size, a_rounds);
 end;
@@ -957,7 +957,7 @@ class function THashFactory.TCrypto.CreateTiger2(a_hash_size: Int32;
   a_rounds: THashRounds): IHash;
 begin
   if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
-    raise EArgumentException.CreateRes(@SInvalidTiger2HashSize);
+    raise EArgumentHashLibException.CreateRes(@SInvalidTiger2HashSize);
 
   result := TTiger2_Base.Create(a_hash_size, a_rounds);
 end;
@@ -1032,16 +1032,16 @@ class function TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(a_hash: IHash;
 begin
 
   if not(System.Assigned(a_hash)) then
-    raise EArgumentNilException.CreateRes(@SUninitializedInstance);
+    raise EArgumentNilHashLibException.CreateRes(@SUninitializedInstance);
 
   if (a_password = Nil) then
-    raise EArgumentNilException.CreateRes(@SEmptyPassword);
+    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
 
   if (a_salt = Nil) then
-    raise EArgumentNilException.CreateRes(@SEmptySalt);
+    raise EArgumentNilHashLibException.CreateRes(@SEmptySalt);
 
   if (a_iterations < 1) then
-    raise EArgumentException.CreateRes(@SIterationtooSmall);
+    raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
 
   result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
     a_iterations);

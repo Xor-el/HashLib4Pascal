@@ -17,14 +17,14 @@ type
 {$IFDEF FPC}
   PUInt64 = ^UInt64;
 {$ENDIF FPC}
-  EInvalidOperationException = class(Exception);
-  EIndexOutOfRangeException = class(Exception);
-  EndOfStreamException = class(Exception);
-  EArgumentException = class(Exception);
-  EArgumentNilException = class(Exception);
-  EArgumentOutOfRangeException = class(Exception);
-  ENullReference = class(Exception);
-  EUnsupportedType = class(Exception);
+  EHashLibException = class(Exception);
+  EInvalidOperationHashLibException = class(EHashLibException);
+  EIndexOutOfRangeHashLibException = class(EHashLibException);
+  EArgumentHashLibException = class(EHashLibException);
+  EArgumentNilHashLibException = class(EHashLibException);
+  EArgumentOutOfRangeHashLibException = class(EHashLibException);
+  ENullReferenceHashLibException = class(EHashLibException);
+  EUnsupportedTypeHashLibException = class(EHashLibException);
 
 {$IFDEF HAS_UNITSCOPE}
   /// <summary>

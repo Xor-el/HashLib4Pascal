@@ -111,7 +111,7 @@ begin
   else
   begin
     if System.Length(value) <> KeyLength.value then
-      raise EArgumentException.CreateResFmt(@SInvalidKeyLength,
+      raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength.value]);
     Fm_key := TConverters.ReadBytesAsUInt32LE(PByte(value), 0);
   end;

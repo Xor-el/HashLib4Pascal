@@ -192,7 +192,8 @@ end;
 function THashResult.GetInt32: Int32;
 begin
   if (System.Length(Fm_hash) <> 4) then
-    raise EInvalidOperationException.CreateRes(@SImpossibleRepresentationInt32);
+    raise EInvalidOperationHashLibException.CreateRes
+      (@SImpossibleRepresentationInt32);
 
   result := Int32((Int32(Fm_hash[0]) shl 24) or (Int32(Fm_hash[1]) shl 16) or
     (Int32(Fm_hash[2]) shl 8) or (Int32(Fm_hash[3])));
@@ -202,7 +203,8 @@ end;
 function THashResult.GetUInt8: UInt8;
 begin
   if (System.Length(Fm_hash) <> 1) then
-    raise EInvalidOperationException.CreateRes(@SImpossibleRepresentationUInt8);
+    raise EInvalidOperationHashLibException.CreateRes
+      (@SImpossibleRepresentationUInt8);
 
   result := (UInt8(Fm_hash[0]));
 end;
@@ -210,7 +212,7 @@ end;
 function THashResult.GetUInt16: UInt16;
 begin
   if (System.Length(Fm_hash) <> 2) then
-    raise EInvalidOperationException.CreateRes
+    raise EInvalidOperationHashLibException.CreateRes
       (@SImpossibleRepresentationUInt16);
 
   result := (UInt16(Fm_hash[0]) shl 8) or (UInt16(Fm_hash[1]));
@@ -220,7 +222,7 @@ end;
 function THashResult.GetUInt32: UInt32;
 begin
   if (System.Length(Fm_hash) <> 4) then
-    raise EInvalidOperationException.CreateRes
+    raise EInvalidOperationHashLibException.CreateRes
       (@SImpossibleRepresentationUInt32);
 
   result := (UInt32(Fm_hash[0]) shl 24) or (UInt32(Fm_hash[1]) shl 16) or
@@ -231,7 +233,7 @@ end;
 function THashResult.GetUInt64: UInt64;
 begin
   if (System.Length(Fm_hash) <> 8) then
-    raise EInvalidOperationException.CreateRes
+    raise EInvalidOperationHashLibException.CreateRes
       (@SImpossibleRepresentationUInt64);
 
   result := (UInt64(Fm_hash[0]) shl 56) or (UInt64(Fm_hash[1]) shl 48) or

@@ -108,7 +108,7 @@ begin
   end
   else
   begin
-    raise EArgumentException.CreateRes(@SInvalidBufferSize);
+    raise EArgumentHashLibException.CreateRes(@SInvalidBufferSize);
   end;
 end;
 
@@ -243,7 +243,7 @@ begin
     begin
 
       if ((a_stream.Position + a_length) > a_stream.Size) then
-        raise EIndexOutOfRangeException.CreateRes(@SIndexOutOfRange);
+        raise EIndexOutOfRangeHashLibException.CreateRes(@SIndexOutOfRange);
     end;
 
     if (a_stream.Position >= a_stream.Size) then
@@ -251,7 +251,7 @@ begin
   end
   else
   begin
-    raise EArgumentNilException.CreateRes(@SUnAssignedStream);
+    raise EArgumentNilHashLibException.CreateRes(@SUnAssignedStream);
   end;
 
   if BufferSize > a_stream.Size then // Sanity Check
@@ -316,7 +316,7 @@ begin
   System.Assert((a_length = -1) or (a_length > 0));
 {$ENDIF DEBUG}
   if not FileExists(a_file_name) then
-    raise EArgumentException.CreateRes(@SFileNotExist);
+    raise EArgumentHashLibException.CreateRes(@SFileNotExist);
 
   MyFileStream := TFileStream.Create(a_file_name, fmOpenRead or
     fmShareDenyWrite);
