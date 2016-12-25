@@ -453,838 +453,454 @@ begin
 
   // Step 2
 
-  T := $428A2F98 + ptr_data[0] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $71374491 + ptr_data[1] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $B5C0FBCF + ptr_data[2] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $E9B5DBA5 + ptr_data[3] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $3956C25B + ptr_data[4] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $59F111F1 + ptr_data[5] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $923F82A4 + ptr_data[6] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $AB1C5ED5 + ptr_data[7] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $D807AA98 + ptr_data[8] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $12835B01 + ptr_data[9] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $243185BE + ptr_data[10] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $550C7DC3 + ptr_data[11] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $72BE5D74 + ptr_data[12] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $80DEB1FE + ptr_data[13] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $9BDC06A7 + ptr_data[14] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $C19BF174 + ptr_data[15] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $E49B69C1 + ptr_data[16] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $EFBE4786 + ptr_data[17] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $0FC19DC6 + ptr_data[18] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $240CA1CC + ptr_data[19] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $2DE92C6F + ptr_data[20] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $4A7484AA + ptr_data[21] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $5CB0A9DC + ptr_data[22] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $76F988DA + ptr_data[23] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $983E5152 + ptr_data[24] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $A831C66D + ptr_data[25] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $B00327C8 + ptr_data[26] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $BF597FC7 + ptr_data[27] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $C6E00BF3 + ptr_data[28] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $D5A79147 + ptr_data[29] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $06CA6351 + ptr_data[30] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $14292967 + ptr_data[31] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $27B70A85 + ptr_data[32] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $2E1B2138 + ptr_data[33] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $4D2C6DFC + ptr_data[34] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $53380D13 + ptr_data[35] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $650A7354 + ptr_data[36] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $766A0ABB + ptr_data[37] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $81C2C92E + ptr_data[38] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $92722C85 + ptr_data[39] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $A2BFE8A1 + ptr_data[40] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $A81A664B + ptr_data[41] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $C24B8B70 + ptr_data[42] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $C76C51A3 + ptr_data[43] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $D192E819 + ptr_data[44] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $D6990624 + ptr_data[45] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $F40E3585 + ptr_data[46] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $106AA070 + ptr_data[47] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $19A4C116 + ptr_data[48] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $1E376C08 + ptr_data[49] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $2748774C + ptr_data[50] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $34B0BCB5 + ptr_data[51] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $391C0CB3 + ptr_data[52] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $4ED8AA4A + ptr_data[53] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $5B9CCA4F + ptr_data[54] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $682E6FF3 + ptr_data[55] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $748F82EE + ptr_data[56] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $78A5636F + ptr_data[57] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $84C87814 + ptr_data[58] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $8CC70208 + ptr_data[59] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $90BEFFFA + ptr_data[60] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $A4506CEB + ptr_data[61] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $BEF9A3F7 + ptr_data[62] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
-  T := $C67178F2 + ptr_data[63] + H +
-    ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
-    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G));
-  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
-    xor (TBits.RotateRight32(A, 22))) + ((A and B) xor (A and C) xor (B and C));
-  H := G;
-  G := F;
-  F := E;
-  E := D + T;
-  D := C;
-  C := B;
-  B := A;
-  A := T + T2;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $428A2F98 + ptr_data[0];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $71374491 + ptr_data[1];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $B5C0FBCF + ptr_data[2];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $E9B5DBA5 + ptr_data[3];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $3956C25B + ptr_data[4];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $59F111F1 + ptr_data[5];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $923F82A4 + ptr_data[6];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $AB1C5ED5 + ptr_data[7];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $D807AA98 + ptr_data[8];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $12835B01 + ptr_data[9];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $243185BE + ptr_data[10];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $550C7DC3 + ptr_data[11];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $72BE5D74 + ptr_data[12];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $80DEB1FE + ptr_data[13];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $9BDC06A7 + ptr_data[14];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $C19BF174 + ptr_data[15];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $E49B69C1 + ptr_data[16];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $EFBE4786 + ptr_data[17];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $0FC19DC6 + ptr_data[18];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $240CA1CC + ptr_data[19];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $2DE92C6F + ptr_data[20];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $4A7484AA + ptr_data[21];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $5CB0A9DC + ptr_data[22];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $76F988DA + ptr_data[23];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $983E5152 + ptr_data[24];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $A831C66D + ptr_data[25];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $B00327C8 + ptr_data[26];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $BF597FC7 + ptr_data[27];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $C6E00BF3 + ptr_data[28];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $D5A79147 + ptr_data[29];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $06CA6351 + ptr_data[30];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $14292967 + ptr_data[31];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $27B70A85 + ptr_data[32];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $2E1B2138 + ptr_data[33];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $4D2C6DFC + ptr_data[34];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $53380D13 + ptr_data[35];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $650A7354 + ptr_data[36];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $766A0ABB + ptr_data[37];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $81C2C92E + ptr_data[38];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $92722C85 + ptr_data[39];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $A2BFE8A1 + ptr_data[40];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $A81A664B + ptr_data[41];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $C24B8B70 + ptr_data[42];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $C76C51A3 + ptr_data[43];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $D192E819 + ptr_data[44];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $D6990624 + ptr_data[45];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $F40E3585 + ptr_data[46];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $106AA070 + ptr_data[47];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $19A4C116 + ptr_data[48];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $1E376C08 + ptr_data[49];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $2748774C + ptr_data[50];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $34B0BCB5 + ptr_data[51];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $391C0CB3 + ptr_data[52];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $4ED8AA4A + ptr_data[53];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $5B9CCA4F + ptr_data[54];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $682E6FF3 + ptr_data[55];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
+  T := H + ((TBits.RotateRight32(E, 6)) xor (TBits.RotateRight32(E, 11))
+    xor (TBits.RotateRight32(E, 25))) + ((E and F) xor (not E and G)) +
+    $748F82EE + ptr_data[56];
+  T2 := ((TBits.RotateRight32(A, 2)) xor (TBits.RotateRight32(A, 13))
+    xor ((A shr 22) xor (A shl 10))) + ((A and B) xor (A and C) xor (B and C));
+  H := T + T2;
+  D := D + T;
+  T := G + ((TBits.RotateRight32(D, 6)) xor (TBits.RotateRight32(D, 11))
+    xor (TBits.RotateRight32(D, 25))) + ((D and E) xor (not D and F)) +
+    $78A5636F + ptr_data[57];
+  T2 := ((TBits.RotateRight32(H, 2)) xor (TBits.RotateRight32(H, 13))
+    xor ((H shr 22) xor (H shl 10))) + ((H and A) xor (H and B) xor (A and B));
+  G := T + T2;
+  C := C + T;
+  T := F + ((TBits.RotateRight32(C, 6)) xor (TBits.RotateRight32(C, 11))
+    xor (TBits.RotateRight32(C, 25))) + ((C and D) xor (not C and E)) +
+    $84C87814 + ptr_data[58];
+  T2 := ((TBits.RotateRight32(G, 2)) xor (TBits.RotateRight32(G, 13))
+    xor ((G shr 22) xor (G shl 10))) + ((G and H) xor (G and A) xor (H and A));
+  F := T + T2;
+  B := B + T;
+  T := E + ((TBits.RotateRight32(B, 6)) xor (TBits.RotateRight32(B, 11))
+    xor (TBits.RotateRight32(B, 25))) + ((B and C) xor (not B and D)) +
+    $8CC70208 + ptr_data[59];
+  T2 := ((TBits.RotateRight32(F, 2)) xor (TBits.RotateRight32(F, 13))
+    xor ((F shr 22) xor (F shl 10))) + ((F and G) xor (F and H) xor (G and H));
+  E := T + T2;
+  A := A + T;
+  T := D + ((TBits.RotateRight32(A, 6)) xor (TBits.RotateRight32(A, 11))
+    xor (TBits.RotateRight32(A, 25))) + ((A and B) xor (not A and C)) +
+    $90BEFFFA + ptr_data[60];
+  T2 := ((TBits.RotateRight32(E, 2)) xor (TBits.RotateRight32(E, 13))
+    xor ((E shr 22) xor (E shl 10))) + ((E and F) xor (E and G) xor (F and G));
+  D := T + T2;
+  H := H + T;
+  T := C + ((TBits.RotateRight32(H, 6)) xor (TBits.RotateRight32(H, 11))
+    xor (TBits.RotateRight32(H, 25))) + ((H and A) xor (not H and B)) +
+    $A4506CEB + ptr_data[61];
+  T2 := ((TBits.RotateRight32(D, 2)) xor (TBits.RotateRight32(D, 13))
+    xor ((D shr 22) xor (D shl 10))) + ((D and E) xor (D and F) xor (E and F));
+  C := T + T2;
+  G := G + T;
+  T := B + ((TBits.RotateRight32(G, 6)) xor (TBits.RotateRight32(G, 11))
+    xor (TBits.RotateRight32(G, 25))) + ((G and H) xor (not G and A)) +
+    $BEF9A3F7 + ptr_data[62];
+  T2 := ((TBits.RotateRight32(C, 2)) xor (TBits.RotateRight32(C, 13))
+    xor ((C shr 22) xor (C shl 10))) + ((C and D) xor (C and E) xor (D and E));
+  B := T + T2;
+  F := F + T;
+  T := A + ((TBits.RotateRight32(F, 6)) xor (TBits.RotateRight32(F, 11))
+    xor (TBits.RotateRight32(F, 25))) + ((F and G) xor (not F and H)) +
+    $C67178F2 + ptr_data[63];
+  T2 := ((TBits.RotateRight32(B, 2)) xor (TBits.RotateRight32(B, 13))
+    xor ((B shr 22) xor (B shl 10))) + ((B and C) xor (B and D) xor (C and D));
+  A := T + T2;
+  E := E + T;
 
 {$ELSE}
   // Step 1

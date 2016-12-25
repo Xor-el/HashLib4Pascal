@@ -47,7 +47,7 @@
 
 {$IFDEF DELPHI}
 
-{.$DEFINE USE_UNROLLED_VARIANT}
+{$DEFINE USE_UNROLLED_VARIANT}
 
 // This option is needed to enable code browsing (aka Ctrl+Click)
 // It does not affect the binary size or generated code
@@ -85,6 +85,11 @@
 {$IF CompilerVersion >= 23.0}
 {$DEFINE DELPHIXE2_UP}
 {$DEFINE HAS_UNITSCOPE}
+{$IFEND}
+
+// XE3 and Below
+{$IF CompilerVersion <= 24.0}
+{$DEFINE DELPHIXE3_DOWN}
 {$IFEND}
 
  // XE3 and Above
