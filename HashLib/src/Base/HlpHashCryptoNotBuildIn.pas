@@ -89,7 +89,7 @@ begin
   while (a_length >= (Fm_buffer.Length)) do
   begin
     Fm_processed_bytes := Fm_processed_bytes + UInt64(Fm_buffer.Length);
-    TransformBlock(ptr_a_data, System.Length(a_data), a_index);
+    TransformBlock(ptr_a_data, Fm_buffer.Length, a_index);
     a_index := a_index + (Fm_buffer.Length);
     a_length := a_length - (Fm_buffer.Length);
   end;
