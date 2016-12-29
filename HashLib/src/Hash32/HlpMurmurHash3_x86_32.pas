@@ -34,7 +34,7 @@ type
     Fm_idx: Int32;
     Fm_buf: THashLibByteArray;
 
-    procedure ByteUpdate(a_b: Byte); {$IFDEF FPC}inline; {$ENDIF FPC}
+    procedure ByteUpdate(a_b: Byte); inline;
     procedure Finish();
 
   const
@@ -137,13 +137,15 @@ end;
 procedure TMurmurHash3_x86_32.ByteUpdate(a_b: Byte);
 var
   k: UInt32;
+  ptr_Fm_buf: PByte;
 begin
 
   Fm_buf[Fm_idx] := a_b;
   System.Inc(Fm_idx);
   if Fm_idx >= 4 then
   begin
-    k := TConverters.ReadBytesAsUInt32LE(PByte(Fm_buf), 0);
+    ptr_Fm_buf := PByte(Fm_buf);
+    k := TConverters.ReadBytesAsUInt32LE(ptr_Fm_buf, 0);
     TransformUInt32Fast(k);
     Fm_idx := 0;
   end;

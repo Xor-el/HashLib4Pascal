@@ -34,7 +34,7 @@ type
     Fm_idx: Int32;
     Fm_buf: THashLibByteArray;
 
-    procedure ByteUpdate(a_b: Byte); {$IFDEF FPC}inline; {$ENDIF FPC}
+    procedure ByteUpdate(a_b: Byte); inline;
     procedure Finish();
 
 {$REGION 'Consts'}
@@ -98,7 +98,7 @@ begin
     k1 := k1 * C2;
     Fm_h1 := Fm_h1 xor k1;
 
-    Fm_h1 := (Fm_h1 shl 27) or (Fm_h1 shr 37);
+    Fm_h1 := TBits.RotateLeft64(Fm_h1, 27);
     Fm_h1 := Fm_h1 + Fm_h2;
     Fm_h1 := Fm_h1 * 5 + C3;
 
