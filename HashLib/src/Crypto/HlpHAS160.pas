@@ -23,7 +23,6 @@ type
   strict private
 
     Fm_hash: THashLibUInt32Array;
-    Fptr_Fm_hash: PCardinal;
 
 {$REGION 'Consts'}
 
@@ -61,7 +60,6 @@ constructor THAS160.Create;
 begin
   Inherited Create(20, 64);
   System.SetLength(Fm_hash, 5);
-  Fptr_Fm_hash := PCardinal(Fm_hash);
 end;
 
 procedure THAS160.Finish;
@@ -102,11 +100,11 @@ end;
 
 procedure THAS160.Initialize;
 begin
-  Fptr_Fm_hash[0] := $67452301;
-  Fptr_Fm_hash[1] := $EFCDAB89;
-  Fptr_Fm_hash[2] := $98BADCFE;
-  Fptr_Fm_hash[3] := $10325476;
-  Fptr_Fm_hash[4] := $C3D2E1F0;
+  Fm_hash[0] := $67452301;
+  Fm_hash[1] := $EFCDAB89;
+  Fm_hash[2] := $98BADCFE;
+  Fm_hash[3] := $10325476;
+  Fm_hash[4] := $C3D2E1F0;
 
   Inherited Initialize();
 end;
@@ -117,28 +115,24 @@ var
   A, B, C, D, E, T: UInt32;
   r: Int32;
   data: array [0 .. 19] of UInt32;
-  ptr_data: PCardinal;
 begin
-  A := Fptr_Fm_hash[0];
-  B := Fptr_Fm_hash[1];
-  C := Fptr_Fm_hash[2];
-  D := Fptr_Fm_hash[3];
-  E := Fptr_Fm_hash[4];
+  A := Fm_hash[0];
+  B := Fm_hash[1];
+  C := Fm_hash[2];
+  D := Fm_hash[3];
+  E := Fm_hash[4];
 
-  ptr_data := @(data[0]);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 64);
 
-  TConverters.le32_copy(a_data, a_index, ptr_data, 0, 64);
-
-  ptr_data[16] := ptr_data[0] xor ptr_data[1] xor ptr_data[2] xor ptr_data[3];
-  ptr_data[17] := ptr_data[4] xor ptr_data[5] xor ptr_data[6] xor ptr_data[7];
-  ptr_data[18] := ptr_data[8] xor ptr_data[9] xor ptr_data[10] xor ptr_data[11];
-  ptr_data[19] := ptr_data[12] xor ptr_data[13] xor ptr_data[14]
-    xor ptr_data[15];
+  data[16] := data[0] xor data[1] xor data[2] xor data[3];
+  data[17] := data[4] xor data[5] xor data[6] xor data[7];
+  data[18] := data[8] xor data[9] xor data[10] xor data[11];
+  data[19] := data[12] xor data[13] xor data[14] xor data[15];
 
   r := 0;
   while r < 20 do
   begin
-    T := ptr_data[s_index[r]] + (A shl s_rot[r] or A shr s_tor[r]) +
+    T := data[s_index[r]] + (A shl s_rot[r] or A shr s_tor[r]) +
       ((B and C) or (not B and D)) + E;
     E := D;
     D := C;
@@ -148,15 +142,15 @@ begin
     System.Inc(r);
   end;
 
-  ptr_data[16] := ptr_data[3] xor ptr_data[6] xor ptr_data[9] xor ptr_data[12];
-  ptr_data[17] := ptr_data[2] xor ptr_data[5] xor ptr_data[8] xor ptr_data[15];
-  ptr_data[18] := ptr_data[1] xor ptr_data[4] xor ptr_data[11] xor ptr_data[14];
-  ptr_data[19] := ptr_data[0] xor ptr_data[7] xor ptr_data[10] xor ptr_data[13];
+  data[16] := data[3] xor data[6] xor data[9] xor data[12];
+  data[17] := data[2] xor data[5] xor data[8] xor data[15];
+  data[18] := data[1] xor data[4] xor data[11] xor data[14];
+  data[19] := data[0] xor data[7] xor data[10] xor data[13];
 
   r := 20;
   while r < 40 do
   begin
-    T := ptr_data[s_index[r]] + $5A827999 +
+    T := data[s_index[r]] + $5A827999 +
       (A shl s_rot[r - 20] or A shr s_tor[r - 20]) + (B xor C xor D) + E;
     E := D;
     D := C;
@@ -166,15 +160,15 @@ begin
     System.Inc(r);
   end;
 
-  ptr_data[16] := ptr_data[5] xor ptr_data[7] xor ptr_data[12] xor ptr_data[14];
-  ptr_data[17] := ptr_data[0] xor ptr_data[2] xor ptr_data[9] xor ptr_data[11];
-  ptr_data[18] := ptr_data[4] xor ptr_data[6] xor ptr_data[13] xor ptr_data[15];
-  ptr_data[19] := ptr_data[1] xor ptr_data[3] xor ptr_data[8] xor ptr_data[10];
+  data[16] := data[5] xor data[7] xor data[12] xor data[14];
+  data[17] := data[0] xor data[2] xor data[9] xor data[11];
+  data[18] := data[4] xor data[6] xor data[13] xor data[15];
+  data[19] := data[1] xor data[3] xor data[8] xor data[10];
 
   r := 40;
   while r < 60 do
   begin
-    T := ptr_data[s_index[r]] + $6ED9EBA1 +
+    T := data[s_index[r]] + $6ED9EBA1 +
       (A shl s_rot[r - 40] or A shr s_tor[r - 40]) + (C xor (B or not D)) + E;
     E := D;
     D := C;
@@ -184,15 +178,15 @@ begin
     System.Inc(r);
   end;
 
-  ptr_data[16] := ptr_data[2] xor ptr_data[7] xor ptr_data[8] xor ptr_data[13];
-  ptr_data[17] := ptr_data[3] xor ptr_data[4] xor ptr_data[9] xor ptr_data[14];
-  ptr_data[18] := ptr_data[0] xor ptr_data[5] xor ptr_data[10] xor ptr_data[15];
-  ptr_data[19] := ptr_data[1] xor ptr_data[6] xor ptr_data[11] xor ptr_data[12];
+  data[16] := data[2] xor data[7] xor data[8] xor data[13];
+  data[17] := data[3] xor data[4] xor data[9] xor data[14];
+  data[18] := data[0] xor data[5] xor data[10] xor data[15];
+  data[19] := data[1] xor data[6] xor data[11] xor data[12];
 
   r := 60;
   while r < 80 do
   begin
-    T := ptr_data[s_index[r]] + $8F1BBCDC +
+    T := data[s_index[r]] + $8F1BBCDC +
       (A shl s_rot[r - 60] or A shr s_tor[r - 60]) + (B xor C xor D) + E;
     E := D;
     D := C;
@@ -202,11 +196,11 @@ begin
     System.Inc(r);
   end;
 
-  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] + A;
-  Fptr_Fm_hash[1] := Fptr_Fm_hash[1] + B;
-  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + C;
-  Fptr_Fm_hash[3] := Fptr_Fm_hash[3] + D;
-  Fptr_Fm_hash[4] := Fptr_Fm_hash[4] + E;
+  Fm_hash[0] := Fm_hash[0] + A;
+  Fm_hash[1] := Fm_hash[1] + B;
+  Fm_hash[2] := Fm_hash[2] + C;
+  Fm_hash[3] := Fm_hash[3] + D;
+  Fm_hash[4] := Fm_hash[4] + E;
 
   System.FillChar(data, System.SizeOf(data), 0);
 

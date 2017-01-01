@@ -22,16 +22,12 @@ type
 
   strict private
 
-    Fm_hash, Fk, Fm, Ftemp: THashLibUInt64Array;
-    Fptr_Fm_hash, Fptr_Fk, Fptr_Fm, Fptr_Ftemp: PUInt64;
+    Fm_hash: THashLibUInt64Array;
 
-  class var
+    class var
 
-    Fs_C0, Fs_C1, Fs_C2, Fs_C3, Fs_C4, Fs_C5, Fs_C6, Fs_C7,
+      Fs_C0, Fs_C1, Fs_C2, Fs_C3, Fs_C4, Fs_C5, Fs_C6, Fs_C7,
       Fs_rc: THashLibUInt64Array;
-
-    Fptr_Fs_C0, Fptr_Fs_C1, Fptr_Fs_C2, Fptr_Fs_C3, Fptr_Fs_C4, Fptr_Fs_C5,
-      Fptr_Fs_C6, Fptr_Fs_C7, Fptr_Fs_rc: PUInt64;
 
 {$REGION 'Consts'}
 
@@ -88,16 +84,7 @@ begin
   Inherited Create(64, 64);
 
   System.SetLength(Fm_hash, 8);
-  Fptr_Fm_hash := PUInt64(Fm_hash);
 
-  System.SetLength(Fk, 8);
-  Fptr_Fk := PUInt64(Fk);
-
-  System.SetLength(Fm, 8);
-  Fptr_Fm := PUInt64(Fm);
-
-  System.SetLength(Ftemp, 8);
-  Fptr_Ftemp := PUInt64(Ftemp);
 end;
 
 procedure TWhirlPool.Finish;
@@ -160,21 +147,18 @@ end;
 procedure TWhirlPool.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data: array [0 .. 7] of UInt64;
+  data, k, m, temp: array [0 .. 7] of UInt64;
   i, round: Int32;
-  ptr_data: PUInt64;
 
 begin
 
-  ptr_data := @(data[0]);
-
-  TConverters.be64_copy(a_data, a_index, ptr_data, 0, 64);
+  TConverters.be64_copy(a_data, a_index, @(data[0]), 0, 64);
 
   i := 0;
   while i < 8 do
   begin
-    Fptr_Fk[i] := Fptr_Fm_hash[i];
-    Fptr_Ftemp[i] := ptr_data[i] xor Fptr_Fk[i];
+    k[i] := Fm_hash[i];
+    temp[i] := data[i] xor k[i];
     System.Inc(i);
   end;
 
@@ -188,50 +172,43 @@ begin
     while i < 8 do
     begin
 
-      Fptr_Fm[i] := 0;
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C0[Byte(Fptr_Fk[(i - 0) and 7] shr 56)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C1[Byte(Fptr_Fk[(i - 1) and 7] shr 48)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C2[Byte(Fptr_Fk[(i - 2) and 7] shr 40)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C3[Byte(Fptr_Fk[(i - 3) and 7] shr 32)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C4[Byte(Fptr_Fk[(i - 4) and 7] shr 24)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C5[Byte(Fptr_Fk[(i - 5) and 7] shr 16)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C6[Byte(Fptr_Fk[(i - 6) and 7] shr 8)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C7[Byte(Fptr_Fk[(i - 7) and 7])]);
+      m[i] := 0;
+      m[i] := m[i] xor (Fs_C0[Byte(k[(i - 0) and 7] shr 56)]);
+      m[i] := m[i] xor (Fs_C1[Byte(k[(i - 1) and 7] shr 48)]);
+      m[i] := m[i] xor (Fs_C2[Byte(k[(i - 2) and 7] shr 40)]);
+      m[i] := m[i] xor (Fs_C3[Byte(k[(i - 3) and 7] shr 32)]);
+      m[i] := m[i] xor (Fs_C4[Byte(k[(i - 4) and 7] shr 24)]);
+      m[i] := m[i] xor (Fs_C5[Byte(k[(i - 5) and 7] shr 16)]);
+      m[i] := m[i] xor (Fs_C6[Byte(k[(i - 6) and 7] shr 8)]);
+      m[i] := m[i] xor (Fs_C7[Byte(k[(i - 7) and 7])]);
 
       System.Inc(i);
     end;
 
-    System.Move(Fm[0], Fk[0], System.Length(Fk) * System.SizeOf(UInt64));
+    System.Move(m[0], k[0], 8 * System.SizeOf(UInt64));
 
-    Fptr_Fk[0] := Fptr_Fk[0] xor Fptr_Fs_rc[round];
+    k[0] := k[0] xor Fs_rc[round];
 
     i := 0;
 
     while i < 8 do
 
     begin
-      Fptr_Fm[i] := Fptr_Fk[i];
+      m[i] := k[i];
 
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C0[Byte(Fptr_Ftemp[(i - 0) and 7] shr 56)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C1[Byte(Fptr_Ftemp[(i - 1) and 7] shr 48)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C2[Byte(Fptr_Ftemp[(i - 2) and 7] shr 40)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C3[Byte(Fptr_Ftemp[(i - 3) and 7] shr 32)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C4[Byte(Fptr_Ftemp[(i - 4) and 7] shr 24)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C5[Byte(Fptr_Ftemp[(i - 5) and 7] shr 16)]);
-      Fptr_Fm[i] := Fptr_Fm[i]
-        xor (Fs_C6[Byte(Fptr_Ftemp[(i - 6) and 7] shr 8)]);
-      Fptr_Fm[i] := Fptr_Fm[i] xor (Fs_C7[Byte(Fptr_Ftemp[(i - 7) and 7])]);
+      m[i] := m[i] xor (Fs_C0[Byte(temp[(i - 0) and 7] shr 56)]);
+      m[i] := m[i] xor (Fs_C1[Byte(temp[(i - 1) and 7] shr 48)]);
+      m[i] := m[i] xor (Fs_C2[Byte(temp[(i - 2) and 7] shr 40)]);
+      m[i] := m[i] xor (Fs_C3[Byte(temp[(i - 3) and 7] shr 32)]);
+      m[i] := m[i] xor (Fs_C4[Byte(temp[(i - 4) and 7] shr 24)]);
+      m[i] := m[i] xor (Fs_C5[Byte(temp[(i - 5) and 7] shr 16)]);
+      m[i] := m[i] xor (Fs_C6[Byte(temp[(i - 6) and 7] shr 8)]);
+      m[i] := m[i] xor (Fs_C7[Byte(temp[(i - 7) and 7])]);
 
       System.Inc(i);
     end;
 
-    System.Move(Fm[0], Ftemp[0], System.Length(Ftemp) * System.SizeOf(UInt64));
+    System.Move(m[0], temp[0], System.Length(temp) * System.SizeOf(UInt64));
 
     System.Inc(round);
 
@@ -241,7 +218,7 @@ begin
 
   while i < 8 do
   begin
-    Fptr_Fm_hash[i] := Fptr_Fm_hash[i] xor (Fptr_Ftemp[i] xor ptr_data[i]);
+    Fm_hash[i] := Fm_hash[i] xor (temp[i] xor data[i]);
 
     System.Inc(i);
   end;
@@ -257,25 +234,15 @@ var
 begin
 
   System.SetLength(Fs_C0, 256);
-  Fptr_Fs_C0 := PUInt64(Fs_C0);
   System.SetLength(Fs_C1, 256);
-  Fptr_Fs_C1 := PUInt64(Fs_C1);
   System.SetLength(Fs_C2, 256);
-  Fptr_Fs_C2 := PUInt64(Fs_C2);
   System.SetLength(Fs_C3, 256);
-  Fptr_Fs_C3 := PUInt64(Fs_C3);
   System.SetLength(Fs_C4, 256);
-  Fptr_Fs_C4 := PUInt64(Fs_C4);
   System.SetLength(Fs_C5, 256);
-  Fptr_Fs_C5 := PUInt64(Fs_C5);
   System.SetLength(Fs_C6, 256);
-  Fptr_Fs_C6 := PUInt64(Fs_C6);
   System.SetLength(Fs_C7, 256);
-  Fptr_Fs_C7 := PUInt64(Fs_C7);
 
   System.SetLength(Fs_rc, ROUNDS + 1);
-
-  Fptr_Fs_rc := PUInt64(Fs_rc);
 
   i := 0;
   while i < 256 do
@@ -288,19 +255,19 @@ begin
     v8 := maskWithReductionPolynomial(v4 shl 1);
     v9 := v8 xor v1;
 
-    Fptr_Fs_C0[i] := packIntoUInt64(v1, v1, v4, v1, v8, v5, v2, v9);
-    Fptr_Fs_C1[i] := packIntoUInt64(v9, v1, v1, v4, v1, v8, v5, v2);
-    Fptr_Fs_C2[i] := packIntoUInt64(v2, v9, v1, v1, v4, v1, v8, v5);
-    Fptr_Fs_C3[i] := packIntoUInt64(v5, v2, v9, v1, v1, v4, v1, v8);
-    Fptr_Fs_C4[i] := packIntoUInt64(v8, v5, v2, v9, v1, v1, v4, v1);
-    Fptr_Fs_C5[i] := packIntoUInt64(v1, v8, v5, v2, v9, v1, v1, v4);
-    Fptr_Fs_C6[i] := packIntoUInt64(v4, v1, v8, v5, v2, v9, v1, v1);
-    Fptr_Fs_C7[i] := packIntoUInt64(v1, v4, v1, v8, v5, v2, v9, v1);
+    Fs_C0[i] := packIntoUInt64(v1, v1, v4, v1, v8, v5, v2, v9);
+    Fs_C1[i] := packIntoUInt64(v9, v1, v1, v4, v1, v8, v5, v2);
+    Fs_C2[i] := packIntoUInt64(v2, v9, v1, v1, v4, v1, v8, v5);
+    Fs_C3[i] := packIntoUInt64(v5, v2, v9, v1, v1, v4, v1, v8);
+    Fs_C4[i] := packIntoUInt64(v8, v5, v2, v9, v1, v1, v4, v1);
+    Fs_C5[i] := packIntoUInt64(v1, v8, v5, v2, v9, v1, v1, v4);
+    Fs_C6[i] := packIntoUInt64(v4, v1, v8, v5, v2, v9, v1, v1);
+    Fs_C7[i] := packIntoUInt64(v1, v4, v1, v8, v5, v2, v9, v1);
 
     System.Inc(i);
   end;
 
-  Fptr_Fs_rc[0] := 0;
+  Fs_rc[0] := 0;
 
   r := 1;
 
@@ -309,14 +276,14 @@ begin
   begin
 
     i := 8 * (r - 1);
-    Fptr_Fs_rc[r] := (Fptr_Fs_C0[i] and $FF00000000000000)
-      xor (Fptr_Fs_C1[i + 1] and $00FF000000000000)
-      xor (Fptr_Fs_C2[i + 2] and $0000FF0000000000)
-      xor (Fptr_Fs_C3[i + 3] and $000000FF00000000)
-      xor (Fptr_Fs_C4[i + 4] and $00000000FF000000)
-      xor (Fptr_Fs_C5[i + 5] and $0000000000FF0000)
-      xor (Fptr_Fs_C6[i + 6] and $000000000000FF00)
-      xor (Fptr_Fs_C7[i + 7] and $00000000000000FF);
+    Fs_rc[r] := (Fs_C0[i] and $FF00000000000000)
+      xor (Fs_C1[i + 1] and $00FF000000000000)
+      xor (Fs_C2[i + 2] and $0000FF0000000000)
+      xor (Fs_C3[i + 3] and $000000FF00000000)
+      xor (Fs_C4[i + 4] and $00000000FF000000)
+      xor (Fs_C5[i + 5] and $0000000000FF0000)
+      xor (Fs_C6[i + 6] and $000000000000FF00)
+      xor (Fs_C7[i + 7] and $00000000000000FF);
 
     System.Inc(r);
   end;

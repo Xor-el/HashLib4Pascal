@@ -47,14 +47,14 @@ end;
 procedure TSHA2_512.Initialize;
 begin
 
-  Fptr_Fm_state[0] := $6A09E667F3BCC908;
-  Fptr_Fm_state[1] := UInt64($BB67AE8584CAA73B);
-  Fptr_Fm_state[2] := $3C6EF372FE94F82B;
-  Fptr_Fm_state[3] := UInt64($A54FF53A5F1D36F1);
-  Fptr_Fm_state[4] := $510E527FADE682D1;
-  Fptr_Fm_state[5] := UInt64($9B05688C2B3E6C1F);
-  Fptr_Fm_state[6] := $1F83D9ABFB41BD6B;
-  Fptr_Fm_state[7] := $5BE0CD19137E2179;
+  Fm_state[0] := $6A09E667F3BCC908;
+  Fm_state[1] := UInt64($BB67AE8584CAA73B);
+  Fm_state[2] := $3C6EF372FE94F82B;
+  Fm_state[3] := UInt64($A54FF53A5F1D36F1);
+  Fm_state[4] := $510E527FADE682D1;
+  Fm_state[5] := UInt64($9B05688C2B3E6C1F);
+  Fm_state[6] := $1F83D9ABFB41BD6B;
+  Fm_state[7] := $5BE0CD19137E2179;
 
   Inherited Initialize();
 

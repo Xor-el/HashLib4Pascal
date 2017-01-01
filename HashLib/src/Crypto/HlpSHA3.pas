@@ -24,7 +24,6 @@ type
 
   strict private
     Fm_state: THashLibUInt64Array;
-    Fptr_Fm_state: PUInt64;
 
   strict protected
 
@@ -108,8 +107,6 @@ begin
 
   System.SetLength(Fm_state, 25);
 
-  Fptr_Fm_state := PUInt64(Fm_state);
-
 end;
 
 procedure TSHA3.Finish;
@@ -125,11 +122,11 @@ begin
 
   TransformBlock(PByte(block), System.Length(block), 0);
 
-  Fptr_Fm_state[1] := not Fptr_Fm_state[1];
-  Fptr_Fm_state[2] := not Fptr_Fm_state[2];
-  Fptr_Fm_state[8] := not Fptr_Fm_state[8];
-  Fptr_Fm_state[12] := not Fptr_Fm_state[12];
-  Fptr_Fm_state[17] := not Fptr_Fm_state[17];
+  Fm_state[1] := not Fm_state[1];
+  Fm_state[2] := not Fm_state[2];
+  Fm_state[8] := not Fm_state[8];
+  Fm_state[12] := not Fm_state[12];
+  Fm_state[17] := not Fm_state[17];
 
 end;
 
@@ -149,12 +146,12 @@ begin
   System.FillChar(Fm_state[0], System.Length(Fm_state) * System.SizeOf(UInt64),
     UInt64(0));
 
-  Fptr_Fm_state[1] := System.High(UInt64);
-  Fptr_Fm_state[2] := System.High(UInt64);
-  Fptr_Fm_state[8] := System.High(UInt64);
-  Fptr_Fm_state[12] := System.High(UInt64);
-  Fptr_Fm_state[17] := System.High(UInt64);
-  Fptr_Fm_state[20] := System.High(UInt64);
+  Fm_state[1] := System.High(UInt64);
+  Fm_state[2] := System.High(UInt64);
+  Fm_state[8] := System.High(UInt64);
+  Fm_state[12] := System.High(UInt64);
+  Fm_state[17] := System.High(UInt64);
+  Fm_state[20] := System.High(UInt64);
 
   Inherited Initialize();
 
@@ -170,45 +167,43 @@ var
     Ebi, Ebo, Ebu, Ega, Ege, Egi, Ego, Egu, Eka, Eke, Eki, Eko, Eku, Ema, Eme,
     Emi, Emo, Emu, Esa, Ese, Esi, Eso, Esu: UInt64;
   data: array [0 .. 17] of UInt64;
-  ptr_data: PUInt64;
   j: Int32;
 begin
-  ptr_data := @(data[0]);
-  TConverters.le64_copy(a_data, a_index, ptr_data, 0, FBlockSize);
+  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, FBlockSize);
 
   j := 0;
 
   while j < (FBlockSize shr 3) do
   begin
-    Fptr_Fm_state[j] := Fptr_Fm_state[j] xor ptr_data[j];
+    Fm_state[j] := Fm_state[j] xor data[j];
     System.Inc(j);
   end;
 
-  Aba := Fptr_Fm_state[0];
-  Abe := Fptr_Fm_state[1];
-  Abi := Fptr_Fm_state[2];
-  Abo := Fptr_Fm_state[3];
-  Abu := Fptr_Fm_state[4];
-  Aga := Fptr_Fm_state[5];
-  Age := Fptr_Fm_state[6];
-  Agi := Fptr_Fm_state[7];
-  Ago := Fptr_Fm_state[8];
-  Agu := Fptr_Fm_state[9];
-  Aka := Fptr_Fm_state[10];
-  Ake := Fptr_Fm_state[11];
-  Aki := Fptr_Fm_state[12];
-  Ako := Fptr_Fm_state[13];
-  Aku := Fptr_Fm_state[14];
-  Ama := Fptr_Fm_state[15];
-  Ame := Fptr_Fm_state[16];
-  Ami := Fptr_Fm_state[17];
-  Amo := Fptr_Fm_state[18];
-  Amu := Fptr_Fm_state[19];
-  Asa := Fptr_Fm_state[20];
-  Ase := Fptr_Fm_state[21];
-  Asi := Fptr_Fm_state[22];
-  Aso := Fptr_Fm_state[23];
-  Asu := Fptr_Fm_state[24];
+  Aba := Fm_state[0];
+  Abe := Fm_state[1];
+  Abi := Fm_state[2];
+  Abo := Fm_state[3];
+  Abu := Fm_state[4];
+  Aga := Fm_state[5];
+  Age := Fm_state[6];
+  Agi := Fm_state[7];
+  Ago := Fm_state[8];
+  Agu := Fm_state[9];
+  Aka := Fm_state[10];
+  Ake := Fm_state[11];
+  Aki := Fm_state[12];
+  Ako := Fm_state[13];
+  Aku := Fm_state[14];
+  Ama := Fm_state[15];
+  Ame := Fm_state[16];
+  Ami := Fm_state[17];
+  Amo := Fm_state[18];
+  Amu := Fm_state[19];
+  Asa := Fm_state[20];
+  Ase := Fm_state[21];
+  Asi := Fm_state[22];
+  Aso := Fm_state[23];
+  Asu := Fm_state[24];
 
   Ca := Aba xor Aga xor Aka xor Ama xor Asa;
   Ce := Abe xor Age xor Ake xor Ame xor Ase;
@@ -2759,31 +2754,31 @@ begin
   Aso := Bso xor (Bsu or Bsa);
   Asu := Bsu xor (Bsa and Bse);
 
-  Fptr_Fm_state[0] := Aba;
-  Fptr_Fm_state[1] := Abe;
-  Fptr_Fm_state[2] := Abi;
-  Fptr_Fm_state[3] := Abo;
-  Fptr_Fm_state[4] := Abu;
-  Fptr_Fm_state[5] := Aga;
-  Fptr_Fm_state[6] := Age;
-  Fptr_Fm_state[7] := Agi;
-  Fptr_Fm_state[8] := Ago;
-  Fptr_Fm_state[9] := Agu;
-  Fptr_Fm_state[10] := Aka;
-  Fptr_Fm_state[11] := Ake;
-  Fptr_Fm_state[12] := Aki;
-  Fptr_Fm_state[13] := Ako;
-  Fptr_Fm_state[14] := Aku;
-  Fptr_Fm_state[15] := Ama;
-  Fptr_Fm_state[16] := Ame;
-  Fptr_Fm_state[17] := Ami;
-  Fptr_Fm_state[18] := Amo;
-  Fptr_Fm_state[19] := Amu;
-  Fptr_Fm_state[20] := Asa;
-  Fptr_Fm_state[21] := Ase;
-  Fptr_Fm_state[22] := Asi;
-  Fptr_Fm_state[23] := Aso;
-  Fptr_Fm_state[24] := Asu;
+  Fm_state[0] := Aba;
+  Fm_state[1] := Abe;
+  Fm_state[2] := Abi;
+  Fm_state[3] := Abo;
+  Fm_state[4] := Abu;
+  Fm_state[5] := Aga;
+  Fm_state[6] := Age;
+  Fm_state[7] := Agi;
+  Fm_state[8] := Ago;
+  Fm_state[9] := Agu;
+  Fm_state[10] := Aka;
+  Fm_state[11] := Ake;
+  Fm_state[12] := Aki;
+  Fm_state[13] := Ako;
+  Fm_state[14] := Aku;
+  Fm_state[15] := Ama;
+  Fm_state[16] := Ame;
+  Fm_state[17] := Ami;
+  Fm_state[18] := Amo;
+  Fm_state[19] := Amu;
+  Fm_state[20] := Asa;
+  Fm_state[21] := Ase;
+  Fm_state[22] := Asi;
+  Fm_state[23] := Aso;
+  Fm_state[24] := Asu;
 
   System.FillChar(data, System.SizeOf(data), 0);
 end;

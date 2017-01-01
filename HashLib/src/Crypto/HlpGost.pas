@@ -22,14 +22,10 @@ type
   strict private
 
     Fm_state, Fm_hash: THashLibUInt32Array;
-    Fptr_Fm_state, Fptr_Fm_hash: PCardinal;
 
-  class var
+    class var
 
-    Fs_sbox1, Fs_sbox2, Fs_sbox3, Fs_sbox4: THashLibUInt32Array;
-    Fs, Fm: array [0 .. 7] of UInt32;
-    Fptr_Fs_sbox1, Fptr_Fs_sbox2, Fptr_Fs_sbox3, Fptr_Fs_sbox4, Fptr_Fs,
-      Fptr_Fm: PCardinal;
+      Fs_sbox1, Fs_sbox2, Fs_sbox3, Fs_sbox4: THashLibUInt32Array;
 
     procedure Compress(a_m: PCardinal);
     class constructor Gost();
@@ -56,15 +52,16 @@ var
     w3, w4, w5, w6, w7, key0, key1, key2, key3, key4, key5, key6, key7, r, l,
     t: UInt32;
   i: Int32;
+  s: array [0 .. 7] of UInt32;
 begin
-  u0 := Fptr_Fm_hash[0];
-  u1 := Fptr_Fm_hash[1];
-  u2 := Fptr_Fm_hash[2];
-  u3 := Fptr_Fm_hash[3];
-  u4 := Fptr_Fm_hash[4];
-  u5 := Fptr_Fm_hash[5];
-  u6 := Fptr_Fm_hash[6];
-  u7 := Fptr_Fm_hash[7];
+  u0 := Fm_hash[0];
+  u1 := Fm_hash[1];
+  u2 := Fm_hash[2];
+  u3 := Fm_hash[3];
+  u4 := Fm_hash[4];
+  u5 := Fm_hash[5];
+  u6 := Fm_hash[6];
+  u7 := Fm_hash[7];
 
   v0 := a_m[0];
   v1 := a_m[1];
@@ -106,112 +103,112 @@ begin
     key7 := (w1 shr 24) or ((w3 and $FF000000) shr 16) or
       ((w5 and $FF000000) shr 8) or (w7 and $FF000000);
 
-    r := Fptr_Fm_hash[i];
-    l := Fptr_Fm_hash[i + 1];
+    r := Fm_hash[i];
+    l := Fm_hash[i + 1];
 
     t := key0 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key1 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key2 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key3 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key4 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key5 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key6 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key7 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key0 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key1 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key2 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key3 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key4 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key5 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key6 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key7 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key0 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key1 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key2 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key3 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key4 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key5 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key6 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key7 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key7 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key6 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key5 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key4 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key3 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key2 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key1 + r;
-    l := l xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    l := l xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
     t := key0 + l;
-    r := r xor (Fptr_Fs_sbox1[Byte(t)] xor Fptr_Fs_sbox2[Byte(t shr 8)
-      ] xor Fptr_Fs_sbox3[Byte(t shr 16)] xor Fptr_Fs_sbox4[t shr 24]);
+    r := r xor (Fs_sbox1[Byte(t)] xor Fs_sbox2[Byte(t shr 8)] xor Fs_sbox3
+      [Byte(t shr 16)] xor Fs_sbox4[t shr 24]);
 
     t := r;
     r := l;
     l := t;
 
-    Fptr_Fs[i] := r;
-    Fptr_Fs[i + 1] := l;
+    s[i] := r;
+    s[i + 1] := l;
 
     if (i = 6) then
       break;
@@ -255,81 +252,73 @@ begin
     System.Inc(i, 2);
   end;
 
-  u0 := a_m[0] xor Fptr_Fs[6];
-  u1 := a_m[1] xor Fptr_Fs[7];
-  u2 := a_m[2] xor (Fptr_Fs[0] shl 16) xor (Fptr_Fs[0] shr 16)
-    xor (Fptr_Fs[0] and $FFFF) xor (Fptr_Fs[1] and $FFFF)
-    xor (Fptr_Fs[1] shr 16) xor (Fptr_Fs[2] shl 16) xor Fptr_Fs[6]
-    xor (Fptr_Fs[6] shl 16) xor (Fptr_Fs[7] and $FFFF0000)
-    xor (Fptr_Fs[7] shr 16);
-  u3 := a_m[3] xor (Fptr_Fs[0] and $FFFF) xor (Fptr_Fs[0] shl 16)
-    xor (Fptr_Fs[1] and $FFFF) xor (Fptr_Fs[1] shl 16) xor (Fptr_Fs[1] shr 16)
-    xor (Fptr_Fs[2] shl 16) xor (Fptr_Fs[2] shr 16) xor (Fptr_Fs[3] shl 16)
-    xor Fptr_Fs[6] xor (Fptr_Fs[6] shl 16) xor (Fptr_Fs[6] shr 16)
-    xor (Fptr_Fs[7] and $FFFF) xor (Fptr_Fs[7] shl 16) xor (Fptr_Fs[7] shr 16);
-  u4 := a_m[4] xor (Fptr_Fs[0] and $FFFF0000) xor (Fptr_Fs[0] shl 16)
-    xor (Fptr_Fs[0] shr 16) xor (Fptr_Fs[1] and $FFFF0000)
-    xor (Fptr_Fs[1] shr 16) xor (Fptr_Fs[2] shl 16) xor (Fptr_Fs[2] shr 16)
-    xor (Fptr_Fs[3] shl 16) xor (Fptr_Fs[3] shr 16) xor (Fptr_Fs[4] shl 16)
-    xor (Fptr_Fs[6] shl 16) xor (Fptr_Fs[6] shr 16) xor (Fptr_Fs[7] and $FFFF)
-    xor (Fptr_Fs[7] shl 16) xor (Fptr_Fs[7] shr 16);
-  u5 := a_m[5] xor (Fptr_Fs[0] shl 16) xor (Fptr_Fs[0] shr 16)
-    xor (Fptr_Fs[0] and $FFFF0000) xor (Fptr_Fs[1] and $FFFF) xor Fptr_Fs[2]
-    xor (Fptr_Fs[2] shr 16) xor (Fptr_Fs[3] shl 16) xor (Fptr_Fs[3] shr 16)
-    xor (Fptr_Fs[4] shl 16) xor (Fptr_Fs[4] shr 16) xor (Fptr_Fs[5] shl 16)
-    xor (Fptr_Fs[6] shl 16) xor (Fptr_Fs[6] shr 16)
-    xor (Fptr_Fs[7] and $FFFF0000) xor (Fptr_Fs[7] shl 16)
-    xor (Fptr_Fs[7] shr 16);
-  u6 := a_m[6] xor Fptr_Fs[0] xor (Fptr_Fs[1] shr 16) xor (Fptr_Fs[2] shl 16)
-    xor Fptr_Fs[3] xor (Fptr_Fs[3] shr 16) xor (Fptr_Fs[4] shl 16)
-    xor (Fptr_Fs[4] shr 16) xor (Fptr_Fs[5] shl 16) xor (Fptr_Fs[5] shr 16)
-    xor Fptr_Fs[6] xor (Fptr_Fs[6] shl 16) xor (Fptr_Fs[6] shr 16)
-    xor (Fptr_Fs[7] shl 16);
-  u7 := a_m[7] xor (Fptr_Fs[0] and $FFFF0000) xor (Fptr_Fs[0] shl 16)
-    xor (Fptr_Fs[1] and $FFFF) xor (Fptr_Fs[1] shl 16) xor (Fptr_Fs[2] shr 16)
-    xor (Fptr_Fs[3] shl 16) xor Fptr_Fs[4] xor (Fptr_Fs[4] shr 16)
-    xor (Fptr_Fs[5] shl 16) xor (Fptr_Fs[5] shr 16) xor (Fptr_Fs[6] shr 16)
-    xor (Fptr_Fs[7] and $FFFF) xor (Fptr_Fs[7] shl 16) xor (Fptr_Fs[7] shr 16);
+  u0 := a_m[0] xor s[6];
+  u1 := a_m[1] xor s[7];
+  u2 := a_m[2] xor (s[0] shl 16) xor (s[0] shr 16) xor (s[0] and $FFFF)
+    xor (s[1] and $FFFF) xor (s[1] shr 16) xor (s[2] shl 16)
+    xor s[6] xor (s[6] shl 16) xor (s[7] and $FFFF0000) xor (s[7] shr 16);
+  u3 := a_m[3] xor (s[0] and $FFFF) xor (s[0] shl 16) xor (s[1] and $FFFF)
+    xor (s[1] shl 16) xor (s[1] shr 16) xor (s[2] shl 16) xor (s[2] shr 16)
+    xor (s[3] shl 16) xor s[6] xor (s[6] shl 16) xor (s[6] shr 16)
+    xor (s[7] and $FFFF) xor (s[7] shl 16) xor (s[7] shr 16);
+  u4 := a_m[4] xor (s[0] and $FFFF0000) xor (s[0] shl 16) xor (s[0] shr 16)
+    xor (s[1] and $FFFF0000) xor (s[1] shr 16) xor (s[2] shl 16)
+    xor (s[2] shr 16) xor (s[3] shl 16) xor (s[3] shr 16) xor (s[4] shl 16)
+    xor (s[6] shl 16) xor (s[6] shr 16) xor (s[7] and $FFFF) xor (s[7] shl 16)
+    xor (s[7] shr 16);
+  u5 := a_m[5] xor (s[0] shl 16) xor (s[0] shr 16) xor (s[0] and $FFFF0000)
+    xor (s[1] and $FFFF) xor s[2] xor (s[2] shr 16) xor (s[3] shl 16)
+    xor (s[3] shr 16) xor (s[4] shl 16) xor (s[4] shr 16) xor (s[5] shl 16)
+    xor (s[6] shl 16) xor (s[6] shr 16) xor (s[7] and $FFFF0000)
+    xor (s[7] shl 16) xor (s[7] shr 16);
+  u6 := a_m[6] xor s[0] xor (s[1] shr 16) xor (s[2] shl 16)
+    xor s[3] xor (s[3] shr 16) xor (s[4] shl 16) xor (s[4] shr 16)
+    xor (s[5] shl 16) xor (s[5] shr 16) xor s[6] xor (s[6] shl 16)
+    xor (s[6] shr 16) xor (s[7] shl 16);
+  u7 := a_m[7] xor (s[0] and $FFFF0000) xor (s[0] shl 16) xor (s[1] and $FFFF)
+    xor (s[1] shl 16) xor (s[2] shr 16) xor (s[3] shl 16)
+    xor s[4] xor (s[4] shr 16) xor (s[5] shl 16) xor (s[5] shr 16)
+    xor (s[6] shr 16) xor (s[7] and $FFFF) xor (s[7] shl 16) xor (s[7] shr 16);
 
-  v0 := Fptr_Fm_hash[0] xor (u1 shl 16) xor (u0 shr 16);
-  v1 := Fptr_Fm_hash[1] xor (u2 shl 16) xor (u1 shr 16);
-  v2 := Fptr_Fm_hash[2] xor (u3 shl 16) xor (u2 shr 16);
-  v3 := Fptr_Fm_hash[3] xor (u4 shl 16) xor (u3 shr 16);
-  v4 := Fptr_Fm_hash[4] xor (u5 shl 16) xor (u4 shr 16);
-  v5 := Fptr_Fm_hash[5] xor (u6 shl 16) xor (u5 shr 16);
-  v6 := Fptr_Fm_hash[6] xor (u7 shl 16) xor (u6 shr 16);
-  v7 := Fptr_Fm_hash[7] xor (u0 and $FFFF0000) xor (u0 shl 16) xor (u7 shr 16)
+  v0 := Fm_hash[0] xor (u1 shl 16) xor (u0 shr 16);
+  v1 := Fm_hash[1] xor (u2 shl 16) xor (u1 shr 16);
+  v2 := Fm_hash[2] xor (u3 shl 16) xor (u2 shr 16);
+  v3 := Fm_hash[3] xor (u4 shl 16) xor (u3 shr 16);
+  v4 := Fm_hash[4] xor (u5 shl 16) xor (u4 shr 16);
+  v5 := Fm_hash[5] xor (u6 shl 16) xor (u5 shr 16);
+  v6 := Fm_hash[6] xor (u7 shl 16) xor (u6 shr 16);
+  v7 := Fm_hash[7] xor (u0 and $FFFF0000) xor (u0 shl 16) xor (u7 shr 16)
     xor (u1 and $FFFF0000) xor (u1 shl 16) xor (u6 shl 16)
     xor (u7 and $FFFF0000);
 
-  Fptr_Fm_hash[0] := (v0 and $FFFF0000) xor (v0 shl 16) xor (v0 shr 16)
+  Fm_hash[0] := (v0 and $FFFF0000) xor (v0 shl 16) xor (v0 shr 16)
     xor (v1 shr 16) xor (v1 and $FFFF0000) xor (v2 shl 16) xor (v3 shr 16)
     xor (v4 shl 16) xor (v5 shr 16) xor v5 xor (v6 shr 16) xor (v7 shl 16)
     xor (v7 shr 16) xor (v7 and $FFFF);
-  Fptr_Fm_hash[1] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
+  Fm_hash[1] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
     xor (v1 and $FFFF) xor v2 xor (v2 shr 16) xor (v3 shl 16) xor (v4 shr 16)
     xor (v5 shl 16) xor (v6 shl 16) xor v6 xor (v7 and $FFFF0000)
     xor (v7 shr 16);
-  Fptr_Fm_hash[2] := (v0 and $FFFF) xor (v0 shl 16) xor (v1 shl 16)
-    xor (v1 shr 16) xor (v1 and $FFFF0000) xor (v2 shl 16) xor (v3 shr 16)
+  Fm_hash[2] := (v0 and $FFFF) xor (v0 shl 16) xor (v1 shl 16) xor (v1 shr 16)
+    xor (v1 and $FFFF0000) xor (v2 shl 16) xor (v3 shr 16)
     xor v3 xor (v4 shl 16) xor (v5 shr 16) xor v6 xor (v6 shr 16)
     xor (v7 and $FFFF) xor (v7 shl 16) xor (v7 shr 16);
-  Fptr_Fm_hash[3] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
+  Fm_hash[3] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
     xor (v1 and $FFFF0000) xor (v1 shr 16) xor (v2 shl 16) xor (v2 shr 16)
     xor v2 xor (v3 shl 16) xor (v4 shr 16) xor v4 xor (v5 shl 16)
     xor (v6 shl 16) xor (v7 and $FFFF) xor (v7 shr 16);
-  Fptr_Fm_hash[4] := (v0 shr 16) xor (v1 shl 16) xor v1 xor (v2 shr 16)
+  Fm_hash[4] := (v0 shr 16) xor (v1 shl 16) xor v1 xor (v2 shr 16)
     xor v2 xor (v3 shl 16) xor (v3 shr 16) xor v3 xor (v4 shl 16)
     xor (v5 shr 16) xor v5 xor (v6 shl 16) xor (v6 shr 16) xor (v7 shl 16);
-  Fptr_Fm_hash[5] := (v0 shl 16) xor (v0 and $FFFF0000) xor (v1 shl 16)
+  Fm_hash[5] := (v0 shl 16) xor (v0 and $FFFF0000) xor (v1 shl 16)
     xor (v1 shr 16) xor (v1 and $FFFF0000) xor (v2 shl 16)
     xor v2 xor (v3 shr 16) xor v3 xor (v4 shl 16) xor (v4 shr 16)
     xor v4 xor (v5 shl 16) xor (v6 shl 16) xor (v6 shr 16)
     xor v6 xor (v7 shl 16) xor (v7 shr 16) xor (v7 and $FFFF0000);
-  Fptr_Fm_hash[6] := v0 xor v2 xor (v2 shr 16) xor v3 xor (v3 shl 16)
+  Fm_hash[6] := v0 xor v2 xor (v2 shr 16) xor v3 xor (v3 shl 16)
     xor v4 xor (v4 shr 16) xor (v5 shl 16) xor (v5 shr 16)
     xor v5 xor (v6 shl 16) xor (v6 shr 16) xor v6 xor (v7 shl 16) xor v7;
-  Fptr_Fm_hash[7] := v0 xor (v0 shr 16) xor (v1 shl 16) xor (v1 shr 16)
+  Fm_hash[7] := v0 xor (v0 shr 16) xor (v1 shl 16) xor (v1 shr 16)
     xor (v2 shl 16) xor (v3 shr 16) xor v3 xor (v4 shl 16)
     xor v4 xor (v5 shr 16) xor v5 xor (v6 shl 16) xor (v6 shr 16)
     xor (v7 shl 16) xor v7;
@@ -340,12 +329,8 @@ constructor TGost.Create;
 begin
   Inherited Create(32, 32);
   System.SetLength(Fm_state, 8);
-  Fptr_Fm_state := PCardinal(Fm_state);
   System.SetLength(Fm_hash, 8);
-  Fptr_Fm_hash := PCardinal(Fm_hash);
 
-  Fptr_Fm := @(Fm[0]);
-  Fptr_Fs := @(Fs[0]);
 end;
 
 procedure TGost.Finish;
@@ -367,7 +352,7 @@ begin
 
   Compress(PCardinal(m_length));
 
-  Compress(Fptr_Fm_state);
+  Compress(PCardinal(Fm_state));
 
 end;
 
@@ -380,12 +365,12 @@ end;
 
 class constructor TGost.Gost;
 var
-  Fsbox: THashLibMatrixUInt32Array;
+  sbox: THashLibMatrixUInt32Array;
 
   i, a, b: Int32;
   ax, bx, cx, dx: UInt32;
 begin
-  Fsbox := THashLibMatrixUInt32Array.Create(THashLibUInt32Array.Create(4, 10, 9,
+  sbox := THashLibMatrixUInt32Array.Create(THashLibUInt32Array.Create(4, 10, 9,
     2, 13, 8, 0, 14, 6, 11, 1, 12, 7, 15, 5, 3), THashLibUInt32Array.Create(14,
     11, 4, 12, 6, 13, 15, 10, 2, 3, 8, 1, 0, 7, 5, 9),
     THashLibUInt32Array.Create(5, 8, 1, 13, 10, 3, 4, 2, 14, 15, 12, 7, 6, 0, 9,
@@ -397,32 +382,28 @@ begin
     7, 10, 4, 9, 2, 3, 14, 6, 11, 8, 12));
 
   System.SetLength(Fs_sbox1, 256);
-  Fptr_Fs_sbox1 := PCardinal(Fs_sbox1);
   System.SetLength(Fs_sbox2, 256);
-  Fptr_Fs_sbox2 := PCardinal(Fs_sbox2);
   System.SetLength(Fs_sbox3, 256);
-  Fptr_Fs_sbox3 := PCardinal(Fs_sbox3);
   System.SetLength(Fs_sbox4, 256);
-  Fptr_Fs_sbox4 := PCardinal(Fs_sbox4);
 
   i := 0;
 
   for a := 0 to 15 do
 
   begin
-    ax := Fsbox[1, a] shl 15;
-    bx := Fsbox[3, a] shl 23;
-    cx := Fsbox[5, a];
+    ax := sbox[1, a] shl 15;
+    bx := sbox[3, a] shl 23;
+    cx := sbox[5, a];
     cx := TBits.RotateRight32(cx, 1);
-    dx := Fsbox[7, a] shl 7;
+    dx := sbox[7, a] shl 7;
 
     for b := 0 to 15 do
 
     begin
-      Fptr_Fs_sbox1[i] := ax or (Fsbox[0, b] shl 11);
-      Fptr_Fs_sbox2[i] := bx or (Fsbox[2, b] shl 19);
-      Fptr_Fs_sbox3[i] := cx or (Fsbox[4, b] shl 27);
-      Fptr_Fs_sbox4[i] := dx or (Fsbox[6, b] shl 3);
+      Fs_sbox1[i] := ax or (sbox[0, b] shl 11);
+      Fs_sbox2[i] := bx or (sbox[2, b] shl 19);
+      Fs_sbox3[i] := cx or (sbox[4, b] shl 27);
+      Fs_sbox4[i] := dx or (sbox[6, b] shl 3);
       System.Inc(i);
     end;
 
@@ -445,22 +426,19 @@ end;
 procedure TGost.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
-  data: array [0 .. 7] of UInt32;
-  ptr_data: PCardinal;
+  data, m: array [0 .. 7] of UInt32;
   c, a, b: UInt32;
   i: Int32;
 begin
 
   c := 0;
 
-  ptr_data := @(data[0]);
-
-  TConverters.le32_copy(a_data, a_index, ptr_data, 0, 32);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 32);
 
   for i := 0 to 7 do
   begin
-    a := ptr_data[i];
-    Fptr_Fm[i] := a;
+    a := data[i];
+    m[i] := a;
     b := Fm_state[i];
     c := a + c + Fm_state[i];
     Fm_state[i] := c;
@@ -472,8 +450,9 @@ begin
 
   end;
 
-  Compress(Fptr_Fm);
+  Compress(@(m[0]));
 
+  System.FillChar(m, System.SizeOf(m), 0);
   System.FillChar(data, System.SizeOf(data), 0);
 
 end;

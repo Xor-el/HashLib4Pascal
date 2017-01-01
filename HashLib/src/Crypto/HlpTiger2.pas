@@ -559,7 +559,6 @@ type
 {$ENDREGION}
   strict protected
     Fm_hash: THashLibUInt64Array;
-    Fptr_Fm_hash: PUInt64;
 
     constructor Create(a_hash_size: Int32; a_rounds: THashRounds);
 
@@ -622,7 +621,6 @@ constructor TTiger2.Create(a_hash_size: Int32; a_rounds: THashRounds);
 begin
   Inherited Create(a_hash_size, 64);
   System.SetLength(Fm_hash, 3);
-  Fptr_Fm_hash := PUInt64(Fm_hash);
   Fm_rounds := Int32(a_rounds);
 end;
 
@@ -662,9 +660,9 @@ end;
 procedure TTiger2.Initialize;
 begin
 
-  Fptr_Fm_hash[0] := $0123456789ABCDEF;
-  Fptr_Fm_hash[1] := UInt64($FEDCBA9876543210);
-  Fptr_Fm_hash[2] := UInt64($F096A5B4C3B2E187);
+  Fm_hash[0] := $0123456789ABCDEF;
+  Fm_hash[1] := UInt64($FEDCBA9876543210);
+  Fm_hash[2] := UInt64($F096A5B4C3B2E187);
 
   Inherited Initialize();
 
@@ -676,212 +674,210 @@ var
   a, b, c, temp_a: UInt64;
   rounds: Int32;
   data: array [0 .. 7] of UInt64;
-  ptr_data: PUInt64;
 begin
 
-  ptr_data := @(data[0]);
-  TConverters.le64_copy(a_data, a_index, ptr_data, 0, 64);
+  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, 64);
 
-  a := Fptr_Fm_hash[0];
-  b := Fptr_Fm_hash[1];
-  c := Fptr_Fm_hash[2];
+  a := Fm_hash[0];
+  b := Fm_hash[1];
+  c := Fm_hash[2];
 
-  c := c xor ptr_data[0];
+  c := c xor data[0];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 5;
 
-  a := a xor ptr_data[1];
+  a := a xor data[1];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 5;
 
-  b := b xor ptr_data[2];
+  b := b xor data[2];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 5;
 
-  c := c xor ptr_data[3];
+  c := c xor data[3];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 5;
 
-  a := a xor ptr_data[4];
+  a := a xor data[4];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 5;
 
-  b := b xor ptr_data[5];
+  b := b xor data[5];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 5;
 
-  c := c xor ptr_data[6];
+  c := c xor data[6];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 5;
 
-  a := a xor ptr_data[7];
+  a := a xor data[7];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 5;
 
-  ptr_data[0] := ptr_data[0] - (ptr_data[7] xor C1);
-  ptr_data[1] := ptr_data[1] xor ptr_data[0];
-  ptr_data[2] := ptr_data[2] + ptr_data[1];
-  ptr_data[3] := ptr_data[3] - (ptr_data[2] xor (not ptr_data[1] shl 19));
-  ptr_data[4] := ptr_data[4] xor ptr_data[3];
-  ptr_data[5] := ptr_data[5] + ptr_data[4];
-  ptr_data[6] := ptr_data[6] - (ptr_data[5] xor (not ptr_data[4] shr 23));
-  ptr_data[7] := ptr_data[7] xor ptr_data[6];
-  ptr_data[0] := ptr_data[0] + ptr_data[7];
-  ptr_data[1] := ptr_data[1] - (ptr_data[0] xor (not ptr_data[7] shl 19));
-  ptr_data[2] := ptr_data[2] xor ptr_data[1];
-  ptr_data[3] := ptr_data[3] + ptr_data[2];
-  ptr_data[4] := ptr_data[4] - (ptr_data[3] xor (not ptr_data[2] shr 23));
-  ptr_data[5] := ptr_data[5] xor ptr_data[4];
-  ptr_data[6] := ptr_data[6] + ptr_data[5];
-  ptr_data[7] := ptr_data[7] - (ptr_data[6] xor C2);
+  data[0] := data[0] - (data[7] xor C1);
+  data[1] := data[1] xor data[0];
+  data[2] := data[2] + data[1];
+  data[3] := data[3] - (data[2] xor (not data[1] shl 19));
+  data[4] := data[4] xor data[3];
+  data[5] := data[5] + data[4];
+  data[6] := data[6] - (data[5] xor (not data[4] shr 23));
+  data[7] := data[7] xor data[6];
+  data[0] := data[0] + data[7];
+  data[1] := data[1] - (data[0] xor (not data[7] shl 19));
+  data[2] := data[2] xor data[1];
+  data[3] := data[3] + data[2];
+  data[4] := data[4] - (data[3] xor (not data[2] shr 23));
+  data[5] := data[5] xor data[4];
+  data[6] := data[6] + data[5];
+  data[7] := data[7] - (data[6] xor C2);
 
-  b := b xor ptr_data[0];
+  b := b xor data[0];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 7;
 
-  c := c xor ptr_data[1];
+  c := c xor data[1];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 7;
 
-  a := a xor ptr_data[2];
+  a := a xor data[2];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 7;
 
-  b := b xor ptr_data[3];
+  b := b xor data[3];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 7;
 
-  c := c xor ptr_data[4];
+  c := c xor data[4];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 7;
 
-  a := a xor ptr_data[5];
+  a := a xor data[5];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 7;
 
-  b := b xor ptr_data[6];
+  b := b xor data[6];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 7;
 
-  c := c xor ptr_data[7];
+  c := c xor data[7];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 7;
 
-  ptr_data[0] := ptr_data[0] - (ptr_data[7] xor C1);
-  ptr_data[1] := ptr_data[1] xor ptr_data[0];
-  ptr_data[2] := ptr_data[2] + ptr_data[1];
-  ptr_data[3] := ptr_data[3] - (ptr_data[2] xor (not ptr_data[1] shl 19));
-  ptr_data[4] := ptr_data[4] xor ptr_data[3];
-  ptr_data[5] := ptr_data[5] + ptr_data[4];
-  ptr_data[6] := ptr_data[6] - (ptr_data[5] xor (not ptr_data[4] shr 23));
-  ptr_data[7] := ptr_data[7] xor ptr_data[6];
-  ptr_data[0] := ptr_data[0] + ptr_data[7];
-  ptr_data[1] := ptr_data[1] - (ptr_data[0] xor (not ptr_data[7] shl 19));
-  ptr_data[2] := ptr_data[2] xor ptr_data[1];
-  ptr_data[3] := ptr_data[3] + ptr_data[2];
-  ptr_data[4] := ptr_data[4] - (ptr_data[3] xor (not ptr_data[2] shr 23));
-  ptr_data[5] := ptr_data[5] xor ptr_data[4];
-  ptr_data[6] := ptr_data[6] + ptr_data[5];
-  ptr_data[7] := ptr_data[7] - (ptr_data[6] xor C2);
+  data[0] := data[0] - (data[7] xor C1);
+  data[1] := data[1] xor data[0];
+  data[2] := data[2] + data[1];
+  data[3] := data[3] - (data[2] xor (not data[1] shl 19));
+  data[4] := data[4] xor data[3];
+  data[5] := data[5] + data[4];
+  data[6] := data[6] - (data[5] xor (not data[4] shr 23));
+  data[7] := data[7] xor data[6];
+  data[0] := data[0] + data[7];
+  data[1] := data[1] - (data[0] xor (not data[7] shl 19));
+  data[2] := data[2] xor data[1];
+  data[3] := data[3] + data[2];
+  data[4] := data[4] - (data[3] xor (not data[2] shr 23));
+  data[5] := data[5] xor data[4];
+  data[6] := data[6] + data[5];
+  data[7] := data[7] - (data[6] xor C2);
 
-  a := a xor ptr_data[0];
+  a := a xor data[0];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 9;
 
-  b := b xor ptr_data[1];
+  b := b xor data[1];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 9;
 
-  c := c xor ptr_data[2];
+  c := c xor data[2];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 9;
 
-  a := a xor ptr_data[3];
+  a := a xor data[3];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 9;
 
-  b := b xor ptr_data[4];
+  b := b xor data[4];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
     ] xor s_T1[Byte(b shr 56)]);
   a := a * 9;
 
-  c := c xor ptr_data[5];
+  c := c xor data[5];
   a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
     ] xor s_T4[Byte(c shr 48)]);
   b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
     ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
   b := b * 9;
 
-  a := a xor ptr_data[6];
+  a := a xor data[6];
   b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
     ] xor s_T4[Byte(a shr 48)]);
   c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2[Byte(a shr 40)
     ] xor s_T1[Byte(a shr 56)]);
   c := c * 9;
 
-  b := b xor ptr_data[7];
+  b := b xor data[7];
   c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
     ] xor s_T4[Byte(b shr 48)]);
   a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2[Byte(b shr 40)
@@ -892,73 +888,73 @@ begin
   while rounds < Fm_rounds do
   begin
 
-    ptr_data[0] := ptr_data[0] - (ptr_data[7] xor C1);
-    ptr_data[1] := ptr_data[1] xor ptr_data[0];
-    ptr_data[2] := ptr_data[2] + ptr_data[1];
-    ptr_data[3] := ptr_data[3] - (ptr_data[2] xor (not ptr_data[1] shl 19));
-    ptr_data[4] := ptr_data[4] xor ptr_data[3];
-    ptr_data[5] := ptr_data[5] + ptr_data[4];
-    ptr_data[6] := ptr_data[6] - (ptr_data[5] xor (not ptr_data[4] shr 23));
-    ptr_data[7] := ptr_data[7] xor ptr_data[6];
-    ptr_data[0] := ptr_data[0] + ptr_data[7];
-    ptr_data[1] := ptr_data[1] - (ptr_data[0] xor (not ptr_data[7] shl 19));
-    ptr_data[2] := ptr_data[2] xor ptr_data[1];
-    ptr_data[3] := ptr_data[3] + ptr_data[2];
-    ptr_data[4] := ptr_data[4] - (ptr_data[3] xor (not ptr_data[2] shr 23));
-    ptr_data[5] := ptr_data[5] xor ptr_data[4];
-    ptr_data[6] := ptr_data[6] + ptr_data[5];
-    ptr_data[7] := ptr_data[7] - (ptr_data[6] xor C2);
+    data[0] := data[0] - (data[7] xor C1);
+    data[1] := data[1] xor data[0];
+    data[2] := data[2] + data[1];
+    data[3] := data[3] - (data[2] xor (not data[1] shl 19));
+    data[4] := data[4] xor data[3];
+    data[5] := data[5] + data[4];
+    data[6] := data[6] - (data[5] xor (not data[4] shr 23));
+    data[7] := data[7] xor data[6];
+    data[0] := data[0] + data[7];
+    data[1] := data[1] - (data[0] xor (not data[7] shl 19));
+    data[2] := data[2] xor data[1];
+    data[3] := data[3] + data[2];
+    data[4] := data[4] - (data[3] xor (not data[2] shr 23));
+    data[5] := data[5] xor data[4];
+    data[6] := data[6] + data[5];
+    data[7] := data[7] - (data[6] xor C2);
 
-    c := c xor ptr_data[0];
+    c := c xor data[0];
     a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
       ] xor s_T4[Byte(c shr 48)]);
     b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
       ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
     b := b * 9;
 
-    a := a xor ptr_data[1];
+    a := a xor data[1];
     b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
       ] xor s_T4[Byte(a shr 48)]);
     c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2
       [Byte(a shr 40)] xor s_T1[Byte(a shr 56)]);
     c := c * 9;
 
-    b := b xor ptr_data[2];
+    b := b xor data[2];
     c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
       ] xor s_T4[Byte(b shr 48)]);
     a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2
       [Byte(b shr 40)] xor s_T1[Byte(b shr 56)]);
     a := a * 9;
 
-    c := c xor ptr_data[3];
+    c := c xor data[3];
     a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
       ] xor s_T4[Byte(c shr 48)]);
     b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
       ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
     b := b * 9;
 
-    a := a xor ptr_data[4];
+    a := a xor data[4];
     b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
       ] xor s_T4[Byte(a shr 48)]);
     c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2
       [Byte(a shr 40)] xor s_T1[Byte(a shr 56)]);
     c := c * 9;
 
-    b := b xor ptr_data[5];
+    b := b xor data[5];
     c := c - (s_T1[Byte(b)] xor s_T2[Byte(b shr 16)] xor s_T3[Byte(b shr 32)
       ] xor s_T4[Byte(b shr 48)]);
     a := a + (s_T4[Byte(b shr 8)] xor s_T3[Byte(b shr 24)] xor s_T2
       [Byte(b shr 40)] xor s_T1[Byte(b shr 56)]);
     a := a * 9;
 
-    c := c xor ptr_data[6];
+    c := c xor data[6];
     a := a - (s_T1[Byte(c)] xor s_T2[Byte(c shr 16)] xor s_T3[Byte(c shr 32)
       ] xor s_T4[Byte(c shr 48)]);
     b := b + (s_T4[Byte(c shr 8) and $FF] xor s_T3[Byte(c shr 24)
       ] xor s_T2[Byte(c shr 40)] xor s_T1[Byte(c shr 56)]);
     b := b * 9;
 
-    a := a xor ptr_data[7];
+    a := a xor data[7];
     b := b - (s_T1[Byte(a)] xor s_T2[Byte(a shr 16)] xor s_T3[Byte(a shr 32)
       ] xor s_T4[Byte(a shr 48)]);
     c := c + (s_T4[Byte(a shr 8)] xor s_T3[Byte(a shr 24)] xor s_T2
@@ -973,9 +969,9 @@ begin
     System.Inc(rounds);
   end;
 
-  Fptr_Fm_hash[0] := Fptr_Fm_hash[0] xor a;
-  Fptr_Fm_hash[1] := b - Fptr_Fm_hash[1];
-  Fptr_Fm_hash[2] := Fptr_Fm_hash[2] + c;
+  Fm_hash[0] := Fm_hash[0] xor a;
+  Fm_hash[1] := b - Fm_hash[1];
+  Fm_hash[2] := Fm_hash[2] + c;
 
   System.FillChar(data, System.SizeOf(data), 0);
 

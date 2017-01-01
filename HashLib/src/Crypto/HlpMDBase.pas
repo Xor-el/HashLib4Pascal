@@ -22,7 +22,6 @@ type
 
   strict protected
     Fm_state: THashLibUInt32Array;
-    Fptr_Fm_state: PCardinal;
 
   const
 
@@ -53,7 +52,6 @@ constructor TMDBase.Create(a_state_length, a_hash_size: Int32);
 begin
   Inherited Create(a_hash_size, 64);
   System.SetLength(Fm_state, a_state_length);
-  Fptr_Fm_state := PCardinal(Fm_state);
 end;
 
 procedure TMDBase.Finish;
@@ -93,10 +91,10 @@ end;
 
 procedure TMDBase.Initialize;
 begin
-  Fptr_Fm_state[0] := $67452301;
-  Fptr_Fm_state[1] := $EFCDAB89;
-  Fptr_Fm_state[2] := $98BADCFE;
-  Fptr_Fm_state[3] := $10325476;
+  Fm_state[0] := $67452301;
+  Fm_state[1] := $EFCDAB89;
+  Fm_state[2] := $98BADCFE;
+  Fm_state[3] := $10325476;
   inherited Initialize();
 
 end;

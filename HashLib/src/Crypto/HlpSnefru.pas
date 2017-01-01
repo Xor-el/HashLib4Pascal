@@ -33,7 +33,6 @@ type
 
     Fm_state: THashLibUInt32Array;
     Fm_security_level, FHashSize, FBlockSize: Int32;
-    Fptr_Fm_state: PCardinal;
 
   const
     s_shifts: array [0 .. 3] of Int32 = (16, 8, 16, 24);
@@ -74,7 +73,6 @@ begin
   FHashSize := HashSize;
   FBlockSize := BlockSize;
   System.SetLength(Fm_state, FHashSize shr 2);
-  Fptr_Fm_state := PCardinal(Fm_state);
 
 end;
 
@@ -127,7 +125,7 @@ var
 begin
 
   ptr_work := @(work[0]);
-  System.Move(Fm_state[0], ptr_work[0], System.Length(Fm_state) *
+  System.Move(Fm_state[0], work[0], System.Length(Fm_state) *
     System.SizeOf(UInt32));
 
   TConverters.be32_copy(a_data, a_index, ptr_work + System.Length(Fm_state), 0,
@@ -146,38 +144,38 @@ begin
 
     begin
 
-      ptr_work[15] := ptr_work[15] xor sbox0[Byte(ptr_work[0])];
-      ptr_work[1] := ptr_work[1] xor sbox0[Byte(ptr_work[0])];
-      ptr_work[0] := ptr_work[0] xor sbox0[Byte(ptr_work[1])];
-      ptr_work[2] := ptr_work[2] xor sbox0[Byte(ptr_work[1])];
-      ptr_work[1] := ptr_work[1] xor sbox1[Byte(ptr_work[2])];
-      ptr_work[3] := ptr_work[3] xor sbox1[Byte(ptr_work[2])];
-      ptr_work[2] := ptr_work[2] xor sbox1[Byte(ptr_work[3])];
-      ptr_work[4] := ptr_work[4] xor sbox1[Byte(ptr_work[3])];
-      ptr_work[3] := ptr_work[3] xor sbox0[Byte(ptr_work[4])];
-      ptr_work[5] := ptr_work[5] xor sbox0[Byte(ptr_work[4])];
-      ptr_work[4] := ptr_work[4] xor sbox0[Byte(ptr_work[5])];
-      ptr_work[6] := ptr_work[6] xor sbox0[Byte(ptr_work[5])];
-      ptr_work[5] := ptr_work[5] xor sbox1[Byte(ptr_work[6])];
-      ptr_work[7] := ptr_work[7] xor sbox1[Byte(ptr_work[6])];
-      ptr_work[6] := ptr_work[6] xor sbox1[Byte(ptr_work[7])];
-      ptr_work[8] := ptr_work[8] xor sbox1[Byte(ptr_work[7])];
-      ptr_work[7] := ptr_work[7] xor sbox0[Byte(ptr_work[8])];
-      ptr_work[9] := ptr_work[9] xor sbox0[Byte(ptr_work[8])];
-      ptr_work[8] := ptr_work[8] xor sbox0[Byte(ptr_work[9])];
-      ptr_work[10] := ptr_work[10] xor sbox0[Byte(ptr_work[9])];
-      ptr_work[9] := ptr_work[9] xor sbox1[Byte(ptr_work[10])];
-      ptr_work[11] := ptr_work[11] xor sbox1[Byte(ptr_work[10])];
-      ptr_work[10] := ptr_work[10] xor sbox1[Byte(ptr_work[11])];
-      ptr_work[12] := ptr_work[12] xor sbox1[Byte(ptr_work[11])];
-      ptr_work[11] := ptr_work[11] xor sbox0[Byte(ptr_work[12])];
-      ptr_work[13] := ptr_work[13] xor sbox0[Byte(ptr_work[12])];
-      ptr_work[12] := ptr_work[12] xor sbox0[Byte(ptr_work[13])];
-      ptr_work[14] := ptr_work[14] xor sbox0[Byte(ptr_work[13])];
-      ptr_work[13] := ptr_work[13] xor sbox1[Byte(ptr_work[14])];
-      ptr_work[15] := ptr_work[15] xor sbox1[Byte(ptr_work[14])];
-      ptr_work[14] := ptr_work[14] xor sbox1[Byte(ptr_work[15])];
-      ptr_work[0] := ptr_work[0] xor sbox1[Byte(ptr_work[15])];
+      work[15] := work[15] xor sbox0[Byte(work[0])];
+      work[1] := work[1] xor sbox0[Byte(work[0])];
+      work[0] := work[0] xor sbox0[Byte(work[1])];
+      work[2] := work[2] xor sbox0[Byte(work[1])];
+      work[1] := work[1] xor sbox1[Byte(work[2])];
+      work[3] := work[3] xor sbox1[Byte(work[2])];
+      work[2] := work[2] xor sbox1[Byte(work[3])];
+      work[4] := work[4] xor sbox1[Byte(work[3])];
+      work[3] := work[3] xor sbox0[Byte(work[4])];
+      work[5] := work[5] xor sbox0[Byte(work[4])];
+      work[4] := work[4] xor sbox0[Byte(work[5])];
+      work[6] := work[6] xor sbox0[Byte(work[5])];
+      work[5] := work[5] xor sbox1[Byte(work[6])];
+      work[7] := work[7] xor sbox1[Byte(work[6])];
+      work[6] := work[6] xor sbox1[Byte(work[7])];
+      work[8] := work[8] xor sbox1[Byte(work[7])];
+      work[7] := work[7] xor sbox0[Byte(work[8])];
+      work[9] := work[9] xor sbox0[Byte(work[8])];
+      work[8] := work[8] xor sbox0[Byte(work[9])];
+      work[10] := work[10] xor sbox0[Byte(work[9])];
+      work[9] := work[9] xor sbox1[Byte(work[10])];
+      work[11] := work[11] xor sbox1[Byte(work[10])];
+      work[10] := work[10] xor sbox1[Byte(work[11])];
+      work[12] := work[12] xor sbox1[Byte(work[11])];
+      work[11] := work[11] xor sbox0[Byte(work[12])];
+      work[13] := work[13] xor sbox0[Byte(work[12])];
+      work[12] := work[12] xor sbox0[Byte(work[13])];
+      work[14] := work[14] xor sbox0[Byte(work[13])];
+      work[13] := work[13] xor sbox1[Byte(work[14])];
+      work[15] := work[15] xor sbox1[Byte(work[14])];
+      work[14] := work[14] xor sbox1[Byte(work[15])];
+      work[0] := work[0] xor sbox1[Byte(work[15])];
 
       shift := s_shifts[j];
 
@@ -185,7 +183,7 @@ begin
 
       while k < 16 do
       begin
-        ptr_work[k] := TBits.RotateRight32(ptr_work[k], shift);
+        work[k] := TBits.RotateRight32(work[k], shift);
         System.Inc(k);
       end;
 
@@ -195,17 +193,17 @@ begin
     System.Inc(i);
   end;
 
-  Fptr_Fm_state[0] := Fptr_Fm_state[0] xor ptr_work[15];
-  Fptr_Fm_state[1] := Fptr_Fm_state[1] xor ptr_work[14];
-  Fptr_Fm_state[2] := Fptr_Fm_state[2] xor ptr_work[13];
-  Fptr_Fm_state[3] := Fptr_Fm_state[3] xor ptr_work[12];
+  Fm_state[0] := Fm_state[0] xor work[15];
+  Fm_state[1] := Fm_state[1] xor work[14];
+  Fm_state[2] := Fm_state[2] xor work[13];
+  Fm_state[3] := Fm_state[3] xor work[12];
 
   if (FHashSize = 32) then
   begin
-    Fptr_Fm_state[4] := Fptr_Fm_state[4] xor ptr_work[11];
-    Fptr_Fm_state[5] := Fptr_Fm_state[5] xor ptr_work[10];
-    Fptr_Fm_state[6] := Fptr_Fm_state[6] xor ptr_work[9];
-    Fptr_Fm_state[7] := Fptr_Fm_state[7] xor ptr_work[8];
+    Fm_state[4] := Fm_state[4] xor work[11];
+    Fm_state[5] := Fm_state[5] xor work[10];
+    Fm_state[6] := Fm_state[6] xor work[9];
+    Fm_state[7] := Fm_state[7] xor work[8];
   end;
 
   System.FillChar(work, System.SizeOf(work), 0);

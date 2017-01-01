@@ -23,8 +23,6 @@ type
 
     Fm_stages: THashLibMatrixUInt32Array;
 
-    Fptr_Fm_state, Fptr_Ftheta, Fptr_Fgamma, Fptr_Fpi: PCardinal;
-
     Fm_tap: Int32;
 
     procedure GPT(a_theta: PCardinal);
@@ -54,8 +52,6 @@ begin
   Inherited Create(32, 32);
   System.SetLength(Fm_state, 17);
 
-  Fptr_Fm_state := PCardinal(Fm_state);
-
   System.SetLength(Fm_stages, 32);
   i := 0;
   while i <= System.High(Fm_stages) do
@@ -66,15 +62,10 @@ begin
 
   System.SetLength(Ftheta, 17);
 
-  Fptr_Ftheta := PCardinal(Ftheta);
-
   System.SetLength(Fgamma, 17);
-
-  Fptr_Fgamma := PCardinal(Fgamma);
 
   System.SetLength(Fpi, 17);
 
-  Fptr_Fpi := PCardinal(Fpi);
 end;
 
 procedure TPanama.Finish;
@@ -115,32 +106,32 @@ begin
     Fm_stages[tap25, 5] := Fm_stages[tap25, 5] xor Fm_stages[Fm_tap, 7];
     Fm_stages[tap25, 6] := Fm_stages[tap25, 6] xor Fm_stages[Fm_tap, 0];
     Fm_stages[tap25, 7] := Fm_stages[tap25, 7] xor Fm_stages[Fm_tap, 1];
-    Fm_stages[Fm_tap, 0] := Fm_stages[Fm_tap, 0] xor Fptr_Fm_state[1];
-    Fm_stages[Fm_tap, 1] := Fm_stages[Fm_tap, 1] xor Fptr_Fm_state[2];
-    Fm_stages[Fm_tap, 2] := Fm_stages[Fm_tap, 2] xor Fptr_Fm_state[3];
-    Fm_stages[Fm_tap, 3] := Fm_stages[Fm_tap, 3] xor Fptr_Fm_state[4];
-    Fm_stages[Fm_tap, 4] := Fm_stages[Fm_tap, 4] xor Fptr_Fm_state[5];
-    Fm_stages[Fm_tap, 5] := Fm_stages[Fm_tap, 5] xor Fptr_Fm_state[6];
-    Fm_stages[Fm_tap, 6] := Fm_stages[Fm_tap, 6] xor Fptr_Fm_state[7];
-    Fm_stages[Fm_tap, 7] := Fm_stages[Fm_tap, 7] xor Fptr_Fm_state[8];
+    Fm_stages[Fm_tap, 0] := Fm_stages[Fm_tap, 0] xor Fm_state[1];
+    Fm_stages[Fm_tap, 1] := Fm_stages[Fm_tap, 1] xor Fm_state[2];
+    Fm_stages[Fm_tap, 2] := Fm_stages[Fm_tap, 2] xor Fm_state[3];
+    Fm_stages[Fm_tap, 3] := Fm_stages[Fm_tap, 3] xor Fm_state[4];
+    Fm_stages[Fm_tap, 4] := Fm_stages[Fm_tap, 4] xor Fm_state[5];
+    Fm_stages[Fm_tap, 5] := Fm_stages[Fm_tap, 5] xor Fm_state[6];
+    Fm_stages[Fm_tap, 6] := Fm_stages[Fm_tap, 6] xor Fm_state[7];
+    Fm_stages[Fm_tap, 7] := Fm_stages[Fm_tap, 7] xor Fm_state[8];
 
-    Fptr_Fm_state[0] := ptr_theta[0] xor $01;
-    Fptr_Fm_state[1] := ptr_theta[1] xor Fm_stages[tap4, 0];
-    Fptr_Fm_state[2] := ptr_theta[2] xor Fm_stages[tap4, 1];
-    Fptr_Fm_state[3] := ptr_theta[3] xor Fm_stages[tap4, 2];
-    Fptr_Fm_state[4] := ptr_theta[4] xor Fm_stages[tap4, 3];
-    Fptr_Fm_state[5] := ptr_theta[5] xor Fm_stages[tap4, 4];
-    Fptr_Fm_state[6] := ptr_theta[6] xor Fm_stages[tap4, 5];
-    Fptr_Fm_state[7] := ptr_theta[7] xor Fm_stages[tap4, 6];
-    Fptr_Fm_state[8] := ptr_theta[8] xor Fm_stages[tap4, 7];
-    Fptr_Fm_state[9] := ptr_theta[9] xor Fm_stages[tap16, 0];
-    Fptr_Fm_state[10] := ptr_theta[10] xor Fm_stages[tap16, 1];
-    Fptr_Fm_state[11] := ptr_theta[11] xor Fm_stages[tap16, 2];
-    Fptr_Fm_state[12] := ptr_theta[12] xor Fm_stages[tap16, 3];
-    Fptr_Fm_state[13] := ptr_theta[13] xor Fm_stages[tap16, 4];
-    Fptr_Fm_state[14] := ptr_theta[14] xor Fm_stages[tap16, 5];
-    Fptr_Fm_state[15] := ptr_theta[15] xor Fm_stages[tap16, 6];
-    Fptr_Fm_state[16] := ptr_theta[16] xor Fm_stages[tap16, 7];
+    Fm_state[0] := theta[0] xor $01;
+    Fm_state[1] := theta[1] xor Fm_stages[tap4, 0];
+    Fm_state[2] := theta[2] xor Fm_stages[tap4, 1];
+    Fm_state[3] := theta[3] xor Fm_stages[tap4, 2];
+    Fm_state[4] := theta[4] xor Fm_stages[tap4, 3];
+    Fm_state[5] := theta[5] xor Fm_stages[tap4, 4];
+    Fm_state[6] := theta[6] xor Fm_stages[tap4, 5];
+    Fm_state[7] := theta[7] xor Fm_stages[tap4, 6];
+    Fm_state[8] := theta[8] xor Fm_stages[tap4, 7];
+    Fm_state[9] := theta[9] xor Fm_stages[tap16, 0];
+    Fm_state[10] := theta[10] xor Fm_stages[tap16, 1];
+    Fm_state[11] := theta[11] xor Fm_stages[tap16, 2];
+    Fm_state[12] := theta[12] xor Fm_stages[tap16, 3];
+    Fm_state[13] := theta[13] xor Fm_stages[tap16, 4];
+    Fm_state[14] := theta[14] xor Fm_stages[tap16, 5];
+    Fm_state[15] := theta[15] xor Fm_stages[tap16, 6];
+    Fm_state[16] := theta[16] xor Fm_stages[tap16, 7];
 
     System.Inc(i);
   end;
@@ -160,76 +151,59 @@ end;
 procedure TPanama.GPT(a_theta: PCardinal);
 begin
 
-  Fptr_Fgamma[0] := Fptr_Fm_state[0] xor (Fptr_Fm_state[1] or
-    not Fptr_Fm_state[2]);
-  Fptr_Fgamma[1] := Fptr_Fm_state[1] xor (Fptr_Fm_state[2] or
-    not Fptr_Fm_state[3]);
-  Fptr_Fgamma[2] := Fptr_Fm_state[2] xor (Fptr_Fm_state[3] or
-    not Fptr_Fm_state[4]);
-  Fptr_Fgamma[3] := Fptr_Fm_state[3] xor (Fptr_Fm_state[4] or
-    not Fptr_Fm_state[5]);
-  Fptr_Fgamma[4] := Fptr_Fm_state[4] xor (Fptr_Fm_state[5] or
-    not Fptr_Fm_state[6]);
-  Fptr_Fgamma[5] := Fptr_Fm_state[5] xor (Fptr_Fm_state[6] or
-    not Fptr_Fm_state[7]);
-  Fptr_Fgamma[6] := Fptr_Fm_state[6] xor (Fptr_Fm_state[7] or
-    not Fptr_Fm_state[8]);
-  Fptr_Fgamma[7] := Fptr_Fm_state[7] xor (Fptr_Fm_state[8] or
-    not Fptr_Fm_state[9]);
-  Fptr_Fgamma[8] := Fptr_Fm_state[8] xor (Fptr_Fm_state[9] or
-    not Fptr_Fm_state[10]);
-  Fptr_Fgamma[9] := Fptr_Fm_state[9] xor (Fptr_Fm_state[10] or
-    not Fptr_Fm_state[11]);
-  Fptr_Fgamma[10] := Fptr_Fm_state[10] xor (Fptr_Fm_state[11] or
-    not Fptr_Fm_state[12]);
-  Fptr_Fgamma[11] := Fptr_Fm_state[11] xor (Fptr_Fm_state[12] or
-    not Fptr_Fm_state[13]);
-  Fptr_Fgamma[12] := Fptr_Fm_state[12] xor (Fptr_Fm_state[13] or
-    not Fptr_Fm_state[14]);
-  Fptr_Fgamma[13] := Fptr_Fm_state[13] xor (Fptr_Fm_state[14] or
-    not Fptr_Fm_state[15]);
-  Fptr_Fgamma[14] := Fptr_Fm_state[14] xor (Fptr_Fm_state[15] or
-    not Fptr_Fm_state[16]);
-  Fptr_Fgamma[15] := Fptr_Fm_state[15] xor (Fptr_Fm_state[16] or
-    not Fptr_Fm_state[0]);
-  Fptr_Fgamma[16] := Fptr_Fm_state[16] xor (Fptr_Fm_state[0] or
-    not Fptr_Fm_state[1]);
+  Fgamma[0] := Fm_state[0] xor (Fm_state[1] or not Fm_state[2]);
+  Fgamma[1] := Fm_state[1] xor (Fm_state[2] or not Fm_state[3]);
+  Fgamma[2] := Fm_state[2] xor (Fm_state[3] or not Fm_state[4]);
+  Fgamma[3] := Fm_state[3] xor (Fm_state[4] or not Fm_state[5]);
+  Fgamma[4] := Fm_state[4] xor (Fm_state[5] or not Fm_state[6]);
+  Fgamma[5] := Fm_state[5] xor (Fm_state[6] or not Fm_state[7]);
+  Fgamma[6] := Fm_state[6] xor (Fm_state[7] or not Fm_state[8]);
+  Fgamma[7] := Fm_state[7] xor (Fm_state[8] or not Fm_state[9]);
+  Fgamma[8] := Fm_state[8] xor (Fm_state[9] or not Fm_state[10]);
+  Fgamma[9] := Fm_state[9] xor (Fm_state[10] or not Fm_state[11]);
+  Fgamma[10] := Fm_state[10] xor (Fm_state[11] or not Fm_state[12]);
+  Fgamma[11] := Fm_state[11] xor (Fm_state[12] or not Fm_state[13]);
+  Fgamma[12] := Fm_state[12] xor (Fm_state[13] or not Fm_state[14]);
+  Fgamma[13] := Fm_state[13] xor (Fm_state[14] or not Fm_state[15]);
+  Fgamma[14] := Fm_state[14] xor (Fm_state[15] or not Fm_state[16]);
+  Fgamma[15] := Fm_state[15] xor (Fm_state[16] or not Fm_state[0]);
+  Fgamma[16] := Fm_state[16] xor (Fm_state[0] or not Fm_state[1]);
 
-  Fptr_Fpi[0] := Fptr_Fgamma[0];
-  Fptr_Fpi[1] := TBits.RotateLeft32(Fptr_Fgamma[7], 1);
-  Fptr_Fpi[2] := TBits.RotateLeft32(Fptr_Fgamma[14], 3);
-  Fptr_Fpi[3] := TBits.RotateLeft32(Fptr_Fgamma[4], 6);
-  Fptr_Fpi[4] := TBits.RotateLeft32(Fptr_Fgamma[11], 10);
-  Fptr_Fpi[5] := TBits.RotateLeft32(Fptr_Fgamma[1], 15);
-  Fptr_Fpi[6] := TBits.RotateLeft32(Fptr_Fgamma[8], 21);
-  Fptr_Fpi[7] := TBits.RotateLeft32(Fptr_Fgamma[15], 28);
-  Fptr_Fpi[8] := TBits.RotateLeft32(Fptr_Fgamma[5], 4);
-  Fptr_Fpi[9] := TBits.RotateLeft32(Fptr_Fgamma[12], 13);
-  Fptr_Fpi[10] := TBits.RotateLeft32(Fptr_Fgamma[2], 23);
-  Fptr_Fpi[11] := TBits.RotateLeft32(Fptr_Fgamma[9], 2);
-  Fptr_Fpi[12] := TBits.RotateLeft32(Fptr_Fgamma[16], 14);
-  Fptr_Fpi[13] := TBits.RotateLeft32(Fptr_Fgamma[6], 27);
-  Fptr_Fpi[14] := TBits.RotateLeft32(Fptr_Fgamma[13], 9);
-  Fptr_Fpi[15] := TBits.RotateLeft32(Fptr_Fgamma[3], 24);
-  Fptr_Fpi[16] := TBits.RotateLeft32(Fptr_Fgamma[10], 8);
+  Fpi[0] := Fgamma[0];
+  Fpi[1] := TBits.RotateLeft32(Fgamma[7], 1);
+  Fpi[2] := TBits.RotateLeft32(Fgamma[14], 3);
+  Fpi[3] := TBits.RotateLeft32(Fgamma[4], 6);
+  Fpi[4] := TBits.RotateLeft32(Fgamma[11], 10);
+  Fpi[5] := TBits.RotateLeft32(Fgamma[1], 15);
+  Fpi[6] := TBits.RotateLeft32(Fgamma[8], 21);
+  Fpi[7] := TBits.RotateLeft32(Fgamma[15], 28);
+  Fpi[8] := TBits.RotateLeft32(Fgamma[5], 4);
+  Fpi[9] := TBits.RotateLeft32(Fgamma[12], 13);
+  Fpi[10] := TBits.RotateLeft32(Fgamma[2], 23);
+  Fpi[11] := TBits.RotateLeft32(Fgamma[9], 2);
+  Fpi[12] := TBits.RotateLeft32(Fgamma[16], 14);
+  Fpi[13] := TBits.RotateLeft32(Fgamma[6], 27);
+  Fpi[14] := TBits.RotateLeft32(Fgamma[13], 9);
+  Fpi[15] := TBits.RotateLeft32(Fgamma[3], 24);
+  Fpi[16] := TBits.RotateLeft32(Fgamma[10], 8);
 
-  a_theta[0] := Fptr_Fpi[0] xor Fptr_Fpi[1] xor Fptr_Fpi[4];
-  a_theta[1] := Fptr_Fpi[1] xor Fptr_Fpi[2] xor Fptr_Fpi[5];
-  a_theta[2] := Fptr_Fpi[2] xor Fptr_Fpi[3] xor Fptr_Fpi[6];
-  a_theta[3] := Fptr_Fpi[3] xor Fptr_Fpi[4] xor Fptr_Fpi[7];
-  a_theta[4] := Fptr_Fpi[4] xor Fptr_Fpi[5] xor Fptr_Fpi[8];
-  a_theta[5] := Fptr_Fpi[5] xor Fptr_Fpi[6] xor Fptr_Fpi[9];
-  a_theta[6] := Fptr_Fpi[6] xor Fptr_Fpi[7] xor Fptr_Fpi[10];
-  a_theta[7] := Fptr_Fpi[7] xor Fptr_Fpi[8] xor Fptr_Fpi[11];
-  a_theta[8] := Fptr_Fpi[8] xor Fptr_Fpi[9] xor Fptr_Fpi[12];
-  a_theta[9] := Fptr_Fpi[9] xor Fptr_Fpi[10] xor Fptr_Fpi[13];
-  a_theta[10] := Fptr_Fpi[10] xor Fptr_Fpi[11] xor Fptr_Fpi[14];
-  a_theta[11] := Fptr_Fpi[11] xor Fptr_Fpi[12] xor Fptr_Fpi[15];
-  a_theta[12] := Fptr_Fpi[12] xor Fptr_Fpi[13] xor Fptr_Fpi[16];
-  a_theta[13] := Fptr_Fpi[13] xor Fptr_Fpi[14] xor Fptr_Fpi[0];
-  a_theta[14] := Fptr_Fpi[14] xor Fptr_Fpi[15] xor Fptr_Fpi[1];
-  a_theta[15] := Fptr_Fpi[15] xor Fptr_Fpi[16] xor Fptr_Fpi[2];
-  a_theta[16] := Fptr_Fpi[16] xor Fptr_Fpi[0] xor Fptr_Fpi[3];
+  a_theta[0] := Fpi[0] xor Fpi[1] xor Fpi[4];
+  a_theta[1] := Fpi[1] xor Fpi[2] xor Fpi[5];
+  a_theta[2] := Fpi[2] xor Fpi[3] xor Fpi[6];
+  a_theta[3] := Fpi[3] xor Fpi[4] xor Fpi[7];
+  a_theta[4] := Fpi[4] xor Fpi[5] xor Fpi[8];
+  a_theta[5] := Fpi[5] xor Fpi[6] xor Fpi[9];
+  a_theta[6] := Fpi[6] xor Fpi[7] xor Fpi[10];
+  a_theta[7] := Fpi[7] xor Fpi[8] xor Fpi[11];
+  a_theta[8] := Fpi[8] xor Fpi[9] xor Fpi[12];
+  a_theta[9] := Fpi[9] xor Fpi[10] xor Fpi[13];
+  a_theta[10] := Fpi[10] xor Fpi[11] xor Fpi[14];
+  a_theta[11] := Fpi[11] xor Fpi[12] xor Fpi[15];
+  a_theta[12] := Fpi[12] xor Fpi[13] xor Fpi[16];
+  a_theta[13] := Fpi[13] xor Fpi[14] xor Fpi[0];
+  a_theta[14] := Fpi[14] xor Fpi[15] xor Fpi[1];
+  a_theta[15] := Fpi[15] xor Fpi[16] xor Fpi[2];
+  a_theta[16] := Fpi[16] xor Fpi[0] xor Fpi[3];
 
 end;
 
@@ -255,20 +229,17 @@ procedure TPanama.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
   work_buffer: array [0 .. 7] of UInt32;
-  ptr_work_buffer: PCardinal;
   tap16, tap25: Int32;
 begin
 
-  ptr_work_buffer := @(work_buffer[0]);
-
-  TConverters.le32_copy(a_data, a_index, ptr_work_buffer, 0, 32);
+  TConverters.le32_copy(a_data, a_index, @(work_buffer[0]), 0, 32);
 
   tap16 := (Fm_tap + 16) and $1F;
 
   Fm_tap := (Fm_tap - 1) and $1F;
   tap25 := (Fm_tap + 25) and $1F;
 
-  GPT(Fptr_Ftheta);
+  GPT(PCardinal(Ftheta));
 
   Fm_stages[tap25, 0] := Fm_stages[tap25, 0] xor Fm_stages[Fm_tap, 2];
   Fm_stages[tap25, 1] := Fm_stages[tap25, 1] xor Fm_stages[Fm_tap, 3];
@@ -278,32 +249,32 @@ begin
   Fm_stages[tap25, 5] := Fm_stages[tap25, 5] xor Fm_stages[Fm_tap, 7];
   Fm_stages[tap25, 6] := Fm_stages[tap25, 6] xor Fm_stages[Fm_tap, 0];
   Fm_stages[tap25, 7] := Fm_stages[tap25, 7] xor Fm_stages[Fm_tap, 1];
-  Fm_stages[Fm_tap, 0] := Fm_stages[Fm_tap, 0] xor ptr_work_buffer[0];
-  Fm_stages[Fm_tap, 1] := Fm_stages[Fm_tap, 1] xor ptr_work_buffer[1];
-  Fm_stages[Fm_tap, 2] := Fm_stages[Fm_tap, 2] xor ptr_work_buffer[2];
-  Fm_stages[Fm_tap, 3] := Fm_stages[Fm_tap, 3] xor ptr_work_buffer[3];
-  Fm_stages[Fm_tap, 4] := Fm_stages[Fm_tap, 4] xor ptr_work_buffer[4];
-  Fm_stages[Fm_tap, 5] := Fm_stages[Fm_tap, 5] xor ptr_work_buffer[5];
-  Fm_stages[Fm_tap, 6] := Fm_stages[Fm_tap, 6] xor ptr_work_buffer[6];
-  Fm_stages[Fm_tap, 7] := Fm_stages[Fm_tap, 7] xor ptr_work_buffer[7];
+  Fm_stages[Fm_tap, 0] := Fm_stages[Fm_tap, 0] xor work_buffer[0];
+  Fm_stages[Fm_tap, 1] := Fm_stages[Fm_tap, 1] xor work_buffer[1];
+  Fm_stages[Fm_tap, 2] := Fm_stages[Fm_tap, 2] xor work_buffer[2];
+  Fm_stages[Fm_tap, 3] := Fm_stages[Fm_tap, 3] xor work_buffer[3];
+  Fm_stages[Fm_tap, 4] := Fm_stages[Fm_tap, 4] xor work_buffer[4];
+  Fm_stages[Fm_tap, 5] := Fm_stages[Fm_tap, 5] xor work_buffer[5];
+  Fm_stages[Fm_tap, 6] := Fm_stages[Fm_tap, 6] xor work_buffer[6];
+  Fm_stages[Fm_tap, 7] := Fm_stages[Fm_tap, 7] xor work_buffer[7];
 
-  Fptr_Fm_state[0] := Fptr_Ftheta[0] xor $01;
-  Fptr_Fm_state[1] := Fptr_Ftheta[1] xor ptr_work_buffer[0];
-  Fptr_Fm_state[2] := Fptr_Ftheta[2] xor ptr_work_buffer[1];
-  Fptr_Fm_state[3] := Fptr_Ftheta[3] xor ptr_work_buffer[2];
-  Fptr_Fm_state[4] := Fptr_Ftheta[4] xor ptr_work_buffer[3];
-  Fptr_Fm_state[5] := Fptr_Ftheta[5] xor ptr_work_buffer[4];
-  Fptr_Fm_state[6] := Fptr_Ftheta[6] xor ptr_work_buffer[5];
-  Fptr_Fm_state[7] := Fptr_Ftheta[7] xor ptr_work_buffer[6];
-  Fptr_Fm_state[8] := Fptr_Ftheta[8] xor ptr_work_buffer[7];
-  Fptr_Fm_state[9] := Fptr_Ftheta[9] xor Fm_stages[tap16, 0];
-  Fptr_Fm_state[10] := Fptr_Ftheta[10] xor Fm_stages[tap16, 1];
-  Fptr_Fm_state[11] := Fptr_Ftheta[11] xor Fm_stages[tap16, 2];
-  Fptr_Fm_state[12] := Fptr_Ftheta[12] xor Fm_stages[tap16, 3];
-  Fptr_Fm_state[13] := Fptr_Ftheta[13] xor Fm_stages[tap16, 4];
-  Fptr_Fm_state[14] := Fptr_Ftheta[14] xor Fm_stages[tap16, 5];
-  Fptr_Fm_state[15] := Fptr_Ftheta[15] xor Fm_stages[tap16, 6];
-  Fptr_Fm_state[16] := Fptr_Ftheta[16] xor Fm_stages[tap16, 7];
+  Fm_state[0] := Ftheta[0] xor $01;
+  Fm_state[1] := Ftheta[1] xor work_buffer[0];
+  Fm_state[2] := Ftheta[2] xor work_buffer[1];
+  Fm_state[3] := Ftheta[3] xor work_buffer[2];
+  Fm_state[4] := Ftheta[4] xor work_buffer[3];
+  Fm_state[5] := Ftheta[5] xor work_buffer[4];
+  Fm_state[6] := Ftheta[6] xor work_buffer[5];
+  Fm_state[7] := Ftheta[7] xor work_buffer[6];
+  Fm_state[8] := Ftheta[8] xor work_buffer[7];
+  Fm_state[9] := Ftheta[9] xor Fm_stages[tap16, 0];
+  Fm_state[10] := Ftheta[10] xor Fm_stages[tap16, 1];
+  Fm_state[11] := Ftheta[11] xor Fm_stages[tap16, 2];
+  Fm_state[12] := Ftheta[12] xor Fm_stages[tap16, 3];
+  Fm_state[13] := Ftheta[13] xor Fm_stages[tap16, 4];
+  Fm_state[14] := Ftheta[14] xor Fm_stages[tap16, 5];
+  Fm_state[15] := Ftheta[15] xor Fm_stages[tap16, 6];
+  Fm_state[16] := Ftheta[16] xor Fm_stages[tap16, 7];
 
   System.FillChar(work_buffer, System.SizeOf(work_buffer), 0);
 

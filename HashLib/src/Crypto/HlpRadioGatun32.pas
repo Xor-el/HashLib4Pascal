@@ -21,8 +21,6 @@ type
 
     Fm_mill: THashLibUInt32Array;
 
-    Fptr_Fm_mill: PCardinal;
-
     Fm_belt: THashLibMatrixUInt32Array;
 
     procedure RoundFunction();
@@ -50,7 +48,6 @@ begin
 
   Inherited Create(32, 12);
   System.SetLength(Fm_mill, 19);
-  Fptr_Fm_mill := PCardinal(Fm_mill);
 
   System.SetLength(Fm_belt, 13);
   i := 0;
@@ -131,11 +128,9 @@ procedure TRadioGatun32.RoundFunction;
 var
   q: THashLibUInt32Array;
   a: array [0 .. 18] of UInt32;
-  ptr_a: PCardinal;
   i: Int32;
 begin
 
-  ptr_a := @(a[0]);
   q := Fm_belt[12];
   i := 12;
   while i > 0 do
@@ -149,47 +144,45 @@ begin
   i := 0;
   while i < 12 do
   begin
-    Fm_belt[i + 1][i mod 3] := Fm_belt[i + 1][i mod 3] xor Fptr_Fm_mill[i + 1];
+    Fm_belt[i + 1][i mod 3] := Fm_belt[i + 1][i mod 3] xor Fm_mill[i + 1];
     System.Inc(i);
   end;
 
   i := 0;
   while i < 19 do
   begin
-    ptr_a[i] := Fptr_Fm_mill[i] xor (Fptr_Fm_mill[(i + 1) mod 19] or
-      not Fptr_Fm_mill[(i + 2) mod 19]);
+    a[i] := Fm_mill[i] xor (Fm_mill[(i + 1) mod 19] or
+      not Fm_mill[(i + 2) mod 19]);
     System.Inc(i);
   end;
 
   i := 0;
   while i < 19 do
   begin
-    Fptr_Fm_mill[i] := TBits.RotateRight32(ptr_a[(7 * i) mod 19],
-      (i * (i + 1)) shr 1);
+    Fm_mill[i] := TBits.RotateRight32(a[(7 * i) mod 19], (i * (i + 1)) shr 1);
     System.Inc(i);
   end;
 
   i := 0;
   while i < 19 do
   begin
-    ptr_a[i] := Fptr_Fm_mill[i] xor Fptr_Fm_mill[(i + 1) mod 19]
-      xor Fptr_Fm_mill[(i + 4) mod 19];
+    a[i] := Fm_mill[i] xor Fm_mill[(i + 1) mod 19] xor Fm_mill[(i + 4) mod 19];
     System.Inc(i);
   end;
 
-  ptr_a[0] := ptr_a[0] xor 1;
+  a[0] := a[0] xor 1;
 
   i := 0;
   while i < 19 do
   begin
-    Fptr_Fm_mill[i] := ptr_a[i];
+    Fm_mill[i] := a[i];
     System.Inc(i);
   end;
 
   i := 0;
   while i < 3 do
   begin
-    Fptr_Fm_mill[i + 13] := Fptr_Fm_mill[i + 13] xor q[i];
+    Fm_mill[i + 13] := Fm_mill[i + 13] xor q[i];
     System.Inc(i);
   end;
 
@@ -199,18 +192,15 @@ procedure TRadioGatun32.TransformBlock(a_data: PByte; a_data_length: Int32;
   a_index: Int32);
 var
   data: array [0 .. 2] of UInt32;
-  ptr_data: PCardinal;
   i: Int32;
 begin
-
-  ptr_data := @(data[0]);
-  TConverters.le32_copy(a_data, a_index, ptr_data, 0, 12);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 12);
 
   i := 0;
   while i < 3 do
   begin
-    Fptr_Fm_mill[i + 16] := Fptr_Fm_mill[i + 16] xor ptr_data[i];
-    Fm_belt[0][i] := Fm_belt[0][i] xor ptr_data[i];
+    Fm_mill[i + 16] := Fm_mill[i + 16] xor data[i];
+    Fm_belt[0][i] := Fm_belt[0][i] xor data[i];
 
     System.Inc(i);
   end;

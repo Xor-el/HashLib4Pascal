@@ -17,7 +17,6 @@ type
 
   strict private
     Fm_state, Fm_checksum: THashLibByteArray;
-    Fptr_Fm_state, Fptr_Fm_checksum: PByte;
 
 {$REGION 'Consts'}
 
@@ -80,9 +79,7 @@ constructor TMD2.Create;
 begin
   Inherited Create(16, 16);
   System.SetLength(Fm_state, 16);
-  Fptr_Fm_state := PByte(Fm_state);
   System.SetLength(Fm_checksum, 16);
-  Fptr_Fm_checksum := PByte(Fm_checksum);
 
 end;
 
@@ -129,18 +126,16 @@ var
   i, j: Int32;
   t: UInt32;
   temp: array [0 .. 47] of Byte;
-  ptr_temp: PByte;
 
 begin
 
-  ptr_temp := @(temp[0]);
   System.Move(Fm_state[0], temp[0], 16);
 
   System.Move(a_data[a_index], temp[16], 16);
 
   for i := 0 to 15 do
   begin
-    ptr_temp[i + 32] := Byte(Fptr_Fm_state[i] xor a_data[i + a_index]);
+    temp[i + 32] := Byte(Fm_state[i] xor a_data[i + a_index]);
   end;
 
   t := 0;
@@ -150,8 +145,8 @@ begin
 
     for j := 0 to 47 do
     begin
-      ptr_temp[j] := Byte(ptr_temp[j] xor s_pi[t]);
-      t := ptr_temp[j];
+      temp[j] := Byte(temp[j] xor s_pi[t]);
+      t := temp[j];
     end;
 
     t := Byte(t + UInt32(i));
@@ -159,14 +154,13 @@ begin
 
   System.Move(temp[0], Fm_state[0], 16);
 
-  t := Fptr_Fm_checksum[15];
+  t := Fm_checksum[15];
 
   for i := 0 to 15 do
   begin
 
-    Fptr_Fm_checksum[i] := Fptr_Fm_checksum[i]
-      xor (s_pi[a_data[i + a_index] xor t]);
-    t := Fptr_Fm_checksum[i];
+    Fm_checksum[i] := Fm_checksum[i] xor (s_pi[a_data[i + a_index] xor t]);
+    t := Fm_checksum[i];
   end;
 
   System.FillChar(temp, System.SizeOf(temp), 0);
