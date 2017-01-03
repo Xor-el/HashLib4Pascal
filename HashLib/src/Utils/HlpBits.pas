@@ -172,7 +172,7 @@ begin
 {$IFDEF FPC}
   result := RolDWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n and 31;
+  a_n := a_n and 31;
 
   result := (a_value shl a_n) or (a_value shr (32 - a_n));
 {$ENDIF FPC}
@@ -186,7 +186,7 @@ begin
 {$IFDEF FPC}
   result := RolQWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n and 63;
+  a_n := a_n and 63;
 
   result := (a_value shl a_n) or (a_value shr (64 - a_n));
 {$ENDIF FPC}
@@ -200,7 +200,7 @@ begin
 {$IFDEF FPC}
   result := RorDWord(a_value, a_n);
 {$ELSE}
-  // a_n := a_n and 31;
+  a_n := a_n and 31;
 
   result := (a_value shr a_n) or (a_value shl (32 - a_n));
 {$ENDIF FPC}
@@ -214,9 +214,8 @@ begin
 {$IFDEF FPC}
   result := RorQWord(a_value, a_n);
 {$ELSE}
-{$IFDEF DELPHIXE3_DOWN}
   a_n := a_n and 63;
-{$ENDIF DELPHIXE3_DOWN}
+
   result := (a_value shr a_n) or (a_value shl (64 - a_n));
 {$ENDIF FPC}
 end;

@@ -146,7 +146,15 @@ var
   LBufferSize: Int32;
 begin
   PtrBuffer := @a_data;
-  LBufferSize := BufferSize;
+
+  if BufferSize > a_length then // Sanity Check
+  begin
+    LBufferSize := BUFFER_SIZE;
+  end
+  else
+  begin
+    LBufferSize := BufferSize;
+  end;
 
   if PtrBuffer <> Nil then
   begin
@@ -256,9 +264,12 @@ begin
 
   if BufferSize > a_stream.Size then // Sanity Check
   begin
-    BufferSize := BUFFER_SIZE;
+    LBufferSize := BUFFER_SIZE;
+  end
+  else
+  begin
+    LBufferSize := BufferSize;
   end;
-  LBufferSize := BufferSize;
 
   System.SetLength(data, LBufferSize);
 
