@@ -45,22 +45,18 @@ type
 {$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
 
-    C1: UInt64 = ($87C37B91114253D5);
-    C2: UInt64 = ($4CF5AD432745937F);
-
-    C5: UInt64 = ($FF51AFD7ED558CCD);
-    C6: UInt64 = ($C4CEB9FE1A85EC53);
+    C1: UInt64 = UInt64($87C37B91114253D5);
+    C5: UInt64 = UInt64($FF51AFD7ED558CCD);
+    C6: UInt64 = UInt64($C4CEB9FE1A85EC53);
 
 {$ELSE}
     C1 = UInt64($87C37B91114253D5);
-    C2 = UInt64($4CF5AD432745937F);
-
     C5 = UInt64($FF51AFD7ED558CCD);
     C6 = UInt64($C4CEB9FE1A85EC53);
 {$ENDIF FPC}
+    C2 = UInt64($4CF5AD432745937F);
     C3 = UInt32($52DCE729);
     C4 = UInt32($38495AB5);
-
 {$ENDREGION}
     function GetKeyLength(): TNullableInteger;
     function GetKey: THashLibByteArray; inline;
