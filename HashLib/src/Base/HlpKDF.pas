@@ -11,12 +11,14 @@ uses
 type
   TKDF = class abstract(TInterfacedObject, IKDF)
 
-  public
+  strict protected
 
     // Not really needed because there is an Intristic default constructor always
     // called for classes if none is defined by the developer but I just put it
     // for readability reasons.
     constructor Create();
+
+  public
 
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
