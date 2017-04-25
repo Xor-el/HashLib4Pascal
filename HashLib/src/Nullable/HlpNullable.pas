@@ -43,10 +43,10 @@ type
   var
     fInitDefault: string;
     procedure SetValue(const aValue: T); inline;
-    function GetValue: T; inline;
-    function GetIsNull: Boolean; inline;
     procedure CheckValue; inline;
     procedure CheckType; inline;
+    function GetValue: T; inline;
+    function GetIsNull: Boolean; inline;
     function GetHasValue: Boolean; inline;
     function GetHasDefault: Boolean; inline;
   public
@@ -90,6 +90,36 @@ end;
 function Nullable<T>.GetIsNull: Boolean;
 begin
   Result := fInitValue <> 'I';
+end;
+
+procedure Nullable<T>.CheckType;
+var
+  info: PTypeInfo;
+begin
+  info := TypeInfo(T);
+  case info^.Kind of
+    tkInteger:
+      ;
+    tkFloat:
+      ;
+    tkString:
+      ;
+    tkInt64:
+      ;
+    tkUString:
+      ;
+  else
+    Raise EUnsupportedTypeHashLibException.CreateRes(@SUnsupportedType);
+  end;
+end;
+
+procedure Nullable<T>.CheckValue;
+begin
+  if IsNull then
+    if HasDefault then
+      fValue := fDefault
+    else
+      raise ENullReferenceHashLibException.CreateRes(@SGetNullValue);
 end;
 
 function Nullable<T>.GetValue: T;
@@ -190,36 +220,6 @@ begin
         Result.Value := AddInt64(a.fValue, b.fValue);
     end;
   end;
-end;
-
-procedure Nullable<T>.CheckType;
-var
-  info: PTypeInfo;
-begin
-  info := TypeInfo(T);
-  case info^.Kind of
-    tkInteger:
-      ;
-    tkFloat:
-      ;
-    tkString:
-      ;
-    tkInt64:
-      ;
-    tkUString:
-      ;
-  else
-    Raise EUnsupportedTypeHashLibException.CreateRes(@SUnsupportedType);
-  end;
-end;
-
-procedure Nullable<T>.CheckValue;
-begin
-  if IsNull then
-    if HasDefault then
-      fValue := fDefault
-    else
-      raise ENullReferenceHashLibException.CreateRes(@SGetNullValue);
 end;
 
 procedure Nullable<T>.ClearValue;

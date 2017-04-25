@@ -34,6 +34,7 @@ type
     Fm_idx: Int32;
     Fm_buf: THashLibByteArray;
 
+    procedure TransformUInt32Fast(a_data: UInt32); inline;
     procedure ByteUpdate(a_b: Byte); inline;
     procedure Finish();
 
@@ -49,7 +50,6 @@ type
     function GetKeyLength(): TNullableInteger;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(value: THashLibByteArray); inline;
-    procedure TransformUInt32Fast(a_data: UInt32); inline;
 
   public
     constructor Create();
@@ -132,6 +132,21 @@ begin
   Fm_h := Fm_h xor (Fm_h shr 13);
   Fm_h := Fm_h * C5;
   Fm_h := Fm_h xor (Fm_h shr 16);
+end;
+
+procedure TMurmurHash3_x86_32.TransformUInt32Fast(a_data: UInt32);
+var
+  k: UInt32;
+begin
+  k := a_data;
+
+  k := k * C1;
+  k := TBits.RotateLeft32(k, 15);
+  k := k * C2;
+
+  Fm_h := Fm_h xor k;
+  Fm_h := TBits.RotateLeft32(Fm_h, 13);
+  Fm_h := (Fm_h * 5) + C3;
 end;
 
 procedure TMurmurHash3_x86_32.ByteUpdate(a_b: Byte);
@@ -233,21 +248,6 @@ begin
   Finish();
   result := THashResult.Create(Fm_h);
   Initialize();
-end;
-
-procedure TMurmurHash3_x86_32.TransformUInt32Fast(a_data: UInt32);
-var
-  k: UInt32;
-begin
-  k := a_data;
-
-  k := k * C1;
-  k := TBits.RotateLeft32(k, 15);
-  k := k * C2;
-
-  Fm_h := Fm_h xor k;
-  Fm_h := TBits.RotateLeft32(Fm_h, 13);
-  Fm_h := (Fm_h * 5) + C3;
 end;
 
 end.

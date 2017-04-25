@@ -44,10 +44,10 @@ type
     KEY1 = UInt64($0F0E0D0C0B0A0908);
 
 {$ENDREGION}
-    procedure ByteUpdate(a_b: Byte); inline;
-    procedure ProcessBlock(a_m: UInt64); inline;
     procedure Compress(); inline;
     procedure CompressTimes(a_times: Int32); inline;
+    procedure ProcessBlock(a_m: UInt64); inline;
+    procedure ByteUpdate(a_b: Byte); inline;
     procedure Finish();
 
     function GetKeyLength(): TNullableInteger;
@@ -90,24 +90,6 @@ end;
 
 { TSipHash }
 
-procedure TSipHash.ByteUpdate(a_b: Byte);
-var
-  ptr_Fm_buf: PByte;
-  m: UInt64;
-begin
-
-  Fm_buf[Fm_idx] := a_b;
-  System.Inc(Fm_idx);
-  if Fm_idx >= 8 then
-  begin
-    ptr_Fm_buf := PByte(Fm_buf);
-    m := TConverters.ReadBytesAsUInt64LE(ptr_Fm_buf, 0);
-    ProcessBlock(m);
-    Fm_idx := 0;
-  end;
-
-end;
-
 procedure TSipHash.Compress;
 begin
   Fm_v0 := Fm_v0 + Fm_v1;
@@ -136,6 +118,31 @@ begin
     Compress();
     System.Inc(i);
   end;
+end;
+
+procedure TSipHash.ProcessBlock(a_m: UInt64);
+begin
+  Fm_v3 := Fm_v3 xor a_m;
+  CompressTimes(F_cr);
+  Fm_v0 := Fm_v0 xor a_m;
+end;
+
+procedure TSipHash.ByteUpdate(a_b: Byte);
+var
+  ptr_Fm_buf: PByte;
+  m: UInt64;
+begin
+
+  Fm_buf[Fm_idx] := a_b;
+  System.Inc(Fm_idx);
+  if Fm_idx >= 8 then
+  begin
+    ptr_Fm_buf := PByte(Fm_buf);
+    m := TConverters.ReadBytesAsUInt64LE(ptr_Fm_buf, 0);
+    ProcessBlock(m);
+    Fm_idx := 0;
+  end;
+
 end;
 
 constructor TSipHash.Create(a_compression_rounds, a_finalization_rounds: Int32);
@@ -255,13 +262,6 @@ begin
   Fm_v1 := Fm_v1 xor Fm_key1;
   Fm_v0 := Fm_v0 xor Fm_key0;
 
-end;
-
-procedure TSipHash.ProcessBlock(a_m: UInt64);
-begin
-  Fm_v3 := Fm_v3 xor a_m;
-  CompressTimes(F_cr);
-  Fm_v0 := Fm_v0 xor a_m;
 end;
 
 procedure TSipHash.SetKey(value: THashLibByteArray);

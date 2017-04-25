@@ -66,7 +66,7 @@ begin
 
 {$IFDEF USE_UNROLLED_VARIANT}
   a_data[16] := ((a_data[16 - 3] xor a_data[16 - 8]) xor a_data[16 - 14])
-    xor a_data[16 - 16];
+    xor a_data[0];
   a_data[17] := ((a_data[17 - 3] xor a_data[17 - 8]) xor a_data[17 - 14])
     xor a_data[17 - 16];
   a_data[18] := ((a_data[18 - 3] xor a_data[18 - 8]) xor a_data[18 - 14])

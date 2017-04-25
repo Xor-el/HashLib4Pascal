@@ -404,7 +404,7 @@ var
 begin
   result := '';
 
-  chArrayLength := Length * 3;
+  chArrayLength := &Length * 3;
 
   System.SetLength(chArray, chArrayLength);
   Idx := 0;

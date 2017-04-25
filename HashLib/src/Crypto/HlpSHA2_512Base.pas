@@ -130,7 +130,7 @@ begin
   data[16] := ((TBits.RotateLeft64(T1, 45)) xor (TBits.RotateLeft64(T1, 3))
     xor (T1 shr 6)) + data[16 - 7] +
     ((TBits.RotateLeft64(T0, 63)) xor (TBits.RotateLeft64(T0, 56))
-    xor (T0 shr 7)) + data[16 - 16];
+    xor (T0 shr 7)) + data[0];
   T0 := data[17 - 15];
   T1 := data[17 - 2];
   data[17] := ((TBits.RotateLeft64(T1, 45)) xor (TBits.RotateLeft64(T1, 3))
