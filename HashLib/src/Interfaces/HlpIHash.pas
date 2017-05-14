@@ -35,8 +35,9 @@ type
     function ComputeUntyped(const a_data; a_length: Int64): IHashResult;
     function ComputeStream(a_stream: TStream; a_length: Int64 = -1)
       : IHashResult;
-    function ComputeFile(const a_file_name: String; a_from: Int64 = 0;
-      a_length: Int64 = -1): IHashResult;
+    function ComputeFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from: Int64 = 0; a_length: Int64 = -1): IHashResult;
 
     procedure Initialize();
 
@@ -53,8 +54,9 @@ type
 {$IFDEF FPC}UnicodeString{$ELSE} String
 {$ENDIF FPC}; a_encoding: TEncoding);
     procedure TransformStream(a_stream: TStream; a_length: Int64 = -1);
-    procedure TransformFile(const a_file_name: String; a_from: Int64 = 0;
-      a_length: Int64 = -1);
+    procedure TransformFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from: Int64 = 0; a_length: Int64 = -1);
 
   end;
 

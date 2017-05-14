@@ -55,8 +55,9 @@ type
     function ComputeUntyped(const a_data; a_length: Int64): IHashResult;
     function ComputeStream(a_stream: TStream; a_length: Int64 = -1)
       : IHashResult;
-    function ComputeFile(const a_file_name: String; a_from: Int64 = 0;
-      a_length: Int64 = -1): IHashResult;
+    function ComputeFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from: Int64 = 0; a_length: Int64 = -1): IHashResult;
     procedure TransformString(const a_data:
 {$IFDEF FPC}UnicodeString{$ELSE} String
 {$ENDIF FPC}; a_encoding: TEncoding);
@@ -67,8 +68,9 @@ type
       a_length: Int32); overload; virtual; abstract;
     procedure TransformUntyped(const a_data; a_length: Int64);
     procedure TransformStream(a_stream: TStream; a_length: Int64 = -1);
-    procedure TransformFile(const a_file_name: String; a_from: Int64 = 0;
-      a_length: Int64 = -1);
+    procedure TransformFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from: Int64 = 0; a_length: Int64 = -1);
     procedure Initialize(); virtual; abstract;
     function TransformFinal(): IHashResult; virtual; abstract;
 
@@ -191,8 +193,9 @@ begin
 
 end;
 
-function THash.ComputeFile(const a_file_name: String; a_from, a_length: Int64)
-  : IHashResult;
+function THash.ComputeFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from, a_length: Int64): IHashResult;
 begin
   Initialize();
   TransformFile(a_file_name, a_from, a_length);
@@ -317,8 +320,9 @@ begin
 
 end;
 
-procedure THash.TransformFile(const a_file_name: String;
-  a_from, a_length: Int64);
+procedure THash.TransformFile(const a_file_name:
+{$IFDEF FPC}UnicodeString{$ELSE} String
+{$ENDIF FPC}; a_from, a_length: Int64);
 var
   MyFileStream: TFileStream;
 begin
