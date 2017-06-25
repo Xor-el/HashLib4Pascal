@@ -47,7 +47,7 @@ begin
   end;
 
   Fm_buffer := THashBuffer.Create(a_buffer_size);
-  Fm_processed_bytes := 0;
+
 end;
 
 procedure TBlockHash.Initialize;
