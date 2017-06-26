@@ -194,6 +194,11 @@ type
     CRC10_CDMA2000,
 
     /// <summary>
+    /// CRC standard named "CRC10_GSM".
+    /// </summary>
+    CRC10_GSM,
+
+    /// <summary>
     /// CRC standard named "CRC11".
     /// </summary>
     CRC11,
@@ -851,6 +856,10 @@ begin
       result := TCRC.Create(10, $3D9, $3FF, False, False, $000, $233,
         THashLibStringArray.Create('CRC-10/CDMA2000'));
 
+    TCRCStandard.CRC10_GSM:
+      result := TCRC.Create(10, $175, $000, False, False, $3FF, $12A,
+        THashLibStringArray.Create('CRC-10/GSM'));
+
     TCRCStandard.CRC11:
       result := TCRC.Create(11, $385, $01A, False, False, $000, $5A3,
         THashLibStringArray.Create('CRC-11'));
@@ -865,7 +874,7 @@ begin
 
     TCRCStandard.CRC12_DECT:
       result := TCRC.Create(12, $80F, $000, False, False, $000, $F5B,
-        THashLibStringArray.Create('CRC-12/DECT'));
+        THashLibStringArray.Create('CRC-12/DECT', 'X-CRC-12'));
 
     TCRCStandard.CRC12_GSM:
       result := TCRC.Create(12, $D31, $000, False, False, $FFF, $B34,
@@ -1109,7 +1118,7 @@ begin
     TCRCStandard.CRC64:
       result := TCRC.Create(64, $42F0E1EBA9EA3693, $0000000000000000, False,
         False, $0000000000000000, $6C40DF5F0B497347,
-        THashLibStringArray.Create('CRC-64'));
+        THashLibStringArray.Create('CRC-64', 'CRC-64/ECMA-182'));
 
     TCRCStandard.CRC64_GOISO:
       result := TCRC.Create(64, $000000000000001B, $FFFFFFFFFFFFFFFF, True,
