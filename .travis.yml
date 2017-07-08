@@ -1,6 +1,7 @@
 # Part of `travis-lazarus` (https://github.com/nielsAD/travis-lazarus)
 # License: MIT
 
+group: deprecated-2017Q2
 language: generic
 sudo: required
 dist: trusty
