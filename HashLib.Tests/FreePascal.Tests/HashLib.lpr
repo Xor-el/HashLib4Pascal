@@ -7,7 +7,7 @@ uses
   Forms,
   GuiTestRunner,
  // fpcunittestrunner,
-  HashLibTests,
+  //HashLibTests,
   BitConverterTests,
   PBKDF2_HMACTests;
 
