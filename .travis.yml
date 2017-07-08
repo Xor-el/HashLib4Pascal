@@ -31,6 +31,7 @@ matrix:
 before_install:
   # Start virtual display server
   - Xvfb $DISPLAY &
+  - chmod +x ./travis.install.py
 
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
