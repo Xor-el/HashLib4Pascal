@@ -33,7 +33,7 @@ before_install:
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
  # - ./.travis.install.py
- - ./HashLib4Pascal/.travis.install.py
+ - /.travis.install.py
 
 script:
   - lazbuild $LAZ_OPT /HashLib4Pascal/HashLib.Tests/FreePascal.Tests/HashLib.Tests.lpi               # Build my_lazarus_test project
