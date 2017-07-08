@@ -30,7 +30,7 @@ matrix:
 
 before_install:
   # Start virtual display server
-  #- Xvfb $DISPLAY &
+  - Xvfb $DISPLAY &
 
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
