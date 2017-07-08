@@ -443,6 +443,9 @@
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <Target>
+      <Filename Value=".\bin\HashLib"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
       <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF"/>
