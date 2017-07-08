@@ -3,8 +3,8 @@
 
 #group: deprecated-2017Q2
 language: generic
-#sudo: required
-sudo: false
+sudo: required
+#sudo: false
 dist: trusty
 
 os:
