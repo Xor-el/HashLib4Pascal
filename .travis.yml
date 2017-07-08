@@ -4,6 +4,7 @@
 language: generic
 sudo: required
 dist: trusty
+install: ./HashLib4Pascal/.travis.install.py
 
 os:
   - linux
