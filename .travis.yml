@@ -39,7 +39,7 @@ install:
 
 script:
   - lazbuild $LAZ_OPT ./HashLib.Tests/FreePascal.Tests/HashLib.Tests.lpi               # Build HashLib4Pascal Test Project
-  - $LAZ_ENV ./bin/HashLib.Tests --all --format=plain # Run HashLib4Pascal TestSuite
+  - $LAZ_ENV ./bin/HashLib.Tests/FreePascal.Tests/HashLib.Tests --all --format=plain # Run HashLib4Pascal TestSuite
 
 notifications:
   email:
