@@ -155,4 +155,4 @@ def main():
     return install_lazarus(os.environ.get('LAZ_VER'),os.environ.get('LAZ_REL'),os.environ.get('LAZ_ENV'))
 
 if __name__ == '__main__':
-sys.exit(int(not main()))
+    sys.exit(int(not main()))
