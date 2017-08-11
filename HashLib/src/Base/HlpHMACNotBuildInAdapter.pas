@@ -92,7 +92,7 @@ var
   LKey: THashLibByteArray;
   Idx, LBlockSize: Int32;
 begin
-  LBlockSize := Fm_hash.BlockSize;
+  LBlockSize := Fm_blocksize;
   if (System.Length(Key) > LBlockSize) then
   begin
     LKey := Fm_hash.ComputeBytes(Key).GetBytes();

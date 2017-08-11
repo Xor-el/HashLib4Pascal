@@ -88,6 +88,12 @@ To Run Unit Tests,
     5). To Use TestInsight, right-click on the project, then select 
 		"Enable for TestInsight" or "TestInsight Project".
         Save Project then Build and Run Test Project through TestInsight. 
+        
+###Other Implementations
+
+If you want implementations in other languages, you can check out these
+
+[HashLib4CPP By Mbadiwe Nnaemeka Ronald](https://github.com/ron4fun/HashLib4CPP)
 
 ###License
 
