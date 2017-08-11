@@ -89,12 +89,12 @@ To Run Unit Tests,
 		"Enable for TestInsight" or "TestInsight Project".
         Save Project then Build and Run Test Project through TestInsight. 
         
-###Other Implementations
+  **Other Implementations**
 
 If you want implementations in other languages, you can check out these
 
 [HashLib4CPP By Mbadiwe Nnaemeka Ronald](https://github.com/ron4fun/HashLib4CPP)
 
-###License
+**License**
 
 This "Software" is Licensed Under  **`MIT License (MIT)`** .
