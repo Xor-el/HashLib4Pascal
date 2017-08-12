@@ -20,6 +20,8 @@ uses
 resourcestring
   SIndexOutOfRange = 'Current Index Is Out Of Range';
   SInvalidBufferSize = '"BufferSize" Must Be Greater Than Zero';
+  SInvalidBlockSize = '"BlockSize" Must Be Greater Than Zero';
+  SInvalidHashSize = '"HashSize" Must Be Greater Than Zero';
   SUnAssignedStream = 'Input Stream Is Unassigned';
   SFileNotExist = 'Specified File Not Found';
 
@@ -34,7 +36,10 @@ type
     BUFFER_SIZE = Int32(64 * 1024); // 64Kb
 
     function GetBlockSize: Int32; virtual;
+    procedure SetBlockSize(value: Int32); virtual;
+
     function GetHashSize: Int32; virtual;
+    procedure SetHashSize(value: Int32); virtual;
 
     function GetBufferSize: Int32; inline;
     procedure SetBufferSize(value: Int32); inline;
@@ -47,8 +52,8 @@ type
 
     constructor Create(a_hash_size, a_block_size: Int32);
     property Name: String read GetName;
-    property BlockSize: Int32 read GetBlockSize;
-    property HashSize: Int32 read GetHashSize;
+    property BlockSize: Int32 read GetBlockSize write SetBlockSize;
+    property HashSize: Int32 read GetHashSize write SetHashSize;
     function ComputeString(const a_data: {$IFDEF FPC}UnicodeString{$ELSE} String
 {$ENDIF FPC}; a_encoding: TEncoding): IHashResult; virtual;
     function ComputeBytes(a_data: THashLibByteArray): IHashResult; virtual;
@@ -85,7 +90,7 @@ constructor THash.Create(a_hash_size, a_block_size: Int32);
 begin
 {$IFDEF DEBUG}
   System.Assert((a_block_size > 0) or (a_block_size = -1));
-  System.Assert(a_hash_size > 0);
+  System.Assert((a_hash_size > 0) or (a_hash_size = -1));
 {$ENDIF DEBUG}
   Fm_block_size := a_block_size;
   Fm_hash_size := a_hash_size;
@@ -119,9 +124,33 @@ begin
   result := Fm_block_size;
 end;
 
+procedure THash.SetBlockSize(value: Int32);
+begin
+  if value > 0 then
+  begin
+    Fm_block_size := value;
+  end
+  else
+  begin
+    raise EArgumentHashLibException.CreateRes(@SInvalidBlockSize);
+  end;
+end;
+
 function THash.GetHashSize: Int32;
 begin
   result := Fm_hash_size;
+end;
+
+procedure THash.SetHashSize(value: Int32);
+begin
+  if value > 0 then
+  begin
+    Fm_hash_size := value;
+  end
+  else
+  begin
+    raise EArgumentHashLibException.CreateRes(@SInvalidHashSize);
+  end;
 end;
 
 function THash.ComputeString(const a_data:

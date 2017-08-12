@@ -680,25 +680,31 @@ begin
 
   FIsTableGenerated := False;
 
+  Inherited Create(-1, -1); // Dummy State
+
   case _Width of
     0 .. 7:
       begin
-        Inherited Create(1, 1);
+        Self.HashSize := 1;
+        Self.BlockSize := 1;
       end;
 
     8 .. 16:
       begin
-        Inherited Create(2, 1);
+        Self.HashSize := 2;
+        Self.BlockSize := 1;
       end;
 
     17 .. 39:
       begin
-        Inherited Create(4, 1);
+        Self.HashSize := 4;
+        Self.BlockSize := 1;
       end;
 
   else
     begin
-      Inherited Create(8, 1);
+      Self.HashSize := 8;
+      Self.BlockSize := 1;
     end;
 
   end;
