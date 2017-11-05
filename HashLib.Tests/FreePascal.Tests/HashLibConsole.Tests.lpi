@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -12,9 +12,6 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <VersionInfo>
-      <StringTable ProductVersion=""/>
-    </VersionInfo>
     <BuildModes Count="2">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
@@ -23,7 +20,7 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF"/>
+            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Crypto\backup;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -62,7 +59,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="92">
+    <Units Count="107">
       <Unit0>
         <Filename Value="HashLibConsole.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -432,6 +429,66 @@
         <Filename Value="..\..\HashLib\src\Interfaces\HlpICRC.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit91>
+      <Unit92>
+        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2B.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BIvBuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BTreeConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="..\..\HashLib\src\Crypto\backup\HlpBlake2B.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2S.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="..\src\Blake2BTestVectors.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="..\src\Blake2STestVectors.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit106>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -442,7 +499,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF"/>
+      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations"/>
     </SearchPaths>
   </CompilerOptions>
   <Debugging>

@@ -71,6 +71,20 @@ uses
   HlpTiger in '..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
+  HlpBlake2B in '..\..\HashLib\src\Crypto\HlpBlake2B.pas',
+  HlpBlake2S in '..\..\HashLib\src\Crypto\HlpBlake2S.pas',
+  HlpBlake2BConfig
+    in '..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas',
+  HlpBlake2BIvBuilder
+    in '..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BIvBuilder.pas',
+  HlpBlake2BTreeConfig
+    in '..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BTreeConfig.pas',
+  HlpBlake2SConfig
+    in '..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas',
+  HlpBlake2SIvBuilder
+    in '..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas',
+  HlpBlake2STreeConfig
+    in '..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas',
   HlpAP in '..\..\HashLib\src\Hash32\HlpAP.pas',
   HlpBernstein in '..\..\HashLib\src\Hash32\HlpBernstein.pas',
   HlpBernstein1 in '..\..\HashLib\src\Hash32\HlpBernstein1.pas',
@@ -106,6 +120,14 @@ uses
   HlpICRC in '..\..\HashLib\src\Interfaces\HlpICRC.pas',
   HlpIHashInfo in '..\..\HashLib\src\Interfaces\HlpIHashInfo.pas',
   HlpIHashResult in '..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
+  HlpIBlake2BConfig
+    in '..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas',
+  HlpIBlake2SConfig
+    in '..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
+  HlpIBlake2STreeConfig
+    in '..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
+  HlpIBlake2BTreeConfig
+    in '..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
   HlpPBKDF2_HMACNotBuildInAdapter
     in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpNullable in '..\..\HashLib\src\Nullable\HlpNullable.pas',
@@ -114,7 +136,9 @@ uses
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HashLibTests in '..\src\HashLibTests.pas',
   BitConverterTests in '..\src\BitConverterTests.pas',
-  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas';
+  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas',
+  Blake2BTestVectors in '..\src\Blake2BTestVectors.pas',
+  Blake2STestVectors in '..\src\Blake2STestVectors.pas';
 
 begin
 

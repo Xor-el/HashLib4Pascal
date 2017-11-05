@@ -9,7 +9,9 @@ uses
  // fpcunittestrunner,
   HashLibTests,
   BitConverterTests,
-  PBKDF2_HMACTests;
+  PBKDF2_HMACTests,
+  Blake2BTestVectors,
+  Blake2STestVectors;
 
 {$R *.res}
 
