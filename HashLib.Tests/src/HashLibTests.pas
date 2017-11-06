@@ -3119,7 +3119,8 @@ type
     procedure TestCheckTestVectors();
     procedure TestCheckKeyedTestVectors();
     procedure TestSplits();
-
+    procedure TestEmpty;
+    procedure TestQuickBrownDog;
   end;
 
 type
@@ -3141,7 +3142,8 @@ type
     procedure TestSplits();
     procedure TestWithSaltPersonalisation();
     procedure TestWithSaltPersonalisationKey();
-
+    procedure TestEmpty;
+    procedure TestQuickBrownDog;
   end;
 
 implementation
@@ -13040,6 +13042,34 @@ begin
 
 end;
 
+procedure TTestBlake2B.TestEmpty;
+// Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
+const
+  input = '';
+  expected = '786A02F742015903C6C6FD852552D272912F4740E15847618A86E217F71F5419D25E1031AFEE585313896444934EB04B903A685B1448B755D56F701AFE9BE2CE';
+var
+  hash : AnsiString;
+begin
+  FBlake2B.Initialize();
+  FBlake2B.TransformString(input, TEncoding.ASCII);
+  hash := FBlake2B.TransformFinal.ToString();
+  CheckEquals(expected, hash);
+end;
+
+procedure TTestBlake2B.TestQuickBrownDog;
+// Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
+const
+  input = 'The quick brown fox jumps over the lazy dog';
+  expected = 'A8ADD4BDDDFD93E4877D2746E62817B116364A1FA7BC148D95090BC7333B3673F82401CF7AA2E4CB1ECD90296E3F14CB5413F8ED77BE73045B13914CDCD6A918';
+var
+  hash : AnsiString;
+begin
+  FBlake2B.Initialize();
+  FBlake2B.TransformString(input, TEncoding.ASCII);
+  hash := FBlake2B.TransformFinal.ToString();
+  CheckEquals(expected, hash);
+end;
+
 procedure TTestBlake2B.SetUp;
 var
   i: Int32;
@@ -13061,6 +13091,8 @@ begin
   inherited;
 
 end;
+
+
 
 { TTestBlake2S }
 
@@ -13219,6 +13251,35 @@ begin
     [FExpectedString, FActualString]));
 
   FBlake2SWithConfig := Nil;
+end;
+
+
+procedure TTestBlake2S.TestEmpty;
+// Note: Results taken from http://corz.org/windows/software/checksum/files/Standard%20Test%20Vectors/[Standard%20Test%20Vectors].nfo
+const
+  input = '';
+  expected = '69217A3079908094E11121D042354A7C1F55B6482CA1A51E1B250DFD1ED0EEF9';
+var
+  hash : AnsiString;
+begin
+  FBlake2S.Initialize();
+  FBlake2S.TransformString(input, TEncoding.ASCII);
+  hash := FBlake2S.TransformFinal.ToString();
+  CheckEquals(expected, hash);
+end;
+
+procedure TTestBlake2S.TestQuickBrownDog;
+// Note: results taken from http://corz.org/windows/software/checksum/files/Standard%20Test%20Vectors/[Standard%20Test%20Vectors].nfo
+const
+  input = 'The quick brown fox jumps over the lazy dog';
+  expected = '606BEEEC743CCBEFF6CBCDF5D5302AA855C256C29B88C8ED331EA1A6BF3C8812';
+var
+  hash : AnsiString;
+begin
+  FBlake2S.Initialize();
+  FBlake2S.TransformString(input, TEncoding.ASCII);
+  hash := FBlake2S.TransformFinal.ToString();
+  CheckEquals(expected, hash);
 end;
 
 procedure TTestBlake2S.SetUp;
