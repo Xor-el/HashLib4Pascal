@@ -90,6 +90,7 @@ begin
   begin
     Fm_processed_bytes := Fm_processed_bytes + UInt64(Fm_buffer.Length);
     TransformBlock(ptr_a_data, Fm_buffer.Length, a_index);
+    // TransformBlock(ptr_a_data, a_length, a_index);
     a_index := a_index + (Fm_buffer.Length);
     a_length := a_length - (Fm_buffer.Length);
   end;
@@ -99,6 +100,7 @@ begin
     Fm_buffer.Feed(ptr_a_data, System.Length(a_data), a_index, a_length,
       Fm_processed_bytes);
   end;
+
 end;
 
 function TBlockHash.TransformFinal: IHashResult;

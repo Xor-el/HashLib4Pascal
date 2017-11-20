@@ -4,6 +4,7 @@
 
 unit HashLib4PascalPackage;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -20,10 +21,13 @@ uses
   HlpDJB, HlpELF, HlpFNV, HlpFNV1a, HlpJenkins3, HlpJS, HlpMurmur2, 
   HlpMurmurHash3_x86_32, HlpOneAtTime, HlpPJW, HlpRotating, HlpRS, HlpSDBM, 
   HlpShiftAndXor, HlpSuperFast, HlpXXHash32, HlpFNV1a64, HlpFNV64, 
-  HlpMurmur2_64, HlpSipHash, HlpXXHash64, HlpIHash, HlpIHashBuffer, 
-  HlpIHashInfo, HlpIHashResult, HlpNullable, HlpBitConverter, HlpBits, 
-  HlpHashLibTypes, HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, 
-  HlpIKDF, HlpKDF, HlpICRC;
+  HlpMurmur2_64, HlpSipHash, HlpXXHash64, HlpIHash, HlpIHashInfo, 
+  HlpIHashResult, HlpNullable, HlpBitConverter, HlpBits, HlpHashLibTypes, 
+  HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, HlpIKDF, HlpKDF, 
+  HlpICRC, HlpBlake2B, HlpBlake2S, HlpBlake2BConfig, HlpBlake2BIvBuilder, 
+  HlpBlake2BTreeConfig, HlpBlake2SConfig, HlpBlake2SIvBuilder, 
+  HlpBlake2STreeConfig, HlpIBlake2BConfig, HlpIBlake2BTreeConfig, 
+  HlpIBlake2SConfig, HlpIBlake2STreeConfig;
 
 implementation
 

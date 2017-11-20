@@ -82,6 +82,10 @@ uses
   HlpRIPEMD256,
   HlpRIPEMD320,
   HlpSHA3,
+  HlpBlake2B,
+  HlpIBlake2BConfig,
+  HlpBlake2S,
+  HlpIBlake2SConfig,
   // HMAC Unit
   HlpHMACNotBuildInAdapter,
   // PBKDF2_HMAC Unit
@@ -341,6 +345,9 @@ type
       class function CreateSHA3_256(): IHash; static;
       class function CreateSHA3_384(): IHash; static;
       class function CreateSHA3_512(): IHash; static;
+
+      class function CreateBlake2B(config: IBlake2BConfig = Nil): IHash; static;
+      class function CreateBlake2S(config: IBlake2SConfig = Nil): IHash; static;
 
     end;
 
@@ -864,6 +871,32 @@ end;
 class function THashFactory.TCrypto.CreateSHA3_512: IHash;
 begin
   result := TSHA3_512.Create();
+end;
+
+class function THashFactory.TCrypto.CreateBlake2B
+  (config: IBlake2BConfig): IHash;
+begin
+  if config = Nil then
+  begin
+    result := TBlake2B.Create()
+  end
+  else
+  begin
+    result := TBlake2B.Create(config);
+  end;
+end;
+
+class function THashFactory.TCrypto.CreateBlake2S
+  (config: IBlake2SConfig): IHash;
+begin
+  if config = Nil then
+  begin
+    result := TBlake2S.Create()
+  end
+  else
+  begin
+    result := TBlake2S.Create(config);
+  end;
 end;
 
 class function THashFactory.TCrypto.CreateSnefru(a_security_level: Int32;

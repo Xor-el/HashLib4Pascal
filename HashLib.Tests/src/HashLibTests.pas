@@ -17,7 +17,13 @@ uses
   HlpHashFactory,
   HlpIHash,
   HlpIHashResult,
-  HlpConverters;
+  HlpConverters,
+  HlpBlake2BConfig,
+  HlpIBlake2BConfig,
+  Blake2BTestVectors,
+  HlpBlake2SConfig,
+  HlpIBlake2SConfig,
+  Blake2STestVectors;
 
 type
 
@@ -43,6 +49,7 @@ type
       : String = 'I will not buy this record, it is scratched.';
     FRandomStringTobacco
       : String = 'I will not buy this tobacconist''s, it is scratched.';
+    FQuickBrownDog = 'The quick brown fox jumps over the lazy dog';
     FBytesabcde: array [0 .. 4] of Byte = ($61, $62, $63, $64, $65);
     FHexStringAsKey: String = '000102030405060708090A0B0C0D0E0F';
     FHMACLongStringKey: String = 'I need an Angel';
@@ -3093,6 +3100,66 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+
+  end;
+
+type
+
+  TTestBlake2B = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FBlake2B: IHash;
+    Fconfig: IBlake2BConfig;
+    FInput: TBytes;
+
+  const
+    FExpectedHashOfEmptyData =
+      '786A02F742015903C6C6FD852552D272912F4740E15847618A86E217F71F5419D25E1031AFEE585313896444934EB04B903A685B1448B755D56F701AFE9BE2CE';
+
+    FExpectedHashOfQuickBrownDog =
+      'A8ADD4BDDDFD93E4877D2746E62817B116364A1FA7BC148D95090BC7333B3673F82401CF7AA2E4CB1ECD90296E3F14CB5413F8ED77BE73045B13914CDCD6A918';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestCheckTestVectors();
+    procedure TestCheckKeyedTestVectors();
+    procedure TestSplits();
+    procedure TestEmpty();
+    procedure TestQuickBrownDog();
+
+  end;
+
+type
+
+  TTestBlake2S = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FBlake2S: IHash;
+    Fconfig: IBlake2SConfig;
+    FInput, FSalt, FPersonalisation, FValue: TBytes;
+
+  const
+    FExpectedHashOfEmptyData =
+      '69217A3079908094E11121D042354A7C1F55B6482CA1A51E1B250DFD1ED0EEF9';
+
+    FExpectedHashOfQuickBrownDog =
+      '606BEEEC743CCBEFF6CBCDF5D5302AA855C256C29B88C8ED331EA1A6BF3C8812';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestCheckTestVectors();
+    procedure TestCheckKeyedTestVectors();
+    procedure TestSplits();
+    procedure TestWithSaltPersonalisation();
+    procedure TestWithSaltPersonalisationKey();
+    procedure TestEmpty();
+    procedure TestQuickBrownDog();
 
   end;
 
@@ -12885,6 +12952,363 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+{ TTestBlake2B }
+
+procedure TTestBlake2B.TestCheckKeyedTestVectors;
+var
+  len, i: Int32;
+  Key: TBytes;
+  FBlake2BWithKey: IHash;
+begin
+
+  System.SetLength(Key, 64);
+  for i := 0 to 63 do
+  begin
+    Key[i] := i;
+  end;
+
+  Fconfig := TBlake2BConfig.Create();
+  Fconfig.Key := Key;
+  FBlake2BWithKey := THashFactory.TCrypto.CreateBlake2B(Fconfig);
+
+  for len := 0 to High(TBlake2BTestVectors.FkeyedBlake2B) do
+  begin
+
+    if len = 0 then
+    begin
+      FInput := Nil;
+    end
+    else
+    begin
+      System.SetLength(FInput, len);
+      for i := 0 to Pred(len) do
+      begin
+        FInput[i] := i;
+      end;
+    end;
+
+    FActualString := FBlake2BWithKey.ComputeBytes(FInput).ToString();
+    FExpectedString := TBlake2BTestVectors.FkeyedBlake2B[len];
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+  FBlake2BWithKey := Nil;
+
+end;
+
+procedure TTestBlake2B.TestCheckTestVectors;
+var
+  len, i: Int32;
+  Input: TBytes;
+begin
+
+  for len := 0 to High(TBlake2BTestVectors.FUnkeyedBlake2B) do
+  begin
+
+    if len = 0 then
+    begin
+      Input := Nil;
+    end
+    else
+    begin
+      System.SetLength(Input, len);
+      for i := 0 to Pred(len) do
+      begin
+        Input[i] := i;
+      end;
+    end;
+
+    FActualString := FBlake2B.ComputeBytes(Input).ToString();
+    FExpectedString := TBlake2BTestVectors.FUnkeyedBlake2B[len];
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+end;
+
+procedure TTestBlake2B.TestSplits;
+var
+  len, split1, split2: Int32;
+  hash0, hash1: String;
+
+begin
+  for len := 0 to 256 do
+  begin
+    FBlake2B.Initialize();
+    FBlake2B.TransformBytes(FInput, 0, len);
+    hash0 := FBlake2B.TransformFinal.ToString();
+
+    for split1 := 0 to len do
+    begin
+      for split2 := split1 to len do
+      begin
+        FBlake2B.Initialize();
+        FBlake2B.TransformBytes(FInput, 0, split1);
+        FBlake2B.TransformBytes(FInput, split1, split2 - split1);
+        FBlake2B.TransformBytes(FInput, split2, len - split2);
+        hash1 := FBlake2B.TransformFinal.ToString();
+        CheckEquals(hash0, hash1, Format('Expected %s but got %s.',
+          [hash0, hash1]));
+      end;
+    end;
+
+  end;
+
+end;
+
+procedure TTestBlake2B.TestEmpty;
+// Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
+begin
+  FBlake2B.Initialize();
+  FBlake2B.TransformString(FEmptyData, TEncoding.UTF8);
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FBlake2B.TransformFinal.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2B.TestQuickBrownDog;
+// Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
+begin
+  FBlake2B.Initialize();
+  FBlake2B.TransformString(FQuickBrownDog, TEncoding.UTF8);
+  FExpectedString := FExpectedHashOfQuickBrownDog;
+  FActualString := FBlake2B.TransformFinal.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2B.SetUp;
+var
+  i: Int32;
+begin
+  inherited;
+  FBlake2B := THashFactory.TCrypto.CreateBlake2B();
+  System.SetLength(FInput, 256);
+  for i := 0 to 255 do
+  begin
+    FInput[i] := i;
+  end;
+
+end;
+
+procedure TTestBlake2B.TearDown;
+begin
+  FBlake2B := Nil;
+  Fconfig := Nil;
+  inherited;
+
+end;
+
+{ TTestBlake2S }
+
+procedure TTestBlake2S.TestCheckKeyedTestVectors;
+var
+  len, i: Int32;
+  Key: TBytes;
+  FBlake2SWithKey: IHash;
+begin
+
+  System.SetLength(Key, 32);
+  for i := 0 to 31 do
+  begin
+    Key[i] := i;
+  end;
+
+  Fconfig := TBlake2SConfig.Create();
+  Fconfig.Key := Key;
+  FBlake2SWithKey := THashFactory.TCrypto.CreateBlake2S(Fconfig);
+
+  for len := 0 to High(TBlake2STestVectors.FkeyedBlake2S) do
+  begin
+
+    if len = 0 then
+    begin
+      FInput := Nil;
+    end
+    else
+    begin
+      System.SetLength(FInput, len);
+      for i := 0 to Pred(len) do
+      begin
+        FInput[i] := i;
+      end;
+    end;
+
+    FActualString := FBlake2SWithKey.ComputeBytes(FInput).ToString();
+    FExpectedString := TBlake2STestVectors.FkeyedBlake2S[len];
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+  FBlake2SWithKey := Nil;
+
+end;
+
+procedure TTestBlake2S.TestCheckTestVectors;
+var
+  len, i: Int32;
+  Input: TBytes;
+begin
+
+  for len := 0 to High(TBlake2STestVectors.FUnkeyedBlake2S) do
+  begin
+
+    if len = 0 then
+    begin
+      Input := Nil;
+    end
+    else
+    begin
+      System.SetLength(Input, len);
+      for i := 0 to Pred(len) do
+      begin
+        Input[i] := i;
+      end;
+    end;
+
+    FActualString := FBlake2S.ComputeBytes(Input).ToString();
+    FExpectedString := TBlake2STestVectors.FUnkeyedBlake2S[len];
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+end;
+
+procedure TTestBlake2S.TestSplits;
+var
+  len, split1, split2: Int32;
+  hash0, hash1: String;
+
+begin
+  for len := 0 to 256 do
+  begin
+    FBlake2S.Initialize();
+    FBlake2S.TransformBytes(FInput, 0, len);
+    hash0 := FBlake2S.TransformFinal.ToString();
+
+    for split1 := 0 to len do
+    begin
+      for split2 := split1 to len do
+      begin
+        FBlake2S.Initialize();
+        FBlake2S.TransformBytes(FInput, 0, split1);
+        FBlake2S.TransformBytes(FInput, split1, split2 - split1);
+        FBlake2S.TransformBytes(FInput, split2, len - split2);
+        hash1 := FBlake2S.TransformFinal.ToString();
+        CheckEquals(hash0, hash1, Format('Expected %s but got %s.',
+          [hash0, hash1]));
+      end;
+    end;
+
+  end;
+
+end;
+
+procedure TTestBlake2S.TestWithSaltPersonalisation;
+var
+  FBlake2SWithConfig: IHash;
+begin
+
+  Fconfig := TBlake2SConfig.Create();
+  Fconfig.HashSize := 18;
+  Fconfig.Salt := FSalt;
+  Fconfig.Personalisation := FPersonalisation;
+
+  FBlake2SWithConfig := THashFactory.TCrypto.CreateBlake2S(Fconfig);
+
+  FActualString := FBlake2SWithConfig.ComputeBytes(FValue).ToString();
+  FExpectedString := '23F1CAE542785205164E8356D1F622038679';
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+
+  FBlake2SWithConfig := Nil;
+end;
+
+procedure TTestBlake2S.TestWithSaltPersonalisationKey;
+var
+  FBlake2SWithConfig: IHash;
+  Key: TBytes;
+  i: Int32;
+begin
+
+  System.SetLength(Key, 32);
+  for i := 0 to 31 do
+  begin
+    Key[i] := i;
+  end;
+
+  Fconfig := TBlake2SConfig.Create();
+  Fconfig.HashSize := 32;
+  Fconfig.Salt := FSalt;
+  Fconfig.Personalisation := FPersonalisation;
+  Fconfig.Key := Key;
+
+  FBlake2SWithConfig := THashFactory.TCrypto.CreateBlake2S(Fconfig);
+
+  FActualString := FBlake2SWithConfig.ComputeBytes(FValue).ToString();
+  FExpectedString :=
+    'ED1B7315F06E4AC734DC4FC23D3DFB1A86DDA2CDB2FFFD5893EE3796495231B6';
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+
+  FBlake2SWithConfig := Nil;
+end;
+
+procedure TTestBlake2S.TestEmpty;
+// Note: Results taken from http://corz.org/windows/software/checksum/files/Standard%20Test%20Vectors/[Standard%20Test%20Vectors].nfo
+begin
+  FBlake2S.Initialize();
+  FBlake2S.TransformString(FEmptyData, TEncoding.UTF8);
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FBlake2S.TransformFinal.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2S.TestQuickBrownDog;
+// Note: results taken from http://corz.org/windows/software/checksum/files/Standard%20Test%20Vectors/[Standard%20Test%20Vectors].nfo
+begin
+  FBlake2S.Initialize();
+  FBlake2S.TransformString(FQuickBrownDog, TEncoding.UTF8);
+  FExpectedString := FExpectedHashOfQuickBrownDog;
+  FActualString := FBlake2S.TransformFinal.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2S.SetUp;
+var
+  i: Int32;
+begin
+  inherited;
+  FSalt := TBytes.Create(1, 2, 3, 4, 5, 6, 7, 8);
+  FPersonalisation := TBytes.Create(9, 10, 11, 12, 13, 14, 15, 16);
+  FValue := TBytes.Create(255, 254, 253, 252, 251, 250);
+  FBlake2S := THashFactory.TCrypto.CreateBlake2S();
+  System.SetLength(FInput, 256);
+  for i := 0 to 255 do
+  begin
+    FInput[i] := i;
+  end;
+
+end;
+
+procedure TTestBlake2S.TearDown;
+begin
+  FBlake2S := Nil;
+  Fconfig := Nil;
+  inherited;
+
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -12967,6 +13391,8 @@ RegisterTest(TTestSHA3_224);
 RegisterTest(TTestSHA3_256);
 RegisterTest(TTestSHA3_384);
 RegisterTest(TTestSHA3_512);
+RegisterTest(TTestBlake2B);
+RegisterTest(TTestBlake2S);
 RegisterTest(TTestSnefru_8_128);
 RegisterTest(TTestSnefru_8_256);
 RegisterTest(TTestTiger_3_128);
@@ -13066,6 +13492,8 @@ RegisterTest(TTestSHA3_224.Suite);
 RegisterTest(TTestSHA3_256.Suite);
 RegisterTest(TTestSHA3_384.Suite);
 RegisterTest(TTestSHA3_512.Suite);
+RegisterTest(TTestBlake2B.Suite);
+RegisterTest(TTestBlake2S.Suite);
 RegisterTest(TTestSnefru_8_128.Suite);
 RegisterTest(TTestSnefru_8_256.Suite);
 RegisterTest(TTestTiger_3_128.Suite);

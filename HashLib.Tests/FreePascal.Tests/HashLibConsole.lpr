@@ -6,7 +6,9 @@ uses
   consoletestrunner,
   HashLibTests,
   BitConverterTests,
-  PBKDF2_HMACTests;
+  PBKDF2_HMACTests,
+  Blake2BTestVectors,
+  Blake2STestVectors;
 
 type
 
@@ -14,7 +16,7 @@ type
 
   THashLibConsoleTestRunner = class(TTestRunner)
   protected
-    // override the protected methods of TTestRunner to customize its behavior
+    // override the protected methods of TTestRunner to customize its behaviour
 end;
 
 var
