@@ -1606,7 +1606,7 @@ begin
   FrawConfig := TBlake2BIvBuilder.ConfigB(config, Nil);
   if ((config.Key <> Nil) and (System.Length(config.Key) <> 0)) then
   begin
-    System.SetLength(FKey, FBlockSize);
+   // System.SetLength(FKey, FBlockSize);
 
     FKey := Copy(config.Key, Low(config.Key), Length(config.Key));
 
