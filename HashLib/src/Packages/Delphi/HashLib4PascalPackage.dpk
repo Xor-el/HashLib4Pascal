@@ -34,7 +34,6 @@ requires
   soaprtl;
 
 contains
-  HlpConverters in '..\..\Base\HlpConverters.pas',
   HlpHash in '..\..\Base\HlpHash.pas',
   HlpHashBuffer in '..\..\Base\HlpHashBuffer.pas',
   HlpHashCryptoNotBuildIn in '..\..\Base\HlpHashCryptoNotBuildIn.pas',
@@ -129,6 +128,7 @@ contains
   HlpIBlake2STreeConfig in '..\..\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpNullable in '..\..\Nullable\HlpNullable.pas',
+  HlpConverters in '..\..\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\Utils\HlpBits.pas',
   HlpHashLibTypes in '..\..\Utils\HlpHashLibTypes.pas';

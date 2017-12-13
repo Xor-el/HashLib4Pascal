@@ -20,7 +20,6 @@ uses
   TestFramework,
   GUITestRunner,
   TextTestRunner,
-  HlpConverters in '..\..\HashLib\src\Base\HlpConverters.pas',
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
@@ -131,6 +130,7 @@ uses
   HlpPBKDF2_HMACNotBuildInAdapter
     in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpNullable in '..\..\HashLib\src\Nullable\HlpNullable.pas',
+  HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
