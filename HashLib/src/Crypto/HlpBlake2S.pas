@@ -1388,7 +1388,7 @@ begin
   if ((config.Key <> Nil) and (System.Length(config.Key) <> 0)) then
   begin
 
-    FKey := Copy(config.Key, System.Low(config.Key), System.Length(config.Key));
+    FKey := System.Copy(config.Key, System.Low(config.Key), System.Length(config.Key));
 
     System.SetLength(FKey, FBlockSize);
 
