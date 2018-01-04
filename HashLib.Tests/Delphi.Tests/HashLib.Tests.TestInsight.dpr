@@ -81,6 +81,7 @@ uses
     in '..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas',
   HlpBlake2STreeConfig
     in '..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas',
+  HlpNullDigest in '..\..\HashLib\src\NullDigest\HlpNullDigest.pas',
   HlpAP in '..\..\HashLib\src\Hash32\HlpAP.pas',
   HlpBernstein in '..\..\HashLib\src\Hash32\HlpBernstein.pas',
   HlpBernstein1 in '..\..\HashLib\src\Hash32\HlpBernstein1.pas',

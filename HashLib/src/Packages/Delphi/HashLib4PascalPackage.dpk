@@ -89,6 +89,7 @@ contains
   HlpBlake2SConfig in '..\..\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas',
   HlpBlake2SIvBuilder in '..\..\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas',
   HlpBlake2STreeConfig in '..\..\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas',
+  HlpNullDigest in '..\..\NullDigest\HlpNullDigest.pas',
   HlpAP in '..\..\Hash32\HlpAP.pas',
   HlpBernstein in '..\..\Hash32\HlpBernstein.pas',
   HlpBernstein1 in '..\..\Hash32\HlpBernstein1.pas',

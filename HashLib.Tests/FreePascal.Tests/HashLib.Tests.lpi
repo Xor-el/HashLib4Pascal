@@ -21,7 +21,7 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations"/>
+            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -65,7 +65,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="106">
+    <Units Count="107">
       <Unit0>
         <Filename Value="HashLib.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -491,6 +491,10 @@
         <Filename Value="..\..\HashLib\src\Utils\HlpConverters.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit105>
+      <Unit106>
+        <Filename Value="..\..\HashLib\src\NullDigest\HlpNullDigest.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit106>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -501,7 +505,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations"/>
+      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
     </SearchPaths>
   </CompilerOptions>
   <Debugging>

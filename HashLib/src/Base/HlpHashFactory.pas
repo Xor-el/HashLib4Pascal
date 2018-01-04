@@ -15,6 +15,8 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpHashLibTypes,
+  // NullDigest Unit //
+  HlpNullDigest,
   // Checksum Units //
   HlpAdler32,
   HlpCRC,
@@ -93,6 +95,16 @@ uses
 
 type
   THashFactory = class sealed(TObject)
+
+    // ====================== TNullDigestFactory ====================== //
+
+  type
+    TNullDigestFactory = class sealed(TObject)
+
+    public
+      class function CreateNullDigest(): IHash; static;
+
+    end;
 
     // ====================== TChecksum ====================== //
 
@@ -394,236 +406,243 @@ type
 
 implementation
 
+{ THashFactory.TNullDigestFactory }
+
+class function THashFactory.TNullDigestFactory.CreateNullDigest: IHash;
+begin
+  Result := TNullDigest.Create();
+end;
+
 { THashFactory.TChecksum }
 
 class function THashFactory.TChecksum.CreateCRC(_Width: Int32;
   _poly, _Init: UInt64; _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   _Names: THashLibStringArray): IHash;
 begin
-  result := TCRC.Create(_Width, _poly, _Init, _refIn, _refOut, _XorOut,
+  Result := TCRC.Create(_Width, _poly, _Init, _refIn, _refOut, _XorOut,
     _check, _Names);
 end;
 
 class function THashFactory.TChecksum.CreateCRC(_value: TCRCStandard): IHash;
 begin
-  result := TCRC.CreateCRCObject(_value);
+  Result := TCRC.CreateCRCObject(_value);
 end;
 
 class function THashFactory.TChecksum.CreateCRC16(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   _Names: THashLibStringArray): IHash;
 begin
-  result := TCRC16.Create(_poly, _Init, _refIn, _refOut, _XorOut,
+  Result := TCRC16.Create(_poly, _Init, _refIn, _refOut, _XorOut,
     _check, _Names);
 end;
 
 class function THashFactory.TChecksum.CreateCRC16_BUYPASS: IHash;
 begin
-  result := TCRC16_BUYPASS.Create();
+  Result := TCRC16_BUYPASS.Create();
 end;
 
 class function THashFactory.TChecksum.CreateCRC32(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   _Names: THashLibStringArray): IHash;
 begin
-  result := TCRC32.Create(_poly, _Init, _refIn, _refOut, _XorOut,
+  Result := TCRC32.Create(_poly, _Init, _refIn, _refOut, _XorOut,
     _check, _Names);
 end;
 
 class function THashFactory.TChecksum.CreateCRC32_CASTAGNOLI: IHash;
 begin
-  result := TCRC32_CASTAGNOLI.Create();
+  Result := TCRC32_CASTAGNOLI.Create();
 end;
 
 class function THashFactory.TChecksum.CreateCRC32_PKZIP: IHash;
 begin
-  result := TCRC32_PKZIP.Create();
+  Result := TCRC32_PKZIP.Create();
 end;
 
 class function THashFactory.TChecksum.CreateCRC64(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   _Names: THashLibStringArray): IHash;
 begin
-  result := TCRC64.Create(_poly, _Init, _refIn, _refOut, _XorOut,
+  Result := TCRC64.Create(_poly, _Init, _refIn, _refOut, _XorOut,
     _check, _Names);
 end;
 
 class function THashFactory.TChecksum.CreateCRC64_ECMA: IHash;
 begin
-  result := TCRC64_ECMA.Create();
+  Result := TCRC64_ECMA.Create();
 end;
 
 class function THashFactory.TChecksum.CreateAdler32: IHash;
 begin
-  result := TAdler32.Create();
+  Result := TAdler32.Create();
 end;
 
 { THashFactory.THash32 }
 
 class function THashFactory.THash32.CreateAP: IHash;
 begin
-  result := TAP.Create();
+  Result := TAP.Create();
 end;
 
 class function THashFactory.THash32.CreateBernstein: IHash;
 begin
-  result := TBernstein.Create();
+  Result := TBernstein.Create();
 end;
 
 class function THashFactory.THash32.CreateBernstein1: IHash;
 begin
-  result := TBernstein1.Create();
+  Result := TBernstein1.Create();
 end;
 
 class function THashFactory.THash32.CreateBKDR: IHash;
 begin
-  result := TBKDR.Create();
+  Result := TBKDR.Create();
 end;
 
 class function THashFactory.THash32.CreateDEK: IHash;
 begin
-  result := TDEK.Create();
+  Result := TDEK.Create();
 end;
 
 class function THashFactory.THash32.CreateDJB: IHash;
 begin
-  result := TDJB.Create();
+  Result := TDJB.Create();
 end;
 
 class function THashFactory.THash32.CreateELF: IHash;
 begin
-  result := TELF.Create();
+  Result := TELF.Create();
 end;
 
 class function THashFactory.THash32.CreateFNV: IHash;
 begin
-  result := TFNV.Create();
+  Result := TFNV.Create();
 end;
 
 class function THashFactory.THash32.CreateFNV1a: IHash;
 begin
-  result := TFNV1a.Create();
+  Result := TFNV1a.Create();
 end;
 
 class function THashFactory.THash32.CreateJenkins3: IHash;
 begin
-  result := TJenkins3.Create();
+  Result := TJenkins3.Create();
 end;
 
 class function THashFactory.THash32.CreateJS: IHash;
 begin
-  result := TJS.Create();
+  Result := TJS.Create();
 end;
 
 class function THashFactory.THash32.CreateMurmur2: IHashWithKey;
 begin
-  result := TMurmur2.Create();
+  Result := TMurmur2.Create();
 end;
 
 class function THashFactory.THash32.CreateMurmurHash3_x86_32: IHashWithKey;
 begin
-  result := TMurmurHash3_x86_32.Create();
+  Result := TMurmurHash3_x86_32.Create();
 end;
 
 class function THashFactory.THash32.CreateOneAtTime: IHash;
 begin
-  result := TOneAtTime.Create();
+  Result := TOneAtTime.Create();
 end;
 
 class function THashFactory.THash32.CreatePJW: IHash;
 begin
-  result := TPJW.Create();
+  Result := TPJW.Create();
 end;
 
 class function THashFactory.THash32.CreateRotating: IHash;
 begin
-  result := TRotating.Create();
+  Result := TRotating.Create();
 end;
 
 class function THashFactory.THash32.CreateRS: IHash;
 begin
-  result := TRS.Create();
+  Result := TRS.Create();
 end;
 
 class function THashFactory.THash32.CreateSDBM: IHash;
 begin
-  result := TSDBM.Create();
+  Result := TSDBM.Create();
 end;
 
 class function THashFactory.THash32.CreateShiftAndXor: IHash;
 begin
-  result := TShiftAndXor.Create();
+  Result := TShiftAndXor.Create();
 end;
 
 class function THashFactory.THash32.CreateSuperFast: IHash;
 begin
-  result := TSuperFast.Create();
+  Result := TSuperFast.Create();
 end;
 
 class function THashFactory.THash32.CreateXXHash32: IHashWithKey;
 begin
-  result := TXXHash32.Create();
+  Result := TXXHash32.Create();
 end;
 
 { THashFactory.THash64 }
 
 class function THashFactory.THash64.CreateFNV: IHash;
 begin
-  result := TFNV64.Create();
+  Result := TFNV64.Create();
 end;
 
 class function THashFactory.THash64.CreateFNV1a: IHash;
 begin
-  result := TFNV1a64.Create();
+  Result := TFNV1a64.Create();
 end;
 
 class function THashFactory.THash64.CreateMurmur2: IHashWithKey;
 begin
-  result := TMurmur2_64.Create();
+  Result := TMurmur2_64.Create();
 end;
 
 class function THashFactory.THash64.CreateSipHash2_4: IHashWithKey;
 begin
-  result := TSipHash2_4.Create();
+  Result := TSipHash2_4.Create();
 end;
 
 class function THashFactory.THash64.CreateXXHash64: IHashWithKey;
 begin
-  result := TXXHash64.Create();
+  Result := TXXHash64.Create();
 end;
 
 { THashFactory.THash128 }
 
 class function THashFactory.THash128.CreateMurmurHash3_x86_128: IHashWithKey;
 begin
-  result := TMurmurHash3_x86_128.Create();
+  Result := TMurmurHash3_x86_128.Create();
 end;
 
 class function THashFactory.THash128.CreateMurmurHash3_x64_128: IHashWithKey;
 begin
-  result := TMurmurHash3_x64_128.Create();
+  Result := TMurmurHash3_x64_128.Create();
 end;
 
 { THashFactory.TCrypto }
 
 class function THashFactory.TCrypto.CreateGost: IHash;
 begin
-  result := TGost.Create();
+  Result := TGost.Create();
 end;
 
 class function THashFactory.TCrypto.CreateGrindahl256: IHash;
 begin
-  result := TGrindahl256.Create();
+  Result := TGrindahl256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateGrindahl512: IHash;
 begin
-  result := TGrindahl512.Create();
+  Result := TGrindahl512.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHAS160: IHash;
 begin
-  result := THAS160.Create();
+  Result := THAS160.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval(a_rounds: THashRounds;
@@ -633,15 +652,15 @@ begin
     hrRounds3:
       case a_hash_size of
         hsHashSize128:
-          result := CreateHaval_3_128();
+          Result := CreateHaval_3_128();
         hsHashSize160:
-          result := CreateHaval_3_160();
+          Result := CreateHaval_3_160();
         hsHashSize192:
-          result := CreateHaval_3_192();
+          Result := CreateHaval_3_192();
         hsHashSize224:
-          result := CreateHaval_3_224();
+          Result := CreateHaval_3_224();
         hsHashSize256:
-          result := CreateHaval_3_256();
+          Result := CreateHaval_3_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
@@ -649,15 +668,15 @@ begin
     hrRounds4:
       case a_hash_size of
         hsHashSize128:
-          result := CreateHaval_4_128();
+          Result := CreateHaval_4_128();
         hsHashSize160:
-          result := CreateHaval_4_160();
+          Result := CreateHaval_4_160();
         hsHashSize192:
-          result := CreateHaval_4_192();
+          Result := CreateHaval_4_192();
         hsHashSize224:
-          result := CreateHaval_4_224();
+          Result := CreateHaval_4_224();
         hsHashSize256:
-          result := CreateHaval_4_256();
+          Result := CreateHaval_4_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
@@ -665,15 +684,15 @@ begin
     hrRounds5:
       case a_hash_size of
         hsHashSize128:
-          result := CreateHaval_5_128();
+          Result := CreateHaval_5_128();
         hsHashSize160:
-          result := CreateHaval_5_160();
+          Result := CreateHaval_5_160();
         hsHashSize192:
-          result := CreateHaval_5_192();
+          Result := CreateHaval_5_192();
         hsHashSize224:
-          result := CreateHaval_5_224();
+          Result := CreateHaval_5_224();
         hsHashSize256:
-          result := CreateHaval_5_256();
+          Result := CreateHaval_5_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
@@ -685,192 +704,192 @@ end;
 
 class function THashFactory.TCrypto.CreateHaval_3_128: IHash;
 begin
-  result := THaval_3_128.Create();
+  Result := THaval_3_128.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_3_160: IHash;
 begin
-  result := THaval_3_160.Create();
+  Result := THaval_3_160.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_3_192: IHash;
 begin
-  result := THaval_3_192.Create();
+  Result := THaval_3_192.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_3_224: IHash;
 begin
-  result := THaval_3_224.Create();
+  Result := THaval_3_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_3_256: IHash;
 begin
-  result := THaval_3_256.Create();
+  Result := THaval_3_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_4_128: IHash;
 begin
-  result := THaval_4_128.Create();
+  Result := THaval_4_128.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_4_160: IHash;
 begin
-  result := THaval_4_160.Create();
+  Result := THaval_4_160.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_4_192: IHash;
 begin
-  result := THaval_4_192.Create();
+  Result := THaval_4_192.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_4_224: IHash;
 begin
-  result := THaval_4_224.Create();
+  Result := THaval_4_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_4_256: IHash;
 begin
-  result := THaval_4_256.Create();
+  Result := THaval_4_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_5_128: IHash;
 begin
-  result := THaval_5_128.Create();
+  Result := THaval_5_128.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_5_160: IHash;
 begin
-  result := THaval_5_160.Create();
+  Result := THaval_5_160.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_5_192: IHash;
 begin
-  result := THaval_5_192.Create();
+  Result := THaval_5_192.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_5_224: IHash;
 begin
-  result := THaval_5_224.Create();
+  Result := THaval_5_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateHaval_5_256: IHash;
 begin
-  result := THaval_5_256.Create();
+  Result := THaval_5_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateMD2: IHash;
 begin
-  result := TMD2.Create();
+  Result := TMD2.Create();
 end;
 
 class function THashFactory.TCrypto.CreateMD4: IHash;
 begin
-  result := TMD4.Create();
+  Result := TMD4.Create();
 end;
 
 class function THashFactory.TCrypto.CreateMD5: IHash;
 begin
-  result := TMD5.Create();
+  Result := TMD5.Create();
 end;
 
 class function THashFactory.TCrypto.CreatePanama: IHash;
 begin
-  result := TPanama.Create();
+  Result := TPanama.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRadioGatun32: IHash;
 begin
-  result := TRadioGatun32.Create();
+  Result := TRadioGatun32.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRadioGatun64: IHash;
 begin
-  result := TRadioGatun64.Create();
+  Result := TRadioGatun64.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRIPEMD: IHash;
 begin
-  result := TRIPEMD.Create();
+  Result := TRIPEMD.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRIPEMD128: IHash;
 begin
-  result := TRIPEMD128.Create();
+  Result := TRIPEMD128.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRIPEMD160: IHash;
 begin
-  result := TRIPEMD160.Create();
+  Result := TRIPEMD160.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRIPEMD256: IHash;
 begin
-  result := TRIPEMD256.Create();
+  Result := TRIPEMD256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateRIPEMD320: IHash;
 begin
-  result := TRIPEMD320.Create();
+  Result := TRIPEMD320.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA0: IHash;
 begin
-  result := TSHA0.Create();
+  Result := TSHA0.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA1: IHash;
 begin
-  result := TSHA1.Create();
+  Result := TSHA1.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_224: IHash;
 begin
-  result := TSHA2_224.Create();
+  Result := TSHA2_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_256: IHash;
 begin
-  result := TSHA2_256.Create();
+  Result := TSHA2_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_384: IHash;
 begin
-  result := TSHA2_384.Create();
+  Result := TSHA2_384.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_512: IHash;
 begin
-  result := TSHA2_512.Create();
+  Result := TSHA2_512.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_512_224: IHash;
 begin
-  result := TSHA2_512_224.Create();
+  Result := TSHA2_512_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA2_512_256: IHash;
 begin
-  result := TSHA2_512_256.Create();
+  Result := TSHA2_512_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA3_224: IHash;
 begin
-  result := TSHA3_224.Create();
+  Result := TSHA3_224.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA3_256: IHash;
 begin
-  result := TSHA3_256.Create();
+  Result := TSHA3_256.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA3_384: IHash;
 begin
-  result := TSHA3_384.Create();
+  Result := TSHA3_384.Create();
 end;
 
 class function THashFactory.TCrypto.CreateSHA3_512: IHash;
 begin
-  result := TSHA3_512.Create();
+  Result := TSHA3_512.Create();
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B
@@ -878,11 +897,11 @@ class function THashFactory.TCrypto.CreateBlake2B
 begin
   if config = Nil then
   begin
-    result := TBlake2B.Create()
+    Result := TBlake2B.Create()
   end
   else
   begin
-    result := TBlake2B.Create(config);
+    Result := TBlake2B.Create(config);
   end;
 end;
 
@@ -891,11 +910,11 @@ class function THashFactory.TCrypto.CreateBlake2S
 begin
   if config = Nil then
   begin
-    result := TBlake2S.Create()
+    Result := TBlake2S.Create()
   end
   else
   begin
-    result := TBlake2S.Create(config);
+    Result := TBlake2S.Create(config);
   end;
 end;
 
@@ -908,7 +927,7 @@ begin
   if ((a_hash_size = THashSize.hsHashSize128) or
     (a_hash_size = THashSize.hsHashSize256)) then
   begin
-    result := TSnefru.Create(a_security_level, a_hash_size);
+    Result := TSnefru.Create(a_security_level, a_hash_size);
   end
   else
   begin
@@ -919,62 +938,62 @@ end;
 
 class function THashFactory.TCrypto.CreateSnefru_8_128: IHash;
 begin
-  result := CreateSnefru(8, THashSize.hsHashSize128);
+  Result := CreateSnefru(8, THashSize.hsHashSize128);
 end;
 
 class function THashFactory.TCrypto.CreateSnefru_8_256: IHash;
 begin
-  result := CreateSnefru(8, THashSize.hsHashSize256);
+  Result := CreateSnefru(8, THashSize.hsHashSize256);
 end;
 
 class function THashFactory.TCrypto.CreateTiger_3_128: IHash;
 begin
-  result := TTiger_128.CreateRound3();
+  Result := TTiger_128.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_3_160: IHash;
 begin
-  result := TTiger_160.CreateRound3();
+  Result := TTiger_160.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_3_192: IHash;
 begin
-  result := TTiger_192.CreateRound3();
+  Result := TTiger_192.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_4_128: IHash;
 begin
-  result := TTiger_128.CreateRound4();
+  Result := TTiger_128.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_4_160: IHash;
 begin
-  result := TTiger_160.CreateRound4();
+  Result := TTiger_160.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_4_192: IHash;
 begin
-  result := TTiger_192.CreateRound4();
+  Result := TTiger_192.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_5_128: IHash;
 begin
-  result := TTiger_128.CreateRound5();
+  Result := TTiger_128.CreateRound5();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_5_160: IHash;
 begin
-  result := TTiger_160.CreateRound5();
+  Result := TTiger_160.CreateRound5();
 end;
 
 class function THashFactory.TCrypto.CreateTiger_5_192: IHash;
 begin
-  result := TTiger_192.CreateRound5();
+  Result := TTiger_192.CreateRound5();
 end;
 
 class function THashFactory.TCrypto.CreateWhirlPool: IHash;
 begin
-  result := TWhirlPool.Create();
+  Result := TWhirlPool.Create();
 end;
 
 class function THashFactory.TCrypto.CreateTiger(a_hash_size: Int32;
@@ -983,7 +1002,7 @@ begin
   if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
     raise EArgumentHashLibException.CreateRes(@SInvalidTigerHashSize);
 
-  result := TTiger_Base.Create(a_hash_size, a_rounds);
+  Result := TTiger_Base.Create(a_hash_size, a_rounds);
 end;
 
 class function THashFactory.TCrypto.CreateTiger2(a_hash_size: Int32;
@@ -992,52 +1011,52 @@ begin
   if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
     raise EArgumentHashLibException.CreateRes(@SInvalidTiger2HashSize);
 
-  result := TTiger2_Base.Create(a_hash_size, a_rounds);
+  Result := TTiger2_Base.Create(a_hash_size, a_rounds);
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_3_128: IHash;
 begin
-  result := TTiger2_128.CreateRound3();
+  Result := TTiger2_128.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_3_160: IHash;
 begin
-  result := TTiger2_160.CreateRound3();
+  Result := TTiger2_160.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_3_192: IHash;
 begin
-  result := TTiger2_192.CreateRound3();
+  Result := TTiger2_192.CreateRound3();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_4_128: IHash;
 begin
-  result := TTiger2_128.CreateRound4();
+  Result := TTiger2_128.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_4_160: IHash;
 begin
-  result := TTiger2_160.CreateRound4();
+  Result := TTiger2_160.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_4_192: IHash;
 begin
-  result := TTiger2_192.CreateRound4();
+  Result := TTiger2_192.CreateRound4();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_5_128: IHash;
 begin
-  result := TTiger2_128.CreateRound5();
+  Result := TTiger2_128.CreateRound5();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_5_160: IHash;
 begin
-  result := TTiger2_160.CreateRound5();
+  Result := TTiger2_160.CreateRound5();
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_5_192: IHash;
 begin
-  result := TTiger2_192.CreateRound5();
+  Result := TTiger2_192.CreateRound5();
 end;
 
 { THashFactory.THMAC }
@@ -1047,12 +1066,12 @@ begin
 
   if Supports(a_hash, IHMAC) then
   begin
-    result := (a_hash) as IHMAC;
+    Result := (a_hash) as IHMAC;
     Exit;
   end
   else
   begin
-    result := THMACNotBuildInAdapter.Create(a_hash);
+    Result := THMACNotBuildInAdapter.Create(a_hash);
     Exit;
   end;
 
@@ -1076,7 +1095,7 @@ begin
   if (a_iterations < 1) then
     raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
 
-  result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
+  Result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
     a_iterations);
 end;
 

@@ -57,6 +57,25 @@ type
 
   end;
 
+  // NullDigest
+
+type
+  TTestNullDigest = class(THashLibAlgorithmTestCase)
+
+  private
+    FNullDigest: IHash;
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyBytes;
+    procedure TestBytesabcde;
+    procedure TestIncrementalHash;
+
+  end;
+
+
   // CheckSum
 
 type
@@ -13309,11 +13328,116 @@ begin
 
 end;
 
+{ TTestNullDigest }
+
+procedure TTestNullDigest.SetUp;
+begin
+  inherited;
+  FNullDigest := THashFactory.TNullDigestFactory.CreateNullDigest();
+end;
+
+procedure TTestNullDigest.TearDown;
+begin
+  inherited;
+  FNullDigest := Nil;
+end;
+
+procedure TTestNullDigest.TestBytesabcde;
+var
+  BytesABCDE, result: TBytes;
+begin
+  BytesABCDE := TEncoding.UTF8.GetBytes('abcde');
+  CheckEquals(-1, FNullDigest.BlockSize);
+  CheckEquals(-1, FNullDigest.HashSize);
+
+  FNullDigest.Initialize;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  FNullDigest.TransformBytes(BytesABCDE);
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(System.Length(BytesABCDE), FNullDigest.HashSize);
+
+  result := FNullDigest.TransformFinal.GetBytes;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  CheckTrue(CompareMem(PByte(BytesABCDE), PByte(result),
+    System.Length(BytesABCDE) * System.SizeOf(Byte)));
+
+end;
+
+procedure TTestNullDigest.TestEmptyBytes;
+var
+  BytesEmpty, result: TBytes;
+begin
+  BytesEmpty := TEncoding.UTF8.GetBytes('');
+  CheckEquals(-1, FNullDigest.BlockSize);
+  CheckEquals(-1, FNullDigest.HashSize);
+
+  FNullDigest.Initialize;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  FNullDigest.TransformBytes(BytesEmpty);
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(System.Length(BytesEmpty), FNullDigest.HashSize);
+
+  result := FNullDigest.TransformFinal.GetBytes;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  CheckTrue(CompareMem(PByte(BytesEmpty), PByte(result),
+    System.Length(BytesEmpty) * System.SizeOf(Byte)));
+
+end;
+
+procedure TTestNullDigest.TestIncrementalHash;
+var
+  BytesZeroToNine, result: TBytes;
+begin
+  BytesZeroToNine := TEncoding.UTF8.GetBytes('0123456789');
+  CheckEquals(-1, FNullDigest.BlockSize);
+  CheckEquals(-1, FNullDigest.HashSize);
+
+  FNullDigest.Initialize;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  FNullDigest.TransformBytes(System.Copy(BytesZeroToNine, 0, 4));
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(4, FNullDigest.HashSize);
+
+  FNullDigest.TransformBytes(System.Copy(BytesZeroToNine, 4, 6));
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(10, FNullDigest.HashSize);
+
+  result := FNullDigest.TransformFinal.GetBytes;
+
+  CheckEquals(0, FNullDigest.BlockSize);
+  CheckEquals(0, FNullDigest.HashSize);
+
+  CheckTrue(CompareMem(PByte(BytesZeroToNine), PByte(result),
+    System.Length(BytesZeroToNine) * System.SizeOf(Byte)));
+
+end;
+
 initialization
 
 // Register any test cases with the test runner
 
 {$IFDEF FPC}
+// NullDigest
+RegisterTest(TTestNullDigest);
 // CheckSum
 RegisterTest(TTestCRCModel);
 RegisterTest(TTestAlder32);
@@ -13415,6 +13539,8 @@ RegisterTest(TTestTiger2_4_192);
 RegisterTest(TTestTiger2_5_192);
 RegisterTest(TTestWhirlPool);
 {$ELSE}
+// NullDigest
+RegisterTest(TTestNullDigest.Suite);
 // CheckSum
 RegisterTest(TTestCRCModel.Suite);
 RegisterTest(TTestAlder32.Suite);
