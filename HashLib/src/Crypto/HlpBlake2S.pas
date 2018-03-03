@@ -8,11 +8,13 @@ uses
 {$IFDEF DELPHI2010}
   SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
 {$ENDIF DELPHI2010}
-  HlpBits,
 {$IFDEF DELPHI}
-  HlpHashBuffer,
   HlpBitConverter,
+  HlpHashBuffer,
 {$ENDIF DELPHI}
+{$IFNDEF USE_UNROLLED_VARIANT}
+  HlpBits,
+{$ENDIF USE_UNROLLED_VARIANT}
   HlpHash,
   HlpHashResult,
   HlpIHashResult,
@@ -1388,7 +1390,8 @@ begin
   if ((config.Key <> Nil) and (System.Length(config.Key) <> 0)) then
   begin
 
-    FKey := System.Copy(config.Key, System.Low(config.Key), System.Length(config.Key));
+    FKey := System.Copy(config.Key, System.Low(config.Key),
+      System.Length(config.Key));
 
     System.SetLength(FKey, FBlockSize);
 

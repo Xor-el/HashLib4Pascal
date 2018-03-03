@@ -8,12 +8,20 @@ unit HlpCRC;
 interface
 
 uses
+{$IFDEF HAS_UNITSCOPE}
+  System.TypInfo,
+{$ELSE}
+  TypInfo,
+{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpHash,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
   HlpICRC;
+
+resourcestring
+  SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';
 
 {$REGION 'CRC Standards'}
 
@@ -1139,7 +1147,11 @@ begin
     TCRCStandard.CRC64_XZ:
       result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
         True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($995DC9BBDF1939FA),
-        THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'));
+        THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'))
+
+  else
+    raise EArgumentInvalidHashLibException.CreateResFmt(@SUnSupportedCRCType,
+      [GetEnumName(TypeInfo(TCRCStandard), Ord(a_value))]);
 
   end;
 end;

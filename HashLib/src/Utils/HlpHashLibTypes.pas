@@ -21,6 +21,7 @@ type
   EInvalidOperationHashLibException = class(EHashLibException);
   EIndexOutOfRangeHashLibException = class(EHashLibException);
   EArgumentHashLibException = class(EHashLibException);
+  EArgumentInvalidHashLibException = class(EHashLibException);
   EArgumentNilHashLibException = class(EHashLibException);
   EArgumentOutOfRangeHashLibException = class(EHashLibException);
   ENullReferenceHashLibException = class(EHashLibException);
