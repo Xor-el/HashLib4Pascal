@@ -64,16 +64,22 @@ type
       static; inline;
 
     class function ReadUInt32AsBytesLE(a_in: UInt32): THashLibByteArray;
-      static; inline;
+      overload; static; inline;
 
     class function ReadUInt64AsBytesLE(a_in: UInt64): THashLibByteArray;
       overload; static; inline;
+
+    class procedure ReadUInt32AsBytesLE(a_in: UInt32; a_out: THashLibByteArray;
+      a_index: Int32); overload; static; inline;
+
+    class procedure ReadUInt32AsBytesBE(a_in: UInt32; a_out: THashLibByteArray;
+      a_index: Int32); overload; static; inline;
 
     class procedure ReadUInt64AsBytesLE(a_in: UInt64; a_out: THashLibByteArray;
       a_index: Int32); overload; static; inline;
 
     class procedure ReadUInt64AsBytesBE(a_in: UInt64; a_out: THashLibByteArray;
-      a_index: Int32); static; inline;
+      a_index: Int32); overload; static; inline;
 
     class function ConvertStringToBytes(const a_in:
 {$IFDEF FPC}UnicodeString{$ELSE} String
@@ -285,6 +291,24 @@ begin
   result := THashLibByteArray.Create(Byte(a_in), Byte(a_in shr 8),
     Byte(a_in shr 16), Byte(a_in shr 24), Byte(a_in shr 32), Byte(a_in shr 40),
     Byte(a_in shr 48), Byte(a_in shr 56));
+end;
+
+class procedure TConverters.ReadUInt32AsBytesLE(a_in: UInt32;
+  a_out: THashLibByteArray; a_index: Int32);
+begin
+  a_out[a_index] := Byte(a_in);
+  a_out[a_index + 1] := Byte(a_in shr 8);
+  a_out[a_index + 2] := Byte(a_in shr 16);
+  a_out[a_index + 3] := Byte(a_in shr 24);
+end;
+
+class procedure TConverters.ReadUInt32AsBytesBE(a_in: UInt32;
+  a_out: THashLibByteArray; a_index: Int32);
+begin
+  a_out[a_index] := Byte(a_in shr 24);
+  a_out[a_index + 1] := Byte(a_in shr 16);
+  a_out[a_index + 2] := Byte(a_in shr 8);
+  a_out[a_index + 3] := Byte(a_in);
 end;
 
 class procedure TConverters.ReadUInt64AsBytesLE(a_in: UInt64;
