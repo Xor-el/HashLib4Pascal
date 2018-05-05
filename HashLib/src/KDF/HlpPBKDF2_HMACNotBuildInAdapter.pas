@@ -19,6 +19,7 @@ resourcestring
   SEmptyPassword = 'Password can''t be empty';
   SEmptySalt = 'Salt can''t be empty';
   SIterationtooSmall = 'Iteration must be greater than zero.';
+  SOutputLengthtooLarge = 'Output Length too Large';
 
 type
 
@@ -129,11 +130,20 @@ end;
 function TPBKDF2_HMACNotBuildInAdapter.GetBytes(bc: Int32): THashLibByteArray;
 var
   LKey, LT_block: THashLibByteArray;
-  LOffset, LSize, LRemainder: Int32;
+  LOffset, LSize, LRemainder, LhLen: Int32;
+  LMaxOutputLength: Int64;
 begin
 
   if (bc <= 0) then
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidArgument);
+  // The standard defines the requirements for the output length to be at most (2^32 - 1) * LhLen bytes
+  // in length where LhLen is the underlying hash's output size, in bytes.
+  // https://tools.ietf.org/html/rfc2898#appendix-A.2
+  LhLen := FHash.HashSize;
+  LMaxOutputLength := ((Int64(1) shl 32) - 1) * LhLen;
+
+  if (Int64(bc) > LMaxOutputLength) then
+    raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputLengthtooLarge);
 
   System.SetLength(LKey, bc);
 
