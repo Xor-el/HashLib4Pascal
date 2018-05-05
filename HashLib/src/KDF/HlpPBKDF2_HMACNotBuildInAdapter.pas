@@ -140,7 +140,7 @@ begin
   // in length where LhLen is the underlying hash's output size, in bytes.
   // https://tools.ietf.org/html/rfc2898#appendix-A.2
   LhLen := FHash.HashSize;
-  LMaxOutputLength := ((Int64(1) shl 32) - 1) * LhLen;
+  LMaxOutputLength := Int32((Int64(1) shl 32) - 1) * LhLen;
 
   if (Int64(bc) > LMaxOutputLength) then
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputLengthtooLarge);
