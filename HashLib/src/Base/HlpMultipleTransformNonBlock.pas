@@ -5,17 +5,11 @@ unit HlpMultipleTransformNonBlock;
 interface
 
 uses
-{$IFDEF DELPHI}
 {$IFDEF HAS_UNITSCOPE}
-  System.Generics.Collections,
+  System.Classes,
 {$ELSE}
-  Generics.Collections,
+  Classes,
 {$ENDIF HAS_UNITSCOPE}
-{$ELSE}
-{$IFDEF FPC}
-  fgl,
-{$ENDIF FPC}
-{$ENDIF DELPHI}
   HlpHashLibTypes,
   HlpHash,
   HlpIHashInfo,
@@ -26,9 +20,7 @@ type
   TMultipleTransformNonBlock = class abstract(THash, INonBlockHash)
 
   strict private
-
-    Fm_list: {$IFDEF DELPHI} TList<THashLibByteArray>
-{$ELSE} TFPGList<THashLibByteArray> {$ENDIF DELPHI};
+    FBuffer: TMemoryStream;
 
     function Aggregate(): THashLibByteArray;
 
@@ -52,58 +44,39 @@ implementation
 { TMultipleTransformNonBlock }
 
 function TMultipleTransformNonBlock.Aggregate: THashLibByteArray;
-var
-  sum, index: Int32;
-  arr: THashLibByteArray;
 begin
-  sum := 0;
-  for arr in Fm_list do
-  begin
-    sum := sum + System.Length(arr);
-  end;
-
-  System.SetLength(result, sum);
-  index := 0;
-
-  for arr in Fm_list do
-
-  begin
-    System.Move(arr[0], result[index], System.Length(arr) *
-      System.SizeOf(Byte));
-    index := index + System.Length(arr);
-  end;
-
+  FBuffer.Position := 0;
+  System.SetLength(result, FBuffer.Size);
+  FBuffer.Read(result[0], FBuffer.Size);
 end;
 
 constructor TMultipleTransformNonBlock.Create(a_hash_size, a_block_size: Int32);
 begin
   Inherited Create(a_hash_size, a_block_size);
-  Fm_list := {$IFDEF DELPHI} TList<THashLibByteArray>
-{$ELSE} TFPGList<THashLibByteArray> {$ENDIF DELPHI}.Create();
+  FBuffer := TMemoryStream.Create();
 end;
 
 destructor TMultipleTransformNonBlock.Destroy;
 begin
-  Fm_list.Free;
+  FBuffer.Free;
   inherited Destroy;
 end;
 
 procedure TMultipleTransformNonBlock.Initialize;
 begin
-  Fm_list.Clear;
+  FBuffer.Clear;
+  FBuffer.SetSize(0);
 end;
 
 procedure TMultipleTransformNonBlock.TransformBytes(a_data: THashLibByteArray;
   a_index, a_length: Int32);
-
 begin
 {$IFDEF DEBUG}
   System.Assert(a_index >= 0);
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
 {$ENDIF DEBUG}
-  Fm_list.Add(System.Copy(a_data, a_index, a_length));
-
+  FBuffer.Write(a_data[a_index], a_length);
 end;
 
 function TMultipleTransformNonBlock.TransformFinal: IHashResult;
