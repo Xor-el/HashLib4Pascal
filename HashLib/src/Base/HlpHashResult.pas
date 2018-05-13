@@ -48,7 +48,7 @@ type
 
     Fm_hash: THashLibByteArray;
 
-    class function SlowEquals(a_ar1, a_ar2: THashLibByteArray): Boolean;
+    class function SlowEquals(a_ar1, a_ar2: THashLibByteArray): Boolean; static;
 
   public
 
