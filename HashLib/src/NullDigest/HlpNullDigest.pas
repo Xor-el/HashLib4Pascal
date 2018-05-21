@@ -16,7 +16,7 @@ uses
 type
   TNullDigest = class sealed(THash, IBlockHash, ITransformBlock)
   strict private
-
+  var
     FbOut: TMemoryStream;
 
   public
