@@ -372,7 +372,7 @@
         <IsPartOfProject Value="True"/>
       </Unit75>
       <Unit76>
-        <Filename Value="..\..\HashLib\src\Include\Helper.inc"/>
+        <Filename Value="..\..\HashLib\src\Include\HashLibHelper.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit76>
       <Unit77>

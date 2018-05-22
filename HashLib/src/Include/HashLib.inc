@@ -10,7 +10,7 @@
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 {$IFDEF FPC}
-{$I Helper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
+{$I HashLibHelper.inc} // Had to Include this Since Delphi Does not allow "FPC_FULLVERSION" to Compile.
 {$UNDEF DELPHI}
 {$MODE delphi}
 

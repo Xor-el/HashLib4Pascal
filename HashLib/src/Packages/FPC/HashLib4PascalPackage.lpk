@@ -325,7 +325,7 @@
         <Type Value="Include"/>
       </Item75>
       <Item76>
-        <Filename Value="..\..\Include\Helper.inc"/>
+        <Filename Value="..\..\Include\HashLibHelper.inc"/>
         <Type Value="Include"/>
       </Item76>
       <Item77>
