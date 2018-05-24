@@ -86,7 +86,9 @@ uses
   HlpSHA3,
   HlpBlake2B,
   HlpIBlake2BConfig,
+  HlpBlake2BConfig,
   HlpBlake2S,
+  HlpBlake2SConfig,
   HlpIBlake2SConfig,
   // HMAC Unit
   HlpHMACNotBuildInAdapter,
@@ -359,7 +361,18 @@ type
       class function CreateSHA3_512(): IHash; static;
 
       class function CreateBlake2B(config: IBlake2BConfig = Nil): IHash; static;
+
+      class function CreateBlake2B_160(): IHash; static;
+      class function CreateBlake2B_256(): IHash; static;
+      class function CreateBlake2B_384(): IHash; static;
+      class function CreateBlake2B_512(): IHash; static;
+
       class function CreateBlake2S(config: IBlake2SConfig = Nil): IHash; static;
+
+      class function CreateBlake2S_128(): IHash; static;
+      class function CreateBlake2S_160(): IHash; static;
+      class function CreateBlake2S_224(): IHash; static;
+      class function CreateBlake2S_256(): IHash; static;
 
     end;
 
@@ -905,6 +918,30 @@ begin
   end;
 end;
 
+class function THashFactory.TCrypto.CreateBlake2B_160: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2B
+    (TBlake2BConfig.Create(THashSize.hsHashSize160));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2B_256: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2B
+    (TBlake2BConfig.Create(THashSize.hsHashSize256));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2B_384: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2B
+    (TBlake2BConfig.Create(THashSize.hsHashSize384));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2B_512: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2B
+    (TBlake2BConfig.Create(THashSize.hsHashSize512));
+end;
+
 class function THashFactory.TCrypto.CreateBlake2S
   (config: IBlake2SConfig): IHash;
 begin
@@ -916,6 +953,30 @@ begin
   begin
     Result := TBlake2S.Create(config);
   end;
+end;
+
+class function THashFactory.TCrypto.CreateBlake2S_128: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2S
+    (TBlake2SConfig.Create(THashSize.hsHashSize128));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2S_160: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2S
+    (TBlake2SConfig.Create(THashSize.hsHashSize160));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2S_224: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2S
+    (TBlake2SConfig.Create(THashSize.hsHashSize224));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2S_256: IHash;
+begin
+  Result := THashFactory.TCrypto.CreateBlake2S
+    (TBlake2SConfig.Create(THashSize.hsHashSize256));
 end;
 
 class function THashFactory.TCrypto.CreateSnefru(a_security_level: Int32;

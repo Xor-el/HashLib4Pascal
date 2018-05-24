@@ -5,9 +5,11 @@ unit HlpBlake2B;
 interface
 
 uses
-{$IFDEF DELPHI2010}
-  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
-{$ENDIF DELPHI2010}
+{$IFDEF HAS_UNITSCOPE}
+  System.SysUtils,
+{$ELSE}
+  SysUtils,
+{$ENDIF HAS_UNITSCOPE}
 {$IFDEF DELPHI}
   HlpBitConverter,
   HlpHashBuffer,
@@ -87,6 +89,7 @@ type
   strict protected
 
     FHashSize, FBlockSize: Int32;
+    function GetName: String; override;
 
   public
     constructor Create(); overload;
@@ -1743,6 +1746,11 @@ begin
 
   Initialize();
 
+end;
+
+function TBlake2B.GetName: String;
+begin
+  result := Format('%s_%u', [Self.ClassName, Self.HashSize * 8]);
 end;
 
 end.

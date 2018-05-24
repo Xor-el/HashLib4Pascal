@@ -6,7 +6,12 @@ interface
 
 uses
   HlpIBlake2SConfig,
+  HlpHashSize,
   HlpHashLibTypes;
+
+resourcestring
+  SInvalidHashSize =
+    'BLAKE2S HashSize must be restricted to one of the following [16, 20, 28, 32]';
 
 type
 
@@ -32,7 +37,7 @@ type
     procedure SetHashSize(value: Int32); inline;
 
   public
-    constructor Create();
+    constructor Create(AHashSize: THashSize = THashSize.hsHashSize256);
     property Personalisation: THashLibByteArray read GetPersonalisation
       write SetPersonalisation;
     property Salt: THashLibByteArray read GetSalt write SetSalt;
@@ -45,9 +50,13 @@ implementation
 
 { TBlake2SConfig }
 
-constructor TBlake2SConfig.Create();
+constructor TBlake2SConfig.Create(AHashSize: THashSize);
 begin
-  HashSize := 32;
+  if not Int32(AHashSize) in [16, 20, 28, 32] then
+  begin
+    raise EArgumentHashLibException.CreateRes(@SInvalidHashSize);
+  end;
+  HashSize := Int32(AHashSize);
 end;
 
 function TBlake2SConfig.GetHashSize: Int32;
