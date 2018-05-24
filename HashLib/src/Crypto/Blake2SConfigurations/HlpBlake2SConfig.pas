@@ -52,7 +52,7 @@ implementation
 
 constructor TBlake2SConfig.Create(AHashSize: THashSize);
 begin
-  if not Int32(AHashSize) in [16, 20, 28, 32] then
+  if not (Int32(AHashSize) in [16, 20, 28, 32]) then
   begin
     raise EArgumentHashLibException.CreateRes(@SInvalidHashSize);
   end;
