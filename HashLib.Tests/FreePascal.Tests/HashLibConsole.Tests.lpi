@@ -59,7 +59,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="108">
+    <Units Count="109">
       <Unit0>
         <Filename Value="HashLibConsole.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -493,6 +493,10 @@
         <Filename Value="..\..\HashLib\src\NullDigest\HlpNullDigest.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit107>
+      <Unit108>
+        <Filename Value="..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit108>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

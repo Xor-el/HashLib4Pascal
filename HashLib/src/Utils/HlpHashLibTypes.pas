@@ -71,6 +71,11 @@ type
   THashLibCharArray = TArray<Char>;
 
   /// <summary>
+  /// Represents a dynamic array of array of Byte.
+  /// </summary>
+  THashLibMatrixByteArray = TArray<THashLibByteArray>;
+
+  /// <summary>
   /// Represents a dynamic array of array of UInt32.
   /// </summary>
   THashLibMatrixUInt32Array = TArray<THashLibUInt32Array>;
@@ -100,6 +105,11 @@ type
   /// Represents a dynamic array of Char.
   /// </summary>
   THashLibCharArray = array of Char;
+
+  /// <summary>
+  /// Represents a dynamic array of array of Byte.
+  /// </summary>
+  THashLibMatrixByteArray = array of THashLibByteArray;
 
   /// <summary>
   /// Represents a dynamic array of array of UInt32.

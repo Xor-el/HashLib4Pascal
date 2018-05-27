@@ -951,6 +951,54 @@ type
 
 type
 
+  TTestGOST3411_2012_256 = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FGOST3411_2012_256: IHash;
+
+  const
+    FExpectedHashOfEmptyData =
+      '3F539A213E97C802CC229D474C6AA32A825A360B2A933A949FD925208D9CE1BB';
+    FExpectedHashOfQuickBrownFox =
+      '3E7DEA7F2384B6C5A3D0E24AAA29C05E89DDD762145030EC22C71A6DB8B2C1F4';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyString;
+    procedure TestQuickBrownFox;
+    procedure TestIncrementalHash;
+
+  end;
+
+type
+
+  TTestGOST3411_2012_512 = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FGOST3411_2012_512: IHash;
+
+  const
+    FExpectedHashOfEmptyData =
+      '8E945DA209AA869F0455928529BCAE4679E9873AB707B55315F56CEB98BEF0A7362F715528356EE83CDA5F2AAC4C6AD2BA3A715C1BCD81CB8E9F90BF4C1C1A8A';
+    FExpectedHashOfQuickBrownFox =
+      'D2B793A0BB6CB5904828B5B6DCFB443BB8F33EFC06AD09368878AE4CDC8245B97E60802469BED1E7C21A64FF0B179A6A1E0BB74D92965450A0ADAB69162C00FE';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyString;
+    procedure TestQuickBrownFox;
+    procedure TestIncrementalHash;
+
+  end;
+
+type
+
   TTestGrindahl256 = class(THashLibAlgorithmTestCase)
 
   private
@@ -13431,6 +13479,100 @@ begin
 
 end;
 
+{ TTestGOST3411_2012_256 }
+
+procedure TTestGOST3411_2012_256.SetUp;
+begin
+  inherited;
+  FGOST3411_2012_256 := THashFactory.TCrypto.CreateGOST3411_2012_256();
+end;
+
+procedure TTestGOST3411_2012_256.TearDown;
+begin
+  inherited;
+  FGOST3411_2012_256 := Nil;
+end;
+
+procedure TTestGOST3411_2012_256.TestEmptyString;
+begin
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FGOST3411_2012_256.ComputeString(FEmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_256.TestIncrementalHash;
+begin
+  FExpectedString := FExpectedHashOfQuickBrownFox;
+  FHash := THashFactory.TCrypto.CreateGOST3411_2012_256();
+
+  FHash.Initialize();
+  FHash.TransformString(System.Copy(FQuickBrownDog, 1, 16), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FQuickBrownDog, 17, 16), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FQuickBrownDog, 33, 11), TEncoding.UTF8);
+  FHashResult := FHash.TransformFinal();
+  FActualString := FHashResult.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_256.TestQuickBrownFox;
+begin
+  FExpectedString := FExpectedHashOfQuickBrownFox;
+  FActualString := FGOST3411_2012_256.ComputeString(FQuickBrownDog,
+    TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+{ TTestGOST3411_2012_512 }
+
+procedure TTestGOST3411_2012_512.SetUp;
+begin
+  inherited;
+  FGOST3411_2012_512 := THashFactory.TCrypto.CreateGOST3411_2012_512();
+end;
+
+procedure TTestGOST3411_2012_512.TearDown;
+begin
+  inherited;
+  FGOST3411_2012_512 := Nil;
+end;
+
+procedure TTestGOST3411_2012_512.TestEmptyString;
+begin
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FGOST3411_2012_512.ComputeString(FEmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_512.TestIncrementalHash;
+begin
+  FExpectedString := FExpectedHashOfQuickBrownFox;
+  FHash := THashFactory.TCrypto.CreateGOST3411_2012_512();
+
+  FHash.Initialize();
+  FHash.TransformString(System.Copy(FQuickBrownDog, 1, 16), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FQuickBrownDog, 17, 16), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FQuickBrownDog, 33, 11), TEncoding.UTF8);
+  FHashResult := FHash.TransformFinal();
+  FActualString := FHashResult.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_512.TestQuickBrownFox;
+begin
+  FExpectedString := FExpectedHashOfQuickBrownFox;
+  FActualString := FGOST3411_2012_512.ComputeString(FQuickBrownDog,
+    TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -13474,6 +13616,8 @@ RegisterTest(TTestMurmurHash3_x86_128);
 RegisterTest(TTestMurmurHash3_x64_128);
 // Crypto
 RegisterTest(TTestGost);
+RegisterTest(TTestGOST3411_2012_256);
+RegisterTest(TTestGOST3411_2012_512);
 RegisterTest(TTestGrindahl256);
 RegisterTest(TTestGrindahl512);
 RegisterTest(TTestHAS160);
@@ -13577,6 +13721,8 @@ RegisterTest(TTestMurmurHash3_x86_128.Suite);
 RegisterTest(TTestMurmurHash3_x64_128.Suite);
 // Crypto
 RegisterTest(TTestGost.Suite);
+RegisterTest(TTestGOST3411_2012_256.Suite);
+RegisterTest(TTestGOST3411_2012_512.Suite);
 RegisterTest(TTestGrindahl256.Suite);
 RegisterTest(TTestGrindahl512.Suite);
 RegisterTest(TTestHAS160.Suite);

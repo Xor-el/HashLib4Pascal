@@ -52,6 +52,7 @@ contains
   HlpBlake2B in '..\..\Crypto\HlpBlake2B.pas',
   HlpBlake2S in '..\..\Crypto\HlpBlake2S.pas',
   HlpGost in '..\..\Crypto\HlpGost.pas',
+  HlpGOST3411_2012 in '..\..\Crypto\HlpGOST3411_2012.pas',
   HlpGrindahl256 in '..\..\Crypto\HlpGrindahl256.pas',
   HlpGrindahl512 in '..\..\Crypto\HlpGrindahl512.pas',
   HlpHAS160 in '..\..\Crypto\HlpHAS160.pas',

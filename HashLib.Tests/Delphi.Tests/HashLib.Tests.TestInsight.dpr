@@ -136,7 +136,8 @@ uses
   BitConverterTests in '..\src\BitConverterTests.pas',
   PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas',
   Blake2BTestVectors in '..\src\Blake2BTestVectors.pas',
-  Blake2STestVectors in '..\src\Blake2STestVectors.pas';
+  Blake2STestVectors in '..\src\Blake2STestVectors.pas',
+  HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas';
 
 begin
 

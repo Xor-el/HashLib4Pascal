@@ -77,6 +77,7 @@ uses
   HlpSnefru,
   HlpHaval,
   HlpGost,
+  HlpGOST3411_2012,
   HlpHAS160,
   HlpRIPEMD,
   HlpRIPEMD128,
@@ -346,6 +347,12 @@ type
       class function CreateHaval_5_256(): IHash; static;
 
       class function CreateGost(): IHash; static;
+
+      // Streebog 256
+      class function CreateGOST3411_2012_256(): IHash; static;
+
+      // Streebog 512
+      class function CreateGOST3411_2012_512(): IHash; static;
 
       class function CreateHAS160(): IHash; static;
 
@@ -641,6 +648,16 @@ end;
 class function THashFactory.TCrypto.CreateGost: IHash;
 begin
   Result := TGost.Create();
+end;
+
+class function THashFactory.TCrypto.CreateGOST3411_2012_256: IHash;
+begin
+  Result := TGOST3411_2012_256.Create();
+end;
+
+class function THashFactory.TCrypto.CreateGOST3411_2012_512: IHash;
+begin
+  Result := TGOST3411_2012_512.Create();
 end;
 
 class function THashFactory.TCrypto.CreateGrindahl256: IHash;
