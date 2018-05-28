@@ -20,7 +20,7 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Crypto\backup;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
+            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -59,7 +59,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="109">
+    <Units Count="108">
       <Unit0>
         <Filename Value="HashLibConsole.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -454,49 +454,45 @@
         <IsPartOfProject Value="True"/>
       </Unit97>
       <Unit98>
-        <Filename Value="..\..\HashLib\src\Crypto\backup\HlpBlake2B.pas"/>
+        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2S.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit98>
       <Unit99>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2S.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit99>
       <Unit100>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit100>
       <Unit101>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit101>
       <Unit102>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas"/>
+        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit102>
       <Unit103>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas"/>
+        <Filename Value="..\src\Blake2BTestVectors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit103>
       <Unit104>
-        <Filename Value="..\src\Blake2BTestVectors.pas"/>
+        <Filename Value="..\src\Blake2STestVectors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit104>
       <Unit105>
-        <Filename Value="..\src\Blake2STestVectors.pas"/>
+        <Filename Value="..\..\HashLib\src\Utils\HlpConverters.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit105>
       <Unit106>
-        <Filename Value="..\..\HashLib\src\Utils\HlpConverters.pas"/>
+        <Filename Value="..\..\HashLib\src\NullDigest\HlpNullDigest.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit106>
       <Unit107>
-        <Filename Value="..\..\HashLib\src\NullDigest\HlpNullDigest.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit107>
-      <Unit108>
         <Filename Value="..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit108>
+      </Unit107>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
