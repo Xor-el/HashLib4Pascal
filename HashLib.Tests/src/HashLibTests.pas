@@ -49,7 +49,7 @@ type
       : String = 'I will not buy this record, it is scratched.';
     FRandomStringTobacco
       : String = 'I will not buy this tobacconist''s, it is scratched.';
-    FQuickBrownDog = 'The quick brown fox jumps over the lazy dog';
+    FQuickBrownDog : String = 'The quick brown fox jumps over the lazy dog';
     FBytesabcde: array [0 .. 4] of Byte = ($61, $62, $63, $64, $65);
     FHexStringAsKey: String = '000102030405060708090A0B0C0D0E0F';
     FHMACLongStringKey: String = 'I need an Angel';
