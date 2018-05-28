@@ -2,6 +2,9 @@
 HashLib4Pascal is a Delphi/FreePascal compatible library that provides an easy to use interface for computing hashes and checksums of strings (with a specified encoding), files, streams, byte arrays and untyped data to mention but a few.
 It also supports Incremental Hashing.
 
+**Build Status**
+[![Build Status](https://travis-ci.org/Xor-el/HashLib4Pascal.svg?branch=master)](https://travis-ci.org/Xor-el/HashLib4Pascal)
+
 **Supported Algorithms:**
 
     non-cryptographic 32-bits hash algorithms: AP, BKDR, Bernstein, Bernstein1, DEK, DJB, 
