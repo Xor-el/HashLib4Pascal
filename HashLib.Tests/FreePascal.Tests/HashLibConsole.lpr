@@ -25,6 +25,7 @@ Application: THashLibConsoleTestRunner;
 begin
   Application := THashLibConsoleTestRunner.Create(nil);
   Application.Initialize;
+ // Application.Title := 'HashLib.Tests';
   Application.Run;
   Application.Free;
 end.
