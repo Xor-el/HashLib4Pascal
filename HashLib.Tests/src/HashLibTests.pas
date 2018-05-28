@@ -2,6 +2,11 @@ unit HashLibTests;
 
 interface
 
+{$IFDEF FPC}
+{$WARNINGS OFF}
+{$NOTES OFF}
+{$ENDIF FPC}
+
 uses
   Classes,
   SysUtils,

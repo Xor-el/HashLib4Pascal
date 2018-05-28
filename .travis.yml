@@ -38,7 +38,9 @@ install:
   - ./.travis.install.py
 
 script:
-  - lazbuild $LAZ_OPT ./HashLib.Tests/FreePascal.Tests/HashLibConsole.Tests.lpi               # Build HashLib4Pascal Test Project
+  - lazbuild --add-package-link ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Add HashLib4Pascal Package
+  - lazbuild $LAZ_OPT ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Build HashLib4Pascal Package
+  - lazbuild $LAZ_OPT ./HashLib.Tests/FreePascal.Tests/HashLibConsole.Tests.lpi  # Build HashLib4Pascal Test Project
   - $LAZ_ENV ./HashLib.Tests/FreePascal.Tests/bin/HashLib --all --format=plain # Run HashLib4Pascal TestSuite
 
 notifications:

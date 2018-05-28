@@ -26,6 +26,7 @@
 // Disable Warnings and Hints.
 {$WARNINGS OFF}
 {$HINTS OFF}
+{$NOTES OFF}
 
 // Optimizations
 {$OPTIMIZATION LEVEL3}

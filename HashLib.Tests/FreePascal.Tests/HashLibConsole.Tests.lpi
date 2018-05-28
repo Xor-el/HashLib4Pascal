@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="10"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -19,8 +19,8 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-            <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="..\src"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -50,449 +50,51 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
         <CommandLineParams Value="--format=plain --all --progress"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <CommandLineParams Value="--format=plain --all --progress"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
+        <PackageName Value="HashLib4PascalPackage"/>
       </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
     </RequiredPackages>
-    <Units Count="108">
+    <Units Count="6">
       <Unit0>
         <Filename Value="HashLibConsole.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HashLib.Tests"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashResult.pas"/>
+        <Filename Value="..\src\HashLibTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashCryptoNotBuildIn.pas"/>
+        <Filename Value="..\src\BitConverterTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas"/>
+        <Filename Value="..\src\PBKDF2_HMACTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\..\HashLib\src\Base\HlpMultipleTransformNonBlock.pas"/>
+        <Filename Value="..\src\Blake2BTestVectors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashBuffer.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashFactory.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="..\..\HashLib\src\Base\HlpHash.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashRounds.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="..\..\HashLib\src\Base\HlpHashSize.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="..\..\HashLib\src\Checksum\HlpAdler32.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="..\..\HashLib\src\Checksum\HlpCRC.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="..\..\HashLib\src\Checksum\HlpCRC16.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="..\..\HashLib\src\Checksum\HlpCRC32.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="..\..\HashLib\src\Checksum\HlpCRC64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpTiger2.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpWhirlPool.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSnefru.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpTiger.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_512_256.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA3.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRadioGatun64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_512_224.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpPanama.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRadioGatun32.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit24>
-      <Unit25>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpGrindahl512.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpMD2.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpGost.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpGrindahl256.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRIPEMD320.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRIPEMD256.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRIPEMD160.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRIPEMD128.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpRIPEMD.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpMD5.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpMD4.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpHaval.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit36>
-      <Unit37>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_512.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit37>
-      <Unit38>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_384.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit38>
-      <Unit39>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_512Base.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_256Base.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpMDBase.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA1.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpHAS160.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA0.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_224.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpSHA2_256.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit46>
-      <Unit47>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpMurmur2.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpFNV.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpELF.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit49>
-      <Unit50>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpAP.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit50>
-      <Unit51>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpMurmurHash3_x86_32.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit51>
-      <Unit52>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpXXHash32.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit52>
-      <Unit53>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpSDBM.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit53>
-      <Unit54>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpShiftAndXor.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit54>
-      <Unit55>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpSuperFast.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit55>
-      <Unit56>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpDEK.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit56>
-      <Unit57>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpDJB.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit57>
-      <Unit58>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpFNV1a.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit58>
-      <Unit59>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpJenkins3.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit59>
-      <Unit60>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpJS.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit60>
-      <Unit61>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpOneAtTime.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit61>
-      <Unit62>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpPJW.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit62>
-      <Unit63>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpRotating.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit63>
-      <Unit64>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpRS.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit64>
-      <Unit65>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpBernstein.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit65>
-      <Unit66>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpBernstein1.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit66>
-      <Unit67>
-        <Filename Value="..\..\HashLib\src\Hash32\HlpBKDR.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit67>
-      <Unit68>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpFNV1a64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit68>
-      <Unit69>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpFNV64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit69>
-      <Unit70>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpMurmur2_64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit70>
-      <Unit71>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpSipHash.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit71>
-      <Unit72>
-        <Filename Value="..\..\HashLib\src\Hash64\HlpXXHash64.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit72>
-      <Unit73>
-        <Filename Value="..\..\HashLib\src\Hash128\HlpMurmurHash3_x64_128.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit73>
-      <Unit74>
-        <Filename Value="..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit74>
-      <Unit75>
-        <Filename Value="..\..\HashLib\src\Include\HashLib.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit75>
-      <Unit76>
-        <Filename Value="..\..\HashLib\src\Include\HashLibHelper.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit76>
-      <Unit77>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHash.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit77>
-      <Unit78>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashInfo.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit78>
-      <Unit79>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIHashResult.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit79>
-      <Unit80>
-        <Filename Value="..\..\HashLib\src\Nullable\HlpNullable.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit80>
-      <Unit81>
-        <Filename Value="..\..\HashLib\src\Utils\HlpBitConverter.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit81>
-      <Unit82>
-        <Filename Value="..\..\HashLib\src\Utils\HlpBits.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit82>
-      <Unit83>
-        <Filename Value="..\..\HashLib\src\Utils\HlpHashLibTypes.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit83>
-      <Unit84>
-        <Filename Value="..\src\HashLibTests.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit84>
-      <Unit85>
-        <Filename Value="..\src\BitConverterTests.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit85>
-      <Unit86>
-        <Filename Value="..\src\PBKDF2_HMACTests.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit86>
-      <Unit87>
-        <Filename Value="..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit87>
-      <Unit88>
-        <Filename Value="..\..\HashLib\src\Base\HlpKDF.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit88>
-      <Unit89>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpIKDF.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit89>
-      <Unit90>
-        <Filename Value="..\..\HashLib\src\Interfaces\HlpICRC.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit90>
-      <Unit91>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2B.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit91>
-      <Unit92>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit92>
-      <Unit93>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BIvBuilder.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit93>
-      <Unit94>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BTreeConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit94>
-      <Unit95>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit95>
-      <Unit96>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit96>
-      <Unit97>
-        <Filename Value="..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit97>
-      <Unit98>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpBlake2S.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit98>
-      <Unit99>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit99>
-      <Unit100>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit100>
-      <Unit101>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit101>
-      <Unit102>
-        <Filename Value="..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit102>
-      <Unit103>
-        <Filename Value="..\src\Blake2BTestVectors.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit103>
-      <Unit104>
         <Filename Value="..\src\Blake2STestVectors.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit104>
-      <Unit105>
-        <Filename Value="..\..\HashLib\src\Utils\HlpConverters.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit105>
-      <Unit106>
-        <Filename Value="..\..\HashLib\src\NullDigest\HlpNullDigest.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit106>
-      <Unit107>
-        <Filename Value="..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit107>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -502,8 +104,8 @@
       <Filename Value=".\bin\HashLib"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);..\..\HashLib\src\Include"/>
-      <OtherUnitFiles Value="..\..\HashLib\src\Base;..\..\HashLib\src\Checksum;..\..\HashLib\src\Crypto;..\..\HashLib\src\Hash32;..\..\HashLib\src\Hash64;..\..\HashLib\src\Hash128;..\..\HashLib\src\Interfaces;..\..\HashLib\src\Nullable;..\..\HashLib\src\Utils;..\src;..\..\HashLib\src\KDF;..\..\HashLib\src\Crypto\Blake2BConfigurations;..\..\HashLib\src\Crypto\Blake2SConfigurations;..\..\HashLib\src\Interfaces\IBlake2BConfigurations;..\..\HashLib\src\Interfaces\IBlake2SConfigurations;..\..\HashLib\src\NullDigest"/>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\src"/>
     </SearchPaths>
   </CompilerOptions>
   <Debugging>
