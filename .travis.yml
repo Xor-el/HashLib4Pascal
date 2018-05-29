@@ -17,7 +17,9 @@ env:
    # - LAZ_PKG=true  # Use the latest version from the default package manager
     - LAZ_VER=1.6 # Use specific (binary) release
     - LAZ_VER=1.8.0
-    - LAZ_VER=1.8.4
+   # FPC 3.0.4 Linker Fails in Old Linux OS, See 
+   # https://forum.lazarus.freepascal.org/index.php?topic=40238.0 and https://bugs.freepascal.org/view.php?id=32251
+   # - LAZ_VER=1.8.4
 
 matrix:
   include:
@@ -53,7 +55,7 @@ script:
   - lazbuild --add-package-link ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Add HashLib4Pascal Package
   - lazbuild $LAZ_OPT ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Build HashLib4Pascal Package
   - lazbuild $LAZ_OPT ./HashLib.Tests/FreePascal.Tests/HashLibConsole.Tests.lpi  # Build HashLib4Pascal Test Project
-  - travis_wait 120 $LAZ_ENV ./HashLib.Tests/FreePascal.Tests/bin/HashLib --all --format=plain # Run HashLib4Pascal TestSuite
+  - travis_wait 120 $LAZ_ENV ./HashLib.Tests/FreePascal.Tests/bin/HashLib --all --format=plain # Run HashLib4Pascal TestSuite with timeout of 120 mins
 
 notifications:
   email:
