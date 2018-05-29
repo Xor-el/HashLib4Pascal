@@ -7,49 +7,47 @@ import os
 import subprocess
 
 OS_NAME=os.environ.get('TRAVIS_OS_NAME') or 'linux'
-#OS_PMAN={'linux': 'sudo apt-get', 'osx': 'brew'}[OS_NAME]
-OS_PMAN={'linux': 'sudo apt-get'}[OS_NAME]
+OS_PMAN={'linux': 'sudo apt-get', 'osx': 'brew'}[OS_NAME]
 
 LAZ_TMP_DIR=os.environ.get('LAZ_TMP_DIR') or 'lazarus_tmp'
-#LAZ_REL_DEF=os.environ.get('LAZ_REL_DEF') or {'linux':'amd64', 'qemu-arm':'amd64', 'qemu-arm-static':'amd64', 'osx':'i386', 'wine':'32'}
-LAZ_REL_DEF=os.environ.get('LAZ_REL_DEF') or {'linux':'amd64', 'qemu-arm':'amd64', 'qemu-arm-static':'amd64', 'wine':'32'}
+LAZ_REL_DEF=os.environ.get('LAZ_REL_DEF') or {'linux':'amd64', 'qemu-arm':'amd64', 'qemu-arm-static':'amd64', 'osx':'i386', 'wine':'32'}
 LAZ_BIN_SRC=os.environ.get('LAZ_BIN_SRC') or 'http://mirrors.iwi.me/lazarus/releases/%(target)s/Lazarus%%20%(version)s'
 LAZ_BIN_TGT=os.environ.get('LAZ_BIN_TGT') or {
     'linux':           'Lazarus%%20Linux%%20%(release)s%%20DEB',
     'qemu-arm':        'Lazarus%%20Linux%%20%(release)s%%20DEB',
     'qemu-arm-static': 'Lazarus%%20Linux%%20%(release)s%%20DEB',
-#    'osx':             'Lazarus%%20Mac%%20OS%%20X%%20%(release)s',
+    'osx':             'Lazarus%%20Mac%%20OS%%20X%%20%(release)s',
     'wine':            'Lazarus%%20Windows%%20%(release)s%%20bits'
 }
 
-#def install_osx_dmg(dmg):
-#    try:
-#        # Mount .dmg file and parse (automatically determined) target volumes
-#        res = subprocess.check_output('sudo hdiutil attach %s | grep /Volumes/' % (dmg), shell=True)
-#        vol = ('/Volumes/' + l.strip().split('/Volumes/')[-1] for l in res.splitlines() if '/Volumes/' in l)
-#    except:
-#        return False
-#
-#    # Install .pkg files with installer
-#    install_pkg = lambda v, f: os.system('sudo installer -pkg %s/%s -target /' % (v, f)) == 0
-#
-#    for v in vol:
-#        try:
-#            if not all(map(lambda f: (not f.endswith('.pkg')) or install_pkg(v, f), os.listdir(v))):
-#                return False
-#        finally:
-#            # Unmount after installation
-#            os.system('hdiutil detach %s' % (v))
-#
-#    return True
+def install_osx_dmg(dmg):
+    try:
+        # Mount .dmg file and parse (automatically determined) target volumes
+        res = subprocess.check_output('sudo hdiutil attach %s | grep /Volumes/' % (dmg), shell=True)
+        vol = ('/Volumes/' + l.strip().split('/Volumes/')[-1] for l in res.splitlines() if '/Volumes/' in l)
+    except:
+        return False
+
+    # Install .pkg files with installer
+    install_pkg = lambda v, f: os.system('sudo installer -pkg %s/%s -target /' % (v, f)) == 0
+
+    for v in vol:
+        try:
+            if not all(map(lambda f: (not f.endswith('.pkg')) or install_pkg(v, f), os.listdir(v))):
+                return False
+        finally:
+            # Unmount after installation
+            os.system('hdiutil detach %s' % (v))
+
+    return True
 
 def install_lazarus_default():
     if OS_NAME == 'linux':
         # Make sure nogui is installed for headless runs
         pkg = 'lazarus lcl-nogui'
-#    elif OS_NAME == 'osx':
-#        # Install brew cask first
-#        pkg = 'fpc caskroom/cask/brew-cask && %s cask install fpcsrc lazarus' % (OS_PMAN)
+    elif OS_NAME == 'osx':
+        # Install brew cask first
+        pkg = 'fpc caskroom/cask/brew-cask && %s cask install fpcsrc lazarus' % (OS_PMAN)
     else:
         # Default to lazarus
         pkg = 'lazarus'
@@ -91,9 +89,9 @@ def install_lazarus_version(ver,rel,env):
 
         # Install all .deb files
         process_file = lambda f: (not f.endswith('.deb')) or os.system('sudo dpkg --force-overwrite -i %s' % (f)) == 0
-#    elif osn == 'osx':
-#        # Install all .dmg files
-#        process_file = lambda f: (not f.endswith('.dmg')) or install_osx_dmg(f)
+    elif osn == 'osx':
+        # Install all .dmg files
+        process_file = lambda f: (not f.endswith('.dmg')) or install_osx_dmg(f)
     else:
         return False
 
@@ -109,7 +107,7 @@ def install_lazarus_version(ver,rel,env):
         # Redirect listed executables so they execute in wine
         for alias in ('fpc', 'lazbuild', 'lazarus'):
             os.system('echo "#!/usr/bin/env bash \nwine %(target)s \$@" | sudo tee %(name)s > /dev/null && sudo chmod +x %(name)s' % {
-                'target': alias,
+                'target': subprocess.check_output("find $WINEPREFIX -iname '%s.exe' | head -1 " % (alias), shell=True).strip(),
                 'name': '/usr/bin/%s' % (alias)
             })
     elif osn == 'qemu-arm' or osn == 'qemu-arm-static':
@@ -127,7 +125,7 @@ def install_lazarus_version(ver,rel,env):
         # Compile ARM cross compiler
         if os.system('cd /usr/share/fpcsrc/%s && sudo make clean crossall crossinstall %s' % (fpcv, opts)) != 0:
             return False
-
+        
         # Symbolic link to update default FPC cross compiler for ARM
         if os.system('sudo ln -sf /usr/lib/fpc/%s/ppcrossarm /usr/bin/ppcarm' % (fpcv)) != 0:
             return False
@@ -142,7 +140,8 @@ def install_lazarus_version(ver,rel,env):
             '-Fl/usr/lib/gcc/arm-linux-gnueabi/%s' % (gccv),
             '-Fl/usr/lib/gcc-cross/arm-linux-gnueabi/%s' % (gccv),
             # '-CpARMV7A', '-CfVFPV3_D16',
-            '#ENDIF'
+            '#ENDIF',
+            ''
         ])
         with open(os.path.expanduser('~/.fpc.cfg'),'w') as f:
             f.write(config)

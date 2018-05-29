@@ -1,37 +1,42 @@
 # Part of `travis-lazarus` (https://github.com/nielsAD/travis-lazarus)
 # License: MIT
 
-#group: deprecated-2017Q2
 language: generic
 sudo: required
-#sudo: false
 dist: trusty
 
 os:
   - linux
- # - osx
+  - osx
 
 env:
   global:
     - WINEPREFIX=~/.winelaz
     - DISPLAY=:99.0
- # matrix:
- #   - LAZ_PKG=true  # Use the latest version from the default package manager
- #   - LAZ_VER=1.6.4
+  matrix:
+    - LAZ_PKG=true  # Use the latest version from the default package manager
+    - LAZ_VER=1.6 # Use specific (binary) release
+    - LAZ_VER=1.8.0
 
 matrix:
   include:
     - os: linux
-      env: LAZ_VER=1.6.4  LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+      env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
     - os: linux
-      env: LAZ_VER=1.6.4  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
- #   - os: linux
- #     env: LAZ_VER=1.6.4  LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+      env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+    - os: linux
+      env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+    - os: linux
+      env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+    - os: linux
+      env: LAZ_VER=1.6  LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+    - os: linux
+      env: LAZ_VER=1.8.0 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
 
 before_install:
   # Start virtual display server
   - Xvfb $DISPLAY &
-  - chmod +x .travis.install.py
+  - chmod +x .travis.install.py 
 
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
