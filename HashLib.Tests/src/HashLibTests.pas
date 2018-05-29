@@ -13107,7 +13107,7 @@ var
   hash0, hash1: String;
 
 begin
-  for len := 0 to 256 do
+  for len := 0 to 20 do
   begin
     FBlake2B.Initialize();
     FBlake2B.TransformBytes(FInput, 0, len);
@@ -13159,8 +13159,8 @@ var
 begin
   inherited;
   FBlake2B := THashFactory.TCrypto.CreateBlake2B();
-  System.SetLength(FInput, 256);
-  for i := 0 to 255 do
+  System.SetLength(FInput, 20);
+  for i := 0 to 19 do
   begin
     FInput[i] := i;
   end;
@@ -13258,7 +13258,7 @@ var
   hash0, hash1: String;
 
 begin
-  for len := 0 to 256 do
+  for len := 0 to 20 do
   begin
     FBlake2S.Initialize();
     FBlake2S.TransformBytes(FInput, 0, len);
@@ -13365,8 +13365,8 @@ begin
   FPersonalisation := TBytes.Create(9, 10, 11, 12, 13, 14, 15, 16);
   FValue := TBytes.Create(255, 254, 253, 252, 251, 250);
   FBlake2S := THashFactory.TCrypto.CreateBlake2S();
-  System.SetLength(FInput, 256);
-  for i := 0 to 255 do
+  System.SetLength(FInput, 20);
+  for i := 0 to 19 do
   begin
     FInput[i] := i;
   end;
