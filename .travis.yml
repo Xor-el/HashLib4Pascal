@@ -14,9 +14,10 @@ env:
     - WINEPREFIX=~/.winelaz
     - DISPLAY=:99.0
   matrix:
-    - LAZ_PKG=true  # Use the latest version from the default package manager
+   # - LAZ_PKG=true  # Use the latest version from the default package manager
     - LAZ_VER=1.6 # Use specific (binary) release
     - LAZ_VER=1.8.0
+    - LAZ_VER=1.8.4
 
 matrix:
   include:
@@ -25,13 +26,19 @@ matrix:
     - os: linux
       env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
     - os: linux
+      env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+    - os: linux
       env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
     - os: linux
       env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
     - os: linux
+      env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+    - os: linux
       env: LAZ_VER=1.6  LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
     - os: linux
       env: LAZ_VER=1.8.0 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+    - os: linux
+      env: LAZ_VER=1.8.4 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
 
 before_install:
   # Start virtual display server
@@ -46,7 +53,7 @@ script:
   - lazbuild --add-package-link ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Add HashLib4Pascal Package
   - lazbuild $LAZ_OPT ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Build HashLib4Pascal Package
   - lazbuild $LAZ_OPT ./HashLib.Tests/FreePascal.Tests/HashLibConsole.Tests.lpi  # Build HashLib4Pascal Test Project
-  - $LAZ_ENV ./HashLib.Tests/FreePascal.Tests/bin/HashLib --all --format=plain # Run HashLib4Pascal TestSuite
+  - travis_wait 60 $LAZ_ENV ./HashLib.Tests/FreePascal.Tests/bin/HashLib --all --format=plain # Run HashLib4Pascal TestSuite
 
 notifications:
   email:
