@@ -81,10 +81,8 @@ type
     class procedure ReadUInt64AsBytesBE(a_in: UInt64; a_out: THashLibByteArray;
       a_index: Int32); overload; static; inline;
 
-    class function ConvertStringToBytes(const a_in:
-{$IFDEF FPC}UnicodeString{$ELSE} String
-{$ENDIF FPC}; a_encoding: TEncoding): THashLibByteArray; overload;
-      static; inline;
+    class function ConvertStringToBytes(const a_in: String;
+      a_encoding: TEncoding): THashLibByteArray; overload; static; inline;
 
     class function ConvertHexStringToBytes(a_in: String): THashLibByteArray;
       static; inline;
@@ -400,9 +398,8 @@ begin
 
 end;
 
-class function TConverters.ConvertStringToBytes(const a_in:
-{$IFDEF FPC}UnicodeString{$ELSE} String
-{$ENDIF FPC}; a_encoding: TEncoding): THashLibByteArray;
+class function TConverters.ConvertStringToBytes(const a_in: String;
+  a_encoding: TEncoding): THashLibByteArray;
 begin
   result := a_encoding.GetBytes(a_in);
 end;
