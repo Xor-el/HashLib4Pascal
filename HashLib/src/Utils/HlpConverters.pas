@@ -18,6 +18,9 @@ uses
   HlpBits,
   HlpBitConverter;
 
+resourcestring
+  SEncodingInstanceNil = 'Encoding Instance Cannot Be Nil';
+
 type
   TConverters = class sealed(TObject)
 
@@ -82,7 +85,7 @@ type
       a_index: Int32); overload; static; inline;
 
     class function ConvertStringToBytes(const a_in: String;
-      a_encoding: TEncoding): THashLibByteArray; overload; static; inline;
+      a_encoding: TEncoding): THashLibByteArray; overload; static;
 
     class function ConvertHexStringToBytes(a_in: String): THashLibByteArray;
       static; inline;
@@ -401,20 +404,33 @@ end;
 class function TConverters.ConvertStringToBytes(const a_in: String;
   a_encoding: TEncoding): THashLibByteArray;
 begin
+
+  if a_encoding = Nil then
+  begin
+    raise EArgumentNilHashLibException.CreateRes(@SEncodingInstanceNil);
+  end;
+
   result := a_encoding.GetBytes(a_in);
 end;
 
 class function TConverters.SplitString(const S: String; Delimiter: Char)
   : THashLibStringArray;
 var
-  PosStart, PosDel, SplitPoints, I, Len: Int32;
+  PosStart, PosDel, SplitPoints, I, LowPoint, HighPoint, Len: Int32;
 begin
   result := Nil;
   if S <> '' then
   begin
     { Determine the length of the resulting array }
     SplitPoints := 0;
-    for I := 1 to System.length(S) do
+{$IFDEF DELPHIXE3_UP}
+    LowPoint := System.Low(S);
+    HighPoint := System.High(S);
+{$ELSE}
+    LowPoint := 1;
+    HighPoint := System.length(S);
+{$ENDIF DELPHIXE3_UP}
+    for I := LowPoint to HighPoint do
     begin
       if (Delimiter = S[I]) then
         System.Inc(SplitPoints);
@@ -426,7 +442,13 @@ begin
 
     I := 0;
     Len := System.length(Delimiter);
+{$IFDEF DELPHIXE3_UP}
+    PosStart := System.Low(S);
+    HighPoint := System.High(S);
+{$ELSE}
     PosStart := 1;
+    HighPoint := System.length(S);
+{$ENDIF DELPHIXE3_UP}
     PosDel := System.Pos(Delimiter, S);
     while PosDel > 0 do
     begin
@@ -435,7 +457,7 @@ begin
       PosDel := PosEx(Delimiter, S, PosStart);
       System.Inc(I);
     end;
-    result[I] := System.Copy(S, PosStart, System.length(S));
+    result[I] := System.Copy(S, PosStart, HighPoint);
   end;
 end;
 
