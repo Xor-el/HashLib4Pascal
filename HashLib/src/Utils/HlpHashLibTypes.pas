@@ -124,9 +124,10 @@ type
 
 implementation
 
+{$IFDEF FPC}
+
 initialization
 
-{$IFDEF FPC}
 // Set UTF-8 in AnsiStrings, just like Lazarus
 SetMultiByteConversionCodePage(CP_UTF8);
 // SetMultiByteFileSystemCodePage(CP_UTF8); not needed, this is the default under Windows
