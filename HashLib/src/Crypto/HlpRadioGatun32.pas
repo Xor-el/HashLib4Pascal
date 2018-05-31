@@ -194,7 +194,7 @@ var
   data: array [0 .. 2] of UInt32;
   i: Int32;
 begin
-  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 12);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   i := 0;
   while i < 3 do

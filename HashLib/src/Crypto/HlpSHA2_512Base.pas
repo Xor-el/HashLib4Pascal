@@ -120,7 +120,7 @@ var
   data: array [0 .. 79] of UInt64;
 begin
 
-  TConverters.be64_copy(a_data, a_index, @(data[0]), 0, 128);
+  TConverters.be64_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   // Step 1
 

@@ -433,7 +433,7 @@ begin
 
   c := 0;
 
-  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 32);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   for i := 0 to 7 do
   begin

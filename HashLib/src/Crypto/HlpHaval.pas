@@ -380,7 +380,7 @@ var
   temp: array [0 .. 31] of UInt32;
 begin
 
-  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, 128);
+  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, a_data_length);
 
   a := Fm_hash[0];
   b := Fm_hash[1];
@@ -801,7 +801,7 @@ var
   temp: array [0 .. 31] of UInt32;
 begin
 
-  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, 128);
+  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, a_data_length);
 
   a := Fm_hash[0];
   b := Fm_hash[1];
@@ -1383,7 +1383,7 @@ var
   temp: array [0 .. 31] of UInt32;
 begin
 
-  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, 128);
+  TConverters.le32_copy(a_data, a_index, @(temp[0]), 0, a_data_length);
 
   a := Fm_hash[0];
   b := Fm_hash[1];

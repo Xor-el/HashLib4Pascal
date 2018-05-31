@@ -262,7 +262,7 @@ begin
 
   ptr_data := @(data[0]);
 
-  TConverters.be32_copy(a_data, a_index, ptr_data, 0, 64);
+  TConverters.be32_copy(a_data, a_index, ptr_data, 0, a_data_length);
 
   Expand(ptr_data);
 

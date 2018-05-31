@@ -122,7 +122,7 @@ begin
   D := Fm_hash[3];
   E := Fm_hash[4];
 
-  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 64);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   data[16] := data[0] xor data[1] xor data[2] xor data[3];
   data[17] := data[4] xor data[5] xor data[6] xor data[7];

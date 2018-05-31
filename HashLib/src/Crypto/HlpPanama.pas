@@ -232,7 +232,7 @@ var
   tap16, tap25: Int32;
 begin
 
-  TConverters.le32_copy(a_data, a_index, @(work_buffer[0]), 0, 32);
+  TConverters.le32_copy(a_data, a_index, @(work_buffer[0]), 0, a_data_length);
 
   tap16 := (Fm_tap + 16) and $1F;
 

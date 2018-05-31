@@ -1135,8 +1135,8 @@ begin
         THashLibStringArray.Create('CRC-64', 'CRC-64/ECMA-182'));
 
     TCRCStandard.CRC64_GOISO:
-      result := TCRC.Create(64, $000000000000001B, $FFFFFFFFFFFFFFFF, True,
-        True, $FFFFFFFFFFFFFFFF, $B90956C775A41001,
+      result := TCRC.Create(64, $000000000000001B, UInt64($FFFFFFFFFFFFFFFF), True,
+        True, UInt64($FFFFFFFFFFFFFFFF), UInt64($B90956C775A41001),
         THashLibStringArray.Create('CRC-64/GO-ISO'));
 
     TCRCStandard.CRC64_WE:

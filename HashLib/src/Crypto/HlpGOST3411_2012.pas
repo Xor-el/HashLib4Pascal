@@ -118,7 +118,7 @@ begin
 
   while i >= 0 do
   begin
-    c := (A[i] and $FF) + (B[i] and $FF) + (TBits.Asr32(c, 8));
+    c := Int32(A[i] and $FF) + Int32(B[i] and $FF) + (TBits.Asr32(c, 8));
     A[i] := Byte(c);
     System.Dec(i);
   end;

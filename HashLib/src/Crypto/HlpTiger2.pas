@@ -676,7 +676,7 @@ var
   data: array [0 .. 7] of UInt64;
 begin
 
-  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, 64);
+  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   a := Fm_hash[0];
   b := Fm_hash[1];

@@ -169,7 +169,7 @@ var
   data: array [0 .. 17] of UInt64;
   j: Int32;
 begin
-  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, FBlockSize);
+  TConverters.le64_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   j := 0;
 

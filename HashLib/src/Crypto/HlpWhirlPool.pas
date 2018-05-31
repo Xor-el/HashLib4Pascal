@@ -152,7 +152,7 @@ var
 
 begin
 
-  TConverters.be64_copy(a_data, a_index, @(data[0]), 0, 64);
+  TConverters.be64_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   i := 0;
   while i < 8 do

@@ -44,7 +44,7 @@ var
   data: array [0 .. 15] of UInt32;
 begin
 
-  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, 64);
+  TConverters.le32_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   A := Fm_state[0];
   B := Fm_state[1];

@@ -129,7 +129,7 @@ begin
     System.SizeOf(UInt32));
 
   TConverters.be32_copy(a_data, a_index, ptr_work + System.Length(Fm_state), 0,
-    FBlockSize);
+    a_data_length);
 
   i := 0;
 

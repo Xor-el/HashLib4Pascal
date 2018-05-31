@@ -129,9 +129,9 @@ var
 
 begin
 
-  System.Move(Fm_state[0], temp[0], 16);
+  System.Move(Fm_state[0], temp[0], a_data_length);
 
-  System.Move(a_data[a_index], temp[16], 16);
+  System.Move(a_data[a_index], temp[a_data_length], a_data_length);
 
   for i := 0 to 15 do
   begin

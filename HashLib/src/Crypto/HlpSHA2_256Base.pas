@@ -96,7 +96,7 @@ var
   data: array [0 .. 63] of UInt32;
 begin
 
-  TConverters.be32_copy(a_data, a_index, @(data[0]), 0, 64);
+  TConverters.be32_copy(a_data, a_index, @(data[0]), 0, a_data_length);
 
   A := Fm_state[0];
   B := Fm_state[1];
