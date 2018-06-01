@@ -410,7 +410,11 @@ begin
     raise EArgumentNilHashLibException.CreateRes(@SEncodingInstanceNil);
   end;
 
+{$IFDEF FPC}
+  result := a_encoding.GetBytes(UnicodeString(a_in));
+{$ELSE}
   result := a_encoding.GetBytes(a_in);
+{$ENDIF FPC}
 end;
 
 class function TConverters.SplitString(const S: String; Delimiter: Char)
