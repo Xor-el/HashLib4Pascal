@@ -45,7 +45,7 @@ type
     FActualString, FExpectedString: String;
 
   const
-    Fc_chunkSize: array [0 .. 8] of Int32 = (1,
+    Fc_chunkSize: array [0 .. 49] of Int32 = (1,
       // Test many chunk of < sizeof(int)
       2, // Test many chunk of < sizeof(int)
       3, // Test many chunk of < sizeof(int)
@@ -54,19 +54,23 @@ type
       6, // Test many chunk of > sizeof(int)
       7, // Test many chunk of > sizeof(int)
       8, // Test many chunk of > 2*sizeof(int)
-      9);
+      9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+      28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+      46, 47, 48, 49, 50);
 
     FEmptyData: String = '';
     FDefaultData: String = 'HashLib4Pascal';
     FShortMessage: String = 'A short message';
     FZerotoFour: String = '01234';
     FOnetoNine: String = '123456789';
-    FChunkedData: String = 'HashLib4Pascal012345678';
     FRandomStringRecord
       : String = 'I will not buy this record, it is scratched.';
     FRandomStringTobacco
       : String = 'I will not buy this tobacconist''s, it is scratched.';
     FQuickBrownDog: String = 'The quick brown fox jumps over the lazy dog';
+    FChunkedData
+      : String =
+      'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678';
     FBytesabcde: array [0 .. 4] of Byte = ($61, $62, $63, $64, $65);
     FHexStringAsKey: String = '000102030405060708090A0B0C0D0E0F';
     FHMACLongStringKey: String = 'I need an Angel';
@@ -100,13 +104,14 @@ type
   TTestCRCModel = class(THashLibAlgorithmTestCase)
   private
 
-    FCRC: IHash;
+    FCRC, FCRCComplete: IHash;
 
   protected
     procedure TearDown; override;
   published
     procedure TestCheckValue;
     procedure TestCheckValueWithIncrementalHash;
+    procedure TestAnotherChunkedDataIncrementalHash;
 
   end;
 
@@ -449,7 +454,6 @@ type
     FExpectedHashOfDefaultData: String = '30512DE6';
     FExpectedHashOfOnetoNine: String = 'DCCB0167';
     FExpectedHashOfabcde: String = '5F09A8DE';
-    FChunkedDataResult: String = '0F34C2A9';
     FExpectedHashOfDefaultDataWithMaxUInt32AsKey: String = 'B15D52F0';
 
   protected
@@ -479,7 +483,6 @@ type
     FExpectedHashOfEmptyData: String = '00000000';
     FExpectedHashOfDefaultData: String = '3D97B9EB';
     FExpectedHashOfRandomString: String = 'A8D02B9A';
-    FChunkedDataResult: String = 'F378A0E5';
     FExpectedHashOfZerotoFour: String = '19D02170';
     FExpectedHashOfEmptyDataWithOneAsKey: String = '514E28B7';
     FExpectedHashOfDefaultDataWithMaxUInt32AsKey: String = 'B05606FE';
@@ -788,7 +791,6 @@ type
     FExpectedHashOfEmptyData: String = '0000000000000000';
     FExpectedHashOfDefaultData: String = 'F78F3AF068158F5A';
     FExpectedHashOfOnetoNine: String = 'F22BE622518FAF39';
-    FChunkedDataResult: String = '482A04AA1420FA4E';
     FExpectedHashOfabcde: String = 'AF7BA284707E90C2';
     FExpectedHashOfDefaultDataWithMaxUInt32AsKey: String = '49F2E215E924B552';
 
@@ -882,7 +884,6 @@ type
     FExpectedHashOfDefaultData: String = 'B35E1058738E067BF637B17075F14B8B';
     FExpectedHashOfRandomString: String = '9B5B7BA2EF3F7866889ADEAF00F3F98E';
     FExpectedHashOfZerotoFour: String = '35C5B3EE7B3B211600AE108800AE1088';
-    FChunkedDataResult: String = '4A55B7373EDDA78133B53E4A6FDEC417';
     FExpectedHashOfEmptyDataWithOneAsKey
       : String = '88C4ADEC54D201B954D201B954D201B9';
     FExpectedHashOfDefaultDataWithMaxUInt32AsKey
@@ -917,7 +918,6 @@ type
     FExpectedHashOfDefaultData: String = '705BD3C954B94BE056F06B68662E6364';
     FExpectedHashOfRandomString: String = 'D30654ABBD8227E367D73523F0079673';
     FExpectedHashOfZerotoFour: String = '0F04E459497F3FC1ECCC6223A28DD613';
-    FChunkedDataResult: String = 'C6B817ACBF6584ADBC8AE6C433A4827D';
     FExpectedHashOfEmptyDataWithOneAsKey
       : String = '4610ABE56EFF5CB551622DAA78F83583';
     FExpectedHashOfDefaultDataWithMaxUInt32AsKey
@@ -3446,6 +3446,49 @@ begin
 
 end;
 
+procedure TTestCRCModel.TestAnotherChunkedDataIncrementalHash;
+var
+  Idx: TCRCStandard;
+  temp: String;
+  x, size, i: Int32;
+begin
+
+  for x := 0 to System.Pred(System.SizeOf(Fc_chunkSize)
+    div System.SizeOf(Int32)) do
+  begin
+    size := Fc_chunkSize[x];
+    for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+    begin
+      FCRC := THashFactory.TChecksum.CreateCRC(Idx);
+      FCRC.Initialize;
+      FCRCComplete := THashFactory.TChecksum.CreateCRC(Idx);
+
+      i := size;
+      while i < System.Length(FChunkedData) do
+      begin
+        temp := System.Copy(FChunkedData, (i - size) + 1, size);
+        FCRC.TransformString(temp, TEncoding.UTF8);
+
+        System.Inc(i, size);
+      end;
+      temp := System.Copy(FChunkedData, (i - size) + 1,
+        System.Length(FChunkedData) - ((i - size)));
+      FCRC.TransformString(temp, TEncoding.UTF8);
+
+      FActualString := FCRC.TransformFinal().ToString();
+
+      FExpectedString := FCRCComplete.ComputeString(FChunkedData,
+        TEncoding.UTF8).ToString();
+
+      CheckEquals(FExpectedString, FActualString,
+        Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
+        [FExpectedString, FActualString]));
+
+    end;
+  end;
+
+end;
+
 procedure TTestCRCModel.TestCheckValue;
 var
   Idx: TCRCStandard;
@@ -4538,7 +4581,8 @@ begin
     FMurmur2.TransformString(temp, TEncoding.UTF8);
 
     FActualString := FMurmur2.TransformFinal().ToString();
-    FExpectedString := FChunkedDataResult;
+    FExpectedString := THashFactory.THash32.CreateMurmur2.ComputeString
+      (FChunkedData, TEncoding.UTF8).ToString();
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;
@@ -4693,7 +4737,8 @@ begin
     FMurmurHash3_x86_32.TransformString(temp, TEncoding.UTF8);
 
     FActualString := FMurmurHash3_x86_32.TransformFinal().ToString();
-    FExpectedString := FChunkedDataResult;
+    FExpectedString := THashFactory.THash32.CreateMurmurHash3_x86_32.
+      ComputeString(FChunkedData, TEncoding.UTF8).ToString();
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;
@@ -5675,7 +5720,9 @@ begin
     FMurmur2_64.TransformString(temp, TEncoding.UTF8);
 
     FActualString := FMurmur2_64.TransformFinal().ToString();
-    FExpectedString := FChunkedDataResult;
+    FExpectedString := THashFactory.THash64.CreateMurmur2.ComputeString
+      (FChunkedData, TEncoding.UTF8).ToString();
+
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;
@@ -6049,9 +6096,10 @@ begin
     FMurmurHash3_x86_128.TransformString(temp, TEncoding.UTF8);
 
     FActualString := FMurmurHash3_x86_128.TransformFinal().ToString();
-    FExpectedString := FChunkedDataResult;
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+    FExpectedString := THashFactory.THash128.CreateMurmurHash3_x86_128.
+      ComputeString(FChunkedData, TEncoding.UTF8).ToString();
+    CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s',
+      [FExpectedString, FActualString]));
   end;
 
 end;
@@ -6190,7 +6238,8 @@ begin
     FMurmurHash3_x64_128.TransformString(temp, TEncoding.UTF8);
 
     FActualString := FMurmurHash3_x64_128.TransformFinal().ToString();
-    FExpectedString := FChunkedDataResult;
+    FExpectedString := THashFactory.THash128.CreateMurmurHash3_x64_128.
+      ComputeString(FChunkedData, TEncoding.UTF8).ToString();
     CheckEquals(FExpectedString, FActualString,
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;

@@ -215,7 +215,7 @@ begin
   len := a_length;
   i := a_index;
   ptr_a_data := PByte(a_data);
-  Fm_total_length := Fm_total_length + UInt32(len);
+  System.Inc(Fm_total_length, len);
 
   // consume last pending bytes
 
