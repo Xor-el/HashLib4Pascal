@@ -13994,6 +13994,7 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
+  CheckEquals(System.Length(BytesABCDE), System.Length(result));
   CheckTrue(CompareMem(PByte(BytesABCDE), PByte(result),
     System.Length(BytesABCDE) * System.SizeOf(Byte)));
 
@@ -14022,6 +14023,7 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
+  CheckEquals(System.Length(BytesEmpty), System.Length(result));
   CheckTrue(CompareMem(PByte(BytesEmpty), PByte(result),
     System.Length(BytesEmpty) * System.SizeOf(Byte)));
 
@@ -14055,6 +14057,7 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
+  CheckEquals(System.Length(BytesZeroToNine), System.Length(result));
   CheckTrue(CompareMem(PByte(BytesZeroToNine), PByte(result),
     System.Length(BytesZeroToNine) * System.SizeOf(Byte)));
 
