@@ -1,5 +1,7 @@
 unit HlpHashSize;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 type

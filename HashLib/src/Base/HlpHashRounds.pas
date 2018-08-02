@@ -1,5 +1,7 @@
 unit HlpHashRounds;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 type

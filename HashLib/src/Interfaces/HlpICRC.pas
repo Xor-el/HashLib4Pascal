@@ -1,5 +1,7 @@
 unit HlpICRC;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

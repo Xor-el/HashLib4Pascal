@@ -1,5 +1,7 @@
 unit HlpIHashInfo;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

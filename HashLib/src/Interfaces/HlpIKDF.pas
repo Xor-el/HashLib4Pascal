@@ -1,5 +1,7 @@
 unit HlpIKDF;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses

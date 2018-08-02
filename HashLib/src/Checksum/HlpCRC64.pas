@@ -1,5 +1,7 @@
 unit HlpCRC64;
 
+{$I ..\Include\HashLib.inc}
+
 interface
 
 uses
