@@ -84,8 +84,8 @@ var
 begin
   FExpectedString :=
     '0394A2EDE332C9A13EB82E9B24631604C31DF978B4E2F0FBD2C549944F9D79A5';
-  Password := TEncoding.UTF8.GetBytes('password');
-  Salt := TEncoding.UTF8.GetBytes('salt');
+  Password := TConverters.ConvertStringToBytes('password', TEncoding.UTF8);
+  Salt := TConverters.ConvertStringToBytes('salt', TEncoding.UTF8);
   Hash := THashFactory.TCrypto.CreateSHA2_256();
   Key := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 100000)
     .GetBytes(32);
