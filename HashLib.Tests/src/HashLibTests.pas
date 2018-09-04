@@ -563,6 +563,7 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
 
@@ -900,6 +901,7 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithOutsideKey;
 
   end;
@@ -967,6 +969,7 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
 
@@ -1001,6 +1004,7 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
 
@@ -4809,6 +4813,31 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestMurmurHash3_x86_32.TestIndexChunkedDataIncrementalHash;
+var
+  count, i: Int32;
+  ChunkedDataBytes, temp: TBytes;
+
+begin
+  ChunkedDataBytes := TConverters.ConvertStringToBytes(FChunkedData,
+    TEncoding.UTF8);
+  for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
+  begin
+    count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, count);
+    FMurmurHash3_x86_32.Initialize();
+
+    FMurmurHash3_x86_32.TransformBytes(ChunkedDataBytes, i, count);
+
+    FActualString := FMurmurHash3_x86_32.TransformFinal().ToString();
+    FExpectedString := THashFactory.THash32.CreateMurmurHash3_x86_32.
+      ComputeBytes(temp).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+end;
+
 procedure TTestMurmurHash3_x86_32.TestRandomString;
 begin
   FExpectedString := FExpectedHashOfRandomString;
@@ -5959,6 +5988,31 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSipHash2_4.TestIndexChunkedDataIncrementalHash;
+var
+  count, i: Int32;
+  ChunkedDataBytes, temp: TBytes;
+
+begin
+  ChunkedDataBytes := TConverters.ConvertStringToBytes(FChunkedData,
+    TEncoding.UTF8);
+  for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
+  begin
+    count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, count);
+    FSipHash2_4.Initialize();
+
+    FSipHash2_4.TransformBytes(ChunkedDataBytes, i, count);
+
+    FActualString := FSipHash2_4.TransformFinal().ToString();
+    FExpectedString := THashFactory.THash64.CreateSipHash2_4()
+      .ComputeBytes(temp).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+end;
+
 procedure TTestSipHash2_4.TestOnetoNine;
 begin
   FExpectedString := FExpectedHashOfOnetoNine;
@@ -6233,6 +6287,31 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestMurmurHash3_x86_128.TestIndexChunkedDataIncrementalHash;
+var
+  count, i: Int32;
+  ChunkedDataBytes, temp: TBytes;
+
+begin
+  ChunkedDataBytes := TConverters.ConvertStringToBytes(FChunkedData,
+    TEncoding.UTF8);
+  for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
+  begin
+    count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, count);
+    FMurmurHash3_x86_128.Initialize();
+
+    FMurmurHash3_x86_128.TransformBytes(ChunkedDataBytes, i, count);
+
+    FActualString := FMurmurHash3_x86_128.TransformFinal().ToString();
+    FExpectedString := THashFactory.THash128.CreateMurmurHash3_x86_128.
+      ComputeBytes(temp).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
+end;
+
 procedure TTestMurmurHash3_x86_128.TestRandomString;
 begin
   FExpectedString := FExpectedHashOfRandomString;
@@ -6373,6 +6452,31 @@ begin
   FActualString := FHashResult.ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmurHash3_x64_128.TestIndexChunkedDataIncrementalHash;
+var
+  count, i: Int32;
+  ChunkedDataBytes, temp: TBytes;
+
+begin
+  ChunkedDataBytes := TConverters.ConvertStringToBytes(FChunkedData,
+    TEncoding.UTF8);
+  for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
+  begin
+    count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, count);
+    FMurmurHash3_x64_128.Initialize();
+
+    FMurmurHash3_x64_128.TransformBytes(ChunkedDataBytes, i, count);
+
+    FActualString := FMurmurHash3_x64_128.TransformFinal().ToString();
+    FExpectedString := THashFactory.THash128.CreateMurmurHash3_x64_128.
+      ComputeBytes(temp).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  end;
+
 end;
 
 procedure TTestMurmurHash3_x64_128.TestRandomString;
