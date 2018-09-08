@@ -16,6 +16,7 @@ uses
 {$ENDIF DELPHI}
   HlpBits,
   HlpHash,
+  HlpHashSize,
   HlpHashResult,
   HlpIHashResult,
   HlpIBlake2SConfig,
@@ -28,6 +29,8 @@ uses
 
 resourcestring
   SInvalidConfigLength = 'Config Length Must Be 8 Words';
+  SInvalidHashSize =
+    'BLAKE2S HashSize must be restricted to one of the following [16, 20, 28, 32], "%d"';
 
 type
   TBlake2S = class sealed(THash, ICryptoNotBuildIn, ITransformBlock)
@@ -86,6 +89,8 @@ type
 
     procedure Finish(); inline;
 
+    function GetHashSize(AHashSize: Int32): THashSize; inline;
+
   strict protected
 
     function GetName: String; override;
@@ -104,6 +109,25 @@ type
 implementation
 
 { TBlake2S }
+
+function TBlake2S.GetHashSize(AHashSize: Int32): THashSize;
+begin
+  case AHashSize of
+    16:
+      Result := THashSize.hsHashSize128;
+    20:
+      Result := THashSize.hsHashSize160;
+    28:
+      Result := THashSize.hsHashSize224;
+    32:
+      Result := THashSize.hsHashSize256;
+  else
+    begin
+      raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashSize,
+        [AHashSize]);
+    end;
+  end;
+end;
 
 class constructor TBlake2S.Blake2SConfig;
 begin
@@ -136,7 +160,8 @@ function TBlake2S.Clone(): IHash;
 var
   HashInstance: TBlake2S;
 begin
-  HashInstance := TBlake2S.Create();
+  HashInstance := TBlake2S.Create(TBlake2SConfig.Create(GetHashSize(FHashSize))
+    as IBlake2SConfig);
   System.Move(F_m, HashInstance.F_m, System.SizeOf(F_m));
   HashInstance.FrawConfig := System.Copy(FrawConfig);
   HashInstance.Fm_state := System.Copy(Fm_state);
@@ -146,14 +171,12 @@ begin
   System.Move(F_v, HashInstance.F_v, System.SizeOf(F_v));
 {$ENDIF USE_UNROLLED_VARIANT}
   HashInstance.F_bufferFilled := F_bufferFilled;
-  HashInstance.FHashSize := FHashSize;
-  HashInstance.FBlockSize := FBlockSize;
   HashInstance.F_counter0 := F_counter0;
   HashInstance.F_counter1 := F_counter1;
   HashInstance.F_finalizationFlag0 := F_finalizationFlag0;
   HashInstance.F_finalizationFlag1 := F_finalizationFlag1;
-  result := HashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := HashInstance as IHash;
+  Result.BufferSize := BufferSize;
 end;
 
 procedure TBlake2S.Compress(block: PByte; start: Int32);
@@ -1558,7 +1581,7 @@ begin
   TConverters.le32_copy(PCardinal(Fm_state), 0, PByte(tempRes), 0,
     System.Length(tempRes));
 
-  result := THashResult.Create(tempRes);
+  Result := THashResult.Create(tempRes);
 
   Initialize();
 
@@ -1566,7 +1589,7 @@ end;
 
 function TBlake2S.GetName: String;
 begin
-  result := Format('%s_%u', [Self.ClassName, Self.HashSize * 8]);
+  Result := Format('%s_%u', [Self.ClassName, Self.HashSize * 8]);
 end;
 
 end.
