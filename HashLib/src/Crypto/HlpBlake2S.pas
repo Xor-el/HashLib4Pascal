@@ -21,6 +21,7 @@ uses
   HlpIBlake2SConfig,
   HlpBlake2SConfig,
   HlpBlake2SIvBuilder,
+  HlpIHash,
   HlpIHashInfo,
   HlpConverters,
   HlpHashLibTypes;
@@ -67,14 +68,13 @@ type
       FDefaultConfig: IBlake2SConfig;
 
   var
+    F_m: array [0 .. 15] of UInt32;
     FrawConfig, Fm_state: THashLibUInt32Array;
     FKey, F_buf: THashLibByteArray;
-    F_m: array [0 .. 15] of UInt32;
 {$IFNDEF USE_UNROLLED_VARIANT}
     F_v: array [0 .. 15] of UInt32;
 {$ENDIF USE_UNROLLED_VARIANT}
-    F_bufferFilled: Int32;
-
+    F_bufferFilled, FHashSize, FBlockSize: Int32;
     F_counter0, F_counter1, F_finalizationFlag0, F_finalizationFlag1: UInt32;
 
     class constructor Blake2SConfig();
@@ -88,7 +88,6 @@ type
 
   strict protected
 
-    FHashSize, FBlockSize: Int32;
     function GetName: String; override;
 
   public
@@ -98,6 +97,7 @@ type
     procedure TransformBytes(const a_data: THashLibByteArray;
       a_index, a_data_length: Int32); override;
     function TransformFinal: IHashResult; override;
+    function Clone(): IHash; override;
 
   end;
 
@@ -131,6 +131,30 @@ begin
 end;
 
 {$ENDIF USE_UNROLLED_VARIANT}
+
+function TBlake2S.Clone(): IHash;
+var
+  HashInstance: TBlake2S;
+begin
+  HashInstance := TBlake2S.Create();
+  System.Move(F_m, HashInstance.F_m, System.SizeOf(F_m));
+  HashInstance.FrawConfig := System.Copy(FrawConfig);
+  HashInstance.Fm_state := System.Copy(Fm_state);
+  HashInstance.FKey := System.Copy(FKey);
+  HashInstance.F_buf := System.Copy(F_buf);
+{$IFNDEF USE_UNROLLED_VARIANT}
+  System.Move(F_v, HashInstance.F_v, System.SizeOf(F_v));
+{$ENDIF USE_UNROLLED_VARIANT}
+  HashInstance.F_bufferFilled := F_bufferFilled;
+  HashInstance.FHashSize := FHashSize;
+  HashInstance.FBlockSize := FBlockSize;
+  HashInstance.F_counter0 := F_counter0;
+  HashInstance.F_counter1 := F_counter1;
+  HashInstance.F_finalizationFlag0 := F_finalizationFlag0;
+  HashInstance.F_finalizationFlag1 := F_finalizationFlag1;
+  result := HashInstance as IHash;
+  result.BufferSize := BufferSize;
+end;
 
 procedure TBlake2S.Compress(block: PByte; start: Int32);
 var
@@ -1427,7 +1451,7 @@ end;
 
 procedure TBlake2S.Initialize;
 var
-  i: Integer;
+  i: Int32;
 begin
   if (FrawConfig = Nil) then
     raise EArgumentNilHashLibException.Create('config');
@@ -1454,6 +1478,14 @@ begin
 
   System.SetLength(F_buf, BlockSizeInBytes);
 
+  System.FillChar(F_buf[0], (System.Length(F_buf) * System.SizeOf(Byte)
+    ), Byte(0));
+
+  System.FillChar(F_m, System.SizeOf(F_m), UInt32(0));
+
+{$IFNDEF USE_UNROLLED_VARIANT}
+  System.FillChar(F_v, System.SizeOf(F_v), UInt32(0));
+{$ENDIF USE_UNROLLED_VARIANT}
   for i := 0 to 7 do
   begin
     Fm_state[i] := Fm_state[i] xor FrawConfig[i];

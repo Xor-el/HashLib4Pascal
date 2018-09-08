@@ -159,6 +159,8 @@ type
     procedure TestEmptyBytes;
     procedure TestBytesabcde;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -170,7 +172,7 @@ type
   TTestCRCModel = class(THashLibAlgorithmTestCase)
   private
 
-    FCRC, FCRCComplete: IHash;
+    FCRC: IHash;
 
   protected
     procedure TearDown; override;
@@ -178,6 +180,8 @@ type
     procedure TestCheckValue;
     procedure TestCheckValueWithIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -205,6 +209,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -234,6 +240,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -261,6 +269,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -288,6 +298,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -315,6 +327,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -342,6 +356,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -369,6 +385,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -396,6 +414,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -423,6 +443,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -450,6 +472,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -477,6 +501,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -504,6 +530,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -533,6 +561,8 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestWithDifferentKey;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -566,6 +596,8 @@ type
     procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -593,6 +625,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -620,6 +654,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -647,6 +683,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -674,6 +712,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -701,6 +741,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -728,6 +770,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -755,6 +799,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -787,6 +833,8 @@ type
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -816,6 +864,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -843,6 +893,8 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -872,6 +924,8 @@ type
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
     procedure TestWithDifferentKey;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -903,6 +957,8 @@ type
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithOutsideKey;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -935,6 +991,8 @@ type
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt64DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -972,6 +1030,8 @@ type
     procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -1007,6 +1067,8 @@ type
     procedure TestIndexChunkedDataIncrementalHash;
     procedure TestWithDifferentKeyMaxUInt32DefaultData;
     procedure TestWithDifferentKeyOneEmptyString;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -1052,6 +1114,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1078,6 +1143,9 @@ type
     procedure TestQuickBrownFox;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1104,6 +1172,9 @@ type
     procedure TestQuickBrownFox;
     procedure TestIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1147,6 +1218,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1190,6 +1264,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1226,6 +1303,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1259,6 +1339,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1292,6 +1375,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1325,6 +1411,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1361,6 +1450,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1397,6 +1489,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1433,6 +1528,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1470,6 +1568,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1507,6 +1608,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1544,6 +1648,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1581,6 +1688,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1618,6 +1728,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1655,6 +1768,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1698,6 +1814,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1741,6 +1860,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1784,6 +1906,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1817,6 +1942,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1850,6 +1978,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1883,6 +2014,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1926,6 +2060,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -1969,6 +2106,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2012,6 +2152,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2045,6 +2188,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2078,6 +2224,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2114,6 +2263,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2157,6 +2309,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2200,6 +2355,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2236,6 +2394,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2272,6 +2433,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2309,6 +2473,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2352,6 +2519,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2395,6 +2565,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2438,6 +2611,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2475,6 +2651,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2518,6 +2697,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2555,6 +2737,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2598,6 +2783,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2641,6 +2829,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2684,6 +2875,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2717,6 +2911,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2760,6 +2957,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2793,6 +2993,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2826,6 +3029,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2859,6 +3065,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2895,6 +3104,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2931,6 +3143,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -2967,6 +3182,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3004,6 +3222,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3041,6 +3262,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3078,6 +3302,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3111,6 +3338,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3144,6 +3374,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3177,6 +3410,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3213,6 +3449,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3249,6 +3488,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3285,6 +3527,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3322,6 +3567,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3359,6 +3607,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3396,6 +3647,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3439,6 +3693,9 @@ type
     procedure TestBytesabcde;
     procedure TestEmptyStream;
     procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3471,6 +3728,9 @@ type
     procedure TestEmpty();
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestQuickBrownDog();
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3505,6 +3765,9 @@ type
     procedure TestEmpty();
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestQuickBrownDog();
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
 
   end;
 
@@ -3536,7 +3799,6 @@ begin
     begin
       FCRC := THashFactory.TChecksum.CreateCRC(Idx);
       FCRC.Initialize;
-      FCRCComplete := THashFactory.TChecksum.CreateCRC(Idx);
 
       i := size;
       while i < System.Length(FChunkedData) do
@@ -3552,12 +3814,12 @@ begin
 
       FActualString := FCRC.TransformFinal().ToString();
 
-      FExpectedString := FCRCComplete.ComputeString(FChunkedData,
-        TEncoding.UTF8).ToString();
+      FExpectedString := THashFactory.TChecksum.CreateCRC(Idx)
+        .ComputeString(FChunkedData, TEncoding.UTF8).ToString();
 
       CheckEquals(FExpectedString, FActualString,
-        Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
-        [FExpectedString, FActualString]));
+        Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+        FCRC.Name]));
 
     end;
   end;
@@ -3580,8 +3842,8 @@ begin
     FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
-      [FExpectedString, FActualString]));
+      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+      FCRC.Name]));
 
   end;
 
@@ -3611,11 +3873,62 @@ begin
     FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
     CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s.' + ' ' + (FCRC as ICRC).Names[0],
-      [FExpectedString, FActualString]));
+      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+      FCRC.Name]));
 
   end;
 
+end;
+
+procedure TTestCRCModel.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+  Idx: TCRCStandard;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+
+  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  begin
+    Original := THashFactory.TChecksum.CreateCRC(Idx);
+    Original.Initialize;
+
+    Original.TransformBytes(ChunkOne);
+    // Make Copy Of Current State
+    Copy := Original.Clone();
+    Original.TransformBytes(ChunkTwo);
+    FExpectedString := Original.TransformFinal().ToString();
+    Copy.TransformBytes(ChunkTwo);
+    FActualString := Copy.TransformFinal().ToString();
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+      Original.Name]));
+  end;
+end;
+
+procedure TTestCRCModel.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+  Idx: TCRCStandard;
+begin
+  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  begin
+    Original := THashFactory.TChecksum.CreateCRC(Idx);
+    Original.Initialize;
+    Original.BufferSize := (64 * 1024); // 64Kb
+    // Make Copy Of Current State
+    Copy := Original.Clone();
+    Copy.BufferSize := (128 * 1024); // 128Kb
+
+    CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+      Format('Expected %d but got %d. %s', [Original.BufferSize,
+      Copy.BufferSize, Original.Name]));
+  end;
 end;
 
 { TTestAlder32 }
@@ -3642,6 +3955,46 @@ begin
   FActualString := FAdler32.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestAlder32.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FAdler32;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestAlder32.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FAdler32;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestAlder32.TestDefaultData;
@@ -3731,6 +4084,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestAP.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FAP;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestAP.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FAP;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestAP.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -3811,6 +4204,46 @@ begin
   FActualString := FBernstein.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestBernstein.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FBernstein;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBernstein.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FBernstein;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestBernstein.TestDefaultData;
@@ -3898,6 +4331,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestBernstein1.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FBernstein1;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBernstein1.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FBernstein1;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestBernstein1.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -3983,6 +4456,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestBKDR.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FBKDR;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBKDR.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FBKDR;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestBKDR.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -4063,6 +4576,45 @@ begin
   FActualString := FDEK.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestDEK.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FDEK;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestDEK.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FDEK;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestDEK.TestDefaultData;
@@ -4147,6 +4699,45 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestDJB.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FDJB;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestDJB.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FDJB;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestDJB.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -4227,6 +4818,45 @@ begin
   FActualString := FELF.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestELF.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FELF;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestELF.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FELF;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestELF.TestDefaultData;
@@ -4311,6 +4941,45 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestFNV.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FFNV;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FFNV;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestFNV.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -4391,6 +5060,45 @@ begin
   FActualString := FFNV1a.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV1a.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FFNV1a;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV1a.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FFNV1a;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestFNV1a.TestDefaultData;
@@ -4474,6 +5182,45 @@ begin
   FActualString := FJenkins3.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestJenkins3.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FJenkins3;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestJenkins3.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FJenkins3;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestJenkins3.TestDefaultData;
@@ -4561,6 +5308,45 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestJS.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FJS;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestJS.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FJS;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestJS.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -4641,6 +5427,45 @@ begin
   FActualString := FMurmur2.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmur2.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMurmur2;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmur2.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMurmur2;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestMurmur2.TestDefaultData;
@@ -4787,6 +5612,46 @@ begin
 
 end;
 
+procedure TTestMurmurHash3_x86_32.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMurmurHash3_x86_32;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmurHash3_x86_32.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMurmurHash3_x86_32;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestMurmurHash3_x86_32.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -4815,7 +5680,7 @@ end;
 
 procedure TTestMurmurHash3_x86_32.TestIndexChunkedDataIncrementalHash;
 var
-  count, i: Int32;
+  Count, i: Int32;
   ChunkedDataBytes, temp: TBytes;
 
 begin
@@ -4823,11 +5688,11 @@ begin
     TEncoding.UTF8);
   for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
   begin
-    count := System.Length(ChunkedDataBytes) - i;
-    temp := System.Copy(ChunkedDataBytes, i, count);
+    Count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, Count);
     FMurmurHash3_x86_32.Initialize();
 
-    FMurmurHash3_x86_32.TransformBytes(ChunkedDataBytes, i, count);
+    FMurmurHash3_x86_32.TransformBytes(ChunkedDataBytes, i, Count);
 
     FActualString := FMurmurHash3_x86_32.TransformFinal().ToString();
     FExpectedString := THashFactory.THash32.CreateMurmurHash3_x86_32.
@@ -4906,6 +5771,46 @@ begin
   FActualString := FOneAtTime.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestOneAtTime.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FOneAtTime;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestOneAtTime.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FOneAtTime;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestOneAtTime.TestDefaultData;
@@ -4993,6 +5898,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestPJW.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FPJW;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestPJW.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FPJW;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestPJW.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5073,6 +6018,46 @@ begin
   FActualString := FRotating.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestRotating.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRotating;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRotating.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRotating;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestRotating.TestDefaultData;
@@ -5160,6 +6145,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestRS.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRS;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRS.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRS;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestRS.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5242,6 +6267,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSDBM.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSDBM;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSDBM.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSDBM;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestSDBM.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5322,6 +6387,46 @@ begin
   FActualString := FShiftAndXor.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestShiftAndXor.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FShiftAndXor;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShiftAndXor.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FShiftAndXor;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestShiftAndXor.TestDefaultData;
@@ -5407,6 +6512,46 @@ begin
   FActualString := FSuperFast.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestSuperFast.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSuperFast;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSuperFast.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSuperFast;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestSuperFast.TestDefaultData;
@@ -5540,6 +6685,46 @@ begin
 
 end;
 
+procedure TTestXXHash32.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FXXHash32;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestXXHash32.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FXXHash32;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestXXHash32.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5639,6 +6824,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestFNV64.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FFNV64;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV64.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FFNV64;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestFNV64.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5720,6 +6945,46 @@ begin
   FActualString := FFNV1a64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV1a64.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FFNV1a64;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestFNV1a64.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FFNV1a64;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestFNV1a64.TestDefaultData;
@@ -5805,6 +7070,46 @@ begin
   FActualString := FMurmur2_64.ComputeBytes(LBuffer).ToString();
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmur2_64.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMurmur2_64;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmur2_64.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMurmur2_64;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestMurmur2_64.TestDefaultData;
@@ -5938,6 +7243,46 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSipHash2_4.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSipHash2_4;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSipHash2_4.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSipHash2_4;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestSipHash2_4.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -5990,7 +7335,7 @@ end;
 
 procedure TTestSipHash2_4.TestIndexChunkedDataIncrementalHash;
 var
-  count, i: Int32;
+  Count, i: Int32;
   ChunkedDataBytes, temp: TBytes;
 
 begin
@@ -5998,11 +7343,11 @@ begin
     TEncoding.UTF8);
   for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
   begin
-    count := System.Length(ChunkedDataBytes) - i;
-    temp := System.Copy(ChunkedDataBytes, i, count);
+    Count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, Count);
     FSipHash2_4.Initialize();
 
-    FSipHash2_4.TransformBytes(ChunkedDataBytes, i, count);
+    FSipHash2_4.TransformBytes(ChunkedDataBytes, i, Count);
 
     FActualString := FSipHash2_4.TransformFinal().ToString();
     FExpectedString := THashFactory.THash64.CreateSipHash2_4()
@@ -6114,6 +7459,46 @@ begin
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;
 
+end;
+
+procedure TTestXXHash64.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FXXHash64;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestXXHash64.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FXXHash64;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 end;
 
 procedure TTestXXHash64.TestDefaultData;
@@ -6261,6 +7646,46 @@ begin
 
 end;
 
+procedure TTestMurmurHash3_x86_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMurmurHash3_x86_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmurHash3_x86_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMurmurHash3_x86_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestMurmurHash3_x86_128.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -6289,7 +7714,7 @@ end;
 
 procedure TTestMurmurHash3_x86_128.TestIndexChunkedDataIncrementalHash;
 var
-  count, i: Int32;
+  Count, i: Int32;
   ChunkedDataBytes, temp: TBytes;
 
 begin
@@ -6297,11 +7722,11 @@ begin
     TEncoding.UTF8);
   for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
   begin
-    count := System.Length(ChunkedDataBytes) - i;
-    temp := System.Copy(ChunkedDataBytes, i, count);
+    Count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, Count);
     FMurmurHash3_x86_128.Initialize();
 
-    FMurmurHash3_x86_128.TransformBytes(ChunkedDataBytes, i, count);
+    FMurmurHash3_x86_128.TransformBytes(ChunkedDataBytes, i, Count);
 
     FActualString := FMurmurHash3_x86_128.TransformFinal().ToString();
     FExpectedString := THashFactory.THash128.CreateMurmurHash3_x86_128.
@@ -6428,6 +7853,46 @@ begin
 
 end;
 
+procedure TTestMurmurHash3_x64_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMurmurHash3_x64_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMurmurHash3_x64_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMurmurHash3_x64_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestMurmurHash3_x64_128.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
@@ -6456,7 +7921,7 @@ end;
 
 procedure TTestMurmurHash3_x64_128.TestIndexChunkedDataIncrementalHash;
 var
-  count, i: Int32;
+  Count, i: Int32;
   ChunkedDataBytes, temp: TBytes;
 
 begin
@@ -6464,11 +7929,11 @@ begin
     TEncoding.UTF8);
   for i := System.Low(ChunkedDataBytes) to System.High(ChunkedDataBytes) do
   begin
-    count := System.Length(ChunkedDataBytes) - i;
-    temp := System.Copy(ChunkedDataBytes, i, count);
+    Count := System.Length(ChunkedDataBytes) - i;
+    temp := System.Copy(ChunkedDataBytes, i, Count);
     FMurmurHash3_x64_128.Initialize();
 
-    FMurmurHash3_x64_128.TransformBytes(ChunkedDataBytes, i, count);
+    FMurmurHash3_x64_128.TransformBytes(ChunkedDataBytes, i, Count);
 
     FActualString := FMurmurHash3_x64_128.TransformFinal().ToString();
     FExpectedString := THashFactory.THash128.CreateMurmurHash3_x64_128.
@@ -6547,6 +8012,73 @@ begin
   System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
   FExpectedString := FExpectedHashOfabcde;
   FActualString := FGost.ComputeBytes(LBuffer).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGost.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FGost;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGost.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FGost;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestGost.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FGost);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -6668,6 +8200,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestGrindahl256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FGrindahl256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGrindahl256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FGrindahl256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestGrindahl256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FGrindahl256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestGrindahl256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -6778,6 +8377,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FGrindahl512.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGrindahl512.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FGrindahl512;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGrindahl512.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FGrindahl512;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestGrindahl512.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FGrindahl512);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -6896,6 +8562,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHAS160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHAS160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHAS160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHAS160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHAS160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHAS160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHAS160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -7002,6 +8735,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_3_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_3_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_3_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_3_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_3_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -7120,6 +8920,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_4_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_4_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_4_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_4_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_4_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_4_128.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -7230,6 +9097,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_5_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_5_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_5_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_5_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_5_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -7348,6 +9282,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_3_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_3_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_3_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_3_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_3_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_3_160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -7458,6 +9459,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_4_160.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_4_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_4_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_4_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_4_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -7576,6 +9644,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_5_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_5_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_5_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_5_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_5_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_5_160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -7686,6 +9821,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_3_192.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_3_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_3_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_3_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_3_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -7804,6 +10006,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_4_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_4_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_4_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_4_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_4_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_4_192.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -7914,6 +10183,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_5_192.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_5_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_5_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_5_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_5_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -8032,6 +10368,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_3_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_3_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_3_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_3_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_3_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_3_224.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -8142,6 +10545,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_4_224.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_4_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_4_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_4_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_4_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -8260,6 +10730,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_5_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_5_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_5_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_5_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_5_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_5_224.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -8370,6 +10907,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_3_256.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_3_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_3_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_3_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_3_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_3_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -8488,6 +11092,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestHaval_4_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_4_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_4_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_4_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_4_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_4_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestHaval_4_256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -8598,6 +11269,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FHaval_5_256.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FHaval_5_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestHaval_5_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FHaval_5_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestHaval_5_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FHaval_5_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -8715,6 +11453,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestMD2.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMD2;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMD2.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMD2;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestMD2.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FMD2);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestMD2.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -8824,6 +11629,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestMD4.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMD4;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMD4.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMD4;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestMD4.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FMD4);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestMD4.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -8929,6 +11801,73 @@ procedure TTestMD5.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FMD5.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMD5.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FMD5;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestMD5.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FMD5;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestMD5.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FMD5);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -9043,6 +11982,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestPanama.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FPanama;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestPanama.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FPanama;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestPanama.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FPanama);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestPanama.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -9153,6 +12159,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestRadioGatun32.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRadioGatun32;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRadioGatun32.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRadioGatun32;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRadioGatun32.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRadioGatun32);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestRadioGatun32.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -9164,6 +12237,7 @@ begin
   LHMAC.Key := TConverters.ConvertStringToBytes(FHMACLongStringKey,
     TEncoding.UTF8);
   FActualString := LHMAC.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -9263,6 +12337,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FRadioGatun64.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRadioGatun64.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRadioGatun64;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRadioGatun64.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRadioGatun64;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRadioGatun64.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRadioGatun64);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -9381,6 +12522,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestRIPEMD.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRIPEMD;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRIPEMD;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRIPEMD.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRIPEMD);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestRIPEMD.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -9487,6 +12695,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FRIPEMD128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRIPEMD128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRIPEMD128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRIPEMD128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRIPEMD128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -9603,6 +12878,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestRIPEMD160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRIPEMD160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRIPEMD160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRIPEMD160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRIPEMD160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestRIPEMD160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -9711,6 +13053,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FRIPEMD256.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRIPEMD256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRIPEMD256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRIPEMD256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRIPEMD256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -9827,6 +13236,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestRIPEMD320.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FRIPEMD320;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestRIPEMD320.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FRIPEMD320;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestRIPEMD320.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FRIPEMD320);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestRIPEMD320.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -9934,6 +13410,73 @@ procedure TTestSHA0.TestDefaultData;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA0.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA0.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA0;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA0.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA0;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA0.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA0);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -10047,6 +13590,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA1.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA1;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA1.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA1;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA1.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA1);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA1.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -10153,6 +13763,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA2_224.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -10269,6 +13946,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA2_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA2_256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -10377,6 +14121,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA2_384.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_384.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_384;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_384.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_384;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_384.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_384);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -10493,6 +14304,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA2_512.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_512;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_512.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_512;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_512.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_512);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA2_512.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -10601,6 +14479,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA2_512_224.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_512_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_512_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_512_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_512_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_512_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_512_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -10719,6 +14664,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA2_512_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA2_512_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA2_512_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA2_512_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA2_512_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA2_512_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA2_512_256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -10829,6 +14841,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA3_224.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_224.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA3_224;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_224.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA3_224;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA3_224.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA3_224);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -10945,6 +15024,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA3_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA3_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA3_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA3_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA3_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA3_256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -11053,6 +15199,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSHA3_384.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_384.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA3_384;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_384.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA3_384;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA3_384.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA3_384);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -11169,6 +15382,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSHA3_512.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSHA3_512;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSHA3_512.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSHA3_512;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSHA3_512.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSHA3_512);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSHA3_512.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -11277,6 +15557,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FSnefru_8_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSnefru_8_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSnefru_8_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSnefru_8_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSnefru_8_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSnefru_8_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSnefru_8_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -11395,6 +15742,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestSnefru_8_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FSnefru_8_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestSnefru_8_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FSnefru_8_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestSnefru_8_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FSnefru_8_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestSnefru_8_256.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -11505,6 +15919,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger_3_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_3_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_3_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_3_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_3_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_3_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_3_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -11623,6 +16104,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger_4_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_4_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_4_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_4_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_4_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_4_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger_4_128.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -11733,6 +16281,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger_5_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_5_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_5_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_5_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_5_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_5_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_5_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -11851,6 +16466,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger_3_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_3_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_3_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_3_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_3_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_3_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger_3_160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -11961,6 +16643,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger_4_160.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_4_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_4_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_4_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_4_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_4_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_4_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -12079,6 +16828,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger_5_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_5_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_5_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_5_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_5_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_5_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger_5_160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -12189,6 +17005,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger_3_192.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_3_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_3_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_3_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_3_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_3_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_3_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -12307,6 +17190,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger_4_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_4_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_4_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_4_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_4_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_4_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger_4_192.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -12417,6 +17367,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger_5_192.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_5_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger_5_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger_5_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger_5_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger_5_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger_5_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -12535,6 +17552,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger2_3_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_3_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_3_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_3_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_3_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_3_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger2_3_128.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -12645,6 +17729,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger2_4_128.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_4_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_4_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_4_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_4_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_4_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_4_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -12763,6 +17914,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger2_5_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_5_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_5_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_5_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_5_128.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_5_128);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger2_5_128.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -12873,6 +18091,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger2_3_160.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_3_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_3_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_3_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_3_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_3_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_3_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -12991,6 +18276,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger2_4_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_4_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_4_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_4_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_4_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_4_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger2_4_160.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -13101,6 +18453,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger2_5_160.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_5_160.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_5_160;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_5_160.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_5_160;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_5_160.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_5_160);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -13219,6 +18638,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger2_3_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_3_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_3_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_3_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_3_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_3_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger2_3_192.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -13329,6 +18815,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FTiger2_4_192.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_4_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_4_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_4_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_4_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_4_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_4_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -13447,6 +19000,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestTiger2_5_192.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FTiger2_5_192;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestTiger2_5_192.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FTiger2_5_192;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestTiger2_5_192.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FTiger2_5_192);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestTiger2_5_192.TestHMACWithDefaultDataAndLongKey;
 var
   LHMAC: IHMAC;
@@ -13557,6 +19177,73 @@ begin
   FExpectedString := FExpectedHashOfDefaultData;
   FActualString := FWhirlPool.ComputeString(FDefaultData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestWhirlPool.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FWhirlPool;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestWhirlPool.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FWhirlPool;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestWhirlPool.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FWhirlPool);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -13789,6 +19476,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestBlake2B.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FBlake2B;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2B.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FBlake2B;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestBlake2B.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FBlake2B);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestBlake2B.TestQuickBrownDog;
 // Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
 begin
@@ -13968,14 +19722,14 @@ var
 begin
 
   Fconfig := TBlake2SConfig.Create();
-  Fconfig.HashSize := 18;
+  Fconfig.HashSize := 16;
   Fconfig.Salt := FSalt;
   Fconfig.Personalisation := FPersonalisation;
 
   FBlake2SWithConfig := THashFactory.TCrypto.CreateBlake2S(Fconfig);
 
   FActualString := FBlake2SWithConfig.ComputeBytes(FValue).ToString();
-  FExpectedString := '23F1CAE542785205164E8356D1F622038679';
+  FExpectedString := 'B3BA5F552E1BFA639B7F092065E41F79';
 
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
@@ -14021,6 +19775,73 @@ begin
   FBlake2S.TransformString(FEmptyData, TEncoding.UTF8);
   FExpectedString := FExpectedHashOfEmptyData;
   FActualString := FBlake2S.TransformFinal.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2S.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FBlake2S;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2S.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FBlake2S;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestBlake2S.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FBlake2S);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -14133,6 +19954,45 @@ begin
 
 end;
 
+procedure TTestNullDigest.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FNullDigest;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestNullDigest.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FNullDigest;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
 procedure TTestNullDigest.TestIncrementalHash;
 var
   BytesZeroToNine, result: TBytes;
@@ -14223,6 +20083,73 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestGOST3411_2012_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FGOST3411_2012_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FGOST3411_2012_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestGOST3411_2012_256.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FGOST3411_2012_256);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestGOST3411_2012_256.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfQuickBrownFox;
@@ -14299,6 +20226,73 @@ begin
   FExpectedString := FExpectedHashOfEmptyData;
   FActualString := FGOST3411_2012_512.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_512.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FGOST3411_2012_512;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestGOST3411_2012_512.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FGOST3411_2012_512;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestGOST3411_2012_512.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FGOST3411_2012_512);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
