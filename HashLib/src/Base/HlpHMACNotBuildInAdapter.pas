@@ -159,8 +159,7 @@ end;
 
 function THMACNotBuildInAdapter.GetName: String;
 begin
-  result := Format('%s(%s)', [Self.ClassName, (Self.Fm_hash as THash)
-    .ClassName]);
+  result := Format('%s(%s)', ['THMAC', Fm_hash.Name]);
 
 end;
 

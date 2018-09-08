@@ -9,8 +9,10 @@ interface
 
 uses
 {$IFDEF HAS_UNITSCOPE}
+  System.SysUtils,
   System.TypInfo,
 {$ELSE}
+  SysUtils,
   TypInfo,
 {$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
@@ -697,7 +699,7 @@ end;
 
 function TCRC.GetName: String;
 begin
-  result := 'T' + (Self as ICRC).Names[0];
+  result := Format('T%s', [(Self as ICRC).Names[0]]);
 end;
 
 procedure TCRC.CalculateCRCbyTable(a_data: PByte;
