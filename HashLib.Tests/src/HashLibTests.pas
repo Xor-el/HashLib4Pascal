@@ -142,6 +142,8 @@ type
     FHMACLongStringKey: String = 'I need an Angel';
     FHMACShortStringKey: String = 'Hash';
 
+    function AreEqual(const A, B: TBytes): Boolean;
+
   end;
 
   // NullDigest
@@ -3772,6 +3774,20 @@ type
   end;
 
 implementation
+
+{ THashLibAlgorithmTestCase }
+
+function THashLibAlgorithmTestCase.AreEqual(const A, B: TBytes): Boolean;
+begin
+  if System.Length(A) <> System.Length(B) then
+  begin
+    Result := false;
+    Exit;
+  end;
+
+  Result := CompareMem(PByte(A), PByte(B), System.Length(A) *
+    System.SizeOf(Byte));
+end;
 
 // CheckSum
 
@@ -19898,7 +19914,7 @@ end;
 
 procedure TTestNullDigest.TestBytesabcde;
 var
-  BytesABCDE, result: TBytes;
+  BytesABCDE, Result: TBytes;
 begin
   BytesABCDE := TEncoding.UTF8.GetBytes('abcde');
   CheckEquals(-1, FNullDigest.BlockSize);
@@ -19914,20 +19930,18 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(System.Length(BytesABCDE), FNullDigest.HashSize);
 
-  result := FNullDigest.TransformFinal.GetBytes;
+  Result := FNullDigest.TransformFinal.GetBytes;
 
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
-  CheckEquals(System.Length(BytesABCDE), System.Length(result));
-  CheckTrue(CompareMem(PByte(BytesABCDE), PByte(result),
-    System.Length(BytesABCDE) * System.SizeOf(Byte)));
+  CheckTrue(AreEqual(BytesABCDE, Result));
 
 end;
 
 procedure TTestNullDigest.TestEmptyBytes;
 var
-  BytesEmpty, result: TBytes;
+  BytesEmpty, Result: TBytes;
 begin
   BytesEmpty := TEncoding.UTF8.GetBytes('');
   CheckEquals(-1, FNullDigest.BlockSize);
@@ -19943,15 +19957,12 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(System.Length(BytesEmpty), FNullDigest.HashSize);
 
-  result := FNullDigest.TransformFinal.GetBytes;
+  Result := FNullDigest.TransformFinal.GetBytes;
 
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
-  CheckEquals(System.Length(BytesEmpty), System.Length(result));
-  CheckTrue(CompareMem(PByte(BytesEmpty), PByte(result),
-    System.Length(BytesEmpty) * System.SizeOf(Byte)));
-
+  CheckTrue(AreEqual(BytesEmpty, Result));
 end;
 
 procedure TTestNullDigest.TestHashCloneIsCorrect;
@@ -19995,7 +20006,7 @@ end;
 
 procedure TTestNullDigest.TestIncrementalHash;
 var
-  BytesZeroToNine, result: TBytes;
+  BytesZeroToNine, Result: TBytes;
 begin
   BytesZeroToNine := TEncoding.UTF8.GetBytes('0123456789');
   CheckEquals(-1, FNullDigest.BlockSize);
@@ -20016,14 +20027,12 @@ begin
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(10, FNullDigest.HashSize);
 
-  result := FNullDigest.TransformFinal.GetBytes;
+  Result := FNullDigest.TransformFinal.GetBytes;
 
   CheckEquals(0, FNullDigest.BlockSize);
   CheckEquals(0, FNullDigest.HashSize);
 
-  CheckEquals(System.Length(BytesZeroToNine), System.Length(result));
-  CheckTrue(CompareMem(PByte(BytesZeroToNine), PByte(result),
-    System.Length(BytesZeroToNine) * System.SizeOf(Byte)));
+  CheckTrue(AreEqual(BytesZeroToNine, Result));
 
 end;
 
