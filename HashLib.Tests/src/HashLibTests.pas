@@ -3733,6 +3733,7 @@ type
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
     procedure TestHMACCloneIsCorrect;
+    procedure TestNullKeyVsUnKeyed;
 
   end;
 
@@ -3770,6 +3771,7 @@ type
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
     procedure TestHMACCloneIsCorrect;
+    procedure TestNullKeyVsUnKeyed;
 
   end;
 
@@ -19559,6 +19561,31 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestBlake2B.TestNullKeyVsUnKeyed;
+var
+  LConfigNoKeyed, LConfigNullKeyed: IBlake2BConfig;
+  MainData: TBytes;
+  Idx: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  for Idx := 1 to 64 do
+  begin
+    LConfigNoKeyed := TBlake2BConfig.Create(Idx);
+    LConfigNullKeyed := TBlake2BConfig.Create(Idx);
+    LConfigNullKeyed.Key := Nil;
+
+    FExpectedString := THashFactory.TCrypto.CreateBlake2B(LConfigNoKeyed)
+      .ComputeBytes(MainData).ToString();
+
+    FActualString := THashFactory.TCrypto.CreateBlake2B(LConfigNullKeyed)
+      .ComputeBytes(MainData).ToString();
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s at Index %d', [FExpectedString,
+      FActualString, Idx]));
+  end;
+end;
+
 procedure TTestBlake2B.TestQuickBrownDog;
 // Note: results taken from https://en.wikipedia.org/wiki/BLAKE_(hash_function)
 begin
@@ -19860,6 +19887,31 @@ begin
 
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestBlake2S.TestNullKeyVsUnKeyed;
+var
+  LConfigNoKeyed, LConfigNullKeyed: IBlake2SConfig;
+  MainData: TBytes;
+  Idx: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  for Idx := 1 to 32 do
+  begin
+    LConfigNoKeyed := TBlake2SConfig.Create(Idx);
+    LConfigNullKeyed := TBlake2SConfig.Create(Idx);
+    LConfigNullKeyed.Key := Nil;
+
+    FExpectedString := THashFactory.TCrypto.CreateBlake2S(LConfigNoKeyed)
+      .ComputeBytes(MainData).ToString();
+
+    FActualString := THashFactory.TCrypto.CreateBlake2S(LConfigNullKeyed)
+      .ComputeBytes(MainData).ToString();
+
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s at Index %d', [FExpectedString,
+      FActualString, Idx]));
+  end;
 end;
 
 procedure TTestBlake2S.TestQuickBrownDog;
