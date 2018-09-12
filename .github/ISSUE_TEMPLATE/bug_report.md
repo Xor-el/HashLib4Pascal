@@ -22,6 +22,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
  - OS: [e.g. Windows, Linux, Mac]
+ - Compiler Version [e.g. FreePascal 3.0.0]
  - Package Version [e.g. 1.0]
 
 **Additional context**
