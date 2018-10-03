@@ -4,11 +4,17 @@ program HashLib.Tests;
 
 uses
   consoletestrunner,
-  HashLibTests,
-  BitConverterTests,
-  PBKDF2_HMACTests,
   Blake2BTestVectors,
-  Blake2STestVectors;
+  Blake2STestVectors,
+  HashLibTestBase,
+  ChecksumTests,
+  NullDigestTests,
+  Hash32Tests,
+  Hash64Tests,
+  Hash128Tests,
+  CryptoTests,
+  BitConverterTests,
+  PBKDF2_HMACTests;
 
 type
 

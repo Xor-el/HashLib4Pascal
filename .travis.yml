@@ -17,9 +17,8 @@ env:
    # - LAZ_PKG=true  # Use the latest version from the default package manager
     - LAZ_VER=1.6 # Use specific (binary) release
     - LAZ_VER=1.8.0
-   # FPC 3.0.4 Linker Fails in Old Linux OS, See 
-   # https://forum.lazarus.freepascal.org/index.php?topic=40238.0 and https://bugs.freepascal.org/view.php?id=32251
-   # - LAZ_VER=1.8.4
+    - LAZ_VER=1.8.4
+   # - LAZ_VER=2.0RC1
 
 matrix:
   include:
@@ -29,22 +28,34 @@ matrix:
       env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
     - os: linux
       env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+   # - os: linux
+   #   env: LAZ_VER=2.0RC1 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
     - os: linux
       env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
     - os: linux
       env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
     - os: linux
       env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+   # - os: linux
+   #   env: LAZ_VER=2.0RC1 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
     - os: linux
       env: LAZ_VER=1.6  LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
     - os: linux
       env: LAZ_VER=1.8.0 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
     - os: linux
       env: LAZ_VER=1.8.4 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+   # - os: linux
+   #   env: LAZ_VER=2.0RC1 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
 
 before_install:
   # Start virtual display server
   - Xvfb $DISPLAY &
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+          sudo apt-get update;
+          sudo apt-get install binutils-2.26;
+          sudo ln -sf /usr/lib/binutils-2.26/bin/* /usr/bin/;
+          sudo ln -sf /usr/lib/binutils-2.26/ldscripts/* /usr/lib/ldscripts/;
+    fi
   - chmod +x .travis.install.py 
 
 install:
