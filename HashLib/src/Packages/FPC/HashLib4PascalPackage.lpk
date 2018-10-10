@@ -9,7 +9,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\..\..;..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Hash32;..\..\Hash64;..\..\Hash128;..\..\Interfaces;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\KDF;..\..\Nullable;..\..\Utils"/>
+        <IncludeFiles Value="..\..\Include"/>
         <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest"/>
         <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
