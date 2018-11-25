@@ -20,8 +20,7 @@ resourcestring
 
 type
 
-  TXXHash64 = class sealed(THash, IHash64, IHashWithKey,
-    ITransformBlock)
+  TXXHash64 = class sealed(THash, IHash64, IHashWithKey, ITransformBlock)
 
   strict private
 
@@ -165,7 +164,7 @@ begin
   System.Assert(a_length >= 0);
   System.Assert(a_index + a_length <= System.Length(a_data));
 {$ENDIF DEBUG}
-  ptrBuffer := @a_data[a_index];
+  ptrBuffer := PByte(a_data) + a_index;
   ptrMemory := PByte(F_state.Fmemory);
   F_state.Ftotal_len := F_state.Ftotal_len + UInt64(a_length);
 
