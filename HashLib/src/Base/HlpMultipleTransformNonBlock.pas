@@ -71,7 +71,7 @@ end;
 procedure TMultipleTransformNonBlock.Initialize;
 begin
   FBuffer.Clear;
-  FBuffer.SetSize(0);
+  FBuffer.SetSize(Int64(0));
 end;
 
 procedure TMultipleTransformNonBlock.TransformBytes(const a_data
