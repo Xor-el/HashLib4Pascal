@@ -403,15 +403,12 @@ begin
   System.Assert(System.length(l_in) and 1 = 0);
 {$ENDIF DEBUG}
   System.SetLength(result, System.length(l_in) shr 1);
-{$IFDEF FPC}
-  HexToBin(PChar(l_in), @result[0], System.length(result));
-{$ELSE}
+
 {$IFNDEF NEXTGEN}
   HexToBin(PChar(l_in), @result[0], System.length(result));
 {$ELSE}
   HexToBin(PChar(l_in), 0, result, 0, System.length(l_in));
 {$ENDIF !NEXTGEN}
-{$ENDIF FPC}
 end;
 
 class function TConverters.ConvertStringToBytes(const a_in: String;
