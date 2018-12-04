@@ -330,9 +330,8 @@ begin
       else
       begin
         TransformBytes(data, 0, readed);
-        total := total + readed;
       end;
-    end
+    end;
 
   end
   else
@@ -352,7 +351,7 @@ begin
         TransformBytes(data, 0, readed);
         total := total + readed;
       end;
-    end
+    end;
 
   end;
 
