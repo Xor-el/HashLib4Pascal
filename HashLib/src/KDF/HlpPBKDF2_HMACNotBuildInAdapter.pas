@@ -8,6 +8,7 @@ uses
   HlpIHash,
   HlpKDF,
   HlpIHashInfo,
+  HlpHMACNotBuildInAdapter,
   HlpBitConverter,
   HlpHashLibTypes;
 
@@ -63,9 +64,6 @@ type
   end;
 
 implementation
-
-uses
-  HlpHashFactory; // placed here because of circular dependency.
 
 { TPBKDF2_HMACNotBuildInAdapter }
 
@@ -195,7 +193,7 @@ begin
     System.FillChar(Fbuffer[0], System.Length(Fbuffer) *
       System.SizeOf(Byte), Byte(0));
 
-  FHMAC := THashFactory.THMAC.CreateHMAC(FHash);
+  FHMAC := THMACNotBuildInAdapter.CreateHMAC(FHash);
 
   FHMAC.Key := System.Copy(FPassword);
   FBlockSize := FHMAC.HashSize;

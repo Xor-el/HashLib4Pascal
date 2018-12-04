@@ -49,6 +49,8 @@ type
     property Name: String read GetName;
     property KeyLength: TNullableInteger read GetKeyLength;
 
+    class function CreateHMAC(const a_hash: IHash): IHMAC; static;
+
   end;
 
 implementation
@@ -160,6 +162,21 @@ end;
 function THMACNotBuildInAdapter.GetName: String;
 begin
   result := Format('%s(%s)', ['THMAC', Fm_hash.Name]);
+end;
+
+class function THMACNotBuildInAdapter.CreateHMAC(const a_hash: IHash): IHMAC;
+begin
+
+  if Supports(a_hash, IHMAC) then
+  begin
+    result := (a_hash) as IHMAC;
+    Exit;
+  end
+  else
+  begin
+    result := THMACNotBuildInAdapter.Create(a_hash);
+    Exit;
+  end;
 
 end;
 

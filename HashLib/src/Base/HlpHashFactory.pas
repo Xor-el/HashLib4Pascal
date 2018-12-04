@@ -5,11 +5,6 @@ unit HlpHashFactory;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-{$ELSE}
-  SysUtils,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashRounds,
   HlpHashSize,
   HlpIHash,
@@ -1171,18 +1166,7 @@ end;
 
 class function THashFactory.THMAC.CreateHMAC(const a_hash: IHash): IHMAC;
 begin
-
-  if Supports(a_hash, IHMAC) then
-  begin
-    Result := (a_hash) as IHMAC;
-    Exit;
-  end
-  else
-  begin
-    Result := THMACNotBuildInAdapter.Create(a_hash);
-    Exit;
-  end;
-
+  Result := THMACNotBuildInAdapter.CreateHMAC(a_hash);
 end;
 
 { TKDF.TPBKDF2_HMAC }
