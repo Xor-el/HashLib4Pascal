@@ -193,9 +193,8 @@ begin
     System.FillChar(Fbuffer[0], System.Length(Fbuffer) *
       System.SizeOf(Byte), Byte(0));
 
-  FHMAC := THMACNotBuildInAdapter.CreateHMAC(FHash);
+  FHMAC := THMACNotBuildInAdapter.CreateHMAC(FHash, FPassword);
 
-  FHMAC.Key := System.Copy(FPassword);
   FBlockSize := FHMAC.HashSize;
   System.SetLength(Fbuffer, FBlockSize);
   FBlock := 1;

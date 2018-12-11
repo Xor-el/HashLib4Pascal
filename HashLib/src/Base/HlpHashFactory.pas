@@ -395,7 +395,8 @@ type
 
     public
 
-      class function CreateHMAC(const a_hash: IHash): IHMAC; static;
+      class function CreateHMAC(const a_hash: IHash;
+        const a_hmacKey: THashLibByteArray = Nil): IHMAC; static;
 
     end;
 
@@ -1164,9 +1165,10 @@ end;
 
 { THashFactory.THMAC }
 
-class function THashFactory.THMAC.CreateHMAC(const a_hash: IHash): IHMAC;
+class function THashFactory.THMAC.CreateHMAC(const a_hash: IHash;
+  const a_hmacKey: THashLibByteArray): IHMAC;
 begin
-  Result := THMACNotBuildInAdapter.CreateHMAC(a_hash);
+  Result := THMACNotBuildInAdapter.CreateHMAC(a_hash, a_hmacKey);
 end;
 
 { TKDF.TPBKDF2_HMAC }
