@@ -370,6 +370,9 @@ type
       class function CreateKeccak_384(): IHash; static;
       class function CreateKeccak_512(): IHash; static;
 
+      class function CreateShake_128(a_xof_size: THashSize): IHash; static;
+      class function CreateShake_256(a_xof_size: THashSize): IHash; static;
+
       class function CreateBlake2B(const config: IBlake2BConfig = Nil)
         : IHash; static;
 
@@ -926,6 +929,18 @@ end;
 class function THashFactory.TCrypto.CreateSHA3_512: IHash;
 begin
   Result := TSHA3_512.Create();
+end;
+
+class function THashFactory.TCrypto.CreateShake_128
+  (a_xof_size: THashSize): IHash;
+begin
+  Result := (TShake_128.Create() as IXOF).SetXOFOutputSize(a_xof_size);
+end;
+
+class function THashFactory.TCrypto.CreateShake_256
+  (a_xof_size: THashSize): IHash;
+begin
+  Result := (TShake_256.Create() as IXOF).SetXOFOutputSize(a_xof_size);
 end;
 
 class function THashFactory.TCrypto.CreateKeccak_224: IHash;

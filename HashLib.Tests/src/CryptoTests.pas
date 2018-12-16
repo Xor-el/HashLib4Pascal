@@ -18,6 +18,7 @@ uses
 {$ENDIF FPC}
   HashLibTestBase,
   HlpHashFactory,
+  HlpHashSize,
   HlpIHash,
   HlpIHashInfo,
   HlpConverters,
@@ -1834,6 +1835,78 @@ type
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
     procedure TestHMACCloneIsCorrect;
+
+  end;
+
+type
+
+  TTestShake_128 = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FShake_128: IHash;
+
+  const
+    FExpectedHashOfEmptyData
+      : String =
+      '7F9C2BA4E88F827D616045507605853ED73B8093F6EFBC88EB1A6EACFA66EF263CB1EEA988004B93103CFB0AEEFD2A686E01FA4A58E8A3639CA8A1E3F9AE57E2';
+    FExpectedHashOfDefaultData
+      : String =
+      '10F69AD42A1BDE254004CD13B5176D6DAAD5E92198CD4715AA923017FFC809C4B3AA88E2CCBF4ABA98A0E9B7B49FC1A39ABAEC03F020CE4A72601B80E158F515';
+    FExpectedHashOfOnetoNine
+      : String =
+      '1ACA6B9E651B5F20079A305CA8F86D39B9451C4C32873F95F8B315834BD5F272C3044114D6F3E2C2F5F4EAA1825FC80F8CE10CF3E7DE557408811F54D1AF85FD';
+    FExpectedHashOfabcde
+      : String =
+      '907C1B3F41470218D0DFD8FEDDDA93C1074F0D608F08980E4F17BE0853D0A684324815152908BE3DFB69D8A01EA8DD41A3413CD1F635F449D9875DE319469648';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyString;
+    procedure TestDefaultData;
+    procedure TestOnetoNine;
+    procedure TestBytesabcde;
+    procedure TestEmptyStream;
+    procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+
+  end;
+
+  TTestShake_256 = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FShake_256: IHash;
+
+  const
+    FExpectedHashOfEmptyData
+      : String =
+      '46B9DD2B0BA88D13233B3FEB743EEB243FCD52EA62B81B82B50C27646ED5762FD75DC4DDD8C0F200CB05019D67B592F6FC821C49479AB48640292EACB3B7C4BE';
+    FExpectedHashOfDefaultData
+      : String =
+      '922279516284A34F384ADA776D3606FBEC97875E716E6EA0FFCF9372AAB696BEEFAB7C34CC5D1C926CEAD58FD4D6DB597C8620782541D7D7B47498FE4AF4B7A4';
+    FExpectedHashOfOnetoNine
+      : String =
+      '24347B9C4B6DA2FC9CDE08C87F33EDD2E603C8DCD6840E6B3920F62B1DD69D7BC4655A9E6F0EE6255940380DCD1488DBCA3E796AE58A2234CC31CD61DFD1EB56';
+    FExpectedHashOfabcde
+      : String =
+      '98AD79D7ED29F585AD1AFFBC2BB5B5F244917F97CEA8B5424FDC6F7377A22042FD410C95237B587A0A13B10062034E1E3BF6B5766291CCC1F4C44229371991ED';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyString;
+    procedure TestDefaultData;
+    procedure TestOnetoNine;
+    procedure TestBytesabcde;
+    procedure TestEmptyStream;
+    procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
 
   end;
 
@@ -10445,6 +10518,268 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+{ TTestShake_128 }
+
+procedure TTestShake_128.SetUp;
+begin
+  inherited;
+  FShake_128 := THashFactory.TCrypto.CreateShake_128(THashSize.hsHashSize512);
+end;
+
+procedure TTestShake_128.TearDown;
+begin
+  FShake_128 := Nil;
+  inherited;
+end;
+
+procedure TTestShake_128.TestEmptyString;
+begin
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FShake_128.ComputeString(FEmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_128.TestBytesabcde;
+var
+  LBuffer: TBytes;
+begin
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
+  FExpectedString := FExpectedHashOfabcde;
+  FActualString := FShake_128.ComputeBytes(LBuffer).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_128.TestDefaultData;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FActualString := FShake_128.ComputeString(FDefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_128.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FShake_128;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_128.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FShake_128;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  (Original as IXOF).XOFSize := THashSize.hsHashSize128;
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+  (Copy as IXOF).XOFSize := THashSize.hsHashSize256;
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+
+  CheckNotEquals(Int32((Original as IXOF).XOFSize),
+    Int32((Copy as IXOF).XOFSize), Format('Expected %d but got %d.',
+    [Int32((Original as IXOF).XOFSize), Int32((Copy as IXOF).XOFSize)]));
+end;
+
+procedure TTestShake_128.TestEmptyStream;
+var
+  stream: TStream;
+begin
+  stream := TMemoryStream.Create;
+  try
+    FExpectedString := FExpectedHashOfEmptyData;
+    FActualString := FShake_128.ComputeStream(stream).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  finally
+    stream.Free;
+  end;
+end;
+
+procedure TTestShake_128.TestIncrementalHash;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FHash := THashFactory.TCrypto.CreateShake_128(THashSize.hsHashSize512);
+
+  FHash.Initialize();
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHashResult := FHash.TransformFinal();
+  FActualString := FHashResult.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_128.TestOnetoNine;
+begin
+  FExpectedString := FExpectedHashOfOnetoNine;
+  FActualString := FShake_128.ComputeString(FOnetoNine, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+{ TTestShake_256 }
+
+procedure TTestShake_256.SetUp;
+begin
+  inherited;
+  FShake_256 := THashFactory.TCrypto.CreateShake_256(THashSize.hsHashSize512);
+end;
+
+procedure TTestShake_256.TearDown;
+begin
+  FShake_256 := Nil;
+  inherited;
+end;
+
+procedure TTestShake_256.TestEmptyString;
+begin
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FShake_256.ComputeString(FEmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestBytesabcde;
+var
+  LBuffer: TBytes;
+begin
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
+  FExpectedString := FExpectedHashOfabcde;
+  FActualString := FShake_256.ComputeBytes(LBuffer).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestDefaultData;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FActualString := FShake_256.ComputeString(FDefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FShake_256;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FShake_256;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  (Original as IXOF).XOFSize := THashSize.hsHashSize128;
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+  (Copy as IXOF).XOFSize := THashSize.hsHashSize256;
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+
+  CheckNotEquals(Int32((Original as IXOF).XOFSize),
+    Int32((Copy as IXOF).XOFSize), Format('Expected %d but got %d.',
+    [Int32((Original as IXOF).XOFSize), Int32((Copy as IXOF).XOFSize)]));
+end;
+
+procedure TTestShake_256.TestEmptyStream;
+var
+  stream: TStream;
+begin
+  stream := TMemoryStream.Create;
+  try
+    FExpectedString := FExpectedHashOfEmptyData;
+    FActualString := FShake_256.ComputeStream(stream).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  finally
+    stream.Free;
+  end;
+end;
+
+procedure TTestShake_256.TestIncrementalHash;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FHash := THashFactory.TCrypto.CreateShake_256(THashSize.hsHashSize512);
+
+  FHash.Initialize();
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHashResult := FHash.TransformFinal();
+  FActualString := FHashResult.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestOnetoNine;
+begin
+  FExpectedString := FExpectedHashOfOnetoNine;
+  FActualString := FShake_256.ComputeString(FOnetoNine, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 { TTestSnefru_8_128 }
 
 procedure TTestSnefru_8_128.SetUp;
@@ -15911,6 +16246,8 @@ RegisterTest(TTestSHA3_224);
 RegisterTest(TTestSHA3_256);
 RegisterTest(TTestSHA3_384);
 RegisterTest(TTestSHA3_512);
+RegisterTest(TTestShake_128);
+RegisterTest(TTestShake_256);
 RegisterTest(TTestKeccak_224);
 RegisterTest(TTestKeccak_256);
 RegisterTest(TTestKeccak_384);
@@ -15984,6 +16321,8 @@ RegisterTest(TTestSHA3_224.Suite);
 RegisterTest(TTestSHA3_256.Suite);
 RegisterTest(TTestSHA3_384.Suite);
 RegisterTest(TTestSHA3_512.Suite);
+RegisterTest(TTestShake_128.Suite);
+RegisterTest(TTestShake_256.Suite);
 RegisterTest(TTestKeccak_224.Suite);
 RegisterTest(TTestKeccak_256.Suite);
 RegisterTest(TTestKeccak_384.Suite);
