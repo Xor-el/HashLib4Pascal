@@ -33,22 +33,22 @@ It also supports Incremental Hashing.
     
     Delphi 2010 and Above.
 
-**Installing the Library.**
+## Installing the Library. ##
 
 **Method One:**
 
- Use the Provided Packages in the "Packages" Folder.
+ - Use the Provided Packages in the "Packages" Folder.
 
 **Method Two:**
 
- Add the Library Path and Sub Path to your Project Search Path.
+- Add the Library Path and Sub Path to your Project Search Path.
 
 **Usage Examples.**
 
-    Coming Soon.
-    But in the mean time, you can poke around the sources and Unit Tests.
+- Coming Soon.
+- But in the mean time, you can poke around the sources and Unit Tests.
 
- **Unit Tests.**
+ ## Unit Tests. ##
 
 To Run Unit Tests,
 
@@ -64,33 +64,34 @@ To Run Unit Tests,
      To Build and Run the Unit Tests For Delphi 10 Seattle (should be similar for 
      other versions)
     
-    1). Open Project Options of Unit Test (HashLib.Tests) in "Delphi.Tests" Folder.
+    1. Open Project Options of Unit Test (HashLib.Tests) in "Delphi.Tests" Folder.
     
-    2). Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
+    2. Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
     
-    3). In Output directory add ".\$(Platform)\$(Config)" without the quotes.
+    3. In Output directory add ".\$(Platform)\$(Config)" without the quotes.
     
-    4). In Search path add "$(BDS)\Source\DUnit\src" without the quotes.
+    4. In Search path add "$(BDS)\Source\DUnit\src" without the quotes.
     
-    5). In Unit output directory add "." without the quotes.
+    5. In Unit output directory add "." without the quotes.
     
-    6). In Unit scope names (If Available), Delete "DUnitX" from the List.
+    6. In Unit scope names (If Available), Delete "DUnitX" from the List.
     
     Press Ok and save, then build and run.
     
  **Method Two (Using TestInsight) (Preferred).**
 
-    1). Download and Install TestInsight.
+    1. Download and Install TestInsight.
     
-    2). Open Project Options of Unit Test (HashLib.Tests.TestInsight) in "Delphi.Tests" 
+    2. Open Project Options of Unit Test (HashLib.Tests.TestInsight) in "Delphi.Tests" 
         Folder. 
 
-    3). Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
+    3. Change Target to All Configurations (Or "Base" In Older Delphi Versions.)
 
-    4). In Unit scope names (If Available), Delete "DUnitX" from the List.
+    4. In Unit scope names (If Available), Delete "DUnitX" from the List.
 
-    5). To Use TestInsight, right-click on the project, then select 
-		"Enable for TestInsight" or "TestInsight Project".
+    5. To Use TestInsight, right-click on the project, then select 
+    
+  ###### "Enable for TestInsight" or "TestInsight Project". ######
         Save Project then Build and Run Test Project through TestInsight. 
         
   **Other Implementations**
