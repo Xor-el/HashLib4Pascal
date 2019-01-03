@@ -3168,7 +3168,6 @@ begin
     System.Inc(Idx);
   end;
 
-  // Fm_buffer.Pos := buffer_pos;
   System.SetLength(Result, LXofSize);
 
   TConverters.le64_copy(PUInt64(Fm_state), 0, PByte(Result), 0,

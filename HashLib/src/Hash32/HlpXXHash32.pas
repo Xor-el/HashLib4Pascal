@@ -74,7 +74,7 @@ implementation
 
 function TXXHash32.TXXH_State.Clone(): TXXH_State;
 begin
-  result := Default (TXXH_State);
+  result := Default(TXXH_State);
   result.Ftotal_len := Ftotal_len;
   result.Fmemsize := Fmemsize;
   result.Fv1 := Fv1;

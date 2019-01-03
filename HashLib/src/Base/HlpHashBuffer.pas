@@ -53,7 +53,7 @@ implementation
 
 function THashBuffer.Clone(): THashBuffer;
 begin
-  result := Default (THashBuffer);
+  result := Default(THashBuffer);
   result.Fm_data := System.Copy(Fm_data);
   result.Fm_pos := Fm_pos;
 end;
