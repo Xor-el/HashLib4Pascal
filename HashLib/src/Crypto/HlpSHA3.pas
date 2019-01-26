@@ -3155,7 +3155,7 @@ begin
   buffer_pos := Fm_buffer.Pos;
   block := Fm_buffer.GetBytesZeroPadded();
 
-  LXofSize := FXOFSize div 8;
+  LXofSize := FXOFSize shr 3;
   Idx := 0;
 
   while Idx < LXofSize do
@@ -3190,7 +3190,7 @@ begin
 {$ENDIF DEBUG}
   tempresult := GetResult();
 {$IFDEF DEBUG}
-  System.Assert(System.Length(tempresult) = (XOFSize div 8));
+  System.Assert(System.Length(tempresult) = (XOFSize shr 3));
 {$ENDIF DEBUG}
   Initialize();
   Result := THashResult.Create(tempresult);
