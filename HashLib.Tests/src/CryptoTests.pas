@@ -18,7 +18,6 @@ uses
 {$ENDIF FPC}
   HashLibTestBase,
   HlpHashFactory,
-  HlpHashSize,
   HlpIHash,
   HlpIHashInfo,
   HlpConverters,
@@ -10523,7 +10522,7 @@ end;
 procedure TTestShake_128.SetUp;
 begin
   inherited;
-  FShake_128 := THashFactory.TCrypto.CreateShake_128(THashSize.hsHashSize512);
+  FShake_128 := THashFactory.TCrypto.CreateShake_128(512);
 end;
 
 procedure TTestShake_128.TearDown;
@@ -10594,18 +10593,18 @@ begin
   Original := FShake_128;
   Original.Initialize;
   Original.BufferSize := (64 * 1024); // 64Kb
-  (Original as IXOF).XOFSize := THashSize.hsHashSize128;
+  (Original as IXOF).XOFSize := 128;
   // Make Copy Of Current State
   Copy := Original.Clone();
   Copy.BufferSize := (128 * 1024); // 128Kb
-  (Copy as IXOF).XOFSize := THashSize.hsHashSize256;
+  (Copy as IXOF).XOFSize := 256;
 
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals(Int32((Original as IXOF).XOFSize),
-    Int32((Copy as IXOF).XOFSize), Format('Expected %d but got %d.',
-    [Int32((Original as IXOF).XOFSize), Int32((Copy as IXOF).XOFSize)]));
+  CheckNotEquals((Original as IXOF).XOFSize,
+    (Copy as IXOF).XOFSize, Format('Expected %d but got %d.',
+    [(Original as IXOF).XOFSize, (Copy as IXOF).XOFSize]));
 end;
 
 procedure TTestShake_128.TestEmptyStream;
@@ -10626,7 +10625,7 @@ end;
 procedure TTestShake_128.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FHash := THashFactory.TCrypto.CreateShake_128(THashSize.hsHashSize512);
+  FHash := THashFactory.TCrypto.CreateShake_128(512);
 
   FHash.Initialize();
   FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
@@ -10654,7 +10653,7 @@ end;
 procedure TTestShake_256.SetUp;
 begin
   inherited;
-  FShake_256 := THashFactory.TCrypto.CreateShake_256(THashSize.hsHashSize512);
+  FShake_256 := THashFactory.TCrypto.CreateShake_256(512);
 end;
 
 procedure TTestShake_256.TearDown;
@@ -10725,18 +10724,18 @@ begin
   Original := FShake_256;
   Original.Initialize;
   Original.BufferSize := (64 * 1024); // 64Kb
-  (Original as IXOF).XOFSize := THashSize.hsHashSize128;
+  (Original as IXOF).XOFSize := 128;
   // Make Copy Of Current State
   Copy := Original.Clone();
   Copy.BufferSize := (128 * 1024); // 128Kb
-  (Copy as IXOF).XOFSize := THashSize.hsHashSize256;
+  (Copy as IXOF).XOFSize := 256;
 
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals(Int32((Original as IXOF).XOFSize),
-    Int32((Copy as IXOF).XOFSize), Format('Expected %d but got %d.',
-    [Int32((Original as IXOF).XOFSize), Int32((Copy as IXOF).XOFSize)]));
+  CheckNotEquals((Original as IXOF).XOFSize,
+    (Copy as IXOF).XOFSize, Format('Expected %d but got %d.',
+    [(Original as IXOF).XOFSize, (Copy as IXOF).XOFSize]));
 end;
 
 procedure TTestShake_256.TestEmptyStream;
@@ -10757,7 +10756,7 @@ end;
 procedure TTestShake_256.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FHash := THashFactory.TCrypto.CreateShake_256(THashSize.hsHashSize512);
+  FHash := THashFactory.TCrypto.CreateShake_256(512);
 
   FHash.Initialize();
   FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
