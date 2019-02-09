@@ -67,6 +67,7 @@ uses
   HlpTiger in '..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
+  HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas',
   HlpBlake2B in '..\..\HashLib\src\Crypto\HlpBlake2B.pas',
   HlpBlake2S in '..\..\HashLib\src\Crypto\HlpBlake2S.pas',
   HlpBlake2BConfig in '..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas',
@@ -120,6 +121,8 @@ uses
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HashLibTestBase in '..\src\HashLibTestBase.pas',
+  Blake2BTestVectors in '..\src\Blake2BTestVectors.pas',
+  Blake2STestVectors in '..\src\Blake2STestVectors.pas',
   ChecksumTests in '..\src\ChecksumTests.pas',
   NullDigestTests in '..\src\NullDigestTests.pas',
   Hash32Tests in '..\src\Hash32Tests.pas',
@@ -127,10 +130,7 @@ uses
   Hash128Tests in '..\src\Hash128Tests.pas',
   CryptoTests in '..\src\CryptoTests.pas',
   BitConverterTests in '..\src\BitConverterTests.pas',
-  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas',
-  Blake2BTestVectors in '..\src\Blake2BTestVectors.pas',
-  Blake2STestVectors in '..\src\Blake2STestVectors.pas',
-  HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas';
+  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas';
 
 begin
 
