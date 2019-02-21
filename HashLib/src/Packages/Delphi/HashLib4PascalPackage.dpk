@@ -48,6 +48,7 @@ contains
   HlpCRC in '..\..\Checksum\HlpCRC.pas',
   HlpCRC16 in '..\..\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\Checksum\HlpCRC32.pas',
+  HlpCRC32Fast in '..\..\Checksum\HlpCRC32Fast.pas',
   HlpCRC64 in '..\..\Checksum\HlpCRC64.pas',
   HlpBlake2B in '..\..\Crypto\HlpBlake2B.pas',
   HlpBlake2S in '..\..\Crypto\HlpBlake2S.pas',

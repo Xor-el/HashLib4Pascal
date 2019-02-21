@@ -28,7 +28,7 @@ uses
   HlpBlake2BIvBuilder, HlpBlake2BTreeConfig, HlpBlake2SConfig, 
   HlpBlake2SIvBuilder, HlpBlake2STreeConfig, HlpIBlake2BConfig, 
   HlpIBlake2BTreeConfig, HlpIBlake2SConfig, HlpIBlake2STreeConfig, 
-  HlpGOST3411_2012;
+  HlpGOST3411_2012, HlpCRC32Fast;
 
 implementation
 

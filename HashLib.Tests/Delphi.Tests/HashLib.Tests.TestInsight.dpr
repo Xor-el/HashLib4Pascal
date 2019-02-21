@@ -31,6 +31,7 @@ uses
   HlpCRC in '..\..\HashLib\src\Checksum\HlpCRC.pas',
   HlpCRC16 in '..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\HashLib\src\Checksum\HlpCRC32.pas',
+  HlpCRC32Fast in '..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
   HlpCRC64 in '..\..\HashLib\src\Checksum\HlpCRC64.pas',
   HlpGost in '..\..\HashLib\src\Crypto\HlpGost.pas',
   HlpGrindahl256 in '..\..\HashLib\src\Crypto\HlpGrindahl256.pas',
