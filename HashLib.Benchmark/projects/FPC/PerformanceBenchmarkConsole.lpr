@@ -1,7 +1,5 @@
 program PerformanceBenchmarkConsole;
 
-{$APPTYPE CONSOLE}
-
 uses
   Classes,
   SysUtils,
