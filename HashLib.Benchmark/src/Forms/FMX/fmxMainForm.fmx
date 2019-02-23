@@ -1,0 +1,35 @@
+object MainForm: TMainForm
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  Caption = 'PerformanceBenchmarkFMX'
+  ClientHeight = 480
+  ClientWidth = 640
+  Position = MainFormCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object mmoBenchmarkLog: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    Position.X = 24.000000000000000000
+    Position.Y = 24.000000000000000000
+    Size.Width = 593.000000000000000000
+    Size.Height = 393.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Viewport.Width = 589.000000000000000000
+    Viewport.Height = 389.000000000000000000
+  end
+  object DoBenchmark: TButton
+    Position.X = 168.000000000000000000
+    Position.Y = 432.000000000000000000
+    Size.Width = 305.000000000000000000
+    Size.Height = 41.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Do Benchmark'
+    OnClick = DoBenchmarkClick
+  end
+end

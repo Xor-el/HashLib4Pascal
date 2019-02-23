@@ -1,11 +1,15 @@
-program PerformanceBenchmarkConsole;
-
-{$APPTYPE CONSOLE}
+program PerformanceBenchmarkFMX;
 
 uses
-  Classes,
-  SysUtils,
+  System.StartUpCopy,
+  FMX.Forms,
+  fmxMainForm in '..\..\src\Forms\FMX\fmxMainForm.pas' {MainForm},
   uPerformanceBenchmark in '..\..\src\Core\uPerformanceBenchmark.pas',
+  HlpCRC in '..\..\..\HashLib\src\Checksum\HlpCRC.pas',
+  HlpICRC in '..\..\..\HashLib\src\Interfaces\HlpICRC.pas',
+  HlpBitConverter in '..\..\..\HashLib\src\Utils\HlpBitConverter.pas',
+  HlpGrindahl512 in '..\..\..\HashLib\src\Crypto\HlpGrindahl512.pas',
+  HlpGrindahl256 in '..\..\..\HashLib\src\Crypto\HlpGrindahl256.pas',
   HlpHashFactory in '..\..\..\HashLib\src\Base\HlpHashFactory.pas',
   HlpCRC32Fast in '..\..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
   HlpCRC64 in '..\..\..\HashLib\src\Checksum\HlpCRC64.pas',
@@ -25,13 +29,10 @@ uses
   HlpHMACNotBuildInAdapter in '..\..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPanama in '..\..\..\HashLib\src\Crypto\HlpPanama.pas',
-  HlpGrindahl256 in '..\..\..\HashLib\src\Crypto\HlpGrindahl256.pas',
-  HlpGrindahl512 in '..\..\..\HashLib\src\Crypto\HlpGrindahl512.pas',
   HlpAdler32 in '..\..\..\HashLib\src\Checksum\HlpAdler32.pas',
   HlpAP in '..\..\..\HashLib\src\Hash32\HlpAP.pas',
   HlpBernstein in '..\..\..\HashLib\src\Hash32\HlpBernstein.pas',
   HlpBernstein1 in '..\..\..\HashLib\src\Hash32\HlpBernstein1.pas',
-  HlpBitConverter in '..\..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBKDR in '..\..\..\HashLib\src\Hash32\HlpBKDR.pas',
   HlpBlake2BConfig in '..\..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas',
   HlpBlake2BIvBuilder in '..\..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BIvBuilder.pas',
@@ -40,7 +41,6 @@ uses
   HlpBlake2SConfig in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas',
   HlpBlake2SIvBuilder in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas',
   HlpBlake2STreeConfig in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas',
-  HlpCRC in '..\..\..\HashLib\src\Checksum\HlpCRC.pas',
   HlpCRC16 in '..\..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpDEK in '..\..\..\HashLib\src\Hash32\HlpDEK.pas',
   HlpDJB in '..\..\..\HashLib\src\Hash32\HlpDJB.pas',
@@ -60,7 +60,6 @@ uses
   HlpIBlake2BTreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
   HlpIBlake2SConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
   HlpIBlake2STreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
-  HlpICRC in '..\..\..\HashLib\src\Interfaces\HlpICRC.pas',
   HlpIHash in '..\..\..\HashLib\src\Interfaces\HlpIHash.pas',
   HlpIHashResult in '..\..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
   HlpIKDF in '..\..\..\HashLib\src\Interfaces\HlpIKDF.pas',
@@ -108,30 +107,10 @@ uses
   HlpTiger2 in '..\..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas';
 
-var
-  StringList: TStringList;
-  Log: String;
+{$R *.res}
 
 begin
-  try
-    Writeln('Please be patient, this might take some time' + SLineBreak);
-    StringList := TStringList.Create;
-    try
-      TPerformanceBenchmark.DoBenchmark(StringList);
-
-      for Log in StringList do
-      begin
-        Writeln(Log);
-      end;
-
-    finally
-      StringList.Free;
-    end;
-    Writeln(SLineBreak + 'Performance Benchmark Finished');
-    ReadLn;
-  except
-    on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
-  end;
-
+  Application.Initialize;
+  Application.CreateForm(TMainForm, MainForm);
+  Application.Run;
 end.
