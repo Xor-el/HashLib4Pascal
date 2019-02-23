@@ -3,7 +3,6 @@ program PerformanceBenchmarkConsole;
 uses
   Classes,
   SysUtils,
-  uPerformanceBenchmark in '..\..\src\uPerformanceBenchmark.pas',
   HlpHashFactory in '..\..\..\HashLib\src\Base\HlpHashFactory.pas',
   HlpCRC32Fast in '..\..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
   HlpCRC64 in '..\..\..\HashLib\src\Checksum\HlpCRC64.pas',
@@ -104,7 +103,8 @@ uses
   HlpSuperFast in '..\..\..\HashLib\src\Hash32\HlpSuperFast.pas',
   HlpTiger in '..\..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\..\HashLib\src\Crypto\HlpTiger2.pas',
-  HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas';
+  HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
+  uPerformanceBenchmark in '..\..\src\Core\uPerformanceBenchmark.pas';
 
 var
   StringList: TStringList;
