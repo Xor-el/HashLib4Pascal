@@ -135,8 +135,6 @@ begin
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2B_512));
 
-  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2B_256));
-
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2S_128));
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2S_256));
