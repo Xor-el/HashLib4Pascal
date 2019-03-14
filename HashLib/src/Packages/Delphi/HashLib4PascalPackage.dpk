@@ -130,6 +130,8 @@ contains
   HlpIBlake2SConfig in '..\..\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
   HlpIBlake2STreeConfig in '..\..\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
+  HlpPBKDF_Argon2NotBuildInAdapter in '..\..\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2TypeAndVersion in '..\..\KDF\HlpArgon2TypeAndVersion.pas',
   HlpNullable in '..\..\Nullable\HlpNullable.pas',
   HlpConverters in '..\..\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',

@@ -14,7 +14,8 @@ uses
   Hash128Tests,
   CryptoTests,
   BitConverterTests,
-  PBKDF2_HMACTests;
+  PBKDF2_HMACTests,
+  PBKDF_Argon2Tests;
 
 type
 

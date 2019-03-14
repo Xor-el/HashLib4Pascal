@@ -116,6 +116,8 @@ uses
   HlpIBlake2STreeConfig in '..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
   HlpIBlake2BTreeConfig in '..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
+  HlpPBKDF_Argon2NotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2TypeAndVersion in '..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpNullable in '..\..\HashLib\src\Nullable\HlpNullable.pas',
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
@@ -131,7 +133,8 @@ uses
   Hash128Tests in '..\src\Hash128Tests.pas',
   CryptoTests in '..\src\CryptoTests.pas',
   BitConverterTests in '..\src\BitConverterTests.pas',
-  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas';
+  PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas',
+  PBKDF_Argon2Tests in '..\src\PBKDF_Argon2Tests.pas';
 
 begin
 

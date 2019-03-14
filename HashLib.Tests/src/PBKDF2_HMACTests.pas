@@ -76,6 +76,8 @@ begin
 
 end;
 
+{ TTestPBKDF2_HMACSHA2_256 }
+
 procedure TTestPBKDF2_HMACSHA2_256.TestOne;
 var
   Password, Salt, Key: TBytes;

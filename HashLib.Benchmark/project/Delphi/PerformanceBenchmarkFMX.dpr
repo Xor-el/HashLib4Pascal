@@ -28,6 +28,8 @@ uses
   HlpHashCryptoNotBuildIn in '..\..\..\HashLib\src\Base\HlpHashCryptoNotBuildIn.pas',
   HlpHMACNotBuildInAdapter in '..\..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
+  HlpPBKDF_Argon2NotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2TypeAndVersion in '..\..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPanama in '..\..\..\HashLib\src\Crypto\HlpPanama.pas',
   HlpAdler32 in '..\..\..\HashLib\src\Checksum\HlpAdler32.pas',
   HlpAP in '..\..\..\HashLib\src\Hash32\HlpAP.pas',
