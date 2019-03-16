@@ -1113,7 +1113,7 @@ begin
         LPosition := TPosition.CreatePosition(LIdx, LKdx, LJdx, 0);
         LArrayTasks[LKdx] := CreateTask(LPosition);
       end;
-      for LTaskIdx := Low(LArrayTasks) to High(LArrayTasks) do
+      for LTaskIdx := System.Low(LArrayTasks) to System.High(LArrayTasks) do
       begin
         LArrayTasks[LTaskIdx].Start;
       end;
