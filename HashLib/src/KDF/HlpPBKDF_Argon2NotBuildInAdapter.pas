@@ -5,6 +5,11 @@
 interface
 
 uses
+{$IFDEF DELPHIXE7_UP}
+  System.Classes,
+  System.SysUtils,
+  System.Threading,
+{$ENDIF DELPHIXE7_UP}
   HlpKDF,
   HlpBits,
   HlpIHash,
@@ -1080,6 +1085,46 @@ begin
   end;
 end;
 
+{$IFDEF DELPHIXE7_UP}
+
+procedure TPBKDF_Argon2NotBuildInAdapter.FillMemoryBlocks;
+
+  function CreateTask(APosition: TPosition): ITask;
+  begin
+    result := TTask.Create(
+      procedure()
+      begin
+        FillSegment(APosition);
+      end);
+  end;
+
+var
+  LIdx, LJdx, LKdx, LTaskIdx: Int32;
+  LPosition: TPosition;
+  LArrayTasks: array of ITask;
+begin
+  System.SetLength(LArrayTasks, FParameters.Lanes);
+  for LIdx := 0 to System.Pred(FParameters.Iterations) do
+  begin
+    for LJdx := 0 to System.Pred(ARGON2_SYNC_POINTS) do
+    begin
+      for LKdx := 0 to System.Pred(FParameters.Lanes) do
+      begin
+        LPosition := TPosition.CreatePosition(LIdx, LKdx, LJdx, 0);
+        LArrayTasks[LKdx] := CreateTask(LPosition);
+      end;
+      for LTaskIdx := Low(LArrayTasks) to High(LArrayTasks) do
+      begin
+        LArrayTasks[LTaskIdx].Start;
+      end;
+      TTask.WaitForAll(LArrayTasks);
+    end;
+  end;
+
+end;
+
+{$ELSE}
+
 procedure TPBKDF_Argon2NotBuildInAdapter.FillMemoryBlocks;
 var
   LIdx, LJdx, LKdx: Int32;
@@ -1097,6 +1142,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF DELPHIXE7_UP}
 
 procedure TPBKDF_Argon2NotBuildInAdapter.Initialize(const APassword
   : THashLibByteArray; AOutputLength: Int32);
