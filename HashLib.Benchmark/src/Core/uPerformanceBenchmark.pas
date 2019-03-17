@@ -4,7 +4,6 @@ unit uPerformanceBenchmark;
 {$MODE DELPHI}
 {$WARNINGS OFF}
 {$ENDIF FPC}
-
 {$ZEROBASEDSTRINGS OFF}
 
 interface
@@ -84,8 +83,7 @@ begin
   end;
 
   Result := Format('%s Throughput: %.2f MB/s with Blocks of %d KB',
-    [Copy(NewName, System.Low(NewName) + 1, System.High(NewName) - 1), MaxRate,
-    ASize div 1024]);
+    [Copy(NewName, 2, System.Length(NewName) - 1), MaxRate, ASize div 1024]);
 end;
 
 class procedure TPerformanceBenchmark.DoBenchmark(var AStringList: TStringList);
