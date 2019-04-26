@@ -179,7 +179,7 @@ type
       class function CreateFNV(): IHash; static;
       class function CreateFNV1a(): IHash; static;
 
-      class function CreateJenkins3(): IHash; static;
+      class function CreateJenkins3(AInitialValue: Int32 = 0): IHash; static;
 
       class function CreateJS(): IHash; static;
 
@@ -604,9 +604,9 @@ begin
   Result := TFNV1a.Create();
 end;
 
-class function THashFactory.THash32.CreateJenkins3: IHash;
+class function THashFactory.THash32.CreateJenkins3(AInitialValue: Int32): IHash;
 begin
-  Result := TJenkins3.Create();
+  Result := TJenkins3.Create(AInitialValue);
 end;
 
 class function THashFactory.THash32.CreateJS: IHash;

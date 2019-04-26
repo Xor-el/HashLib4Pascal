@@ -294,7 +294,7 @@ type
     FJenkins3: IHash;
 
   const
-    FExpectedHashOfEmptyData: String = '00000000';
+    FExpectedHashOfEmptyData: String = 'DEADBEEF';
     FExpectedHashOfDefaultData: String = 'F0F69CEF';
     FExpectedHashOfOnetoNine: String = '845D9A96';
     FExpectedHashOfabcde: String = '026D72DE';
