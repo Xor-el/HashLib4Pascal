@@ -370,6 +370,7 @@ type
 
       class function CreateKeccak_224(): IHash; static;
       class function CreateKeccak_256(): IHash; static;
+      class function CreateKeccak_288(): IHash; static;
       class function CreateKeccak_384(): IHash; static;
       class function CreateKeccak_512(): IHash; static;
 
@@ -1002,6 +1003,11 @@ end;
 class function THashFactory.TCrypto.CreateKeccak_256: IHash;
 begin
   Result := TKeccak_256.Create();
+end;
+
+class function THashFactory.TCrypto.CreateKeccak_288: IHash;
+begin
+  Result := TKeccak_288.Create();
 end;
 
 class function THashFactory.TCrypto.CreateKeccak_384: IHash;

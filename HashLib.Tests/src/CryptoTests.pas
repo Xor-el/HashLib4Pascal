@@ -2889,6 +2889,52 @@ type
 
 type
 
+  TTestKeccak_288 = class(THashLibAlgorithmTestCase)
+
+  private
+
+    FKeccak_288: IHash;
+
+  const
+    FExpectedHashOfEmptyData
+      : String =
+      '6753E3380C09E385D0339EB6B050A68F66CFD60A73476E6FD6ADEB72F5EDD7C6F04A5D01';
+    FExpectedHashOfDefaultData
+      : String =
+      'A81F64CA8FAFFA1FC64A8E40E3F6A6FEA3303753B8F7F25E7E6EABA3D99A13F1EDF0F125';
+    FExpectedHashOfDefaultDataWithHMACWithLongKey
+      : String =
+      'EDC893C0E0E9E70F299098D5049D82EE6811582B93B5C38A5DC9FD14F984A352042365D0';
+    FExpectedHashOfDefaultDataWithHMACWithShortKey
+      : String =
+      '615143BAA85817D4F6F051E33801A900AEA480E716A01826E1392743A92B46EED587E9F7';
+    FExpectedHashOfOnetoNine
+      : String =
+      '2B87D3D1907AA78236C7037752CA8C456611C24CE8FBAAAC961AABF3137B471C93A8F031';
+    FExpectedHashOfabcde
+      : String =
+      'F996518E4703A5D660B250D720A143B0A44C5DE31819A82FEF0F30158D18E74E6DF405F6';
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEmptyString;
+    procedure TestDefaultData;
+    procedure TestHMACWithDefaultDataAndLongKey;
+    procedure TestHMACWithDefaultDataAndShortKey;
+    procedure TestOnetoNine;
+    procedure TestBytesabcde;
+    procedure TestEmptyStream;
+    procedure TestIncrementalHash;
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneIsUnique;
+    procedure TestHMACCloneIsCorrect;
+
+  end;
+
+type
+
   TTestKeccak_384 = class(THashLibAlgorithmTestCase)
 
   private
@@ -10602,9 +10648,9 @@ begin
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals((Original as IXOF).XOFSize,
-    (Copy as IXOF).XOFSize, Format('Expected %d but got %d.',
-    [(Original as IXOF).XOFSize, (Copy as IXOF).XOFSize]));
+  CheckNotEquals((Original as IXOF).XOFSize, (Copy as IXOF).XOFSize,
+    Format('Expected %d but got %d.', [(Original as IXOF).XOFSize,
+    (Copy as IXOF).XOFSize]));
 end;
 
 procedure TTestShake_128.TestEmptyStream;
@@ -10733,9 +10779,9 @@ begin
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals((Original as IXOF).XOFSize,
-    (Copy as IXOF).XOFSize, Format('Expected %d but got %d.',
-    [(Original as IXOF).XOFSize, (Copy as IXOF).XOFSize]));
+  CheckNotEquals((Original as IXOF).XOFSize, (Copy as IXOF).XOFSize,
+    Format('Expected %d but got %d.', [(Original as IXOF).XOFSize,
+    (Copy as IXOF).XOFSize]));
 end;
 
 procedure TTestShake_256.TestEmptyStream;
@@ -15543,6 +15589,185 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+{ TTestKeccak_288 }
+
+procedure TTestKeccak_288.SetUp;
+begin
+  inherited;
+  FKeccak_288 := THashFactory.TCrypto.CreateKeccak_288();
+end;
+
+procedure TTestKeccak_288.TearDown;
+begin
+  FKeccak_288 := Nil;
+  inherited;
+end;
+
+procedure TTestKeccak_288.TestBytesabcde;
+var
+  LBuffer: TBytes;
+begin
+  System.SetLength(LBuffer, System.SizeOf(FBytesabcde));
+  System.Move(FBytesabcde, Pointer(LBuffer)^, System.SizeOf(FBytesabcde));
+  FExpectedString := FExpectedHashOfabcde;
+  FActualString := FKeccak_288.ComputeBytes(LBuffer).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestDefaultData;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FActualString := FKeccak_288.ComputeString(FDefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestHashCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := FKeccak_288;
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestHashCloneIsUnique;
+var
+  Original, Copy: IHash;
+begin
+  Original := FKeccak_288;
+  Original.Initialize;
+  Original.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Copy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(Original.BufferSize, Copy.BufferSize,
+    Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
+end;
+
+procedure TTestKeccak_288.TestHMACCloneIsCorrect;
+var
+  Original, Copy: IHash;
+  MainData, ChunkOne, ChunkTwo: TBytes;
+  Count: Int32;
+begin
+  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  Count := System.Length(MainData) - 3;
+  ChunkOne := System.Copy(MainData, 0, Count);
+  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  Original := THashFactory.THMAC.CreateHMAC(FKeccak_288);
+  (Original as IHMAC).Key := TConverters.ConvertStringToBytes
+    (FHMACLongStringKey, TEncoding.UTF8);
+  Original.Initialize;
+
+  Original.TransformBytes(ChunkOne);
+  // Make Copy Of Current State
+  Copy := Original.Clone();
+  Original.TransformBytes(ChunkTwo);
+  FExpectedString := Original.TransformFinal().ToString();
+  Copy.TransformBytes(ChunkTwo);
+  FActualString := Copy.TransformFinal().ToString();
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestHMACWithDefaultDataAndLongKey;
+var
+  LHMAC: IHMAC;
+begin
+  FExpectedString := FExpectedHashOfDefaultDataWithHMACWithLongKey;
+  LHMAC := THashFactory.THMAC.CreateHMAC(THashFactory.TCrypto.CreateKeccak_288);
+
+  LHMAC.Key := TConverters.ConvertStringToBytes(FHMACLongStringKey,
+    TEncoding.UTF8);
+  FActualString := LHMAC.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestHMACWithDefaultDataAndShortKey;
+var
+  LHMAC: IHMAC;
+begin
+  FExpectedString := FExpectedHashOfDefaultDataWithHMACWithShortKey;
+  LHMAC := THashFactory.THMAC.CreateHMAC(THashFactory.TCrypto.CreateKeccak_288);
+  LHMAC.Key := TConverters.ConvertStringToBytes(FHMACShortStringKey,
+    TEncoding.UTF8);
+  FActualString := LHMAC.ComputeString(FDefaultData, TEncoding.UTF8).ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestEmptyStream;
+var
+  stream: TStream;
+begin
+  stream := TMemoryStream.Create;
+  try
+    FExpectedString := FExpectedHashOfEmptyData;
+    FActualString := FKeccak_288.ComputeStream(stream).ToString();
+    CheckEquals(FExpectedString, FActualString,
+      Format('Expected %s but got %s.', [FExpectedString, FActualString]));
+  finally
+    stream.Free;
+  end;
+end;
+
+procedure TTestKeccak_288.TestEmptyString;
+begin
+  FExpectedString := FExpectedHashOfEmptyData;
+  FActualString := FKeccak_288.ComputeString(FEmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestIncrementalHash;
+begin
+  FExpectedString := FExpectedHashOfDefaultData;
+  FHash := THashFactory.TCrypto.CreateKeccak_288();
+
+  FHash.Initialize();
+  FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 4, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 7, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 10, 3), TEncoding.UTF8);
+  FHash.TransformString(System.Copy(FDefaultData, 13, 2), TEncoding.UTF8);
+  FHashResult := FHash.TransformFinal();
+  FActualString := FHashResult.ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
+procedure TTestKeccak_288.TestOnetoNine;
+begin
+  FExpectedString := FExpectedHashOfOnetoNine;
+  FActualString := FKeccak_288.ComputeString(FOnetoNine, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 { TTestKeccak_384 }
 
 procedure TTestKeccak_384.SetUp;
@@ -16249,6 +16474,7 @@ RegisterTest(TTestShake_128);
 RegisterTest(TTestShake_256);
 RegisterTest(TTestKeccak_224);
 RegisterTest(TTestKeccak_256);
+RegisterTest(TTestKeccak_288);
 RegisterTest(TTestKeccak_384);
 RegisterTest(TTestKeccak_512);
 RegisterTest(TTestBlake2B);
@@ -16324,6 +16550,7 @@ RegisterTest(TTestShake_128.Suite);
 RegisterTest(TTestShake_256.Suite);
 RegisterTest(TTestKeccak_224.Suite);
 RegisterTest(TTestKeccak_256.Suite);
+RegisterTest(TTestKeccak_288.Suite);
 RegisterTest(TTestKeccak_384.Suite);
 RegisterTest(TTestKeccak_512.Suite);
 RegisterTest(TTestBlake2B.Suite);

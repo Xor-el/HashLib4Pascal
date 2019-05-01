@@ -27,7 +27,8 @@ uses
 
 resourcestring
   SInvalidHashMode = 'Only "[%s]" HashModes are Supported';
-  SInvalidXOFSize = 'XOFSize in Bits must not be Negative and be Divisible by 8.';
+  SInvalidXOFSize =
+    'XOFSize in Bits must not be Negative and be Divisible by 8.';
 
 type
   TSHA3 = class abstract(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
@@ -129,6 +130,16 @@ type
 type
 
   TKeccak_256 = class sealed(TSHA3)
+
+  public
+
+    constructor Create();
+    function Clone(): IHash; override;
+  end;
+
+type
+
+  TKeccak_288 = class sealed(TSHA3)
 
   public
 
@@ -3096,6 +3107,26 @@ end;
 constructor TKeccak_256.Create;
 begin
   Inherited Create(THashSize.hsHashSize256);
+  FHashMode := THashMode.hmKeccak;
+end;
+
+{ TKeccak_288 }
+
+function TKeccak_288.Clone(): IHash;
+var
+  HashInstance: TKeccak_288;
+begin
+  HashInstance := TKeccak_288.Create();
+  HashInstance.Fm_state := System.Copy(Fm_state);
+  HashInstance.Fm_buffer := Fm_buffer.Clone();
+  HashInstance.Fm_processed_bytes := Fm_processed_bytes;
+  Result := HashInstance as IHash;
+  Result.BufferSize := BufferSize;
+end;
+
+constructor TKeccak_288.Create;
+begin
+  Inherited Create(THashSize.hsHashSize288);
   FHashMode := THashMode.hmKeccak;
 end;
 
