@@ -985,14 +985,22 @@ end;
 
 class function THashFactory.TCrypto.CreateShake_128(a_xof_size_in_bits
   : Int32): IHash;
+var
+  LXof: IXOF;
 begin
-  Result := (TShake_128.Create() as IXOF).SetXOFOutputSize(a_xof_size_in_bits);
+  LXof := (TShake_128.Create() as IXOF);
+  LXof.XOFSizeInBits := a_xof_size_in_bits;
+  Result := LXof as IHash;
 end;
 
 class function THashFactory.TCrypto.CreateShake_256(a_xof_size_in_bits
   : Int32): IHash;
+var
+  LXof: IXOF;
 begin
-  Result := (TShake_256.Create() as IXOF).SetXOFOutputSize(a_xof_size_in_bits);
+  LXof := (TShake_256.Create() as IXOF);
+  LXof.XOFSizeInBits := a_xof_size_in_bits;
+  Result := LXof as IHash;
 end;
 
 class function THashFactory.TCrypto.CreateKeccak_224: IHash;

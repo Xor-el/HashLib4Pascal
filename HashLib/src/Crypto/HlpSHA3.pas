@@ -171,13 +171,13 @@ type
   TShake = class abstract(TSHA3, IXOF)
   strict private
   var
-    FXOFSize: Int32;
-    function GetXOFSize: Int32; inline;
-    procedure SetXOFSize(a_xof_size_in_bits: Int32); inline;
+    FXOFSizeInBits: Int32;
+    function GetXOFSizeInBits: Int32; inline;
+    procedure SetXOFSizeInBits(a_xof_size_in_bits: Int32); inline;
+    function SetXOFSizeInBitsInternal(a_xof_size_in_bits: Int32): IXOF;
   strict protected
     constructor Create(a_hash_size: THashSize);
-    function SetXOFOutputSize(a_xof_size_in_bits: Int32): IXOF;
-    property XOFSize: Int32 read GetXOFSize write SetXOFSize;
+    property XOFSizeInBits: Int32 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
     function GetResult(): THashLibByteArray; override;
@@ -248,7 +248,7 @@ begin
       Result := Self.ClassName;
     TSHA3.THashMode.hmShake:
       Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBits',
-        (Self as IXOF).XOFSize]);
+        (Self as IXOF).XOFSizeInBits]);
   else
     begin
       raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashMode,
@@ -3172,6 +3172,16 @@ end;
 
 { TShake }
 
+function TShake.SetXOFSizeInBitsInternal(a_xof_size_in_bits: Int32): IXOF;
+begin
+  If (a_xof_size_in_bits < 0) or ((a_xof_size_in_bits and $7) <> 0) then
+  begin
+    raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
+  end;
+  FXOFSizeInBits := a_xof_size_in_bits;
+  Result := Self;
+end;
+
 constructor TShake.Create(a_hash_size: THashSize);
 begin
   Inherited Create(a_hash_size);
@@ -3180,16 +3190,16 @@ end;
 
 function TShake.GetResult: THashLibByteArray;
 var
-  buffer_pos, Idx, LXofSize: Int32;
+  buffer_pos, Idx, LXofSizeInBytes: Int32;
   block: THashLibByteArray;
 begin
   buffer_pos := Fm_buffer.Pos;
   block := Fm_buffer.GetBytesZeroPadded();
 
-  LXofSize := FXOFSize shr 3;
+  LXofSizeInBytes := FXOFSizeInBits shr 3;
   Idx := 0;
 
-  while Idx < LXofSize do
+  while Idx < LXofSizeInBytes do
   begin
     if buffer_pos >= FBlockSize then
     begin
@@ -3199,16 +3209,16 @@ begin
     System.Inc(Idx);
   end;
 
-  System.SetLength(Result, LXofSize);
+  System.SetLength(Result, LXofSizeInBytes);
 
   TConverters.le64_copy(PUInt64(Fm_state), 0, PByte(Result), 0,
     System.Length(Result));
 
 end;
 
-function TShake.GetXOFSize: Int32;
+function TShake.GetXOFSizeInBits: Int32;
 begin
-  Result := FXOFSize;
+  Result := FXOFSizeInBits;
 end;
 
 function TShake.TransformFinal: IHashResult;
@@ -3221,25 +3231,15 @@ begin
 {$ENDIF DEBUG}
   tempresult := GetResult();
 {$IFDEF DEBUG}
-  System.Assert(System.Length(tempresult) = (XOFSize shr 3));
+  System.Assert(System.Length(tempresult) = (XOFSizeInBits shr 3));
 {$ENDIF DEBUG}
   Initialize();
   Result := THashResult.Create(tempresult);
 end;
 
-function TShake.SetXOFOutputSize(a_xof_size_in_bits: Int32): IXOF;
+procedure TShake.SetXOFSizeInBits(a_xof_size_in_bits: Int32);
 begin
-  If (a_xof_size_in_bits < 0) or ((a_xof_size_in_bits and $7) <> 0) then
-  begin
-    raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
-  end;
-  FXOFSize := a_xof_size_in_bits;
-  Result := Self;
-end;
-
-procedure TShake.SetXOFSize(a_xof_size_in_bits: Int32);
-begin
-  SetXOFOutputSize(a_xof_size_in_bits);
+  SetXOFSizeInBitsInternal(a_xof_size_in_bits);
 end;
 
 { TShake_128 }
@@ -3247,9 +3247,11 @@ end;
 function TShake_128.Clone(): IHash;
 var
   HashInstance: TShake_128;
+  LXof: IXOF;
 begin
-  HashInstance := (TShake_128.Create() as IXOF)
-    .SetXOFOutputSize((Self as IXOF).XOFSize) as TShake_128;
+  LXof := (TShake_128.Create() as IXOF);
+  LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+  HashInstance := LXof as TShake_128;
   HashInstance.Fm_state := System.Copy(Fm_state);
   HashInstance.Fm_buffer := Fm_buffer.Clone();
   HashInstance.Fm_processed_bytes := Fm_processed_bytes;
@@ -3267,9 +3269,11 @@ end;
 function TShake_256.Clone(): IHash;
 var
   HashInstance: TShake_256;
+  LXof: IXOF;
 begin
-  HashInstance := (TShake_256.Create() as IXOF)
-    .SetXOFOutputSize((Self as IXOF).XOFSize) as TShake_256;
+  LXof := (TShake_256.Create() as IXOF);
+  LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+  HashInstance := LXof as TShake_256;
   HashInstance.Fm_state := System.Copy(Fm_state);
   HashInstance.Fm_buffer := Fm_buffer.Clone();
   HashInstance.Fm_processed_bytes := Fm_processed_bytes;

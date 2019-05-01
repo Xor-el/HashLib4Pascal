@@ -10639,18 +10639,18 @@ begin
   Original := FShake_128;
   Original.Initialize;
   Original.BufferSize := (64 * 1024); // 64Kb
-  (Original as IXOF).XOFSize := 128;
+  (Original as IXOF).XOFSizeInBits := 128;
   // Make Copy Of Current State
   Copy := Original.Clone();
   Copy.BufferSize := (128 * 1024); // 128Kb
-  (Copy as IXOF).XOFSize := 256;
+  (Copy as IXOF).XOFSizeInBits := 256;
 
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals((Original as IXOF).XOFSize, (Copy as IXOF).XOFSize,
-    Format('Expected %d but got %d.', [(Original as IXOF).XOFSize,
-    (Copy as IXOF).XOFSize]));
+  CheckNotEquals((Original as IXOF).XOFSizeInBits, (Copy as IXOF).XOFSizeInBits,
+    Format('Expected %d but got %d.', [(Original as IXOF).XOFSizeInBits,
+    (Copy as IXOF).XOFSizeInBits]));
 end;
 
 procedure TTestShake_128.TestEmptyStream;
@@ -10770,18 +10770,18 @@ begin
   Original := FShake_256;
   Original.Initialize;
   Original.BufferSize := (64 * 1024); // 64Kb
-  (Original as IXOF).XOFSize := 128;
+  (Original as IXOF).XOFSizeInBits := 128;
   // Make Copy Of Current State
   Copy := Original.Clone();
   Copy.BufferSize := (128 * 1024); // 128Kb
-  (Copy as IXOF).XOFSize := 256;
+  (Copy as IXOF).XOFSizeInBits := 256;
 
   CheckNotEquals(Original.BufferSize, Copy.BufferSize,
     Format('Expected %d but got %d.', [Original.BufferSize, Copy.BufferSize]));
 
-  CheckNotEquals((Original as IXOF).XOFSize, (Copy as IXOF).XOFSize,
-    Format('Expected %d but got %d.', [(Original as IXOF).XOFSize,
-    (Copy as IXOF).XOFSize]));
+  CheckNotEquals((Original as IXOF).XOFSizeInBits, (Copy as IXOF).XOFSizeInBits,
+    Format('Expected %d but got %d.', [(Original as IXOF).XOFSizeInBits,
+    (Copy as IXOF).XOFSizeInBits]));
 end;
 
 procedure TTestShake_256.TestEmptyStream;
