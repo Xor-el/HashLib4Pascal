@@ -23,9 +23,13 @@ uses
   HlpConverters,
   HlpBlake2BConfig,
   HlpIBlake2BConfig,
+  HlpBlake2STreeConfig,
+  HlpIBlake2STreeConfig,
   Blake2BTestVectors,
   HlpBlake2SConfig,
   HlpIBlake2SConfig,
+  HlpBlake2BTreeConfig,
+  HlpIBlake2BTreeConfig,
   Blake2STestVectors;
 
 // Crypto
@@ -2746,6 +2750,11 @@ type
       : String =
       'A8ADD4BDDDFD93E4877D2746E62817B116364A1FA7BC148D95090BC7333B3673F82401CF7AA2E4CB1ECD90296E3F14CB5413F8ED77BE73045B13914CDCD6A918';
 
+    // https://docs.python.org/3/library/hashlib.html#tree-mode
+    FBlake2BTreeHashingMode
+      : String =
+      '3AD2A9B37C6070E374C7A8C508FE20CA86B6ED54E286E93A0318E95E881DB5AA';
+
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -2760,6 +2769,8 @@ type
     procedure TestHashCloneIsUnique;
     procedure TestHMACCloneIsCorrect;
     procedure TestNullKeyVsUnKeyed;
+    // https://docs.python.org/3/library/hashlib.html#tree-mode
+    procedure TestBlake2BTreeHashingMode;
 
   end;
 
@@ -2782,6 +2793,9 @@ type
       : String =
       '606BEEEC743CCBEFF6CBCDF5D5302AA855C256C29B88C8ED331EA1A6BF3C8812';
 
+    // https://docs.python.org/3/library/hashlib.html#tree-mode modified for Blake2s
+    FBlake2STreeHashingMode: String = 'C81CD326CA1CA6F40E090A9D9E738892';
+
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -2798,6 +2812,8 @@ type
     procedure TestHashCloneIsUnique;
     procedure TestHMACCloneIsCorrect;
     procedure TestNullKeyVsUnKeyed;
+    // https://docs.python.org/3/library/hashlib.html#tree-mode modified for Blake2s
+    procedure TestBlake2STreeHashingMode;
 
   end;
 
@@ -14659,6 +14675,71 @@ begin
 
 end;
 
+procedure TTestBlake2B.TestBlake2BTreeHashingMode;
+const
+  FAN_OUT = Byte(2);
+  DEPTH = Byte(2); // MaxDepth
+  LEAF_SIZE = UInt32(4096);
+  INNER_SIZE = Byte(64);
+var
+  Buf: TBytes;
+  Blake2BTreeConfigh00, Blake2BTreeConfigh01, Blake2BTreeConfigh10
+    : IBlake2BTreeConfig;
+  h00, h01, h10: IHash;
+begin
+  System.SetLength(Buf, 6000);
+  // Left leaf
+  Blake2BTreeConfigh00 := TBlake2BTreeConfig.Create();
+  Blake2BTreeConfigh00.FanOut := FAN_OUT;
+  Blake2BTreeConfigh00.MaxDepth := DEPTH;
+  Blake2BTreeConfigh00.LeafSize := LEAF_SIZE;
+  Blake2BTreeConfigh00.InnerHashSize := INNER_SIZE;
+  Blake2BTreeConfigh00.NodeOffset := 0;
+  Blake2BTreeConfigh00.NodeDepth := 0;
+  Blake2BTreeConfigh00.IsLastNode := False;
+  h00 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
+    as IBlake2BConfig, Blake2BTreeConfigh00);
+  h00.Initialize;
+
+  // Right leaf
+  Blake2BTreeConfigh01 := TBlake2BTreeConfig.Create();
+  Blake2BTreeConfigh01.FanOut := FAN_OUT;
+  Blake2BTreeConfigh01.MaxDepth := DEPTH;
+  Blake2BTreeConfigh01.LeafSize := LEAF_SIZE;
+  Blake2BTreeConfigh01.InnerHashSize := INNER_SIZE;
+  Blake2BTreeConfigh01.NodeOffset := 1;
+  Blake2BTreeConfigh01.NodeDepth := 0;
+  Blake2BTreeConfigh01.IsLastNode := True;
+  h01 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
+    as IBlake2BConfig, Blake2BTreeConfigh01);
+  h01.Initialize;
+
+  // Root node
+  Blake2BTreeConfigh10 := TBlake2BTreeConfig.Create();
+  Blake2BTreeConfigh10.FanOut := FAN_OUT;
+  Blake2BTreeConfigh10.MaxDepth := DEPTH;
+  Blake2BTreeConfigh10.LeafSize := LEAF_SIZE;
+  Blake2BTreeConfigh10.InnerHashSize := INNER_SIZE;
+  Blake2BTreeConfigh10.NodeOffset := 0;
+  Blake2BTreeConfigh10.NodeDepth := 1;
+  Blake2BTreeConfigh10.IsLastNode := True;
+  h10 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create(32)
+    as IBlake2BConfig, Blake2BTreeConfigh10);
+  h10.Initialize;
+
+  h10.TransformBytes(h00.ComputeBytes(System.Copy(Buf, 0, LEAF_SIZE))
+    .GetBytes());
+
+  h10.TransformBytes(h01.ComputeBytes(System.Copy(Buf, LEAF_SIZE,
+    UInt32(System.Length(Buf)) - LEAF_SIZE)).GetBytes());
+
+  FActualString := h10.TransformFinal().ToString();
+  FExpectedString := FBlake2BTreeHashingMode;
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+end;
+
 procedure TTestBlake2B.TestCheckKeyedTestVectors;
 var
   len, i: Int32;
@@ -14933,6 +15014,71 @@ begin
       Format('Expected %s but got %s.', [FExpectedString, FActualString]));
   end;
 
+end;
+
+procedure TTestBlake2S.TestBlake2STreeHashingMode;
+const
+  FAN_OUT = Byte(2);
+  DEPTH = Byte(2); // MaxDepth
+  LEAF_SIZE = UInt32(4096);
+  INNER_SIZE = Byte(32);
+var
+  Buf: TBytes;
+  Blake2STreeConfigh00, Blake2STreeConfigh01, Blake2STreeConfigh10
+    : IBlake2STreeConfig;
+  h00, h01, h10: IHash;
+begin
+  System.SetLength(Buf, 6000);
+  // Left leaf
+  Blake2STreeConfigh00 := TBlake2STreeConfig.Create();
+  Blake2STreeConfigh00.FanOut := FAN_OUT;
+  Blake2STreeConfigh00.MaxDepth := DEPTH;
+  Blake2STreeConfigh00.LeafSize := LEAF_SIZE;
+  Blake2STreeConfigh00.InnerHashSize := INNER_SIZE;
+  Blake2STreeConfigh00.NodeOffset := 0;
+  Blake2STreeConfigh00.NodeDepth := 0;
+  Blake2STreeConfigh00.IsLastNode := False;
+  h00 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
+    as IBlake2SConfig, Blake2STreeConfigh00);
+  h00.Initialize;
+
+  // Right leaf
+  Blake2STreeConfigh01 := TBlake2STreeConfig.Create();
+  Blake2STreeConfigh01.FanOut := FAN_OUT;
+  Blake2STreeConfigh01.MaxDepth := DEPTH;
+  Blake2STreeConfigh01.LeafSize := LEAF_SIZE;
+  Blake2STreeConfigh01.InnerHashSize := INNER_SIZE;
+  Blake2STreeConfigh01.NodeOffset := 1;
+  Blake2STreeConfigh01.NodeDepth := 0;
+  Blake2STreeConfigh01.IsLastNode := True;
+  h01 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
+    as IBlake2SConfig, Blake2STreeConfigh01);
+  h01.Initialize;
+
+  // Root node
+  Blake2STreeConfigh10 := TBlake2STreeConfig.Create();
+  Blake2STreeConfigh10.FanOut := FAN_OUT;
+  Blake2STreeConfigh10.MaxDepth := DEPTH;
+  Blake2STreeConfigh10.LeafSize := LEAF_SIZE;
+  Blake2STreeConfigh10.InnerHashSize := INNER_SIZE;
+  Blake2STreeConfigh10.NodeOffset := 0;
+  Blake2STreeConfigh10.NodeDepth := 1;
+  Blake2STreeConfigh10.IsLastNode := True;
+  h10 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create(16)
+    as IBlake2SConfig, Blake2STreeConfigh10);
+  h10.Initialize;
+
+  h10.TransformBytes(h00.ComputeBytes(System.Copy(Buf, 0, LEAF_SIZE))
+    .GetBytes());
+
+  h10.TransformBytes(h01.ComputeBytes(System.Copy(Buf, LEAF_SIZE,
+    UInt32(System.Length(Buf)) - LEAF_SIZE)).GetBytes());
+
+  FActualString := h10.TransformFinal().ToString();
+  FExpectedString := FBlake2STreeHashingMode;
+
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
 end;
 
 procedure TTestBlake2S.TestCheckKeyedTestVectors;

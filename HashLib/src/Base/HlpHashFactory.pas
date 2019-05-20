@@ -84,9 +84,11 @@ uses
   HlpBlake2B,
   HlpIBlake2BConfig,
   HlpBlake2BConfig,
+  HlpIBlake2BTreeConfig,
   HlpBlake2S,
   HlpBlake2SConfig,
   HlpIBlake2SConfig,
+  HlpIBlake2STreeConfig,
   // HMAC Unit
   HlpHMACNotBuildInAdapter,
   // PBKDF2_HMAC Unit
@@ -377,16 +379,16 @@ type
       class function CreateShake_128(a_xof_size_in_bits: Int32): IHash; static;
       class function CreateShake_256(a_xof_size_in_bits: Int32): IHash; static;
 
-      class function CreateBlake2B(const config: IBlake2BConfig = Nil)
-        : IHash; static;
+      class function CreateBlake2B(const config: IBlake2BConfig = Nil;
+        const treeConfig: IBlake2BTreeConfig = Nil): IHash; static;
 
       class function CreateBlake2B_160(): IHash; static;
       class function CreateBlake2B_256(): IHash; static;
       class function CreateBlake2B_384(): IHash; static;
       class function CreateBlake2B_512(): IHash; static;
 
-      class function CreateBlake2S(const config: IBlake2SConfig = Nil)
-        : IHash; static;
+      class function CreateBlake2S(const config: IBlake2SConfig = Nil;
+        const treeConfig: IBlake2STreeConfig = Nil): IHash; static;
 
       class function CreateBlake2S_128(): IHash; static;
       class function CreateBlake2S_160(): IHash; static;
@@ -1028,17 +1030,17 @@ begin
   Result := TKeccak_512.Create();
 end;
 
-class function THashFactory.TCrypto.CreateBlake2B(const config
-  : IBlake2BConfig): IHash;
+class function THashFactory.TCrypto.CreateBlake2B(const config: IBlake2BConfig;
+  const treeConfig: IBlake2BTreeConfig): IHash;
+var
+  LConfig: IBlake2BConfig;
 begin
-  if config = Nil then
+  LConfig := config;
+  if (LConfig = Nil) then
   begin
-    Result := TBlake2B.Create()
-  end
-  else
-  begin
-    Result := TBlake2B.Create(config);
+    LConfig := TBlake2BConfig.Create();
   end;
+  Result := TBlake2B.Create(LConfig, treeConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_160: IHash;
@@ -1065,17 +1067,17 @@ begin
     (TBlake2BConfig.Create(THashSize.hsHashSize512));
 end;
 
-class function THashFactory.TCrypto.CreateBlake2S(const config
-  : IBlake2SConfig): IHash;
+class function THashFactory.TCrypto.CreateBlake2S(const config: IBlake2SConfig;
+  const treeConfig: IBlake2STreeConfig): IHash;
+var
+  LConfig: IBlake2SConfig;
 begin
-  if config = Nil then
+  LConfig := config;
+  if (LConfig = Nil) then
   begin
-    Result := TBlake2S.Create()
-  end
-  else
-  begin
-    Result := TBlake2S.Create(config);
+    LConfig := TBlake2SConfig.Create();
   end;
+  Result := TBlake2S.Create(LConfig, treeConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_128: IHash;
