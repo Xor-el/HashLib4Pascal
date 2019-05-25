@@ -376,8 +376,8 @@ type
       class function CreateKeccak_384(): IHash; static;
       class function CreateKeccak_512(): IHash; static;
 
-      class function CreateShake_128(a_xof_size_in_bits: Int32): IHash; static;
-      class function CreateShake_256(a_xof_size_in_bits: Int32): IHash; static;
+      class function CreateShake_128(a_xof_size_in_bits: UInt32): IHash; static;
+      class function CreateShake_256(a_xof_size_in_bits: UInt32): IHash; static;
 
       class function CreateBlake2B(const config: IBlake2BConfig = Nil;
         const treeConfig: IBlake2BTreeConfig = Nil): IHash; static;
@@ -986,7 +986,7 @@ begin
 end;
 
 class function THashFactory.TCrypto.CreateShake_128(a_xof_size_in_bits
-  : Int32): IHash;
+  : UInt32): IHash;
 var
   LXof: IXOF;
 begin
@@ -996,7 +996,7 @@ begin
 end;
 
 class function THashFactory.TCrypto.CreateShake_256(a_xof_size_in_bits
-  : Int32): IHash;
+  : UInt32): IHash;
 var
   LXof: IXOF;
 begin
