@@ -376,9 +376,6 @@ type
       class function CreateKeccak_384(): IHash; static;
       class function CreateKeccak_512(): IHash; static;
 
-      class function CreateShake_128(a_xof_size_in_bits: UInt32): IHash; static;
-      class function CreateShake_256(a_xof_size_in_bits: UInt32): IHash; static;
-
       class function CreateBlake2B(const config: IBlake2BConfig = Nil;
         const treeConfig: IBlake2BTreeConfig = Nil): IHash; static;
 
@@ -394,6 +391,18 @@ type
       class function CreateBlake2S_160(): IHash; static;
       class function CreateBlake2S_224(): IHash; static;
       class function CreateBlake2S_256(): IHash; static;
+
+    end;
+
+    // ====================== TXOF ====================== //
+
+  type
+    TXOF = class sealed(TObject)
+
+    public
+
+      class function CreateShake_128(a_xof_size_in_bits: UInt32): IHash; static;
+      class function CreateShake_256(a_xof_size_in_bits: UInt32): IHash; static;
 
     end;
 
@@ -985,26 +994,6 @@ begin
   Result := TSHA3_512.Create();
 end;
 
-class function THashFactory.TCrypto.CreateShake_128(a_xof_size_in_bits
-  : UInt32): IHash;
-var
-  LXof: IXOF;
-begin
-  LXof := (TShake_128.Create() as IXOF);
-  LXof.XOFSizeInBits := a_xof_size_in_bits;
-  Result := LXof as IHash;
-end;
-
-class function THashFactory.TCrypto.CreateShake_256(a_xof_size_in_bits
-  : UInt32): IHash;
-var
-  LXof: IXOF;
-begin
-  LXof := (TShake_256.Create() as IXOF);
-  LXof.XOFSizeInBits := a_xof_size_in_bits;
-  Result := LXof as IHash;
-end;
-
 class function THashFactory.TCrypto.CreateKeccak_224: IHash;
 begin
   Result := TKeccak_224.Create();
@@ -1243,6 +1232,28 @@ end;
 class function THashFactory.TCrypto.CreateTiger2_5_192: IHash;
 begin
   Result := TTiger2_192.CreateRound5();
+end;
+
+{ THashFactory.TXOF }
+
+class function THashFactory.TXOF.CreateShake_128(a_xof_size_in_bits
+  : UInt32): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TShake_128.Create() as IXOF);
+  LXof.XOFSizeInBits := a_xof_size_in_bits;
+  Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateShake_256(a_xof_size_in_bits
+  : UInt32): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TShake_256.Create() as IXOF);
+  LXof.XOFSizeInBits := a_xof_size_in_bits;
+  Result := LXof as IHash;
 end;
 
 { THashFactory.THMAC }
