@@ -10617,7 +10617,7 @@ end;
 procedure TTestShake_128.SetUp;
 begin
   inherited;
-  FShake_128 := THashFactory.TCrypto.CreateShake_128(512);
+  FShake_128 := THashFactory.TXOF.CreateShake_128(512);
 end;
 
 procedure TTestShake_128.TearDown;
@@ -10720,7 +10720,7 @@ end;
 procedure TTestShake_128.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FHash := THashFactory.TCrypto.CreateShake_128(512);
+  FHash := THashFactory.TXOF.CreateShake_128(512);
 
   FHash.Initialize();
   FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
@@ -10747,7 +10747,7 @@ procedure TTestShake_128.TestVeryLongShakeOfEmptyString;
 var
   VeryLongShake_128: IHash;
 begin
-  VeryLongShake_128 := THashFactory.TCrypto.CreateShake_128(8000);
+  VeryLongShake_128 := THashFactory.TXOF.CreateShake_128(8000);
   FActualString := VeryLongShake_128.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   FExpectedString := FVeryLongShakeOfEmptyString;
@@ -10760,7 +10760,7 @@ end;
 procedure TTestShake_256.SetUp;
 begin
   inherited;
-  FShake_256 := THashFactory.TCrypto.CreateShake_256(512);
+  FShake_256 := THashFactory.TXOF.CreateShake_256(512);
 end;
 
 procedure TTestShake_256.TearDown;
@@ -10863,7 +10863,7 @@ end;
 procedure TTestShake_256.TestIncrementalHash;
 begin
   FExpectedString := FExpectedHashOfDefaultData;
-  FHash := THashFactory.TCrypto.CreateShake_256(512);
+  FHash := THashFactory.TXOF.CreateShake_256(512);
 
   FHash.Initialize();
   FHash.TransformString(System.Copy(FDefaultData, 1, 3), TEncoding.UTF8);
@@ -10890,7 +10890,7 @@ procedure TTestShake_256.TestVeryLongShakeOfEmptyString;
 var
   VeryLongShake_256: IHash;
 begin
-  VeryLongShake_256 := THashFactory.TCrypto.CreateShake_256(8000);
+  VeryLongShake_256 := THashFactory.TXOF.CreateShake_256(8000);
   FActualString := VeryLongShake_256.ComputeString(FEmptyData, TEncoding.UTF8)
     .ToString();
   FExpectedString := FVeryLongShakeOfEmptyString;
