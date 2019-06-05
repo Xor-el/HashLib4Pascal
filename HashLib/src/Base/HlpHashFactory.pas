@@ -1099,15 +1099,12 @@ begin
   if a_security_level < Int32(1) then
     raise EArgumentHashLibException.CreateRes(@SInvalidSnefruLevel);
 
-  if ((a_hash_size = THashSize.hsHashSize128) or
-    (a_hash_size = THashSize.hsHashSize256)) then
-  begin
-    Result := TSnefru.Create(a_security_level, a_hash_size);
-  end
+  case a_hash_size of
+    THashSize.hsHashSize128, THashSize.hsHashSize256:
+      Result := TSnefru.Create(a_security_level, a_hash_size);
   else
-  begin
     raise EArgumentHashLibException.CreateRes(@SInvalidSnefruHashSize);
-  end
+  end;
 
 end;
 
@@ -1174,19 +1171,23 @@ end;
 class function THashFactory.TCrypto.CreateTiger(a_hash_size: Int32;
   a_rounds: THashRounds): IHash;
 begin
-  if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
+  case a_hash_size of
+    16, 20, 24:
+      Result := TTiger_Base.Create(a_hash_size, a_rounds);
+  else
     raise EArgumentHashLibException.CreateRes(@SInvalidTigerHashSize);
-
-  Result := TTiger_Base.Create(a_hash_size, a_rounds);
+  end;
 end;
 
 class function THashFactory.TCrypto.CreateTiger2(a_hash_size: Int32;
   a_rounds: THashRounds): IHash;
 begin
-  if ((a_hash_size <> 16) and (a_hash_size <> 20) and (a_hash_size <> 24)) then
+  case a_hash_size of
+    16, 20, 24:
+      Result := TTiger2_Base.Create(a_hash_size, a_rounds);
+  else
     raise EArgumentHashLibException.CreateRes(@SInvalidTiger2HashSize);
-
-  Result := TTiger2_Base.Create(a_hash_size, a_rounds);
+  end;
 end;
 
 class function THashFactory.TCrypto.CreateTiger2_3_128: IHash;
@@ -1270,18 +1271,8 @@ class function TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(const a_hash: IHash;
   const a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
   : IPBKDF2_HMAC;
 begin
-
-  if not(System.Assigned(a_hash)) then
-    raise EArgumentNilHashLibException.CreateRes(@SNotInitializedIHashInstance);
-
-  if (a_password = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
-
-  if (a_salt = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptySalt);
-
-  if (a_iterations < 1) then
-    raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
+  TPBKDF2_HMACNotBuildInAdapter.ValidatePBKDF2_HMACInputs(a_hash, a_password,
+    a_salt, a_iterations);
 
   Result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
     a_iterations);
@@ -1293,12 +1284,8 @@ class function TKDF.TPBKDF_Argon2.CreatePBKDF_Argon2(const APassword
   : THashLibByteArray; const AArgon2Parameters: IArgon2Parameters)
   : IPBKDF_Argon2;
 begin
-  if not(System.Assigned(AArgon2Parameters)) then
-    raise EArgumentNilHashLibException.CreateRes
-      (@SArgon2ParameterBuilderNotInitialized);
-
-  if (APassword = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
+  TPBKDF_Argon2NotBuildInAdapter.ValidatePBKDF_Argon2Inputs(APassword,
+    AArgon2Parameters);
 
   Result := TPBKDF_Argon2NotBuildInAdapter.Create(APassword, AArgon2Parameters)
 end;

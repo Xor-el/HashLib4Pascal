@@ -22,6 +22,7 @@ uses
   HlpHashLibTypes;
 
 resourcestring
+  SEmptyPassword = 'Password Can''t be Empty';
   SInvalidOutputByteCount = '"bc (ByteCount)" Argument Less Than "%d".';
   SBlockInstanceNotInitialized = 'Block Instance not Initialized';
   SInputLengthInvalid = 'Input Length "%d" is not Equal to BlockSize "%d"';
@@ -309,6 +310,9 @@ type
 
   public
 
+    class procedure ValidatePBKDF_Argon2Inputs(const APassword
+      : THashLibByteArray; const AArgon2Parameters: IArgon2Parameters); static;
+
     /// <summary>
     /// Initialise the <see cref="HlpPBKDF_Argon2NotBuildInAdapter|TPBKDF_Argon2NotBuildInAdapter" />
     /// from the password and parameters.
@@ -525,6 +529,18 @@ end;
 
 { TPBKDF_Argon2NotBuildInAdapter }
 
+class procedure TPBKDF_Argon2NotBuildInAdapter.ValidatePBKDF_Argon2Inputs
+  (const APassword: THashLibByteArray;
+  const AArgon2Parameters: IArgon2Parameters);
+begin
+  if not(System.Assigned(AArgon2Parameters)) then
+    raise EArgumentNilHashLibException.CreateRes
+      (@SArgon2ParameterBuilderNotInitialized);
+
+  if (APassword = Nil) then
+    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
+end;
+
 class procedure TPBKDF_Argon2NotBuildInAdapter.AddIntToLittleEndian
   (const AHash: IHash; An: Int32);
 begin
@@ -610,7 +626,7 @@ begin
   for LIdx := 0 to System.Pred(System.Length(FMemory)) do
   begin
     FMemory[LIdx].Clear;
-    FMemory[LIdx] := Default(TBlock);
+    FMemory[LIdx] := Default (TBlock);
   end;
   FMemory := Nil;
   System.FillChar(FResult[0], System.Length(FResult) *
@@ -1206,7 +1222,7 @@ end;
 
 class function TPBKDF_Argon2NotBuildInAdapter.TBlock.CreateBlock: TBlock;
 begin
-  result := Default(TBlock);
+  result := Default (TBlock);
   System.SetLength(result.Fv, ARGON2_QWORDS_IN_BLOCK);
   result.FInitialized := True;
 end;
@@ -1321,7 +1337,7 @@ end;
 class function TPBKDF_Argon2NotBuildInAdapter.TPosition.CreatePosition(APass,
   ALane, ASlice, AIndex: Int32): TPosition;
 begin
-  result := Default(TPosition);
+  result := Default (TPosition);
   result.FPass := APass;
   result.FLane := ALane;
   result.FSlice := ASlice;

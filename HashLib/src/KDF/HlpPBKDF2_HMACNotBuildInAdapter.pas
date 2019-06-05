@@ -49,6 +49,10 @@ type
 
   public
 
+    class procedure ValidatePBKDF2_HMACInputs(const a_hash: IHash;
+      const a_password, a_salt: THashLibByteArray;
+      a_iterations: UInt32); static;
+
     constructor Create(const a_underlyingHash: IHash;
       const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
 
@@ -66,6 +70,23 @@ type
 implementation
 
 { TPBKDF2_HMACNotBuildInAdapter }
+
+class procedure TPBKDF2_HMACNotBuildInAdapter.ValidatePBKDF2_HMACInputs
+  (const a_hash: IHash; const a_password, a_salt: THashLibByteArray;
+  a_iterations: UInt32);
+begin
+  if not(System.Assigned(a_hash)) then
+    raise EArgumentNilHashLibException.CreateRes(@SNotInitializedIHashInstance);
+
+  if (a_password = Nil) then
+    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
+
+  if (a_salt = Nil) then
+    raise EArgumentNilHashLibException.CreateRes(@SEmptySalt);
+
+  if (a_iterations < 1) then
+    raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
+end;
 
 constructor TPBKDF2_HMACNotBuildInAdapter.Create(const a_underlyingHash: IHash;
   const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
