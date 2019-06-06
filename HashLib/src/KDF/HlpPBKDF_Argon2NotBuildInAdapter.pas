@@ -22,7 +22,6 @@ uses
   HlpHashLibTypes;
 
 resourcestring
-  SEmptyPassword = 'Password Can''t be Empty';
   SInvalidOutputByteCount = '"bc (ByteCount)" Argument Less Than "%d".';
   SBlockInstanceNotInitialized = 'Block Instance not Initialized';
   SInputLengthInvalid = 'Input Length "%d" is not Equal to BlockSize "%d"';
@@ -220,7 +219,7 @@ type
     MIN_PARALLELISM = Int32(1);
     MAX_PARALLELISM = Int32(16777216);
 
-    // Minimum and maximum digest size in bytes
+    // Minimum digest size in bytes
     MIN_OUTLEN = Int32(4);
 
     // Minimum and maximum number of passes
@@ -308,10 +307,10 @@ type
     procedure Initialize(const APassword: THashLibByteArray;
       AOutputLength: Int32); inline;
 
-  public
+    class procedure ValidatePBKDF_Argon2Inputs(const AArgon2Parameters
+      : IArgon2Parameters); static;
 
-    class procedure ValidatePBKDF_Argon2Inputs(const APassword
-      : THashLibByteArray; const AArgon2Parameters: IArgon2Parameters); static;
+  public
 
     /// <summary>
     /// Initialise the <see cref="HlpPBKDF_Argon2NotBuildInAdapter|TPBKDF_Argon2NotBuildInAdapter" />
@@ -530,15 +529,11 @@ end;
 { TPBKDF_Argon2NotBuildInAdapter }
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.ValidatePBKDF_Argon2Inputs
-  (const APassword: THashLibByteArray;
-  const AArgon2Parameters: IArgon2Parameters);
+  (const AArgon2Parameters: IArgon2Parameters);
 begin
   if not(System.Assigned(AArgon2Parameters)) then
     raise EArgumentNilHashLibException.CreateRes
       (@SArgon2ParameterBuilderNotInitialized);
-
-  if (APassword = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
 end;
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.AddIntToLittleEndian
@@ -1174,6 +1169,7 @@ constructor TPBKDF_Argon2NotBuildInAdapter.Create(const APassword
   : THashLibByteArray; const AParameters: IArgon2Parameters);
 begin
   Inherited Create();
+  ValidatePBKDF_Argon2Inputs(AParameters);
   FPassword := System.Copy(APassword);
   FParameters := AParameters;
 
@@ -1205,8 +1201,8 @@ end;
 function TPBKDF_Argon2NotBuildInAdapter.GetBytes(bc: Int32): THashLibByteArray;
 begin
   if (bc <= MIN_OUTLEN) then
-    raise EArgumentOutOfRangeHashLibException.CreateResFmt
-      (@SInvalidOutputByteCount, [MIN_OUTLEN]);
+    raise EArgumentHashLibException.CreateResFmt(@SInvalidOutputByteCount,
+      [MIN_OUTLEN]);
 
   Initialize(FPassword, bc);
   FillMemoryBlocks();

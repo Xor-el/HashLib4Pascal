@@ -94,7 +94,9 @@ uses
   // PBKDF2_HMAC Unit
   HlpPBKDF2_HMACNotBuildInAdapter,
   // PBKDF_Argon2 Unit
-  HlpPBKDF_Argon2NotBuildInAdapter;
+  HlpPBKDF_Argon2NotBuildInAdapter,
+  // PBKDF_Scrypt Unit
+  HlpPBKDF_ScryptNotBuildInAdapter;
 
 type
   THashFactory = class sealed(TObject)
@@ -413,8 +415,8 @@ type
 
     public
 
-      class function CreateHMAC(const a_hash: IHash;
-        const a_hmacKey: THashLibByteArray = Nil): IHMAC; static;
+      class function CreateHMAC(const AHash: IHash;
+        const AHmacKey: THashLibByteArray = Nil): IHMAC; static;
 
     end;
 
@@ -436,17 +438,17 @@ type
       /// an "IHash" to be used as an "IHMAC" hashing implementation to
       /// derive the key.
       /// </summary>
-      /// <param name="a_hash">
+      /// <param name="AHash">
       /// The name of the "IHash" implementation to be transformed to an
       /// "IHMAC" Instance so it can be used to derive the key.
       /// </param>
-      /// <param name="a_password">
+      /// <param name="APassword">
       /// The password to derive the key for.
       /// </param>
-      /// <param name="a_salt">
+      /// <param name="ASalt">
       /// The salt to use to derive the key.
       /// </param>
-      /// <param name="a_iterations">
+      /// <param name="AIterations">
       /// The number of iterations to use to derive the key.
       /// </param>
       /// <returns>
@@ -458,8 +460,8 @@ type
       /// <exception cref="EArgumentHashLibException">
       /// The iteration is less than 1.
       /// </exception>
-      class function CreatePBKDF2_HMAC(const a_hash: IHash;
-        const a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
+      class function CreatePBKDF2_HMAC(const AHash: IHash;
+        const APassword, ASalt: THashLibByteArray; AIterations: UInt32)
         : IPBKDF2_HMAC; static;
 
     end;
@@ -491,6 +493,40 @@ type
       /// </exception>
       class function CreatePBKDF_Argon2(const APassword: THashLibByteArray;
         const AArgon2Parameters: IArgon2Parameters): IPBKDF_Argon2; static;
+
+    end;
+
+    // ====================== TPBKDF_Scrypt ====================== //
+
+  type
+    TPBKDF_Scrypt = class sealed(TObject)
+
+    public
+
+      /// <summary>
+      /// Initializes a new interface instance of the TPBKDF_Scrypt class
+      /// using a password, a salt, a cost, blocksize and parallelism parameters to
+      /// derive the key.
+      /// </summary>
+      /// <param name="APasswordBytes">the bytes of the pass phrase.</param>
+      /// <param name="ASaltBytes">the salt to use for this invocation.</param>
+      /// <param name="ACost">CPU/Memory cost parameter. Must be larger than 1, a power of 2 and less than
+      /// <code>2^(128 * ABlockSize / 8)</code>.</param>
+      /// <param name="ABlockSize">the block size, must be >= 1.</param>
+      /// <param name="AParallelism">Parallelization parameter. Must be a positive integer less than or equal to
+      /// <code>(System.High(Int32) div (128 * ABlockSize * 8))</code>.</param>
+      /// <returns>
+      /// The PBKDF_Scrypt KDF Interface Instance <br />
+      /// </returns>
+      /// <exception cref="EArgumentNilHashLibException">
+      /// The password, salt is Nil.
+      /// </exception>
+      /// <exception cref="EArgumentHashLibException">
+      /// The cost, blocksize or parallelism is Invalid.
+      /// </exception>
+      class function CreatePBKDF_Scrypt(const APasswordBytes,
+        ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32)
+        : IPBKDF_Scrypt; static;
 
     end;
 
@@ -1259,23 +1295,19 @@ end;
 
 { THashFactory.THMAC }
 
-class function THashFactory.THMAC.CreateHMAC(const a_hash: IHash;
-  const a_hmacKey: THashLibByteArray): IHMAC;
+class function THashFactory.THMAC.CreateHMAC(const AHash: IHash;
+  const AHmacKey: THashLibByteArray): IHMAC;
 begin
-  Result := THMACNotBuildInAdapter.CreateHMAC(a_hash, a_hmacKey);
+  Result := THMACNotBuildInAdapter.CreateHMAC(AHash, AHmacKey);
 end;
 
 { TKDF.TPBKDF2_HMAC }
 
-class function TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(const a_hash: IHash;
-  const a_password, a_salt: THashLibByteArray; a_iterations: UInt32)
-  : IPBKDF2_HMAC;
+class function TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(const AHash: IHash;
+  const APassword, ASalt: THashLibByteArray; AIterations: UInt32): IPBKDF2_HMAC;
 begin
-  TPBKDF2_HMACNotBuildInAdapter.ValidatePBKDF2_HMACInputs(a_hash, a_password,
-    a_salt, a_iterations);
-
-  Result := TPBKDF2_HMACNotBuildInAdapter.Create(a_hash, a_password, a_salt,
-    a_iterations);
+  Result := TPBKDF2_HMACNotBuildInAdapter.Create(AHash, APassword, ASalt,
+    AIterations);
 end;
 
 { TKDF.TPBKDF_Argon2 }
@@ -1284,10 +1316,17 @@ class function TKDF.TPBKDF_Argon2.CreatePBKDF_Argon2(const APassword
   : THashLibByteArray; const AArgon2Parameters: IArgon2Parameters)
   : IPBKDF_Argon2;
 begin
-  TPBKDF_Argon2NotBuildInAdapter.ValidatePBKDF_Argon2Inputs(APassword,
-    AArgon2Parameters);
-
   Result := TPBKDF_Argon2NotBuildInAdapter.Create(APassword, AArgon2Parameters)
+end;
+
+{ TKDF.TPBKDF_Scrypt }
+
+class function TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(const APasswordBytes,
+  ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32)
+  : IPBKDF_Scrypt;
+begin
+  Result := TPBKDF_ScryptNotBuildInAdapter.Create(APasswordBytes, ASaltBytes,
+    ACost, ABlockSize, AParallelism);
 end;
 
 end.

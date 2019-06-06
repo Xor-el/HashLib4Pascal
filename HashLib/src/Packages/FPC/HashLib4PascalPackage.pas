@@ -29,7 +29,7 @@ uses
   HlpBlake2SIvBuilder, HlpBlake2STreeConfig, HlpIBlake2BConfig, 
   HlpIBlake2BTreeConfig, HlpIBlake2SConfig, HlpIBlake2STreeConfig, 
   HlpGOST3411_2012, HlpCRC32Fast, HlpArgon2TypeAndVersion, 
-  HlpPBKDF_Argon2NotBuildInAdapter;
+  HlpPBKDF_Argon2NotBuildInAdapter, HlpPBKDF_ScryptNotBuildInAdapter;
 
 implementation
 

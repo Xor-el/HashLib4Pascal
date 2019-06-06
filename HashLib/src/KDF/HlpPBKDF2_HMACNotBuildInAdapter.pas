@@ -17,8 +17,6 @@ resourcestring
     '"bc (ByteCount)" Argument must be a value greater than zero.';
   SInvalidIndex = 'Invalid start or end index in the internal buffer';
   SNotInitializedIHashInstance = '"IHash" instance is uninitialized';
-  SEmptyPassword = 'Password can''t be empty';
-  SEmptySalt = 'Salt can''t be empty';
   SIterationtooSmall = 'Iteration must be greater than zero.';
 
 type
@@ -47,11 +45,9 @@ type
     class function GetBigEndianBytes(i: UInt32): THashLibByteArray;
       static; inline;
 
-  public
-
     class procedure ValidatePBKDF2_HMACInputs(const a_hash: IHash;
-      const a_password, a_salt: THashLibByteArray;
       a_iterations: UInt32); static;
+  public
 
     constructor Create(const a_underlyingHash: IHash;
       const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
@@ -72,17 +68,10 @@ implementation
 { TPBKDF2_HMACNotBuildInAdapter }
 
 class procedure TPBKDF2_HMACNotBuildInAdapter.ValidatePBKDF2_HMACInputs
-  (const a_hash: IHash; const a_password, a_salt: THashLibByteArray;
-  a_iterations: UInt32);
+  (const a_hash: IHash; a_iterations: UInt32);
 begin
   if not(System.Assigned(a_hash)) then
     raise EArgumentNilHashLibException.CreateRes(@SNotInitializedIHashInstance);
-
-  if (a_password = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptyPassword);
-
-  if (a_salt = Nil) then
-    raise EArgumentNilHashLibException.CreateRes(@SEmptySalt);
 
   if (a_iterations < 1) then
     raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
@@ -92,6 +81,7 @@ constructor TPBKDF2_HMACNotBuildInAdapter.Create(const a_underlyingHash: IHash;
   const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
 begin
   Inherited Create();
+  ValidatePBKDF2_HMACInputs(a_underlyingHash, a_iterations);
   FHash := a_underlyingHash;
   FPassword := System.Copy(a_password);
   FSalt := System.Copy(a_salt);
@@ -152,7 +142,7 @@ var
 begin
 
   if (bc <= 0) then
-    raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidByteCount);
+    raise EArgumentHashLibException.CreateRes(@SInvalidByteCount);
 
   System.SetLength(LKey, bc);
 

@@ -15,7 +15,8 @@ uses
   CryptoTests,
   BitConverterTests,
   PBKDF2_HMACTests,
-  PBKDF_Argon2Tests;
+  PBKDF_Argon2Tests,
+  PBKDF_ScryptTests;
 
 type
 

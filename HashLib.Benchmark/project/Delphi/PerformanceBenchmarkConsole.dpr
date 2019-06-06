@@ -31,6 +31,7 @@ uses
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
   HlpArgon2TypeAndVersion in '..\..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
+  HlpPBKDF_ScryptNotBuildInAdapter in '..\..\..\HashLib\src\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
   HlpPanama in '..\..\..\HashLib\src\Crypto\HlpPanama.pas',
   HlpAdler32 in '..\..\..\HashLib\src\Checksum\HlpAdler32.pas',
   HlpAP in '..\..\..\HashLib\src\Hash32\HlpAP.pas',
