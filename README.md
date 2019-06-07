@@ -28,6 +28,8 @@ It also supports Incremental Hashing.
     PBKDF2_HMAC for any of the above.
     
     PBKDF_Argon2 (2i, 2d and 2id variants).
+    
+    PBKDF_Scrypt.
 
 **Supported Compilers**
  
