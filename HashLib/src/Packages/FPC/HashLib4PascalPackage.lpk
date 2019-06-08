@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="3" Minor="6"/>
-    <Files Count="106">
+    <Files Count="107">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -448,6 +448,10 @@
         <Filename Value="..\..\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas"/>
         <UnitName Value="HlpPBKDF_ScryptNotBuildInAdapter"/>
       </Item106>
+      <Item107>
+        <Filename Value="..\..\Utils\HlpArrayUtils.pas"/>
+        <UnitName Value="HlpArrayUtils"/>
+      </Item107>
     </Files>
     <LazDoc PackageName="(default)"/>
     <RequiredPkgs Count="1">

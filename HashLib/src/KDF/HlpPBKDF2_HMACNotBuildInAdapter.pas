@@ -10,6 +10,7 @@ uses
   HlpIHashInfo,
   HlpHMACNotBuildInAdapter,
   HlpBitConverter,
+  HlpArrayUtils,
   HlpHashLibTypes;
 
 resourcestring
@@ -27,9 +28,9 @@ type
   strict private
     FHash: IHash;
     FHMAC: IHMAC;
-    FPassword, FSalt, Fbuffer: THashLibByteArray;
+    FPassword, FSalt, FBuffer: THashLibByteArray;
     FIterationCount, FBlock: UInt32;
-    FBlockSize, FstartIndex, FendIndex: Int32;
+    FBlockSize, FStartIndex, FEndIndex: Int32;
 
     // initializes the state of the operation.
     procedure Initialize();
@@ -51,6 +52,10 @@ type
 
     constructor Create(const a_underlyingHash: IHash;
       const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
+
+    destructor Destroy; override;
+
+    procedure Clear(); override;
 
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
@@ -77,6 +82,12 @@ begin
     raise EArgumentHashLibException.CreateRes(@SIterationtooSmall);
 end;
 
+procedure TPBKDF2_HMACNotBuildInAdapter.Clear();
+begin
+  TArrayUtils.ZeroFill(FPassword);
+  TArrayUtils.ZeroFill(FSalt);
+end;
+
 constructor TPBKDF2_HMACNotBuildInAdapter.Create(const a_underlyingHash: IHash;
   const a_password, a_salt: THashLibByteArray; a_iterations: UInt32);
 begin
@@ -87,6 +98,12 @@ begin
   FSalt := System.Copy(a_salt);
   FIterationCount := a_iterations;
   Initialize();
+end;
+
+destructor TPBKDF2_HMACNotBuildInAdapter.Destroy;
+begin
+  Clear();
+  inherited Destroy;
 end;
 
 class function TPBKDF2_HMACNotBuildInAdapter.GetBigEndianBytes(i: UInt32)
@@ -147,26 +164,26 @@ begin
   System.SetLength(LKey, bc);
 
   LOffset := 0;
-  LSize := FendIndex - FstartIndex;
+  LSize := FEndIndex - FStartIndex;
   if (LSize > 0) then
   begin
     if (bc >= LSize) then
     begin
-      System.Move(Fbuffer[FstartIndex], LKey[0], LSize);
-      FstartIndex := 0;
-      FendIndex := 0;
+      System.Move(FBuffer[FStartIndex], LKey[0], LSize);
+      FStartIndex := 0;
+      FEndIndex := 0;
       LOffset := LOffset + LSize;
     end
     else
     begin
-      System.Move(Fbuffer[FstartIndex], LKey[0], bc);
-      FstartIndex := FstartIndex + bc;
+      System.Move(FBuffer[FStartIndex], LKey[0], bc);
+      FStartIndex := FStartIndex + bc;
       result := LKey;
       Exit;
     end;
   end;
 
-  if ((FstartIndex <> 0) and (FendIndex <> 0)) then
+  if ((FStartIndex <> 0) and (FEndIndex <> 0)) then
     raise EArgumentHashLibException.CreateRes(@SInvalidIndex);
 
   while (LOffset < bc) do
@@ -187,9 +204,9 @@ begin
       LRemCount := FBlockSize - LRemainder;
       if LRemCount > 0 then
       begin
-        System.Move(LT_block[LRemainder], Fbuffer[FstartIndex], LRemCount);
+        System.Move(LT_block[LRemainder], FBuffer[FStartIndex], LRemCount);
       end;
-      FendIndex := FendIndex + LRemCount;
+      FEndIndex := FEndIndex + LRemCount;
       result := LKey;
       Exit;
     end;
@@ -200,17 +217,15 @@ end;
 
 procedure TPBKDF2_HMACNotBuildInAdapter.Initialize;
 begin
-  if (Fbuffer <> Nil) then
-    System.FillChar(Fbuffer[0], System.Length(Fbuffer) *
-      System.SizeOf(Byte), Byte(0));
+  TArrayUtils.ZeroFill(FBuffer);
 
   FHMAC := THMACNotBuildInAdapter.CreateHMAC(FHash, FPassword);
 
   FBlockSize := FHMAC.HashSize;
-  System.SetLength(Fbuffer, FBlockSize);
+  System.SetLength(FBuffer, FBlockSize);
   FBlock := 1;
-  FstartIndex := 0;
-  FendIndex := 0;
+  FStartIndex := 0;
+  FEndIndex := 0;
 end;
 
 end.

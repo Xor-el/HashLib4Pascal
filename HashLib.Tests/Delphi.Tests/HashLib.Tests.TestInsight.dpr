@@ -121,6 +121,7 @@ uses
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
+  HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas',
   HashLibTestBase in '..\src\HashLibTestBase.pas',
   Blake2BTestVectors in '..\src\Blake2BTestVectors.pas',
   Blake2STestVectors in '..\src\Blake2STestVectors.pas',

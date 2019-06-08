@@ -16,7 +16,8 @@ uses
   TestFramework,
 {$ENDIF FPC}
   HlpIHash,
-  HlpIHashResult;
+  HlpIHashResult,
+  HlpArrayUtils;
 
 type
 
@@ -140,14 +141,7 @@ implementation
 
 function THashLibAlgorithmTestCase.AreEqual(const A, B: TBytes): Boolean;
 begin
-  if System.Length(A) <> System.Length(B) then
-  begin
-    Result := false;
-    Exit;
-  end;
-
-  Result := CompareMem(PByte(A), PByte(B), System.Length(A) *
-    System.SizeOf(Byte));
+  Result := TArrayUtils.AreEqual(A, B);
 end;
 
 end.

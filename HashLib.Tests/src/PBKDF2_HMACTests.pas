@@ -68,6 +68,7 @@ begin
   Hash := THashFactory.TCrypto.CreateSHA1();
   PBKDF2 := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 2048);
   Key := PBKDF2.GetBytes(24);
+  PBKDF2.Clear();
 
   FActualString := TConverters.ConvertBytesToHexString(Key, False);
 
@@ -82,6 +83,7 @@ procedure TTestPBKDF2_HMACSHA2_256.TestOne;
 var
   Password, Salt, Key: TBytes;
   Hash: IHash;
+  PBKDF2: IPBKDF2_HMAC;
 
 begin
   FExpectedString :=
@@ -89,8 +91,9 @@ begin
   Password := TConverters.ConvertStringToBytes('password', TEncoding.UTF8);
   Salt := TConverters.ConvertStringToBytes('salt', TEncoding.UTF8);
   Hash := THashFactory.TCrypto.CreateSHA2_256();
-  Key := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 100000)
-    .GetBytes(32);
+  PBKDF2 := TKDF.TPBKDF2_HMAC.CreatePBKDF2_HMAC(Hash, Password, Salt, 100000);
+  Key := PBKDF2.GetBytes(32);
+  PBKDF2.Clear();
 
   FActualString := TConverters.ConvertBytesToHexString(Key, False);
 

@@ -139,6 +139,7 @@ contains
   HlpConverters in '..\..\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\Utils\HlpBits.pas',
+  HlpArrayUtils in '..\..\Utils\HlpArrayUtils.pas',
   HlpHashLibTypes in '..\..\Utils\HlpHashLibTypes.pas';
 
 end.

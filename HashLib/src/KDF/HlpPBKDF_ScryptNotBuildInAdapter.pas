@@ -17,6 +17,7 @@ uses
   HlpIHashInfo,
   HlpPBKDF2_HMACNotBuildInAdapter,
   HlpConverters,
+  HlpArrayUtils,
   HlpHashLibTypes;
 
 resourcestring
@@ -43,10 +44,13 @@ type
     FPasswordBytes, FSaltBytes: THashLibByteArray;
     FCost, FBlockSize, FParallelism: Int32;
 
-    class procedure Clear(const AInput: THashLibByteArray); overload; static;
-    class procedure Clear(const AInput: THashLibUInt32Array); overload; static;
+    class procedure ClearArray(const AInput: THashLibByteArray);
+      overload; static;
+    class procedure ClearArray(const AInput: THashLibUInt32Array);
+      overload; static;
 
-    class procedure ClearAll(const AInputs: THashLibMatrixUInt32Array); static;
+    class procedure ClearAllArrays(const AInputs
+      : THashLibMatrixUInt32Array); static;
 
     class function IsPowerOf2(x: Int32): Boolean; static; inline;
 
@@ -99,6 +103,10 @@ type
     constructor Create(const APasswordBytes, ASaltBytes: THashLibByteArray;
       ACost, ABlockSize, AParallelism: Int32);
 
+    destructor Destroy; override;
+
+    procedure Clear(); override;
+
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
     /// </summary>
@@ -113,18 +121,14 @@ implementation
 
 { TPBKDF_ScryptNotBuildInAdapter }
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.Clear(const AInput
-  : THashLibByteArray);
+class procedure TPBKDF_ScryptNotBuildInAdapter.ClearArray
+  (const AInput: THashLibByteArray);
 begin
-  if AInput <> Nil then
-  begin
-    System.FillChar(AInput[0], System.Length(AInput) *
-      System.SizeOf(Byte), Byte(0));
-  end;
+  TArrayUtils.ZeroFill(AInput);
 end;
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.Clear(const AInput
-  : THashLibUInt32Array);
+class procedure TPBKDF_ScryptNotBuildInAdapter.ClearArray
+  (const AInput: THashLibUInt32Array);
 {$IFNDEF FPC}
 var
   Idx: Int32;
@@ -143,14 +147,14 @@ begin
   end;
 end;
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.ClearAll(const AInputs
-  : THashLibMatrixUInt32Array);
+class procedure TPBKDF_ScryptNotBuildInAdapter.ClearAllArrays
+  (const AInputs: THashLibMatrixUInt32Array);
 var
   Idx: Int32;
 begin
   for Idx := System.Low(AInputs) to System.High(AInputs) do
   begin
-    Clear(AInputs[Idx]);
+    ClearArray(AInputs[Idx]);
   end;
 end;
 
@@ -349,8 +353,9 @@ begin
 
     System.Move(x[0], b[bOff], BCount * System.SizeOf(UInt32));
   finally
-    ClearAll(V);
-    ClearAll(THashLibMatrixUInt32Array.Create(x, blockX1, blockX2, blockY));
+    ClearAllArrays(V);
+    ClearAllArrays(THashLibMatrixUInt32Array.Create(x, blockX1,
+      blockX2, blockY));
   end;
 end;
 
@@ -426,8 +431,8 @@ begin
 
     result := SingleIterationPBKDF2(APasswordBytes, bytes, AOutputLength);
   finally
-    Clear(b);
-    Clear(bytes);
+    ClearArray(b);
+    ClearArray(bytes);
   end;
 
 end;
@@ -455,16 +460,28 @@ begin
       [maxParallel, ABlockSize]);
 end;
 
+procedure TPBKDF_ScryptNotBuildInAdapter.Clear();
+begin
+  TArrayUtils.ZeroFill(FPasswordBytes);
+  TArrayUtils.ZeroFill(FSaltBytes);
+end;
+
 constructor TPBKDF_ScryptNotBuildInAdapter.Create(const APasswordBytes,
   ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32);
 begin
   Inherited Create();
   ValidatePBKDF_ScryptInputs(ACost, ABlockSize, AParallelism);
-  FPasswordBytes := APasswordBytes;
-  FSaltBytes := ASaltBytes;
+  FPasswordBytes := System.Copy(APasswordBytes);
+  FSaltBytes := System.Copy(ASaltBytes);
   FCost := ACost;
   FBlockSize := ABlockSize;
   FParallelism := AParallelism;
+end;
+
+destructor TPBKDF_ScryptNotBuildInAdapter.Destroy;
+begin
+  Clear();
+  inherited Destroy;
 end;
 
 function TPBKDF_ScryptNotBuildInAdapter.GetBytes(bc: Int32): THashLibByteArray;

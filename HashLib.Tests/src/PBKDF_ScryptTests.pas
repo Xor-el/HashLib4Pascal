@@ -70,6 +70,7 @@ begin
   PBKDF_Scrypt := TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(APasswordBytes,
     ASaltBytes, ACost, ABlockSize, AParallelism);
   OutputBytes := PBKDF_Scrypt.GetBytes(AOutputSize);
+  PBKDF_Scrypt.Clear();
   Result := TConverters.ConvertBytesToHexString(OutputBytes, False);
 end;
 
@@ -92,15 +93,22 @@ end;
 procedure TTestPBKDF_Scrypt.DoCheckOk(const AMsg: String;
   const APassword, ASalt: THashLibByteArray; ACost, ABlockSize, AParallelism,
   AOutputSize: Int32);
+var
+  PBKDF_Scrypt: IPBKDF_Scrypt;
 begin
   try
-    TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(APassword, ASalt, ACost, ABlockSize,
-      AParallelism).GetBytes(AOutputSize);
-  except
-    on e: EArgumentHashLibException do
-    begin
-      Fail(AMsg);
+    try
+      PBKDF_Scrypt := TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(APassword, ASalt,
+        ACost, ABlockSize, AParallelism);
+      PBKDF_Scrypt.GetBytes(AOutputSize);
+    except
+      on e: EArgumentHashLibException do
+      begin
+        Fail(AMsg);
+      end;
     end;
+  finally
+    PBKDF_Scrypt.Clear();
   end;
 end;
 

@@ -108,7 +108,8 @@ uses
   HlpSuperFast in '..\..\..\HashLib\src\Hash32\HlpSuperFast.pas',
   HlpTiger in '..\..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\..\HashLib\src\Crypto\HlpTiger2.pas',
-  HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas';
+  HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
+  HlpArrayUtils in '..\..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 
 {$R *.res}
 

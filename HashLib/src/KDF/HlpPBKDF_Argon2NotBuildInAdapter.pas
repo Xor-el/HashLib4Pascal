@@ -19,6 +19,7 @@ uses
   HlpIBlake2BConfig,
   HlpConverters,
   HlpArgon2TypeAndVersion,
+  HlpArrayUtils,
   HlpHashLibTypes;
 
 resourcestring
@@ -91,6 +92,8 @@ type
     constructor Create(AType: TArgon2Type);
 
   public
+
+    destructor Destroy(); override;
 
     function WithParallelism(AParallelism: Int32)
       : IArgon2ParametersBuilder; virtual;
@@ -325,6 +328,10 @@ type
     constructor Create(const APassword: THashLibByteArray;
       const AParameters: IArgon2Parameters);
 
+    destructor Destroy; override;
+
+    procedure Clear(); override;
+
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
     /// </summary>
@@ -398,12 +405,9 @@ end;
 
 procedure TArgon2ParametersBuilder.TArgon2Parameters.Clear();
 begin
-  System.FillChar(FSalt[0], System.Length(FSalt) * System.SizeOf(Byte),
-    Byte(0));
-  System.FillChar(FSecret[0], System.Length(FSecret) *
-    System.SizeOf(Byte), Byte(0));
-  System.FillChar(FAdditional[0], System.Length(FAdditional) *
-    System.SizeOf(Byte), Byte(0));
+  TArrayUtils.ZeroFill(FSalt);
+  TArrayUtils.ZeroFill(FSecret);
+  TArrayUtils.ZeroFill(FAdditional);
 end;
 
 { TArgon2ParametersBuilder }
@@ -416,6 +420,12 @@ begin
   FIterations := DEFAULT_ITERATIONS;
   FType := AType;
   FVersion := DEFAULT_VERSION;
+end;
+
+destructor TArgon2ParametersBuilder.Destroy;
+begin
+  Clear();
+  inherited Destroy;
 end;
 
 function TArgon2ParametersBuilder.WithAdditional(const AAdditional
@@ -482,12 +492,9 @@ end;
 
 procedure TArgon2ParametersBuilder.Clear();
 begin
-  System.FillChar(FSalt[0], System.Length(FSalt) * System.SizeOf(Byte),
-    Byte(0));
-  System.FillChar(FSecret[0], System.Length(FSecret) *
-    System.SizeOf(Byte), Byte(0));
-  System.FillChar(FAdditional[0], System.Length(FAdditional) *
-    System.SizeOf(Byte), Byte(0));
+  TArrayUtils.ZeroFill(FSalt);
+  TArrayUtils.ZeroFill(FSecret);
+  TArrayUtils.ZeroFill(FAdditional);
 end;
 
 { TArgon2iParametersBuilder }
@@ -624,8 +631,7 @@ begin
     FMemory[LIdx] := Default (TBlock);
   end;
   FMemory := Nil;
-  System.FillChar(FResult[0], System.Length(FResult) *
-    System.SizeOf(Byte), Byte(0));
+  TArrayUtils.ZeroFill(FResult);
   DoInit(FParameters);
 end;
 
@@ -1165,6 +1171,11 @@ begin
   FillFirstBlocks(LInitialHash);
 end;
 
+procedure TPBKDF_Argon2NotBuildInAdapter.Clear();
+begin
+  TArrayUtils.ZeroFill(FPassword);
+end;
+
 constructor TPBKDF_Argon2NotBuildInAdapter.Create(const APassword
   : THashLibByteArray; const AParameters: IArgon2Parameters);
 begin
@@ -1196,6 +1207,12 @@ begin
 
   DoInit(AParameters);
 
+end;
+
+destructor TPBKDF_Argon2NotBuildInAdapter.Destroy;
+begin
+  Clear();
+  inherited Destroy;
 end;
 
 function TPBKDF_Argon2NotBuildInAdapter.GetBytes(bc: Int32): THashLibByteArray;
@@ -1269,7 +1286,7 @@ end;
 procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.Clear;
 begin
   CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
-  System.FillChar(Fv[0], System.Length(Fv) * System.SizeOf(Byte), Byte(0));
+  TArrayUtils.ZeroFill(Fv);
 end;
 
 procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.&Xor(const AB1, AB2,

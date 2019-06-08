@@ -74,6 +74,7 @@ type
 
   IHMAC = Interface(IWithKey)
     ['{A6D4DCC6-F6C3-4110-8CA2-FBE85227676E}']
+    procedure Clear();
   end;
 
   IHMACNotBuildIn = Interface(IHMAC)

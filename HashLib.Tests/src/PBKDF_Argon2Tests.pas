@@ -80,6 +80,7 @@ var
   LGenerator: IPBKDF_Argon2;
   LActual: String;
   LAdditional, LSecret, LSalt, LPassword: THashLibByteArray;
+  LArgon2Parameter: IArgon2Parameters;
 begin
 
   LAdditional := TConverters.ConvertHexStringToBytes(AAdditional);
@@ -94,11 +95,16 @@ begin
   //
   // Set the password.
   //
+  LArgon2Parameter := AArgon2ParametersBuilder.Build();
+  AArgon2ParametersBuilder.Clear();
   LGenerator := TKDF.TPBKDF_Argon2.CreatePBKDF_Argon2(LPassword,
-    AArgon2ParametersBuilder.Build());
+    LArgon2Parameter);
 
   LActual := TConverters.ConvertBytesToHexString
     (LGenerator.GetBytes(AOutputLength), False);
+
+  LArgon2Parameter.Clear();
+  LGenerator.Clear();
 
   CheckEquals(APasswordRef, LActual, Format('Expected %s but got %s.',
     [APasswordRef, LActual]));
@@ -152,6 +158,7 @@ var
   LGenerator: IPBKDF_Argon2;
   LSalt, LPassword: THashLibByteArray;
   LActual: String;
+  LArgon2Parameter: IArgon2Parameters;
 begin
 
   LSalt := TConverters.ConvertStringToBytes(ASalt, TEncoding.ASCII);
@@ -163,11 +170,16 @@ begin
   //
   // Set the password.
   //
+  LArgon2Parameter := AArgon2ParametersBuilder.Build();
+  AArgon2ParametersBuilder.Clear();
   LGenerator := TKDF.TPBKDF_Argon2.CreatePBKDF_Argon2(LPassword,
-    AArgon2ParametersBuilder.Build());
+    LArgon2Parameter);
 
   LActual := TConverters.ConvertBytesToHexString
     (LGenerator.GetBytes(AOutputLength), False);
+
+  LArgon2Parameter.Clear();
+  LGenerator.Clear();
 
   CheckEquals(APasswordRef, LActual, Format('Expected %s but got %s.',
     [APasswordRef, LActual]));
