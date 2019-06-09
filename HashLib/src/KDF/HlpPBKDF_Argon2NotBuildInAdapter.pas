@@ -284,7 +284,7 @@ type
     function RotatePrevOffset(ACurrentOffset, APrevOffset: Int32)
       : Int32; inline;
     procedure FillSegment(var APosition: TPosition);
-    procedure FillMemoryBlocks();
+    procedure DoParallelFillMemoryBlocks();
 
     (* *
 
@@ -1104,7 +1104,7 @@ end;
 
 {$IFDEF DELPHIXE7_UP}
 
-procedure TPBKDF_Argon2NotBuildInAdapter.FillMemoryBlocks;
+procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks;
 
   function CreateTask(APosition: TPosition): ITask;
   begin
@@ -1142,7 +1142,7 @@ end;
 
 {$ELSE}
 
-procedure TPBKDF_Argon2NotBuildInAdapter.FillMemoryBlocks;
+procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks;
 var
   LIdx, LJdx, LKdx: Int32;
   LPosition: TPosition;
@@ -1222,7 +1222,7 @@ begin
       [MIN_OUTLEN]);
 
   Initialize(FPassword, bc);
-  FillMemoryBlocks();
+  DoParallelFillMemoryBlocks();
   Digest(bc);
   System.SetLength(result, bc);
   System.Move(FResult[0], result[0], bc * System.SizeOf(Byte));
