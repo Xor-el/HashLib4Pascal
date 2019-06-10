@@ -14,7 +14,6 @@ uses
   HlpIHashInfo,
   HlpHashFactory,
   HlpConverters,
-  HlpHashLibTypes,
   HlpPBKDF_Argon2NotBuildInAdapter,
   HlpArgon2TypeAndVersion;
 
@@ -79,7 +78,7 @@ procedure TTestPBKDF_Argon2FromInternetDraft.HashTestFromInternetDraft
 var
   LGenerator: IPBKDF_Argon2;
   LActual: String;
-  LAdditional, LSecret, LSalt, LPassword: THashLibByteArray;
+  LAdditional, LSecret, LSalt, LPassword: TBytes;
   LArgon2Parameter: IArgon2Parameters;
 begin
 
@@ -156,7 +155,7 @@ procedure TTestPBKDF_Argon2Others.HashTestOthers(const AArgon2ParametersBuilder
   const APassword, ASalt, APasswordRef: String; AOutputLength: Int32);
 var
   LGenerator: IPBKDF_Argon2;
-  LSalt, LPassword: THashLibByteArray;
+  LSalt, LPassword: TBytes;
   LActual: String;
   LArgon2Parameter: IArgon2Parameters;
 begin
