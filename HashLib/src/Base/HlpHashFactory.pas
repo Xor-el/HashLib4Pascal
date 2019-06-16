@@ -12,8 +12,9 @@ uses
   HlpHashLibTypes,
   // NullDigest Unit //
   HlpNullDigest,
-  // Checksum Units //
+  // Checksum Unit //
   HlpAdler32,
+  // CRC Units //
   HlpCRC,
   HlpCRC16,
   HlpCRC32,
@@ -111,10 +112,10 @@ type
 
     end;
 
-    // ====================== TChecksum ====================== //
+    // ====================== TCRC ====================== //
 
   type
-    TChecksum = class sealed(TObject)
+    TCRC = class sealed(TObject)
 
     public
 
@@ -157,6 +158,15 @@ type
       /// </summary>
       /// <returns></returns>
       class function CreateCRC64_ECMA_182(): IHash; static;
+
+    end;
+
+    // ====================== TChecksum ====================== //
+
+  type
+    TChecksum = class sealed(TObject)
+
+    public
 
       class function CreateAdler32: IHash; static;
     end;
@@ -541,22 +551,22 @@ begin
   Result := TNullDigest.Create();
 end;
 
-{ THashFactory.TChecksum }
+{ THashFactory.TCRC }
 
-class function THashFactory.TChecksum.CreateCRC(_Width: Int32;
-  _poly, _Init: UInt64; _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
+class function THashFactory.TCRC.CreateCRC(_Width: Int32; _poly, _Init: UInt64;
+  _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   const _Names: THashLibStringArray): IHash;
 begin
-  Result := TCRC.Create(_Width, _poly, _Init, _refIn, _refOut, _XorOut,
+  Result := HlpCRC.TCRC.Create(_Width, _poly, _Init, _refIn, _refOut, _XorOut,
     _check, _Names);
 end;
 
-class function THashFactory.TChecksum.CreateCRC(_value: TCRCStandard): IHash;
+class function THashFactory.TCRC.CreateCRC(_value: TCRCStandard): IHash;
 begin
-  Result := TCRC.CreateCRCObject(_value);
+  Result := HlpCRC.TCRC.CreateCRCObject(_value);
 end;
 
-class function THashFactory.TChecksum.CreateCRC16(_poly, _Init: UInt64;
+class function THashFactory.TCRC.CreateCRC16(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   const _Names: THashLibStringArray): IHash;
 begin
@@ -564,12 +574,12 @@ begin
     _check, _Names);
 end;
 
-class function THashFactory.TChecksum.CreateCRC16_BUYPASS: IHash;
+class function THashFactory.TCRC.CreateCRC16_BUYPASS: IHash;
 begin
   Result := TCRC16_BUYPASS.Create();
 end;
 
-class function THashFactory.TChecksum.CreateCRC32(_poly, _Init: UInt64;
+class function THashFactory.TCRC.CreateCRC32(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   const _Names: THashLibStringArray): IHash;
 begin
@@ -577,17 +587,17 @@ begin
     _check, _Names);
 end;
 
-class function THashFactory.TChecksum.CreateCRC32_CASTAGNOLI: IHash;
+class function THashFactory.TCRC.CreateCRC32_CASTAGNOLI: IHash;
 begin
   Result := HlpCRC32Fast.TCRC32_CASTAGNOLI.Create();
 end;
 
-class function THashFactory.TChecksum.CreateCRC32_PKZIP: IHash;
+class function THashFactory.TCRC.CreateCRC32_PKZIP: IHash;
 begin
   Result := HlpCRC32Fast.TCRC32_PKZIP.Create();
 end;
 
-class function THashFactory.TChecksum.CreateCRC64(_poly, _Init: UInt64;
+class function THashFactory.TCRC.CreateCRC64(_poly, _Init: UInt64;
   _refIn, _refOut: Boolean; _XorOut, _check: UInt64;
   const _Names: THashLibStringArray): IHash;
 begin
@@ -595,10 +605,12 @@ begin
     _check, _Names);
 end;
 
-class function THashFactory.TChecksum.CreateCRC64_ECMA_182: IHash;
+class function THashFactory.TCRC.CreateCRC64_ECMA_182: IHash;
 begin
   Result := TCRC64_ECMA_182.Create();
 end;
+
+{ THashFactory.TChecksum }
 
 class function THashFactory.TChecksum.CreateAdler32: IHash;
 begin

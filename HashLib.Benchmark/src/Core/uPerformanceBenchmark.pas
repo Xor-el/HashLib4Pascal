@@ -97,11 +97,11 @@ begin
 
   AStringList.Append(Calculate(THashFactory.TChecksum.CreateAdler32));
 
-  AStringList.Append(Calculate(THashFactory.TChecksum.CreateCRC
+  AStringList.Append(Calculate(THashFactory.TCRC.CreateCRC
     (TCRCStandard.CRC32), 'PKZIP_Generic'));
 
   AStringList.Append
-    (Calculate(THashFactory.TChecksum.CreateCRC32_PKZIP, 'Fast'));
+    (Calculate(THashFactory.TCRC.CreateCRC32_PKZIP, 'Fast'));
 
   AStringList.Append(Calculate(THashFactory.THash32.CreateMurmurHash3_x86_32));
 

@@ -38,7 +38,7 @@
         <PackageName Value="FCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="HashLib.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -96,6 +96,10 @@
         <Filename Value="..\src\PBKDF_ScryptTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="..\src\CRCTests.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

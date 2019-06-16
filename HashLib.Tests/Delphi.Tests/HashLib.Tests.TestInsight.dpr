@@ -134,7 +134,8 @@ uses
   BitConverterTests in '..\src\BitConverterTests.pas',
   PBKDF2_HMACTests in '..\src\PBKDF2_HMACTests.pas',
   PBKDF_Argon2Tests in '..\src\PBKDF_Argon2Tests.pas',
-  PBKDF_ScryptTests in '..\src\PBKDF_ScryptTests.pas';
+  PBKDF_ScryptTests in '..\src\PBKDF_ScryptTests.pas',
+  CRCTests in '..\src\CRCTests.pas';
 
 begin
 
