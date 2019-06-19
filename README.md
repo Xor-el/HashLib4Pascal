@@ -58,9 +58,9 @@ Available Algorithms
 
  * `SHA-2 (224, 256, 384, 512, 512-224, 512-256)`
 
- * `Gost3411`
+ * `GOST 34.11-94`
 
- * `Gost3411-2012 (256, 512)`
+ * `GOST R 34.11-2012 (AKA Streebog) (256, 512)`
  
  * `Grindahl (256, 512)`
  
