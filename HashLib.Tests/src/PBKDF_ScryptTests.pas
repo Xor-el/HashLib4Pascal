@@ -89,7 +89,7 @@ begin
 end;
 
 procedure TTestPBKDF_Scrypt.DoCheckOk(const AMsg: String;
-  const APassword, ASalt: THashLibByteArray; ACost, ABlockSize, AParallelism,
+  const APassword, ASalt: TBytes; ACost, ABlockSize, AParallelism,
   AOutputSize: Int32);
 var
   PBKDF_Scrypt: IPBKDF_Scrypt;
