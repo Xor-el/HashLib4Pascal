@@ -15,17 +15,12 @@ uses
   HlpHashFactory,
   HlpConverters,
   HlpPBKDF_Argon2NotBuildInAdapter,
-  HlpArgon2TypeAndVersion;
+  HlpArgon2TypeAndVersion,
+  HashLibTestBase;
 
 type
 
-  THashLibTestCase = class abstract(TTestCase)
-
-  end;
-
-type
-
-  TPBKDF_Argon2TestCase = class abstract(THashLibTestCase)
+  TPBKDF_Argon2TestCase = class abstract(THashLibAlgorithmTestCase)
 
   strict protected
   const

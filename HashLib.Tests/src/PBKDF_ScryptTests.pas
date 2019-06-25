@@ -13,17 +13,12 @@ uses
   HlpIHashInfo,
   HlpHashFactory,
   HlpConverters,
-  HlpHashLibTypes;
+  HlpHashLibTypes,
+  HashLibTestBase;
 
 type
 
-  THashLibTestCase = class abstract(TTestCase)
-
-  end;
-
-type
-
-  TPBKDF_ScryptTestCase = class abstract(THashLibTestCase)
+  TPBKDF_ScryptTestCase = class abstract(THashLibAlgorithmTestCase)
 
   end;
 
@@ -35,7 +30,6 @@ type
   TTestPBKDF_Scrypt = class(TPBKDF_ScryptTestCase)
 
   private
-    FExpectedString, FActualString: String;
 
     function DoTestVector(const APassword, ASalt: String;
       ACost, ABlockSize, AParallelism, AOutputSize: Int32): String;

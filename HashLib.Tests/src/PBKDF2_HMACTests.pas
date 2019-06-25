@@ -13,26 +13,18 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpHashFactory,
-  HlpConverters;
+  HlpConverters,
+  HashLibTestBase;
 
 type
 
-  THashLibTestCase = class abstract(TTestCase)
-
-  end;
-
-type
-
-  TPBKDF2_HMACTestCase = class abstract(THashLibTestCase)
+  TPBKDF2_HMACTestCase = class abstract(THashLibAlgorithmTestCase)
 
   end;
 
 type
 
   TTestPBKDF2_HMACSHA1 = class(TPBKDF2_HMACTestCase)
-
-  private
-    FExpectedString, FActualString: String;
 
   published
     procedure TestOne;
@@ -42,9 +34,6 @@ type
 type
 
   TTestPBKDF2_HMACSHA2_256 = class(TPBKDF2_HMACTestCase)
-
-  private
-    FExpectedString, FActualString: String;
 
   published
     procedure TestOne;
