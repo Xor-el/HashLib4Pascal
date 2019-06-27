@@ -1,5 +1,5 @@
 unit HlpBlake2B;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -1801,4 +1801,3 @@ begin
 end;
 
 end.
-
