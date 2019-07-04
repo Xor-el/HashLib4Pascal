@@ -44,10 +44,10 @@ type
     FPasswordBytes, FSaltBytes: THashLibByteArray;
     FCost, FBlockSize, FParallelism: Int32;
 
-    class procedure ClearArray(const AInput: THashLibByteArray);
-      overload; static;
-    class procedure ClearArray(const AInput: THashLibUInt32Array);
-      overload; static;
+    class procedure ClearArray(const AInput: THashLibByteArray); overload;
+      static; inline;
+    class procedure ClearArray(const AInput: THashLibUInt32Array); overload;
+      static; inline;
 
     class procedure ClearAllArrays(const AInputs
       : THashLibMatrixUInt32Array); static;
@@ -129,22 +129,8 @@ end;
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.ClearArray
   (const AInput: THashLibUInt32Array);
-{$IFNDEF FPC}
-var
-  Idx: Int32;
-{$ENDIF}
 begin
-  if AInput <> Nil then
-  begin
-{$IFDEF FPC}
-    System.FillDWord(AInput[0], System.Length(AInput), UInt32(0));
-{$ELSE}
-    for Idx := System.Low(AInput) to System.High(AInput) do
-    begin
-      AInput[Idx] := UInt32(0);
-    end;
-{$ENDIF}
-  end;
+  TArrayUtils.ZeroFill(AInput);
 end;
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.ClearAllArrays
