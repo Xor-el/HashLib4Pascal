@@ -56,26 +56,7 @@
 
 {$IFDEF DELPHI}
 
-{$DEFINE USE_UNROLLED_VARIANT}
-
-// This option is needed to enable code browsing (aka Ctrl+Click)
-// It does not affect the binary size or generated code
-{$DEFINITIONINFO ON}
-
-// Disable Overflow and RangeChecks.
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
-
- // Enable Pointer Math
-{$POINTERMATH ON}
-
-// Disable String Checks
-{$STRINGCHECKS OFF}
-
-// Disable Duplicate Constructor Warnings
-{$WARN DUPLICATE_CTOR_DTOR OFF}
-
- // XE3 and Above
+  // XE3 and Above
 {$IF CompilerVersion >= 24.0}
    {$DEFINE DELPHIXE3_UP}
    {$LEGACYIFEND ON}
@@ -119,6 +100,24 @@
    {$MESSAGE ERROR 'This Library requires Delphi 2010 or higher.'}
 {$ENDIF}
 
+{$DEFINE USE_UNROLLED_VARIANT}
+
+// This option is needed to enable code browsing (aka Ctrl+Click)
+// It does not affect the binary size or generated code
+{$DEFINITIONINFO ON}
+
+// Disable Overflow and RangeChecks.
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+
+ // Enable Pointer Math
+{$POINTERMATH ON}
+
+// Disable String Checks
+{$STRINGCHECKS OFF}
+
+// Disable Duplicate Constructor Warnings
+{$WARN DUPLICATE_CTOR_DTOR OFF}
 
 {$ENDIF DELPHI}
 
