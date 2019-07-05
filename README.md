@@ -127,7 +127,7 @@ Available Algorithms
 
 * `Linux (Including Android and Raspberry PI)`
 
-* `macOS`
+* `Mac OS X`
 
 * `iOS`
 
