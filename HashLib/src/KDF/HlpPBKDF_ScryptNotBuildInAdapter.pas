@@ -88,7 +88,7 @@ type
     class procedure BlockMix(const b, X1, X2, y: THashLibUInt32Array;
       R: Int32); static;
 
-    class procedure DoParallelSMix(const b: THashLibUInt32Array;
+    class procedure DoSMix(const b: THashLibUInt32Array;
       AParallelism, ACost, ABlockSize: Int32); static;
 
     class function MFcrypt(const APasswordBytes, ASaltBytes: THashLibByteArray;
@@ -347,7 +347,7 @@ end;
 
 {$IFDEF DELPHIXE7_UP}
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
+class procedure TPBKDF_ScryptNotBuildInAdapter.DoSMix
   (const b: THashLibUInt32Array; AParallelism, ACost, ABlockSize: Int32);
 
   function CreateTask(AOffset: Int32): ITask;
@@ -377,7 +377,7 @@ end;
 
 {$ELSE}
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
+class procedure TPBKDF_ScryptNotBuildInAdapter.DoSMix
   (const b: THashLibUInt32Array; AParallelism, ACost, ABlockSize: Int32);
 var
   i: Int32;
@@ -410,7 +410,7 @@ begin
     TConverters.le32_copy(PByte(bytes), 0, PCardinal(b), 0,
       System.Length(bytes) * System.SizeOf(Byte));
 
-    DoParallelSMix(b, AParallelism, ACost, ABlockSize);
+    DoSMix(b, AParallelism, ACost, ABlockSize);
 
     TConverters.le32_copy(PCardinal(b), 0, PByte(bytes), 0,
       System.Length(b) * System.SizeOf(UInt32));
