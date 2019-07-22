@@ -5,11 +5,11 @@
 interface
 
 uses
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_PPL}
   System.Classes,
   System.SysUtils,
   System.Threading,
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_PPL}
   HlpKDF,
   HlpBits,
   HlpIHash,
@@ -1100,7 +1100,7 @@ begin
   end;
 end;
 
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_PPL}
 
 procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks;
 
@@ -1165,7 +1165,7 @@ begin
   end;
 end;
 
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_PPL}
 
 procedure TPBKDF_Argon2NotBuildInAdapter.Initialize(const APassword
   : THashLibByteArray; AOutputLength: Int32);

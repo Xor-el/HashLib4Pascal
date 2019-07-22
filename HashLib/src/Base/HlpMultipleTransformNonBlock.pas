@@ -5,11 +5,7 @@ unit HlpMultipleTransformNonBlock;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.Classes,
-{$ELSE}
   Classes,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpHash,
   HlpIHashInfo,

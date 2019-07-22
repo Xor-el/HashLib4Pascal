@@ -5,14 +5,8 @@ unit HlpIHash;
 interface
 
 uses
-
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-  System.Classes,
-{$ELSE}
   SysUtils,
   Classes,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpIHashResult;
 

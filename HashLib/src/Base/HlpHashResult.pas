@@ -1,29 +1,21 @@
 unit HlpHashResult;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
 
 uses
-
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-{$IFDEF DELPHIXE7_UP}
-  System.NetEncoding,
-{$ELSE}
-  System.Classes,
-  Soap.EncdDecd,
-{$ENDIF DELPHIXE7_UP}
-{$ELSE}
   SysUtils,
-{$IFDEF DELPHI}
-  Classes,
-  EncdDecd,
-{$ENDIF DELPHI}
 {$IFDEF FPC}
   base64,
+{$ELSE}
+{$IFDEF HAS_DELPHI_NET_ENCODING}
+  System.NetEncoding,
+{$ELSE}
+  Classes,
+  EncdDecd,
+{$ENDIF HAS_DELPHI_NET_ENCODING}
 {$ENDIF FPC}
-{$ENDIF HAS_UNITSCOPE}
   HlpBits,
   HlpHashLibTypes,
   HlpIHashResult,
@@ -132,30 +124,30 @@ var
   LResult: UInt32;
   I, Top: Int32;
   Temp: string;
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_NET_ENCODING}
   TempHolder: THashLibByteArray;
 {$ELSE}
 {$IFDEF DELPHI}
   TempHolder: TBytesStream;
 {$ENDIF DELPHI}
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_NET_ENCODING}
 {$IFDEF FPC}
   TempHolder: String;
 {$ENDIF FPC}
 begin
 
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_NET_ENCODING}
   TempHolder := Self.Fm_hash;
 {$ELSE}
 {$IFDEF DELPHI}
   TempHolder := TBytesStream.Create(Self.Fm_hash);
 {$ENDIF DELPHI}
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_NET_ENCODING}
 {$IFDEF FPC}
   TempHolder := EncodeStringBase64
     (TConverters.ConvertBytesToString(Self.Fm_hash, TEncoding.UTF8));
 {$ENDIF FPC}
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_NET_ENCODING}
   Temp := StringReplace(TNetEncoding.base64.EncodeBytesToString(TempHolder),
     sLineBreak, '', [rfReplaceAll]);
 {$ELSE}
@@ -167,7 +159,7 @@ begin
     TempHolder.Free;
   end;
 {$ENDIF DELPHI}
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_NET_ENCODING}
 {$IFDEF FPC}
   Temp := TempHolder;
 {$ENDIF FPC}
@@ -252,3 +244,4 @@ begin
 end;
 
 end.
+

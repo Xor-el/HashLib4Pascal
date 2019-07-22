@@ -1,5 +1,6 @@
 unit HlpCRC;
 
+
 // A vast majority if not all of the parameters for these CRC standards
 // were gotten from http://reveng.sourceforge.net/crc-catalogue/.
 
@@ -8,13 +9,8 @@ unit HlpCRC;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-  System.TypInfo,
-{$ELSE}
   SysUtils,
   TypInfo,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,

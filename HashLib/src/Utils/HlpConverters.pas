@@ -5,15 +5,9 @@ unit HlpConverters;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.Classes,
-  System.StrUtils,
-  System.SysUtils,
-{$ELSE}
   Classes,
   StrUtils,
   SysUtils,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpBits,
   HlpBitConverter;

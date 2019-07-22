@@ -1,18 +1,13 @@
 unit HlpBlake2S;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-{$ELSE}
   SysUtils,
-{$ENDIF HAS_UNITSCOPE}
 {$IFDEF DELPHI}
   HlpBitConverter,
-  HlpHashBuffer,
 {$ENDIF DELPHI}
   HlpBits,
   HlpHash,
@@ -1582,3 +1577,4 @@ begin
 end;
 
 end.
+

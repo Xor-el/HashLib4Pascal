@@ -5,11 +5,7 @@ unit HlpHashBuffer;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-{$ELSE}
   SysUtils,
-{$ENDIF HAS_UNITSCOPE}
   HlpArrayUtils,
   HlpHashLibTypes;
 

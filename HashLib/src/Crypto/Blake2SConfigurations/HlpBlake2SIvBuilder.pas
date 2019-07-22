@@ -1,10 +1,13 @@
 unit HlpBlake2SIvBuilder;
-
+
 {$I ..\..\Include\HashLib.inc}
 
 interface
 
 uses
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpConverters,
   HlpBlake2STreeConfig,
   HlpIBlake2SConfig,
@@ -163,3 +166,4 @@ begin
 end;
 
 end.
+

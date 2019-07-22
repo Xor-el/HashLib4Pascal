@@ -5,11 +5,7 @@ unit HlpHMACNotBuildInAdapter;
 interface
 
 uses
-{$IFDEF HAS_UNITSCOPE}
-  System.SysUtils,
-{$ELSE}
   SysUtils,
-{$ENDIF HAS_UNITSCOPE}
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,

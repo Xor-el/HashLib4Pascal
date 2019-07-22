@@ -81,7 +81,6 @@
   // XE2 and Above
 {$IF CompilerVersion >= 23.0}
    {$DEFINE DELPHIXE2_UP}
-   {$DEFINE HAS_UNITSCOPE}
 {$IFEND}
 
  // XE4 and Above
@@ -93,6 +92,8 @@
   // XE7 and Above
 {$IF CompilerVersion >= 28.0}
    {$DEFINE DELPHIXE7_UP}
+   {$DEFINE HAS_DELPHI_PPL} // Has Delphi Parallel Programming Library
+   {$DEFINE HAS_DELPHI_NET_ENCODING}
 {$IFEND}
 
   // 2010 and Above

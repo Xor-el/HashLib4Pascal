@@ -5,11 +5,14 @@ unit HlpPBKDF_ScryptNotBuildInAdapter;
 interface
 
 uses
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_PPL}
   System.Classes,
   System.SysUtils,
   System.Threading,
-{$ENDIF DELPHIXE7_UP}
+{$ENDIF HAS_DELPHI_PPL}
+{$IFDEF DELPHI}
+  HlpBitConverter,
+{$ENDIF DELPHI}
   HlpIHash,
   HlpKDF,
   HlpBits,
@@ -345,7 +348,7 @@ begin
   end;
 end;
 
-{$IFDEF DELPHIXE7_UP}
+{$IFDEF HAS_DELPHI_PPL}
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.DoSMix
   (const b: THashLibUInt32Array; AParallelism, ACost, ABlockSize: Int32);
@@ -389,7 +392,7 @@ begin
   end;
 end;
 
-{$ENDIF}
+{$ENDIF HAS_DELPHI_PPL}
 
 class function TPBKDF_ScryptNotBuildInAdapter.MFcrypt(const APasswordBytes,
   ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism,
