@@ -299,17 +299,14 @@ begin
     bOff := bOff + 16;
     System.Dec(i);
   end;
-
-  System.Move(y[0], b[0], System.Length(y) * System.SizeOf(UInt32));
 end;
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.SMix
   (const b: THashLibUInt32Array; bOff, N, R: Int32);
 var
-  BCount, i: Int32;
-  mask, j: UInt32;
-  blockX1, blockX2, blockY, x: THashLibUInt32Array;
-  V: THashLibMatrixUInt32Array;
+  BCount, i, j, off: Int32;
+  mask: UInt32;
+  blockX1, blockX2, blockY, x, V: THashLibUInt32Array;
 begin
   BCount := R * 32;
   System.SetLength(blockX1, 16);
@@ -318,15 +315,22 @@ begin
 
   System.SetLength(x, BCount);
 
-  System.SetLength(V, N);
+  System.SetLength(V, N * BCount);
 
   try
     System.Move(b[bOff], x[0], BCount * System.SizeOf(UInt32));
 
-    for i := 0 to System.Pred(N) do
+    off := 0;
+    i := 0;
+    while i < N do
     begin
-      V[i] := System.Copy(x);
+      System.Move(x[0], V[off], BCount * System.SizeOf(UInt32));
+      off := off + BCount;
       BlockMix(x, blockX1, blockX2, blockY, R);
+      System.Move(blockY[0], V[off], BCount * System.SizeOf(UInt32));
+      off := off + BCount;
+      BlockMix(blockY, blockX1, blockX2, x, R);
+      System.Inc(i, 2);
     end;
 
     mask := UInt32(N) - 1;
@@ -335,14 +339,15 @@ begin
     while i < N do
     begin
       j := x[BCount - 16] and mask;
-      &Xor(x, V[j], 0, x);
-      BlockMix(x, blockX1, blockX2, blockY, R);
+      System.Move(V[j * BCount], blockY[0], BCount * System.SizeOf(UInt32));
+      &Xor(blockY, x, 0, blockY);
+      BlockMix(blockY, blockX1, blockX2, x, R);
       System.Inc(i);
     end;
 
     System.Move(x[0], b[bOff], BCount * System.SizeOf(UInt32));
   finally
-    ClearAllArrays(V);
+    ClearArray(V);
     ClearAllArrays(THashLibMatrixUInt32Array.Create(x, blockX1,
       blockX2, blockY));
   end;
