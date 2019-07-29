@@ -61,21 +61,20 @@ end;
 procedure TAdler32.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
-  i, n: Int32;
-
+  LIdx, LN: Int32;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
   System.Assert(ALength >= 0);
   System.Assert(AIndex + ALength <= System.Length(AData));
 {$ENDIF DEBUG}
-  i := AIndex;
+  LIdx := AIndex;
 
   { while ALength > 0 do
     begin
-    FA := (FA + AData[i]) mod MOD_ADLER;
+    FA := (FA + AData[LIdx]) mod MOD_ADLER;
     FB := (FB + FA) mod MOD_ADLER;
-    System.Inc(i);
+    System.Inc(LIdx);
     System.Dec(ALength);
     end; }
 
@@ -86,25 +85,23 @@ begin
     // We can defer the modulo operation:
     // FA maximally grows from 65521 to 65521 + 255 * 3800
     // FB maximally grows by3800 * median(FA) = 2090079800 < 2^31
-    n := 3800;
-    if (n > ALength) then
+    LN := 3800;
+    if (LN > ALength) then
     begin
-      n := ALength;
+      LN := ALength;
     end;
-    ALength := ALength - n;
+    ALength := ALength - LN;
 
-    while (n - 1) >= 0 do
+    while (LN - 1) >= 0 do
     begin
-      FA := (FA + AData[i]);
+      FA := (FA + AData[LIdx]);
       FB := (FB + FA);
-      System.Inc(i);
-      System.Dec(n);
+      System.Inc(LIdx);
+      System.Dec(LN);
     end;
     FA := FA mod MOD_ADLER;
     FB := FB mod MOD_ADLER;
-
   end;
-
 end;
 
 function TAdler32.TransformFinal: IHashResult;
