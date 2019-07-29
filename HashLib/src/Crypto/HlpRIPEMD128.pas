@@ -1,5 +1,5 @@
 unit HlpRIPEMD128;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -344,4 +344,3 @@ begin
 end;
 
 end.
-

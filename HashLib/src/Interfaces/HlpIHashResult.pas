@@ -1,5 +1,5 @@
 unit HlpIHashResult;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -26,4 +26,3 @@ type
 implementation
 
 end.
-

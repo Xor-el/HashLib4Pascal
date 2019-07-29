@@ -1,5 +1,5 @@
 unit HlpHAS160;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -219,4 +219,3 @@ begin
 end;
 
 end.
-

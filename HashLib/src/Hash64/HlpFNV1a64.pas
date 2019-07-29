@@ -1,5 +1,5 @@
 unit HlpFNV1a64;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -78,4 +78,3 @@ begin
 end;
 
 end.
-

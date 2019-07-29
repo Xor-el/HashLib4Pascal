@@ -1,5 +1,5 @@
 unit HlpBlake2BIvBuilder;
-
+
 {$I ..\..\Include\HashLib.inc}
 
 interface
@@ -162,4 +162,3 @@ begin
 end;
 
 end.
-

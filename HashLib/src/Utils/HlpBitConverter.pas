@@ -1,5 +1,5 @@
 unit HlpBitConverter;
-
+
 {$I ..\Include\HashLib.inc}
 { /*  Some code here were translated from Microsoft .NET Framework source on Github */ }
 
@@ -432,4 +432,3 @@ begin
 end;
 
 end.
-

@@ -1,5 +1,5 @@
 unit HlpHaval;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -2402,4 +2402,3 @@ begin
 end;
 
 end.
-

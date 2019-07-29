@@ -1,5 +1,5 @@
 unit HlpSHA2_256Base;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -945,4 +945,3 @@ begin
 end;
 
 end.
-

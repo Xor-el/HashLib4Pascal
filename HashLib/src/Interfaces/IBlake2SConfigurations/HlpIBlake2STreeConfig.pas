@@ -1,5 +1,5 @@
 unit HlpIBlake2STreeConfig;
-
+
 {$I ..\..\Include\HashLib.inc}
 
 interface
@@ -41,4 +41,3 @@ type
 implementation
 
 end.
-

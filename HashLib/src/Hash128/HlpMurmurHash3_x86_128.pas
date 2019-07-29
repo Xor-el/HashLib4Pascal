@@ -1,5 +1,5 @@
 unit HlpMurmurHash3_x86_128;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -593,4 +593,3 @@ begin
 end;
 
 end.
-

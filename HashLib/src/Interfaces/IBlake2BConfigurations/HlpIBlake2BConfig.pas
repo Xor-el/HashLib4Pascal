@@ -1,5 +1,5 @@
 unit HlpIBlake2BConfig;
-
+
 {$I ..\..\Include\HashLib.inc}
 
 interface
@@ -29,4 +29,3 @@ type
 implementation
 
 end.
-

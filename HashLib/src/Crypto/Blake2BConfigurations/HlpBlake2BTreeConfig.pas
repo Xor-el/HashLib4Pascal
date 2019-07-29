@@ -1,5 +1,5 @@
 unit HlpBlake2BTreeConfig;
-
+
 {$I ..\..\Include\HashLib.inc}
 
 interface
@@ -195,4 +195,3 @@ begin
 end;
 
 end.
-
