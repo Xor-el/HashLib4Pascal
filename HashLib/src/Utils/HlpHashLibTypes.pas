@@ -1,5 +1,5 @@
 unit HlpHashLibTypes;
-
+
 {$I ..\Include\HashLib.inc}
 
 interface
@@ -131,3 +131,4 @@ SetMultiByteRTLFileSystemCodePage(CP_UTF8);
 {$ENDIF FPC}
 
 end.
+

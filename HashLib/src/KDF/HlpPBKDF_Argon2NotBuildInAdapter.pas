@@ -23,7 +23,7 @@ uses
   HlpHashLibTypes;
 
 resourcestring
-  SInvalidOutputByteCount = '"bc (ByteCount)" Argument Less Than "%d".';
+  SInvalidOutputByteCount = '"(AByteCount)" Argument Less Than "%d".';
   SBlockInstanceNotInitialized = 'Block Instance not Initialized';
   SInputLengthInvalid = 'Input Length "%d" is not Equal to BlockSize "%d"';
   SLanesTooSmall = 'Lanes Must be Greater Than "%d"';
@@ -287,7 +287,7 @@ type
       * + == addition modulo 2^64
       * aL = least 32 bit
       * }
-    class procedure fBlaMka(var ABlock: TBlock; Ax, Ay: Int32); static; inline;
+    class procedure FBlaMka(var ABlock: TBlock; Ax, Ay: Int32); static; inline;
     class procedure Rotr64(var ABlock: TBlock; Av, Aw, Ac: Int32);
       static; inline;
     class procedure F(var ABlock: TBlock; Aa, Ab, Ac, Ad: Int32);
@@ -375,10 +375,10 @@ type
     /// <summary>
     /// Returns the pseudo-random bytes for this object.
     /// </summary>
-    /// <param name="bc">The number of pseudo-random key bytes to generate.</param>
+    /// <param name="AByteCount">The number of pseudo-random key bytes to generate.</param>
     /// <returns>A byte array filled with pseudo-random key bytes.</returns>
-    /// /// <exception cref="EArgumentOutOfRangeHashLibException">bc must be greater than zero.</exception>
-    function GetBytes(bc: Int32): THashLibByteArray; override;
+    /// /// <exception cref="EArgumentOutOfRangeHashLibException">AByteCount must be greater than MIN_OUTLEN.</exception>
+    function GetBytes(AByteCount: Int32): THashLibByteArray; override;
 
   end;
 
@@ -579,8 +579,10 @@ class procedure TPBKDF_Argon2NotBuildInAdapter.ValidatePBKDF_Argon2Inputs
   (const AArgon2Parameters: IArgon2Parameters);
 begin
   if not(System.Assigned(AArgon2Parameters)) then
+  begin
     raise EArgumentNilHashLibException.CreateRes
       (@SArgon2ParameterBuilderNotInitialized);
+  end;
 end;
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.AddIntToLittleEndian
@@ -617,12 +619,10 @@ begin
   begin
     // we have already generated the first two blocks
     result := 2;
-    Exit;
   end
   else
   begin
     result := 0;
-    Exit;
   end;
 end;
 
@@ -674,7 +674,7 @@ begin
   TArrayUtils.ZeroFill(FResult);
 end;
 
-class procedure TPBKDF_Argon2NotBuildInAdapter.fBlaMka(var ABlock: TBlock;
+class procedure TPBKDF_Argon2NotBuildInAdapter.FBlaMka(var ABlock: TBlock;
   Ax, Ay: Int32);
 var
   Lm: UInt32;
@@ -689,25 +689,25 @@ end;
 class procedure TPBKDF_Argon2NotBuildInAdapter.Rotr64(var ABlock: TBlock;
   Av, Aw, Ac: Int32);
 var
-  Ltemp: UInt64;
+  LTemp: UInt64;
 begin
-  Ltemp := ABlock.Fv[Av] xor ABlock.Fv[Aw];
-  ABlock.Fv[Av] := TBits.RotateRight64(Ltemp, Ac);
+  LTemp := ABlock.Fv[Av] xor ABlock.Fv[Aw];
+  ABlock.Fv[Av] := TBits.RotateRight64(LTemp, Ac);
 end;
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.F(var ABlock: TBlock;
   Aa, Ab, Ac, Ad: Int32);
 begin
-  fBlaMka(ABlock, Aa, Ab);
+  FBlaMka(ABlock, Aa, Ab);
   Rotr64(ABlock, Ad, Aa, 32);
 
-  fBlaMka(ABlock, Ac, Ad);
+  FBlaMka(ABlock, Ac, Ad);
   Rotr64(ABlock, Ab, Ac, 24);
 
-  fBlaMka(ABlock, Aa, Ab);
+  FBlaMka(ABlock, Aa, Ab);
   Rotr64(ABlock, Ad, Aa, 16);
 
-  fBlaMka(ABlock, Ac, Ad);
+  FBlaMka(ABlock, Ac, Ad);
   Rotr64(ABlock, Ab, Ac, 63);
 end;
 
@@ -956,7 +956,7 @@ end;
 function TPBKDF_Argon2NotBuildInAdapter.GetRefColumn(const APosition: TPosition;
   APseudoRandom: UInt64; ASameLane: Boolean): Int32;
 var
-  LReferenceAreaSize, LStartPosition, Ltemp: Int32;
+  LReferenceAreaSize, LStartPosition, LTemp: Int32;
   LRelativePosition: UInt64;
 begin
 
@@ -974,15 +974,14 @@ begin
     begin
       if (APosition.FIndex = 0) then
       begin
-        Ltemp := -1;
+        LTemp := -1;
       end
       else
       begin
-        Ltemp := 0;
+        LTemp := 0;
       end;
-      LReferenceAreaSize := (APosition.FSlice * FSegmentLength) + Ltemp;
+      LReferenceAreaSize := (APosition.FSlice * FSegmentLength) + LTemp;
     end
-
   end
   else
   begin
@@ -996,13 +995,13 @@ begin
     begin
       if (APosition.FIndex = 0) then
       begin
-        Ltemp := -1;
+        LTemp := -1;
       end
       else
       begin
-        Ltemp := 0;
+        LTemp := 0;
       end;
-      LReferenceAreaSize := FLaneLength - FSegmentLength + Ltemp;
+      LReferenceAreaSize := FLaneLength - FSegmentLength + LTemp;
     end;
   end;
 
@@ -1211,7 +1210,6 @@ begin
   end;
 
   DoInit(AParameters);
-
 end;
 
 destructor TPBKDF_Argon2NotBuildInAdapter.Destroy;
@@ -1220,20 +1218,22 @@ begin
   inherited Destroy;
 end;
 
-function TPBKDF_Argon2NotBuildInAdapter.GetBytes(bc: Int32): THashLibByteArray;
+function TPBKDF_Argon2NotBuildInAdapter.GetBytes(AByteCount: Int32)
+  : THashLibByteArray;
 begin
-  if (bc <= MIN_OUTLEN) then
+  if (AByteCount <= MIN_OUTLEN) then
+  begin
     raise EArgumentHashLibException.CreateResFmt(@SInvalidOutputByteCount,
       [MIN_OUTLEN]);
+  end;
 
-  Initialize(FPassword, bc);
+  Initialize(FPassword, AByteCount);
   DoParallelFillMemoryBlocks();
-  Digest(bc);
-  System.SetLength(result, bc);
-  System.Move(FResult[0], result[0], bc * System.SizeOf(Byte));
+  Digest(AByteCount);
+  System.SetLength(result, AByteCount);
+  System.Move(FResult[0], result[0], AByteCount * System.SizeOf(Byte));
 
   Reset();
-
 end;
 
 { TPBKDF_Argon2NotBuildInAdapter.TBlock }
@@ -1397,29 +1397,28 @@ end;
 
 procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.ApplyBlake();
 var
-  i, i16, i2: Int32;
+  Li, Li16, Li2: Int32;
 begin
   (* Apply Blake2 on columns of 64-bit words: (0,1,...,15) , then
     (16,17,..31)... finally (112,113,...127) *)
 
-  for i := 0 to System.Pred(8) do
+  for Li := 0 to System.Pred(8) do
   begin
-    i16 := 16 * i;
-    RoundFunction(FZ, i16, i16 + 1, i16 + 2, i16 + 3, i16 + 4, i16 + 5, i16 + 6,
-      i16 + 7, i16 + 8, i16 + 9, i16 + 10, i16 + 11, i16 + 12, i16 + 13,
-      i16 + 14, i16 + 15);
+    Li16 := 16 * Li;
+    RoundFunction(FZ, Li16, Li16 + 1, Li16 + 2, Li16 + 3, Li16 + 4, Li16 + 5,
+      Li16 + 6, Li16 + 7, Li16 + 8, Li16 + 9, Li16 + 10, Li16 + 11, Li16 + 12,
+      Li16 + 13, Li16 + 14, Li16 + 15);
   end;
 
   (* Apply Blake2 on rows of 64-bit words: (0,1,16,17,...112,113), then
     (2,3,18,19,...,114,115).. finally (14,15,30,31,...,126,127) *)
 
-  for i := 0 to System.Pred(8) do
+  for Li := 0 to System.Pred(8) do
   begin
-    i2 := 2 * i;
-    RoundFunction(FZ, i2, i2 + 1, i2 + 16, i2 + 17, i2 + 32, i2 + 33, i2 + 48,
-      i2 + 49, i2 + 64, i2 + 65, i2 + 80, i2 + 81, i2 + 96, i2 + 97, i2 + 112,
-      i2 + 113);
-
+    Li2 := 2 * Li;
+    RoundFunction(FZ, Li2, Li2 + 1, Li2 + 16, Li2 + 17, Li2 + 32, Li2 + 33,
+      Li2 + 48, Li2 + 49, Li2 + 64, Li2 + 65, Li2 + 80, Li2 + 81, Li2 + 96,
+      Li2 + 97, Li2 + 112, Li2 + 113);
   end;
 end;
 
