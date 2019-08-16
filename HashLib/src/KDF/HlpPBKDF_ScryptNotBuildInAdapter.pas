@@ -340,7 +340,7 @@ begin
     LIdx := 0;
     while LIdx < AN do
     begin
-      LJdx := LX[LBCount - 16] and LMask;
+      LJdx := Int32(LX[LBCount - 16] and LMask);
       System.Move(LV[LJdx * LBCount], LBlockY[0],
         LBCount * System.SizeOf(UInt32));
       &Xor(LBlockY, LX, 0, LBlockY);
