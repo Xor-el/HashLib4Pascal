@@ -11,7 +11,7 @@ OS_PMAN={'linux': 'sudo apt-get', 'osx': 'brew'}[OS_NAME]
 
 LAZ_TMP_DIR=os.environ.get('LAZ_TMP_DIR') or 'lazarus_tmp'
 LAZ_REL_DEF=os.environ.get('LAZ_REL_DEF') or {'linux':'amd64', 'qemu-arm':'amd64', 'qemu-arm-static':'amd64', 'osx':'i386', 'wine':'32'}
-LAZ_BIN_SRC=os.environ.get('LAZ_BIN_SRC') or 'http://mirrors.iwi.me/lazarus/releases/%(target)s/Lazarus%%20%(version)s'
+LAZ_BIN_SRC=os.environ.get('LAZ_BIN_SRC') or 'https://sourceforge.net/projects/lazarus/files/%(target)s/Lazarus%%20%(version)s/'
 LAZ_BIN_TGT=os.environ.get('LAZ_BIN_TGT') or {
     'linux':           'Lazarus%%20Linux%%20%(release)s%%20DEB',
     'qemu-arm':        'Lazarus%%20Linux%%20%(release)s%%20DEB',
@@ -58,7 +58,16 @@ def install_lazarus_version(ver,rel,env):
     osn = env or OS_NAME
     tgt = LAZ_BIN_TGT[osn] % {'release': rel or LAZ_REL_DEF[osn]}
     src = LAZ_BIN_SRC % {'target': tgt, 'version': ver}
-    if os.system('wget -r -l1 -T 30 -np -nd -nc -A .deb,.dmg,.exe %s -P %s' % (src, LAZ_TMP_DIR)) != 0:
+    if os.system('echo wget -w 1 -np -m -A download %s' % (src)) != 0:
+        return False
+
+    if os.system('wget -w 1 -np -m -A download %s' % (src)) != 0:
+        return False
+
+    if os.system('grep -Rh refresh sourceforge.net/ | grep -o "https://[^\\?]*" > urllist') != 0:
+        return False
+
+    if os.system('while read url; do wget --content-disposition "${url}"  -A .deb,.dmg,.exe -P %s; done < urllist'  % (LAZ_TMP_DIR)) != 0:
         return False
 
     if osn == 'wine':
