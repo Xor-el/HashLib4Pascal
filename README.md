@@ -113,6 +113,8 @@ Available Algorithms
 
 * `Shake (Shake-128, Shake-256)`
 
+* `CShake (CShake-128, CShake-256)`
+
 ### Supported Compilers
 ----------------------------------------
 
