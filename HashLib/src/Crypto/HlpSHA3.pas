@@ -31,7 +31,7 @@ type
 
   type
 {$SCOPEDENUMS ON}
-    THashMode = (hmKeccak = $1, hmSHA3 = $6, hmShake = $1F);
+    THashMode = (hmKeccak = $1, hmSHA3 = $6, hmShake = $1F, hmCShake = $4);
 {$SCOPEDENUMS OFF}
   strict protected
   var
@@ -198,6 +198,55 @@ type
     function Clone(): IHash; override;
   end;
 
+type
+  TCShake = class(TShake)
+
+  strict private
+
+    function LeftEncode(AInput: UInt64): THashLibByteArray;
+    function BytePad(const AInput: THashLibByteArray; AW: Int32)
+      : THashLibByteArray;
+
+  protected
+
+  var
+    FN, FS, FInitBlock: THashLibByteArray;
+
+    /// <param name="AHashSize">
+    /// the HashSize of the underlying Shake function
+    /// </param>
+    /// <param name="N">
+    /// the function name string, note this is reserved for use by NIST.
+    /// Avoid using if not required
+    /// </param>
+    /// <param name="S">
+    /// the customization string - available for local use
+    /// </param>
+    constructor Create(AHashSize: THashSize; const N, S: THashLibByteArray);
+
+  public
+
+    procedure Initialize(); override;
+  end;
+
+type
+  TCShake_128 = class sealed(TCShake)
+
+  public
+
+    constructor Create(const N, S: THashLibByteArray);
+    function Clone(): IHash; override;
+  end;
+
+type
+  TCShake_256 = class sealed(TCShake)
+
+  public
+
+    constructor Create(const N, S: THashLibByteArray);
+    function Clone(): IHash; override;
+  end;
+
 implementation
 
 { TSHA3 }
@@ -234,10 +283,13 @@ begin
     TSHA3.THashMode.hmShake:
       Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBits',
         (Self as IXOF).XOFSizeInBits]);
+    TSHA3.THashMode.hmCShake:
+      Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBits',
+        (Self as IXOF).XOFSizeInBits]);
   else
     begin
       raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashMode,
-        ['hmKeccak, hmSHA3, hmShake']);
+        ['hmKeccak, hmSHA3, hmShake, hmCShake']);
     end;
   end;
 end;
@@ -908,6 +960,142 @@ end;
 constructor TShake_256.Create;
 begin
   Inherited Create(THashSize.hsHashSize256);
+end;
+
+{ TCShake }
+
+function TCShake.LeftEncode(AInput: UInt64): THashLibByteArray;
+var
+  LN: Byte;
+  LV: UInt64;
+  LIdx: Int32;
+begin
+  LN := 1;
+  LV := AInput;
+  LV := LV shr 8;
+
+  while (LV <> 0) do
+  begin
+    System.Inc(LN);
+    LV := LV shr 8;
+  end;
+
+  System.SetLength(Result, LN + 1);
+  Result[0] := LN;
+  for LIdx := 1 to LN do
+  begin
+    Result[LIdx] := Byte(AInput shr (8 * (LN - LIdx)));
+  end;
+end;
+
+function TCShake.BytePad(const AInput: THashLibByteArray; AW: Int32)
+  : THashLibByteArray;
+var
+  LBuffer: THashLibByteArray;
+  LPadLength: Int32;
+begin
+  // LeftEncode always returns max 9 bytes
+  LBuffer := Nil;
+  LBuffer := TArrayUtils.Concatenate(LBuffer, LeftEncode(UInt64(AW)));
+  LBuffer := TArrayUtils.Concatenate(LBuffer, AInput);
+
+  LPadLength := AW - (System.Length(LBuffer) mod AW);
+  System.SetLength(Result, LPadLength);
+  Result := TArrayUtils.Concatenate(LBuffer, Result);
+end;
+
+constructor TCShake.Create(AHashSize: THashSize; const N, S: THashLibByteArray);
+begin
+  Inherited Create(AHashSize);
+
+  FN := N;
+  FS := S;
+  FInitBlock := Nil;
+
+  if (System.Length(FN) = 0) and (System.Length(FS) = 0) then
+  begin
+    FHashMode := THashMode.hmShake;
+  end
+  else
+  begin
+    FHashMode := THashMode.hmCShake;
+    // LeftEncode returns max 9 bytes
+    FInitBlock := TArrayUtils.Concatenate(FInitBlock,
+      LeftEncode(UInt64(System.Length(FN) * 8)));
+
+    FInitBlock := TArrayUtils.Concatenate(FInitBlock, FN);
+
+    FInitBlock := TArrayUtils.Concatenate(FInitBlock,
+      LeftEncode(UInt64(System.Length(FS) * 8)));
+
+    FInitBlock := TArrayUtils.Concatenate(FInitBlock, FS);
+  end;
+end;
+
+procedure TCShake.Initialize;
+begin
+  Inherited Initialize();
+
+  if FInitBlock <> Nil then
+  begin
+    TransformBytes(BytePad(FInitBlock, FBlockSize));
+  end;
+end;
+
+{ TCShake_128 }
+
+function TCShake_128.Clone(): IHash;
+var
+  LHashInstance: TCShake_128;
+  LCShakeInstance, LCurrentInstance: TCShake;
+  LXof: IXOF;
+begin
+  LCurrentInstance := Self as TCShake;
+  LCShakeInstance := TCShake_128.Create(System.Copy(LCurrentInstance.FN),
+    System.Copy(LCurrentInstance.FS));
+  LCShakeInstance.FInitBlock := System.Copy(LCurrentInstance.FInitBlock);
+  LXof := LCShakeInstance as IXOF;
+
+  LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+  LHashInstance := LXof as TCShake_128;
+  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+  Result := LHashInstance as IHash;
+  Result.BufferSize := BufferSize;
+end;
+
+constructor TCShake_128.Create(const N, S: THashLibByteArray);
+begin
+  Inherited Create(THashSize.hsHashSize128, N, S);
+end;
+
+{ TCShake_256 }
+
+function TCShake_256.Clone(): IHash;
+var
+  LHashInstance: TCShake_256;
+  LCShakeInstance, LCurrentInstance: TCShake;
+  LXof: IXOF;
+begin
+  LCurrentInstance := Self as TCShake;
+  LCShakeInstance := TCShake_256.Create(System.Copy(LCurrentInstance.FN),
+    System.Copy(LCurrentInstance.FS));
+  LCShakeInstance.FInitBlock := System.Copy(LCurrentInstance.FInitBlock);
+  LXof := LCShakeInstance as IXOF;
+
+  LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+  LHashInstance := LXof as TCShake_256;
+  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+  Result := LHashInstance as IHash;
+  Result.BufferSize := BufferSize;
+end;
+
+constructor TCShake_256.Create(const N, S: THashLibByteArray);
+begin
+  Inherited Create(THashSize.hsHashSize256, N, S);
 end;
 
 end.

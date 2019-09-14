@@ -417,6 +417,11 @@ type
       class function CreateShake_128(AXofSizeInBits: UInt32): IHash; static;
       class function CreateShake_256(AXofSizeInBits: UInt32): IHash; static;
 
+      class function CreateCShake_128(const N, S: THashLibByteArray;
+        AXofSizeInBits: UInt32): IHash; static;
+      class function CreateCShake_256(const N, S: THashLibByteArray;
+        AXofSizeInBits: UInt32): IHash; static;
+
     end;
 
     // ====================== THMAC ====================== //
@@ -1300,6 +1305,26 @@ var
   LXof: IXOF;
 begin
   LXof := (TShake_256.Create() as IXOF);
+  LXof.XOFSizeInBits := AXofSizeInBits;
+  Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateCShake_128(const N, S: THashLibByteArray;
+  AXofSizeInBits: UInt32): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TCShake_128.Create(N, S) as IXOF);
+  LXof.XOFSizeInBits := AXofSizeInBits;
+  Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateCShake_256(const N, S: THashLibByteArray;
+  AXofSizeInBits: UInt32): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TCShake_256.Create(N, S) as IXOF);
   LXof.XOFSizeInBits := AXofSizeInBits;
   Result := LXof as IHash;
 end;
