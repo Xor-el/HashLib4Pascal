@@ -1965,6 +1965,15 @@ type
 
     FCShake_128: IHash;
 
+  const
+    FExpectedHashOfZeroToThreeInHex
+      : String =
+      'C1C36925B6409A04F1B504FCBCA9D82B4017277CB5ED2B2065FC1D3814D5AAF5';
+
+    FExpectedHashOfZeroToOneHundredAndNinetyNineInHex
+      : String =
+      'C5221D50E4F822D96A2E8881A961420F294B7B24FE3D2094BAED2C6524CC166B';
+
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -1983,6 +1992,16 @@ type
   private
 
     FCShake_256: IHash;
+
+  const
+    FExpectedHashOfZeroToThreeInHex: String = 'D008828E2B80AC9D2218FFEE1D070C48'
+      + 'B8E4C87BFF32C9699D5B6896EEE0EDD1' + '64020E2BE0560858D9C00C037E34A969'
+      + '37C561A74C412BB4C746469527281C8C';
+
+    FExpectedHashOfZeroToOneHundredAndNinetyNineInHex
+      : String = '07DC27B11E51FBAC75BC7B3C1D983E8B' +
+      '4B85FB1DEFAF218912AC864302730917' + '27F42B17ED1DF63E8EC118F04B23633C' +
+      '1DFB1574C8FB55CB45DA8E25AFB092BB';
 
   protected
     procedure SetUp; override;
@@ -11036,7 +11055,7 @@ begin
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 
-  Data := TConverters.ConvertHexStringToBytes('EEAABEEF');
+  Data := TConverters.ConvertHexStringToBytes(FEEAABEEF);
   Shake_128 := THashFactory.TXOF.CreateShake_128(8000);
   CShake_128 := THashFactory.TXOF.CreateCShake_128(Nil, Nil, 8000);
   FExpectedString := Shake_128.ComputeBytes(Data).ToString();
@@ -11051,23 +11070,15 @@ var
 begin
   CShake_128 := THashFactory.TXOF.CreateCShake_128(Nil, FS, 256);
   FActualString := ComputeCShake(CShake_128,
-    TConverters.ConvertHexStringToBytes('00010203'));
-  FExpectedString :=
-    'C1C36925B6409A04F1B504FCBCA9D82B4017277CB5ED2B2065FC1D3814D5AAF5';
+    TConverters.ConvertHexStringToBytes(FZeroToThreeInHex));
+  FExpectedString := FExpectedHashOfZeroToThreeInHex;
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 
   CShake_128 := THashFactory.TXOF.CreateCShake_128(Nil, FS, 256);
   FActualString := ComputeCShake(CShake_128,
-    TConverters.ConvertHexStringToBytes('000102030405060708090A0B0C0D0E0F' +
-    '101112131415161718191A1B1C1D1E1F' + '202122232425262728292A2B2C2D2E2F' +
-    '303132333435363738393A3B3C3D3E3F' + '404142434445464748494A4B4C4D4E4F' +
-    '505152535455565758595A5B5C5D5E5F' + '606162636465666768696A6B6C6D6E6F' +
-    '707172737475767778797A7B7C7D7E7F' + '808182838485868788898A8B8C8D8E8F' +
-    '909192939495969798999A9B9C9D9E9F' + 'A0A1A2A3A4A5A6A7A8A9AAABACADAEAF' +
-    'B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF' + 'C0C1C2C3C4C5C6C7'));
-  FExpectedString :=
-    'C5221D50E4F822D96A2E8881A961420F294B7B24FE3D2094BAED2C6524CC166B';
+    TConverters.ConvertHexStringToBytes(FZeroToOneHundredAndNinetyNineInHex));
+  FExpectedString := FExpectedHashOfZeroToOneHundredAndNinetyNineInHex;
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
@@ -11145,7 +11156,7 @@ begin
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 
-  Data := TConverters.ConvertHexStringToBytes('EEAABEEF');
+  Data := TConverters.ConvertHexStringToBytes(FEEAABEEF);
   Shake_256 := THashFactory.TXOF.CreateShake_256(8000);
   CShake_256 := THashFactory.TXOF.CreateCShake_256(Nil, Nil, 8000);
   FExpectedString := Shake_256.ComputeBytes(Data).ToString();
@@ -11160,25 +11171,15 @@ var
 begin
   CShake_256 := THashFactory.TXOF.CreateCShake_256(Nil, FS, 512);
   FActualString := ComputeCShake(CShake_256,
-    TConverters.ConvertHexStringToBytes('00010203'));
-  FExpectedString := 'D008828E2B80AC9D2218FFEE1D070C48' +
-    'B8E4C87BFF32C9699D5B6896EEE0EDD1' + '64020E2BE0560858D9C00C037E34A969' +
-    '37C561A74C412BB4C746469527281C8C';
+    TConverters.ConvertHexStringToBytes(FZeroToThreeInHex));
+  FExpectedString := FExpectedHashOfZeroToThreeInHex;
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 
   CShake_256 := THashFactory.TXOF.CreateCShake_256(Nil, FS, 512);
   FActualString := ComputeCShake(CShake_256,
-    TConverters.ConvertHexStringToBytes('000102030405060708090A0B0C0D0E0F' +
-    '101112131415161718191A1B1C1D1E1F' + '202122232425262728292A2B2C2D2E2F' +
-    '303132333435363738393A3B3C3D3E3F' + '404142434445464748494A4B4C4D4E4F' +
-    '505152535455565758595A5B5C5D5E5F' + '606162636465666768696A6B6C6D6E6F' +
-    '707172737475767778797A7B7C7D7E7F' + '808182838485868788898A8B8C8D8E8F' +
-    '909192939495969798999A9B9C9D9E9F' + 'A0A1A2A3A4A5A6A7A8A9AAABACADAEAF' +
-    'B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF' + 'C0C1C2C3C4C5C6C7'));
-  FExpectedString := '07DC27B11E51FBAC75BC7B3C1D983E8B' +
-    '4B85FB1DEFAF218912AC864302730917' + '27F42B17ED1DF63E8EC118F04B23633C' +
-    '1DFB1574C8FB55CB45DA8E25AFB092BB';
+    TConverters.ConvertHexStringToBytes(FZeroToOneHundredAndNinetyNineInHex));
+  FExpectedString := FExpectedHashOfZeroToOneHundredAndNinetyNineInHex;
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 end;
