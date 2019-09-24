@@ -72,9 +72,13 @@ type
     ['{7DD70C4D-FBF6-4629-B587-C6A7CC047D35}']
   end;
 
-  IHMAC = Interface(IWithKey)
-    ['{A6D4DCC6-F6C3-4110-8CA2-FBE85227676E}']
+  IMAC = Interface(IWithKey)
+    ['{C75C99A1-B7D3-475F-AC39-03386EECC095}']
     procedure Clear();
+  end;
+
+  IHMAC = Interface(IMAC)
+    ['{A6D4DCC6-F6C3-4110-8CA2-FBE85227676E}']
   end;
 
   IHMACNotBuildIn = Interface(IHMAC)
@@ -103,9 +107,11 @@ type
 
   IXOF = Interface(IHash)
     ['{944ED7F0-D033-4489-A5DD-9C83353F23F0}']
-    function GetXOFSizeInBits: UInt32;
-    procedure SetXOFSizeInBits(AXofSizeInBits: UInt32);
-    property XOFSizeInBits: UInt32 read GetXOFSizeInBits write SetXOFSizeInBits;
+    function GetXOFSizeInBits: UInt64;
+    procedure SetXOFSizeInBits(AXofSizeInBits: UInt64);
+    property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
+    procedure DoOutput(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64);
   end;
 
 type

@@ -36,6 +36,8 @@ type
     procedure SetIsLastNode(AValue: Boolean);
     property IsLastNode: Boolean read GetIsLastNode write SetIsLastNode;
 
+    function Clone(): IBlake2BTreeConfig;
+
   end;
 
 implementation

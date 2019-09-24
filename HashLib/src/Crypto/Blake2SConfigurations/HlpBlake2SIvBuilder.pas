@@ -27,14 +27,9 @@ type
   TBlake2SIvBuilder = class sealed(TObject)
 
   strict private
-    class var
-
-      FSequentialTreeConfig: IBlake2STreeConfig;
 
     class procedure VerifyConfigS(const AConfig: IBlake2SConfig;
       const ATreeConfig: IBlake2STreeConfig; AIsSequential: Boolean); static;
-
-    class constructor Blake2SIvBuilder();
 
   public
     class function ConfigS(const AConfig: IBlake2SConfig;
@@ -88,7 +83,7 @@ begin
   if (ATreeConfig <> Nil) then
   begin
 
-    if ((not AIsSequential) and ((ATreeConfig.InnerHashSize <= 0))) then
+    if ((AIsSequential) and ((ATreeConfig.InnerHashSize <> 0))) then
     begin
       raise EArgumentOutOfRangeHashLibException.Create
         ('treeConfig.TreeIntermediateHashSize');
@@ -103,18 +98,6 @@ begin
 
 end;
 
-class constructor TBlake2SIvBuilder.Blake2SIvBuilder;
-begin
-  FSequentialTreeConfig := TBlake2STreeConfig.Create();
-  FSequentialTreeConfig.FanOut := 1;
-  FSequentialTreeConfig.MaxDepth := 1;
-  FSequentialTreeConfig.LeafSize := 0;
-  FSequentialTreeConfig.NodeOffset := 0;
-  FSequentialTreeConfig.NodeDepth := 0;
-  FSequentialTreeConfig.InnerHashSize := 0;
-  FSequentialTreeConfig.IsLastNode := False;
-end;
-
 class function TBlake2SIvBuilder.ConfigS(const AConfig: IBlake2SConfig;
   var ATreeConfig: IBlake2STreeConfig): THashLibUInt32Array;
 var
@@ -124,7 +107,7 @@ begin
   LIsSequential := ATreeConfig = Nil;
   if (LIsSequential) then
   begin
-    ATreeConfig := FSequentialTreeConfig;
+    ATreeConfig := TBlake2STreeConfig.SequentialTreeConfig;
   end;
 
   VerifyConfigS(AConfig, ATreeConfig, LIsSequential);

@@ -115,6 +115,8 @@ Available Algorithms
 
 * `CShake (CShake-128, CShake-256)`
 
+* `Blake2X (Blake2XS, Blake2XB)`
+
 ### Supported Compilers
 ----------------------------------------
 

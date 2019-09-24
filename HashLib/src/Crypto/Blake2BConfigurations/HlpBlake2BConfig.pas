@@ -28,6 +28,8 @@ type
     FHashSize: Int32;
     FPersonalisation, FSalt, FKey: THashLibByteArray;
 
+    class function GetDefaultConfig: IBlake2BConfig; static;
+
     procedure ValidateHashSize(AHashSize: Int32); inline;
     procedure ValidateKeyLength(const AKey: THashLibByteArray); inline;
     procedure ValidatePersonalisationLength(const APersonalisation
@@ -56,11 +58,20 @@ type
     property Key: THashLibByteArray read GetKey write SetKey;
     property HashSize: Int32 read GetHashSize write SetHashSize;
 
+    class property DefaultConfig: IBlake2BConfig read GetDefaultConfig;
+
+    function Clone(): IBlake2BConfig;
+
   end;
 
 implementation
 
 { TBlake2BConfig }
+
+class function TBlake2BConfig.GetDefaultConfig: IBlake2BConfig;
+begin
+  Result := TBlake2BConfig.Create();
+end;
 
 procedure TBlake2BConfig.ValidateHashSize(AHashSize: Int32);
 begin
@@ -119,22 +130,22 @@ end;
 
 function TBlake2BConfig.GetHashSize: Int32;
 begin
-  result := FHashSize;
+  Result := FHashSize;
 end;
 
 function TBlake2BConfig.GetKey: THashLibByteArray;
 begin
-  result := FKey;
+  Result := FKey;
 end;
 
 function TBlake2BConfig.GetPersonalisation: THashLibByteArray;
 begin
-  result := FPersonalisation;
+  Result := FPersonalisation;
 end;
 
 function TBlake2BConfig.GetSalt: THashLibByteArray;
 begin
-  result := FSalt;
+  Result := FSalt;
 end;
 
 procedure TBlake2BConfig.SetHashSize(AValue: Int32);
@@ -176,6 +187,14 @@ begin
   Inherited Create();
   ValidateHashSize(AHashSize);
   FHashSize := AHashSize;
+end;
+
+function TBlake2BConfig.Clone(): IBlake2BConfig;
+begin
+  Result := TBlake2BConfig.Create(FHashSize);
+  Result.Key := System.Copy(FKey);
+  Result.Personalisation := System.Copy(FPersonalisation);
+  Result.Salt := System.Copy(FSalt);
 end;
 
 end.

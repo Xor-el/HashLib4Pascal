@@ -412,15 +412,33 @@ type
   type
     TXOF = class sealed(TObject)
 
+    type
+      TBlake2XSConfig = HlpBlake2S.TBlake2XSConfig;
+
+    type
+      TBlake2XBConfig = HlpBlake2B.TBlake2XBConfig;
+
     public
 
-      class function CreateShake_128(AXofSizeInBits: UInt32): IHash; static;
-      class function CreateShake_256(AXofSizeInBits: UInt32): IHash; static;
+      class function CreateShake_128(AXofSizeInBits: UInt64): IHash; static;
+      class function CreateShake_256(AXofSizeInBits: UInt64): IHash; static;
 
-      class function CreateCShake_128(const N, S: THashLibByteArray;
-        AXofSizeInBits: UInt32): IHash; static;
-      class function CreateCShake_256(const N, S: THashLibByteArray;
-        AXofSizeInBits: UInt32): IHash; static;
+      class function CreateCShake_128(const AN, &AS: THashLibByteArray;
+        AXofSizeInBits: UInt64): IHash; static;
+      class function CreateCShake_256(const AN, &AS: THashLibByteArray;
+        AXofSizeInBits: UInt64): IHash; static;
+
+      class function CreateBlake2XS(const ABlake2XSConfig: TBlake2XSConfig;
+        AXofSizeInBits: UInt64): IHash; overload; static;
+
+      class function CreateBlake2XS(const AKey: THashLibByteArray;
+        AXofSizeInBits: UInt64): IHash; overload; static;
+
+      class function CreateBlake2XB(const ABlake2XBConfig: TBlake2XBConfig;
+        AXofSizeInBits: UInt64): IHash; overload; static;
+
+      class function CreateBlake2XB(const AKey: THashLibByteArray;
+        AXofSizeInBits: UInt64): IHash; overload; static;
 
     end;
 
@@ -1291,7 +1309,7 @@ end;
 
 { THashFactory.TXOF }
 
-class function THashFactory.TXOF.CreateShake_128(AXofSizeInBits: UInt32): IHash;
+class function THashFactory.TXOF.CreateShake_128(AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
@@ -1300,7 +1318,7 @@ begin
   Result := LXof as IHash;
 end;
 
-class function THashFactory.TXOF.CreateShake_256(AXofSizeInBits: UInt32): IHash;
+class function THashFactory.TXOF.CreateShake_256(AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
@@ -1309,24 +1327,66 @@ begin
   Result := LXof as IHash;
 end;
 
-class function THashFactory.TXOF.CreateCShake_128(const N, S: THashLibByteArray;
-  AXofSizeInBits: UInt32): IHash;
+class function THashFactory.TXOF.CreateCShake_128(const AN,
+  &AS: THashLibByteArray; AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
-  LXof := (TCShake_128.Create(N, S) as IXOF);
+  LXof := (TCShake_128.Create(AN, &AS) as IXOF);
   LXof.XOFSizeInBits := AXofSizeInBits;
   Result := LXof as IHash;
 end;
 
-class function THashFactory.TXOF.CreateCShake_256(const N, S: THashLibByteArray;
-  AXofSizeInBits: UInt32): IHash;
+class function THashFactory.TXOF.CreateCShake_256(const AN,
+  &AS: THashLibByteArray; AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
-  LXof := (TCShake_256.Create(N, S) as IXOF);
+  LXof := (TCShake_256.Create(AN, &AS) as IXOF);
   LXof.XOFSizeInBits := AXofSizeInBits;
   Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateBlake2XS(const ABlake2XSConfig
+  : TBlake2XSConfig; AXofSizeInBits: UInt64): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TBlake2XS.Create(ABlake2XSConfig) as IXOF);
+  LXof.XOFSizeInBits := AXofSizeInBits;
+  Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateBlake2XS(const AKey: THashLibByteArray;
+  AXofSizeInBits: UInt64): IHash;
+var
+  LConfig: IBlake2SConfig;
+begin
+  LConfig := TBlake2SConfig.Create(32);
+  LConfig.Key := AKey;
+  Result := CreateBlake2XS(TBlake2XSConfig.Create(LConfig, Nil),
+    AXofSizeInBits);
+end;
+
+class function THashFactory.TXOF.CreateBlake2XB(const ABlake2XBConfig
+  : TBlake2XBConfig; AXofSizeInBits: UInt64): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TBlake2XB.Create(ABlake2XBConfig) as IXOF);
+  LXof.XOFSizeInBits := AXofSizeInBits;
+  Result := LXof as IHash;
+end;
+
+class function THashFactory.TXOF.CreateBlake2XB(const AKey: THashLibByteArray;
+  AXofSizeInBits: UInt64): IHash;
+var
+  LConfig: IBlake2BConfig;
+begin
+  LConfig := TBlake2BConfig.Create(64);
+  LConfig.Key := AKey;
+  Result := CreateBlake2XB(TBlake2XBConfig.Create(LConfig, Nil),
+    AXofSizeInBits);
 end;
 
 { THashFactory.THMAC }

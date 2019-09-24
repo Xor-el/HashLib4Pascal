@@ -24,7 +24,10 @@ uses
 
 resourcestring
   SInvalidHashMode = 'Only "[%s]" HashModes are Supported';
-  SInvalidXOFSize = 'XOFSize in Bits must be Divisible by 8.';
+  SInvalidXOFSize =
+    'XOFSize in Bits must be Multiples of 8 and be Greater than Zero Bytes';
+  SOutputLengthInvalid = 'Output Length is above the Digest Length';
+  SOutputBufferTooShort = 'Output Buffer Too Short';
 
 type
   TSHA3 = class abstract(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
@@ -167,17 +170,24 @@ type
   TShake = class abstract(TSHA3, IXOF)
   strict private
   var
-    FXOFSizeInBits: UInt32;
-    function GetXOFSizeInBits: UInt32; inline;
-    procedure SetXOFSizeInBits(AXofSizeInBits: UInt32); inline;
-    function SetXOFSizeInBitsInternal(AXofSizeInBits: UInt32): IXOF;
+    FXOFSizeInBits: UInt64;
+    function GetXOFSizeInBits: UInt64; inline;
+    procedure SetXOFSizeInBits(AXofSizeInBits: UInt64); inline;
+    function SetXOFSizeInBitsInternal(AXofSizeInBits: UInt64): IXOF;
   strict protected
+  var
+    FBufferPosition, FDigestPosition, FShakeBufferPosition: UInt64;
+    FShakeBuffer: THashLibByteArray;
+    FFinalized: Boolean;
     constructor Create(AHashSize: THashSize);
-    property XOFSizeInBits: UInt32 read GetXOFSizeInBits write SetXOFSizeInBits;
+    property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
+    procedure Initialize(); override;
     function GetResult(): THashLibByteArray; override;
     function TransformFinal(): IHashResult; override;
+    procedure DoOutput(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64);
   end;
 
 type
@@ -280,12 +290,9 @@ begin
       Result := Format('%s_%u', ['TKeccak', Self.HashSize * 8]);
     TSHA3.THashMode.hmSHA3:
       Result := Self.ClassName;
-    TSHA3.THashMode.hmShake:
-      Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBits',
-        (Self as IXOF).XOFSizeInBits]);
-    TSHA3.THashMode.hmCShake:
-      Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBits',
-        (Self as IXOF).XOFSizeInBits]);
+    TSHA3.THashMode.hmShake, TSHA3.THashMode.hmCShake:
+      Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBytes',
+        (Self as IXOF).XOFSizeInBits shr 3]);
   else
     begin
       raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashMode,
@@ -849,9 +856,12 @@ end;
 
 { TShake }
 
-function TShake.SetXOFSizeInBitsInternal(AXofSizeInBits: UInt32): IXOF;
+function TShake.SetXOFSizeInBitsInternal(AXofSizeInBits: UInt64): IXOF;
+var
+  LXofSizeInBytes: UInt64;
 begin
-  If ((AXofSizeInBits and $7) <> 0) then
+  LXofSizeInBytes := AXofSizeInBits shr 3;
+  If (((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1)) then
   begin
     raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
   end;
@@ -863,57 +873,99 @@ constructor TShake.Create(AHashSize: THashSize);
 begin
   Inherited Create(AHashSize);
   FHashMode := THashMode.hmShake;
+  FFinalized := False;
+  System.SetLength(FShakeBuffer, 8);
+end;
+
+procedure TShake.DoOutput(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+var
+  LDestinationOffset: UInt64;
+begin
+
+  if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
+  then
+  begin
+    raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputBufferTooShort);
+  end;
+
+  if ((FDigestPosition + AOutputLength) > (FXOFSizeInBits shr 3)) then
+  begin
+    raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputLengthInvalid);
+  end;
+
+  if not FFinalized then
+  begin
+    Finish();
+    FFinalized := True;
+  end;
+
+  LDestinationOffset := ADestinationOffset;
+
+  while AOutputLength > 0 do
+  begin
+    if FShakeBufferPosition >= 8 then
+    begin
+
+      if (FBufferPosition * 8) >= UInt64(FBlockSize) then
+      begin
+        KeccakF1600_StatePermute();
+        FBufferPosition := 0;
+      end;
+
+      TConverters.ReadUInt64AsBytesLE(FState[FBufferPosition], FShakeBuffer, 0);
+      System.Inc(FBufferPosition);
+      FShakeBufferPosition := 0;
+    end;
+
+    ADestination[LDestinationOffset] := FShakeBuffer[FShakeBufferPosition];
+
+    System.Inc(FShakeBufferPosition);
+    System.Dec(AOutputLength);
+    System.Inc(FDigestPosition);
+    System.Inc(LDestinationOffset);
+  end;
 end;
 
 function TShake.GetResult: THashLibByteArray;
 var
-  LBufferPosition: Int32;
-  LIdx, LXofSizeInBytes: UInt32;
+  LXofSizeInBytes: UInt64;
 begin
-  LBufferPosition := FBuffer.Position;
-
   LXofSizeInBytes := FXOFSizeInBits shr 3;
-  LIdx := 0;
+
   System.SetLength(Result, LXofSizeInBytes);
 
-  while LIdx < (LXofSizeInBytes shr 3) do
-  begin
-
-    if (LBufferPosition * 8) >= FBlockSize then
-    begin
-      KeccakF1600_StatePermute();
-      LBufferPosition := 0;
-    end;
-
-    TConverters.ReadUInt64AsBytesLE(FState[LBufferPosition], Result, LIdx * 8);
-
-    System.Inc(LBufferPosition);
-    System.Inc(LIdx);
-  end;
+  DoOutput(Result, 0, LXofSizeInBytes);
 end;
 
-function TShake.GetXOFSizeInBits: UInt32;
+function TShake.GetXOFSizeInBits: UInt64;
 begin
   Result := FXOFSizeInBits;
+end;
+
+procedure TShake.Initialize;
+begin
+  inherited Initialize();
+  FBufferPosition := 0;
+  FDigestPosition := 0;
+  FShakeBufferPosition := 8;
+  FFinalized := False;
+  TArrayUtils.ZeroFill(FShakeBuffer);
 end;
 
 function TShake.TransformFinal: IHashResult;
 var
   LBuffer: THashLibByteArray;
 begin
-  Finish();
-{$IFDEF DEBUG}
-  System.Assert(FBuffer.IsEmpty);
-{$ENDIF DEBUG}
   LBuffer := GetResult();
 {$IFDEF DEBUG}
-  System.Assert(UInt32(System.Length(LBuffer)) = (XOFSizeInBits shr 3));
+  System.Assert(UInt64(System.Length(LBuffer)) = (XOFSizeInBits shr 3));
 {$ENDIF DEBUG}
   Initialize();
   Result := THashResult.Create(LBuffer);
 end;
 
-procedure TShake.SetXOFSizeInBits(AXofSizeInBits: UInt32);
+procedure TShake.SetXOFSizeInBits(AXofSizeInBits: UInt64);
 begin
   SetXOFSizeInBitsInternal(AXofSizeInBits);
 end;
@@ -925,12 +977,23 @@ var
   LHashInstance: TShake_128;
   LXof: IXOF;
 begin
+  // Xof Cloning
   LXof := (TShake_128.Create() as IXOF);
   LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+
+  // Shake_128 Cloning
   LHashInstance := LXof as TShake_128;
-  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FBufferPosition := FBufferPosition;
+  LHashInstance.FDigestPosition := FDigestPosition;
+  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
+  LHashInstance.FFinalized := FFinalized;
+  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+
+  // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FState := System.Copy(FState);
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;
@@ -947,12 +1010,23 @@ var
   LHashInstance: TShake_256;
   LXof: IXOF;
 begin
+  // Xof Cloning
   LXof := (TShake_256.Create() as IXOF);
   LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+
+  // Shake_256 Cloning
   LHashInstance := LXof as TShake_256;
-  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FBufferPosition := FBufferPosition;
+  LHashInstance.FDigestPosition := FDigestPosition;
+  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
+  LHashInstance.FFinalized := FFinalized;
+  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+
+  // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FState := System.Copy(FState);
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;
@@ -1047,20 +1121,27 @@ end;
 function TCShake_128.Clone(): IHash;
 var
   LHashInstance: TCShake_128;
-  LCShakeInstance, LCurrentInstance: TCShake;
   LXof: IXOF;
 begin
-  LCurrentInstance := Self as TCShake;
-  LCShakeInstance := TCShake_128.Create(System.Copy(LCurrentInstance.FN),
-    System.Copy(LCurrentInstance.FS));
-  LCShakeInstance.FInitBlock := System.Copy(LCurrentInstance.FInitBlock);
-  LXof := LCShakeInstance as IXOF;
-
+  // Xof Cloning
+  LXof := TCShake_128.Create(System.Copy(FN), System.Copy(FS)) as IXOF;
   LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+
+  // CShake_128 Cloning
   LHashInstance := LXof as TCShake_128;
-  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FInitBlock := System.Copy(FInitBlock);
+
+  LHashInstance.FBufferPosition := FBufferPosition;
+  LHashInstance.FDigestPosition := FDigestPosition;
+  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
+  LHashInstance.FFinalized := FFinalized;
+  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+
+  // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FState := System.Copy(FState);
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;
@@ -1075,20 +1156,27 @@ end;
 function TCShake_256.Clone(): IHash;
 var
   LHashInstance: TCShake_256;
-  LCShakeInstance, LCurrentInstance: TCShake;
   LXof: IXOF;
 begin
-  LCurrentInstance := Self as TCShake;
-  LCShakeInstance := TCShake_256.Create(System.Copy(LCurrentInstance.FN),
-    System.Copy(LCurrentInstance.FS));
-  LCShakeInstance.FInitBlock := System.Copy(LCurrentInstance.FInitBlock);
-  LXof := LCShakeInstance as IXOF;
-
+  // Xof Cloning
+  LXof := TCShake_256.Create(System.Copy(FN), System.Copy(FS)) as IXOF;
   LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+
+  // CShake_256 Cloning
   LHashInstance := LXof as TCShake_256;
-  LHashInstance.FState := System.Copy(FState);
+  LHashInstance.FInitBlock := System.Copy(FInitBlock);
+
+  LHashInstance.FBufferPosition := FBufferPosition;
+  LHashInstance.FDigestPosition := FDigestPosition;
+  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
+  LHashInstance.FFinalized := FFinalized;
+  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+
+  // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
+  LHashInstance.FState := System.Copy(FState);
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
+
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;

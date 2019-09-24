@@ -30,6 +30,7 @@ uses
   HlpIBlake2SConfig,
   HlpBlake2BTreeConfig,
   HlpIBlake2BTreeConfig,
+  HlpHashLibTypes,
   Blake2STestVectors;
 
 // Crypto
@@ -1892,6 +1893,7 @@ type
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
     procedure TestVeryLongShakeOfEmptyString;
+    procedure TestVeryLongShakeOfEmptyStringWithStreamingOutput;
 
   end;
 
@@ -1943,6 +1945,7 @@ type
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
     procedure TestVeryLongShakeOfEmptyString;
+    procedure TestVeryLongShakeOfEmptyStringWithStreamingOutput;
 
   end;
 
@@ -2915,6 +2918,32 @@ type
     procedure TestNullKeyVsUnKeyed;
     // https://docs.python.org/3/library/hashlib.html#tree-mode modified for Blake2s
     procedure TestBlake2STreeHashingMode;
+
+  end;
+
+type
+
+  TTestBlake2XS = class(THashLibAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestCheckTestVectors();
+    procedure TestOutputOverflow();
+
+  end;
+
+type
+
+  TTestBlake2XB = class(THashLibAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestCheckTestVectors();
+    procedure TestOutputOverflow();
 
   end;
 
@@ -10823,6 +10852,70 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+procedure TTestShake_128.TestVeryLongShakeOfEmptyStringWithStreamingOutput;
+var
+  VeryLongShake_128: IXOF;
+  TempResult, ExpectedChunk, ActualChunk: TBytes;
+begin
+  System.SetLength(TempResult, 1000);
+  VeryLongShake_128 := THashFactory.TXOF.CreateShake_128(8000) as IXOF;
+  VeryLongShake_128.Initialize;
+  VeryLongShake_128.TransformString(FEmptyData, TEncoding.UTF8);
+
+  VeryLongShake_128.DoOutput(TempResult, 0, 250);
+
+  ActualChunk := System.Copy(TempResult, 0, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 0, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake128 Streaming Test 1 Mismatch');
+
+  VeryLongShake_128.DoOutput(TempResult, 250, 250);
+
+  ActualChunk := System.Copy(TempResult, 250, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 250, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake128 Streaming Test 2 Mismatch');
+
+  VeryLongShake_128.DoOutput(TempResult, 500, 250);
+
+  ActualChunk := System.Copy(TempResult, 500, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 500, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake128 Streaming Test 3 Mismatch');
+
+  VeryLongShake_128.DoOutput(TempResult, 750, 250);
+
+  ActualChunk := System.Copy(TempResult, 750, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 750, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake128 Streaming Test 4 Mismatch');
+
+  FActualString := TConverters.ConvertBytesToHexString(TempResult, False);
+  FExpectedString := FVeryLongShakeOfEmptyString;
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+
+  // Verify that Initialization Works
+  VeryLongShake_128.Initialize;
+
+  VeryLongShake_128.DoOutput(TempResult, 0, 250);
+
+  ActualChunk := System.Copy(TempResult, 0, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 0, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake128 Streaming Initialization Test Fail');
+end;
+
 { TTestShake_256 }
 
 procedure TTestShake_256.SetUp;
@@ -10964,6 +11057,70 @@ begin
   FExpectedString := FVeryLongShakeOfEmptyString;
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
+end;
+
+procedure TTestShake_256.TestVeryLongShakeOfEmptyStringWithStreamingOutput;
+var
+  VeryLongShake_256: IXOF;
+  TempResult, ExpectedChunk, ActualChunk: TBytes;
+begin
+  System.SetLength(TempResult, 1000);
+  VeryLongShake_256 := THashFactory.TXOF.CreateShake_256(8000) as IXOF;
+  VeryLongShake_256.Initialize;
+  VeryLongShake_256.TransformString(FEmptyData, TEncoding.UTF8);
+
+  VeryLongShake_256.DoOutput(TempResult, 0, 250);
+
+  ActualChunk := System.Copy(TempResult, 0, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 0, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake256 Streaming Test 1 Mismatch');
+
+  VeryLongShake_256.DoOutput(TempResult, 250, 250);
+
+  ActualChunk := System.Copy(TempResult, 250, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 250, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake256 Streaming Test 2 Mismatch');
+
+  VeryLongShake_256.DoOutput(TempResult, 500, 250);
+
+  ActualChunk := System.Copy(TempResult, 500, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 500, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake256 Streaming Test 3 Mismatch');
+
+  VeryLongShake_256.DoOutput(TempResult, 750, 250);
+
+  ActualChunk := System.Copy(TempResult, 750, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 750, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake256 Streaming Test 4 Mismatch');
+
+  FActualString := TConverters.ConvertBytesToHexString(TempResult, False);
+  FExpectedString := FVeryLongShakeOfEmptyString;
+  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+    [FExpectedString, FActualString]));
+
+  // Verify that Initialization Works
+  VeryLongShake_256.Initialize;
+
+  VeryLongShake_256.DoOutput(TempResult, 0, 250);
+
+  ActualChunk := System.Copy(TempResult, 0, 250);
+  ExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (FVeryLongShakeOfEmptyString), 0, 250);
+
+  CheckTrue(AreEqual(ActualChunk, ExpectedChunk),
+    'Shake256 Streaming Initialization Test Fail');
 end;
 
 { TTestCShake }
@@ -16909,6 +17066,190 @@ begin
     [FExpectedString, FActualString]));
 end;
 
+{ TTestBlake2XS }
+
+procedure TTestBlake2XS.SetUp;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2XS.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2XS.TestCheckTestVectors;
+var
+  i: Int32;
+  vector: THashLibStringArray;
+  Input, Key, &out, outClone: TBytes;
+  h, Clone: IHash;
+begin
+
+  for i := 0 to System.Pred
+    (System.Length(TBlake2STestVectors.FBlake2XS_XofTestVectors)) do
+  begin
+    vector := TBlake2STestVectors.FBlake2XS_XofTestVectors[i];
+    Input := TConverters.ConvertHexStringToBytes
+      (TBlake2STestVectors.FBlake2XS_XofTestInput);
+    Key := TConverters.ConvertHexStringToBytes(vector[0]);
+
+    h := THashFactory.TXOF.CreateBlake2XS(Key,
+      (System.Length(vector[1]) shr 1) * 8);
+    h.Initialize;
+    h.TransformBytes(Input);
+    &out := h.TransformFinal().GetBytes();
+
+    if not AreEqual(&out, TConverters.ConvertHexStringToBytes(vector[1])) then
+    begin
+      Fail(Format
+        ('BLAKE2XS mismatch on test vector, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(&out, False)]));
+    end;
+
+    System.SetLength(&out, System.Length(vector[1]) shr 1);
+
+    h.TransformBytes(Input);
+    Clone := h.Clone();
+
+    (h as IXOF).DoOutput(&out, 0, System.Length(&out));
+    if (not AreEqual(&out, TConverters.ConvertHexStringToBytes(vector[1]))) then
+    begin
+      Fail(Format
+        ('BLAKE2XS mismatch on test vector after a reset, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(&out, False)]));
+    end;
+
+    outClone := Clone.TransformFinal().GetBytes();
+
+    if (not AreEqual(&out, outClone)) then
+    begin
+      Fail(Format
+        ('BLAKE2XS mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(outClone, False)]));
+    end;
+  end;
+end;
+
+procedure TTestBlake2XS.TestOutputOverflow;
+var
+  h: IHash;
+  &out: TBytes;
+begin
+
+  h := THashFactory.TXOF.CreateBlake2XS(Nil, 1 * 8);
+
+  h.Initialize;
+
+  System.SetLength(&out, 2);
+
+  try
+    (h as IXOF).DoOutput(&out, 0, System.Length(&out));
+    Fail('no exception');
+  except
+    on e: EArgumentOutOfRangeHashLibException do
+    begin
+      CheckEquals('Output Length is above the Digest Length', e.Message);
+    end;
+  end;
+
+  &out := h.TransformFinal().GetBytes();
+end;
+
+{ TTestBlake2XB }
+
+procedure TTestBlake2XB.SetUp;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2XB.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2XB.TestCheckTestVectors;
+var
+  i: Int32;
+  vector: THashLibStringArray;
+  Input, Key, &out, outClone: TBytes;
+  h, Clone: IHash;
+begin
+
+  for i := 0 to System.Pred
+    (System.Length(TBlake2BTestVectors.FBlake2XB_XofTestVectors)) do
+  begin
+    vector := TBlake2BTestVectors.FBlake2XB_XofTestVectors[i];
+    Input := TConverters.ConvertHexStringToBytes
+      (TBlake2BTestVectors.FBlake2XB_XofTestInput);
+    Key := TConverters.ConvertHexStringToBytes(vector[0]);
+
+    h := THashFactory.TXOF.CreateBlake2XB(Key,
+      (System.Length(vector[1]) shr 1) * 8);
+    h.Initialize;
+    h.TransformBytes(Input);
+    &out := h.TransformFinal().GetBytes();
+
+    if not AreEqual(&out, TConverters.ConvertHexStringToBytes(vector[1])) then
+    begin
+      Fail(Format
+        ('BLAKE2XB mismatch on test vector, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(&out, False)]));
+    end;
+
+    System.SetLength(&out, System.Length(vector[1]) shr 1);
+
+    h.TransformBytes(Input);
+    Clone := h.Clone();
+
+    (h as IXOF).DoOutput(&out, 0, System.Length(&out));
+    if (not AreEqual(&out, TConverters.ConvertHexStringToBytes(vector[1]))) then
+    begin
+      Fail(Format
+        ('BLAKE2XB mismatch on test vector after a reset, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(&out, False)]));
+    end;
+
+    outClone := Clone.TransformFinal().GetBytes();
+
+    if (not AreEqual(&out, outClone)) then
+    begin
+      Fail(Format
+        ('BLAKE2XB mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+        [vector[1], TConverters.ConvertBytesToHexString(outClone, False)]));
+    end;
+  end;
+end;
+
+procedure TTestBlake2XB.TestOutputOverflow;
+var
+  h: IHash;
+  &out: TBytes;
+begin
+
+  h := THashFactory.TXOF.CreateBlake2XB(Nil, 1 * 8);
+
+  h.Initialize;
+
+  System.SetLength(&out, 2);
+
+  try
+    (h as IXOF).DoOutput(&out, 0, System.Length(&out));
+    Fail('no exception');
+  except
+    on e: EArgumentOutOfRangeHashLibException do
+    begin
+      CheckEquals('Output Length is above the Digest Length', e.Message);
+    end;
+  end;
+
+  &out := h.TransformFinal().GetBytes();
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -16970,6 +17311,8 @@ RegisterTest(TTestKeccak_384);
 RegisterTest(TTestKeccak_512);
 RegisterTest(TTestBlake2B);
 RegisterTest(TTestBlake2S);
+RegisterTest(TTestBlake2XS);
+RegisterTest(TTestBlake2XB);
 RegisterTest(TTestSnefru_8_128);
 RegisterTest(TTestSnefru_8_256);
 RegisterTest(TTestTiger_3_128);
@@ -17048,6 +17391,8 @@ RegisterTest(TTestKeccak_384.Suite);
 RegisterTest(TTestKeccak_512.Suite);
 RegisterTest(TTestBlake2B.Suite);
 RegisterTest(TTestBlake2S.Suite);
+RegisterTest(TTestBlake2XS.Suite);
+RegisterTest(TTestBlake2XB.Suite);
 RegisterTest(TTestSnefru_8_128.Suite);
 RegisterTest(TTestSnefru_8_256.Suite);
 RegisterTest(TTestTiger_3_128.Suite);

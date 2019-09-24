@@ -24,6 +24,8 @@ type
     procedure SetHashSize(AValue: Int32);
     property HashSize: Int32 read GetHashSize write SetHashSize;
 
+    function Clone(): IBlake2BConfig;
+
   end;
 
 implementation

@@ -148,13 +148,14 @@ begin
   CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
     [FExpectedString, FActualString]));
 
-  FActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 1048576,
-    8, 1, 64);
-  FExpectedString :=
-    '2101CB9B6A511AAEADDBBE09CF70F881EC568D574A2FFD4DABE5EE9820ADAA478E56FD8F4BA5D09FFA1C6D927C40F4C337304049E8A952FBCBF45C6FA77A41A4';
-
-  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
-    [FExpectedString, FActualString]));
+  // disabled test because it's very expensive
+  // FActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 1048576,
+  // 8, 1, 64);
+  // FExpectedString :=
+  // '2101CB9B6A511AAEADDBBE09CF70F881EC568D574A2FFD4DABE5EE9820ADAA478E56FD8F4BA5D09FFA1C6D927C40F4C337304049E8A952FBCBF45C6FA77A41A4';
+  //
+  // CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
+  // [FExpectedString, FActualString]));
 
 end;
 
