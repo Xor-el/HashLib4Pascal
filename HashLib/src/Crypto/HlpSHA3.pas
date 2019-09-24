@@ -213,9 +213,13 @@ type
 
   strict private
 
-    function LeftEncode(AInput: UInt64): THashLibByteArray;
-    function BytePad(const AInput: THashLibByteArray; AW: Int32)
-      : THashLibByteArray;
+    // LeftEncode returns max 9 bytes
+    class function LeftEncode(AInput: UInt64): THashLibByteArray; static;
+    // class function RightEncode(AInput: UInt64): THashLibByteArray; static;
+    class function BytePad(const AInput: THashLibByteArray; AW: Int32)
+      : THashLibByteArray; static;
+    class function EncodeString(const AInput: THashLibByteArray)
+      : THashLibByteArray; static;
 
   protected
 
@@ -1038,7 +1042,7 @@ end;
 
 { TCShake }
 
-function TCShake.LeftEncode(AInput: UInt64): THashLibByteArray;
+class function TCShake.LeftEncode(AInput: UInt64): THashLibByteArray;
 var
   LN: Byte;
   LV: UInt64;
@@ -1062,20 +1066,52 @@ begin
   end;
 end;
 
-function TCShake.BytePad(const AInput: THashLibByteArray; AW: Int32)
+// class function TCShake.RightEncode(AInput: UInt64): THashLibByteArray;
+// var
+// LN: Byte;
+// LV: UInt64;
+// LIdx: Int32;
+// begin
+// LN := 1;
+// LV := AInput;
+// LV := LV shr 8;
+//
+// while (LV <> 0) do
+// begin
+// System.Inc(LN);
+// LV := LV shr 8;
+// end;
+//
+// System.SetLength(Result, LN + 1);
+// Result[LN] := LN;
+// for LIdx := 1 to LN do
+// begin
+// Result[LIdx - 1] := Byte(AInput shr (8 * (LN - LIdx)));
+// end;
+// end;
+
+class function TCShake.BytePad(const AInput: THashLibByteArray; AW: Int32)
   : THashLibByteArray;
 var
   LBuffer: THashLibByteArray;
   LPadLength: Int32;
 begin
-  // LeftEncode always returns max 9 bytes
-  LBuffer := Nil;
-  LBuffer := TArrayUtils.Concatenate(LBuffer, LeftEncode(UInt64(AW)));
-  LBuffer := TArrayUtils.Concatenate(LBuffer, AInput);
-
+  LBuffer := TArrayUtils.Concatenate(LeftEncode(UInt64(AW)), AInput);
   LPadLength := AW - (System.Length(LBuffer) mod AW);
   System.SetLength(Result, LPadLength);
   Result := TArrayUtils.Concatenate(LBuffer, Result);
+end;
+
+class function TCShake.EncodeString(const AInput: THashLibByteArray)
+  : THashLibByteArray;
+begin
+  if System.Length(AInput) = 0 then
+  begin
+    Result := LeftEncode(0);
+    Exit;
+  end;
+  Result := TArrayUtils.Concatenate(LeftEncode(UInt64(System.Length(AInput) * 8)
+    ), AInput);
 end;
 
 constructor TCShake.Create(AHashSize: THashSize; const N, S: THashLibByteArray);
@@ -1093,16 +1129,7 @@ begin
   else
   begin
     FHashMode := THashMode.hmCShake;
-    // LeftEncode returns max 9 bytes
-    FInitBlock := TArrayUtils.Concatenate(FInitBlock,
-      LeftEncode(UInt64(System.Length(FN) * 8)));
-
-    FInitBlock := TArrayUtils.Concatenate(FInitBlock, FN);
-
-    FInitBlock := TArrayUtils.Concatenate(FInitBlock,
-      LeftEncode(UInt64(System.Length(FS) * 8)));
-
-    FInitBlock := TArrayUtils.Concatenate(FInitBlock, FS);
+    FInitBlock := TArrayUtils.Concatenate(EncodeString(N), EncodeString(S));
   end;
 end;
 
