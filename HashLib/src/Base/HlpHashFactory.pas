@@ -440,6 +440,12 @@ type
       class function CreateBlake2XB(const AKey: THashLibByteArray;
         AXofSizeInBits: UInt64): IHash; overload; static;
 
+      class function CreateKMAC128XOF(const AKMACKey, ACustomization
+        : THashLibByteArray; AXofSizeInBits: UInt64): IHash; static;
+
+      class function CreateKMAC256XOF(const AKMACKey, ACustomization
+        : THashLibByteArray; AXofSizeInBits: UInt64): IHash; static;
+
     end;
 
     // ====================== THMAC ====================== //
@@ -451,6 +457,21 @@ type
 
       class function CreateHMAC(const AHash: IHash;
         const AHMACKey: THashLibByteArray = Nil): IHMAC; static;
+
+    end;
+
+    // ====================== TKMAC ====================== //
+
+  type
+    TKMAC = class sealed(TObject)
+
+    public
+
+      class function CreateKMAC128(const AKMACKey, ACustomization
+        : THashLibByteArray; AOutputLengthInBits: UInt64): IKMAC; static;
+
+      class function CreateKMAC256(const AKMACKey, ACustomization
+        : THashLibByteArray; AOutputLengthInBits: UInt64): IKMAC; static;
 
     end;
 
@@ -1389,12 +1410,42 @@ begin
     AXofSizeInBits);
 end;
 
+class function THashFactory.TXOF.CreateKMAC128XOF(const AKMACKey,
+  ACustomization: THashLibByteArray; AXofSizeInBits: UInt64): IHash;
+begin
+  Result := TKMAC128XOF.CreateKMAC128XOF(AKMACKey, ACustomization,
+    AXofSizeInBits);
+end;
+
+class function THashFactory.TXOF.CreateKMAC256XOF(const AKMACKey,
+  ACustomization: THashLibByteArray; AXofSizeInBits: UInt64): IHash;
+begin
+  Result := TKMAC256XOF.CreateKMAC256XOF(AKMACKey, ACustomization,
+    AXofSizeInBits);
+end;
+
 { THashFactory.THMAC }
 
 class function THashFactory.THMAC.CreateHMAC(const AHash: IHash;
   const AHMACKey: THashLibByteArray): IHMAC;
 begin
   Result := THMACNotBuildInAdapter.CreateHMAC(AHash, AHMACKey);
+end;
+
+{ THashFactory.TKMAC }
+
+class function THashFactory.TKMAC.CreateKMAC128(const AKMACKey,
+  ACustomization: THashLibByteArray; AOutputLengthInBits: UInt64): IKMAC;
+begin
+  Result := TKMAC128.CreateKMAC128(AKMACKey, ACustomization,
+    AOutputLengthInBits);
+end;
+
+class function THashFactory.TKMAC.CreateKMAC256(const AKMACKey,
+  ACustomization: THashLibByteArray; AOutputLengthInBits: UInt64): IKMAC;
+begin
+  Result := TKMAC256.CreateKMAC256(AKMACKey, ACustomization,
+    AOutputLengthInBits);
 end;
 
 { TKDF.TPBKDF2_HMAC }

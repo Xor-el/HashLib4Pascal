@@ -3169,6 +3169,69 @@ type
 
   end;
 
+  TTestKMAC = class(THashLibAlgorithmTestCase)
+
+  protected
+
+    const
+    FRawDataInHex
+      : String =
+      '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F';
+    FCustomizationMessage: String = 'My Tagged Application';
+
+  var
+    FData: String;
+
+  end;
+
+  TTestKMAC128 = class(TTestKMAC)
+
+  private
+
+    const
+
+    FOutputSizeInBits = UInt64(32 * 8);
+
+    procedure DoComputeKMAC128(const AKey, ACustomization, AData,
+      AExpectedResult: String; AOutputSizeInBits: UInt64; IsXOF: Boolean);
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestKMAC128NISTSample1;
+    procedure TestKMAC128NISTSample2;
+    procedure TestKMAC128NISTSample3;
+    procedure TestKMAC128XOFNISTSample1;
+    procedure TestKMAC128XOFNISTSample2;
+    procedure TestKMAC128XOFNISTSample3;
+
+  end;
+
+  TTestKMAC256 = class(TTestKMAC)
+
+  private
+
+    const
+
+    FOutputSizeInBits = UInt64(64 * 8);
+
+    procedure DoComputeKMAC256(const AKey, ACustomization, AData,
+      AExpectedResult: String; AOutputSizeInBits: UInt64; IsXOF: Boolean);
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestKMAC256NISTSample1;
+    procedure TestKMAC256NISTSample2;
+    procedure TestKMAC256NISTSample3;
+    procedure TestKMAC256XOFNISTSample1;
+    procedure TestKMAC256XOFNISTSample2;
+    procedure TestKMAC256XOFNISTSample3;
+
+  end;
+
 implementation
 
 // Crypto
@@ -17250,6 +17313,276 @@ begin
   &out := h.TransformFinal().GetBytes();
 end;
 
+{ TTestKMAC128 }
+
+procedure TTestKMAC128.DoComputeKMAC128(const AKey, ACustomization, AData,
+  AExpectedResult: String; AOutputSizeInBits: UInt64; IsXOF: Boolean);
+var
+  LHash, LClone: IHash;
+  LIdx: Int32;
+  LActualResult, LActualResultClone, LKey, LCustomization, LData: TBytes;
+  Suffix: String;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(AKey);
+  LCustomization := TConverters.ConvertStringToBytes(ACustomization,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(AData);
+
+  if IsXOF then
+  begin
+    LHash := THashFactory.TXOF.CreateKMAC128XOF(LKey, LCustomization,
+      AOutputSizeInBits);
+    Suffix := 'XOF';
+  end
+  else
+  begin
+    LHash := THashFactory.TKMAC.CreateKMAC128(LKey, LCustomization,
+      AOutputSizeInBits);
+    Suffix := '';
+  end;
+
+  LHash.Initialize;
+
+  for LIdx := System.Low(LData) to System.High(LData) do
+  begin
+    LHash.TransformBytes(TBytes.Create(LData[LIdx])); // do incremental hashing
+  end;
+
+  LClone := LHash.Clone();
+
+  if IsXOF then
+  begin
+    System.SetLength(LActualResult, AOutputSizeInBits shr 3);
+    System.SetLength(LActualResultClone, AOutputSizeInBits shr 3);
+
+    ((LHash as IKMAC) as IXOF).DoOutput(LActualResult, 0,
+      AOutputSizeInBits shr 3);
+
+    ((LClone as IKMAC) as IXOF).DoOutput(LActualResultClone, 0,
+      AOutputSizeInBits shr 3);
+
+    LHash.Initialize();
+    LClone.Initialize();
+  end
+  else
+  begin
+    LActualResult := LHash.TransformFinal().GetBytes();
+    LActualResultClone := LClone.TransformFinal().GetBytes();
+  end;
+
+  CheckEquals(AExpectedResult, TConverters.ConvertBytesToHexString
+    (LActualResult, False), Format('Expected %s But got %s',
+    [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResult,
+    False)]));
+
+  if (not AreEqual(LActualResult, LActualResultClone)) then
+  begin
+    Fail(Format
+      ('KMAC128%s mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+      [Suffix, AExpectedResult, TConverters.ConvertBytesToHexString
+      (LActualResultClone, False)]));
+  end;
+
+end;
+
+procedure TTestKMAC128.SetUp;
+var
+  LIdx: Int32;
+  LTemp: TBytes;
+begin
+  inherited;
+  System.SetLength(LTemp, 200);
+  for LIdx := 0 to 199 do
+  begin
+    LTemp[LIdx] := LIdx;
+  end;
+
+  FData := TConverters.ConvertBytesToHexString(LTemp, False);
+end;
+
+procedure TTestKMAC128.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestKMAC128.TestKMAC128NISTSample1;
+begin
+  DoComputeKMAC128(FRawDataInHex, '', FZeroToThreeInHex,
+    'E5780B0D3EA6F7D3A429C5706AA43A00FADBD7D49628839E3187243F456EE14E',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC128.TestKMAC128NISTSample2;
+begin
+  DoComputeKMAC128(FRawDataInHex, FCustomizationMessage, FZeroToThreeInHex,
+    '3B1FBA963CD8B0B59E8C1A6D71888B7143651AF8BA0A7070C0979E2811324AA5',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC128.TestKMAC128NISTSample3;
+begin
+  DoComputeKMAC128(FRawDataInHex, FCustomizationMessage, FData,
+    '1F5B4E6CCA02209E0DCB5CA635B89A15E271ECC760071DFD805FAA38F9729230',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC128.TestKMAC128XOFNISTSample1;
+begin
+  DoComputeKMAC128(FRawDataInHex, '', FZeroToThreeInHex,
+    'CD83740BBD92CCC8CF032B1481A0F4460E7CA9DD12B08A0C4031178BACD6EC35',
+    FOutputSizeInBits, True);
+end;
+
+procedure TTestKMAC128.TestKMAC128XOFNISTSample2;
+begin
+  DoComputeKMAC128(FRawDataInHex, FCustomizationMessage, FZeroToThreeInHex,
+    '31A44527B4ED9F5C6101D11DE6D26F0620AA5C341DEF41299657FE9DF1A3B16C',
+    FOutputSizeInBits, True);
+end;
+
+procedure TTestKMAC128.TestKMAC128XOFNISTSample3;
+begin
+  DoComputeKMAC128(FRawDataInHex, FCustomizationMessage, FData,
+    '47026C7CD793084AA0283C253EF658490C0DB61438B8326FE9BDDF281B83AE0F',
+    FOutputSizeInBits, True);
+end;
+
+{ TTestKMAC256 }
+
+procedure TTestKMAC256.DoComputeKMAC256(const AKey, ACustomization, AData,
+  AExpectedResult: String; AOutputSizeInBits: UInt64; IsXOF: Boolean);
+var
+  LHash, LClone: IHash;
+  LIdx: Int32;
+  LActualResult, LActualResultClone, LKey, LCustomization, LData: TBytes;
+  Suffix: String;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(AKey);
+  LCustomization := TConverters.ConvertStringToBytes(ACustomization,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(AData);
+
+  if IsXOF then
+  begin
+    LHash := THashFactory.TXOF.CreateKMAC256XOF(LKey, LCustomization,
+      AOutputSizeInBits);
+    Suffix := 'XOF';
+  end
+  else
+  begin
+    LHash := THashFactory.TKMAC.CreateKMAC256(LKey, LCustomization,
+      AOutputSizeInBits);
+    Suffix := '';
+  end;
+
+  LHash.Initialize;
+
+  for LIdx := System.Low(LData) to System.High(LData) do
+  begin
+    LHash.TransformBytes(TBytes.Create(LData[LIdx])); // do incremental hashing
+  end;
+
+  LClone := LHash.Clone();
+
+  if IsXOF then
+  begin
+    System.SetLength(LActualResult, AOutputSizeInBits shr 3);
+    System.SetLength(LActualResultClone, AOutputSizeInBits shr 3);
+
+    ((LHash as IKMAC) as IXOF).DoOutput(LActualResult, 0,
+      AOutputSizeInBits shr 3);
+
+    ((LClone as IKMAC) as IXOF).DoOutput(LActualResultClone, 0,
+      AOutputSizeInBits shr 3);
+
+    LHash.Initialize();
+    LClone.Initialize();
+  end
+  else
+  begin
+    LActualResult := LHash.TransformFinal().GetBytes();
+    LActualResultClone := LClone.TransformFinal().GetBytes();
+  end;
+
+  CheckEquals(AExpectedResult, TConverters.ConvertBytesToHexString
+    (LActualResult, False), Format('Expected %s But got %s',
+    [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResult,
+    False)]));
+
+  if (not AreEqual(LActualResult, LActualResultClone)) then
+  begin
+    Fail(Format
+      ('KMAC256%s mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+      [Suffix, AExpectedResult, TConverters.ConvertBytesToHexString
+      (LActualResultClone, False)]));
+  end;
+
+end;
+
+procedure TTestKMAC256.SetUp;
+var
+  LIdx: Int32;
+  LTemp: TBytes;
+begin
+  inherited;
+  System.SetLength(LTemp, 200);
+  for LIdx := 0 to 199 do
+  begin
+    LTemp[LIdx] := LIdx;
+  end;
+
+  FData := TConverters.ConvertBytesToHexString(LTemp, False);
+end;
+
+procedure TTestKMAC256.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestKMAC256.TestKMAC256NISTSample1;
+begin
+  DoComputeKMAC256(FRawDataInHex, FCustomizationMessage, FZeroToThreeInHex,
+    '20C570C31346F703C9AC36C61C03CB64C3970D0CFC787E9B79599D273A68D2F7F69D4CC3DE9D104A351689F27CF6F5951F0103F33F4F24871024D9C27773A8DD',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC256.TestKMAC256NISTSample2;
+begin
+  DoComputeKMAC256(FRawDataInHex, '', FData,
+    '75358CF39E41494E949707927CEE0AF20A3FF553904C86B08F21CC414BCFD691589D27CF5E15369CBBFF8B9A4C2EB17800855D0235FF635DA82533EC6B759B69',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC256.TestKMAC256NISTSample3;
+begin
+  DoComputeKMAC256(FRawDataInHex, FCustomizationMessage, FData,
+    'B58618F71F92E1D56C1B8C55DDD7CD188B97B4CA4D99831EB2699A837DA2E4D970FBACFDE50033AEA585F1A2708510C32D07880801BD182898FE476876FC8965',
+    FOutputSizeInBits, False);
+end;
+
+procedure TTestKMAC256.TestKMAC256XOFNISTSample1;
+begin
+  DoComputeKMAC256(FRawDataInHex, FCustomizationMessage, FZeroToThreeInHex,
+    '1755133F1534752AAD0748F2C706FB5C784512CAB835CD15676B16C0C6647FA96FAA7AF634A0BF8FF6DF39374FA00FAD9A39E322A7C92065A64EB1FB0801EB2B',
+    FOutputSizeInBits, True);
+end;
+
+procedure TTestKMAC256.TestKMAC256XOFNISTSample2;
+begin
+  DoComputeKMAC256(FRawDataInHex, '', FData,
+    'FF7B171F1E8A2B24683EED37830EE797538BA8DC563F6DA1E667391A75EDC02CA633079F81CE12A25F45615EC89972031D18337331D24CEB8F8CA8E6A19FD98B',
+    FOutputSizeInBits, True);
+end;
+
+procedure TTestKMAC256.TestKMAC256XOFNISTSample3;
+begin
+  DoComputeKMAC256(FRawDataInHex, FCustomizationMessage, FData,
+    'D5BE731C954ED7732846BB59DBE3A8E30F83E77A4BFF4459F2F1C2B4ECEBB8CE67BA01C62E8AB8578D2D499BD1BB276768781190020A306A97DE281DCC30305D',
+    FOutputSizeInBits, True);
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -17334,6 +17667,8 @@ RegisterTest(TTestTiger2_3_192);
 RegisterTest(TTestTiger2_4_192);
 RegisterTest(TTestTiger2_5_192);
 RegisterTest(TTestWhirlPool);
+RegisterTest(TTestKMAC128);
+RegisterTest(TTestKMAC256);
 {$ELSE}
 // Crypto
 RegisterTest(TTestGost.Suite);
@@ -17414,6 +17749,8 @@ RegisterTest(TTestTiger2_3_192.Suite);
 RegisterTest(TTestTiger2_4_192.Suite);
 RegisterTest(TTestTiger2_5_192.Suite);
 RegisterTest(TTestWhirlPool.Suite);
+RegisterTest(TTestKMAC128.Suite);
+RegisterTest(TTestKMAC256.Suite);
 {$ENDIF FPC}
 
 end.

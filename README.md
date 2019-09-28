@@ -108,6 +108,8 @@ Available Algorithms
 
 * `HMAC (all supported hashes)`
 
+* `KMAC (KMAC128, KMAC256)`
+
 ### XOF (Extendable Output Function)
 ----------------------------------------
 
@@ -116,6 +118,8 @@ Available Algorithms
 * `CShake (CShake-128, CShake-256)`
 
 * `Blake2X (Blake2XS, Blake2XB)`
+
+* `KMACXOF (KMAC128XOF, KMAC256XOF)`
 
 ### Supported Compilers
 ----------------------------------------
