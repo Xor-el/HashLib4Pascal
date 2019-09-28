@@ -216,7 +216,7 @@ type
     // LeftEncode returns max 9 bytes
     class function LeftEncode(AInput: UInt64): THashLibByteArray; static;
 
-  protected
+  strict protected
 
   var
     FN, FS, FInitBlock: THashLibByteArray;
@@ -989,6 +989,16 @@ begin
   Result := Self;
 end;
 
+function TShake.GetXOFSizeInBits: UInt64;
+begin
+  Result := FXOFSizeInBits;
+end;
+
+procedure TShake.SetXOFSizeInBits(AXofSizeInBits: UInt64);
+begin
+  SetXOFSizeInBitsInternal(AXofSizeInBits);
+end;
+
 constructor TShake.Create(AHashSize: THashSize);
 begin
   Inherited Create(AHashSize);
@@ -1058,11 +1068,6 @@ begin
   DoOutput(Result, 0, LXofSizeInBytes);
 end;
 
-function TShake.GetXOFSizeInBits: UInt64;
-begin
-  Result := FXOFSizeInBits;
-end;
-
 procedure TShake.Initialize;
 begin
   inherited Initialize();
@@ -1083,11 +1088,6 @@ begin
 {$ENDIF DEBUG}
   Initialize();
   Result := THashResult.Create(LBuffer);
-end;
-
-procedure TShake.SetXOFSizeInBits(AXofSizeInBits: UInt64);
-begin
-  SetXOFSizeInBitsInternal(AXofSizeInBits);
 end;
 
 { TShake_128 }

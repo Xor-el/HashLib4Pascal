@@ -78,7 +78,7 @@ type
 {$ENDIF USE_UNROLLED_VARIANT}
     procedure Compress(ABlock: PByte; AStart: Int32);
 
-  protected
+  strict protected
   var
     FM: array [0 .. 15] of UInt64;
     FRawConfig, FState: THashLibUInt64Array;
@@ -136,7 +136,7 @@ type
   end;
 
 type
-  TBlake2XB = class abstract(TBlake2B, IXOF)
+  TBlake2XB = class sealed(TBlake2B, IXOF)
   strict private
   const
     Blake2BHashSize = Int32(64);

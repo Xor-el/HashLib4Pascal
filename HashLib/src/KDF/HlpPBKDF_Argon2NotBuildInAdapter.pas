@@ -211,7 +211,7 @@ type
     public
       class function CreateBlock(): TBlock; static;
 
-      function Clear(): TBlock; inline;
+      function Clear(): TBlock;
       procedure &Xor(const AB1, AB2, AB3: TBlock); overload;
       procedure FromBytes(const AInput: THashLibByteArray);
 
