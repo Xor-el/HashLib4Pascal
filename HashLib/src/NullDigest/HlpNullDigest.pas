@@ -59,8 +59,7 @@ end;
 
 procedure TNullDigest.Initialize;
 begin
-  FOut.Position := 0;
-  FOut.Size := 0;
+  FOut.Clear;
   HashSize := 0;
   BlockSize := 0;
 end;
