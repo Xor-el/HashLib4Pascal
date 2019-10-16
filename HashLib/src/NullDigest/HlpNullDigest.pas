@@ -14,11 +14,19 @@ uses
   HlpHashResult,
   HlpIHashResult;
 
+resourcestring
+  SHashSizeNotImplemented = 'HashSize Not Implemented For "%s"';
+  SBlockSizeNotImplemented = 'BlockSize Not Implemented For "%s"';
+
 type
   TNullDigest = class sealed(THash, ITransformBlock)
   strict private
   var
     FOut: TMemoryStream;
+
+  strict protected
+    function GetBlockSize: Int32; override;
+    function GetHashSize: Int32; override;
 
   public
     constructor Create();
@@ -33,6 +41,18 @@ type
 implementation
 
 { TNullDigest }
+
+function TNullDigest.GetBlockSize: Int32;
+begin
+  raise ENotImplementedHashLibException.CreateResFmt
+    (@SBlockSizeNotImplemented, [Name]);
+end;
+
+function TNullDigest.GetHashSize: Int32;
+begin
+  raise ENotImplementedHashLibException.CreateResFmt
+    (@SHashSizeNotImplemented, [Name]);
+end;
 
 function TNullDigest.Clone(): IHash;
 var
@@ -60,8 +80,6 @@ end;
 procedure TNullDigest.Initialize;
 begin
   FOut.Clear;
-  HashSize := 0;
-  BlockSize := 0;
 end;
 
 procedure TNullDigest.TransformBytes(const AData: THashLibByteArray;

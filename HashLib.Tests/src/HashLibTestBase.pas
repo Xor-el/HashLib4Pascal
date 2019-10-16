@@ -20,6 +20,12 @@ uses
   HlpIHashResult,
   HlpArrayUtils;
 
+{$IFDEF FPC}
+
+type
+  TTestMethod = TRunMethod;
+{$ENDIF}
+
 type
 
   THashLibTestCase = class abstract(TTestCase)

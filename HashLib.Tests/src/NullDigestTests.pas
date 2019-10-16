@@ -3,6 +3,7 @@ unit NullDigestTests;
 interface
 
 {$IFDEF FPC}
+{$MODE DELPHI}
 {$WARNINGS OFF}
 {$NOTES OFF}
 {$ENDIF FPC}
@@ -18,7 +19,8 @@ uses
   HashLibTestBase,
   HlpHashFactory,
   HlpIHash,
-  HlpConverters;
+  HlpConverters,
+  HlpHashLibTypes;
 
 // NullDigest
 
@@ -27,6 +29,10 @@ type
 
   private
     FNullDigest: IHash;
+    FBlockSizeMethod, FHashSizeMethod: TTestMethod;
+
+    procedure CallGetBlockSize();
+    procedure CallGetHashSize();
 
   protected
     procedure SetUp; override;
@@ -44,16 +50,30 @@ implementation
 
 { TTestNullDigest }
 
+procedure TTestNullDigest.CallGetBlockSize;
+begin
+  FNullDigest.BlockSize;
+end;
+
+procedure TTestNullDigest.CallGetHashSize;
+begin
+  FNullDigest.HashSize;
+end;
+
 procedure TTestNullDigest.SetUp;
 begin
   inherited;
   FNullDigest := THashFactory.TNullDigestFactory.CreateNullDigest();
+  FBlockSizeMethod := CallGetBlockSize;
+  FHashSizeMethod := CallGetHashSize;
 end;
 
 procedure TTestNullDigest.TearDown;
 begin
   inherited;
   FNullDigest := Nil;
+  FBlockSizeMethod := Nil;
+  FHashSizeMethod := Nil;
 end;
 
 procedure TTestNullDigest.TestBytesabcde;
@@ -61,26 +81,16 @@ var
   BytesABCDE, Result: TBytes;
 begin
   BytesABCDE := TEncoding.UTF8.GetBytes('abcde');
-  CheckEquals(-1, FNullDigest.BlockSize);
-  CheckEquals(-1, FNullDigest.HashSize);
 
   FNullDigest.Initialize;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   FNullDigest.TransformBytes(BytesABCDE);
-
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(System.Length(BytesABCDE), FNullDigest.HashSize);
 
   Result := FNullDigest.TransformFinal.GetBytes;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   CheckTrue(AreEqual(BytesABCDE, Result));
-
+  CheckException(FBlockSizeMethod, ENotImplementedHashLibException);
+  CheckException(FHashSizeMethod, ENotImplementedHashLibException);
 end;
 
 procedure TTestNullDigest.TestEmptyBytes;
@@ -88,25 +98,16 @@ var
   BytesEmpty, Result: TBytes;
 begin
   BytesEmpty := TEncoding.UTF8.GetBytes('');
-  CheckEquals(-1, FNullDigest.BlockSize);
-  CheckEquals(-1, FNullDigest.HashSize);
 
   FNullDigest.Initialize;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   FNullDigest.TransformBytes(BytesEmpty);
-
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(System.Length(BytesEmpty), FNullDigest.HashSize);
 
   Result := FNullDigest.TransformFinal.GetBytes;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   CheckTrue(AreEqual(BytesEmpty, Result));
+  CheckException(FBlockSizeMethod, ENotImplementedHashLibException);
+  CheckException(FHashSizeMethod, ENotImplementedHashLibException);
 end;
 
 procedure TTestNullDigest.TestHashCloneIsCorrect;
@@ -153,31 +154,18 @@ var
   BytesZeroToNine, Result: TBytes;
 begin
   BytesZeroToNine := TEncoding.UTF8.GetBytes('0123456789');
-  CheckEquals(-1, FNullDigest.BlockSize);
-  CheckEquals(-1, FNullDigest.HashSize);
 
   FNullDigest.Initialize;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   FNullDigest.TransformBytes(System.Copy(BytesZeroToNine, 0, 4));
-
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(4, FNullDigest.HashSize);
 
   FNullDigest.TransformBytes(System.Copy(BytesZeroToNine, 4, 6));
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(10, FNullDigest.HashSize);
-
   Result := FNullDigest.TransformFinal.GetBytes;
 
-  CheckEquals(0, FNullDigest.BlockSize);
-  CheckEquals(0, FNullDigest.HashSize);
-
   CheckTrue(AreEqual(BytesZeroToNine, Result));
-
+  CheckException(FBlockSizeMethod, ENotImplementedHashLibException);
+  CheckException(FHashSizeMethod, ENotImplementedHashLibException);
 end;
 
 initialization
