@@ -39,7 +39,6 @@ type
   strict protected
   var
     FState: THashLibUInt64Array;
-    FHashSize, FBlockSize: Int32;
     FHashMode: THashMode;
 
 {$REGION 'Consts'}
@@ -384,8 +383,6 @@ implementation
 constructor TSHA3.Create(AHashSize: THashSize);
 begin
   Inherited Create(Int32(AHashSize), 200 - (Int32(AHashSize) * 2));
-  FHashSize := HashSize;
-  FBlockSize := BlockSize;
   System.SetLength(FState, 25);
 end;
 
@@ -398,7 +395,7 @@ begin
   LBlock := FBuffer.GetBytesZeroPadded();
 
   LBlock[LBufferPosition] := Int32(FHashMode);
-  LBlock[FBlockSize - 1] := LBlock[FBlockSize - 1] xor $80;
+  LBlock[BlockSize - 1] := LBlock[BlockSize - 1] xor $80;
 
   TransformBlock(PByte(LBlock), System.Length(LBlock), 0);
 end;
@@ -423,7 +420,7 @@ end;
 
 function TSHA3.GetResult: THashLibByteArray;
 begin
-  System.SetLength(Result, FHashSize);
+  System.SetLength(Result, HashSize);
 
   TConverters.le64_copy(PUInt64(FState), 0, PByte(Result), 0,
     System.Length(Result));
@@ -783,7 +780,7 @@ var
 begin
   TConverters.le64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
   LJdx := 0;
-  LBlockCount := FBlockSize shr 3;
+  LBlockCount := BlockSize shr 3;
   while LJdx < LBlockCount do
   begin
     FState[LJdx] := FState[LJdx] xor LData[LJdx];
@@ -1037,7 +1034,7 @@ begin
     if FShakeBufferPosition >= 8 then
     begin
 
-      if (FBufferPosition * 8) >= UInt64(FBlockSize) then
+      if (FBufferPosition * 8) >= UInt64(BlockSize) then
       begin
         KeccakF1600_StatePermute();
         FBufferPosition := 0;
@@ -1255,7 +1252,7 @@ begin
 
   if FInitBlock <> Nil then
   begin
-    TransformBytes(BytePad(FInitBlock, FBlockSize));
+    TransformBytes(BytePad(FInitBlock, BlockSize));
   end;
 end;
 
