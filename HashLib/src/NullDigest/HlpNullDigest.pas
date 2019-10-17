@@ -88,7 +88,6 @@ begin
   if AData <> Nil then
   begin
     FOut.Write(AData[AIndex], ALength);
-    HashSize := Int32(FOut.Size);
   end;
 end;
 
