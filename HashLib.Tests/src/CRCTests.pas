@@ -90,7 +90,7 @@ begin
     size := Fc_chunkSize[x];
     for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
     begin
-      FCRC := THashFactory.TCRC.CreateCRC(Idx);
+      FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
       FCRC.Initialize;
 
       i := size;
@@ -107,7 +107,7 @@ begin
 
       FActualString := FCRC.TransformFinal().ToString();
 
-      FExpectedString := THashFactory.TCRC.CreateCRC(Idx)
+      FExpectedString := THashFactory.TChecksum.TCRC.CreateCRC(Idx)
         .ComputeString(FChunkedData, TEncoding.UTF8).ToString();
 
       CheckEquals(FExpectedString, FActualString,
@@ -126,7 +126,7 @@ var
 begin
   for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    FCRC := THashFactory.TCRC.CreateCRC(Idx);
+    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
 
     FExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
 
@@ -149,7 +149,7 @@ var
 begin
   for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    FCRC := THashFactory.TCRC.CreateCRC(Idx);
+    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
 
     FCRC.Initialize();
 
@@ -187,7 +187,7 @@ begin
 
   for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    Original := THashFactory.TCRC.CreateCRC(Idx);
+    Original := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
     Original.Initialize;
 
     Original.TransformBytes(ChunkOne);
@@ -211,7 +211,7 @@ var
 begin
   for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    Original := THashFactory.TCRC.CreateCRC(Idx);
+    Original := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
     Original.Initialize;
     Original.BufferSize := (64 * 1024); // 64Kb
     // Make Copy Of Current State
@@ -231,12 +231,12 @@ begin
   case AIndex of
     0:
       begin
-        FCRC32Fast := THashFactory.TCRC.CreateCRC32_PKZIP();
+        FCRC32Fast := THashFactory.TChecksum.TCRC.CreateCRC32_PKZIP();
         Result := CRC32_PKZIP_Check_Value;
       end;
     1:
       begin
-        FCRC32Fast := THashFactory.TCRC.CreateCRC32_CASTAGNOLI();
+        FCRC32Fast := THashFactory.TChecksum.TCRC.CreateCRC32_CASTAGNOLI();
         Result := CRC32_CASTAGNOLI_Check_Value;
       end
   else

@@ -112,60 +112,60 @@ type
 
     end;
 
-    // ====================== TCRC ====================== //
-
-  type
-    TCRC = class sealed(TObject)
-
-    public
-
-      class function CreateCRC(AWidth: Int32;
-        APolynomial, AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
-        AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray)
-        : IHash; overload; static;
-
-      class function CreateCRC(AValue: TCRCStandard): IHash; overload; static;
-
-      class function CreateCRC16(APolynomial, AInitialValue: UInt64;
-        AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-        const ANames: THashLibStringArray): IHash; static;
-
-      class function CreateCRC32(APolynomial, AInitialValue: UInt64;
-        AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-        const ANames: THashLibStringArray): IHash; static;
-
-      class function CreateCRC64(APolynomial, AInitialValue: UInt64;
-        AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-        const ANames: THashLibStringArray): IHash; static;
-
-      /// <summary>
-      /// BUYPASS, polynomial = $8005
-      /// </summary>
-      /// <returns></returns>
-      class function CreateCRC16_BUYPASS(): IHash; static;
-
-      /// <summary>
-      /// PKZIP, polynomial = $04C11DB7, reversed = $EDB88320
-      /// </summary>
-      /// <returns></returns>
-      class function CreateCRC32_PKZIP(): IHash; static;
-      /// <summary>
-      /// Castagnoli, polynomial = $1EDC6F41, reversed = $82F63B78
-      /// </summary>
-      /// <returns></returns>
-      class function CreateCRC32_CASTAGNOLI(): IHash; static;
-      /// <summary>
-      /// ECMA-182, polynomial = $42F0E1EBA9EA3693
-      /// </summary>
-      /// <returns></returns>
-      class function CreateCRC64_ECMA_182(): IHash; static;
-
-    end;
-
     // ====================== TChecksum ====================== //
 
   type
     TChecksum = class sealed(TObject)
+
+      // ====================== TCRC ====================== //
+
+    type
+      TCRC = class sealed(TObject)
+
+      public
+
+        class function CreateCRC(AWidth: Int32;
+          APolynomial, AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
+          AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray)
+          : IHash; overload; static;
+
+        class function CreateCRC(AValue: TCRCStandard): IHash; overload; static;
+
+        class function CreateCRC16(APolynomial, AInitialValue: UInt64;
+          AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
+          const ANames: THashLibStringArray): IHash; static;
+
+        class function CreateCRC32(APolynomial, AInitialValue: UInt64;
+          AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
+          const ANames: THashLibStringArray): IHash; static;
+
+        class function CreateCRC64(APolynomial, AInitialValue: UInt64;
+          AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
+          const ANames: THashLibStringArray): IHash; static;
+
+        /// <summary>
+        /// BUYPASS, polynomial = $8005
+        /// </summary>
+        /// <returns></returns>
+        class function CreateCRC16_BUYPASS(): IHash; static;
+
+        /// <summary>
+        /// PKZIP, polynomial = $04C11DB7, reversed = $EDB88320
+        /// </summary>
+        /// <returns></returns>
+        class function CreateCRC32_PKZIP(): IHash; static;
+        /// <summary>
+        /// Castagnoli, polynomial = $1EDC6F41, reversed = $82F63B78
+        /// </summary>
+        /// <returns></returns>
+        class function CreateCRC32_CASTAGNOLI(): IHash; static;
+        /// <summary>
+        /// ECMA-182, polynomial = $42F0E1EBA9EA3693
+        /// </summary>
+        /// <returns></returns>
+        class function CreateCRC64_ECMA_182(): IHash; static;
+
+      end;
 
     public
 
@@ -596,9 +596,9 @@ begin
   Result := TNullDigest.Create();
 end;
 
-{ THashFactory.TCRC }
+{ THashFactory.TChecksum.TCRC }
 
-class function THashFactory.TCRC.CreateCRC(AWidth: Int32;
+class function THashFactory.TChecksum.TCRC.CreateCRC(AWidth: Int32;
   APolynomial, AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
@@ -606,51 +606,52 @@ begin
     AReflectOut, AOutputXor, ACheckValue, ANames);
 end;
 
-class function THashFactory.TCRC.CreateCRC(AValue: TCRCStandard): IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC
+  (AValue: TCRCStandard): IHash;
 begin
   Result := HlpCRC.TCRC.CreateCRCObject(AValue);
 end;
 
-class function THashFactory.TCRC.CreateCRC16(APolynomial, AInitialValue: UInt64;
-  AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-  const ANames: THashLibStringArray): IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC16(APolynomial,
+  AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
+  AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
   Result := TCRC16.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
     AOutputXor, ACheckValue, ANames);
 end;
 
-class function THashFactory.TCRC.CreateCRC16_BUYPASS: IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC16_BUYPASS: IHash;
 begin
   Result := TCRC16_BUYPASS.Create();
 end;
 
-class function THashFactory.TCRC.CreateCRC32(APolynomial, AInitialValue: UInt64;
-  AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-  const ANames: THashLibStringArray): IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC32(APolynomial,
+  AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
+  AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
   Result := TCRC32.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
     AOutputXor, ACheckValue, ANames);
 end;
 
-class function THashFactory.TCRC.CreateCRC32_CASTAGNOLI: IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC32_CASTAGNOLI: IHash;
 begin
   Result := HlpCRC32Fast.TCRC32_CASTAGNOLI.Create();
 end;
 
-class function THashFactory.TCRC.CreateCRC32_PKZIP: IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC32_PKZIP: IHash;
 begin
   Result := HlpCRC32Fast.TCRC32_PKZIP.Create();
 end;
 
-class function THashFactory.TCRC.CreateCRC64(APolynomial, AInitialValue: UInt64;
-  AReflectIn, AReflectOut: Boolean; AOutputXor, ACheckValue: UInt64;
-  const ANames: THashLibStringArray): IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC64(APolynomial,
+  AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
+  AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
   Result := TCRC64.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
     AOutputXor, ACheckValue, ANames);
 end;
 
-class function THashFactory.TCRC.CreateCRC64_ECMA_182: IHash;
+class function THashFactory.TChecksum.TCRC.CreateCRC64_ECMA_182: IHash;
 begin
   Result := TCRC64_ECMA_182.Create();
 end;
