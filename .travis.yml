@@ -1,66 +1,65 @@
 # Part of `travis-lazarus` (https://github.com/nielsAD/travis-lazarus)
 # License: MIT
 
-language: generic
+language: shell
 sudo: required
-dist: trusty
+dist: bionic
 
 os:
   - linux
   - osx
+  - windows
 
 env:
   global:
     - WINEPREFIX=~/.winelaz
     - DISPLAY=:99.0
   matrix:
-   # - LAZ_PKG=true  # Use the latest version from the default package manager
+    - LAZ_PKG=true  # Use the latest version from the default package manager. (apt, brew or choco)
     - LAZ_VER=1.6 # Use specific (binary) release
-    - LAZ_VER=1.8.0
-    - LAZ_VER=1.8.4
-   # - LAZ_VER=2.0RC1
+    # - LAZ_VER=2.0.4
 
 matrix:
   include:
     - os: linux
-      env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-    - os: linux
-      env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-    - os: linux
-      env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-   # - os: linux
-   #   env: LAZ_VER=2.0RC1 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-    - os: linux
-      env: LAZ_VER=1.6  LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
-    - os: linux
-      env: LAZ_VER=1.8.0 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
-    - os: linux
-      env: LAZ_VER=1.8.4 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
-   # - os: linux
-   #   env: LAZ_VER=2.0RC1 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
-    - os: linux
       env: LAZ_VER=1.6  LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
     - os: linux
-      env: LAZ_VER=1.8.0 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+      env: LAZ_VER=2.0.4 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
     - os: linux
-      env: LAZ_VER=1.8.4 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
-   # - os: linux
-   #   env: LAZ_VER=2.0RC1 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
+      arch: arm64
+      env: LAZ_PKG=true
+    # - os: windows
+    #   env: LAZ_VER=1.6 LAZ_REL=64 LAZ_OPT="--os=win64 --cpu=x86_64"
+    # - os: windows
+    #   env: LAZ_VER=2.0.4 LAZ_REL=64 LAZ_OPT="--os=win64 --cpu=x86_64"
+
+# before_install:
+#   # Start virtual display server
+#   - Xvfb $DISPLAY &
+#   # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+#   #         sudo apt-get update;
+#   #         sudo apt-get install binutils-2.26;
+#   #         sudo ln -sf /usr/lib/binutils-2.26/bin/* /usr/bin/;
+#   #         sudo ln -sf /usr/lib/binutils-2.26/ldscripts/* /usr/lib/ldscripts/;
+#   #   fi
+#   - chmod +x .travis.install.py 
 
 before_install:
-  # Start virtual display server
-  - Xvfb $DISPLAY &
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-          sudo apt-get update;
-          sudo apt-get install binutils-2.26;
-          sudo ln -sf /usr/lib/binutils-2.26/bin/* /usr/bin/;
-          sudo ln -sf /usr/lib/binutils-2.26/ldscripts/* /usr/lib/ldscripts/;
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install python3 --params "/InstallDir:C:\python3"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export PATH=/c/Python3:/c/Python3/Scripts:/c/lazarus:$PATH; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+      Xvfb $DISPLAY &
     fi
   - chmod +x .travis.install.py 
 
+# install:
+#   # Install prerequisites (fpc/lazarus/wine/qemu)
+#   - ./.travis.install.py
+
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
-  - ./.travis.install.py
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then python ./.travis.install.py; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./.travis.install.py; fi
 
 script:
   - lazbuild --add-package-link ./HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk  # Add HashLib4Pascal Package
