@@ -69,7 +69,6 @@ type
 {$ENDREGION}
 
   var
-    FHashSize, FBlockSize: Int32;
     FTreeConfig: IBlake2STreeConfig;
     FConfig: IBlake2SConfig;
 
@@ -188,6 +187,46 @@ type
 
   end;
 
+type
+  TBlake2SMACNotBuildInAdapter = class sealed(THash, IBlake2SMAC,
+    IBlake2SMACNotBuildIn, ICrypto, ICryptoNotBuildIn)
+
+  strict private
+  var
+    FHash: IHash;
+    FKey: THashLibByteArray;
+
+    constructor Create(const ABlake2SKey, ASalt, APersonalisation
+      : THashLibByteArray; AOutputLengthInBits: Int32); overload;
+    constructor Create(const AHash: IHash;
+      const ABlake2SKey: THashLibByteArray); overload;
+
+  strict protected
+
+    function GetName: String; override;
+
+    function GetKey(): THashLibByteArray;
+    procedure SetKey(const AValue: THashLibByteArray);
+
+  public
+
+    destructor Destroy; override;
+
+    procedure Clear();
+
+    procedure Initialize(); override;
+    function TransformFinal(): IHashResult; override;
+    procedure TransformBytes(const AData: THashLibByteArray;
+      AIndex, ALength: Int32); override;
+    function Clone(): IHash; override;
+    property Key: THashLibByteArray read GetKey write SetKey;
+    property Name: String read GetName;
+
+    class function CreateBlake2SMAC(const ABlake2SKey, ASalt, APersonalisation
+      : THashLibByteArray; AOutputLengthInBits: Int32): IBlake2SMAC; static;
+
+  end;
+
 implementation
 
 { TBlake2S }
@@ -250,7 +289,7 @@ var
 
 {$ENDIF USE_UNROLLED_VARIANT}
 begin
-  TConverters.le32_copy(ABlock, AStart, @(FM[0]), 0, FBlockSize);
+  TConverters.le32_copy(ABlock, AStart, @(FM[0]), 0, BlockSize);
 
 {$IFDEF USE_UNROLLED_VARIANT}
   m0 := FM[0];
@@ -1494,20 +1533,17 @@ constructor TBlake2S.Create(const AConfig: IBlake2SConfig;
 begin
   FConfig := AConfig;
   FTreeConfig := ATreeConfig;
-  FBlockSize := BlockSizeInBytes;
 
   if (FConfig = Nil) then
   begin
     FConfig := TBlake2SConfig.DefaultConfig;
   end;
 
-  FHashSize := FConfig.HashSize;
-
   System.SetLength(FState, 8);
 
   System.SetLength(FBuffer, BlockSizeInBytes);
 
-  Inherited Create(FHashSize, FBlockSize);
+  Inherited Create(FConfig.HashSize, BlockSizeInBytes);
 end;
 
 procedure TBlake2S.Finish;
@@ -1545,7 +1581,7 @@ begin
   begin
     FKey := System.Copy(FConfig.Key, System.Low(FConfig.Key),
       System.Length(FConfig.Key));
-    System.SetLength(FKey, FBlockSize);
+    System.SetLength(FKey, BlockSize);
   end;
 
   if (FRawConfig = Nil) then
@@ -1641,7 +1677,7 @@ var
   LBuffer: THashLibByteArray;
 begin
   Finish();
-  System.SetLength(LBuffer, FHashSize);
+  System.SetLength(LBuffer, HashSize);
   TConverters.le32_copy(PCardinal(FState), 0, PByte(LBuffer), 0,
     System.Length(LBuffer));
   Result := THashResult.Create(LBuffer);
@@ -1971,6 +2007,99 @@ begin
 {$ENDIF DEBUG}
   Initialize();
   Result := THashResult.Create(LBuffer);
+end;
+
+{ TBlake2SMACNotBuildInAdapter }
+
+procedure TBlake2SMACNotBuildInAdapter.Clear();
+begin
+  TArrayUtils.ZeroFill(FKey);
+end;
+
+function TBlake2SMACNotBuildInAdapter.Clone(): IHash;
+var
+  LHashInstance: TBlake2SMACNotBuildInAdapter;
+begin
+  LHashInstance := TBlake2SMACNotBuildInAdapter.Create(FHash.Clone(), FKey);
+  Result := LHashInstance as IHash;
+  Result.BufferSize := BufferSize;
+end;
+
+constructor TBlake2SMACNotBuildInAdapter.Create(const ABlake2SKey, ASalt,
+  APersonalisation: THashLibByteArray; AOutputLengthInBits: Int32);
+var
+  LConfig: TBlake2SConfig;
+begin
+  LConfig := TBlake2SConfig.Create(AOutputLengthInBits shr 3);
+  LConfig.Key := ABlake2SKey;
+  LConfig.Salt := ASalt;
+  LConfig.Personalisation := APersonalisation;
+  Create(TBlake2S.Create(LConfig, Nil) as IHash, ABlake2SKey);
+end;
+
+constructor TBlake2SMACNotBuildInAdapter.Create(const AHash: IHash;
+  const ABlake2SKey: THashLibByteArray);
+begin
+  Inherited Create(AHash.HashSize, AHash.BlockSize);
+  SetKey(ABlake2SKey);
+  FHash := AHash;
+end;
+
+class function TBlake2SMACNotBuildInAdapter.CreateBlake2SMAC(const ABlake2SKey,
+  ASalt, APersonalisation: THashLibByteArray; AOutputLengthInBits: Int32)
+  : IBlake2SMAC;
+begin
+  Result := TBlake2SMACNotBuildInAdapter.Create(ABlake2SKey, ASalt,
+    APersonalisation, AOutputLengthInBits) as IBlake2SMAC;
+end;
+
+destructor TBlake2SMACNotBuildInAdapter.Destroy;
+begin
+  Clear();
+  inherited Destroy;
+end;
+
+function TBlake2SMACNotBuildInAdapter.GetKey: THashLibByteArray;
+begin
+  Result := System.Copy(FKey);
+end;
+
+function TBlake2SMACNotBuildInAdapter.GetName: String;
+begin
+  Result := Format('%s', ['TBlake2SMAC']);
+end;
+
+procedure TBlake2SMACNotBuildInAdapter.Initialize;
+begin
+  FHash.Initialize;
+end;
+
+procedure TBlake2SMACNotBuildInAdapter.SetKey(const AValue: THashLibByteArray);
+begin
+  if (AValue = Nil) then
+  begin
+    FKey := Nil;
+  end
+  else
+  begin
+    FKey := System.Copy(AValue);
+  end;
+end;
+
+procedure TBlake2SMACNotBuildInAdapter.TransformBytes
+  (const AData: THashLibByteArray; AIndex, ALength: Int32);
+begin
+{$IFDEF DEBUG}
+  System.Assert(AIndex >= 0);
+  System.Assert(ALength >= 0);
+  System.Assert(AIndex + ALength <= System.Length(AData));
+{$ENDIF}
+  FHash.TransformBytes(AData, AIndex, ALength);
+end;
+
+function TBlake2SMACNotBuildInAdapter.TransformFinal: IHashResult;
+begin
+  Result := FHash.TransformFinal();
 end;
 
 end.

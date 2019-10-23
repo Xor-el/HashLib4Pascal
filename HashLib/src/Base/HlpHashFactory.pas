@@ -475,6 +475,30 @@ type
 
     end;
 
+    // ====================== TBlake2BMAC ====================== //
+
+  type
+    TBlake2BMAC = class sealed(TObject)
+
+    public
+
+      class function CreateBlake2BMAC(const ABlake2BKey, ASalt, APersonalisation
+        : THashLibByteArray; AOutputLengthInBits: Int32): IBlake2BMAC; static;
+
+    end;
+
+    // ====================== TBlake2SMAC ====================== //
+
+  type
+    TBlake2SMAC = class sealed(TObject)
+
+    public
+
+      class function CreateBlake2SMAC(const ABlake2SKey, ASalt, APersonalisation
+        : THashLibByteArray; AOutputLengthInBits: Int32): IBlake2SMAC; static;
+
+    end;
+
   end;
 
 type
@@ -1447,6 +1471,26 @@ class function THashFactory.TKMAC.CreateKMAC256(const AKMACKey,
 begin
   Result := TKMAC256.CreateKMAC256(AKMACKey, ACustomization,
     AOutputLengthInBits);
+end;
+
+{ THashFactory.TBlake2BMAC }
+
+class function THashFactory.TBlake2BMAC.CreateBlake2BMAC(const ABlake2BKey,
+  ASalt, APersonalisation: THashLibByteArray; AOutputLengthInBits: Int32)
+  : IBlake2BMAC;
+begin
+  Result := TBlake2BMACNotBuildInAdapter.CreateBlake2BMAC(ABlake2BKey, ASalt,
+    APersonalisation, AOutputLengthInBits)
+end;
+
+{ THashFactory.TBlake2SMAC }
+
+class function THashFactory.TBlake2SMAC.CreateBlake2SMAC(const ABlake2SKey,
+  ASalt, APersonalisation: THashLibByteArray; AOutputLengthInBits: Int32)
+  : IBlake2SMAC;
+begin
+  Result := TBlake2SMACNotBuildInAdapter.CreateBlake2SMAC(ABlake2SKey, ASalt,
+    APersonalisation, AOutputLengthInBits)
 end;
 
 { TKDF.TPBKDF2_HMAC }

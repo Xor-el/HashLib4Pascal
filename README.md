@@ -110,6 +110,8 @@ Available Algorithms
 
 * `KMAC (KMAC128, KMAC256)`
 
+* `Blake2MAC (Blake2BMAC, Blake2SMAC)`
+
 ### XOF (Extendable Output Function)
 ----------------------------------------
 

@@ -72,6 +72,22 @@ type
     ['{FC7AF5A9-BD6A-4DBD-B1DD-B6E110B44A20}']
   end;
 
+  IBlake2BMAC = Interface(IMAC)
+    ['{F6E0B1CA-1497-43C6-9CD9-2628F70E8451}']
+  end;
+
+  IBlake2BMACNotBuildIn = Interface(IBlake2BMAC)
+    ['{20B33EE5-48B4-4F7E-B1B8-1FD7B45E256E}']
+  end;
+
+  IBlake2SMAC = Interface(IMAC)
+    ['{7354FC5C-775C-42E9-9A25-274F62BF2CCE}']
+  end;
+
+  IBlake2SMACNotBuildIn = Interface(IBlake2SMAC)
+    ['{FFB17B7A-86A1-40D7-A5E7-60366FF8513C}']
+  end;
+
   IPBKDF2_HMAC = Interface(IKDF)
     ['{0D409BA8-7F98-4417-858F-3C1EBA11B7E1}']
   end;

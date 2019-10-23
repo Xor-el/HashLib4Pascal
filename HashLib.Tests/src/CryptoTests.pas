@@ -3232,6 +3232,40 @@ type
 
   end;
 
+  TTestBlake2BMAC = class(THashLibAlgorithmTestCase)
+
+  private
+
+    procedure DoComputeBlake2BMAC(const AKey, APersonalisation, ASalt, AData,
+      AExpectedResult: String; AOutputSizeInBits: Int32);
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestBlake2BMACSample1;
+    procedure TestBlake2BMACSample2;
+    procedure TestBlake2BMACSample3;
+
+  end;
+
+  TTestBlake2SMAC = class(THashLibAlgorithmTestCase)
+
+  private
+
+    procedure DoComputeBlake2SMAC(const AKey, APersonalisation, ASalt, AData,
+      AExpectedResult: String; AOutputSizeInBits: Int32);
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestBlake2SMACSample1;
+    procedure TestBlake2SMACSample2;
+    procedure TestBlake2SMACSample3;
+
+  end;
+
 implementation
 
 // Crypto
@@ -17583,6 +17617,183 @@ begin
     FOutputSizeInBits, True);
 end;
 
+{ TTestBlake2BMAC }
+
+procedure TTestBlake2BMAC.DoComputeBlake2BMAC(const AKey, APersonalisation,
+  ASalt, AData, AExpectedResult: String; AOutputSizeInBits: Int32);
+var
+  LHash, LClone: IHash;
+  LIdx: Int32;
+  LActualResult, LActualResultClone, LKey, LPersonalisation, LSalt,
+    LData: TBytes;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(AKey);
+  LPersonalisation := TConverters.ConvertStringToBytes(APersonalisation,
+    TEncoding.UTF8);
+
+  // if personalisation length <> 16, resize to 16, padding with zeros if necessary
+  if System.Length(LPersonalisation) <> 16 then
+  begin
+    System.SetLength(LPersonalisation, 16);
+  end;
+
+  LSalt := TConverters.ConvertHexStringToBytes(ASalt);
+  LData := TConverters.ConvertStringToBytes(AData, TEncoding.UTF8);
+
+  LHash := THashFactory.TBlake2BMAC.CreateBlake2BMAC(LKey, LSalt,
+    LPersonalisation, AOutputSizeInBits);
+
+  LHash.Initialize;
+
+  for LIdx := System.Low(LData) to System.High(LData) do
+  begin
+    LHash.TransformBytes(TBytes.Create(LData[LIdx])); // do incremental hashing
+  end;
+
+  LClone := LHash.Clone();
+
+  LActualResult := LHash.TransformFinal().GetBytes();
+  LActualResultClone := LClone.TransformFinal().GetBytes();
+
+  CheckEquals(AExpectedResult, TConverters.ConvertBytesToHexString
+    (LActualResult, False), Format('Expected %s But got %s',
+    [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResult,
+    False)]));
+
+  if (not AreEqual(LActualResult, LActualResultClone)) then
+  begin
+    Fail(Format
+      ('Blake2BMAC mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+      [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResultClone,
+      False)]));
+  end;
+
+end;
+
+procedure TTestBlake2BMAC.SetUp;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2BMAC.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2BMAC.TestBlake2BMACSample1;
+begin
+  DoComputeBlake2BMAC
+    ('000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F', '', '',
+    'Sample input for outlen<digest_length', '2A', 1 * 8);
+end;
+
+procedure TTestBlake2BMAC.TestBlake2BMACSample2;
+begin
+  DoComputeBlake2BMAC
+    ('000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F',
+    'application', '000102030405060708090A0B0C0D0E0F',
+    'Combo input with outlen, custom and salt',
+    '51742FC491171EAF6B9459C8B93A44BBF8F44A0B4869A17FA178C8209918AD96', 32 * 8);
+end;
+
+procedure TTestBlake2BMAC.TestBlake2BMACSample3;
+begin
+  DoComputeBlake2BMAC
+    ('000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F',
+    'application', '000102030405060708090A0B0C0D0E0F',
+    'Sample input for keylen<blocklen, salt and custom',
+    '233A6C732212F4813EC4C9F357E35297E59A652FD24155205F00363F7C54734EE1E8C7329D92116CBEC62DB35EBB5D51F9E5C2BA41789B84AC9EBC266918E524',
+    64 * 8);
+end;
+
+{ TTestBlake2SMAC }
+
+procedure TTestBlake2SMAC.DoComputeBlake2SMAC(const AKey, APersonalisation,
+  ASalt, AData, AExpectedResult: String; AOutputSizeInBits: Int32);
+var
+  LHash, LClone: IHash;
+  LIdx: Int32;
+  LActualResult, LActualResultClone, LKey, LPersonalisation, LSalt,
+    LData: TBytes;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(AKey);
+  LPersonalisation := TConverters.ConvertStringToBytes(APersonalisation,
+    TEncoding.UTF8);
+
+  // if personalisation length <> 8, resize to 8, padding with zeros if necessary
+  if System.Length(LPersonalisation) <> 8 then
+  begin
+    System.SetLength(LPersonalisation, 8);
+  end;
+
+  LSalt := TConverters.ConvertHexStringToBytes(ASalt);
+  LData := TConverters.ConvertStringToBytes(AData, TEncoding.UTF8);
+
+  LHash := THashFactory.TBlake2SMAC.CreateBlake2SMAC(LKey, LSalt,
+    LPersonalisation, AOutputSizeInBits);
+
+  LHash.Initialize;
+
+  for LIdx := System.Low(LData) to System.High(LData) do
+  begin
+    LHash.TransformBytes(TBytes.Create(LData[LIdx])); // do incremental hashing
+  end;
+
+  LClone := LHash.Clone();
+
+  LActualResult := LHash.TransformFinal().GetBytes();
+  LActualResultClone := LClone.TransformFinal().GetBytes();
+
+  CheckEquals(AExpectedResult, TConverters.ConvertBytesToHexString
+    (LActualResult, False), Format('Expected %s But got %s',
+    [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResult,
+    False)]));
+
+  if (not AreEqual(LActualResult, LActualResultClone)) then
+  begin
+    Fail(Format
+      ('Blake2SMAC mismatch on test vector test vector against a clone, Expected "%s" but got "%s"',
+      [AExpectedResult, TConverters.ConvertBytesToHexString(LActualResultClone,
+      False)]));
+  end;
+
+end;
+
+procedure TTestBlake2SMAC.SetUp;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2SMAC.TearDown;
+begin
+  inherited;
+
+end;
+
+procedure TTestBlake2SMAC.TestBlake2SMACSample1;
+begin
+  DoComputeBlake2SMAC
+    ('000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F', '', '',
+    'Sample input for outlen<digest_length', '07', 1 * 8);
+end;
+
+procedure TTestBlake2SMAC.TestBlake2SMACSample2;
+begin
+  DoComputeBlake2SMAC('000102030405060708090A0B0C0D0E0F', 'app',
+    '0001020304050607', 'Combo input with outlen, custom and salt',
+    '6808D8DAAE537A16BF00E837010969A4', 16 * 8);
+end;
+
+procedure TTestBlake2SMAC.TestBlake2SMACSample3;
+begin
+  DoComputeBlake2SMAC('000102030405060708090A0B0C0D0E0F', 'app',
+    'A205819E78D6D762', 'Sample input for keylen<blocklen, salt and custom',
+    'E9F7704DFE5080A4AAFE62A806F53EA7F98FFC24175164158F18EC5497B961F5', 32 * 8);
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -17669,6 +17880,8 @@ RegisterTest(TTestTiger2_5_192);
 RegisterTest(TTestWhirlPool);
 RegisterTest(TTestKMAC128);
 RegisterTest(TTestKMAC256);
+RegisterTest(TTestBlake2BMAC);
+RegisterTest(TTestBlake2SMAC);
 {$ELSE}
 // Crypto
 RegisterTest(TTestGost.Suite);
@@ -17751,6 +17964,8 @@ RegisterTest(TTestTiger2_5_192.Suite);
 RegisterTest(TTestWhirlPool.Suite);
 RegisterTest(TTestKMAC128.Suite);
 RegisterTest(TTestKMAC256.Suite);
+RegisterTest(TTestBlake2BMAC.Suite);
+RegisterTest(TTestBlake2SMAC.Suite);
 {$ENDIF FPC}
 
 end.
