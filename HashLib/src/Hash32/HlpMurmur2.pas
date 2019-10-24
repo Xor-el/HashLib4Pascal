@@ -24,7 +24,7 @@ resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
 
 type
-
+  // The original MurmurHash2 32-bit algorithm by Austin Appleby.
   TMurmur2 = class sealed(TMultipleTransformNonBlock, IHash32, IHashWithKey,
     ITransformBlock)
 
