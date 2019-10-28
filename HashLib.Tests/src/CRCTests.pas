@@ -2,11 +2,6 @@ unit CRCTests;
 
 interface
 
-{$IFDEF FPC}
-{$WARNINGS OFF}
-{$NOTES OFF}
-{$ENDIF FPC}
-
 uses
   Classes,
   SysUtils,
@@ -84,34 +79,34 @@ var
   x, size, i: Int32;
 begin
 
-  for x := 0 to System.Pred(System.SizeOf(Fc_chunkSize)
+  for x := 0 to System.Pred(System.SizeOf(ChunkSizes)
     div System.SizeOf(Int32)) do
   begin
-    size := Fc_chunkSize[x];
+    size := ChunkSizes[x];
     for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
     begin
       FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
       FCRC.Initialize;
 
       i := size;
-      while i < System.Length(FChunkedData) do
+      while i < System.Length(ChunkedData) do
       begin
-        temp := System.Copy(FChunkedData, (i - size) + 1, size);
+        temp := System.Copy(ChunkedData, (i - size) + 1, size);
         FCRC.TransformString(temp, TEncoding.UTF8);
 
         System.Inc(i, size);
       end;
-      temp := System.Copy(FChunkedData, (i - size) + 1,
-        System.Length(FChunkedData) - ((i - size)));
+      temp := System.Copy(ChunkedData, (i - size) + 1,
+        System.Length(ChunkedData) - ((i - size)));
       FCRC.TransformString(temp, TEncoding.UTF8);
 
-      FActualString := FCRC.TransformFinal().ToString();
+      ActualString := FCRC.TransformFinal().ToString();
 
-      FExpectedString := THashFactory.TChecksum.TCRC.CreateCRC(Idx)
-        .ComputeString(FChunkedData, TEncoding.UTF8).ToString();
+      ExpectedString := THashFactory.TChecksum.TCRC.CreateCRC(Idx)
+        .ComputeString(ChunkedData, TEncoding.UTF8).ToString();
 
-      CheckEquals(FExpectedString, FActualString,
-        Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+      CheckEquals(ExpectedString, ActualString,
+        Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
         FCRC.Name]));
 
     end;
@@ -128,14 +123,14 @@ begin
   begin
     FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
 
-    FExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
+    ExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
 
-    tmp := FCRC.ComputeString(FOnetoNine, TEncoding.UTF8).ToString();
+    tmp := FCRC.ComputeString(OneToNine, TEncoding.UTF8).ToString();
 
-    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       FCRC.Name]));
 
   end;
@@ -153,20 +148,18 @@ begin
 
     FCRC.Initialize();
 
-    FExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
+    ExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
 
-    FCRC.TransformString(System.Copy(FOnetoNine, 1, 3), TEncoding.UTF8);
-    FCRC.TransformString(System.Copy(FOnetoNine, 4, 3), TEncoding.UTF8);
-    FCRC.TransformString(System.Copy(FOnetoNine, 7, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(OneToNine, 1, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(OneToNine, 4, 3), TEncoding.UTF8);
+    FCRC.TransformString(System.Copy(OneToNine, 7, 3), TEncoding.UTF8);
 
-    FHashResult := FCRC.TransformFinal();
+    tmp := FCRC.TransformFinal().ToString();
 
-    tmp := FHashResult.ToString();
+    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
-    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
-
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       FCRC.Name]));
 
   end;
@@ -180,7 +173,7 @@ var
   Count: Int32;
   Idx: TCRCStandard;
 begin
-  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  MainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
   Count := System.Length(MainData) - 3;
   ChunkOne := System.Copy(MainData, 0, Count);
   ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
@@ -194,12 +187,12 @@ begin
     // Make Copy Of Current State
     Copy := Original.Clone();
     Original.TransformBytes(ChunkTwo);
-    FExpectedString := Original.TransformFinal().ToString();
+    ExpectedString := Original.TransformFinal().ToString();
     Copy.TransformBytes(ChunkTwo);
-    FActualString := Copy.TransformFinal().ToString();
+    ActualString := Copy.TransformFinal().ToString();
 
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       Original.Name]));
   end;
 end;
@@ -258,10 +251,10 @@ var
   x, size, i, Idx: Int32;
 begin
 
-  for x := 0 to System.Pred(System.SizeOf(Fc_chunkSize)
+  for x := 0 to System.Pred(System.SizeOf(ChunkSizes)
     div System.SizeOf(Int32)) do
   begin
-    size := Fc_chunkSize[x];
+    size := ChunkSizes[x];
 
     for Idx := LOW_INDEX to HIGH_INDEX do
     begin
@@ -271,24 +264,24 @@ begin
       FCRC32Fast.Initialize;
 
       i := size;
-      while i < System.Length(FChunkedData) do
+      while i < System.Length(ChunkedData) do
       begin
-        temp := System.Copy(FChunkedData, (i - size) + 1, size);
+        temp := System.Copy(ChunkedData, (i - size) + 1, size);
         FCRC32Fast.TransformString(temp, TEncoding.UTF8);
 
         System.Inc(i, size);
       end;
-      temp := System.Copy(FChunkedData, (i - size) + 1,
-        System.Length(FChunkedData) - ((i - size)));
+      temp := System.Copy(ChunkedData, (i - size) + 1,
+        System.Length(ChunkedData) - ((i - size)));
       FCRC32Fast.TransformString(temp, TEncoding.UTF8);
 
-      FActualString := FCRC32Fast.TransformFinal().ToString();
+      ActualString := FCRC32Fast.TransformFinal().ToString();
 
-      FExpectedString := FCRC32Fast.ComputeString(FChunkedData, TEncoding.UTF8)
+      ExpectedString := FCRC32Fast.ComputeString(ChunkedData, TEncoding.UTF8)
         .ToString();
 
-      CheckEquals(FExpectedString, FActualString,
-        Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+      CheckEquals(ExpectedString, ActualString,
+        Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
         FCRC32Fast.Name]));
 
     end;
@@ -309,14 +302,14 @@ begin
 
     Check_Value := GetWorkingValue(Idx);
 
-    FExpectedString := IntToHex(Check_Value, 16);
+    ExpectedString := IntToHex(Check_Value, 16);
 
-    tmp := FCRC32Fast.ComputeString(FOnetoNine, TEncoding.UTF8).ToString();
+    tmp := FCRC32Fast.ComputeString(OneToNine, TEncoding.UTF8).ToString();
 
-    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       FCRC32Fast.Name]));
 
   end;
@@ -337,20 +330,18 @@ begin
 
     FCRC32Fast.Initialize();
 
-    FExpectedString := IntToHex(Check_Value, 16);
+    ExpectedString := IntToHex(Check_Value, 16);
 
-    FCRC32Fast.TransformString(System.Copy(FOnetoNine, 1, 3), TEncoding.UTF8);
-    FCRC32Fast.TransformString(System.Copy(FOnetoNine, 4, 3), TEncoding.UTF8);
-    FCRC32Fast.TransformString(System.Copy(FOnetoNine, 7, 3), TEncoding.UTF8);
+    FCRC32Fast.TransformString(System.Copy(OneToNine, 1, 3), TEncoding.UTF8);
+    FCRC32Fast.TransformString(System.Copy(OneToNine, 4, 3), TEncoding.UTF8);
+    FCRC32Fast.TransformString(System.Copy(OneToNine, 7, 3), TEncoding.UTF8);
 
-    FHashResult := FCRC32Fast.TransformFinal();
+    tmp := FCRC32Fast.TransformFinal().ToString();
 
-    tmp := FHashResult.ToString();
+    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
 
-    FActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
-
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       FCRC32Fast.Name]));
 
   end;
@@ -363,7 +354,7 @@ var
   MainData, ChunkOne, ChunkTwo: TBytes;
   Count, Idx: Int32;
 begin
-  MainData := TConverters.ConvertStringToBytes(FDefaultData, TEncoding.UTF8);
+  MainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
   Count := System.Length(MainData) - 3;
   ChunkOne := System.Copy(MainData, 0, Count);
   ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
@@ -378,12 +369,12 @@ begin
     // Make Copy Of Current State
     Copy := Original.Clone();
     Original.TransformBytes(ChunkTwo);
-    FExpectedString := Original.TransformFinal().ToString();
+    ExpectedString := Original.TransformFinal().ToString();
     Copy.TransformBytes(ChunkTwo);
-    FActualString := Copy.TransformFinal().ToString();
+    ActualString := Copy.TransformFinal().ToString();
 
-    CheckEquals(FExpectedString, FActualString,
-      Format('Expected %s but got %s. %s', [FExpectedString, FActualString,
+    CheckEquals(ExpectedString, ActualString,
+      Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
       Original.Name]));
   end;
 end;

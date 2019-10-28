@@ -2,13 +2,8 @@ unit HashLibTestBase;
 
 interface
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$WARNINGS OFF}
-{$NOTES OFF}
-{$ENDIF FPC}
-
 uses
+  Classes,
   SysUtils,
 {$IFDEF FPC}
   fpcunit,
@@ -17,8 +12,11 @@ uses
   TestFramework,
 {$ENDIF FPC}
   HlpIHash,
+  HlpIHashInfo,
   HlpIHashResult,
-  HlpArrayUtils;
+  HlpConverters,
+  HlpArrayUtils,
+  HlpHashLibTypes;
 
 {$IFDEF FPC}
 
@@ -27,21 +25,30 @@ type
 {$ENDIF}
 
 type
-
   THashLibTestCase = class abstract(TTestCase)
 
   end;
 
 type
-
   THashLibAlgorithmTestCase = class abstract(THashLibTestCase)
-  protected
-    FHash: IHash;
-    FHashResult: IHashResult;
+
+  strict private
+  var
+    FHashInstance: IHash;
     FActualString, FExpectedString: String;
 
+    function GetHashInstance: IHash; inline;
+    procedure SetHashInstance(const AValue: IHash); inline;
+
+    function GetActualString: String; inline;
+    procedure SetActualString(const AValue: String); inline;
+    function GetExpectedString: String; inline;
+    procedure SetExpectedString(const AValue: String); inline;
+
+  strict protected
+
   const
-    Fc_chunkSize: array [0 .. 259] of Int32 = (1,
+    ChunkSizes: array [0 .. 259] of Int32 = (1,
       // Test many chunk of < sizeof(int)
       2, // Test many chunk of < sizeof(int)
       3, // Test many chunk of < sizeof(int)
@@ -120,35 +127,282 @@ type
     // 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022,
     // 1023, 1024);
 
-    FEmptyData: String = '';
-    FDefaultData: String = 'HashLib4Pascal';
-    FShortMessage: String = 'A short message';
-    FZerotoFour: String = '01234';
-    FOnetoNine: String = '123456789';
-    FEEAABEEF: String = 'EEAABEEF';
-    FZeroToThreeInHex: String = '00010203';
-    FZeroToOneHundredAndNinetyNineInHex
-      : String = '000102030405060708090A0B0C0D0E0F' +
+    BytesABCDE: array [0 .. 4] of Byte = ($61, $62, $63, $64, $65);
+    EmptyData: String = '';
+    DefaultData = 'HashLib4Pascal';
+    OneToNine = '123456789';
+    ChunkedData =
+      'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678';
+    EEAABEEF = 'EEAABEEF';
+    ZeroToThreeInHex = '00010203';
+    ZeroToFifteenInHex = '000102030405060708090A0B0C0D0E0F';
+    ZeroToOneHundredAndNinetyNineInHex = '000102030405060708090A0B0C0D0E0F' +
       '101112131415161718191A1B1C1D1E1F' + '202122232425262728292A2B2C2D2E2F' +
       '303132333435363738393A3B3C3D3E3F' + '404142434445464748494A4B4C4D4E4F' +
       '505152535455565758595A5B5C5D5E5F' + '606162636465666768696A6B6C6D6E6F' +
       '707172737475767778797A7B7C7D7E7F' + '808182838485868788898A8B8C8D8E8F' +
       '909192939495969798999A9B9C9D9E9F' + 'A0A1A2A3A4A5A6A7A8A9AAABACADAEAF' +
       'B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF' + 'C0C1C2C3C4C5C6C7';
-    FRandomStringRecord
-      : String = 'I will not buy this record, it is scratched.';
-    FRandomStringTobacco
-      : String = 'I will not buy this tobacconist''s, it is scratched.';
-    FQuickBrownDog: String = 'The quick brown fox jumps over the lazy dog';
-    FChunkedData
-      : String =
-      'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678';
-    FBytesabcde: array [0 .. 4] of Byte = ($61, $62, $63, $64, $65);
-    FHexStringAsKey: String = '000102030405060708090A0B0C0D0E0F';
-    FHMACLongStringKey: String = 'I need an Angel';
-    FHMACShortStringKey: String = 'Hash';
+
+    HMACLongStringKey = 'I need an Angel';
+    HMACShortStringKey = 'Hash';
 
     function AreEqual(const A, B: TBytes): Boolean;
+
+    property HashInstance: IHash read GetHashInstance write SetHashInstance;
+    property ActualString: String read GetActualString write SetActualString;
+    property ExpectedString: String read GetExpectedString
+      write SetExpectedString;
+
+  end;
+
+type
+  TCloneAlgorithmTestCase = class abstract(THashLibAlgorithmTestCase)
+  published
+    procedure TestHashCloneIsCorrect;
+    procedure TestHashCloneMatchesMainHash;
+    procedure TestHashCloneIsUnique;
+  end;
+
+type
+  TNullDigestAlgorithmTestCase = class abstract(TCloneAlgorithmTestCase)
+  strict protected
+  var
+    FBlockSizeMethod, FHashSizeMethod: TTestMethod;
+
+    procedure CallGetBlockSize();
+    procedure CallGetHashSize();
+  published
+    procedure TestEmptyBytes;
+    procedure TestBytesABCDE;
+  end;
+
+type
+  THashAlgorithmTestCase = class abstract(TCloneAlgorithmTestCase)
+  strict private
+  var
+    FHashOfEmptyData, FHashOfDefaultData, FHashOfOnetoNine,
+      FHashOfABCDE: String;
+
+    function GetHashOfEmptyData: String; inline;
+    function GetHashOfDefaultData: String; inline;
+    function GetHashOfOnetoNine: String; inline;
+    function GetHashOfABCDE: String; inline;
+
+    procedure SetHashOfEmptyData(const AValue: String); inline;
+    procedure SetHashOfDefaultData(const AValue: String); inline;
+    procedure SetHashOfOnetoNine(const AValue: String); inline;
+    procedure SetHashOfABCDE(const AValue: String); inline;
+
+  strict protected
+    property HashOfEmptyData: String read GetHashOfEmptyData
+      write SetHashOfEmptyData;
+    property HashOfDefaultData: String read GetHashOfDefaultData
+      write SetHashOfDefaultData;
+    property HashOfOnetoNine: String read GetHashOfOnetoNine
+      write SetHashOfOnetoNine;
+    property HashOfABCDE: String read GetHashOfABCDE write SetHashOfABCDE;
+  published
+    procedure TestEmptyString;
+    procedure TestDefaultData;
+    procedure TestOnetoNine;
+    procedure TestBytesABCDE;
+    procedure TestEmptyStream;
+    procedure TestIncrementalHash;
+    procedure TestIndexChunkedDataIncrementalHash;
+    procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestUntypedInterface;
+
+  end;
+
+type
+  THashWithUInt32AsKeyAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+  strict private
+  var
+    FHashOfDefaultDataWithMaxUInt32AsKey: String;
+
+    function GetHashOfDefaultDataWithMaxUInt32AsKey: String; inline;
+
+    procedure SetHashOfDefaultDataWithMaxUInt32AsKey(const AValue
+      : String); inline;
+
+  strict protected
+    property HashOfDefaultDataWithMaxUInt32AsKey: String
+      read GetHashOfDefaultDataWithMaxUInt32AsKey
+      write SetHashOfDefaultDataWithMaxUInt32AsKey;
+  published
+    procedure TestWithMaxUInt32AsKey;
+
+  end;
+
+type
+  THashWithUInt64AsKeyAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+  strict private
+  var
+    FHashOfDefaultDataWithMaxUInt64AsKey: String;
+
+    function GetHashOfDefaultDataWithMaxUInt64AsKey: String; inline;
+
+    procedure SetHashOfDefaultDataWithMaxUInt64AsKey(const AValue
+      : String); inline;
+
+  strict protected
+    property HashOfDefaultDataWithMaxUInt64AsKey: String
+      read GetHashOfDefaultDataWithMaxUInt64AsKey
+      write SetHashOfDefaultDataWithMaxUInt64AsKey;
+  published
+    procedure TestWithMaxUInt64AsKey;
+
+  end;
+
+type
+  THashWithExternalKeyAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+  strict private
+  var
+    FHashOfDefaultDataWithExternalKey: String;
+
+    function GetHashOfDefaultDataWithExternalKey: String; inline;
+
+    procedure SetHashOfDefaultDataWithExternalKey(const AValue: String); inline;
+
+  strict protected
+    property HashOfDefaultDataWithExternalKey: String
+      read GetHashOfDefaultDataWithExternalKey
+      write SetHashOfDefaultDataWithExternalKey;
+  published
+    procedure TestWithExternalKey;
+
+  end;
+
+type
+  TCryptoAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+  strict private
+  var
+    FHMACInstance: IHMAC;
+    FHashOfDefaultDataHMACWithShortKey,
+      FHashOfDefaultDataHMACWithLongKey: String;
+
+    function GetHashOfDefaultDataHMACWithShortKey: String; inline;
+    function GetHashOfDefaultDataHMACWithLongKey: String; inline;
+    procedure SetHashOfDefaultDataHMACWithShortKey(const AValue
+      : String); inline;
+    procedure SetHashOfDefaultDataHMACWithLongKey(const AValue: String); inline;
+
+    function GetHMACInstance: IHMAC; inline;
+    procedure SetHMACInstance(const AValue: IHMAC); inline;
+
+  strict protected
+    property HashOfDefaultDataHMACWithShortKey: String
+      read GetHashOfDefaultDataHMACWithShortKey
+      write SetHashOfDefaultDataHMACWithShortKey;
+
+    property HashOfDefaultDataHMACWithLongKey: String
+      read GetHashOfDefaultDataHMACWithLongKey
+      write SetHashOfDefaultDataHMACWithLongKey;
+
+    property HMACInstance: IHMAC read GetHMACInstance write SetHMACInstance;
+  published
+    procedure TestHMACWithDefaultDataShortKey;
+    procedure TestHMACWithDefaultDataLongKey;
+    procedure TestHMACCloneWorks;
+
+  end;
+
+type
+  TBlakeCryptoAlgorithmTestCase = class abstract(TCryptoAlgorithmTestCase)
+
+  strict private
+  var
+    FUnkeyedTestVectors, FKeyedTestVectors: THashLibStringArray;
+    FHashInstanceWithKey: IHash;
+
+    function GetUnkeyedTestVectors: THashLibStringArray; inline;
+    procedure SetUnkeyedTestVectors(const AValue: THashLibStringArray); inline;
+
+    function GetKeyedTestVectors: THashLibStringArray; inline;
+    procedure SetKeyedTestVectors(const AValue: THashLibStringArray); inline;
+
+    function GetHashInstanceWithKey: IHash; inline;
+    procedure SetHashInstanceWithKey(const AValue: IHash); inline;
+
+  strict protected
+    property UnkeyedTestVectors: THashLibStringArray read GetUnkeyedTestVectors
+      write SetUnkeyedTestVectors;
+    property KeyedTestVectors: THashLibStringArray read GetKeyedTestVectors
+      write SetKeyedTestVectors;
+
+    property HashInstanceWithKey: IHash read GetHashInstanceWithKey
+      write SetHashInstanceWithKey;
+
+  published
+    procedure TestSplits();
+    procedure TestCheckKeyedTestVectors();
+    procedure TestCheckUnkeyedTestVectors();
+
+  end;
+
+type
+  TXofAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+  strict private
+  var
+    FXofInstance: IXOF;
+    FXofOfEmptyData: String;
+
+    function GetXofOfEmptyData: String; inline;
+    procedure SetXofOfEmptyData(const AValue: String); inline;
+
+    function GetXofInstance: IXOF; inline;
+    procedure SetXofInstance(const AValue: IXOF); inline;
+
+  strict protected
+    property XofOfEmptyData: String read GetXofOfEmptyData
+      write SetXofOfEmptyData;
+
+    property XofInstance: IXOF read GetXofInstance write SetXofInstance;
+  published
+    procedure TestOutputOverflow;
+    procedure TestVeryLongXofOfEmptyString;
+    procedure TestVeryLongXofOfEmptyStringWithStreamingOutput;
+
+  end;
+
+type
+  TShakeAlgorithmTestCase = class abstract(TXofAlgorithmTestCase)
+
+  end;
+
+type
+  TCShakeAlgorithmTestCase = class abstract(TXofAlgorithmTestCase)
+  strict private
+  var
+    FXofNAndSNilInstance, FXofInstanceTestVector: IXOF;
+    FXofOfZeroToOneHundredAndNinetyNineInHex: String;
+
+    function GetXofOfZeroToOneHundredAndNinetyNineInHex: String; inline;
+    procedure SetXofOfZeroToOneHundredAndNinetyNineInHex
+      (const AValue: String); inline;
+
+    function GetXofInstanceShake: IXOF; inline;
+    procedure SetXofInstanceShake(const AValue: IXOF); inline;
+
+    function GetXofInstanceTestVector: IXOF; inline;
+    procedure SetXofInstanceTestVector(const AValue: IXOF); inline;
+
+    function ComputeCShake(const ACShake: IHash; const AMsg: TBytes): String;
+
+  strict protected
+    property XofOfZeroToOneHundredAndNinetyNineInHex: String
+      read GetXofOfZeroToOneHundredAndNinetyNineInHex
+      write SetXofOfZeroToOneHundredAndNinetyNineInHex;
+
+    property XofInstanceShake: IXOF read GetXofInstanceShake
+      write SetXofInstanceShake;
+
+    property XofInstanceTestVector: IXOF read GetXofInstanceTestVector
+      write SetXofInstanceTestVector;
+  published
+    procedure TestCShakeAndShakeAreSameWhenNAndSAreEmpty;
+    procedure TestCShake_Vectors;
 
   end;
 
@@ -156,9 +410,832 @@ implementation
 
 { THashLibAlgorithmTestCase }
 
+function THashLibAlgorithmTestCase.GetActualString: String;
+begin
+  Result := FActualString;
+end;
+
+function THashLibAlgorithmTestCase.GetExpectedString: String;
+begin
+  Result := FExpectedString;
+end;
+
+function THashLibAlgorithmTestCase.GetHashInstance: IHash;
+begin
+  Result := FHashInstance;
+end;
+
+procedure THashLibAlgorithmTestCase.SetActualString(const AValue: String);
+begin
+  FActualString := AValue;
+end;
+
+procedure THashLibAlgorithmTestCase.SetExpectedString(const AValue: String);
+begin
+  FExpectedString := AValue;
+end;
+
+procedure THashLibAlgorithmTestCase.SetHashInstance(const AValue: IHash);
+begin
+  FHashInstance := AValue;
+end;
+
 function THashLibAlgorithmTestCase.AreEqual(const A, B: TBytes): Boolean;
 begin
   Result := TArrayUtils.AreEqual(A, B);
+end;
+
+{ TCloneAlgorithmTestCase }
+
+procedure TCloneAlgorithmTestCase.TestHashCloneIsCorrect;
+var
+  LOriginal, LCopy: IHash;
+  LMainData, LChunkOne, LChunkTwo: TBytes;
+  LCount: Int32;
+begin
+  LMainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
+  LCount := System.Length(LMainData) - 3;
+  LChunkOne := System.Copy(LMainData, 0, LCount);
+  LChunkTwo := System.Copy(LMainData, LCount, System.Length(LMainData)
+    - LCount);
+  LOriginal := HashInstance;
+  LOriginal.Initialize;
+
+  LOriginal.TransformBytes(LChunkOne);
+  // Make Copy Of Current State
+  LCopy := LOriginal.Clone();
+  LOriginal.TransformBytes(LChunkTwo);
+  ExpectedString := LOriginal.TransformFinal().ToString();
+  LCopy.TransformBytes(LChunkTwo);
+  ActualString := LCopy.TransformFinal().ToString();
+
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TCloneAlgorithmTestCase.TestHashCloneIsUnique;
+var
+  LOriginal, LCopy: IHash;
+begin
+  LOriginal := HashInstance;
+  LOriginal.Initialize;
+  LOriginal.BufferSize := (64 * 1024); // 64Kb
+  // Make Copy Of Current State
+  LCopy := LOriginal.Clone();
+  LCopy.BufferSize := (128 * 1024); // 128Kb
+
+  CheckNotEquals(LOriginal.BufferSize, LCopy.BufferSize,
+    Format('Expected %d but got %d.', [LOriginal.BufferSize,
+    LCopy.BufferSize]));
+end;
+
+procedure TCloneAlgorithmTestCase.TestHashCloneMatchesMainHash;
+var
+  LClone: IHash;
+  LIdx: Int32;
+  LActualResult, LActualResultClone: TBytes;
+begin
+  HashInstance.Initialize;
+
+  for LIdx := System.Low(BytesABCDE) to System.High(BytesABCDE) do
+  begin
+    // do incremental hashing
+    HashInstance.TransformBytes(TBytes.Create(BytesABCDE[LIdx]));
+  end;
+
+  LClone := HashInstance.Clone();
+
+  LActualResult := HashInstance.TransformFinal().GetBytes();
+  LActualResultClone := LClone.TransformFinal().GetBytes();
+
+  if (not AreEqual(LActualResult, LActualResultClone)) then
+  begin
+    Fail(Format('%s Mismatch on test against a Clone', [HashInstance.Name]));
+  end;
+
+end;
+
+{ TNullDigestAlgorithmTestCase }
+
+procedure TNullDigestAlgorithmTestCase.CallGetBlockSize;
+begin
+  HashInstance.BlockSize;
+end;
+
+procedure TNullDigestAlgorithmTestCase.CallGetHashSize;
+begin
+  HashInstance.HashSize;
+end;
+
+procedure TNullDigestAlgorithmTestCase.TestEmptyBytes;
+var
+  BytesEmpty, Result: TBytes;
+begin
+  BytesEmpty := TConverters.ConvertStringToBytes('', TEncoding.UTF8);
+
+  HashInstance.Initialize;
+
+  HashInstance.TransformBytes(BytesEmpty);
+
+  Result := HashInstance.TransformFinal.GetBytes;
+
+  CheckTrue(AreEqual(BytesEmpty, Result));
+  CheckException(FBlockSizeMethod, ENotImplementedHashLibException);
+  CheckException(FHashSizeMethod, ENotImplementedHashLibException);
+end;
+
+procedure TNullDigestAlgorithmTestCase.TestBytesABCDE;
+var
+  LBytesABCDE, LResult: TBytes;
+  LIdx: Int32;
+begin
+  LBytesABCDE := TConverters.ConvertStringToBytes('ABCDE', TEncoding.UTF8);
+
+  HashInstance.Initialize;
+
+  for LIdx := System.Low(LBytesABCDE) to System.High(LBytesABCDE) do
+  begin
+    // do incremental hashing
+    HashInstance.TransformBytes(TBytes.Create(LBytesABCDE[LIdx]));
+  end;
+
+  LResult := HashInstance.TransformFinal.GetBytes;
+
+  CheckTrue(AreEqual(LBytesABCDE, LResult));
+  CheckException(FBlockSizeMethod, ENotImplementedHashLibException);
+  CheckException(FHashSizeMethod, ENotImplementedHashLibException);
+end;
+
+{ THashAlgorithmTestCase }
+
+function THashAlgorithmTestCase.GetHashOfABCDE: String;
+begin
+  Result := FHashOfABCDE;
+end;
+
+function THashAlgorithmTestCase.GetHashOfDefaultData: String;
+begin
+  Result := FHashOfDefaultData;
+end;
+
+function THashAlgorithmTestCase.GetHashOfEmptyData: String;
+begin
+  Result := FHashOfEmptyData;
+end;
+
+function THashAlgorithmTestCase.GetHashOfOnetoNine: String;
+begin
+  Result := FHashOfOnetoNine;
+end;
+
+procedure THashAlgorithmTestCase.SetHashOfABCDE(const AValue: String);
+begin
+  FHashOfABCDE := AValue;
+end;
+
+procedure THashAlgorithmTestCase.SetHashOfDefaultData(const AValue: String);
+begin
+  FHashOfDefaultData := AValue;
+end;
+
+procedure THashAlgorithmTestCase.SetHashOfEmptyData(const AValue: String);
+begin
+  FHashOfEmptyData := AValue;
+end;
+
+procedure THashAlgorithmTestCase.SetHashOfOnetoNine(const AValue: String);
+begin
+  FHashOfOnetoNine := AValue;
+end;
+
+procedure THashAlgorithmTestCase.TestIndexChunkedDataIncrementalHash;
+var
+  LCount, LIdx: Int32;
+  LChunkedDataBytes, LTemp: TBytes;
+  LHashInstanceCopy: IHash;
+begin
+  LHashInstanceCopy := HashInstance.Clone();
+  LChunkedDataBytes := TConverters.ConvertStringToBytes(ChunkedData,
+    TEncoding.UTF8);
+  for LIdx := System.Low(LChunkedDataBytes) to System.High(LChunkedDataBytes) do
+  begin
+    LCount := System.Length(LChunkedDataBytes) - LIdx;
+    LTemp := System.Copy(LChunkedDataBytes, LIdx, LCount);
+    HashInstance.Initialize();
+
+    HashInstance.TransformBytes(LChunkedDataBytes, LIdx, LCount);
+
+    ActualString := HashInstance.TransformFinal().ToString();
+    ExpectedString := LHashInstanceCopy.ComputeBytes(LTemp).ToString();
+
+    CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+      [ExpectedString, ActualString]));
+  end;
+end;
+
+procedure THashAlgorithmTestCase.TestAnotherChunkedDataIncrementalHash;
+var
+  LIdx, LSize, LJIdx: Int32;
+  LTemp: String;
+  LHashInstanceCopy: IHash;
+begin
+  LHashInstanceCopy := HashInstance.Clone();
+  for LIdx := 0 to System.Pred(System.SizeOf(ChunkSizes)
+    div System.SizeOf(Int32)) do
+  begin
+    LSize := ChunkSizes[LIdx];
+    HashInstance.Initialize();
+    LJIdx := LSize;
+    while LJIdx < System.Length(ChunkedData) do
+    begin
+      LTemp := System.Copy(ChunkedData, (LJIdx - LSize) + 1, LSize);
+      HashInstance.TransformString(LTemp, TEncoding.UTF8);
+
+      System.Inc(LJIdx, LSize);
+    end;
+    LTemp := System.Copy(ChunkedData, (LJIdx - LSize) + 1,
+      System.Length(ChunkedData) - ((LJIdx - LSize)));
+    HashInstance.TransformString(LTemp, TEncoding.UTF8);
+
+    ActualString := HashInstance.TransformFinal().ToString();
+    ExpectedString := LHashInstanceCopy.ComputeString(ChunkedData,
+      TEncoding.UTF8).ToString();
+    CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+      [ExpectedString, ActualString]));
+  end;
+end;
+
+procedure THashAlgorithmTestCase.TestBytesABCDE;
+var
+  LBuffer: TBytes;
+begin
+  LBuffer := Nil;
+  System.SetLength(LBuffer, System.SizeOf(BytesABCDE));
+  System.Move(BytesABCDE, Pointer(LBuffer)^, System.SizeOf(BytesABCDE));
+  ExpectedString := HashOfABCDE;
+  ActualString := HashInstance.ComputeBytes(LBuffer).ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure THashAlgorithmTestCase.TestDefaultData;
+begin
+  ExpectedString := HashOfDefaultData;
+  ActualString := HashInstance.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure THashAlgorithmTestCase.TestEmptyStream;
+var
+  LStream: TStream;
+begin
+  LStream := TMemoryStream.Create;
+  try
+    ExpectedString := HashOfEmptyData;
+    ActualString := HashInstance.ComputeStream(LStream).ToString();
+    CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+      [ExpectedString, ActualString]));
+  finally
+    LStream.Free;
+  end;
+end;
+
+procedure THashAlgorithmTestCase.TestEmptyString;
+begin
+  ExpectedString := HashOfEmptyData;
+  ActualString := HashInstance.ComputeString(EmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure THashAlgorithmTestCase.TestIncrementalHash;
+begin
+  ExpectedString := HashOfDefaultData;
+
+  HashInstance.Initialize();
+  HashInstance.TransformString(System.Copy(DefaultData, 1, 3), TEncoding.UTF8);
+  HashInstance.TransformString(System.Copy(DefaultData, 4, 3), TEncoding.UTF8);
+  HashInstance.TransformString(System.Copy(DefaultData, 7, 3), TEncoding.UTF8);
+  HashInstance.TransformString(System.Copy(DefaultData, 10, 3), TEncoding.UTF8);
+  HashInstance.TransformString(System.Copy(DefaultData, 13, 2), TEncoding.UTF8);
+  ActualString := HashInstance.TransformFinal().ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure THashAlgorithmTestCase.TestOnetoNine;
+begin
+  ExpectedString := HashOfOnetoNine;
+  ActualString := HashInstance.ComputeString(OneToNine, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure THashAlgorithmTestCase.TestUntypedInterface;
+var
+  LBuffer, LResultA, LResultB: TBytes;
+begin
+  LBuffer := Nil;
+  System.SetLength(LBuffer, System.SizeOf(BytesABCDE));
+  System.Move(BytesABCDE, Pointer(LBuffer)^, System.SizeOf(BytesABCDE));
+  LResultA := HashInstance.ComputeBytes(LBuffer).GetBytes();
+  LResultB := HashInstance.ComputeUntyped(BytesABCDE, System.SizeOf(BytesABCDE))
+    .GetBytes();
+  CheckTrue(AreEqual(LResultA, LResultB),
+    'Computation Mismatch In Untyped Interface');
+end;
+
+{ THashWithUInt32AsKeyAlgorithmTestCase }
+
+function THashWithUInt32AsKeyAlgorithmTestCase.
+  GetHashOfDefaultDataWithMaxUInt32AsKey: String;
+begin
+  Result := FHashOfDefaultDataWithMaxUInt32AsKey;
+end;
+
+procedure THashWithUInt32AsKeyAlgorithmTestCase.
+  SetHashOfDefaultDataWithMaxUInt32AsKey(const AValue: String);
+begin
+  FHashOfDefaultDataWithMaxUInt32AsKey := AValue;
+end;
+
+procedure THashWithUInt32AsKeyAlgorithmTestCase.TestWithMaxUInt32AsKey;
+var
+  LIHashWithKey: IHashWithKey;
+begin
+  ExpectedString := HashOfDefaultDataWithMaxUInt32AsKey;
+  LIHashWithKey := (HashInstance as IHashWithKey);
+  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
+  ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+{ THashWithUInt64AsKeyAlgorithmTestCase }
+
+function THashWithUInt64AsKeyAlgorithmTestCase.
+  GetHashOfDefaultDataWithMaxUInt64AsKey: String;
+begin
+  Result := FHashOfDefaultDataWithMaxUInt64AsKey;
+end;
+
+procedure THashWithUInt64AsKeyAlgorithmTestCase.
+  SetHashOfDefaultDataWithMaxUInt64AsKey(const AValue: String);
+begin
+  FHashOfDefaultDataWithMaxUInt64AsKey := AValue;
+end;
+
+procedure THashWithUInt64AsKeyAlgorithmTestCase.TestWithMaxUInt64AsKey;
+var
+  LIHashWithKey: IHashWithKey;
+begin
+  ExpectedString := HashOfDefaultDataWithMaxUInt64AsKey;
+  LIHashWithKey := (HashInstance as IHashWithKey);
+  LIHashWithKey.Key := TConverters.ReadUInt64AsBytesLE(System.High(UInt64));
+  ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+{ THashWithExternalKeyAlgorithmTestCase }
+
+function THashWithExternalKeyAlgorithmTestCase.
+  GetHashOfDefaultDataWithExternalKey: String;
+begin
+  Result := FHashOfDefaultDataWithExternalKey;
+end;
+
+procedure THashWithExternalKeyAlgorithmTestCase.
+  SetHashOfDefaultDataWithExternalKey(const AValue: String);
+begin
+  FHashOfDefaultDataWithExternalKey := AValue;
+end;
+
+procedure THashWithExternalKeyAlgorithmTestCase.TestWithExternalKey;
+var
+  LIHashWithKey: IHashWithKey;
+begin
+  ExpectedString := HashOfDefaultDataWithExternalKey;
+  LIHashWithKey := (HashInstance as IHashWithKey);
+  LIHashWithKey.Key := TConverters.ConvertHexStringToBytes(ZeroToFifteenInHex);
+  ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+{ TCryptoAlgorithmTestCase }
+
+function TCryptoAlgorithmTestCase.GetHashOfDefaultDataHMACWithLongKey: String;
+begin
+  Result := FHashOfDefaultDataHMACWithLongKey;
+end;
+
+function TCryptoAlgorithmTestCase.GetHashOfDefaultDataHMACWithShortKey: String;
+begin
+  Result := FHashOfDefaultDataHMACWithShortKey;
+end;
+
+procedure TCryptoAlgorithmTestCase.SetHashOfDefaultDataHMACWithLongKey
+  (const AValue: String);
+begin
+  FHashOfDefaultDataHMACWithLongKey := AValue;
+end;
+
+procedure TCryptoAlgorithmTestCase.SetHashOfDefaultDataHMACWithShortKey
+  (const AValue: String);
+begin
+  FHashOfDefaultDataHMACWithShortKey := AValue;
+end;
+
+function TCryptoAlgorithmTestCase.GetHMACInstance: IHMAC;
+begin
+  Result := FHMACInstance;
+end;
+
+procedure TCryptoAlgorithmTestCase.SetHMACInstance(const AValue: IHMAC);
+begin
+  FHMACInstance := AValue;
+end;
+
+procedure TCryptoAlgorithmTestCase.TestHMACWithDefaultDataShortKey;
+begin
+  ExpectedString := HashOfDefaultDataHMACWithShortKey;
+  HMACInstance.Key := TConverters.ConvertStringToBytes(HMACShortStringKey,
+    TEncoding.UTF8);
+  ActualString := HMACInstance.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TCryptoAlgorithmTestCase.TestHMACWithDefaultDataLongKey;
+begin
+  ExpectedString := HashOfDefaultDataHMACWithLongKey;
+  HMACInstance.Key := TConverters.ConvertStringToBytes(HMACLongStringKey,
+    TEncoding.UTF8);
+  ActualString := HMACInstance.ComputeString(DefaultData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TCryptoAlgorithmTestCase.TestHMACCloneWorks;
+var
+  LOriginal, LCopy: IHMAC;
+  LMainData, LChunkOne, LChunkTwo: TBytes;
+  LCount: Int32;
+begin
+  LMainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
+  LCount := System.Length(LMainData) - 3;
+  LChunkOne := System.Copy(LMainData, 0, LCount);
+  LChunkTwo := System.Copy(LMainData, LCount, System.Length(LMainData)
+    - LCount);
+  LOriginal := HMACInstance;
+  (LOriginal as IHMAC).Key := TConverters.ConvertStringToBytes
+    (HMACLongStringKey, TEncoding.UTF8);
+  LOriginal.Initialize;
+
+  LOriginal.TransformBytes(LChunkOne);
+  // Make Copy Of Current State
+  LCopy := LOriginal.Clone() as IHMAC;
+  LOriginal.TransformBytes(LChunkTwo);
+  ExpectedString := LOriginal.TransformFinal().ToString();
+  LCopy.TransformBytes(LChunkTwo);
+  ActualString := LCopy.TransformFinal().ToString();
+
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+{ TBlakeCryptoAlgorithmTestCase }
+
+function TBlakeCryptoAlgorithmTestCase.GetHashInstanceWithKey: IHash;
+begin
+  Result := FHashInstanceWithKey;
+end;
+
+function TBlakeCryptoAlgorithmTestCase.GetKeyedTestVectors: THashLibStringArray;
+begin
+  Result := FKeyedTestVectors;
+end;
+
+function TBlakeCryptoAlgorithmTestCase.GetUnkeyedTestVectors
+  : THashLibStringArray;
+begin
+  Result := FUnkeyedTestVectors;
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.SetHashInstanceWithKey
+  (const AValue: IHash);
+begin
+  FHashInstanceWithKey := AValue;
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.SetKeyedTestVectors
+  (const AValue: THashLibStringArray);
+begin
+  FKeyedTestVectors := AValue;
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.SetUnkeyedTestVectors
+  (const AValue: THashLibStringArray);
+begin
+  FUnkeyedTestVectors := AValue;
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.TestCheckKeyedTestVectors;
+var
+  LLen, LIdx: Int32;
+  LData: TBytes;
+begin
+  LData := Nil;
+  System.SetLength(LData, 20);
+  for LIdx := 0 to 19 do
+  begin
+    LData[LIdx] := LIdx;
+  end;
+
+  for LLen := System.Low(KeyedTestVectors) to System.High(KeyedTestVectors) do
+  begin
+
+    if LLen = 0 then
+    begin
+      LData := Nil;
+    end
+    else
+    begin
+      System.SetLength(LData, LLen);
+      for LIdx := System.Low(LData) to System.High(LData) do
+      begin
+        LData[LIdx] := LIdx;
+      end;
+    end;
+
+    ActualString := HashInstanceWithKey.ComputeBytes(LData).ToString();
+    ExpectedString := KeyedTestVectors[LLen];
+
+    CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+      [ExpectedString, ActualString]));
+  end;
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.TestCheckUnkeyedTestVectors;
+var
+  LIdx, LJdx: Int32;
+  LInput: TBytes;
+begin
+  for LIdx := System.Low(UnkeyedTestVectors)
+    to System.High(UnkeyedTestVectors) do
+  begin
+
+    if LIdx = 0 then
+    begin
+      LInput := Nil;
+    end
+    else
+    begin
+      System.SetLength(LInput, LIdx);
+      for LJdx := System.Low(LInput) to System.High(LInput) do
+      begin
+        LInput[LJdx] := LJdx;
+      end;
+    end;
+
+    ActualString := HashInstance.ComputeBytes(LInput).ToString();
+    ExpectedString := UnkeyedTestVectors[LIdx];
+
+    CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+      [ExpectedString, ActualString]));
+  end;
+
+end;
+
+procedure TBlakeCryptoAlgorithmTestCase.TestSplits;
+var
+  LLen, LSplit1, LSplit2, LIdx: Int32;
+  LHash0, LHash1: String;
+  LInput: TBytes;
+begin
+  LInput := Nil;
+  System.SetLength(LInput, 20);
+  for LIdx := System.Low(LInput) to System.High(LInput) do
+  begin
+    LInput[LIdx] := LIdx;
+  end;
+
+  for LLen := System.Low(LInput) to System.High(LInput) do
+  begin
+    HashInstance.Initialize();
+    HashInstance.TransformBytes(LInput, 0, LLen);
+    LHash0 := HashInstance.TransformFinal.ToString();
+
+    for LSplit1 := 0 to LLen do
+    begin
+      for LSplit2 := LSplit1 to LLen do
+      begin
+        HashInstance.Initialize();
+        HashInstance.TransformBytes(LInput, 0, LSplit1);
+        HashInstance.TransformBytes(LInput, LSplit1, LSplit2 - LSplit1);
+        HashInstance.TransformBytes(LInput, LSplit2, LLen - LSplit2);
+        LHash1 := HashInstance.TransformFinal.ToString();
+        CheckEquals(LHash0, LHash1, Format('Expected %s but got %s.',
+          [LHash0, LHash1]));
+      end;
+    end;
+
+  end;
+
+end;
+
+{ TXofAlgorithmTestCase }
+
+function TXofAlgorithmTestCase.GetXofInstance: IXOF;
+begin
+  Result := FXofInstance;
+end;
+
+function TXofAlgorithmTestCase.GetXofOfEmptyData: String;
+begin
+  Result := FXofOfEmptyData;
+end;
+
+procedure TXofAlgorithmTestCase.SetXofInstance(const AValue: IXOF);
+begin
+  FXofInstance := AValue;
+end;
+
+procedure TXofAlgorithmTestCase.SetXofOfEmptyData(const AValue: String);
+begin
+  FXofOfEmptyData := AValue;
+end;
+
+procedure TXofAlgorithmTestCase.TestOutputOverflow;
+var
+  LOutput: TBytes;
+begin
+  XofInstance.Initialize;
+  LOutput := Nil;
+  System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3) + 1);
+
+  try
+    (XofInstance as IXOF).DoOutput(LOutput, 0, System.Length(LOutput));
+    Fail('no exception');
+  except
+    on e: EArgumentOutOfRangeHashLibException do
+    begin
+      CheckEquals('Output Length is above the Digest Length', e.Message);
+    end;
+  end;
+
+  LOutput := XofInstance.TransformFinal().GetBytes();
+end;
+
+procedure TXofAlgorithmTestCase.TestVeryLongXofOfEmptyString;
+begin
+  ActualString := XofInstance.ComputeString(EmptyData, TEncoding.UTF8)
+    .ToString();
+  ExpectedString := XofOfEmptyData;
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TXofAlgorithmTestCase.TestVeryLongXofOfEmptyStringWithStreamingOutput;
+var
+  LTempResult, LExpectedChunk, LActualChunk: TBytes;
+begin
+  LTempResult := Nil;
+  System.SetLength(LTempResult, 1000);
+  XofInstance.Initialize;
+  XofInstance.TransformString(EmptyData, TEncoding.UTF8);
+
+  XofInstance.DoOutput(LTempResult, 0, 250);
+
+  LActualChunk := System.Copy(LTempResult, 0, 250);
+  LExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (XofOfEmptyData), 0, 250);
+
+  CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
+    Format('%s Streaming Test 1 Mismatch', [XofInstance.Name]));
+
+  XofInstance.DoOutput(LTempResult, 250, 250);
+
+  LActualChunk := System.Copy(LTempResult, 250, 250);
+  LExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (XofOfEmptyData), 250, 250);
+
+  CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
+    Format('%s Streaming Test 2 Mismatch', [XofInstance.Name]));
+
+  XofInstance.DoOutput(LTempResult, 500, 250);
+
+  LActualChunk := System.Copy(LTempResult, 500, 250);
+  LExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (XofOfEmptyData), 500, 250);
+
+  CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
+    Format('%s Streaming Test 3 Mismatch', [XofInstance.Name]));
+
+  XofInstance.DoOutput(LTempResult, 750, 250);
+
+  LActualChunk := System.Copy(LTempResult, 750, 250);
+  LExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (XofOfEmptyData), 750, 250);
+
+  CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
+    Format('%s Streaming Test 4 Mismatch', [XofInstance.Name]));
+
+  ActualString := TConverters.ConvertBytesToHexString(LTempResult, False);
+  ExpectedString := XofOfEmptyData;
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+
+  // Verify that Initialization Works
+  XofInstance.Initialize;
+
+  XofInstance.DoOutput(LTempResult, 0, 250);
+
+  LActualChunk := System.Copy(LTempResult, 0, 250);
+  LExpectedChunk := System.Copy(TConverters.ConvertHexStringToBytes
+    (XofOfEmptyData), 0, 250);
+
+  CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
+    Format('%s Streaming Initialization Test Fail', [XofInstance.Name]));
+end;
+
+{ TCShakeAlgorithmTestCase }
+
+function TCShakeAlgorithmTestCase.GetXofInstanceTestVector: IXOF;
+begin
+  Result := FXofInstanceTestVector;
+end;
+
+function TCShakeAlgorithmTestCase.GetXofInstanceShake: IXOF;
+begin
+  Result := FXofNAndSNilInstance;
+end;
+
+function TCShakeAlgorithmTestCase.
+  GetXofOfZeroToOneHundredAndNinetyNineInHex: String;
+begin
+  Result := FXofOfZeroToOneHundredAndNinetyNineInHex;
+end;
+
+procedure TCShakeAlgorithmTestCase.SetXofInstanceTestVector(const AValue: IXOF);
+begin
+  FXofInstanceTestVector := AValue;
+end;
+
+procedure TCShakeAlgorithmTestCase.SetXofInstanceShake(const AValue: IXOF);
+begin
+  FXofNAndSNilInstance := AValue;
+end;
+
+procedure TCShakeAlgorithmTestCase.SetXofOfZeroToOneHundredAndNinetyNineInHex
+  (const AValue: String);
+begin
+  FXofOfZeroToOneHundredAndNinetyNineInHex := AValue;
+end;
+
+function TCShakeAlgorithmTestCase.ComputeCShake(const ACShake: IHash;
+  const AMsg: TBytes): String;
+begin
+  ACShake.Initialize;
+  ACShake.TransformBytes(AMsg);
+  Result := ACShake.TransformFinal().ToString();
+end;
+
+procedure TCShakeAlgorithmTestCase.TestCShakeAndShakeAreSameWhenNAndSAreEmpty;
+var
+  LData: TBytes;
+begin
+  ExpectedString := XofInstance.ComputeString(EmptyData, TEncoding.UTF8)
+    .ToString();
+  ActualString := XofInstanceShake.ComputeString(EmptyData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+
+  LData := TConverters.ConvertHexStringToBytes(EEAABEEF);
+  ExpectedString := XofInstance.ComputeBytes(LData).ToString();
+  ActualString := XofInstanceShake.ComputeBytes(LData).ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TCShakeAlgorithmTestCase.TestCShake_Vectors;
+begin
+  ActualString := ComputeCShake(XofInstanceTestVector,
+    TConverters.ConvertHexStringToBytes(ZeroToOneHundredAndNinetyNineInHex));
+  ExpectedString := XofOfZeroToOneHundredAndNinetyNineInHex;
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
 end;
 
 end.

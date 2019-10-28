@@ -126,36 +126,36 @@ end;
 procedure TTestPBKDF_Scrypt.TestVectors;
 begin
 
-  FActualString := DoTestVector('', '', 16, 1, 1, 64);
-  FExpectedString :=
+  ActualString := DoTestVector('', '', 16, 1, 1, 64);
+  ExpectedString :=
     '77D6576238657B203B19CA42C18A0497F16B4844E3074AE8DFDFFA3FEDE21442FCD0069DED0948F8326A753A0FC81F17E8D3E0FB2E0D3628CF35E20C38D18906';
 
-  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
-    [FExpectedString, FActualString]));
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
 
-  FActualString := DoTestVector('password', 'NaCl', 1024, 8, 16, 64);
-  FExpectedString :=
+  ActualString := DoTestVector('password', 'NaCl', 1024, 8, 16, 64);
+  ExpectedString :=
     'FDBABE1C9D3472007856E7190D01E9FE7C6AD7CBC8237830E77376634B3731622EAF30D92E22A3886FF109279D9830DAC727AFB94A83EE6D8360CBDFA2CC0640';
 
-  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
-    [FExpectedString, FActualString]));
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
 
-  FActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 16384,
+  ActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 16384,
     8, 1, 64);
-  FExpectedString :=
+  ExpectedString :=
     '7023BDCB3AFD7348461C06CD81FD38EBFDA8FBBA904F8E3EA9B543F6545DA1F2D5432955613F0FCF62D49705242A9AF9E61E85DC0D651E40DFCF017B45575887';
 
-  CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
-    [FExpectedString, FActualString]));
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
 
   // disabled test because it's very expensive
-  // FActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 1048576,
+  // ActualString := DoTestVector('pleaseletmein', 'SodiumChloride', 1048576,
   // 8, 1, 64);
-  // FExpectedString :=
+  // ExpectedString :=
   // '2101CB9B6A511AAEADDBBE09CF70F881EC568D574A2FFD4DABE5EE9820ADAA478E56FD8F4BA5D09FFA1C6D927C40F4C337304049E8A952FBCBF45C6FA77A41A4';
   //
-  // CheckEquals(FExpectedString, FActualString, Format('Expected %s but got %s.',
-  // [FExpectedString, FActualString]));
+  // CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+  // [ExpectedString, ActualString]));
 
 end;
 
