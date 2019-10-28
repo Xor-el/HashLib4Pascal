@@ -1770,7 +1770,7 @@ function TBlake2XS.ComputeStepLength: Int32;
 var
   LXofSizeInBytes, LDiff: UInt64;
 begin
-  LXofSizeInBytes := FXOFSizeInBits shr 3;
+  LXofSizeInBytes := XOFSizeInBits shr 3;
   LDiff := LXofSizeInBytes - FDigestPosition;
   if (LXofSizeInBytes = UInt64(UnknownDigestLengthInBytes)) then
   begin
@@ -1931,7 +1931,7 @@ begin
 
   if ((XOFSizeInBits shr 3) <> UnknownDigestLengthInBytes) then
   begin
-    if ((FDigestPosition + AOutputLength) > (FXOFSizeInBits shr 3)) then
+    if ((FDigestPosition + AOutputLength) > (XOFSizeInBits shr 3)) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateRes
         (@SOutputLengthInvalid);
