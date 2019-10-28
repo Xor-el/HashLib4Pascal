@@ -163,6 +163,9 @@ type
 
     function GetResult(): THashLibByteArray;
 
+    constructor CreateInternal(const AConfig: IBlake2SConfig;
+      const ATreeConfig: IBlake2STreeConfig);
+
   strict protected
   var
     FBlake2XSConfig: TBlake2XSConfig;
@@ -173,7 +176,6 @@ type
 
     function GetName: String; override;
     property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
-
   public
 
     constructor Create(const ABlake2XSConfig: TBlake2XSConfig);
@@ -1800,9 +1802,9 @@ var
   LXof: IXOF;
 begin
   // Xof Cloning
-  LXof := (TBlake2XS.Create(FBlake2XSConfig.Clone()) as IXOF);
+  LXof := (TBlake2XS.CreateInternal(FRootConfig.Blake2SConfig,
+    FRootConfig.Blake2STreeConfig) as IXOF);
   LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
-
   // Blake2XS Cloning
   LHashInstance := LXof as TBlake2XS;
   LHashInstance.FBlake2XSConfig := FBlake2XSConfig.Clone();
@@ -1832,6 +1834,12 @@ begin
 
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
+end;
+
+constructor TBlake2XS.CreateInternal(const AConfig: IBlake2SConfig;
+  const ATreeConfig: IBlake2STreeConfig);
+begin
+  inherited Create(AConfig, ATreeConfig);
 end;
 
 constructor TBlake2XS.Create(const ABlake2XSConfig: TBlake2XSConfig);
@@ -1889,10 +1897,8 @@ begin
   FOutputConfig.Blake2STreeConfig.InnerHashSize := Blake2SHashSize;
   FOutputConfig.Blake2STreeConfig.IsLastNode := False;
 
-  inherited Create(FRootConfig.Blake2SConfig, FRootConfig.Blake2STreeConfig);
-
+  CreateInternal(FRootConfig.Blake2SConfig, FRootConfig.Blake2STreeConfig);
   System.SetLength(FBlake2XSBuffer, Blake2SHashSize);
-
 end;
 
 procedure TBlake2XS.Initialize;
