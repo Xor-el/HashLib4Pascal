@@ -375,7 +375,7 @@ type
   TCShakeAlgorithmTestCase = class abstract(TXofAlgorithmTestCase)
   strict private
   var
-    FXofNAndSNilInstance, FXofInstanceTestVector: IXOF;
+    FXofInstanceShake, FXofInstanceTestVector: IXOF;
     FXofOfZeroToOneHundredAndNinetyNineInHex: String;
 
     function GetXofOfZeroToOneHundredAndNinetyNineInHex: String; inline;
@@ -1178,7 +1178,7 @@ end;
 
 function TCShakeAlgorithmTestCase.GetXofInstanceShake: IXOF;
 begin
-  Result := FXofNAndSNilInstance;
+  Result := FXofInstanceShake;
 end;
 
 function TCShakeAlgorithmTestCase.
@@ -1194,7 +1194,7 @@ end;
 
 procedure TCShakeAlgorithmTestCase.SetXofInstanceShake(const AValue: IXOF);
 begin
-  FXofNAndSNilInstance := AValue;
+  FXofInstanceShake := AValue;
 end;
 
 procedure TCShakeAlgorithmTestCase.SetXofOfZeroToOneHundredAndNinetyNineInHex
