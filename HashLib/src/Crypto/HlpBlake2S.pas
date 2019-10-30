@@ -1881,21 +1881,11 @@ begin
   FOutputConfig := Default (TBlake2XSConfig);
 
   FOutputConfig.Blake2SConfig := TBlake2SConfig.Create();
-
-  FOutputConfig.Blake2SConfig.HashSize := Blake2SHashSize;
   FOutputConfig.Blake2SConfig.Salt := FRootConfig.Blake2SConfig.Salt;
   FOutputConfig.Blake2SConfig.Personalisation :=
     FRootConfig.Blake2SConfig.Personalisation;
 
   FOutputConfig.Blake2STreeConfig := TBlake2STreeConfig.Create();
-
-  FOutputConfig.Blake2STreeConfig.FanOut := 0;
-  FOutputConfig.Blake2STreeConfig.MaxDepth := 0;
-  FOutputConfig.Blake2STreeConfig.LeafSize := Blake2SHashSize;
-  FOutputConfig.Blake2STreeConfig.NodeOffset := 0;
-  FOutputConfig.Blake2STreeConfig.NodeDepth := 0;
-  FOutputConfig.Blake2STreeConfig.InnerHashSize := Blake2SHashSize;
-  FOutputConfig.Blake2STreeConfig.IsLastNode := False;
 
   CreateInternal(FRootConfig.Blake2SConfig, FRootConfig.Blake2STreeConfig);
   System.SetLength(FBlake2XSBuffer, Blake2SHashSize);
