@@ -28,6 +28,7 @@ resourcestring
     'XOFSize in Bits must be Multiples of 8 and be Greater than Zero Bytes';
   SOutputLengthInvalid = 'Output Length is above the Digest Length';
   SOutputBufferTooShort = 'Output Buffer Too Short';
+  SWritetoXofAfterReadError = '"%s" Write to Xof after Read not Allowed';
 
 type
   TSHA3 = class abstract(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
@@ -184,6 +185,8 @@ type
   public
     procedure Initialize(); override;
     function GetResult(): THashLibByteArray; override;
+    procedure TransformBytes(const AData: THashLibByteArray;
+      AIndex, ADataLength: Int32); override;
     function TransformFinal(): IHashResult; override;
     procedure DoOutput(const ADestination: THashLibByteArray;
       ADestinationOffset, AOutputLength: UInt64);
@@ -1071,6 +1074,17 @@ begin
   FShakeBufferPosition := 8;
   FFinalized := False;
   TArrayUtils.ZeroFill(FShakeBuffer);
+end;
+
+procedure TShake.TransformBytes(const AData: THashLibByteArray;
+  AIndex, ADataLength: Int32);
+begin
+  if FFinalized then
+  begin
+    raise EInvalidOperationHashLibException.CreateResFmt
+      (@SWritetoXofAfterReadError, [Name]);
+  end;
+  inherited TransformBytes(AData, AIndex, ADataLength);
 end;
 
 function TShake.TransformFinal: IHashResult;

@@ -2,6 +2,10 @@ unit HashLibTestBase;
 
 interface
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF FPC}
+
 uses
   Classes,
   SysUtils,
@@ -343,11 +347,13 @@ type
 
 type
   TXofAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
+
   strict private
   var
     FXofInstance: IXOF;
     FXofOfEmptyData: String;
 
+    procedure CallShouldRaiseException();
     function GetXofOfEmptyData: String; inline;
     procedure SetXofOfEmptyData(const AValue: String); inline;
 
@@ -363,6 +369,7 @@ type
     procedure TestOutputOverflow;
     procedure TestVeryLongXofOfEmptyString;
     procedure TestVeryLongXofOfEmptyStringWithStreamingOutput;
+    procedure TestXofShouldRaiseExceptionOnWriteAfterRead;
 
   end;
 
@@ -1056,6 +1063,19 @@ end;
 
 { TXofAlgorithmTestCase }
 
+procedure TXofAlgorithmTestCase.CallShouldRaiseException;
+var
+  LOutput: TBytes;
+begin
+  XofInstance.Initialize;
+  LOutput := Nil;
+  System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
+  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+  XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
+  // this call below should raise exception since we have already read from the Xof
+  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+end;
+
 function TXofAlgorithmTestCase.GetXofInstance: IXOF;
 begin
   Result := FXofInstance;
@@ -1085,7 +1105,7 @@ begin
   System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3) + 1);
 
   try
-    (XofInstance as IXOF).DoOutput(LOutput, 0, System.Length(LOutput));
+    XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
     Fail('no exception');
   except
     on e: EArgumentOutOfRangeHashLibException do
@@ -1167,6 +1187,14 @@ begin
 
   CheckTrue(AreEqual(LActualChunk, LExpectedChunk),
     Format('%s Streaming Initialization Test Fail', [XofInstance.Name]));
+end;
+
+procedure TXofAlgorithmTestCase.TestXofShouldRaiseExceptionOnWriteAfterRead;
+var
+  LTestMethod: TTestMethod;
+begin
+  LTestMethod := CallShouldRaiseException;
+  CheckException(LTestMethod, EInvalidOperationHashLibException);
 end;
 
 { TCShakeAlgorithmTestCase }

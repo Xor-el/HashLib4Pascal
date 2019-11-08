@@ -32,6 +32,7 @@ resourcestring
   SOutputLengthInvalid = 'Output Length is above the Digest Length';
   SOutputBufferTooShort = 'Output Buffer Too Short';
   SMaximumOutputLengthExceeded = '"Maximum Length is 2^32 blocks of 32 bytes';
+  SWritetoXofAfterReadError = '"%s" Write to Xof after Read not Allowed';
 
 type
   TBlake2S = class(THash, ICryptoNotBuildIn, ITransformBlock)
@@ -181,7 +182,8 @@ type
     constructor Create(const ABlake2XSConfig: TBlake2XSConfig);
     procedure Initialize(); override;
     function Clone(): IHash; override;
-
+    procedure TransformBytes(const AData: THashLibByteArray;
+      AIndex, ADataLength: Int32); override;
     function TransformFinal(): IHashResult; override;
 
     procedure DoOutput(const ADestination: THashLibByteArray;
@@ -1903,14 +1905,13 @@ begin
   FOutputConfig.Blake2STreeConfig.NodeOffset := NodeOffsetWithXOFDigestLength
     (LXofSizeInBytes);
 
-  inherited Initialize();
-
   FBlake2XSBufferPosition := Blake2SHashSize;
   FRootHashDigest := Nil;
   FBlockPosition := 0;
   FDigestPosition := 0;
   FFinalized := False;
   TArrayUtils.ZeroFill(FBlake2XSBuffer);
+  inherited Initialize();
 end;
 
 procedure TBlake2XS.DoOutput(const ADestination: THashLibByteArray;
@@ -1991,6 +1992,17 @@ begin
   System.SetLength(Result, LXofSizeInBytes);
 
   DoOutput(Result, 0, LXofSizeInBytes);
+end;
+
+procedure TBlake2XS.TransformBytes(const AData: THashLibByteArray;
+  AIndex, ADataLength: Int32);
+begin
+  if FFinalized then
+  begin
+    raise EInvalidOperationHashLibException.CreateResFmt
+      (@SWritetoXofAfterReadError, [Name]);
+  end;
+  inherited TransformBytes(AData, AIndex, ADataLength);
 end;
 
 function TBlake2XS.TransformFinal: IHashResult;
