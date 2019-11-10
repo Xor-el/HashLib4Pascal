@@ -1576,15 +1576,15 @@ end;
 procedure TBlake2S.Initialize;
 var
   LIdx: Int32;
-  LKey: THashLibByteArray;
+  LBlock: THashLibByteArray;
   LRawConfig: THashLibUInt32Array;
 begin
   LRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
   if ((FConfig.Key <> Nil) and (System.Length(FConfig.Key) <> 0)) then
   begin
-    LKey := System.Copy(FConfig.Key, System.Low(FConfig.Key),
+    LBlock := System.Copy(FConfig.Key, System.Low(FConfig.Key),
       System.Length(FConfig.Key));
-    System.SetLength(LKey, BlockSize);
+    System.SetLength(LBlock, BlockSize);
   end;
 
   if (LRawConfig = Nil) then
@@ -1624,10 +1624,10 @@ begin
     FState[LIdx] := FState[LIdx] xor LRawConfig[LIdx];
   end;
 
-  if (LKey <> Nil) then
+  if (LBlock <> Nil) then
   begin
-    TransformBytes(LKey, 0, System.Length(LKey));
-    TArrayUtils.ZeroFill(LKey); // burn key from memory
+    TransformBytes(LBlock, 0, System.Length(LBlock));
+    TArrayUtils.ZeroFill(LBlock); // burn key from memory
   end;
 end;
 
