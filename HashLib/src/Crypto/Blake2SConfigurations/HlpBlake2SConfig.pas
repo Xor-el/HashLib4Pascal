@@ -7,6 +7,7 @@ interface
 uses
   HlpIBlake2SConfig,
   HlpHashSize,
+  HlpArrayUtils,
   HlpHashLibTypes;
 
 resourcestring
@@ -52,6 +53,7 @@ type
     constructor Create(AHashSize: THashSize = THashSize.hsHashSize256);
       overload;
     constructor Create(AHashSize: Int32); overload;
+    destructor Destroy; override;
     property Personalisation: THashLibByteArray read GetPersonalisation
       write SetPersonalisation;
     property Salt: THashLibByteArray read GetSalt write SetSalt;
@@ -61,6 +63,8 @@ type
     class property DefaultConfig: IBlake2SConfig read GetDefaultConfig;
 
     function Clone(): IBlake2SConfig;
+
+    procedure Clear();
 
   end;
 
@@ -157,19 +161,19 @@ end;
 procedure TBlake2SConfig.SetKey(const AValue: THashLibByteArray);
 begin
   ValidateKeyLength(AValue);
-  FKey := AValue;
+  FKey := System.Copy(AValue);
 end;
 
 procedure TBlake2SConfig.SetPersonalisation(const AValue: THashLibByteArray);
 begin
   ValidatePersonalisationLength(AValue);
-  FPersonalisation := AValue;
+  FPersonalisation := System.Copy(AValue);
 end;
 
 procedure TBlake2SConfig.SetSalt(const AValue: THashLibByteArray);
 begin
   ValidateSaltLength(AValue);
-  FSalt := AValue;
+  FSalt := System.Copy(AValue);
 end;
 
 constructor TBlake2SConfig.Create(AHashSize: THashSize);
@@ -187,6 +191,17 @@ begin
   Inherited Create();
   ValidateHashSize(AHashSize);
   FHashSize := AHashSize;
+end;
+
+procedure TBlake2SConfig.Clear;
+begin
+  TArrayUtils.ZeroFill(FKey);
+end;
+
+destructor TBlake2SConfig.Destroy;
+begin
+  Clear();
+  inherited Destroy;
 end;
 
 function TBlake2SConfig.Clone(): IBlake2SConfig;

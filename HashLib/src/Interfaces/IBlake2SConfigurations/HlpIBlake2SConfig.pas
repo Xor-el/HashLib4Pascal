@@ -26,6 +26,8 @@ type
 
     function Clone(): IBlake2SConfig;
 
+    procedure Clear();
+
   end;
 
 implementation

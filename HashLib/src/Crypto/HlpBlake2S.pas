@@ -80,9 +80,9 @@ type
 
   strict protected
   var
-    FState, FRawConfig: THashLibUInt32Array;
+    FState: THashLibUInt32Array;
     FM: array [0 .. 15] of UInt32;
-    FKey, FBuffer: THashLibByteArray;
+    FBuffer: THashLibByteArray;
 {$IFNDEF USE_UNROLLED_VARIANT}
     FV: array [0 .. 15] of UInt32;
 {$ENDIF USE_UNROLLED_VARIANT}
@@ -266,9 +266,7 @@ begin
     LHashInstance.FTreeConfig := FTreeConfig.Clone();
   end;
   System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
-  LHashInstance.FRawConfig := System.Copy(FRawConfig);
   LHashInstance.FState := System.Copy(FState);
-  LHashInstance.FKey := System.Copy(FKey);
   LHashInstance.FBuffer := System.Copy(FBuffer);
 {$IFNDEF USE_UNROLLED_VARIANT}
   System.Move(FV, LHashInstance.FV, System.SizeOf(FV));
@@ -1578,21 +1576,22 @@ end;
 procedure TBlake2S.Initialize;
 var
   LIdx: Int32;
+  LKey: THashLibByteArray;
+  LRawConfig: THashLibUInt32Array;
 begin
-
-  FRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
+  LRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
   if ((FConfig.Key <> Nil) and (System.Length(FConfig.Key) <> 0)) then
   begin
-    FKey := System.Copy(FConfig.Key, System.Low(FConfig.Key),
+    LKey := System.Copy(FConfig.Key, System.Low(FConfig.Key),
       System.Length(FConfig.Key));
-    System.SetLength(FKey, BlockSize);
+    System.SetLength(LKey, BlockSize);
   end;
 
-  if (FRawConfig = Nil) then
+  if (LRawConfig = Nil) then
   begin
     raise EArgumentNilHashLibException.CreateRes(@SConfigNil);
   end;
-  if (System.Length(FRawConfig) <> 8) then
+  if (System.Length(LRawConfig) <> 8) then
   begin
     raise EArgumentHashLibException.CreateRes(@SInvalidConfigLength);
   end;
@@ -1622,12 +1621,13 @@ begin
 {$ENDIF USE_UNROLLED_VARIANT}
   for LIdx := 0 to 7 do
   begin
-    FState[LIdx] := FState[LIdx] xor FRawConfig[LIdx];
+    FState[LIdx] := FState[LIdx] xor LRawConfig[LIdx];
   end;
 
-  if (FKey <> Nil) then
+  if (LKey <> Nil) then
   begin
-    TransformBytes(FKey, 0, System.Length(FKey));
+    TransformBytes(LKey, 0, System.Length(LKey));
+    TArrayUtils.ZeroFill(LKey); // burn key from memory
   end;
 end;
 
@@ -1821,9 +1821,7 @@ begin
 
   // Internal Blake2S Cloning
   System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
-  LHashInstance.FRawConfig := System.Copy(FRawConfig);
   LHashInstance.FState := System.Copy(FState);
-  LHashInstance.FKey := System.Copy(FKey);
   LHashInstance.FBuffer := System.Copy(FBuffer);
 {$IFNDEF USE_UNROLLED_VARIANT}
   System.Move(FV, LHashInstance.FV, System.SizeOf(FV));
