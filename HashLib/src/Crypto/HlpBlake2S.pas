@@ -1586,6 +1586,7 @@ var
   LRawConfig: THashLibUInt32Array;
 begin
   LRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
+  LBlock := Nil;
 
   if FDoTransformKeyBlock then
   begin
