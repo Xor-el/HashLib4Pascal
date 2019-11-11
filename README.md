@@ -90,6 +90,10 @@ Available Algorithms
  
  * `Keccak (224, 256, 288, 384, 512)`
 
+ * `Blake2BP`
+
+ * `Blake2SP`
+
 ### Key Derivation Functions
 ----------------------------------------
 
