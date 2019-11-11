@@ -371,17 +371,14 @@ class procedure TPBKDF_ScryptNotBuildInAdapter.DoSMix
   end;
 
 var
-  LIdx, LTaskIdx: Int32;
+  LIdx: Int32;
   LArrayTasks: array of ITask;
 begin
   System.SetLength(LArrayTasks, AParallelism);
   for LIdx := 0 to System.Pred(AParallelism) do
   begin
     LArrayTasks[LIdx] := CreateTask(LIdx * 32 * ABlockSize);
-  end;
-  for LTaskIdx := System.Low(LArrayTasks) to System.High(LArrayTasks) do
-  begin
-    LArrayTasks[LTaskIdx].Start;
+    LArrayTasks[LIdx].Start;
   end;
   TTask.WaitForAll(LArrayTasks);
 end;

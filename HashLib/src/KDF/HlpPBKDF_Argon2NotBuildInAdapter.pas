@@ -1113,7 +1113,7 @@ procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks;
   end;
 
 var
-  LIdx, LJdx, LKdx, LTaskIdx: Int32;
+  LIdx, LJdx, LKdx: Int32;
   LFiller: TFillBlock;
   LPosition: TPosition;
   LArrayTasks: array of ITask;
@@ -1130,10 +1130,7 @@ begin
         LPosition := TPosition.CreatePosition();
         LPosition.Update(LIdx, LKdx, LJdx, 0);
         LArrayTasks[LKdx] := CreateTask(LFiller, LPosition);
-      end;
-      for LTaskIdx := System.Low(LArrayTasks) to System.High(LArrayTasks) do
-      begin
-        LArrayTasks[LTaskIdx].Start;
+        LArrayTasks[LKdx].Start;
       end;
       TTask.WaitForAll(LArrayTasks);
     end;
