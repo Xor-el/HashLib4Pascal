@@ -131,6 +131,8 @@ contains
   HlpIBlake2BTreeConfig in '..\..\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
   HlpIBlake2SConfig in '..\..\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
   HlpIBlake2STreeConfig in '..\..\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
+  HlpBlake2BP in '..\..\Crypto\HlpBlake2BP.pas',
+  HlpBlake2SP in '..\..\Crypto\HlpBlake2SP.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
   HlpArgon2TypeAndVersion in '..\..\KDF\HlpArgon2TypeAndVersion.pas',

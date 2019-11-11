@@ -8,6 +8,8 @@ uses
   GuiTestRunner,
   Blake2BTestVectors,
   Blake2STestVectors,
+  Blake2BPTestVectors,
+  Blake2SPTestVectors,
   HashLibTestBase,
   ChecksumTests,
   NullDigestTests,

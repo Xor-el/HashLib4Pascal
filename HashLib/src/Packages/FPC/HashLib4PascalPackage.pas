@@ -30,7 +30,7 @@ uses
   HlpIBlake2BTreeConfig, HlpIBlake2SConfig, HlpIBlake2STreeConfig, 
   HlpGOST3411_2012, HlpCRC32Fast, HlpArgon2TypeAndVersion, 
   HlpPBKDF_Argon2NotBuildInAdapter, HlpPBKDF_ScryptNotBuildInAdapter, 
-  HlpArrayUtils;
+  HlpArrayUtils, HlpBlake2BP, HlpBlake2SP;
 
 implementation
 

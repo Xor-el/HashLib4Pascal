@@ -25,7 +25,9 @@ uses
   HlpBlake2BTreeConfig,
   HlpIBlake2BTreeConfig,
   HlpHashLibTypes,
-  Blake2STestVectors;
+  Blake2STestVectors,
+  Blake2BPTestVectors,
+  Blake2SPTestVectors;
 
 // Crypto
 type
@@ -852,6 +854,24 @@ type
     procedure TestBlake2SMACSample1;
     procedure TestBlake2SMACSample2;
     procedure TestBlake2SMACSample3;
+
+  end;
+
+type
+  TTestBlake2BP = class(TBlakeCryptoAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  end;
+
+type
+  TTestBlake2SP = class(TBlakeCryptoAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
 
   end;
 
@@ -3703,6 +3723,94 @@ begin
     'E9F7704DFE5080A4AAFE62A806F53EA7F98FFC24175164158F18EC5497B961F5', 32 * 8);
 end;
 
+{ TTestBlake2BP }
+
+procedure TTestBlake2BP.SetUp;
+var
+  LIdx: Int32;
+  LKey: TBytes;
+begin
+  inherited;
+  HashInstance := THashFactory.TCrypto.CreateBlake2BP(64, Nil);
+  LKey := Nil;
+  System.SetLength(LKey, 64);
+
+  for LIdx := 0 to 63 do
+  begin
+    LKey[LIdx] := LIdx;
+  end;
+
+  HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2BP(64, LKey);
+  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HashOfEmptyData :=
+    'B5EF811A8038F70B628FA8B294DAAE7492B1EBE343A80EAABBF1F6AE664DD67B9D90B0120791EAB81DC96985F28849F6A305186A85501B405114BFA678DF9380';
+  HashOfDefaultData :=
+    '6F02764BDBA4184E50CAA52539BC392239D31E1BC76CEACBCA42630BCB7B48B527F65AA2F50363C0E26A287B758C87BC77C7175AB7A12B33104330F5A1C6E171';
+  HashOfOnetoNine :=
+    'E70843E71EF73EF84D991990687CB72E272E590F7E86F491935E9904F0582A165A388F956D691101C5D2B035634E4415C3CB21D7F721702CC64791D53AEDB9E2';
+  HashOfABCDE :=
+    'C96CA7B60257D18A67EC6DAF4E06A6A0F882ECEE22605DBE64DFAD2D7AA2FF939726385C7E60F00A2A38CF302E460C33EAE769CA5652FA8456EA6A75DC6AAC39';
+  HashOfDefaultDataHMACWithShortKey :=
+    '671A8EE18AD7BCC940CF4B35B47D0AAA89077AA8503E4E374A5BC2803758BBF04C6C80F97E5B71CD79A1E6DCD6585EB82A5F5482DB268B462D651530CE5CB177';
+  HashOfDefaultDataHMACWithLongKey :=
+    '62B264D5D5DFC01350B69C083B239426EC8A8F971FAC8DCB0B6A4825DD664CB992413AA1F7E5D2950BFFB9C207A9B084591633A96F3F590A861B27C3B827D3BC';
+
+  UnkeyedTestVectors := TBlake2BPTestVectors.FUnkeyedBlake2BP;
+  KeyedTestVectors := TBlake2BPTestVectors.FKeyedBlake2BP;
+end;
+
+procedure TTestBlake2BP.TearDown;
+begin
+  HashInstance := Nil;
+  HashInstanceWithKey := Nil;
+  HMACInstance := Nil;
+  inherited;
+end;
+
+{ TTestBlake2SP }
+
+procedure TTestBlake2SP.SetUp;
+var
+  LIdx: Int32;
+  LKey: TBytes;
+begin
+  inherited;
+  HashInstance := THashFactory.TCrypto.CreateBlake2SP(32, Nil);
+  LKey := Nil;
+  System.SetLength(LKey, 32);
+
+  for LIdx := 0 to 31 do
+  begin
+    LKey[LIdx] := LIdx;
+  end;
+
+  HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2SP(32, LKey);
+  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HashOfEmptyData :=
+    'DD0E891776933F43C7D032B08A917E25741F8AA9A12C12E1CAC8801500F2CA4F';
+  HashOfDefaultData :=
+    'F1617895134C203ED0A9C8CC72938161EBC9AB6F233BBD3CCFC4D4BCA08A5ED0';
+  HashOfOnetoNine :=
+    'D6D3157BD4E809982E0EEA22C5AF5CDDF05473F6ECBE353119591E6CDCB7127E';
+  HashOfABCDE :=
+    '107EEF69D795B14C8411EEBEFA897429682108397680377C78E5D214F014916F';
+  HashOfDefaultDataHMACWithShortKey :=
+    'D818A87A70949BDA7DE9765650D665C49B1B5CF11B05A1780901C46A91FFD786';
+  HashOfDefaultDataHMACWithLongKey :=
+    '7E061EC8E97D200F21BD7DB59FF4ED7BB1F7327D9E75EB3D922B926A76FEFE3F';
+
+  UnkeyedTestVectors := TBlake2SPTestVectors.FUnkeyedBlake2SP;
+  KeyedTestVectors := TBlake2SPTestVectors.FKeyedBlake2SP;
+end;
+
+procedure TTestBlake2SP.TearDown;
+begin
+  HashInstance := Nil;
+  HashInstanceWithKey := Nil;
+  HMACInstance := Nil;
+  inherited;
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -3791,6 +3899,8 @@ RegisterTest(TTestKMAC128);
 RegisterTest(TTestKMAC256);
 RegisterTest(TTestBlake2BMAC);
 RegisterTest(TTestBlake2SMAC);
+RegisterTest(TTestBlake2BP);
+RegisterTest(TTestBlake2SP);
 {$ELSE}
 // Crypto
 RegisterTest(TTestGost.Suite);
@@ -3875,6 +3985,8 @@ RegisterTest(TTestKMAC128.Suite);
 RegisterTest(TTestKMAC256.Suite);
 RegisterTest(TTestBlake2BMAC.Suite);
 RegisterTest(TTestBlake2SMAC.Suite);
+RegisterTest(TTestBlake2BP.Suite);
+RegisterTest(TTestBlake2SP.Suite);
 {$ENDIF FPC}
 
 end.

@@ -63,6 +63,8 @@ uses
   HlpIBlake2BTreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
   HlpIBlake2SConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
   HlpIBlake2STreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
+  HlpBlake2BP in '..\..\..\HashLib\src\Crypto\HlpBlake2BP.pas',
+  HlpBlake2SP in '..\..\..\HashLib\src\Crypto\HlpBlake2SP.pas',
   HlpIHash in '..\..\..\HashLib\src\Interfaces\HlpIHash.pas',
   HlpIHashResult in '..\..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
   HlpIKDF in '..\..\..\HashLib\src\Interfaces\HlpIKDF.pas',

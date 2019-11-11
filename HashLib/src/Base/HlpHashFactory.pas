@@ -90,6 +90,8 @@ uses
   HlpBlake2SConfig,
   HlpIBlake2SConfig,
   HlpIBlake2STreeConfig,
+  HlpBlake2BP,
+  HlpBlake2SP,
   // HMAC Unit
   HlpHMACNotBuildInAdapter,
   // PBKDF2_HMAC Unit
@@ -404,6 +406,12 @@ type
       class function CreateBlake2S_160(): IHash; static;
       class function CreateBlake2S_224(): IHash; static;
       class function CreateBlake2S_256(): IHash; static;
+
+      class function CreateBlake2BP(AHashSize: Int32;
+        const AKey: THashLibByteArray): IHash; static;
+
+      class function CreateBlake2SP(AHashSize: Int32;
+        const AKey: THashLibByteArray): IHash; static;
 
     end;
 
@@ -1209,6 +1217,18 @@ class function THashFactory.TCrypto.CreateBlake2S_256: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
     (TBlake2SConfig.Create(THashSize.hsHashSize256));
+end;
+
+class function THashFactory.TCrypto.CreateBlake2BP(AHashSize: Int32;
+  const AKey: THashLibByteArray): IHash;
+begin
+  Result := TBlake2BP.Create(AHashSize, AKey);
+end;
+
+class function THashFactory.TCrypto.CreateBlake2SP(AHashSize: Int32;
+  const AKey: THashLibByteArray): IHash;
+begin
+  Result := TBlake2SP.Create(AHashSize, AKey);
 end;
 
 class function THashFactory.TCrypto.CreateSnefru(ASecurityLevel: Int32;
