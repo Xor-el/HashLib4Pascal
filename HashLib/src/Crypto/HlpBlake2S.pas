@@ -72,6 +72,7 @@ type
   var
     FTreeConfig: IBlake2STreeConfig;
     FConfig: IBlake2SConfig;
+    FDoTransformKeyBlock: Boolean;
 
 {$IFNDEF USE_UNROLLED_VARIANT}
     procedure G(a, b, c, d, r, i: Int32); inline;
@@ -96,7 +97,8 @@ type
     constructor Create(); overload;
     constructor Create(const AConfig: IBlake2SConfig); overload;
     constructor Create(const AConfig: IBlake2SConfig;
-      const ATreeConfig: IBlake2STreeConfig); overload;
+      const ATreeConfig: IBlake2STreeConfig;
+      ADoTransformKeyBlock: Boolean = True); overload;
     procedure Initialize; override;
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ADataLength: Int32); override;
@@ -259,12 +261,15 @@ end;
 function TBlake2S.Clone(): IHash;
 var
   LHashInstance: TBlake2S;
+  LTreeConfig: IBlake2STreeConfig;
 begin
-  LHashInstance := TBlake2S.Create(FConfig.Clone());
+  LTreeConfig := Nil;
   if FTreeConfig <> Nil then
   begin
-    LHashInstance.FTreeConfig := FTreeConfig.Clone();
+    LTreeConfig := FTreeConfig.Clone();
   end;
+  LHashInstance := TBlake2S.Create(FConfig.Clone(), LTreeConfig,
+    FDoTransformKeyBlock);
   System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
   LHashInstance.FState := System.Copy(FState);
   LHashInstance.FBuffer := System.Copy(FBuffer);
@@ -1531,10 +1536,11 @@ begin
 end;
 
 constructor TBlake2S.Create(const AConfig: IBlake2SConfig;
-  const ATreeConfig: IBlake2STreeConfig);
+  const ATreeConfig: IBlake2STreeConfig; ADoTransformKeyBlock: Boolean);
 begin
   FConfig := AConfig;
   FTreeConfig := ATreeConfig;
+  FDoTransformKeyBlock := ADoTransformKeyBlock;
 
   if (FConfig = Nil) then
   begin
@@ -1580,11 +1586,15 @@ var
   LRawConfig: THashLibUInt32Array;
 begin
   LRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
-  if ((FConfig.Key <> Nil) and (System.Length(FConfig.Key) <> 0)) then
+
+  if FDoTransformKeyBlock then
   begin
-    LBlock := System.Copy(FConfig.Key, System.Low(FConfig.Key),
-      System.Length(FConfig.Key));
-    System.SetLength(LBlock, BlockSize);
+    if ((FConfig.Key <> Nil) and (System.Length(FConfig.Key) <> 0)) then
+    begin
+      LBlock := System.Copy(FConfig.Key, System.Low(FConfig.Key),
+        System.Length(FConfig.Key));
+      System.SetLength(LBlock, BlockSizeInBytes);
+    end;
   end;
 
   if (LRawConfig = Nil) then
@@ -1624,10 +1634,13 @@ begin
     FState[LIdx] := FState[LIdx] xor LRawConfig[LIdx];
   end;
 
-  if (LBlock <> Nil) then
+  if FDoTransformKeyBlock then
   begin
-    TransformBytes(LBlock, 0, System.Length(LBlock));
-    TArrayUtils.ZeroFill(LBlock); // burn key from memory
+    if (LBlock <> Nil) then
+    begin
+      TransformBytes(LBlock, 0, System.Length(LBlock));
+      TArrayUtils.ZeroFill(LBlock); // burn key from memory
+    end;
   end;
 end;
 
