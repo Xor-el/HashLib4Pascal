@@ -181,7 +181,7 @@ begin
 
   while (ACounter >= (ParallelismDegree * BlockSizeInBytes)) do
   begin
-    FLeafHashes[AIdx].TransformUntyped(APtrDataTwo,
+    FLeafHashes[AIdx].TransformUntyped(APtrDataTwo^,
       BlockSizeInBytes * System.SizeOf(Byte));
     System.Inc(APtrDataTwo, ParallelismDegree * BlockSizeInBytes);
     ACounter := ACounter - UInt64(ParallelismDegree * BlockSizeInBytes);
