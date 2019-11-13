@@ -23,7 +23,7 @@ uses
   HlpHashLibTypes;
 
 type
-  TBlake2BP = class(THash, ICryptoNotBuildIn, ITransformBlock)
+  TBlake2BP = class sealed(THash, ICryptoNotBuildIn, ITransformBlock)
   strict private
   const
     BlockSizeInBytes = Int32(128);
@@ -31,8 +31,9 @@ type
     ParallelismDegree = Int32(4);
 
   var
-    FRootHash: IHash;
-    FLeafHashes: THashLibGenericArray<IHash>;
+    // had to use the classes directly for performance purposes
+    FRootHash: TBlake2B;
+    FLeafHashes: THashLibGenericArray<TBlake2B>;
     FBuffer, FKey: THashLibByteArray;
     FBufferLength: UInt64;
 
@@ -43,16 +44,21 @@ type
     /// of these instances is given by <c>TBlake2BTreeConfig.InnerSize</c>
     /// instead. <br />
     /// </summary>
-    function Blake2BPInitLeafParam(const ABlake2BConfig: IBlake2BConfig;
-      const ABlake2BTreeConfig: IBlake2BTreeConfig): IHash;
-    function Blake2BPInitLeaf(AOffset: UInt64): IHash;
-    function Blake2BPInitRoot(): IHash;
+    function Blake2BPCreateLeafParam(const ABlake2BConfig: IBlake2BConfig;
+      const ABlake2BTreeConfig: IBlake2BTreeConfig): TBlake2B;
+    function Blake2BPCreateLeaf(AOffset: UInt64): TBlake2B;
+    function Blake2BPCreateRoot(): TBlake2B;
     procedure ParallelComputation(AIdx: Int32; APtrDataTwo: PByte;
       ACounter: UInt64);
 
     procedure DoParallelComputation(APtrDataTwo: PByte; ACounter: UInt64);
 
+    function DeepCloneBlake2BInstances(const ALeafHashes
+      : THashLibGenericArray<TBlake2B>): THashLibGenericArray<TBlake2B>;
+
     procedure Clear();
+
+    constructor CreateInternal(AHashSize: Int32);
 
   strict protected
     function GetName: String; override;
@@ -71,15 +77,13 @@ implementation
 
 { TBlake2BP }
 
-function TBlake2BP.Blake2BPInitLeafParam(const ABlake2BConfig: IBlake2BConfig;
-  const ABlake2BTreeConfig: IBlake2BTreeConfig): IHash;
+function TBlake2BP.Blake2BPCreateLeafParam(const ABlake2BConfig: IBlake2BConfig;
+  const ABlake2BTreeConfig: IBlake2BTreeConfig): TBlake2B;
 begin
   Result := TBlake2B.Create(ABlake2BConfig, ABlake2BTreeConfig);
-  Result.Initialize;
-  (Result as THash).HashSize := ABlake2BTreeConfig.InnerHashSize;
 end;
 
-function TBlake2BP.Blake2BPInitLeaf(AOffset: UInt64): IHash;
+function TBlake2BP.Blake2BPCreateLeaf(AOffset: UInt64): TBlake2B;
 var
   LBlake2BConfig: IBlake2BConfig;
   LBlake2BTreeConfig: IBlake2BTreeConfig;
@@ -97,10 +101,10 @@ begin
   begin
     LBlake2BTreeConfig.IsLastNode := True;
   end;
-  Result := Blake2BPInitLeafParam(LBlake2BConfig, LBlake2BTreeConfig);
+  Result := Blake2BPCreateLeafParam(LBlake2BConfig, LBlake2BTreeConfig);
 end;
 
-function TBlake2BP.Blake2BPInitRoot(): IHash;
+function TBlake2BP.Blake2BPCreateRoot(): TBlake2B;
 var
   LBlake2BConfig: IBlake2BConfig;
   LBlake2BTreeConfig: IBlake2BTreeConfig;
@@ -116,7 +120,6 @@ begin
   LBlake2BTreeConfig.InnerHashSize := OutSizeInBytes;
   LBlake2BTreeConfig.IsLastNode := True;
   Result := TBlake2B.Create(LBlake2BConfig, LBlake2BTreeConfig, False);
-  Result.Initialize;
 end;
 
 procedure TBlake2BP.Clear;
@@ -124,35 +127,68 @@ begin
   TArrayUtils.ZeroFill(FKey);
 end;
 
+function TBlake2BP.DeepCloneBlake2BInstances(const ALeafHashes
+  : THashLibGenericArray<TBlake2B>): THashLibGenericArray<TBlake2B>;
+var
+  LIdx: Int32;
+begin
+  System.SetLength(Result, System.Length(ALeafHashes));
+  for LIdx := System.Low(ALeafHashes) to System.High(ALeafHashes) do
+  begin
+    Result[LIdx] := ALeafHashes[LIdx].CloneInternal();
+  end;
+end;
+
 function TBlake2BP.Clone(): IHash;
 var
   LHashInstance: TBlake2BP;
 begin
-  LHashInstance := TBlake2BP.Create(HashSize, FKey);
+  LHashInstance := TBlake2BP.CreateInternal(HashSize);
+  LHashInstance.FKey := System.Copy(FKey);
   if FRootHash <> Nil then
   begin
-    LHashInstance.FRootHash := FRootHash.Clone();
+    LHashInstance.FRootHash := FRootHash.CloneInternal();
   end;
-  // TODO
-  // confirm that this line below does a deep copy
-  LHashInstance.FLeafHashes := System.Copy(FLeafHashes);
+  LHashInstance.FLeafHashes := DeepCloneBlake2BInstances(FLeafHashes);
   LHashInstance.FBuffer := System.Copy(FBuffer);
   LHashInstance.FBufferLength := FBufferLength;
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;
 
+constructor TBlake2BP.CreateInternal(AHashSize: Int32);
+begin
+  Inherited Create(AHashSize, BlockSizeInBytes);
+end;
+
 constructor TBlake2BP.Create(AHashSize: Int32; const AKey: THashLibByteArray);
+var
+  LIdx: Int32;
 begin
   Inherited Create(AHashSize, BlockSizeInBytes);
   System.SetLength(FBuffer, ParallelismDegree * BlockSizeInBytes);
   System.SetLength(FLeafHashes, ParallelismDegree);
   FKey := System.Copy(AKey);
+  FRootHash := Blake2BPCreateRoot;
+  for LIdx := 0 to System.Pred(ParallelismDegree) do
+  begin
+    FLeafHashes[LIdx] := Blake2BPCreateLeaf(LIdx);
+  end;
 end;
 
 destructor TBlake2BP.Destroy;
+var
+  LIdx: Int32;
 begin
   Clear();
+  FRootHash.Free;
+  FRootHash := Nil;
+  for LIdx := System.Low(FLeafHashes) to System.High(FLeafHashes) do
+  begin
+    FLeafHashes[LIdx].Free;
+    FLeafHashes[LIdx] := Nil;
+  end;
+  FLeafHashes := Nil;
   inherited Destroy;
 end;
 
@@ -165,10 +201,11 @@ procedure TBlake2BP.Initialize;
 var
   LIdx: Int32;
 begin
-  FRootHash := Blake2BPInitRoot;
+  FRootHash.Initialize;
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    FLeafHashes[LIdx] := Blake2BPInitLeaf(LIdx);
+    FLeafHashes[LIdx].Initialize;
+    FLeafHashes[LIdx].HashSize := OutSizeInBytes;
   end;
   TArrayUtils.ZeroFill(FBuffer);
   FBufferLength := 0;
@@ -176,15 +213,24 @@ end;
 
 procedure TBlake2BP.ParallelComputation(AIdx: Int32; APtrDataTwo: PByte;
   ACounter: UInt64);
+var
+  LLeafHashes: THashLibGenericArray<TBlake2B>;
+  LTemp: THashLibByteArray;
+  LCounter: UInt64;
+  LPtrDataTwo: PByte;
 begin
-  System.Inc(APtrDataTwo, AIdx * BlockSizeInBytes);
-
-  while (ACounter >= (ParallelismDegree * BlockSizeInBytes)) do
+  System.SetLength(LTemp, BlockSizeInBytes);
+  LPtrDataTwo := APtrDataTwo;
+  LCounter := ACounter;
+  System.Inc(LPtrDataTwo, AIdx * BlockSizeInBytes);
+  LLeafHashes := FLeafHashes;
+  while (LCounter >= (ParallelismDegree * BlockSizeInBytes)) do
   begin
-    FLeafHashes[AIdx].TransformUntyped(APtrDataTwo^,
-      BlockSizeInBytes * System.SizeOf(Byte));
-    System.Inc(APtrDataTwo, ParallelismDegree * BlockSizeInBytes);
-    ACounter := ACounter - UInt64(ParallelismDegree * BlockSizeInBytes);
+    System.Move(LPtrDataTwo^, LTemp[0], BlockSizeInBytes);
+
+    LLeafHashes[AIdx].TransformBytes(LTemp, 0, BlockSizeInBytes);
+    System.Inc(LPtrDataTwo, UInt64(ParallelismDegree * BlockSizeInBytes));
+    LCounter := LCounter - UInt64(ParallelismDegree * BlockSizeInBytes);
   end;
 end;
 
@@ -233,7 +279,9 @@ var
   LLeft, LFill, LDataLength, LCounter: UInt64;
   LPtrData, LPtrDataTwo: PByte;
   LIdx: Int32;
+  LLeafHashes: THashLibGenericArray<TBlake2B>;
 begin
+  LLeafHashes := FLeafHashes;
   LDataLength := UInt64(ADataLength);
   LPtrData := PByte(AData) + AIndex;
   LLeft := FBufferLength;
@@ -245,7 +293,7 @@ begin
 
     for LIdx := 0 to System.Pred(ParallelismDegree) do
     begin
-      FLeafHashes[LIdx].TransformBytes(FBuffer, LIdx * BlockSizeInBytes,
+      LLeafHashes[LIdx].TransformBytes(FBuffer, LIdx * BlockSizeInBytes,
         BlockSizeInBytes);
     end;
 
@@ -275,7 +323,11 @@ var
   LHash: THashLibMatrixByteArray;
   LIdx: Int32;
   LLeft: UInt64;
+  LLeafHashes: THashLibGenericArray<TBlake2B>;
+  LRootHash: TBlake2B;
 begin
+  LLeafHashes := FLeafHashes;
+  LRootHash := FRootHash;
   System.SetLength(LHash, ParallelismDegree);
   for LIdx := System.Low(LHash) to System.High(LHash) do
   begin
@@ -291,18 +343,18 @@ begin
       begin
         LLeft := BlockSizeInBytes;
       end;
-      FLeafHashes[LIdx].TransformBytes(FBuffer, LIdx * BlockSizeInBytes,
+      LLeafHashes[LIdx].TransformBytes(FBuffer, LIdx * BlockSizeInBytes,
         Int32(LLeft));
     end;
 
-    LHash[LIdx] := FLeafHashes[LIdx].TransformFinal().GetBytes();
+    LHash[LIdx] := LLeafHashes[LIdx].TransformFinal().GetBytes();
   end;
 
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    FRootHash.TransformBytes(LHash[LIdx]);
+    LRootHash.TransformBytes(LHash[LIdx], 0, OutSizeInBytes);
   end;
-  Result := FRootHash.TransformFinal();
+  Result := LRootHash.TransformFinal();
   Initialize();
 end;
 

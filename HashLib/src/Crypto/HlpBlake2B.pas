@@ -103,6 +103,7 @@ type
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ADataLength: Int32); override;
     function TransformFinal: IHashResult; override;
+    function CloneInternal(): TBlake2B;
     function Clone(): IHash; override;
 
   end;
@@ -266,9 +267,8 @@ end;
 
 {$ENDIF USE_UNROLLED_VARIANT}
 
-function TBlake2B.Clone(): IHash;
+function TBlake2B.CloneInternal(): TBlake2B;
 var
-  LHashInstance: TBlake2B;
   LTreeConfig: IBlake2BTreeConfig;
 begin
   LTreeConfig := Nil;
@@ -276,21 +276,24 @@ begin
   begin
     LTreeConfig := FTreeConfig.Clone();
   end;
-  LHashInstance := TBlake2B.Create(FConfig.Clone(), LTreeConfig,
-    FDoTransformKeyBlock);
-  System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
-  LHashInstance.FState := System.Copy(FState);
-  LHashInstance.FBuffer := System.Copy(FBuffer);
+  Result := TBlake2B.Create(FConfig.Clone(), LTreeConfig, FDoTransformKeyBlock);
+  System.Move(FM, Result.FM, System.SizeOf(FM));
+  Result.FState := System.Copy(FState);
+  Result.FBuffer := System.Copy(FBuffer);
 {$IFNDEF USE_UNROLLED_VARIANT}
   System.Move(FV, LHashInstance.FV, System.SizeOf(FV));
 {$ENDIF USE_UNROLLED_VARIANT}
-  LHashInstance.FFilledBufferCount := FFilledBufferCount;
-  LHashInstance.FCounter0 := FCounter0;
-  LHashInstance.FCounter1 := FCounter1;
-  LHashInstance.FFinalizationFlag0 := FFinalizationFlag0;
-  LHashInstance.FFinalizationFlag1 := FFinalizationFlag1;
-  Result := LHashInstance as IHash;
+  Result.FFilledBufferCount := FFilledBufferCount;
+  Result.FCounter0 := FCounter0;
+  Result.FCounter1 := FCounter1;
+  Result.FFinalizationFlag0 := FFinalizationFlag0;
+  Result.FFinalizationFlag1 := FFinalizationFlag1;
   Result.BufferSize := BufferSize;
+end;
+
+function TBlake2B.Clone(): IHash;
+begin
+  Result := CloneInternal() as IHash;
 end;
 
 procedure TBlake2B.Compress(ABlock: PByte; AStart: Int32);
