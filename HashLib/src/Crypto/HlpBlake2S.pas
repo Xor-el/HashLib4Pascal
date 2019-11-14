@@ -273,7 +273,7 @@ begin
   Result.FState := System.Copy(FState);
   Result.FBuffer := System.Copy(FBuffer);
 {$IFNDEF USE_UNROLLED_VARIANT}
-  System.Move(FV, LHashInstance.FV, System.SizeOf(FV));
+  System.Move(FV, Result.FV, System.SizeOf(FV));
 {$ENDIF USE_UNROLLED_VARIANT}
   Result.FFilledBufferCount := FFilledBufferCount;
   Result.FCounter0 := FCounter0;
