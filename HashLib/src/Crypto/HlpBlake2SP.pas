@@ -25,6 +25,15 @@ uses
 type
   TBlake2SP = class sealed(THash, ICryptoNotBuildIn, ITransformBlock)
   strict private
+
+  type
+    PDataContainer = ^TDataContainer;
+
+    TDataContainer = record
+      PtrData: PByte;
+      Counter: UInt64;
+    end;
+
   const
     BlockSizeInBytes = Int32(64);
     OutSizeInBytes = Int32(32);
@@ -48,10 +57,9 @@ type
       const ABlake2STreeConfig: IBlake2STreeConfig): TBlake2S;
     function Blake2SPCreateLeaf(AOffset: UInt64): TBlake2S;
     function Blake2SPCreateRoot(): TBlake2S;
-    procedure ParallelComputation(AIdx: Int32; APtrDataTwo: PByte;
-      ACounter: UInt64);
+    procedure ParallelComputation(AIdx: Int32; ADataContainer: PDataContainer);
 
-    procedure DoParallelComputation(APtrDataTwo: PByte; ACounter: UInt64);
+    procedure DoParallelComputation(ADataContainer: PDataContainer);
 
     function DeepCloneBlake2SInstances(const ALeafHashes
       : THashLibGenericArray<TBlake2S>): THashLibGenericArray<TBlake2S>;
@@ -211,39 +219,38 @@ begin
   FBufferLength := 0;
 end;
 
-procedure TBlake2SP.ParallelComputation(AIdx: Int32; APtrDataTwo: PByte;
-  ACounter: UInt64);
+procedure TBlake2SP.ParallelComputation(AIdx: Int32;
+  ADataContainer: PDataContainer);
 var
   LLeafHashes: THashLibGenericArray<TBlake2S>;
   LTemp: THashLibByteArray;
   LCounter: UInt64;
-  LPtrDataTwo: PByte;
+  LPtrData: PByte;
 begin
   System.SetLength(LTemp, BlockSizeInBytes);
-  LPtrDataTwo := APtrDataTwo;
-  LCounter := ACounter;
-  System.Inc(LPtrDataTwo, AIdx * BlockSizeInBytes);
+  LPtrData := ADataContainer^.PtrData;
+  LCounter := ADataContainer^.Counter;
+  System.Inc(LPtrData, AIdx * BlockSizeInBytes);
   LLeafHashes := FLeafHashes;
   while (LCounter >= (ParallelismDegree * BlockSizeInBytes)) do
   begin
-    System.Move(LPtrDataTwo^, LTemp[0], BlockSizeInBytes);
-
+    System.Move(LPtrData^, LTemp[0], BlockSizeInBytes);
     LLeafHashes[AIdx].TransformBytes(LTemp, 0, BlockSizeInBytes);
-    System.Inc(LPtrDataTwo, UInt64(ParallelismDegree * BlockSizeInBytes));
+    System.Inc(LPtrData, UInt64(ParallelismDegree * BlockSizeInBytes));
     LCounter := LCounter - UInt64(ParallelismDegree * BlockSizeInBytes);
   end;
 end;
 
 {$IFDEF HAS_DELPHI_PPL}
 
-procedure TBlake2SP.DoParallelComputation(APtrDataTwo: PByte; ACounter: UInt64);
+procedure TBlake2SP.DoParallelComputation(ADataContainer: PDataContainer);
 
-  function CreateTask(AIdx: Int32; APtrDataTwo: PByte; ACounter: UInt64): ITask;
+  function CreateTask(AIdx: Int32; ADataContainer: PDataContainer): ITask;
   begin
     Result := TTask.Create(
       procedure()
       begin
-        ParallelComputation(AIdx, APtrDataTwo, ACounter);
+        ParallelComputation(AIdx, ADataContainer);
       end);
   end;
 
@@ -254,7 +261,7 @@ begin
   System.SetLength(LArrayTasks, ParallelismDegree);
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    LArrayTasks[LIdx] := CreateTask(LIdx, APtrDataTwo, ACounter);
+    LArrayTasks[LIdx] := CreateTask(LIdx, ADataContainer);
     LArrayTasks[LIdx].Start;
   end;
   TTask.WaitForAll(LArrayTasks);
@@ -262,13 +269,13 @@ end;
 
 {$ELSE}
 
-procedure TBlake2SP.DoParallelComputation(APtrDataTwo: PByte; ACounter: UInt64);
+procedure TBlake2SP.DoParallelComputation(ADataContainer: PDataContainer);
 var
   LIdx: Int32;
 begin
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    ParallelComputation(LIdx, APtrDataTwo, ACounter);
+    ParallelComputation(LIdx, ADataContainer);
   end;
 end;
 {$ENDIF HAS_DELPHI_PPL}
@@ -276,10 +283,11 @@ end;
 procedure TBlake2SP.TransformBytes(const AData: THashLibByteArray;
 AIndex, ADataLength: Int32);
 var
-  LLeft, LFill, LDataLength, LCounter: UInt64;
-  LPtrData, LPtrDataTwo: PByte;
+  LLeft, LFill, LDataLength: UInt64;
+  LPtrData: PByte;
   LIdx: Int32;
   LLeafHashes: THashLibGenericArray<TBlake2S>;
+  LPtrDataContainer: PDataContainer;
 begin
   LLeafHashes := FLeafHashes;
   LDataLength := UInt64(ADataLength);
@@ -302,9 +310,14 @@ begin
     LLeft := 0;
   end;
 
-  LPtrDataTwo := LPtrData;
-  LCounter := LDataLength;
-  DoParallelComputation(LPtrDataTwo, LCounter);
+  LPtrDataContainer := New(PDataContainer);
+  try
+    LPtrDataContainer^.PtrData := LPtrData;
+    LPtrDataContainer^.Counter := LDataLength;
+    DoParallelComputation(LPtrDataContainer);
+  finally
+    Dispose(LPtrDataContainer);
+  end;
 
   System.Inc(LPtrData, LDataLength - (LDataLength mod UInt64(ParallelismDegree *
     BlockSizeInBytes)));
