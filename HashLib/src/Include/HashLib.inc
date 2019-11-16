@@ -37,7 +37,7 @@
 {$OPTIMIZATION LEVEL3}
 // disable "USELOADMODIFYSTORE" because it produces incorrect result
 // when used in combination with -CpCOREAVX2 and -OpCOREAVX2 in FPC 3.2.0 beta
-{$IF FPC_FULLVERSION > 30004}
+{$IFDEF FPC_GREATER_THAN_3.0.4}
    {$OPTIMIZATION NOUSELOADMODIFYSTORE}
 {$IFEND}
 // level 4 optimizations
