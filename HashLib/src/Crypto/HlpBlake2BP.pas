@@ -6,10 +6,16 @@ interface
 
 uses
   SysUtils,
-{$IFDEF HAS_DELPHI_PPL}
+{$IFDEF USE_DELPHI_PPL}
   System.Classes,
   System.Threading,
-{$ENDIF HAS_DELPHI_PPL}
+{$ENDIF USE_DELPHI_PPL}
+{$IFDEF USE_PASMP}
+  PasMP,
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+  MTProcs,
+{$ENDIF USE_MTPROCS}
   HlpHash,
   HlpIHashResult,
   HlpBlake2B,
@@ -68,6 +74,15 @@ type
 
     constructor CreateInternal(AHashSize: Int32);
 
+{$IFDEF USE_PASMP}
+    procedure PasMPParallelComputationWrapper(const AJob: PPasMPJob;
+      const AThreadIndex: LongInt; const ADataContainer: Pointer;
+      const AFromIndex, AToIndex: TPasMPNativeInt); inline;
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+    procedure MTProcsParallelComputationWrapper(AIdx: PtrInt;
+      ADataContainer: Pointer; AItem: TMultiThreadProcItem); inline;
+{$ENDIF USE_MTPROCS}
   strict protected
     function GetName: String; override;
 
@@ -241,7 +256,24 @@ begin
   end;
 end;
 
-{$IFDEF HAS_DELPHI_PPL}
+{$IFDEF USE_PASMP}
+
+procedure TBlake2BP.PasMPParallelComputationWrapper(const AJob: PPasMPJob;
+  const AThreadIndex: LongInt; const ADataContainer: Pointer;
+  const AFromIndex, AToIndex: TPasMPNativeInt);
+begin
+  ParallelComputation(AFromIndex, ADataContainer);
+end;
+{$ENDIF}
+{$IFDEF USE_MTPROCS}
+
+procedure TBlake2BP.MTProcsParallelComputationWrapper(AIdx: PtrInt;
+  ADataContainer: Pointer; AItem: TMultiThreadProcItem);
+begin
+  ParallelComputation(AIdx, ADataContainer);
+end;
+{$ENDIF}
+{$IF DEFINED(USE_DELPHI_PPL)}
 
 procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
 
@@ -267,6 +299,22 @@ begin
   TTask.WaitForAll(LArrayTasks);
 end;
 
+{$ELSEIF DEFINED(USE_PASMP) OR DEFINED(USE_MTPROCS)}
+
+procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
+begin
+{$IF DEFINED(USE_PASMP)}
+  TPasMP.CreateGlobalInstance;
+  GlobalPasMP.Invoke(GlobalPasMP.ParallelFor(ADataContainer, 0,
+    ParallelismDegree - 1, PasMPParallelComputationWrapper));
+{$ELSEIF DEFINED(USE_MTPROCS)}
+  ProcThreadPool.DoParallel(MTProcsParallelComputationWrapper, 0,
+    ParallelismDegree - 1, ADataContainer);
+{$ELSE}
+{$MESSAGE ERROR 'Unsupported Threading Library.'}
+{$IFEND USE_PASMP}
+end;
+
 {$ELSE}
 
 procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
@@ -278,7 +326,7 @@ begin
     ParallelComputation(LIdx, ADataContainer);
   end;
 end;
-{$ENDIF HAS_DELPHI_PPL}
+{$IFEND USE_DELPHI_PPL}
 
 procedure TBlake2BP.TransformBytes(const AData: THashLibByteArray;
 AIndex, ADataLength: Int32);

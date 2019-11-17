@@ -52,6 +52,13 @@
    {$OPTIMIZATION USERBP}
 {$ENDIF}
 
+{.$DEFINE USE_MTPROCS}
+{.$DEFINE USE_PASMP}
+
+{$IF DEFINED(USE_MTPROCS) AND DEFINED(USE_PASMP)}
+   {$MESSAGE ERROR 'Only One Threading Library can be used at a time.'}
+{$IFEND}
+
 {$ENDIF FPC}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
@@ -94,7 +101,7 @@
   // XE7 and Above
 {$IF CompilerVersion >= 28.0}
    {$DEFINE DELPHIXE7_UP}
-   {$DEFINE HAS_DELPHI_PPL} // Has Delphi Parallel Programming Library
+   {.$DEFINE USE_DELPHI_PPL} // Use Delphi Parallel Programming Library
    {$DEFINE HAS_DELPHI_NET_ENCODING}
 {$IFEND}
 
@@ -104,6 +111,12 @@
 {$ENDIF}
 
 {$DEFINE USE_UNROLLED_VARIANT}
+
+{.$DEFINE USE_PASMP}
+
+{$IF DEFINED(USE_DELPHI_PPL) AND DEFINED(USE_PASMP)}
+   {$MESSAGE ERROR 'Only One Threading Library can be used at a time.'}
+{$IFEND}
 
 // This option is needed to enable code browsing (aka Ctrl+Click)
 // It does not affect the binary size or generated code

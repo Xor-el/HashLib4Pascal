@@ -5,11 +5,17 @@ unit HlpPBKDF_ScryptNotBuildInAdapter;
 interface
 
 uses
-{$IFDEF HAS_DELPHI_PPL}
+{$IFDEF USE_DELPHI_PPL}
   System.Classes,
   System.SysUtils,
   System.Threading,
-{$ENDIF HAS_DELPHI_PPL}
+{$ENDIF USE_DELPHI_PPL}
+{$IFDEF USE_PASMP}
+  PasMP,
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+  MTProcs,
+{$ENDIF USE_MTPROCS}
 {$IFDEF DELPHI}
   HlpBitConverter,
 {$ENDIF DELPHI}
@@ -102,6 +108,15 @@ type
 
     class procedure DoParallelSMix(ADataContainer: PDataContainer); static;
 
+{$IFDEF USE_PASMP}
+    class procedure PasMPSMixWrapper(const AJob: PPasMPJob;
+      const AThreadIndex: LongInt; const ADataContainer: Pointer;
+      const AFromIndex, AToIndex: TPasMPNativeInt); inline;
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+    class procedure MTProcsSMixWrapper(AIdx: PtrInt; ADataContainer: Pointer;
+      AItem: TMultiThreadProcItem); inline;
+{$ENDIF USE_MTPROCS}
     class function MFCrypt(const APasswordBytes, ASaltBytes: THashLibByteArray;
       ACost, ABlockSize, AParallelism, AOutputLength: Int32)
       : THashLibByteArray; static;
@@ -321,6 +336,7 @@ begin
   LPtrB := APtrDataContainer^.PtrB;
   LCost := APtrDataContainer^.Cost;
   LBlockSize := APtrDataContainer^.BlockSize;
+  AIdx := AIdx * 32 * LBlockSize;
   LBCount := LBlockSize * 32;
   System.SetLength(LBlockX1, 16);
   System.SetLength(LBlockX2, 16);
@@ -367,7 +383,24 @@ begin
   end;
 end;
 
-{$IFDEF HAS_DELPHI_PPL}
+{$IFDEF USE_PASMP}
+
+class procedure TPBKDF_ScryptNotBuildInAdapter.PasMPSMixWrapper
+  (const AJob: PPasMPJob; const AThreadIndex: LongInt;
+  const ADataContainer: Pointer; const AFromIndex, AToIndex: TPasMPNativeInt);
+begin
+  SMix(AFromIndex, ADataContainer);
+end;
+{$ENDIF}
+{$IFDEF USE_MTPROCS}
+
+class procedure TPBKDF_ScryptNotBuildInAdapter.MTProcsSMixWrapper(AIdx: PtrInt;
+  ADataContainer: Pointer; AItem: TMultiThreadProcItem);
+begin
+  SMix(AIdx, ADataContainer);
+end;
+{$ENDIF}
+{$IF DEFINED(USE_DELPHI_PPL)}
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
   (ADataContainer: PDataContainer);
@@ -382,18 +415,37 @@ class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
   end;
 
 var
-  LIdx, LBlockSize, LParallelism: Int32;
+  LIdx, LParallelism: Int32;
   LArrayTasks: array of ITask;
 begin
   LParallelism := ADataContainer^.Parallelism;
-  LBlockSize := ADataContainer^.BlockSize;
   System.SetLength(LArrayTasks, LParallelism);
   for LIdx := 0 to System.Pred(LParallelism) do
   begin
-    LArrayTasks[LIdx] := CreateTask(LIdx * 32 * LBlockSize, ADataContainer);
+    LArrayTasks[LIdx] := CreateTask(LIdx, ADataContainer);
     LArrayTasks[LIdx].Start;
   end;
   TTask.WaitForAll(LArrayTasks);
+end;
+
+{$ELSEIF DEFINED(USE_PASMP) OR DEFINED(USE_MTPROCS)}
+
+class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
+  (ADataContainer: PDataContainer);
+var
+  LParallelism: Int32;
+begin
+  LParallelism := ADataContainer^.Parallelism;
+{$IF DEFINED(USE_PASMP)}
+  TPasMP.CreateGlobalInstance;
+  GlobalPasMP.Invoke(GlobalPasMP.ParallelFor(ADataContainer, 0,
+    LParallelism - 1, PasMPSMixWrapper));
+{$ELSEIF DEFINED(USE_MTPROCS)}
+  ProcThreadPool.DoParallel(MTProcsSMixWrapper, 0, LParallelism - 1,
+    ADataContainer);
+{$ELSE}
+{$MESSAGE ERROR 'Unsupported Threading Library.'}
+{$IFEND USE_PASMP}
 end;
 
 {$ELSE}
@@ -401,17 +453,16 @@ end;
 class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
   (ADataContainer: PDataContainer);
 var
-  LIdx, LBlockSize, LParallelism: Int32;
+  LIdx, LParallelism: Int32;
 begin
   LParallelism := ADataContainer^.Parallelism;
-  LBlockSize := ADataContainer^.BlockSize;
   for LIdx := 0 to System.Pred(LParallelism) do
   begin
-    SMix(LIdx * 32 * LBlockSize, ADataContainer);
+    SMix(LIdx, ADataContainer);
   end;
 end;
 
-{$ENDIF HAS_DELPHI_PPL}
+{$IFEND USE_DELPHI_PPL}
 
 class function TPBKDF_ScryptNotBuildInAdapter.MFCrypt(const APasswordBytes,
   ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism,

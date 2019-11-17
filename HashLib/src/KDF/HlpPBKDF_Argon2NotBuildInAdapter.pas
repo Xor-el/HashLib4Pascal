@@ -5,11 +5,17 @@
 interface
 
 uses
-{$IFDEF HAS_DELPHI_PPL}
+{$IFDEF USE_DELPHI_PPL}
   System.Classes,
   System.SysUtils,
   System.Threading,
-{$ENDIF HAS_DELPHI_PPL}
+{$ENDIF USE_DELPHI_PPL}
+{$IFDEF USE_PASMP}
+  PasMP,
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+  MTProcs,
+{$ENDIF USE_MTPROCS}
   HlpKDF,
   HlpBits,
   HlpIHash,
@@ -331,8 +337,18 @@ type
     function RotatePrevOffset(ACurrentOffset, APrevOffset: Int32)
       : Int32; inline;
     procedure FillSegment(AIdx: Int32; var APosition: TPosition);
-    procedure DoParallelFillMemoryBlocks(APtrDataContainer: PDataContainer);
-
+    procedure FillMemoryBlocks(AIdx: Int32;
+      ADataContainer: PDataContainer); inline;
+    procedure DoParallelFillMemoryBlocks(ADataContainer: PDataContainer);
+{$IFDEF USE_PASMP}
+    procedure PasMPFillMemoryBlocksWrapper(const AJob: PPasMPJob;
+      const AThreadIndex: LongInt; const ADataContainer: Pointer;
+      const AFromIndex, AToIndex: TPasMPNativeInt); inline;
+{$ENDIF USE_PASMP}
+{$IFDEF USE_MTPROCS}
+    procedure MTProcsFillMemoryBlocksWrapper(AIdx: PtrInt;
+      ADataContainer: Pointer; AItem: TMultiThreadProcItem); inline;
+{$ENDIF USE_MTPROCS}
     (* *
 
       * H0 = H64(p, τ, m, t, v, y, |P|, P, |S|, S, |L|, K, |X|, X)
@@ -1118,36 +1134,64 @@ begin
   end;
 end;
 
-{$IFDEF HAS_DELPHI_PPL}
+procedure TPBKDF_Argon2NotBuildInAdapter.FillMemoryBlocks(AIdx: Int32;
+  ADataContainer: PDataContainer);
+var
+  LPosition: TPosition;
+begin
+  LPosition := ADataContainer^.Position;
+  FillSegment(AIdx, LPosition);
+end;
+
+{$IFDEF USE_PASMP}
+
+procedure TPBKDF_Argon2NotBuildInAdapter.PasMPFillMemoryBlocksWrapper
+  (const AJob: PPasMPJob; const AThreadIndex: LongInt;
+  const ADataContainer: Pointer; const AFromIndex, AToIndex: TPasMPNativeInt);
+begin
+  PDataContainer(ADataContainer)^.Position.FLane := AFromIndex;
+  FillMemoryBlocks(AFromIndex, ADataContainer);
+end;
+{$ENDIF}
+{$IFDEF USE_MTPROCS}
+
+procedure TPBKDF_Argon2NotBuildInAdapter.MTProcsFillMemoryBlocksWrapper
+  (AIdx: PtrInt; ADataContainer: Pointer; AItem: TMultiThreadProcItem);
+begin
+  PDataContainer(ADataContainer)^.Position.FLane := AIdx;
+  FillMemoryBlocks(AIdx, ADataContainer);
+end;
+{$ENDIF}
+{$IF DEFINED(USE_DELPHI_PPL)}
 
 procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks
-  (APtrDataContainer: PDataContainer);
+  (ADataContainer: PDataContainer);
 
-  function CreateTask(AIdx: Int32; APosition: TPosition): ITask;
+  function CreateTask(AIdx: Int32; ADataContainer: PDataContainer): ITask;
   begin
     result := TTask.Create(
       procedure()
       begin
-        FillSegment(AIdx, APosition);
+        FillMemoryBlocks(AIdx, ADataContainer);
       end);
   end;
 
 var
-  LIdx, LJdx, LKdx: Int32;
-  LPosition: TPosition;
+  LIdx, LJdx, LKdx, LIterations, LLanes: Int32;
   LArrayTasks: array of ITask;
 begin
-  System.SetLength(LArrayTasks, FParameters.Lanes);
-  LPosition := APtrDataContainer^.Position;
+  LIterations := FParameters.Iterations;
+  LLanes := FParameters.Lanes;
+  System.SetLength(LArrayTasks, LLanes);
 
-  for LIdx := 0 to System.Pred(FParameters.Iterations) do
+  for LIdx := 0 to System.Pred(LIterations) do
   begin
     for LJdx := 0 to System.Pred(ARGON2_SYNC_POINTS) do
     begin
-      for LKdx := 0 to System.Pred(FParameters.Lanes) do
+      for LKdx := 0 to System.Pred(LLanes) do
       begin
-        LPosition.Update(LIdx, LKdx, LJdx, 0);
-        LArrayTasks[LKdx] := CreateTask(LKdx, LPosition);
+        ADataContainer^.Position.Update(LIdx, LKdx, LJdx, 0);
+        LArrayTasks[LKdx] := CreateTask(LKdx, ADataContainer);
         LArrayTasks[LKdx].Start;
       end;
       TTask.WaitForAll(LArrayTasks);
@@ -1156,29 +1200,58 @@ begin
 
 end;
 
-{$ELSE}
+{$ELSEIF DEFINED(USE_PASMP) OR DEFINED(USE_MTPROCS)}
 
 procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks
-  (APtrDataContainer: PDataContainer);
+  (ADataContainer: PDataContainer);
 var
-  LIdx, LJdx, LKdx: Int32;
-  LPosition: TPosition;
+  LIdx, LJdx, LIterations, LLanes: Int32;
 begin
-  LPosition := APtrDataContainer^.Position;
-  for LIdx := 0 to System.Pred(FParameters.Iterations) do
+  LIterations := FParameters.Iterations;
+  LLanes := FParameters.Lanes;
+  for LIdx := 0 to System.Pred(LIterations) do
   begin
     for LJdx := 0 to System.Pred(ARGON2_SYNC_POINTS) do
     begin
-      for LKdx := 0 to System.Pred(FParameters.Lanes) do
+      ADataContainer^.Position.Update(LIdx, 0, LJdx, 0);
+{$IF DEFINED(USE_PASMP)}
+      TPasMP.CreateGlobalInstance;
+      GlobalPasMP.Invoke(GlobalPasMP.ParallelFor(ADataContainer, 0, LLanes - 1,
+        PasMPFillMemoryBlocksWrapper));
+{$ELSEIF DEFINED(USE_MTPROCS)}
+      ProcThreadPool.DoParallel(MTProcsFillMemoryBlocksWrapper, 0, LLanes - 1,
+        ADataContainer);
+{$ELSE}
+{$MESSAGE ERROR 'Unsupported Threading Library.'}
+{$IFEND USE_PASMP}
+    end;
+  end;
+
+end;
+
+{$ELSE}
+
+procedure TPBKDF_Argon2NotBuildInAdapter.DoParallelFillMemoryBlocks
+  (ADataContainer: PDataContainer);
+var
+  LIdx, LJdx, LKdx, LIterations, LLanes: Int32;
+begin
+  LIterations := FParameters.Iterations;
+  LLanes := FParameters.Lanes;
+  for LIdx := 0 to System.Pred(LIterations) do
+  begin
+    for LJdx := 0 to System.Pred(ARGON2_SYNC_POINTS) do
+    begin
+      for LKdx := 0 to System.Pred(LLanes) do
       begin
-        LPosition.Update(LIdx, LKdx, LJdx, 0);
-        FillSegment(LKdx, LPosition);
+        ADataContainer^.Position.Update(LIdx, LKdx, LJdx, 0);
+        FillMemoryBlocks(LKdx, ADataContainer);
       end;
     end;
   end;
 end;
 
-{$ENDIF HAS_DELPHI_PPL}
+{$IFEND USE_DELPHI_PPL}
 
 function TPBKDF_Argon2NotBuildInAdapter.GetBytes(AByteCount: Int32)
   : THashLibByteArray;
