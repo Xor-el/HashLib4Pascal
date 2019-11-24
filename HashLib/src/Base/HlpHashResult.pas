@@ -70,9 +70,8 @@ implementation
 constructor THashResult.Create(AHash: UInt64);
 begin
   Inherited Create();
-  FHash := THashLibByteArray.Create(Byte(AHash shr 56), Byte(AHash shr 48),
-    Byte(AHash shr 40), Byte(AHash shr 32), Byte(AHash shr 24),
-    Byte(AHash shr 16), Byte(AHash shr 8), Byte(AHash));
+  System.SetLength(FHash, System.SizeOf(UInt64));
+  TConverters.ReadUInt64AsBytesBE(AHash, FHash, 0);
 end;
 
 constructor THashResult.Create(const AHash: THashLibByteArray);
@@ -84,8 +83,8 @@ end;
 constructor THashResult.Create(AHash: UInt32);
 begin
   Inherited Create();
-  FHash := THashLibByteArray.Create(Byte(AHash shr 24), Byte(AHash shr 16),
-    Byte(AHash shr 8), Byte(AHash));
+  System.SetLength(FHash, System.SizeOf(UInt32));
+  TConverters.ReadUInt32AsBytesBE(AHash, FHash, 0);
 end;
 
 constructor THashResult.Create(AHash: UInt8);

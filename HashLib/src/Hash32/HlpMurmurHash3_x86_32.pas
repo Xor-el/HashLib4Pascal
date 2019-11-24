@@ -293,17 +293,13 @@ end;
 function TMurmurHash3_x86_32.TransformFinal: IHashResult;
 var
   LBufferByte: THashLibByteArray;
-  LBufferUInt32: THashLibUInt32Array;
 begin
   Finish();
-  LBufferUInt32 := THashLibUInt32Array.Create(FH);
-  System.SetLength(LBufferByte, System.Length(LBufferUInt32) *
-    System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(LBufferUInt32), 0, PByte(LBufferByte), 0,
-    System.Length(LBufferByte));
+
+  System.SetLength(LBufferByte, HashSize);
+  TConverters.ReadUInt32AsBytesBE(FH, LBufferByte, 0);
 
   result := THashResult.Create(LBufferByte);
-
   Initialize();
 end;
 

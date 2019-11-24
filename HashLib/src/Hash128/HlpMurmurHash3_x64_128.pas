@@ -502,17 +502,14 @@ end;
 function TMurmurHash3_x64_128.TransformFinal: IHashResult;
 var
   LBufferByte: THashLibByteArray;
-  LBufferUInt64: THashLibUInt64Array;
 begin
   Finish();
-  LBufferUInt64 := THashLibUInt64Array.Create(FH1, FH2);
-  System.SetLength(LBufferByte, System.length(LBufferUInt64) *
-    System.SizeOf(UInt64));
-  TConverters.be64_copy(PUInt64(LBufferUInt64), 0, PByte(LBufferByte), 0,
-    System.length(LBufferByte));
+
+  System.SetLength(LBufferByte, HashSize);
+  TConverters.ReadUInt64AsBytesBE(FH1, LBufferByte, 0);
+  TConverters.ReadUInt64AsBytesBE(FH2, LBufferByte, 8);
 
   result := THashResult.Create(LBufferByte);
-
   Initialize();
 end;
 
