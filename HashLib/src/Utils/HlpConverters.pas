@@ -64,6 +64,12 @@ type
     class function ReadBytesAsUInt64LE(AInput: PByte; AIndex: Int32): UInt64;
       static; inline;
 
+    class function ReadBytesAsUInt32BE(AInput: PByte; AIndex: Int32): UInt32;
+      static; inline;
+
+    class function ReadBytesAsUInt64BE(AInput: PByte; AIndex: Int32): UInt64;
+      static; inline;
+
     class function ReadUInt32AsBytesLE(AInput: UInt32): THashLibByteArray;
       overload; static; inline;
 
@@ -308,6 +314,9 @@ begin
   System.Move(AInput[AIndex], result, System.SizeOf(UInt32));
 {$ENDIF FPC}
   result := le2me_32(result);
+  // while this below is slower, it's cleaner
+  // result := (UInt32(AInput[AIndex])) or (UInt32(AInput[AIndex + 1]) shl 8) or
+  // (UInt32(AInput[AIndex + 2]) shl 16) or (UInt32(AInput[AIndex + 3]) shl 24);
 end;
 
 class function TConverters.ReadBytesAsUInt64LE(AInput: PByte;
@@ -324,21 +333,44 @@ begin
   System.Move(AInput[AIndex], result, System.SizeOf(UInt64));
 {$ENDIF FPC}
   result := le2me_64(result);
+  // while this below is slower, it's cleaner
+  // result := (UInt64(AInput[AIndex])) or (UInt64(AInput[AIndex + 1]) shl 8) or
+  // (UInt64(AInput[AIndex + 2]) shl 16) or (UInt64(AInput[AIndex + 3]) shl 24)
+  // or (UInt64(AInput[AIndex + 4]) shl 32) or
+  // (UInt64(AInput[AIndex + 5]) shl 40) or (UInt64(AInput[AIndex + 6]) shl 48)
+  // or (UInt64(AInput[AIndex + 7]) shl 56);
+end;
+
+class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;
+  AIndex: Int32): UInt32;
+begin
+  result := (UInt32(AInput[AIndex]) shl 24) or
+    (UInt32(AInput[AIndex + 1]) shl 16) or (UInt32(AInput[AIndex + 2]) shl 8) or
+    (UInt32(AInput[AIndex + 3]));
+end;
+
+class function TConverters.ReadBytesAsUInt64BE(AInput: PByte;
+  AIndex: Int32): UInt64;
+begin
+  result := (UInt64(AInput[AIndex]) shl 56) or
+    (UInt64(AInput[AIndex + 1]) shl 48) or (UInt64(AInput[AIndex + 2]) shl 40)
+    or (UInt64(AInput[AIndex + 3]) shl 32) or
+    (UInt64(AInput[AIndex + 4]) shl 24) or (UInt64(AInput[AIndex + 5]) shl 16)
+    or (UInt64(AInput[AIndex + 6]) shl 8) or (UInt64(AInput[AIndex + 7]));
 end;
 
 class function TConverters.ReadUInt32AsBytesLE(AInput: UInt32)
   : THashLibByteArray;
 begin
-  result := THashLibByteArray.Create(Byte(AInput), Byte(AInput shr 8),
-    Byte(AInput shr 16), Byte(AInput shr 24));
+  System.SetLength(result, System.SizeOf(UInt32));
+  TConverters.ReadUInt32AsBytesLE(AInput, result, 0);
 end;
 
 class function TConverters.ReadUInt64AsBytesLE(AInput: UInt64)
   : THashLibByteArray;
 begin
-  result := THashLibByteArray.Create(Byte(AInput), Byte(AInput shr 8),
-    Byte(AInput shr 16), Byte(AInput shr 24), Byte(AInput shr 32),
-    Byte(AInput shr 40), Byte(AInput shr 48), Byte(AInput shr 56));
+  System.SetLength(result, System.SizeOf(UInt64));
+  TConverters.ReadUInt64AsBytesLE(AInput, result, 0);
 end;
 
 class procedure TConverters.ReadUInt32AsBytesLE(AInput: UInt32;
