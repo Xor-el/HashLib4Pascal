@@ -366,9 +366,16 @@ begin
 end;
 
 function TSipHash.TransformFinal: IHashResult;
+var
+  LBufferByte: THashLibByteArray;
 begin
   Finish();
-  result := THashResult.Create(FV0 xor FV1 xor FV2 xor FV3);
+
+  System.SetLength(LBufferByte, HashSize);
+  TConverters.ReadUInt64AsBytesLE(UInt64(FV0 xor FV1 xor FV2 xor FV3),
+    LBufferByte, 0);
+
+  result := THashResult.Create(LBufferByte);
   Initialize();
 end;
 

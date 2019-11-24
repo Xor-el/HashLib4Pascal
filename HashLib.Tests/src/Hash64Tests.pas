@@ -127,11 +127,11 @@ procedure TTestSipHash2_4.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.THash64.CreateSipHash2_4();
-  HashOfEmptyData := '726FDB47DD0E0E31';
-  HashOfDefaultData := 'AA43C4288619D24E';
-  HashOfOnetoNine := 'CA60FC96020EFEFD';
-  HashOfABCDE := 'A74563E1EA79B873';
-  HashOfDefaultDataWithExternalKey := 'AA43C4288619D24E';
+  HashOfEmptyData := '310E0EDD47DB6F72';
+  HashOfDefaultData := '4ED2198628C443AA';
+  HashOfOnetoNine := 'FDFE0E0296FC60CA';
+  HashOfABCDE := '73B879EAE16345A7';
+  HashOfDefaultDataWithExternalKey := '4ED2198628C443AA';
 end;
 
 procedure TTestSipHash2_4.TearDown;
