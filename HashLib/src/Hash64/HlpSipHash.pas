@@ -111,21 +111,33 @@ end;
 { TSipHash }
 
 procedure TSipHash.Compress;
+var
+  LV0, LV1, LV2, LV3: UInt64;
 begin
-  FV0 := FV0 + FV1;
-  FV2 := FV2 + FV3;
-  FV1 := TBits.RotateLeft64(FV1, 13);
-  FV3 := TBits.RotateLeft64(FV3, 16);
-  FV1 := FV1 xor FV0;
-  FV3 := FV3 xor FV2;
-  FV0 := TBits.RotateLeft64(FV0, 32);
-  FV2 := FV2 + FV1;
-  FV0 := FV0 + FV3;
-  FV1 := TBits.RotateLeft64(FV1, 17);
-  FV3 := TBits.RotateLeft64(FV3, 21);
-  FV1 := FV1 xor FV2;
-  FV3 := FV3 xor FV0;
-  FV2 := TBits.RotateLeft64(FV2, 32);
+  LV0 := FV0;
+  LV1 := FV1;
+  LV2 := FV2;
+  LV3 := FV3;
+
+  LV0 := LV0 + LV1;
+  LV2 := LV2 + LV3;
+  LV1 := TBits.RotateLeft64(LV1, 13);
+  LV3 := TBits.RotateLeft64(LV3, 16);
+  LV1 := LV1 xor LV0;
+  LV3 := LV3 xor LV2;
+  LV0 := TBits.RotateLeft64(LV0, 32);
+  LV2 := LV2 + LV1;
+  LV0 := LV0 + LV3;
+  LV1 := TBits.RotateLeft64(LV1, 17);
+  LV3 := TBits.RotateLeft64(LV3, 21);
+  LV1 := LV1 xor LV2;
+  LV3 := LV3 xor LV0;
+  LV2 := TBits.RotateLeft64(LV2, 32);
+
+  FV0 := LV0;
+  FV1 := LV1;
+  FV2 := LV2;
+  FV3 := LV3;
 end;
 
 procedure TSipHash.CompressTimes(ATimes: Int32);
@@ -276,7 +288,6 @@ begin
   FV2 := FV2 xor FKey0;
   FV1 := FV1 xor FKey1;
   FV0 := FV0 xor FKey0;
-
 end;
 
 procedure TSipHash.SetKey(const AValue: THashLibByteArray);
