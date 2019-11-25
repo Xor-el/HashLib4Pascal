@@ -35,7 +35,6 @@ type
     FIdx: Int32;
     FBuffer: THashLibByteArray;
 
-    procedure TransformUInt32Fast(ABlock: UInt32); inline;
     procedure ByteUpdate(AByte: Byte); inline;
     procedure Finish();
 
@@ -148,21 +147,6 @@ begin
   FH := FH xor (FH shr 16);
 end;
 
-procedure TMurmurHash3_x86_32.TransformUInt32Fast(ABlock: UInt32);
-var
-  LBlock: UInt32;
-begin
-  LBlock := ABlock;
-
-  LBlock := LBlock * C1;
-  LBlock := TBits.RotateLeft32(LBlock, 15);
-  LBlock := LBlock * C2;
-
-  FH := FH xor LBlock;
-  FH := TBits.RotateLeft32(FH, 13);
-  FH := (FH * 5) + C3;
-end;
-
 procedure TMurmurHash3_x86_32.ByteUpdate(AByte: Byte);
 var
   LBlock: UInt32;
@@ -174,7 +158,15 @@ begin
   begin
     LPtrBuffer := PByte(FBuffer);
     LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
-    TransformUInt32Fast(LBlock);
+
+    LBlock := LBlock * C1;
+    LBlock := TBits.RotateLeft32(LBlock, 15);
+    LBlock := LBlock * C2;
+
+    FH := FH xor LBlock;
+    FH := TBits.RotateLeft32(FH, 13);
+    FH := (FH * 5) + C3;
+
     FIdx := 0;
   end;
 end;
@@ -217,7 +209,7 @@ procedure TMurmurHash3_x86_32.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LLength, LNBlocks, LIdx, LOffset: Int32;
-  LBlock: UInt32;
+  LBlock, LH: UInt32;
   LPtrData, LPtrBuffer: PByte;
 begin
 {$IFDEF DEBUG}
@@ -259,7 +251,15 @@ begin
     begin
       LPtrBuffer := PByte(FBuffer);
       LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
-      TransformUInt32Fast(LBlock);
+
+      LBlock := LBlock * C1;
+      LBlock := TBits.RotateLeft32(LBlock, 15);
+      LBlock := LBlock * C2;
+
+      FH := FH xor LBlock;
+      FH := TBits.RotateLeft32(FH, 13);
+      FH := (FH * 5) + C3;
+
       FIdx := 0;
     end;
   end
@@ -272,13 +272,24 @@ begin
 
   // body
 
+  LH := FH;
+
   while LIdx < LNBlocks do
   begin
     LBlock := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + (LIdx * 4));
-    TransformUInt32Fast(LBlock);
+
+    LBlock := LBlock * C1;
+    LBlock := TBits.RotateLeft32(LBlock, 15);
+    LBlock := LBlock * C2;
+
+    LH := LH xor LBlock;
+    LH := TBits.RotateLeft32(LH, 13);
+    LH := (LH * 5) + C3;
 
     System.Inc(LIdx);
   end;
+
+  FH := LH;
 
   // save pending end bytes
   LOffset := AIndex + (LIdx * 4);
@@ -286,7 +297,6 @@ begin
   begin
     ByteUpdate(AData[LOffset]);
     System.Inc(LOffset);
-
   end;
 end;
 

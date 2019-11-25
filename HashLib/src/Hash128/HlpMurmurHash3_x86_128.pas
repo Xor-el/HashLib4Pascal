@@ -510,6 +510,11 @@ begin
 
   // body
 
+  LH1 := FH1;
+  LH2 := FH2;
+  LH3 := FH3;
+  LH4 := FH4;
+
   while LIndex < LNBlocks do
   begin
 
@@ -521,11 +526,6 @@ begin
     System.Inc(LIdx, 4);
     LK4 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
     System.Inc(LIdx, 4);
-
-    LH1 := FH1;
-    LH2 := FH2;
-    LH3 := FH3;
-    LH4 := FH4;
 
     LK1 := LK1 * C1;
     LK1 := TBits.RotateLeft32(LK1, 15);
@@ -567,13 +567,13 @@ begin
     LH4 := LH4 + LH1;
     LH4 := LH4 * 5 + C10;
 
-    FH1 := LH1;
-    FH2 := LH2;
-    FH3 := LH3;
-    FH4 := LH4;
-
     System.Inc(LIndex);
   end;
+
+  FH1 := LH1;
+  FH2 := LH2;
+  FH3 := LH3;
+  FH4 := LH4;
 
   LOffset := AIndex + (LIndex * 16);
 
