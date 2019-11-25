@@ -468,7 +468,7 @@ procedure TMurmurHash3_x86_128.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LLength, LNBlocks, LIndex, LOffset, LIdx: Int32;
-  LK1, LK2, LK3, LK4: UInt32;
+  LK1, LK2, LK3, LK4, LH1, LH2, LH3, LH4: UInt32;
   LPtrData: PByte;
 begin
 {$IFDEF DEBUG}
@@ -522,45 +522,55 @@ begin
     LK4 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
     System.Inc(LIdx, 4);
 
+    LH1 := FH1;
+    LH2 := FH2;
+    LH3 := FH3;
+    LH4 := FH4;
+
     LK1 := LK1 * C1;
     LK1 := TBits.RotateLeft32(LK1, 15);
     LK1 := LK1 * C2;
-    FH1 := FH1 xor LK1;
+    LH1 := LH1 xor LK1;
 
-    FH1 := TBits.RotateLeft32(FH1, 19);
+    LH1 := TBits.RotateLeft32(LH1, 19);
 
-    FH1 := FH1 + FH2;
-    FH1 := FH1 * 5 + C7;
+    LH1 := LH1 + LH2;
+    LH1 := LH1 * 5 + C7;
 
     LK2 := LK2 * C2;
     LK2 := TBits.RotateLeft32(LK2, 16);
     LK2 := LK2 * C3;
-    FH2 := FH2 xor LK2;
+    LH2 := LH2 xor LK2;
 
-    FH2 := TBits.RotateLeft32(FH2, 17);
+    LH2 := TBits.RotateLeft32(LH2, 17);
 
-    FH2 := FH2 + FH3;
-    FH2 := FH2 * 5 + C8;
+    LH2 := LH2 + LH3;
+    LH2 := LH2 * 5 + C8;
 
     LK3 := LK3 * C3;
     LK3 := TBits.RotateLeft32(LK3, 17);
     LK3 := LK3 * C4;
-    FH3 := FH3 xor LK3;
+    LH3 := LH3 xor LK3;
 
-    FH3 := TBits.RotateLeft32(FH3, 15);
+    LH3 := TBits.RotateLeft32(LH3, 15);
 
-    FH3 := FH3 + FH4;
-    FH3 := FH3 * 5 + C9;
+    LH3 := LH3 + LH4;
+    LH3 := LH3 * 5 + C9;
 
     LK4 := LK4 * C4;
     LK4 := TBits.RotateLeft32(LK4, 18);
     LK4 := LK4 * C1;
-    FH4 := FH4 xor LK4;
+    LH4 := LH4 xor LK4;
 
-    FH4 := TBits.RotateLeft32(FH4, 13);
+    LH4 := TBits.RotateLeft32(LH4, 13);
 
-    FH4 := FH4 + FH1;
-    FH4 := FH4 * 5 + C10;
+    LH4 := LH4 + LH1;
+    LH4 := LH4 * 5 + C10;
+
+    FH1 := LH1;
+    FH2 := LH2;
+    FH3 := LH3;
+    FH4 := LH4;
 
     System.Inc(LIndex);
   end;
