@@ -470,6 +470,7 @@ var
   LLength, LNBlocks, LIndex, LOffset, LIdx: Int32;
   LK1, LK2, LK3, LK4, LH1, LH2, LH3, LH4: UInt32;
   LPtrData: PByte;
+  LPtrDataCardinal: PCardinal;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -514,18 +515,18 @@ begin
   LH2 := FH2;
   LH3 := FH3;
   LH4 := FH4;
-
+  LPtrDataCardinal := PCardinal(LPtrData + AIndex);
   while LIndex < LNBlocks do
   begin
 
-    LK1 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 4);
-    LK2 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 4);
-    LK3 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 4);
-    LK4 := TConverters.ReadBytesAsUInt32LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 4);
+    LK1 := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    System.Inc(LIdx);
+    LK2 := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    System.Inc(LIdx);
+    LK3 := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    System.Inc(LIdx);
+    LK4 := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    System.Inc(LIdx);
 
     LK1 := LK1 * C1;
     LK1 := TBits.RotateLeft32(LK1, 15);

@@ -316,6 +316,7 @@ var
   LIdx, LLength, LBlockCount, LOffset: Int32;
   LPtrData, LPtrBuffer: PByte;
   LBlock: UInt64;
+  LPtrDataUInt64: PUInt64;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -358,10 +359,10 @@ begin
   LBlockCount := LLength shr 3;
 
   // body
-
+  LPtrDataUInt64 := PUInt64(LPtrData + AIndex);
   while LIdx < LBlockCount do
   begin
-    LBlock := TConverters.ReadBytesAsUInt64LE(LPtrData, AIndex + (LIdx * 8));
+    LBlock := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
     ProcessBlock(LBlock);
     System.Inc(LIdx);
   end;

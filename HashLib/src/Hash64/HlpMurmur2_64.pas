@@ -78,9 +78,10 @@ end;
 function TMurmur2_64.ComputeAggregatedBytes(const AData: THashLibByteArray)
   : IHashResult;
 var
-  LLength, LCurrentIndex: Int32;
+  LLength, LCurrentIndex, LNBlocks, LIdx: Int32;
   LH, LK: UInt64;
   LPtrData: PByte;
+  LPtrDataUInt64: PUInt64;
 begin
   LLength := System.length(AData);
   LPtrData := PByte(AData);
@@ -93,11 +94,13 @@ begin
 
   LH := FWorkingKey xor (UInt64(LLength) * M);
   LCurrentIndex := 0;
+  LIdx := 0;
+  LPtrDataUInt64 := PUInt64(LPtrData);
+  LNBlocks := LLength shr 3;
 
-  while (LLength >= 8) do
+  while LIdx < LNBlocks do
   begin
-
-    LK := TConverters.ReadBytesAsUInt64LE(LPtrData, LCurrentIndex);
+    LK := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
 
     LK := LK * M;
     LK := LK xor (LK shr R);
@@ -106,9 +109,9 @@ begin
     LH := LH xor LK;
     LH := LH * M;
 
+    System.Inc(LIdx);
     System.Inc(LCurrentIndex, 8);
     System.Dec(LLength, 8);
-
   end;
 
   case LLength of

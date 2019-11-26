@@ -64,6 +64,12 @@ type
     class function ReadBytesAsUInt64LE(AInput: PByte; AIndex: Int32): UInt64;
       static; inline;
 
+    class function ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
+      static; inline;
+
+    class function ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
+      static; inline;
+
     class function ReadBytesAsUInt32BE(AInput: PByte; AIndex: Int32): UInt32;
       static; inline;
 
@@ -194,110 +200,86 @@ end;
 
 class function TConverters.be2me_32(AInput: UInt32): UInt32;
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    result := TBits.ReverseBytesUInt32(AInput)
-  end
-  else
-  begin
-    result := AInput;
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  result := TBits.ReverseBytesUInt32(AInput);
+{$ELSE}
+  result := AInput;
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.be2me_64(AInput: UInt64): UInt64;
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    result := TBits.ReverseBytesUInt64(AInput)
-  end
-  else
-  begin
-    result := AInput;
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  result := TBits.ReverseBytesUInt64(AInput);
+{$ELSE}
+  result := AInput;
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.be32_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    swap_copy_str_to_u32(ASource, ASourceIndex, ADestination,
-      ADestinationIndex, ASize)
-  end
-  else
-  begin
-    System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-      Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  swap_copy_str_to_u32(ASource, ASourceIndex, ADestination,
+    ADestinationIndex, ASize)
+{$ELSE}
+  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
+    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.be64_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
-      ADestinationIndex, ASize)
-  end
-  else
-  begin
-    System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-      Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
+    ADestinationIndex, ASize)
+{$ELSE}
+  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
+    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.le2me_32(AInput: UInt32): UInt32;
 begin
-  if not TBitConverter.IsLittleEndian then
-  begin
-    result := TBits.ReverseBytesUInt32(AInput)
-  end
-  else
-  begin
-    result := AInput;
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  result := AInput;
+{$ELSE}
+  result := TBits.ReverseBytesUInt32(AInput);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.le2me_64(AInput: UInt64): UInt64;
 begin
-  if not TBitConverter.IsLittleEndian then
-  begin
-    result := TBits.ReverseBytesUInt64(AInput)
-  end
-  else
-  begin
-    result := AInput;
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  result := AInput;
+{$ELSE}
+  result := TBits.ReverseBytesUInt64(AInput);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.le32_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-      Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
-  end
-  else
-  begin
-    swap_copy_str_to_u32(ASource, ASourceIndex, ADestination,
-      ADestinationIndex, ASize);
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
+    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
+{$ELSE}
+  swap_copy_str_to_u32(ASource, ASourceIndex, ADestination,
+    ADestinationIndex, ASize);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.le64_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
-  if TBitConverter.IsLittleEndian then
-  begin
-    System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-      Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
-  end
-  else
-  begin
-    swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
-      ADestinationIndex, ASize);
-  end;
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
+    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
+{$ELSE}
+  swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
+    ADestinationIndex, ASize);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.ReadBytesAsUInt32LE(AInput: PByte;
@@ -339,6 +321,36 @@ begin
   // or (UInt64(AInput[AIndex + 4]) shl 32) or
   // (UInt64(AInput[AIndex + 5]) shl 40) or (UInt64(AInput[AIndex + 6]) shl 48)
   // or (UInt64(AInput[AIndex + 7]) shl 56);
+end;
+
+class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
+begin
+{$IFDEF FPC}
+{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput^, result, System.SizeOf(UInt32));
+{$ELSE}
+  result := AInput^;
+{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
+{$ELSE}
+  // Delphi does not handle unaligned memory access on ARM Devices properly.
+  System.Move(AInput^, result, System.SizeOf(UInt32));
+{$ENDIF FPC}
+  result := le2me_32(result);
+end;
+
+class function TConverters.ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
+begin
+{$IFDEF FPC}
+{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput^, result, System.SizeOf(UInt64));
+{$ELSE}
+  result := AInput^;
+{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
+{$ELSE}
+  // Delphi does not handle unaligned memory access on ARM Devices properly.
+  System.Move(AInput^, result, System.SizeOf(UInt64));
+{$ENDIF FPC}
+  result := le2me_64(result);
 end;
 
 class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;

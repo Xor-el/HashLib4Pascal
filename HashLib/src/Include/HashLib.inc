@@ -19,6 +19,10 @@
 {$UNDEF DELPHI}
 {$MODE delphi}
 
+{$IFDEF FPC_LITTLE_ENDIAN}
+   {$DEFINE HASHLIB_LITTLE_ENDIAN}
+{$IFEND}
+
 {$DEFINE USE_UNROLLED_VARIANT}
 
 // Disable Overflow and RangeChecks.
@@ -64,6 +68,8 @@
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
 {$IFDEF DELPHI}
+
+{$DEFINE HASHLIB_LITTLE_ENDIAN}
 
   // XE3 and Above
 {$IF CompilerVersion >= 24.0}

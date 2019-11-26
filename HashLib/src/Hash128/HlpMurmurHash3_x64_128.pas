@@ -418,6 +418,7 @@ var
   LLength, LNBlocks, LIndex, LOffset, LIdx: Int32;
   LK1, LK2, LH1, LH2: UInt64;
   LPtrData: PByte;
+  LPtrDataUInt64: PUInt64;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -460,14 +461,14 @@ begin
 
   LH1 := FH1;
   LH2 := FH2;
-
+  LPtrDataUInt64 := PUInt64(LPtrData + AIndex);
   while LIndex < LNBlocks do
   begin
 
-    LK1 := TConverters.ReadBytesAsUInt64LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 8);
-    LK2 := TConverters.ReadBytesAsUInt64LE(LPtrData, AIndex + LIdx);
-    System.Inc(LIdx, 8);
+    LK1 := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    System.Inc(LIdx);
+    LK2 := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    System.Inc(LIdx);
 
     LK1 := LK1 * C1;
     LK1 := TBits.RotateLeft64(LK1, 31);
