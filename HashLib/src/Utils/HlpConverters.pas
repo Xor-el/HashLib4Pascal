@@ -58,16 +58,16 @@ type
       ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
       static; inline;
 
-    class function ReadBytesAsUInt32LE(AInput: PByte; AIndex: Int32): UInt32;
-      static; inline;
-
-    class function ReadBytesAsUInt64LE(AInput: PByte; AIndex: Int32): UInt64;
-      static; inline;
-
     class function ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
       static; inline;
 
     class function ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
+      static; inline;
+
+    class function ReadBytesAsUInt32LE(AInput: PByte; AIndex: Int32): UInt32;
+      static; inline;
+
+    class function ReadBytesAsUInt64LE(AInput: PByte; AIndex: Int32): UInt64;
       static; inline;
 
     class function ReadBytesAsUInt32BE(AInput: PByte; AIndex: Int32): UInt32;
@@ -282,40 +282,28 @@ begin
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
-class function TConverters.ReadBytesAsUInt32LE(AInput: PByte;
-  AIndex: Int32): UInt32;
+class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
 begin
-{$IFDEF FPC}
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput[AIndex], result, System.SizeOf(UInt32));
+{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput^, result, System.SizeOf(UInt32));
 {$ELSE}
-  result := PCardinal(AInput + AIndex)^;
-{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
-{$ELSE}
-  // Delphi does not handle unaligned memory access on ARM Devices properly.
-  System.Move(AInput[AIndex], result, System.SizeOf(UInt32));
-{$ENDIF FPC}
+  result := AInput^;
+{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
   result := le2me_32(result);
-  // while this below is slower, it's cleaner
+  // while this below is slower, it's portable
   // result := (UInt32(AInput[AIndex])) or (UInt32(AInput[AIndex + 1]) shl 8) or
   // (UInt32(AInput[AIndex + 2]) shl 16) or (UInt32(AInput[AIndex + 3]) shl 24);
 end;
 
-class function TConverters.ReadBytesAsUInt64LE(AInput: PByte;
-  AIndex: Int32): UInt64;
+class function TConverters.ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
 begin
-{$IFDEF FPC}
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput[AIndex], result, System.SizeOf(UInt64));
+{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput^, result, System.SizeOf(UInt64));
 {$ELSE}
-  result := PUInt64(AInput + AIndex)^;
-{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
-{$ELSE}
-  // Delphi does not handle unaligned memory access on ARM Devices properly.
-  System.Move(AInput[AIndex], result, System.SizeOf(UInt64));
-{$ENDIF FPC}
+  result := AInput^;
+{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
   result := le2me_64(result);
-  // while this below is slower, it's cleaner
+  // while this below is slower, it's portable
   // result := (UInt64(AInput[AIndex])) or (UInt64(AInput[AIndex + 1]) shl 8) or
   // (UInt64(AInput[AIndex + 2]) shl 16) or (UInt64(AInput[AIndex + 3]) shl 24)
   // or (UInt64(AInput[AIndex + 4]) shl 32) or
@@ -323,34 +311,16 @@ begin
   // or (UInt64(AInput[AIndex + 7]) shl 56);
 end;
 
-class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
+class function TConverters.ReadBytesAsUInt32LE(AInput: PByte;
+  AIndex: Int32): UInt32;
 begin
-{$IFDEF FPC}
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput^, result, System.SizeOf(UInt32));
-{$ELSE}
-  result := AInput^;
-{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
-{$ELSE}
-  // Delphi does not handle unaligned memory access on ARM Devices properly.
-  System.Move(AInput^, result, System.SizeOf(UInt32));
-{$ENDIF FPC}
-  result := le2me_32(result);
+  result := ReadPCardinalAsUInt32LE(PCardinal(AInput + AIndex));
 end;
 
-class function TConverters.ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
+class function TConverters.ReadBytesAsUInt64LE(AInput: PByte;
+  AIndex: Int32): UInt64;
 begin
-{$IFDEF FPC}
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput^, result, System.SizeOf(UInt64));
-{$ELSE}
-  result := AInput^;
-{$ENDIF FPC_REQUIRES_PROPER_ALIGNMENT}
-{$ELSE}
-  // Delphi does not handle unaligned memory access on ARM Devices properly.
-  System.Move(AInput^, result, System.SizeOf(UInt64));
-{$ENDIF FPC}
-  result := le2me_64(result);
+  result := ReadPUInt64AsUInt64LE(PUInt64(AInput + AIndex));
 end;
 
 class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;
