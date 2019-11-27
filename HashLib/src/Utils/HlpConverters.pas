@@ -58,6 +58,11 @@ type
       ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
       static; inline;
 
+    class function ReadPCardinalAsUInt32(AInput: PCardinal): UInt32;
+      static; inline;
+
+    class function ReadPUInt64AsUInt64(AInput: PUInt64): UInt64; static; inline;
+
     class function ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
       static; inline;
 
@@ -282,14 +287,27 @@ begin
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
-class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
+class function TConverters.ReadPCardinalAsUInt32(AInput: PCardinal): UInt32;
 begin
 {$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
   System.Move(AInput^, result, System.SizeOf(UInt32));
 {$ELSE}
   result := AInput^;
 {$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  result := le2me_32(result);
+end;
+
+class function TConverters.ReadPUInt64AsUInt64(AInput: PUInt64): UInt64;
+begin
+{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput^, result, System.SizeOf(UInt64));
+{$ELSE}
+  result := AInput^;
+{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+end;
+
+class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
+begin
+  result := le2me_32(ReadPCardinalAsUInt32(AInput));
   // while this below is slower, it's portable
   // result := (UInt32(AInput[AIndex])) or (UInt32(AInput[AIndex + 1]) shl 8) or
   // (UInt32(AInput[AIndex + 2]) shl 16) or (UInt32(AInput[AIndex + 3]) shl 24);
@@ -297,12 +315,7 @@ end;
 
 class function TConverters.ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
 begin
-{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput^, result, System.SizeOf(UInt64));
-{$ELSE}
-  result := AInput^;
-{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  result := le2me_64(result);
+  result := le2me_64(ReadPUInt64AsUInt64(AInput));
   // while this below is slower, it's portable
   // result := (UInt64(AInput[AIndex])) or (UInt64(AInput[AIndex + 1]) shl 8) or
   // (UInt64(AInput[AIndex + 2]) shl 16) or (UInt64(AInput[AIndex + 3]) shl 24)
