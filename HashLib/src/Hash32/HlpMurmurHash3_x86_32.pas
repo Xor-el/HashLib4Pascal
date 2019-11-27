@@ -300,14 +300,14 @@ end;
 
 function TMurmurHash3_x86_32.TransformFinal: IHashResult;
 var
-  LBufferByte: THashLibByteArray;
+  LBufferBytes: THashLibByteArray;
 begin
   Finish();
 
-  System.SetLength(LBufferByte, HashSize);
-  TConverters.ReadUInt32AsBytesBE(FH, LBufferByte, 0);
+  System.SetLength(LBufferBytes, HashSize);
+  TConverters.ReadUInt32AsBytesBE(FH, LBufferBytes, 0);
 
-  result := THashResult.Create(LBufferByte);
+  result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 
