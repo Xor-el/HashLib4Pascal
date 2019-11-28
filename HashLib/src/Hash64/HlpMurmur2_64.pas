@@ -82,6 +82,7 @@ var
   LH, LK: UInt64;
   LPtrData: PByte;
   LPtrDataUInt64: PUInt64;
+  LBufferBytes: THashLibByteArray;
 begin
   LLength := System.length(AData);
   LPtrData := PByte(AData);
@@ -209,7 +210,10 @@ begin
   LH := LH * M;
   LH := LH xor (LH shr R);
 
-  result := THashResult.Create(LH);
+  System.SetLength(LBufferBytes, HashSize);
+  TConverters.ReadUInt64AsBytesBE(LH, LBufferBytes, 0);
+
+  result := THashResult.Create(LBufferBytes);
 end;
 
 constructor TMurmur2_64.Create;

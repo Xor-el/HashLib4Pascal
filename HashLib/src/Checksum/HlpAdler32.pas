@@ -10,7 +10,8 @@ uses
   HlpHash,
   HlpIHash,
   HlpHashResult,
-  HlpIHashResult;
+  HlpIHashResult,
+  HlpConverters;
 
 type
   TAdler32 = class sealed(THash, IChecksum, IHash32, ITransformBlock)
@@ -105,8 +106,13 @@ begin
 end;
 
 function TAdler32.TransformFinal: IHashResult;
+var
+  LBufferBytes: THashLibByteArray;
 begin
-  result := THashResult.Create(UInt32((FB shl 16) or FA));
+  System.SetLength(LBufferBytes, HashSize);
+  TConverters.ReadUInt32AsBytesBE(UInt32((FB shl 16) or FA), LBufferBytes, 0);
+
+  result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 

@@ -207,8 +207,13 @@ begin
 end;
 
 function TCRC32Fast.TransformFinal: IHashResult;
+var
+  LBufferBytes: THashLibByteArray;
 begin
-  Result := THashResult.Create(FCurrentCRC);
+  System.SetLength(LBufferBytes, HashSize);
+  TConverters.ReadUInt32AsBytesBE(FCurrentCRC, LBufferBytes, 0);
+
+  Result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 
