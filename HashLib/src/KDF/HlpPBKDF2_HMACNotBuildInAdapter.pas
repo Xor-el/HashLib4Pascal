@@ -9,7 +9,7 @@ uses
   HlpKDF,
   HlpIHashInfo,
   HlpHMACNotBuildInAdapter,
-  HlpBitConverter,
+  HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -109,16 +109,9 @@ end;
 
 class function TPBKDF2_HMACNotBuildInAdapter.GetBigEndianBytes(AInput: UInt32)
   : THashLibByteArray;
-var
-  LBytes: THashLibByteArray;
 begin
-  LBytes := TBitConverter.GetBytes(AInput);
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := THashLibByteArray.Create(LBytes[3], LBytes[2], LBytes[1],
-    LBytes[0]);
-{$ELSE}
-  Result := LBytes;
-{$ENDIF HASHLIB_LITTLE_ENDIAN}
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TConverters.ReadUInt32AsBytesBE(AInput, Result, 0);
 end;
 
 function TPBKDF2_HMACNotBuildInAdapter.Func: THashLibByteArray;
