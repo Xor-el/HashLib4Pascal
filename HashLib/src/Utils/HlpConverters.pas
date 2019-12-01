@@ -19,13 +19,7 @@ type
   TConverters = class sealed(TObject)
 
   strict private
-    class function SplitString(const AInput: String; ADelimiter: Char)
-      : THashLibStringArray; static;
 
-{$IFDEF DEBUG}
-    class procedure Check(const AInput: THashLibByteArray;
-      AInputSize, AOutputSize: Int32); overload; static;
-{$ENDIF DEBUG}
     class procedure swap_copy_str_to_u32(ASource: Pointer; ASourceIndex: Int32;
       ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32); static;
 
@@ -120,16 +114,6 @@ type
 implementation
 
 { TConverters }
-
-{$IFDEF DEBUG}
-
-class procedure TConverters.Check(const AInput: THashLibByteArray;
-  AInputSize, AOutputSize: Int32);
-begin
-  System.Assert(((System.length(AInput) * AInputSize) mod AOutputSize) = 0);
-end;
-
-{$ENDIF DEBUG}
 
 class procedure TConverters.swap_copy_str_to_u32(ASource: Pointer;
   ASourceIndex: Int32; ADestination: Pointer; ADestinationIndex: Int32;
@@ -414,53 +398,20 @@ end;
 
 class function TConverters.ConvertBytesToHexString(const AInput
   : THashLibByteArray; AGroup: Boolean): String;
-var
-  LIdx: Int32;
-  LHexString, LWorkString: String;
-  LTempArray: THashLibStringArray;
 begin
-  LHexString := UpperCase(TBitConverter.ToString(AInput));
+  result := UpperCase(TBitConverter.ToString(AInput));
 
   if System.length(AInput) = 1 then
   begin
-    result := LHexString;
-    Exit;
-  end;
-
-  if System.length(AInput) = 2 then
-  begin
-    result := StringReplace(LHexString, '-', '', [rfIgnoreCase, rfReplaceAll]);
     Exit;
   end;
 
   if (AGroup) then
   begin
-{$IFDEF DEBUG}
-    Check(AInput, 1, 4);
-{$ENDIF DEBUG}
-    LWorkString := UpperCase(TBitConverter.ToString(AInput));
-
-    LTempArray := TConverters.SplitString(LWorkString, '-');
-    LHexString := '';
-    LIdx := 0;
-
-    while LIdx < (System.length(LTempArray) shr 2) do
-    begin
-      if (LIdx <> 0) then
-      begin
-        LHexString := LHexString + '-';
-      end;
-      LHexString := LHexString + LTempArray[LIdx * 4] + LTempArray[LIdx * 4 + 1]
-        + LTempArray[LIdx * 4 + 2] + LTempArray[LIdx * 4 + 3];
-      System.Inc(LIdx);
-    end;
-  end
-  else
-  begin
-    LHexString := StringReplace(LHexString, '-', '',
-      [rfIgnoreCase, rfReplaceAll]);
+    Exit;
   end;
-  result := LHexString;
+
+  result := StringReplace(result, '-', '', [rfIgnoreCase, rfReplaceAll]);
 end;
 
 class function TConverters.ConvertHexStringToBytes(const AInput: String)
@@ -511,57 +462,6 @@ begin
 {$ELSE}
   result := AEncoding.GetString(AInput);
 {$ENDIF FPC}
-end;
-
-class function TConverters.SplitString(const AInput: String; ADelimiter: Char)
-  : THashLibStringArray;
-var
-  LPosStart, LPosSkip, LSplitPoints, LIdx, LLowIndex, LHighIndex,
-    LLength: Int32;
-begin
-  result := Nil;
-  if AInput <> '' then
-  begin
-    { Determine the length of the resulting array }
-    LSplitPoints := 0;
-{$IFDEF DELPHIXE3_UP}
-    LLowIndex := System.Low(AInput);
-    LHighIndex := System.High(AInput);
-{$ELSE}
-    LLowIndex := 1;
-    LHighIndex := System.length(AInput);
-{$ENDIF DELPHIXE3_UP}
-    for LIdx := LLowIndex to LHighIndex do
-    begin
-      if (ADelimiter = AInput[LIdx]) then
-      begin
-        System.Inc(LSplitPoints);
-      end;
-    end;
-
-    System.SetLength(result, LSplitPoints + 1);
-
-    { Split the string and fill the resulting array }
-
-    LIdx := 0;
-    LLength := System.length(ADelimiter);
-{$IFDEF DELPHIXE3_UP}
-    LPosStart := System.Low(AInput);
-    LHighIndex := System.High(AInput);
-{$ELSE}
-    LPosStart := 1;
-    LHighIndex := System.length(AInput);
-{$ENDIF DELPHIXE3_UP}
-    LPosSkip := System.Pos(ADelimiter, AInput);
-    while LPosSkip > 0 do
-    begin
-      result[LIdx] := System.Copy(AInput, LPosStart, LPosSkip - LPosStart);
-      LPosStart := LPosSkip + LLength;
-      LPosSkip := PosEx(ADelimiter, AInput, LPosStart);
-      System.Inc(LIdx);
-    end;
-    result[LIdx] := System.Copy(AInput, LPosStart, LHighIndex);
-  end;
 end;
 
 end.
