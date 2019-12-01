@@ -20,8 +20,8 @@ type
   TPerformanceBenchmark = class sealed(TObject)
   strict private
 
-    class function Calculate(AHashInstance: IHash; ANamePrefix: String = '';
-      ASize: Int32 = 65536): String;
+    class function Calculate(const AHashInstance: IHash;
+      const ANamePrefix: String = ''; ASize: Int32 = 64 * 1024): String;
 
     class constructor PerformanceBenchmark();
 
@@ -34,8 +34,8 @@ implementation
 
 { TPerformanceBenchmark }
 
-class function TPerformanceBenchmark.Calculate(AHashInstance: IHash;
-  ANamePrefix: String = ''; ASize: Int32 = 65536): String;
+class function TPerformanceBenchmark.Calculate(const AHashInstance: IHash;
+  const ANamePrefix: String; ASize: Int32): String;
 const
   THREE_SECONDS_IN_MILLISECONDS = UInt32(3000);
 var
@@ -44,7 +44,7 @@ var
   Idx: Int32;
   Total: Int64;
   A, B, TotalMilliSeconds: UInt32;
-  NewName: String;
+  NewName, BlockSizeAndUnit: String;
 begin
 
   System.SetLength(Data, ASize);
@@ -56,7 +56,9 @@ begin
 
   MaxRate := 0.0;
   TotalMilliSeconds := 0;
-  for Idx := 0 to System.Pred(3) do
+
+  Idx := 3;
+  while Idx > 0 do
   begin
     Total := 0;
 
@@ -71,6 +73,8 @@ begin
 
     MaxRate := Math.Max(Total / (TotalMilliSeconds div 1000) / 1024 /
       1024, MaxRate);
+
+    System.Dec(Idx);
   end;
 
   if ANamePrefix <> '' then
@@ -82,8 +86,21 @@ begin
     NewName := AHashInstance.Name;
   end;
 
-  Result := Format('%s Throughput: %.2f MB/s with Blocks of %d KB',
-    [Copy(NewName, 2, System.Length(NewName) - 1), MaxRate, ASize div 1024]);
+  if ASize >= 1024 * 1024 * 1024 then
+  begin
+    BlockSizeAndUnit := Format('%d GB', [(ASize div (1024 * 1024 * 1024))]);
+  end
+  else if ASize >= 1024 * 1024 then
+  begin
+    BlockSizeAndUnit := Format('%d MB', [(ASize div (1024 * 1024))]);
+  end
+  else
+  begin
+    BlockSizeAndUnit := Format('%d KB', [(ASize div 1024)]);
+  end;
+
+  Result := Format('%s Throughput: %.2f MB/s with Blocks of %s',
+    [Copy(NewName, 2, System.Length(NewName) - 1), MaxRate, BlockSizeAndUnit]);
 end;
 
 class procedure TPerformanceBenchmark.DoBenchmark(var AStringList: TStringList);
@@ -136,6 +153,10 @@ begin
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2S_128));
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2S_256));
+
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2BP(64, Nil)));
+
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2SP(32, Nil)));
 
 end;
 
