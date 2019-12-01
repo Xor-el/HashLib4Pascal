@@ -10,7 +10,6 @@ uses
   HlpHash,
 {$IFDEF DELPHI}
   HlpHashBuffer,
-  HlpBitConverter,
 {$ENDIF DELPHI}
   HlpIHashInfo,
   HlpIHash,

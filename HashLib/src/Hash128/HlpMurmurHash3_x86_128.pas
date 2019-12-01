@@ -12,9 +12,6 @@ uses
   HlpConverters,
   HlpIHashInfo,
   HlpNullable,
-{$IFDEF DELPHI}
-  HlpBitConverter,
-{$ENDIF DELPHI}
   HlpHash,
   HlpIHash,
   HlpHashResult,

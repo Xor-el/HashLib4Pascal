@@ -6,9 +6,6 @@ interface
 
 uses
   SysUtils,
-{$IFDEF DELPHI}
-  HlpBitConverter,
-{$ENDIF DELPHI}
   HlpBits,
   HlpHash,
   HlpHashResult,

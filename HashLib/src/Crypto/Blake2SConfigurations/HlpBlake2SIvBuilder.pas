@@ -5,9 +5,6 @@ unit HlpBlake2SIvBuilder;
 interface
 
 uses
-{$IFDEF DELPHI}
-  HlpBitConverter,
-{$ENDIF DELPHI}
   HlpConverters,
   HlpBlake2STreeConfig,
   HlpIBlake2SConfig,

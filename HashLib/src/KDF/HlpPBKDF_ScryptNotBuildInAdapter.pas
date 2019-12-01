@@ -16,9 +16,6 @@ uses
 {$IFDEF USE_MTPROCS}
   MTProcs,
 {$ENDIF USE_MTPROCS}
-{$IFDEF DELPHI}
-  HlpBitConverter,
-{$ENDIF DELPHI}
   HlpIHash,
   HlpKDF,
   HlpBits,
