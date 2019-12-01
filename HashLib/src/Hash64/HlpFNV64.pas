@@ -10,8 +10,7 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
-  HlpIHashResult,
-  HlpConverters;
+  HlpIHashResult;
 
 type
   TFNV64 = class sealed(THash, IHash64, ITransformBlock)
@@ -73,13 +72,8 @@ begin
 end;
 
 function TFNV64.TransformFinal: IHashResult;
-var
-  LBufferBytes: THashLibByteArray;
 begin
-  System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt64AsBytesBE(FHash, LBufferBytes, 0);
-
-  result := THashResult.Create(LBufferBytes);
+  result := THashResult.Create(FHash);
   Initialize();
 end;
 

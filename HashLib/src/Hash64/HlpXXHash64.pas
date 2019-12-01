@@ -246,7 +246,6 @@ function TXXHash64.TransformFinal: IHashResult;
 var
   LV1, LV2, LV3, LV4: UInt64;
   LPtrEnd, LPtrBuffer: PByte;
-  LBufferBytes: THashLibByteArray;
 begin
 
   if FState.FTotalLength >= UInt64(32) then
@@ -310,10 +309,7 @@ begin
   FHash := FHash * PRIME64_3;
   FHash := FHash xor (FHash shr 32);
 
-  System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt64AsBytesBE(FHash, LBufferBytes, 0);
-
-  result := THashResult.Create(LBufferBytes);
+  result := THashResult.Create(FHash);
   Initialize();
 end;
 
