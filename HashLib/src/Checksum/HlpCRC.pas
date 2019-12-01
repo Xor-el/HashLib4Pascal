@@ -704,16 +704,18 @@ procedure TCRC.CalculateCRCbyTable(AData: PByte; ADataLength, AIndex: Int32);
 var
   LLength, LIndex: Int32;
   LTemp: UInt64;
+  LCRCTable: THashLibUInt64Array;
 begin
   LLength := ADataLength;
   LIndex := AIndex;
   LTemp := FHash;
+  LCRCTable := FCRCTable;
 
   if (IsInputReflected) then
   begin
     while LLength > 0 do
     begin
-      LTemp := (LTemp shr 8) xor FCRCTable[Byte(LTemp xor AData[LIndex])];
+      LTemp := (LTemp shr 8) xor LCRCTable[Byte(LTemp xor AData[LIndex])];
       System.Inc(LIndex);
       System.Dec(LLength);
     end;
@@ -722,7 +724,7 @@ begin
   begin
     while LLength > 0 do
     begin
-      LTemp := (LTemp shl 8) xor FCRCTable
+      LTemp := (LTemp shl 8) xor LCRCTable
         [Byte((LTemp shr (Width - 8)) xor AData[LIndex])];
       System.Inc(LIndex);
       System.Dec(LLength);
@@ -735,7 +737,7 @@ end;
 procedure TCRC.CalculateCRCdirect(AData: PByte; ADataLength, AIndex: Int32);
 var
   LLength, LIdx: Int32;
-  LTemp, LBit, LJdx: UInt64;
+  LTemp, LBit, LJdx, LHash: UInt64;
 begin
 
   LLength := ADataLength;
@@ -749,16 +751,18 @@ begin
     end;
 
     LJdx := $80;
+    LHash := FHash;
     while LJdx > 0 do
     begin
-      LBit := FHash and FCRCHighBitMask;
-      FHash := FHash shl 1;
+      LBit := LHash and FCRCHighBitMask;
+      LHash := LHash shl 1;
       if ((LTemp and LJdx) > 0) then
         LBit := LBit xor FCRCHighBitMask;
       if (LBit > 0) then
-        FHash := FHash xor Polynomial;
+        LHash := LHash xor Polynomial;
       LJdx := LJdx shr 1;
     end;
+    FHash := LHash;
     System.Inc(LIdx);
     System.Dec(LLength);
   end;

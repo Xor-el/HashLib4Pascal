@@ -27,7 +27,7 @@ type
   TCRC16 = class(THash, IChecksum, IHash16, ITransformBlock)
 
   strict private
-
+  var
     FCRCAlgorithm: ICRC;
 
   public

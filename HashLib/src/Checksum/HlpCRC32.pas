@@ -30,7 +30,7 @@ type
   TCRC32 = class(THash, IChecksum, IHash32, ITransformBlock)
 
   strict private
-
+  var
     FCRCAlgorithm: ICRC;
 
   public
