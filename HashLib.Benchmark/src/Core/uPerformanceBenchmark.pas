@@ -62,12 +62,12 @@ begin
   begin
     Total := 0;
 
-    while (TotalMilliSeconds < THREE_SECONDS_IN_MILLISECONDS) do
+    while (TotalMilliSeconds <= THREE_SECONDS_IN_MILLISECONDS) do
     begin
       A := TThread.GetTickCount;
       AHashInstance.ComputeBytes(Data);
-      Total := Total + System.Length(Data);
       B := TThread.GetTickCount;
+      Total := Total + System.Length(Data);
       TotalMilliSeconds := TotalMilliSeconds + (B - A);
     end;
 
