@@ -52,6 +52,22 @@ type
       ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
       static; inline;
 
+    class procedure ReadUInt32AsBytesLE(AInput: UInt32;
+      const AOutput: THashLibByteArray; AIndex: Int32); overload;
+      static; inline;
+
+    class procedure ReadUInt32AsBytesBE(AInput: UInt32;
+      const AOutput: THashLibByteArray; AIndex: Int32); overload;
+      static; inline;
+
+    class procedure ReadUInt64AsBytesLE(AInput: UInt64;
+      const AOutput: THashLibByteArray; AIndex: Int32); overload;
+      static; inline;
+
+    class procedure ReadUInt64AsBytesBE(AInput: UInt64;
+      const AOutput: THashLibByteArray; AIndex: Int32); overload;
+      static; inline;
+
     class function ReadPCardinalAsUInt32(AInput: PCardinal): UInt32;
       static; inline;
 
@@ -80,22 +96,6 @@ type
 
     class function ReadUInt64AsBytesLE(AInput: UInt64): THashLibByteArray;
       overload; static; inline;
-
-    class procedure ReadUInt32AsBytesLE(AInput: UInt32;
-      const AOutput: THashLibByteArray; AIndex: Int32); overload;
-      static; inline;
-
-    class procedure ReadUInt32AsBytesBE(AInput: UInt32;
-      const AOutput: THashLibByteArray; AIndex: Int32); overload;
-      static; inline;
-
-    class procedure ReadUInt64AsBytesLE(AInput: UInt64;
-      const AOutput: THashLibByteArray; AIndex: Int32); overload;
-      static; inline;
-
-    class procedure ReadUInt64AsBytesBE(AInput: UInt64;
-      const AOutput: THashLibByteArray; AIndex: Int32); overload;
-      static; inline;
 
     class function ConvertStringToBytes(const AInput: String;
       const AEncoding: TEncoding): THashLibByteArray; overload; static;
@@ -271,6 +271,68 @@ begin
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
+class procedure TConverters.ReadUInt32AsBytesLE(AInput: UInt32;
+  const AOutput: THashLibByteArray; AIndex: Int32);
+begin
+  AOutput[AIndex] := Byte(AInput);
+  AOutput[AIndex + 1] := Byte(AInput shr 8);
+  AOutput[AIndex + 2] := Byte(AInput shr 16);
+  AOutput[AIndex + 3] := Byte(AInput shr 24);
+end;
+
+class procedure TConverters.ReadUInt32AsBytesBE(AInput: UInt32;
+  const AOutput: THashLibByteArray; AIndex: Int32);
+begin
+  AOutput[AIndex] := Byte(AInput shr 24);
+  AOutput[AIndex + 1] := Byte(AInput shr 16);
+  AOutput[AIndex + 2] := Byte(AInput shr 8);
+  AOutput[AIndex + 3] := Byte(AInput);
+end;
+
+class procedure TConverters.ReadUInt64AsBytesLE(AInput: UInt64;
+  const AOutput: THashLibByteArray; AIndex: Int32);
+begin
+  AOutput[AIndex] := Byte(AInput);
+  AOutput[AIndex + 1] := Byte(AInput shr 8);
+  AOutput[AIndex + 2] := Byte(AInput shr 16);
+  AOutput[AIndex + 3] := Byte(AInput shr 24);
+  AOutput[AIndex + 4] := Byte(AInput shr 32);
+  AOutput[AIndex + 5] := Byte(AInput shr 40);
+  AOutput[AIndex + 6] := Byte(AInput shr 48);
+  AOutput[AIndex + 7] := Byte(AInput shr 56);
+end;
+
+class procedure TConverters.ReadUInt64AsBytesBE(AInput: UInt64;
+  const AOutput: THashLibByteArray; AIndex: Int32);
+begin
+  AOutput[AIndex] := Byte(AInput shr 56);
+  AOutput[AIndex + 1] := Byte(AInput shr 48);
+  AOutput[AIndex + 2] := Byte(AInput shr 40);
+  AOutput[AIndex + 3] := Byte(AInput shr 32);
+  AOutput[AIndex + 4] := Byte(AInput shr 24);
+  AOutput[AIndex + 5] := Byte(AInput shr 16);
+  AOutput[AIndex + 6] := Byte(AInput shr 8);
+  AOutput[AIndex + 7] := Byte(AInput);
+end;
+
+class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;
+  AIndex: Int32): UInt32;
+begin
+  result := (UInt32(AInput[AIndex]) shl 24) or
+    (UInt32(AInput[AIndex + 1]) shl 16) or (UInt32(AInput[AIndex + 2]) shl 8) or
+    (UInt32(AInput[AIndex + 3]));
+end;
+
+class function TConverters.ReadBytesAsUInt64BE(AInput: PByte;
+  AIndex: Int32): UInt64;
+begin
+  result := (UInt64(AInput[AIndex]) shl 56) or
+    (UInt64(AInput[AIndex + 1]) shl 48) or (UInt64(AInput[AIndex + 2]) shl 40)
+    or (UInt64(AInput[AIndex + 3]) shl 32) or
+    (UInt64(AInput[AIndex + 4]) shl 24) or (UInt64(AInput[AIndex + 5]) shl 16)
+    or (UInt64(AInput[AIndex + 6]) shl 8) or (UInt64(AInput[AIndex + 7]));
+end;
+
 class function TConverters.ReadPCardinalAsUInt32(AInput: PCardinal): UInt32;
 begin
 {$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
@@ -320,24 +382,6 @@ begin
   result := ReadPUInt64AsUInt64LE(PUInt64(AInput + AIndex));
 end;
 
-class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;
-  AIndex: Int32): UInt32;
-begin
-  result := (UInt32(AInput[AIndex]) shl 24) or
-    (UInt32(AInput[AIndex + 1]) shl 16) or (UInt32(AInput[AIndex + 2]) shl 8) or
-    (UInt32(AInput[AIndex + 3]));
-end;
-
-class function TConverters.ReadBytesAsUInt64BE(AInput: PByte;
-  AIndex: Int32): UInt64;
-begin
-  result := (UInt64(AInput[AIndex]) shl 56) or
-    (UInt64(AInput[AIndex + 1]) shl 48) or (UInt64(AInput[AIndex + 2]) shl 40)
-    or (UInt64(AInput[AIndex + 3]) shl 32) or
-    (UInt64(AInput[AIndex + 4]) shl 24) or (UInt64(AInput[AIndex + 5]) shl 16)
-    or (UInt64(AInput[AIndex + 6]) shl 8) or (UInt64(AInput[AIndex + 7]));
-end;
-
 class function TConverters.ReadUInt32AsBytesLE(AInput: UInt32)
   : THashLibByteArray;
 begin
@@ -350,50 +394,6 @@ class function TConverters.ReadUInt64AsBytesLE(AInput: UInt64)
 begin
   System.SetLength(result, System.SizeOf(UInt64));
   TConverters.ReadUInt64AsBytesLE(AInput, result, 0);
-end;
-
-class procedure TConverters.ReadUInt32AsBytesLE(AInput: UInt32;
-  const AOutput: THashLibByteArray; AIndex: Int32);
-begin
-  AOutput[AIndex] := Byte(AInput);
-  AOutput[AIndex + 1] := Byte(AInput shr 8);
-  AOutput[AIndex + 2] := Byte(AInput shr 16);
-  AOutput[AIndex + 3] := Byte(AInput shr 24);
-end;
-
-class procedure TConverters.ReadUInt32AsBytesBE(AInput: UInt32;
-  const AOutput: THashLibByteArray; AIndex: Int32);
-begin
-  AOutput[AIndex] := Byte(AInput shr 24);
-  AOutput[AIndex + 1] := Byte(AInput shr 16);
-  AOutput[AIndex + 2] := Byte(AInput shr 8);
-  AOutput[AIndex + 3] := Byte(AInput);
-end;
-
-class procedure TConverters.ReadUInt64AsBytesLE(AInput: UInt64;
-  const AOutput: THashLibByteArray; AIndex: Int32);
-begin
-  AOutput[AIndex] := Byte(AInput);
-  AOutput[AIndex + 1] := Byte(AInput shr 8);
-  AOutput[AIndex + 2] := Byte(AInput shr 16);
-  AOutput[AIndex + 3] := Byte(AInput shr 24);
-  AOutput[AIndex + 4] := Byte(AInput shr 32);
-  AOutput[AIndex + 5] := Byte(AInput shr 40);
-  AOutput[AIndex + 6] := Byte(AInput shr 48);
-  AOutput[AIndex + 7] := Byte(AInput shr 56);
-end;
-
-class procedure TConverters.ReadUInt64AsBytesBE(AInput: UInt64;
-  const AOutput: THashLibByteArray; AIndex: Int32);
-begin
-  AOutput[AIndex] := Byte(AInput shr 56);
-  AOutput[AIndex + 1] := Byte(AInput shr 48);
-  AOutput[AIndex + 2] := Byte(AInput shr 40);
-  AOutput[AIndex + 3] := Byte(AInput shr 32);
-  AOutput[AIndex + 4] := Byte(AInput shr 24);
-  AOutput[AIndex + 5] := Byte(AInput shr 16);
-  AOutput[AIndex + 6] := Byte(AInput shr 8);
-  AOutput[AIndex + 7] := Byte(AInput);
 end;
 
 class function TConverters.ConvertBytesToHexString(const AInput
