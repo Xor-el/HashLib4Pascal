@@ -251,8 +251,8 @@ class procedure TConverters.le32_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
+  System.Move((PByte(ASource) + ASourceIndex)^,
+    (PByte(ADestination) + ADestinationIndex)^, ASize)
 {$ELSE}
   swap_copy_str_to_u32(ASource, ASourceIndex, ADestination,
     ADestinationIndex, ASize);
@@ -263,8 +263,8 @@ class procedure TConverters.le64_copy(ASource: Pointer; ASourceIndex: Int32;
   ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  System.Move(Pointer(PByte(ASource) + ASourceIndex)^,
-    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize)
+  System.Move((PByte(ASource) + ASourceIndex)^,
+    (PByte(ADestination) + ADestinationIndex)^, ASize)
 {$ELSE}
   swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
     ADestinationIndex, ASize);
