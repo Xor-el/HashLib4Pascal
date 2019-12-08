@@ -533,7 +533,17 @@ type
     /// <summary>
     /// CRC standard named "CRC64_XZ".
     /// </summary>
-    CRC64_XZ);
+    CRC64_XZ,
+
+    /// <summary>
+    /// CRC standard named "CRC64_1B".
+    /// </summary>
+    CRC64_1B,
+
+    /// <summary>
+    /// CRC standard named "CRC64_Jones".
+    /// </summary>
+    CRC64_Jones);
 
 {$ENDREGION}
 
@@ -1257,7 +1267,17 @@ begin
     TCRCStandard.CRC64_XZ:
       result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
         True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($995DC9BBDF1939FA),
-        THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'))
+        THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'));
+
+    TCRCStandard.CRC64_1B:
+      result := TCRC.Create(64, $000000000000001B, UInt64($0000000000000000),
+        True, True, UInt64($0000000000000000), $46A5A9388A5BEFFE,
+        THashLibStringArray.Create('CRC-64/1B'));
+
+    TCRCStandard.CRC64_Jones:
+      result := TCRC.Create(64, UInt64($AD93D23594C935A9),
+        UInt64($FFFFFFFFFFFFFFFF), True, True, UInt64($0000000000000000),
+        UInt64($CAA717168609F281), THashLibStringArray.Create('CRC-64/Jones'))
 
   else
     raise EArgumentInvalidHashLibException.CreateResFmt(@SUnSupportedCRCType,
