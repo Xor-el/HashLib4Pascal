@@ -83,7 +83,8 @@ end;
 constructor TCRC16_BUYPASS.Create;
 begin
   Inherited Create(TCRC16Polynomials.BUYPASS, $0000, false, false, $0000, $FEE8,
-    THashLibStringArray.Create('CRC-16/BUYPASS', 'CRC-16/VERIFONE'));
+    THashLibStringArray.Create('CRC-16/BUYPASS', 'CRC-16/VERIFONE',
+    'CRC-16/UMTS'));
 end;
 
 end.
