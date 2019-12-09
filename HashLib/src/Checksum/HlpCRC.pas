@@ -1379,8 +1379,8 @@ end;
 procedure TCRC.Initialize;
 begin
   // initialize some bitmasks
-  FCRCMask := (((UInt64(1) shl (Width - 1)) - 1) shl 1) or 1;
   FCRCHighBitMask := UInt64(1) shl (Width - 1);
+  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
   FHash := InitialValue;
 
   if (Width > Delta) then // then use table
