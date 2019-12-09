@@ -191,6 +191,16 @@ type
     CRC8_WCDMA,
 
     /// <summary>
+    /// CRC standard named "CRC8_MIFAREMAD".
+    /// </summary>
+    CRC8_MIFAREMAD,
+
+    /// <summary>
+    /// CRC standard named "CRC8_NRSC5".
+    /// </summary>
+    CRC8_NRSC5,
+
+    /// <summary>
     /// CRC standard named "CRC10".
     /// </summary>
     CRC10,
@@ -406,6 +416,11 @@ type
     XMODEM,
 
     /// <summary>
+    /// CRC standard named "CRC16_NRSC5".
+    /// </summary>
+    CRC16_NRSC5,
+
+    /// <summary>
     /// CRC standard named "CRC17_CANFD".
     /// </summary>
     CRC17_CANFD,
@@ -449,6 +464,11 @@ type
     /// CRC standard named "CRC24_LTEB".
     /// </summary>
     CRC24_LTEB,
+
+    /// <summary>
+    /// CRC standard named "CRC24_OS9".
+    /// </summary>
+    CRC24_OS9,
 
     /// <summary>
     /// CRC standard named "CRC30_CDMA".
@@ -509,6 +529,11 @@ type
     /// CRC standard named "XFER".
     /// </summary>
     XFER,
+
+    /// <summary>
+    /// CRC standard named "CRC32_CDROMEDC".
+    /// </summary>
+    CRC32_CDROMEDC,
 
     /// <summary>
     /// CRC standard named "CRC40_GSM".
@@ -984,6 +1009,14 @@ begin
       result := TCRC.Create(8, $9B, $00, True, True, $00, $25,
         THashLibStringArray.Create('CRC-8/WCDMA'));
 
+    TCRCStandard.CRC8_MIFAREMAD:
+      result := TCRC.Create(8, $1D, $C7, False, False, $00, $99,
+        THashLibStringArray.Create('CRC-8/MIFARE-MAD'));
+
+    TCRCStandard.CRC8_NRSC5:
+      result := TCRC.Create(8, $31, $FF, False, False, $00, $F7,
+        THashLibStringArray.Create('CRC-8/NRSC-5'));
+
     TCRCStandard.CRC10:
       result := TCRC.Create(10, $233, $000, False, False, $000, $199,
         THashLibStringArray.Create('CRC-10', 'CRC-10/ATM', 'CRC-10/I-610'));
@@ -1163,6 +1196,10 @@ begin
         THashLibStringArray.Create('XMODEM', 'ZMODEM', 'CRC-16/ACORN',
         'CRC-16/XMODEM', 'CRC-16/V-41-MSB'));
 
+    TCRCStandard.CRC16_NRSC5:
+      result := TCRC.Create(16, $080B, $FFFF, True, True, $0000, $A066,
+        THashLibStringArray.Create('CRC-16/NRSC-5'));
+
     TCRCStandard.CRC17_CANFD:
       result := TCRC.Create(17, $1685B, $00000, False, False, $00000, $04F03,
         THashLibStringArray.Create('CRC-17/CAN-FD'));
@@ -1198,6 +1235,10 @@ begin
     TCRCStandard.CRC24_LTEB:
       result := TCRC.Create(24, $800063, $000000, False, False, $000000,
         $23EF52, THashLibStringArray.Create('CRC-24/LTE-B'));
+
+    TCRCStandard.CRC24_OS9:
+      result := TCRC.Create(24, $800063, $FFFFFF, False, False, $FFFFFF,
+        $200FA5, THashLibStringArray.Create('CRC-24/OS-9'));
 
     TCRCStandard.CRC30_CDMA:
       result := TCRC.Create(30, $2030B9C7, $3FFFFFFF, False, False, $3FFFFFFF,
@@ -1249,6 +1290,10 @@ begin
     TCRCStandard.XFER:
       result := TCRC.Create(32, $000000AF, $00000000, False, False, $00000000,
         $BD0BE338, THashLibStringArray.Create('XFER', 'CRC-32/XFER'));
+
+    TCRCStandard.CRC32_CDROMEDC:
+      result := TCRC.Create(32, $8001801B, $00000000, True, True, $00000000,
+        $6EC2EDC4, THashLibStringArray.Create('CRC-32/CD-ROM-EDC'));
 
     TCRCStandard.CRC40_GSM:
       result := TCRC.Create(40, $0004820009, $0000000000, False, False,
