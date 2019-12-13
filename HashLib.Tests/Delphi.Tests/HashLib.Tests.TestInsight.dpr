@@ -103,6 +103,7 @@ uses
   HlpXXHash64 in '..\..\HashLib\src\Hash64\HlpXXHash64.pas',
   HlpMurmurHash3_x86_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas',
   HlpMurmurHash3_x64_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x64_128.pas',
+  HlpSipHash128 in '..\..\HashLib\src\Hash128\HlpSipHash128.pas',
   HlpIHash in '..\..\HashLib\src\Interfaces\HlpIHash.pas',
   HlpIKDF in '..\..\HashLib\src\Interfaces\HlpIKDF.pas',
   HlpICRC in '..\..\HashLib\src\Interfaces\HlpICRC.pas',
