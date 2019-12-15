@@ -13,12 +13,13 @@ uses
 
 resourcestring
   SInvalidHashSize =
-    '"HashSize" Must Be Greater Than 0 And Less Than or Equal To 32';
-  SInvalidKeyLength = '"Key" Length Must Not Be Greater Than 32';
-  SInvalidPersonalisationLength = '"Personalisation" Length Must Be Equal To 8';
-  SInvalidSaltLength = '"Salt" Length Must Be Equal To 8';
+    'BLAKE2S HashSize must be restricted to one of the following [1 .. 32], "%d"';
+  SInvalidKeyLength = '"Key" Length Must Not Be Greater Than 32, "%d"';
+  SInvalidPersonalisationLength =
+    '"Personalisation" Length Must Be Equal To 8, "%d"';
+  SInvalidSaltLength = '"Salt" Length Must Be Equal To 8, "%d"';
   STreeIncorrectInnerHashSize =
-    'Tree Inner Hash Size Must Not Be Greater Than 32';
+    'Tree Inner Hash Size Must Not Be Greater Than 32, "%d"';
 
 type
   TBlake2SIvBuilder = class sealed(TObject)
@@ -45,7 +46,8 @@ begin
   // digest length
   if ((AConfig.HashSize <= 0) or (AConfig.HashSize > 32)) then
   begin
-    raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidHashSize);
+    raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidHashSize,
+      [AConfig.HashSize]);
   end;
 
   // Key length
@@ -53,16 +55,8 @@ begin
   begin
     if (System.Length(AConfig.Key) > 32) then
     begin
-      raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidKeyLength);
-    end;
-  end;
-
-  // Salt length
-  if (AConfig.Salt <> Nil) then
-  begin
-    if (System.Length(AConfig.Salt) <> 8) then
-    begin
-      raise EArgumentOutOfRangeHashLibException.CreateRes(@SInvalidSaltLength);
+      raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidKeyLength,
+        [System.Length(AConfig.Key)]);
     end;
   end;
 
@@ -71,8 +65,19 @@ begin
   begin
     if (System.Length(AConfig.Personalisation) <> 8) then
     begin
-      raise EArgumentOutOfRangeHashLibException.CreateRes
-        (@SInvalidPersonalisationLength);
+      raise EArgumentOutOfRangeHashLibException.CreateResFmt
+        (@SInvalidPersonalisationLength,
+        [System.Length(AConfig.Personalisation)]);
+    end;
+  end;
+
+  // Salt length
+  if (AConfig.Salt <> Nil) then
+  begin
+    if (System.Length(AConfig.Salt) <> 8) then
+    begin
+      raise EArgumentOutOfRangeHashLibException.CreateResFmt
+        (@SInvalidSaltLength, [System.Length(AConfig.Salt)]);
     end;
   end;
 
@@ -88,8 +93,8 @@ begin
 
     if (ATreeConfig.InnerHashSize > 32) then
     begin
-      raise EArgumentOutOfRangeHashLibException.CreateRes
-        (@STreeIncorrectInnerHashSize);
+      raise EArgumentOutOfRangeHashLibException.CreateResFmt
+        (@STreeIncorrectInnerHashSize, [ATreeConfig.InnerHashSize]);
     end;
   end;
 

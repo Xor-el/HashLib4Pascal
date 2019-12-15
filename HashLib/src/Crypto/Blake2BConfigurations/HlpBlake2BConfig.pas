@@ -81,7 +81,7 @@ procedure TBlake2BConfig.ValidateHashSize(AHashSize: Int32);
 begin
   if not((AHashSize) in [1 .. 64]) or (((AHashSize * 8) and 7) <> 0) then
   begin
-    raise EArgumentHashLibException.CreateResFmt(@SInvalidHashSize,
+    raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidHashSize,
       [AHashSize]);
   end;
 end;
