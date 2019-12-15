@@ -68,6 +68,8 @@ type
     FConfig: IBlake2SConfig;
     FDoTransformKeyBlock: Boolean;
 
+    procedure Blake2SIncrementCounter(AIncrementCount: UInt32); inline;
+
 {$IFNDEF USE_UNROLLED_VARIANT}
     procedure G(a, b, c, d, r, i: Int32); inline;
 {$ENDIF USE_UNROLLED_VARIANT}
@@ -235,6 +237,12 @@ implementation
 constructor TBlake2S.Create();
 begin
   Create(TBlake2SConfig.Create() as IBlake2SConfig);
+end;
+
+procedure TBlake2S.Blake2SIncrementCounter(AIncrementCount: UInt32);
+begin
+  FCounter0 := FCounter0 + AIncrementCount;
+  System.Inc(FCounter1, Ord(FCounter0 < AIncrementCount));
 end;
 
 {$IFNDEF USE_UNROLLED_VARIANT}
@@ -1556,7 +1564,7 @@ var
   LCount: Int32;
 begin
   // Last compression
-  FCounter0 := FCounter0 + UInt32(FFilledBufferCount);
+  Blake2SIncrementCounter(UInt32(FFilledBufferCount));
 
   FFinalizationFlag0 := System.High(UInt32);
 
@@ -1657,11 +1665,7 @@ begin
       System.Move(AData[LOffset], FBuffer[FFilledBufferCount],
         LBufferRemaining);
     end;
-    FCounter0 := FCounter0 + UInt32(BlockSizeInBytes);
-    if (FCounter0 = 0) then
-    begin
-      System.Inc(FCounter1);
-    end;
+    Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
     Compress(PByte(FBuffer), 0);
     LOffset := LOffset + LBufferRemaining;
     ADataLength := ADataLength - LBufferRemaining;
@@ -1670,11 +1674,7 @@ begin
 
   while (ADataLength > BlockSizeInBytes) do
   begin
-    FCounter0 := FCounter0 + UInt32(BlockSizeInBytes);
-    if (FCounter0 = 0) then
-    begin
-      System.Inc(FCounter1);
-    end;
+    Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
     Compress(PByte(AData), LOffset);
     LOffset := LOffset + BlockSizeInBytes;
     ADataLength := ADataLength - BlockSizeInBytes;
