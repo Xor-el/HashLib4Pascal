@@ -38,13 +38,7 @@ uses
   HlpBernstein in '..\..\..\HashLib\src\Hash32\HlpBernstein.pas',
   HlpBernstein1 in '..\..\..\HashLib\src\Hash32\HlpBernstein1.pas',
   HlpBKDR in '..\..\..\HashLib\src\Hash32\HlpBKDR.pas',
-  HlpBlake2BConfig in '..\..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BConfig.pas',
-  HlpBlake2BIvBuilder in '..\..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BIvBuilder.pas',
-  HlpBlake2BTreeConfig in '..\..\..\HashLib\src\Crypto\Blake2BConfigurations\HlpBlake2BTreeConfig.pas',
   HlpBlake2S in '..\..\..\HashLib\src\Crypto\HlpBlake2S.pas',
-  HlpBlake2SConfig in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SConfig.pas',
-  HlpBlake2SIvBuilder in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2SIvBuilder.pas',
-  HlpBlake2STreeConfig in '..\..\..\HashLib\src\Crypto\Blake2SConfigurations\HlpBlake2STreeConfig.pas',
   HlpCRC16 in '..\..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpDEK in '..\..\..\HashLib\src\Hash32\HlpDEK.pas',
   HlpDJB in '..\..\..\HashLib\src\Hash32\HlpDJB.pas',
@@ -60,10 +54,6 @@ uses
   HlpHashRounds in '..\..\..\HashLib\src\Base\HlpHashRounds.pas',
   HlpHashSize in '..\..\..\HashLib\src\Base\HlpHashSize.pas',
   HlpHaval in '..\..\..\HashLib\src\Crypto\HlpHaval.pas',
-  HlpIBlake2BConfig in '..\..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BConfig.pas',
-  HlpIBlake2BTreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2BConfigurations\HlpIBlake2BTreeConfig.pas',
-  HlpIBlake2SConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2SConfig.pas',
-  HlpIBlake2STreeConfig in '..\..\..\HashLib\src\Interfaces\IBlake2SConfigurations\HlpIBlake2STreeConfig.pas',
   HlpBlake2BP in '..\..\..\HashLib\src\Crypto\HlpBlake2BP.pas',
   HlpBlake2SP in '..\..\..\HashLib\src\Crypto\HlpBlake2SP.pas',
   HlpIHash in '..\..\..\HashLib\src\Interfaces\HlpIHash.pas',
@@ -113,7 +103,11 @@ uses
   HlpTiger in '..\..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
-  HlpArrayUtils in '..\..\..\HashLib\src\Utils\HlpArrayUtils.pas';
+  HlpArrayUtils in '..\..\..\HashLib\src\Utils\HlpArrayUtils.pas',
+  HlpBlake2SParams in '..\..\..\HashLib\src\Crypto\Blake2SParams\HlpBlake2SParams.pas',
+  HlpBlake2BParams in '..\..\..\HashLib\src\Crypto\Blake2BParams\HlpBlake2BParams.pas',
+  HlpIBlake2SParams in '..\..\..\HashLib\src\Interfaces\IBlake2SParams\HlpIBlake2SParams.pas',
+  HlpIBlake2BParams in '..\..\..\HashLib\src\Interfaces\IBlake2BParams\HlpIBlake2BParams.pas';
 
 var
   StringList: TStringList;
