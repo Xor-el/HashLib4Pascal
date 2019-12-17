@@ -274,10 +274,18 @@ end;
 class procedure TConverters.ReadUInt32AsBytesLE(AInput: UInt32;
   const AOutput: THashLibByteArray; AIndex: Int32);
 begin
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput, AOutput[AIndex], System.SizeOf(UInt32));
+{$ELSE}
+  PCardinal(PByte(AOutput) + AIndex)^ := AInput;
+{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+{$ELSE}
   AOutput[AIndex] := Byte(AInput);
   AOutput[AIndex + 1] := Byte(AInput shr 8);
   AOutput[AIndex + 2] := Byte(AInput shr 16);
   AOutput[AIndex + 3] := Byte(AInput shr 24);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.ReadUInt32AsBytesBE(AInput: UInt32;
@@ -292,6 +300,13 @@ end;
 class procedure TConverters.ReadUInt64AsBytesLE(AInput: UInt64;
   const AOutput: THashLibByteArray; AIndex: Int32);
 begin
+{$IFDEF HASHLIB_LITTLE_ENDIAN}
+{$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  System.Move(AInput, AOutput[AIndex], System.SizeOf(UInt64));
+{$ELSE}
+  PUInt64(PByte(AOutput) + AIndex)^ := AInput;
+{$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+{$ELSE}
   AOutput[AIndex] := Byte(AInput);
   AOutput[AIndex + 1] := Byte(AInput shr 8);
   AOutput[AIndex + 2] := Byte(AInput shr 16);
@@ -300,6 +315,7 @@ begin
   AOutput[AIndex + 5] := Byte(AInput shr 40);
   AOutput[AIndex + 6] := Byte(AInput shr 48);
   AOutput[AIndex + 7] := Byte(AInput shr 56);
+{$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class procedure TConverters.ReadUInt64AsBytesBE(AInput: UInt64;
