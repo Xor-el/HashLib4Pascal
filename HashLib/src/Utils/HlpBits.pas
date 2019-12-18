@@ -232,7 +232,7 @@ begin
   Result := UInt16((AValue and UInt32($FF)) shl 8 or
     (AValue and UInt32($FF00)) shr 8);
 {$ENDIF FPC}
-//  Result := UInt16((AValue shr 8) or (AValue shl 8));
+  // Result := UInt16((AValue shr 8) + (AValue shl 8));
 end;
 
 class function TBits.ReverseBytesUInt32(AValue: UInt32): UInt32;
@@ -245,7 +245,7 @@ begin
     ((AValue shr 8) and UInt32($0000FF00)) or
     ((AValue shr 24) and UInt32($000000FF));
 {$ENDIF FPC}
-  // Result := RotateRight32(AValue and UInt32($00FF00FF), 8) or
+  // Result := RotateRight32(AValue and UInt32($00FF00FF), 8) +
   // RotateLeft32(AValue and UInt32($FF00FF00), 8);
 end;
 
@@ -263,7 +263,7 @@ begin
     ((AValue shr 40) and UInt64($000000000000FF00)) or
     ((AValue shr 56) and UInt64($00000000000000FF));
 {$ENDIF FPC}
-  // Result := (UInt64(ReverseBytesUInt32(UInt32(AValue))) shl 32) or
+  // Result := (UInt64(ReverseBytesUInt32(UInt32(AValue))) shl 32) +
   // ReverseBytesUInt32(UInt32(AValue shr 32));
 end;
 
