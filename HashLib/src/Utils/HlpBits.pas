@@ -9,12 +9,6 @@ type
 
   public
 
-    class function ReverseBytesInt32(AValue: Int32): Int32; static; inline;
-    class function ReverseBitsUInt8(AValue: UInt8): UInt8; static; inline;
-    class function ReverseBytesUInt16(AValue: UInt16): UInt16; static; inline;
-    class function ReverseBytesUInt32(AValue: UInt32): UInt32; static; inline;
-    class function ReverseBytesUInt64(AValue: UInt64): UInt64; static; inline;
-
     /// <summary>
     /// Reverse a ByteArray.
     /// </summary>
@@ -65,6 +59,12 @@ type
     class function RotateRight64(AValue: UInt64; ADistance: Int32): UInt64;
       static; inline;
 
+    class function ReverseBytesInt32(AValue: Int32): Int32; static; inline;
+    class function ReverseBitsUInt8(AValue: UInt8): UInt8; static; inline;
+    class function ReverseBytesUInt16(AValue: UInt16): UInt16; static; inline;
+    class function ReverseBytesUInt32(AValue: UInt32): UInt32; static; inline;
+    class function ReverseBytesUInt64(AValue: UInt64): UInt64; static; inline;
+
   end;
 
 implementation
@@ -86,70 +86,6 @@ begin
     System.Dec(LPtrDestination);
     System.Dec(ASize);
   end;
-end;
-
-class function TBits.ReverseBytesInt32(AValue: Int32): Int32;
-{$IFNDEF FPC}
-var
-  i1, i2, i3, i4: Int32;
-{$ENDIF FPC}
-begin
-{$IFDEF FPC}
-  Result := SwapEndian(AValue);
-{$ELSE}
-  i1 := AValue and $FF;
-  i2 := TBits.Asr32(AValue, 8) and $FF;
-  i3 := TBits.Asr32(AValue, 16) and $FF;
-  i4 := TBits.Asr32(AValue, 24) and $FF;
-
-  Result := (i1 shl 24) or (i2 shl 16) or (i3 shl 8) or (i4 shl 0);
-{$ENDIF FPC}
-end;
-
-class function TBits.ReverseBitsUInt8(AValue: UInt8): UInt8;
-begin
-  AValue := ((AValue shr 1) and $55) or ((AValue shl 1) and $AA);
-  AValue := ((AValue shr 2) and $33) or ((AValue shl 2) and $CC);
-  AValue := ((AValue shr 4) and $0F) or ((AValue shl 4) and $F0);
-  Result := AValue;
-end;
-
-class function TBits.ReverseBytesUInt16(AValue: UInt16): UInt16;
-begin
-{$IFDEF FPC}
-  Result := SwapEndian(AValue);
-{$ELSE}
-  Result := UInt16((AValue and UInt32($FF)) shl 8 or
-    (AValue and UInt32($FF00)) shr 8);
-{$ENDIF FPC}
-end;
-
-class function TBits.ReverseBytesUInt32(AValue: UInt32): UInt32;
-begin
-{$IFDEF FPC}
-  Result := SwapEndian(AValue);
-{$ELSE}
-  Result := ((AValue shl 24) and UInt32($FF000000)) or
-    ((AValue shl 8) and UInt32($00FF0000)) or
-    ((AValue shr 8) and UInt32($0000FF00)) or
-    ((AValue shr 24) and UInt32($000000FF));
-{$ENDIF FPC}
-end;
-
-class function TBits.ReverseBytesUInt64(AValue: UInt64): UInt64;
-begin
-{$IFDEF FPC}
-  Result := SwapEndian(AValue);
-{$ELSE}
-  Result := ((AValue shl 56) and UInt64($FF00000000000000)) or
-    ((AValue shl 40) and UInt64($00FF000000000000)) or
-    ((AValue shl 24) and UInt64($0000FF0000000000)) or
-    ((AValue shl 8) and UInt64($000000FF00000000)) or
-    ((AValue shr 8) and UInt64($00000000FF000000)) or
-    ((AValue shr 24) and UInt64($0000000000FF0000)) or
-    ((AValue shr 40) and UInt64($000000000000FF00)) or
-    ((AValue shr 56) and UInt64($00000000000000FF));
-{$ENDIF FPC}
 end;
 
 class function TBits.Asr32(AValue: Int32; AShiftBits: Byte): Int32;
@@ -260,6 +196,75 @@ begin
 {$ENDIF SHIFT_OVERFLOW_BUG_FIXED}
   Result := (AValue shr ADistance) or (AValue shl (64 - ADistance));
 {$ENDIF FPC}
+end;
+
+class function TBits.ReverseBytesInt32(AValue: Int32): Int32;
+{$IFNDEF FPC}
+var
+  i1, i2, i3, i4: Int32;
+{$ENDIF FPC}
+begin
+{$IFDEF FPC}
+  Result := SwapEndian(AValue);
+{$ELSE}
+  i1 := AValue and $FF;
+  i2 := TBits.Asr32(AValue, 8) and $FF;
+  i3 := TBits.Asr32(AValue, 16) and $FF;
+  i4 := TBits.Asr32(AValue, 24) and $FF;
+
+  Result := (i1 shl 24) or (i2 shl 16) or (i3 shl 8) or (i4 shl 0);
+{$ENDIF FPC}
+end;
+
+class function TBits.ReverseBitsUInt8(AValue: UInt8): UInt8;
+begin
+  AValue := ((AValue shr 1) and $55) or ((AValue shl 1) and $AA);
+  AValue := ((AValue shr 2) and $33) or ((AValue shl 2) and $CC);
+  AValue := ((AValue shr 4) and $0F) or ((AValue shl 4) and $F0);
+  Result := AValue;
+end;
+
+class function TBits.ReverseBytesUInt16(AValue: UInt16): UInt16;
+begin
+{$IFDEF FPC}
+  Result := SwapEndian(AValue);
+{$ELSE}
+  Result := UInt16((AValue and UInt32($FF)) shl 8 or
+    (AValue and UInt32($FF00)) shr 8);
+{$ENDIF FPC}
+//  Result := UInt16((AValue shr 8) or (AValue shl 8));
+end;
+
+class function TBits.ReverseBytesUInt32(AValue: UInt32): UInt32;
+begin
+{$IFDEF FPC}
+  Result := SwapEndian(AValue);
+{$ELSE}
+  Result := ((AValue shl 24) and UInt32($FF000000)) or
+    ((AValue shl 8) and UInt32($00FF0000)) or
+    ((AValue shr 8) and UInt32($0000FF00)) or
+    ((AValue shr 24) and UInt32($000000FF));
+{$ENDIF FPC}
+  // Result := RotateRight32(AValue and UInt32($00FF00FF), 8) or
+  // RotateLeft32(AValue and UInt32($FF00FF00), 8);
+end;
+
+class function TBits.ReverseBytesUInt64(AValue: UInt64): UInt64;
+begin
+{$IFDEF FPC}
+  Result := SwapEndian(AValue);
+{$ELSE}
+  Result := ((AValue shl 56) and UInt64($FF00000000000000)) or
+    ((AValue shl 40) and UInt64($00FF000000000000)) or
+    ((AValue shl 24) and UInt64($0000FF0000000000)) or
+    ((AValue shl 8) and UInt64($000000FF00000000)) or
+    ((AValue shr 8) and UInt64($00000000FF000000)) or
+    ((AValue shr 24) and UInt64($0000000000FF0000)) or
+    ((AValue shr 40) and UInt64($000000000000FF00)) or
+    ((AValue shr 56) and UInt64($00000000000000FF));
+{$ENDIF FPC}
+  // Result := (UInt64(ReverseBytesUInt32(UInt32(AValue))) shl 32) or
+  // ReverseBytesUInt32(UInt32(AValue shr 32));
 end;
 
 end.
