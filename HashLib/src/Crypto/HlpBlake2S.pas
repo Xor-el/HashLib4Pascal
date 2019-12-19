@@ -74,7 +74,7 @@ type
     procedure G(a, b, c, d, r, i: Int32); inline;
 {$ENDIF USE_UNROLLED_VARIANT}
     procedure MixScalar();
-    procedure Compress(ABlock: PByte; AStart: Int32);
+    procedure Compress(ABlock: PByte; AStart: Int32); inline;
 
   strict protected
   var
