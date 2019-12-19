@@ -1659,6 +1659,7 @@ procedure TBlake2S.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 var
   LOffset, LBufferRemaining: Int32;
+  LPtrData: PByte;
 begin
   LOffset := AIndex;
   LBufferRemaining := BlockSizeInBytes - FFilledBufferCount;
@@ -1677,10 +1678,12 @@ begin
     FFilledBufferCount := 0;
   end;
 
+  LPtrData := PByte(AData);
+
   while (ADataLength > BlockSizeInBytes) do
   begin
     Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
-    Compress(PByte(AData), LOffset);
+    Compress(LPtrData, LOffset);
     LOffset := LOffset + BlockSizeInBytes;
     ADataLength := ADataLength - BlockSizeInBytes;
   end;

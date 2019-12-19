@@ -1063,19 +1063,6 @@ end;
 
 { TXofAlgorithmTestCase }
 
-procedure TXofAlgorithmTestCase.CallShouldRaiseException;
-var
-  LOutput: TBytes;
-begin
-  XofInstance.Initialize;
-  LOutput := Nil;
-  System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
-  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
-  XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
-  // this call below should raise exception since we have already read from the Xof
-  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
-end;
-
 function TXofAlgorithmTestCase.GetXofInstance: IXOF;
 begin
   Result := FXofInstance;
@@ -1094,6 +1081,19 @@ end;
 procedure TXofAlgorithmTestCase.SetXofOfEmptyData(const AValue: String);
 begin
   FXofOfEmptyData := AValue;
+end;
+
+procedure TXofAlgorithmTestCase.CallShouldRaiseException;
+var
+  LOutput: TBytes;
+begin
+  XofInstance.Initialize;
+  LOutput := Nil;
+  System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
+  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+  XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
+  // this call below should raise exception since we have already read from the Xof
+  XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
 end;
 
 procedure TXofAlgorithmTestCase.TestOutputOverflow;
