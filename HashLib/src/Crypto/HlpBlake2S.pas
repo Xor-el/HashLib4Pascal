@@ -73,6 +73,7 @@ type
 {$IFNDEF USE_UNROLLED_VARIANT}
     procedure G(a, b, c, d, r, i: Int32); inline;
 {$ENDIF USE_UNROLLED_VARIANT}
+    procedure MixScalar();
     procedure Compress(ABlock: PByte; AStart: Int32);
 
   strict protected
@@ -290,7 +291,7 @@ begin
   Result := CloneInternal() as IHash;
 end;
 
-procedure TBlake2S.Compress(ABlock: PByte; AStart: Int32);
+procedure TBlake2S.MixScalar;
 var
 {$IFDEF USE_UNROLLED_VARIANT}
   m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, v0, v1,
@@ -301,8 +302,6 @@ var
 
 {$ENDIF USE_UNROLLED_VARIANT}
 begin
-  TConverters.le32_copy(ABlock, AStart, @(FM[0]), 0, BlockSize);
-
 {$IFDEF USE_UNROLLED_VARIANT}
   m0 := FM[0];
   m1 := FM[1];
@@ -1533,6 +1532,12 @@ begin
   end;
 
 {$ENDIF USE_UNROLLED_VARIANT}
+end;
+
+procedure TBlake2S.Compress(ABlock: PByte; AStart: Int32);
+begin
+  TConverters.le32_copy(ABlock, AStart, @(FM[0]), 0, BlockSize);
+  MixScalar();
 end;
 
 constructor TBlake2S.Create(const AConfig: IBlake2SConfig);
