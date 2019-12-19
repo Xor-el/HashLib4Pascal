@@ -146,13 +146,15 @@ end;
 
 procedure TMurmurHash3_x86_32.ByteUpdate(AByte: Byte);
 var
+  LPtrBuffer: PByte;
   LBlock: UInt32;
 begin
   FBuffer[FIdx] := AByte;
   System.Inc(FIdx);
   if FIdx >= 4 then
   begin
-    LBlock := TConverters.ReadBytesAsUInt32LE(PByte(FBuffer), 0);
+    LPtrBuffer := PByte(FBuffer);
+    LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
 
     LBlock := LBlock * C1;
     LBlock := TBits.RotateLeft32(LBlock, 15);
@@ -205,7 +207,7 @@ procedure TMurmurHash3_x86_32.TransformBytes(const AData: THashLibByteArray;
 var
   LLength, LNBlocks, LIdx, LOffset: Int32;
   LBlock, LH: UInt32;
-  LPtrData: PByte;
+  LPtrData, LPtrBuffer: PByte;
   LPtrDataCardinal: PCardinal;
 begin
 {$IFDEF DEBUG}
@@ -245,7 +247,8 @@ begin
     end;
     if (FIdx = 4) then
     begin
-      LBlock := TConverters.ReadBytesAsUInt32LE(PByte(FBuffer), 0);
+      LPtrBuffer := PByte(FBuffer);
+      LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
 
       LBlock := LBlock * C1;
       LBlock := TBits.RotateLeft32(LBlock, 15);

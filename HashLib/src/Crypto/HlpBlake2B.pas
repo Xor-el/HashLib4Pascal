@@ -1881,7 +1881,7 @@ procedure TBlake2B.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 var
   LOffset, LBufferRemaining: Int32;
-  LPtrData: PByte;
+  LPtrData, LPtrBuffer: PByte;
 begin
   LOffset := AIndex;
   LBufferRemaining := BlockSizeInBytes - FFilledBufferCount;
@@ -1894,7 +1894,8 @@ begin
         LBufferRemaining);
     end;
     Blake2BIncrementCounter(UInt64(BlockSizeInBytes));
-    Compress(PByte(FBuffer), 0);
+    LPtrBuffer := PByte(FBuffer);
+    Compress(LPtrBuffer, 0);
     LOffset := LOffset + LBufferRemaining;
     ADataLength := ADataLength - LBufferRemaining;
     FFilledBufferCount := 0;
