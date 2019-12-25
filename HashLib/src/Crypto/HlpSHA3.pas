@@ -34,12 +34,11 @@ type
 
   type
 {$SCOPEDENUMS ON}
-    THashMode = (hmKeccak = $1, hmSHA3 = $6, hmShake = $1F, hmCShake = $4);
+    THashMode = (hmKeccak = $1, hmCShake = $4, hmSHA3 = $6, hmShake = $1F);
 {$SCOPEDENUMS OFF}
   strict protected
   var
     FState: THashLibUInt64Array;
-    FHashMode: THashMode;
 
 {$REGION 'Consts'}
 
@@ -70,13 +69,14 @@ type
     procedure TransformBlock(AData: PByte; ADataLength: Int32;
       AIndex: Int32); override;
 
+    function GetHashMode(): TSHA3.THashMode; virtual;
+
   public
     procedure Initialize; override;
 
   end;
 
 type
-
   TSHA3_224 = class sealed(TSHA3)
 
   public
@@ -86,7 +86,6 @@ type
   end;
 
 type
-
   TSHA3_256 = class sealed(TSHA3)
 
   public
@@ -96,7 +95,6 @@ type
   end;
 
 type
-
   TSHA3_384 = class sealed(TSHA3)
 
   public
@@ -106,7 +104,6 @@ type
   end;
 
 type
-
   TSHA3_512 = class sealed(TSHA3)
 
   public
@@ -116,8 +113,15 @@ type
   end;
 
 type
+  TKeccak = class abstract(TSHA3)
 
-  TKeccak_224 = class sealed(TSHA3)
+  strict protected
+
+    function GetHashMode(): TSHA3.THashMode; override;
+  end;
+
+type
+  TKeccak_224 = class sealed(TKeccak)
 
   public
 
@@ -126,18 +130,7 @@ type
   end;
 
 type
-
-  TKeccak_256 = class sealed(TSHA3)
-
-  public
-
-    constructor Create();
-    function Clone(): IHash; override;
-  end;
-
-type
-
-  TKeccak_288 = class sealed(TSHA3)
+  TKeccak_256 = class sealed(TKeccak)
 
   public
 
@@ -146,8 +139,7 @@ type
   end;
 
 type
-
-  TKeccak_384 = class sealed(TSHA3)
+  TKeccak_288 = class sealed(TKeccak)
 
   public
 
@@ -156,8 +148,16 @@ type
   end;
 
 type
+  TKeccak_384 = class sealed(TKeccak)
 
-  TKeccak_512 = class sealed(TSHA3)
+  public
+
+    constructor Create();
+    function Clone(): IHash; override;
+  end;
+
+type
+  TKeccak_512 = class sealed(TKeccak)
 
   public
 
@@ -179,6 +179,7 @@ type
     FShakeBuffer: THashLibByteArray;
     FFinalized: Boolean;
     constructor Create(AHashSize: THashSize);
+    function GetHashMode(): TSHA3.THashMode; override;
     property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
@@ -221,6 +222,8 @@ type
 
   var
     FN, FS, FInitBlock: THashLibByteArray;
+
+    function GetHashMode(): TSHA3.THashMode; override;
 
     /// <param name="AHashSize">
     /// the HashSize of the underlying Shake function
@@ -380,6 +383,11 @@ implementation
 
 { TSHA3 }
 
+function TSHA3.GetHashMode(): TSHA3.THashMode;
+begin
+  Result := TSHA3.THashMode.hmSHA3;
+end;
+
 constructor TSHA3.Create(AHashSize: THashSize);
 begin
   Inherited Create(Int32(AHashSize), 200 - (Int32(AHashSize) * 2));
@@ -394,7 +402,7 @@ begin
   LBufferPosition := FBuffer.Position;
   LBlock := FBuffer.GetBytesZeroPadded();
 
-  LBlock[LBufferPosition] := Int32(FHashMode);
+  LBlock[LBufferPosition] := Int32(GetHashMode());
   LBlock[BlockSize - 1] := LBlock[BlockSize - 1] xor $80;
 
   TransformBlock(PByte(LBlock), System.Length(LBlock), 0);
@@ -402,7 +410,7 @@ end;
 
 function TSHA3.GetName: String;
 begin
-  case FHashMode of
+  case GetHashMode() of
     TSHA3.THashMode.hmKeccak:
       Result := Format('%s_%u', ['TKeccak', Self.HashSize * 8]);
     TSHA3.THashMode.hmSHA3:
@@ -808,7 +816,6 @@ end;
 constructor TSHA3_224.Create;
 begin
   Inherited Create(THashSize.hsHashSize224);
-  FHashMode := THashMode.hmSHA3;
 end;
 
 { TSHA3_256 }
@@ -828,7 +835,6 @@ end;
 constructor TSHA3_256.Create;
 begin
   Inherited Create(THashSize.hsHashSize256);
-  FHashMode := THashMode.hmSHA3;
 end;
 
 { TSHA3_384 }
@@ -848,7 +854,6 @@ end;
 constructor TSHA3_384.Create;
 begin
   Inherited Create(THashSize.hsHashSize384);
-  FHashMode := THashMode.hmSHA3;
 end;
 
 { TSHA3_512 }
@@ -868,7 +873,6 @@ end;
 constructor TSHA3_512.Create;
 begin
   Inherited Create(THashSize.hsHashSize512);
-  FHashMode := THashMode.hmSHA3;
 end;
 
 { TKeccak_224 }
@@ -888,7 +892,6 @@ end;
 constructor TKeccak_224.Create;
 begin
   Inherited Create(THashSize.hsHashSize224);
-  FHashMode := THashMode.hmKeccak;
 end;
 
 { TKeccak_256 }
@@ -908,7 +911,6 @@ end;
 constructor TKeccak_256.Create;
 begin
   Inherited Create(THashSize.hsHashSize256);
-  FHashMode := THashMode.hmKeccak;
 end;
 
 { TKeccak_288 }
@@ -928,7 +930,6 @@ end;
 constructor TKeccak_288.Create;
 begin
   Inherited Create(THashSize.hsHashSize288);
-  FHashMode := THashMode.hmKeccak;
 end;
 
 { TKeccak_384 }
@@ -948,7 +949,6 @@ end;
 constructor TKeccak_384.Create;
 begin
   Inherited Create(THashSize.hsHashSize384);
-  FHashMode := THashMode.hmKeccak;
 end;
 
 { TKeccak_512 }
@@ -968,10 +968,14 @@ end;
 constructor TKeccak_512.Create;
 begin
   Inherited Create(THashSize.hsHashSize512);
-  FHashMode := THashMode.hmKeccak;
 end;
 
 { TShake }
+
+function TShake.GetHashMode(): TSHA3.THashMode;
+begin
+  Result := TSHA3.THashMode.hmShake;
+end;
 
 function TShake.SetXOFSizeInBitsInternal(AXofSizeInBits: UInt64): IXOF;
 var
@@ -999,7 +1003,6 @@ end;
 constructor TShake.Create(AHashSize: THashSize);
 begin
   Inherited Create(AHashSize);
-  FHashMode := THashMode.hmShake;
   FFinalized := False;
   System.SetLength(FShakeBuffer, 8);
 end;
@@ -1166,6 +1169,18 @@ end;
 
 { TCShake }
 
+function TCShake.GetHashMode(): TSHA3.THashMode;
+begin
+  if (System.Length(FN) = 0) and (System.Length(FS) = 0) then
+  begin
+    Result := TSHA3.THashMode.hmShake;
+  end
+  else
+  begin
+    Result := TSHA3.THashMode.hmCShake;
+  end;
+end;
+
 class function TCShake.LeftEncode(AInput: UInt64): THashLibByteArray;
 var
   LN: Byte;
@@ -1244,15 +1259,13 @@ begin
 
   FN := N;
   FS := S;
-  FInitBlock := Nil;
 
   if (System.Length(FN) = 0) and (System.Length(FS) = 0) then
   begin
-    FHashMode := THashMode.hmShake;
+    FInitBlock := Nil;
   end
   else
   begin
-    FHashMode := THashMode.hmCShake;
     FInitBlock := TArrayUtils.Concatenate(EncodeString(N), EncodeString(S));
   end;
 end;
@@ -1628,6 +1641,13 @@ begin
   LXof := (TKMAC256XOF.Create(AKMACKey, ACustomization) as IKMAC) as IXOF;
   LXof.XOFSizeInBits := AXofSizeInBits;
   Result := (LXof as IHash) as IKMAC;
+end;
+
+{ TKeccak }
+
+function TKeccak.GetHashMode(): TSHA3.THashMode;
+begin
+  Result := TSHA3.THashMode.hmKeccak;
 end;
 
 end.

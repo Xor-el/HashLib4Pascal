@@ -374,7 +374,7 @@ begin
     System.Move(LPtrData^, FBuffer[LLeft], LDataLength);
   end;
 
-  FBufferLength := UInt32(LLeft) + UInt32(LDataLength);
+  FBufferLength := LLeft + LDataLength;
 end;
 
 function TBlake2SP.TransformFinal: IHashResult;
