@@ -1401,6 +1401,7 @@ procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.FromBytes
   (const AInput: THashLibByteArray);
 var
   LIdx: Int32;
+  LPtrInput: PByte;
 begin
   CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
   if (System.Length(AInput) <> ARGON2_BLOCK_SIZE) then
@@ -1408,10 +1409,10 @@ begin
     raise EArgumentHashLibException.CreateResFmt(@SInputLengthInvalid,
       [System.Length(AInput), ARGON2_BLOCK_SIZE]);
   end;
-
+  LPtrInput := PByte(AInput);
   for LIdx := 0 to System.Pred(SIZE) do
   begin
-    Fv[LIdx] := TConverters.ReadBytesAsUInt64LE(PByte(AInput), LIdx * 8);
+    Fv[LIdx] := TConverters.ReadBytesAsUInt64LE(LPtrInput, LIdx * 8);
   end;
 end;
 
