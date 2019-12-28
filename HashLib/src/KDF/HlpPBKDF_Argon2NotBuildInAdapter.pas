@@ -258,6 +258,22 @@ type
 
       procedure FillBlock(var Ax, Ay, ACurrentBlock: TBlock; AWithXor: Boolean);
 
+      {
+        *designed by the Lyra PHC team */
+        /* a <- a + b + 2*aL*bL
+        * + == addition modulo 2^64
+        * aL = least 32 bit
+        * }
+      class procedure FBlaMka(var ABlock: TBlock; Ax, Ay: Int32);
+        static; inline;
+      class procedure Rotr64(var ABlock: TBlock; Av, Aw, Ac: Int32);
+        static; inline;
+      class procedure F(var ABlock: TBlock; Aa, Ab, Ac, Ad: Int32);
+        static; inline;
+      class procedure RoundFunction(var ABlock: TBlock;
+        Av0, Av1, Av2, Av3, Av4, Av5, Av6, Av7, Av8, Av9, Av10, Av11, Av12,
+        Av13, Av14, Av15: Int32); static; inline;
+
     public
       property R: TBlock read GetR;
       property Z: TBlock read GetZ;
@@ -293,21 +309,6 @@ type
 
     class function GetStartingIndex(const APosition: TPosition): Int32;
       static; inline;
-
-    {
-      *designed by the Lyra PHC team */
-      /* a <- a + b + 2*aL*bL
-      * + == addition modulo 2^64
-      * aL = least 32 bit
-      * }
-    class procedure FBlaMka(var ABlock: TBlock; Ax, Ay: Int32); static; inline;
-    class procedure Rotr64(var ABlock: TBlock; Av, Aw, Ac: Int32);
-      static; inline;
-    class procedure F(var ABlock: TBlock; Aa, Ab, Ac, Ad: Int32);
-      static; inline;
-    class procedure RoundFunction(var ABlock: TBlock;
-      Av0, Av1, Av2, Av3, Av4, Av5, Av6, Av7, Av8, Av9, Av10, Av11, Av12, Av13,
-      Av14, Av15: Int32); static; inline;
 
     procedure InitializeMemory(AMemoryBlocks: Int32);
     procedure DoInit(const AParameters: IArgon2Parameters);
@@ -406,6 +407,275 @@ type
   end;
 
 implementation
+
+{ TPBKDF_Argon2NotBuildInAdapter.TBlock }
+
+class function TPBKDF_Argon2NotBuildInAdapter.TBlock.CreateBlock: TBlock;
+begin
+  result := Default (TBlock);
+  System.SetLength(result.Fv, SIZE);
+  result.FInitialized := True;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.CheckAreBlocksInitialized
+  (const ABlocks: THashLibGenericArray<TBlock>);
+var
+  LBlock: TBlock;
+begin
+  for LBlock in ABlocks do
+  begin
+    if not(LBlock.FInitialized) then
+    begin
+      raise EArgumentNilHashLibException.CreateRes
+        (@SBlockInstanceNotInitialized);
+    end;
+  end;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.CopyBlock(const AOther: TBlock);
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AOther));
+  Fv := System.Copy(AOther.Fv);
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.&Xor(const AB1, AB2: TBlock);
+var
+  LIdx: Int32;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self,
+    AB1, AB2));
+  for LIdx := 0 to System.Pred(SIZE) do
+  begin
+    Fv[LIdx] := AB1.Fv[LIdx] xor AB2.Fv[LIdx];
+  end;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.XorWith(const AOther: TBlock);
+var
+  LIdx: Int32;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AOther));
+  for LIdx := 0 to System.Pred(System.Length(Fv)) do
+  begin
+    Fv[LIdx] := Fv[LIdx] xor AOther.Fv[LIdx];
+  end;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TBlock.Clear;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
+  TArrayUtils.ZeroFill(Fv);
+  result := Self;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.&Xor(const AB1, AB2,
+  AB3: TBlock);
+var
+  LIdx: Int32;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AB1,
+    AB2, AB3));
+  for LIdx := 0 to System.Pred(SIZE) do
+  begin
+    Fv[LIdx] := AB1.Fv[LIdx] xor AB2.Fv[LIdx] xor AB3.Fv[LIdx];
+  end;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.FromBytes
+  (const AInput: THashLibByteArray);
+var
+  LIdx: Int32;
+  LPtrInput: PByte;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
+  if (System.Length(AInput) <> ARGON2_BLOCK_SIZE) then
+  begin
+    raise EArgumentHashLibException.CreateResFmt(@SInputLengthInvalid,
+      [System.Length(AInput), ARGON2_BLOCK_SIZE]);
+  end;
+  LPtrInput := PByte(AInput);
+  for LIdx := 0 to System.Pred(SIZE) do
+  begin
+    Fv[LIdx] := TConverters.ReadBytesAsUInt64LE(LPtrInput, LIdx * 8);
+  end;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TBlock.ToBytes: THashLibByteArray;
+var
+  LIdx: Int32;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
+  System.SetLength(result, ARGON2_BLOCK_SIZE);
+  for LIdx := 0 to System.Pred(SIZE) do
+  begin
+    TConverters.ReadUInt64AsBytesLE(Fv[LIdx], result, LIdx * 8);
+  end;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TBlock.ToString: String;
+var
+  LIdx: Int32;
+begin
+  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
+  result := '';
+  for LIdx := 0 to System.Pred(SIZE) do
+  begin
+    result := result + TConverters.ConvertBytesToHexString
+      (TConverters.ReadUInt64AsBytesLE(Fv[LIdx]), False);
+  end;
+end;
+
+{ TPBKDF_Argon2NotBuildInAdapter.TPosition }
+
+class function TPBKDF_Argon2NotBuildInAdapter.TPosition.CreatePosition()
+  : TPosition;
+begin
+  result := Default (TPosition);
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TPosition.Update(APass, ALane, ASlice,
+  AIndex: Int32);
+begin
+  FPass := APass;
+  FLane := ALane;
+  FSlice := ASlice;
+  FIndex := AIndex;
+end;
+
+{ TPBKDF_Argon2NotBuildInAdapter.TFillBlock }
+
+class procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.FBlaMka
+  (var ABlock: TBlock; Ax, Ay: Int32);
+var
+  Lm: UInt32;
+  Lxy: UInt64;
+begin
+  Lm := $FFFFFFFF;
+  Lxy := (ABlock.Fv[Ax] and Lm) * (ABlock.Fv[Ay] and Lm);
+
+  ABlock.Fv[Ax] := ABlock.Fv[Ax] + ABlock.Fv[Ay] + (2 * Lxy);
+end;
+
+class procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.Rotr64
+  (var ABlock: TBlock; Av, Aw, Ac: Int32);
+var
+  LTemp: UInt64;
+begin
+  LTemp := ABlock.Fv[Av] xor ABlock.Fv[Aw];
+  ABlock.Fv[Av] := TBits.RotateRight64(LTemp, Ac);
+end;
+
+class procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.F(var ABlock: TBlock;
+  Aa, Ab, Ac, Ad: Int32);
+begin
+  FBlaMka(ABlock, Aa, Ab);
+  Rotr64(ABlock, Ad, Aa, 32);
+
+  FBlaMka(ABlock, Ac, Ad);
+  Rotr64(ABlock, Ab, Ac, 24);
+
+  FBlaMka(ABlock, Aa, Ab);
+  Rotr64(ABlock, Ad, Aa, 16);
+
+  FBlaMka(ABlock, Ac, Ad);
+  Rotr64(ABlock, Ab, Ac, 63);
+end;
+
+class procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.RoundFunction
+  (var ABlock: TBlock; Av0, Av1, Av2, Av3, Av4, Av5, Av6, Av7, Av8, Av9, Av10,
+  Av11, Av12, Av13, Av14, Av15: Int32);
+begin
+  F(ABlock, Av0, Av4, Av8, Av12);
+  F(ABlock, Av1, Av5, Av9, Av13);
+  F(ABlock, Av2, Av6, Av10, Av14);
+  F(ABlock, Av3, Av7, Av11, Av15);
+
+  F(ABlock, Av0, Av5, Av10, Av15);
+  F(ABlock, Av1, Av6, Av11, Av12);
+  F(ABlock, Av2, Av7, Av8, Av13);
+  F(ABlock, Av3, Av4, Av9, Av14);
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetAddressBlock: TBlock;
+begin
+  result := FAddressBlock;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetInputBlock: TBlock;
+begin
+  result := FInputBlock;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetR: TBlock;
+begin
+  result := FR;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetZ: TBlock;
+begin
+  result := FZ;
+end;
+
+function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetZeroBlock: TBlock;
+begin
+  result := FZeroBlock;
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.ApplyBlake();
+var
+  Li, Li16, Li2: Int32;
+begin
+  (* Apply Blake2 on columns of 64-bit words: (0,1,...,15) , then
+    (16,17,..31)... finally (112,113,...127) *)
+
+  for Li := 0 to System.Pred(8) do
+  begin
+    Li16 := 16 * Li;
+    RoundFunction(FZ, Li16, Li16 + 1, Li16 + 2, Li16 + 3, Li16 + 4, Li16 + 5,
+      Li16 + 6, Li16 + 7, Li16 + 8, Li16 + 9, Li16 + 10, Li16 + 11, Li16 + 12,
+      Li16 + 13, Li16 + 14, Li16 + 15);
+  end;
+
+  (* Apply Blake2 on rows of 64-bit words: (0,1,16,17,...112,113), then
+    (2,3,18,19,...,114,115).. finally (14,15,30,31,...,126,127) *)
+
+  for Li := 0 to System.Pred(8) do
+  begin
+    Li2 := 2 * Li;
+    RoundFunction(FZ, Li2, Li2 + 1, Li2 + 16, Li2 + 17, Li2 + 32, Li2 + 33,
+      Li2 + 48, Li2 + 49, Li2 + 64, Li2 + 65, Li2 + 80, Li2 + 81, Li2 + 96,
+      Li2 + 97, Li2 + 112, Li2 + 113);
+  end;
+end;
+
+class function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.CreateFillBlock
+  : TFillBlock;
+begin
+  result := Default (TFillBlock);
+  result.FR := TBlock.CreateBlock();
+  result.FZ := TBlock.CreateBlock();
+  result.FAddressBlock := TBlock.CreateBlock();
+  result.FZeroBlock := TBlock.CreateBlock();
+  result.FInputBlock := TBlock.CreateBlock();
+end;
+
+procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.FillBlock(var Ax, Ay,
+  ACurrentBlock: TBlock; AWithXor: Boolean);
+begin
+  R.&Xor(Ax, Ay);
+  FZ.CopyBlock(R);
+
+  ApplyBlake();
+
+  if (AWithXor) then
+  begin
+    ACurrentBlock.&Xor(R, Z, ACurrentBlock);
+  end
+  else
+  begin
+    ACurrentBlock.&Xor(R, Z);
+  end;
+end;
 
 { TArgon2ParametersBuilder.TArgon2Parameters }
 
@@ -695,58 +965,6 @@ begin
   end;
   FMemory := Nil;
   TArrayUtils.ZeroFill(FResult);
-end;
-
-class procedure TPBKDF_Argon2NotBuildInAdapter.FBlaMka(var ABlock: TBlock;
-  Ax, Ay: Int32);
-var
-  Lm: UInt32;
-  Lxy: UInt64;
-begin
-  Lm := $FFFFFFFF;
-  Lxy := (ABlock.Fv[Ax] and Lm) * (ABlock.Fv[Ay] and Lm);
-
-  ABlock.Fv[Ax] := ABlock.Fv[Ax] + ABlock.Fv[Ay] + (2 * Lxy);
-end;
-
-class procedure TPBKDF_Argon2NotBuildInAdapter.Rotr64(var ABlock: TBlock;
-  Av, Aw, Ac: Int32);
-var
-  LTemp: UInt64;
-begin
-  LTemp := ABlock.Fv[Av] xor ABlock.Fv[Aw];
-  ABlock.Fv[Av] := TBits.RotateRight64(LTemp, Ac);
-end;
-
-class procedure TPBKDF_Argon2NotBuildInAdapter.F(var ABlock: TBlock;
-  Aa, Ab, Ac, Ad: Int32);
-begin
-  FBlaMka(ABlock, Aa, Ab);
-  Rotr64(ABlock, Ad, Aa, 32);
-
-  FBlaMka(ABlock, Ac, Ad);
-  Rotr64(ABlock, Ab, Ac, 24);
-
-  FBlaMka(ABlock, Aa, Ab);
-  Rotr64(ABlock, Ad, Aa, 16);
-
-  FBlaMka(ABlock, Ac, Ad);
-  Rotr64(ABlock, Ab, Ac, 63);
-end;
-
-class procedure TPBKDF_Argon2NotBuildInAdapter.RoundFunction(var ABlock: TBlock;
-  Av0, Av1, Av2, Av3, Av4, Av5, Av6, Av7, Av8, Av9, Av10, Av11, Av12, Av13,
-  Av14, Av15: Int32);
-begin
-  F(ABlock, Av0, Av4, Av8, Av12);
-  F(ABlock, Av1, Av5, Av9, Av13);
-  F(ABlock, Av2, Av6, Av10, Av14);
-  F(ABlock, Av3, Av7, Av11, Av15);
-
-  F(ABlock, Av0, Av5, Av10, Av15);
-  F(ABlock, Av1, Av6, Av11, Av12);
-  F(ABlock, Av2, Av7, Av8, Av13);
-  F(ABlock, Av3, Av4, Av9, Av14);
 end;
 
 function TPBKDF_Argon2NotBuildInAdapter.InitialHash(const AParameters
@@ -1098,6 +1316,10 @@ begin
     (APosition.FSlice * FSegmentLength) + LStartingIndex;
   LPrevOffset := GetPrevOffset(LCurrentOffset);
 
+  LAddressBlock := Default (TBlock);
+  LInputBlock := Default (TBlock);
+  LZeroBlock := Default (TBlock);
+
   if (LDataIndependentAddressing) then
   begin
     LAddressBlock := LFiller.AddressBlock.Clear();
@@ -1322,223 +1544,6 @@ destructor TPBKDF_Argon2NotBuildInAdapter.Destroy;
 begin
   Clear();
   inherited Destroy;
-end;
-
-{ TPBKDF_Argon2NotBuildInAdapter.TBlock }
-
-class function TPBKDF_Argon2NotBuildInAdapter.TBlock.CreateBlock: TBlock;
-begin
-  result := Default (TBlock);
-  System.SetLength(result.Fv, SIZE);
-  result.FInitialized := True;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.CheckAreBlocksInitialized
-  (const ABlocks: THashLibGenericArray<TBlock>);
-var
-  LBlock: TBlock;
-begin
-  for LBlock in ABlocks do
-  begin
-    if not(LBlock.FInitialized) then
-    begin
-      raise EArgumentNilHashLibException.CreateRes
-        (@SBlockInstanceNotInitialized);
-    end;
-  end;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.CopyBlock(const AOther: TBlock);
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AOther));
-  Fv := System.Copy(AOther.Fv);
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.&Xor(const AB1, AB2: TBlock);
-var
-  LIdx: Int32;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self,
-    AB1, AB2));
-  for LIdx := 0 to System.Pred(SIZE) do
-  begin
-    Fv[LIdx] := AB1.Fv[LIdx] xor AB2.Fv[LIdx];
-  end;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.XorWith(const AOther: TBlock);
-var
-  LIdx: Int32;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AOther));
-  for LIdx := 0 to System.Pred(System.Length(Fv)) do
-  begin
-    Fv[LIdx] := Fv[LIdx] xor AOther.Fv[LIdx];
-  end;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TBlock.Clear;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
-  TArrayUtils.ZeroFill(Fv);
-  result := Self;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.&Xor(const AB1, AB2,
-  AB3: TBlock);
-var
-  LIdx: Int32;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self, AB1,
-    AB2, AB3));
-  for LIdx := 0 to System.Pred(SIZE) do
-  begin
-    Fv[LIdx] := AB1.Fv[LIdx] xor AB2.Fv[LIdx] xor AB3.Fv[LIdx];
-  end;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TBlock.FromBytes
-  (const AInput: THashLibByteArray);
-var
-  LIdx: Int32;
-  LPtrInput: PByte;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
-  if (System.Length(AInput) <> ARGON2_BLOCK_SIZE) then
-  begin
-    raise EArgumentHashLibException.CreateResFmt(@SInputLengthInvalid,
-      [System.Length(AInput), ARGON2_BLOCK_SIZE]);
-  end;
-  LPtrInput := PByte(AInput);
-  for LIdx := 0 to System.Pred(SIZE) do
-  begin
-    Fv[LIdx] := TConverters.ReadBytesAsUInt64LE(LPtrInput, LIdx * 8);
-  end;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TBlock.ToBytes: THashLibByteArray;
-var
-  LIdx: Int32;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
-  System.SetLength(result, ARGON2_BLOCK_SIZE);
-  for LIdx := 0 to System.Pred(SIZE) do
-  begin
-    TConverters.ReadUInt64AsBytesLE(Fv[LIdx], result, LIdx * 8);
-  end;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TBlock.ToString: String;
-var
-  LIdx: Int32;
-begin
-  CheckAreBlocksInitialized(THashLibGenericArray<TBlock>.Create(Self));
-  result := '';
-  for LIdx := 0 to System.Pred(SIZE) do
-  begin
-    result := result + TConverters.ConvertBytesToHexString
-      (TConverters.ReadUInt64AsBytesLE(Fv[LIdx]), False);
-  end;
-end;
-
-{ TPBKDF_Argon2NotBuildInAdapter.TPosition }
-
-class function TPBKDF_Argon2NotBuildInAdapter.TPosition.CreatePosition()
-  : TPosition;
-begin
-  result := Default (TPosition);
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TPosition.Update(APass, ALane, ASlice,
-  AIndex: Int32);
-begin
-  FPass := APass;
-  FLane := ALane;
-  FSlice := ASlice;
-  FIndex := AIndex;
-end;
-
-{ TPBKDF_Argon2NotBuildInAdapter.TFillBlock }
-
-function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetAddressBlock: TBlock;
-begin
-  result := FAddressBlock;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetInputBlock: TBlock;
-begin
-  result := FInputBlock;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetR: TBlock;
-begin
-  result := FR;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetZ: TBlock;
-begin
-  result := FZ;
-end;
-
-function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.GetZeroBlock: TBlock;
-begin
-  result := FZeroBlock;
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.ApplyBlake();
-var
-  Li, Li16, Li2: Int32;
-begin
-  (* Apply Blake2 on columns of 64-bit words: (0,1,...,15) , then
-    (16,17,..31)... finally (112,113,...127) *)
-
-  for Li := 0 to System.Pred(8) do
-  begin
-    Li16 := 16 * Li;
-    RoundFunction(FZ, Li16, Li16 + 1, Li16 + 2, Li16 + 3, Li16 + 4, Li16 + 5,
-      Li16 + 6, Li16 + 7, Li16 + 8, Li16 + 9, Li16 + 10, Li16 + 11, Li16 + 12,
-      Li16 + 13, Li16 + 14, Li16 + 15);
-  end;
-
-  (* Apply Blake2 on rows of 64-bit words: (0,1,16,17,...112,113), then
-    (2,3,18,19,...,114,115).. finally (14,15,30,31,...,126,127) *)
-
-  for Li := 0 to System.Pred(8) do
-  begin
-    Li2 := 2 * Li;
-    RoundFunction(FZ, Li2, Li2 + 1, Li2 + 16, Li2 + 17, Li2 + 32, Li2 + 33,
-      Li2 + 48, Li2 + 49, Li2 + 64, Li2 + 65, Li2 + 80, Li2 + 81, Li2 + 96,
-      Li2 + 97, Li2 + 112, Li2 + 113);
-  end;
-end;
-
-class function TPBKDF_Argon2NotBuildInAdapter.TFillBlock.CreateFillBlock
-  : TFillBlock;
-begin
-  result := Default (TFillBlock);
-  result.FR := TBlock.CreateBlock();
-  result.FZ := TBlock.CreateBlock();
-  result.FAddressBlock := TBlock.CreateBlock();
-  result.FZeroBlock := TBlock.CreateBlock();
-  result.FInputBlock := TBlock.CreateBlock();
-end;
-
-procedure TPBKDF_Argon2NotBuildInAdapter.TFillBlock.FillBlock(var Ax, Ay,
-  ACurrentBlock: TBlock; AWithXor: Boolean);
-begin
-  R.&Xor(Ax, Ay);
-  FZ.CopyBlock(R);
-
-  ApplyBlake();
-
-  if (AWithXor) then
-  begin
-    ACurrentBlock.&Xor(R, Z, ACurrentBlock);
-  end
-  else
-  begin
-    ACurrentBlock.&Xor(R, Z);
-  end;
 end;
 
 end.
