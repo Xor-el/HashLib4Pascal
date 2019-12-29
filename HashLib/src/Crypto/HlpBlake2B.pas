@@ -1789,6 +1789,7 @@ end;
 procedure TBlake2B.Finish;
 var
   LCount: Int32;
+  LPtrBuffer: PByte;
 begin
   // Last compression
   Blake2BIncrementCounter(UInt64(FFilledBufferCount));
@@ -1807,8 +1808,8 @@ begin
     TArrayUtils.Fill(FBuffer, FFilledBufferCount,
       LCount + FFilledBufferCount, Byte(0));
   end;
-
-  Compress(PByte(FBuffer), 0);
+  LPtrBuffer := PByte(FBuffer);
+  Compress(LPtrBuffer, 0);
 end;
 
 procedure TBlake2B.Initialize;
