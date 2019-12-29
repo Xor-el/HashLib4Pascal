@@ -22,7 +22,6 @@ uses
   HlpHashLibTypes;
 
 resourcestring
-  SInvalidHashMode = 'Only "[%s]" HashModes are Supported';
   SInvalidXOFSize =
     'XOFSize in Bits must be Multiples of 8 and be Greater than Zero Bytes';
   SOutputLengthInvalid = 'Output Length is above the Digest Length';
@@ -410,20 +409,7 @@ end;
 
 function TSHA3.GetName: String;
 begin
-  case GetHashMode() of
-    TSHA3.THashMode.hmKeccak:
-      Result := Format('%s_%u', ['TKeccak', Self.HashSize * 8]);
-    TSHA3.THashMode.hmSHA3:
-      Result := Self.ClassName;
-    TSHA3.THashMode.hmShake, TSHA3.THashMode.hmCShake:
-      Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBytes',
-        (Self as IXOF).XOFSizeInBits shr 3]);
-  else
-    begin
-      raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashMode,
-        ['hmKeccak, hmSHA3, hmShake, hmCShake']);
-    end;
-  end;
+  Result := Self.ClassName;
 end;
 
 function TSHA3.GetResult: THashLibByteArray;
@@ -1390,15 +1376,7 @@ end;
 
 function TKMACNotBuildInAdapter.GetName: String;
 begin
-  if Supports(Self, IXOF) then
-  begin
-    Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBytes',
-      (FHash as IXOF).XOFSizeInBits shr 3]);
-  end
-  else
-  begin
-    Result := Format('%s', [Self.ClassName]);
-  end;
+  Result := Self.ClassName;
 end;
 
 procedure TKMACNotBuildInAdapter.Initialize;

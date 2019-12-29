@@ -2036,8 +2036,7 @@ end;
 
 function TBlake2XB.GetName: String;
 begin
-  Result := Format('%s_%s_%u', [Self.ClassName, 'XOFSizeInBytes',
-    (Self as IXOF).XOFSizeInBits shr 3]);
+  Result := Self.ClassName;
 end;
 
 function TBlake2XB.Clone(): IHash;
