@@ -116,7 +116,7 @@ end;
 
 function TPBKDF2_HMACNotBuildInAdapter.Func: THashLibByteArray;
 var
-  LINT_Block, LTemp, LRet: THashLibByteArray;
+  LINT_Block, LTemp: THashLibByteArray;
   LIdx: UInt32;
   LJdx: Int32;
 begin
@@ -129,7 +129,7 @@ begin
 
   LTemp := FHMAC.TransformFinal().GetBytes();
 
-  LRet := LTemp;
+  Result := System.Copy(LTemp);
 
   LIdx := 2;
   while LIdx <= FIterationCount do
@@ -138,13 +138,12 @@ begin
     LJdx := 0;
     while LJdx < FBlockSize do
     begin
-      LRet[LJdx] := LRet[LJdx] xor LTemp[LJdx];
+      Result[LJdx] := Result[LJdx] xor LTemp[LJdx];
       System.Inc(LJdx);
     end;
     System.Inc(LIdx);
   end;
   System.Inc(FBlock);
-  Result := LRet;
 end;
 
 function TPBKDF2_HMACNotBuildInAdapter.GetBytes(AByteCount: Int32)
