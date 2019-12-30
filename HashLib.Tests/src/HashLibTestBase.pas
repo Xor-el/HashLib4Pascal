@@ -31,6 +31,42 @@ type
 type
   THashLibTestCase = class abstract(TTestCase)
 
+  strict private
+  var
+    FActualString, FExpectedString: String;
+
+    function GetActualString: String; inline;
+    procedure SetActualString(const AValue: String); inline;
+    function GetExpectedString: String; inline;
+    procedure SetExpectedString(const AValue: String); inline;
+
+  strict protected
+    property ActualString: String read GetActualString write SetActualString;
+    property ExpectedString: String read GetExpectedString
+      write SetExpectedString;
+  end;
+
+type
+  TPBKDF2_HMACTestCase = class abstract(THashLibTestCase)
+
+  strict private
+  var
+    FByteCount: Int32;
+    FPBKDF2_HMACInstance: IPBKDF2_HMAC;
+
+    function GetByteCount: Int32; inline;
+    procedure SetByteCount(const AValue: Int32); inline;
+    function GetPBKDF2_HMACInstance: IPBKDF2_HMAC; inline;
+    procedure SetPBKDF2_HMACInstance(const AValue: IPBKDF2_HMAC); inline;
+
+  strict protected
+    property ByteCount: Int32 read GetByteCount write SetByteCount;
+    property PBKDF2_HMACInstance: IPBKDF2_HMAC read GetPBKDF2_HMACInstance
+      write SetPBKDF2_HMACInstance;
+
+  published
+    procedure TestPBKDF2_HMAC;
+
   end;
 
 type
@@ -39,15 +75,9 @@ type
   strict private
   var
     FHashInstance: IHash;
-    FActualString, FExpectedString: String;
 
     function GetHashInstance: IHash; inline;
     procedure SetHashInstance(const AValue: IHash); inline;
-
-    function GetActualString: String; inline;
-    procedure SetActualString(const AValue: String); inline;
-    function GetExpectedString: String; inline;
-    procedure SetExpectedString(const AValue: String); inline;
 
   strict protected
 
@@ -154,9 +184,6 @@ type
     function AreEqual(const A, B: TBytes): Boolean;
 
     property HashInstance: IHash read GetHashInstance write SetHashInstance;
-    property ActualString: String read GetActualString write SetActualString;
-    property ExpectedString: String read GetExpectedString
-      write SetExpectedString;
 
   end;
 
@@ -415,31 +442,66 @@ type
 
 implementation
 
-{ THashLibAlgorithmTestCase }
+{ THashLibTestCase }
 
-function THashLibAlgorithmTestCase.GetActualString: String;
+function THashLibTestCase.GetActualString: String;
 begin
   Result := FActualString;
 end;
 
-function THashLibAlgorithmTestCase.GetExpectedString: String;
+function THashLibTestCase.GetExpectedString: String;
 begin
   Result := FExpectedString;
 end;
 
-function THashLibAlgorithmTestCase.GetHashInstance: IHash;
-begin
-  Result := FHashInstance;
-end;
-
-procedure THashLibAlgorithmTestCase.SetActualString(const AValue: String);
+procedure THashLibTestCase.SetActualString(const AValue: String);
 begin
   FActualString := AValue;
 end;
 
-procedure THashLibAlgorithmTestCase.SetExpectedString(const AValue: String);
+procedure THashLibTestCase.SetExpectedString(const AValue: String);
 begin
   FExpectedString := AValue;
+end;
+
+{ TPBKDF2_HMACTestCase }
+
+function TPBKDF2_HMACTestCase.GetByteCount: Int32;
+begin
+  Result := FByteCount;
+end;
+
+function TPBKDF2_HMACTestCase.GetPBKDF2_HMACInstance: IPBKDF2_HMAC;
+begin
+  Result := FPBKDF2_HMACInstance;
+end;
+
+procedure TPBKDF2_HMACTestCase.SetByteCount(const AValue: Int32);
+begin
+  FByteCount := AValue;
+end;
+
+procedure TPBKDF2_HMACTestCase.SetPBKDF2_HMACInstance
+  (const AValue: IPBKDF2_HMAC);
+begin
+  FPBKDF2_HMACInstance := AValue;
+end;
+
+procedure TPBKDF2_HMACTestCase.TestPBKDF2_HMAC;
+begin
+  ActualString := TConverters.ConvertBytesToHexString
+    (PBKDF2_HMACInstance.GetBytes(ByteCount), False);
+  PBKDF2_HMACInstance.Clear();
+
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+{ THashLibAlgorithmTestCase }
+
+function THashLibAlgorithmTestCase.GetHashInstance: IHash;
+begin
+  Result := FHashInstance;
 end;
 
 procedure THashLibAlgorithmTestCase.SetHashInstance(const AValue: IHash);
