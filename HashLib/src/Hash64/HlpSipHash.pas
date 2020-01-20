@@ -52,8 +52,9 @@ type
   var
     FV0, FV1, FV2, FV3, FKey0, FKey1, FTotalLength, FPartA, FPartB: UInt64;
     FCompressionRounds, FFinalizationRounds, FIdx: Int32;
-    FMagicXor: Byte;
     FBuffer: THashLibByteArray;
+
+    function GetMagicXor(): Byte; virtual;
 
   public
     constructor Create(AHashSize, ABlockSize: Int32);
@@ -84,6 +85,11 @@ implementation
 
 { TSipHash2_4 }
 
+function TSipHash.GetMagicXor: Byte;
+begin
+  Result := $FF;
+end;
+
 function TSipHash2_4.Clone(): IHash;
 var
   LHashInstance: TSipHash2_4;
@@ -101,14 +107,13 @@ begin
   LHashInstance.FFinalizationRounds := FFinalizationRounds;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance as IHash;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TSipHash2_4.Create(ACompressionRounds, AFinalizationRounds: Int32);
 begin
   Inherited Create(8, 8);
-  FMagicXor := $FF;
   FCompressionRounds := ACompressionRounds;
   FFinalizationRounds := AFinalizationRounds;
 end;
@@ -166,7 +171,7 @@ end;
 
 function TSipHash.ProcessFinalBlock: UInt64;
 begin
-  result := UInt64(FTotalLength and $FF) shl 56;
+  Result := UInt64(FTotalLength and $FF) shl 56;
 
   if (FIdx <> 0) then
   begin
@@ -174,56 +179,56 @@ begin
 
       7:
         begin
-          result := result or (UInt64(FBuffer[6]) shl 48);
-          result := result or (UInt64(FBuffer[5]) shl 40);
-          result := result or (UInt64(FBuffer[4]) shl 32);
-          result := result or (UInt64(FBuffer[3]) shl 24);
-          result := result or (UInt64(FBuffer[2]) shl 16);
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[6]) shl 48);
+          Result := Result or (UInt64(FBuffer[5]) shl 40);
+          Result := Result or (UInt64(FBuffer[4]) shl 32);
+          Result := Result or (UInt64(FBuffer[3]) shl 24);
+          Result := Result or (UInt64(FBuffer[2]) shl 16);
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
       6:
         begin
-          result := result or (UInt64(FBuffer[5]) shl 40);
-          result := result or (UInt64(FBuffer[4]) shl 32);
-          result := result or (UInt64(FBuffer[3]) shl 24);
-          result := result or (UInt64(FBuffer[2]) shl 16);
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[5]) shl 40);
+          Result := Result or (UInt64(FBuffer[4]) shl 32);
+          Result := Result or (UInt64(FBuffer[3]) shl 24);
+          Result := Result or (UInt64(FBuffer[2]) shl 16);
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
       5:
         begin
-          result := result or (UInt64(FBuffer[4]) shl 32);
-          result := result or (UInt64(FBuffer[3]) shl 24);
-          result := result or (UInt64(FBuffer[2]) shl 16);
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[4]) shl 32);
+          Result := Result or (UInt64(FBuffer[3]) shl 24);
+          Result := Result or (UInt64(FBuffer[2]) shl 16);
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
 
       4:
         begin
-          result := result or (UInt64(FBuffer[3]) shl 24);
-          result := result or (UInt64(FBuffer[2]) shl 16);
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[3]) shl 24);
+          Result := Result or (UInt64(FBuffer[2]) shl 16);
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
 
       3:
         begin
-          result := result or (UInt64(FBuffer[2]) shl 16);
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[2]) shl 16);
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
 
       2:
         begin
-          result := result or (UInt64(FBuffer[1]) shl 8);
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[1]) shl 8);
+          Result := Result or (UInt64(FBuffer[0]));
         end;
 
       1:
         begin
-          result := result or (UInt64(FBuffer[0]));
+          Result := Result or (UInt64(FBuffer[0]));
         end;
     end;
   end;
@@ -262,12 +267,12 @@ begin
   TConverters.ReadUInt64AsBytesLE(FKey0, LKey, 0);
   TConverters.ReadUInt64AsBytesLE(FKey1, LKey, 8);
 
-  result := LKey;
+  Result := LKey;
 end;
 
 function TSipHash.GetKeyLength: TNullableInteger;
 begin
-  result := 16;
+  Result := 16;
 end;
 
 procedure TSipHash.Initialize;
@@ -392,7 +397,7 @@ begin
   CompressTimes(FCompressionRounds);
   FV0 := FV0 xor LFinalBlock;
 
-  FV2 := FV2 xor FMagicXor;
+  FV2 := FV2 xor GetMagicXor();
   CompressTimes(FFinalizationRounds);
   FPartA := FV0 xor FV1 xor FV2 xor FV3;
 
@@ -422,7 +427,7 @@ begin
       end;
   end;
 
-  result := THashResult.Create(LBufferBytes);
+  Result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 

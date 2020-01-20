@@ -17,6 +17,9 @@ type
   /// <summary>
   TSipHash128_2_4 = class sealed(TSipHash)
 
+  strict protected
+    function GetMagicXor(): Byte; override;
+
   public
 
     constructor Create(ACompressionRounds: Int32 = 2;
@@ -28,6 +31,11 @@ type
 implementation
 
 { TSipHash128_2_4 }
+
+function TSipHash128_2_4.GetMagicXor: Byte;
+begin
+  Result := $EE;
+end;
 
 function TSipHash128_2_4.Clone: IHash;
 var
@@ -47,15 +55,14 @@ begin
   LHashInstance.FFinalizationRounds := FFinalizationRounds;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance as IHash;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TSipHash128_2_4.Create(ACompressionRounds,
   AFinalizationRounds: Int32);
 begin
   Inherited Create(16, 8);
-  FMagicXor := $EE;
   FCompressionRounds := ACompressionRounds;
   FFinalizationRounds := AFinalizationRounds;
 end;
