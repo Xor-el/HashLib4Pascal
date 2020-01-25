@@ -66,7 +66,7 @@ Available Algorithms
  
  * `Has160`
 
- * `RIPEMD (128, 256, 256, 320)`
+ * `RIPEMD (128, 160, 256, 256, 320)`
 
  * `Tiger (128, 160, 192 (Rounds 3, 4, 5))` 
 
