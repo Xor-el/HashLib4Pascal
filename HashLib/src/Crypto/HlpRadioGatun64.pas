@@ -47,15 +47,10 @@ implementation
 function TRadioGatun64.Clone(): IHash;
 var
   LHashInstance: TRadioGatun64;
-  LIdx: Int32;
 begin
   LHashInstance := TRadioGatun64.Create();
   LHashInstance.FMill := System.Copy(FMill);
-  // since System.Copy() does not support jagged arrays (multidimensional dynamic arrays, we improvise)
-  for LIdx := System.Low(FBelt) to System.High(FBelt) do
-  begin
-    LHashInstance.FBelt[LIdx] := System.Copy(FBelt[LIdx]);
-  end;
+  LHashInstance.FBelt := TArrayUtils.Clone(FBelt);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
   result := LHashInstance as IHash;

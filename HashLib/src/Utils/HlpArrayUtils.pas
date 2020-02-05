@@ -49,6 +49,12 @@ type
     class function Concatenate(const ABuffer1, ABuffer2: THashLibUInt32Array)
       : THashLibUInt32Array; overload; static;
 
+    class function Clone(const AMatrixBuffer: THashLibMatrixUInt32Array)
+      : THashLibMatrixUInt32Array; overload; static;
+
+    class function Clone(const AMatrixBuffer: THashLibMatrixUInt64Array)
+      : THashLibMatrixUInt64Array; overload; static;
+
   end;
 
 implementation
@@ -202,6 +208,30 @@ begin
   begin
     System.Move(ABuffer2[0], Result[LABuffer1Length], System.Length(ABuffer2) *
       System.SizeOf(UInt32));
+  end;
+end;
+
+class function TArrayUtils.Clone(const AMatrixBuffer: THashLibMatrixUInt32Array)
+  : THashLibMatrixUInt32Array;
+var
+  LIdx: Int32;
+begin
+  System.SetLength(Result, System.Length(AMatrixBuffer));
+  for LIdx := System.Low(AMatrixBuffer) to System.High(AMatrixBuffer) do
+  begin
+    Result[LIdx] := System.Copy(AMatrixBuffer[LIdx]);
+  end;
+end;
+
+class function TArrayUtils.Clone(const AMatrixBuffer: THashLibMatrixUInt64Array)
+  : THashLibMatrixUInt64Array;
+var
+  LIdx: Int32;
+begin
+  System.SetLength(Result, System.Length(AMatrixBuffer));
+  for LIdx := System.Low(AMatrixBuffer) to System.High(AMatrixBuffer) do
+  begin
+    Result[LIdx] := System.Copy(AMatrixBuffer[LIdx]);
   end;
 end;
 
