@@ -119,18 +119,9 @@ begin
 end;
 
 procedure TRadioGatun64.Initialize;
-var
-  LIdx: Int32;
 begin
   TArrayUtils.ZeroFill(FMill);
-
-  LIdx := 0;
-  while LIdx < 13 do
-  begin
-    TArrayUtils.ZeroFill(FBelt[LIdx]);
-    System.Inc(LIdx);
-  end;
-
+  TArrayUtils.ZeroFill(FBelt);
   Inherited Initialize();
 end;
 

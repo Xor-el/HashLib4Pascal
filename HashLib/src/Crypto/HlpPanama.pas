@@ -224,8 +224,6 @@ begin
 end;
 
 procedure TPanama.Initialize;
-var
-  LIdx: Int32;
 begin
   TArrayUtils.ZeroFill(FState);
   TArrayUtils.ZeroFill(FTheta);
@@ -234,10 +232,7 @@ begin
 
   FTap := 0;
 
-  for LIdx := System.Low(FStages) to System.High(FStages) do
-  begin
-    TArrayUtils.ZeroFill(FStages[LIdx]);
-  end;
+  TArrayUtils.ZeroFill(FStages);
 
   Inherited Initialize();
 end;
