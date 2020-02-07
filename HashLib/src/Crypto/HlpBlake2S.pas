@@ -1933,7 +1933,7 @@ end;
 procedure TBlake2XS.DoOutput(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 var
-  LDestinationOffset, LOutputLength, LDiff, LCount, LBlockOffset: UInt64;
+  LDiff, LCount, LBlockOffset: UInt64;
 begin
 
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -1962,9 +1962,6 @@ begin
     FFinalized := True;
   end;
 
-  LDestinationOffset := ADestinationOffset;
-  LOutputLength := AOutputLength;
-
   if (FRootHashDigest = Nil) then
   begin
     // Get root digest
@@ -1973,7 +1970,7 @@ begin
       System.Length(FRootHashDigest));
   end;
 
-  while LOutputLength > 0 do
+  while AOutputLength > 0 do
   begin
     if (FDigestPosition and (Blake2SHashSize - 1)) = 0 then
     begin
@@ -1992,9 +1989,9 @@ begin
     LDiff := UInt64(System.Length(FBlake2XSBuffer)) - LBlockOffset;
 
     // Math.Min
-    if LOutputLength < LDiff then
+    if AOutputLength < LDiff then
     begin
-      LCount := LOutputLength
+      LCount := AOutputLength
     end
     else
     begin
@@ -2002,11 +1999,11 @@ begin
     end;
 
     System.Move(FBlake2XSBuffer[LBlockOffset],
-      ADestination[LDestinationOffset], LCount);
+      ADestination[ADestinationOffset], LCount);
 
-    System.Dec(LOutputLength, LCount);
-    System.Inc(LDestinationOffset, LCount);
-    System.Inc(FDigestPosition, UInt64(LCount));
+    System.Dec(AOutputLength, LCount);
+    System.Inc(ADestinationOffset, LCount);
+    System.Inc(FDigestPosition, LCount);
   end;
 end;
 

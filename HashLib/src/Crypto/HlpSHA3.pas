@@ -174,7 +174,7 @@ type
     function SetXOFSizeInBitsInternal(AXofSizeInBits: UInt64): IXOF;
   strict protected
   var
-    FBufferPosition, FDigestPosition, FShakeBufferPosition: UInt64;
+    FBufferPosition, FDigestPosition: UInt64;
     FShakeBuffer: THashLibByteArray;
     FFinalized: Boolean;
     constructor Create(AHashSize: THashSize);
@@ -996,7 +996,7 @@ end;
 procedure TShake.DoOutput(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 var
-  LDestinationOffset: UInt64;
+  LDiff, LCount, LBlockOffset: UInt64;
 begin
 
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -1016,11 +1016,9 @@ begin
     FFinalized := True;
   end;
 
-  LDestinationOffset := ADestinationOffset;
-
   while AOutputLength > 0 do
   begin
-    if FShakeBufferPosition >= 8 then
+    if (FDigestPosition and 7) = 0 then
     begin
 
       if (FBufferPosition * 8) >= UInt64(BlockSize) then
@@ -1031,15 +1029,28 @@ begin
 
       TConverters.ReadUInt64AsBytesLE(FState[FBufferPosition], FShakeBuffer, 0);
       System.Inc(FBufferPosition);
-      FShakeBufferPosition := 0;
     end;
 
-    ADestination[LDestinationOffset] := FShakeBuffer[FShakeBufferPosition];
+    LBlockOffset := FDigestPosition and 7;
 
-    System.Inc(FShakeBufferPosition);
-    System.Dec(AOutputLength);
-    System.Inc(FDigestPosition);
-    System.Inc(LDestinationOffset);
+    LDiff := UInt64(System.Length(FShakeBuffer)) - LBlockOffset;
+
+    // Math.Min
+    if AOutputLength < LDiff then
+    begin
+      LCount := AOutputLength
+    end
+    else
+    begin
+      LCount := LDiff;
+    end;
+
+    System.Move(FShakeBuffer[LBlockOffset],
+      ADestination[ADestinationOffset], LCount);
+
+    System.Dec(AOutputLength, LCount);
+    System.Inc(ADestinationOffset, LCount);
+    System.Inc(FDigestPosition, LCount);
   end;
 end;
 
@@ -1059,7 +1070,6 @@ begin
   inherited Initialize();
   FBufferPosition := 0;
   FDigestPosition := 0;
-  FShakeBufferPosition := 8;
   FFinalized := False;
   TArrayUtils.ZeroFill(FShakeBuffer);
 end;
@@ -1102,7 +1112,6 @@ begin
   LHashInstance := LXof as TShake_128;
   LHashInstance.FBufferPosition := FBufferPosition;
   LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
   LHashInstance.FFinalized := FFinalized;
   LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
 
@@ -1135,7 +1144,6 @@ begin
   LHashInstance := LXof as TShake_256;
   LHashInstance.FBufferPosition := FBufferPosition;
   LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
   LHashInstance.FFinalized := FFinalized;
   LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
 
@@ -1283,7 +1291,6 @@ begin
 
   LHashInstance.FBufferPosition := FBufferPosition;
   LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
   LHashInstance.FFinalized := FFinalized;
   LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
 
@@ -1318,7 +1325,6 @@ begin
 
   LHashInstance.FBufferPosition := FBufferPosition;
   LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FShakeBufferPosition := FShakeBufferPosition;
   LHashInstance.FFinalized := FFinalized;
   LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
 
