@@ -170,7 +170,7 @@ type
   strict protected
   var
     FBlake2XSConfig: TBlake2XSConfig;
-    FBlake2XSBufferPosition, FDigestPosition, FBlockPosition: UInt64;
+    FDigestPosition, FBlockPosition: UInt64;
     FRootConfig, FOutputConfig: TBlake2XSConfig;
     FRootHashDigest, FBlake2XSBuffer: THashLibByteArray;
     FFinalized: Boolean;
@@ -1803,6 +1803,7 @@ begin
     Exit;
   end;
 
+  // Math.Min
   if UInt64(Blake2SHashSize) < LDiff then
   begin
     Result := UInt64(Blake2SHashSize)
@@ -1830,7 +1831,6 @@ begin
   // Blake2XS Cloning
   LHashInstance := LXof as TBlake2XS;
   LHashInstance.FBlake2XSConfig := FBlake2XSConfig.Clone();
-  LHashInstance.FBlake2XSBufferPosition := FBlake2XSBufferPosition;
   LHashInstance.FDigestPosition := FDigestPosition;
   LHashInstance.FBlockPosition := FBlockPosition;
   LHashInstance.FRootConfig := FRootConfig.Clone();
@@ -1922,8 +1922,6 @@ begin
 
   FOutputConfig.Blake2STreeConfig.NodeOffset := NodeOffsetWithXOFDigestLength
     (LXofSizeInBytes);
-
-  FBlake2XSBufferPosition := Blake2SHashSize;
   FRootHashDigest := Nil;
   FBlockPosition := 0;
   FDigestPosition := 0;
@@ -1935,7 +1933,7 @@ end;
 procedure TBlake2XS.DoOutput(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 var
-  LDestinationOffset: UInt64;
+  LDestinationOffset, LOutputLength, LDiff, LCount, LBlockOffset: UInt64;
 begin
 
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -1965,6 +1963,7 @@ begin
   end;
 
   LDestinationOffset := ADestinationOffset;
+  LOutputLength := AOutputLength;
 
   if (FRootHashDigest = Nil) then
   begin
@@ -1974,9 +1973,9 @@ begin
       System.Length(FRootHashDigest));
   end;
 
-  while AOutputLength > 0 do
+  while LOutputLength > 0 do
   begin
-    if FBlake2XSBufferPosition >= UInt64(Blake2SHashSize) then
+    if (FDigestPosition and (Blake2SHashSize - 1)) = 0 then
     begin
       FOutputConfig.Blake2SConfig.HashSize := ComputeStepLength();
       FOutputConfig.Blake2STreeConfig.InnerHashSize := Blake2SHashSize;
@@ -1986,16 +1985,28 @@ begin
         .GetBytes();
       FOutputConfig.Blake2STreeConfig.NodeOffset :=
         FOutputConfig.Blake2STreeConfig.NodeOffset + 1;
-      FBlake2XSBufferPosition := 0;
     end;
 
-    ADestination[LDestinationOffset] := FBlake2XSBuffer
-      [FBlake2XSBufferPosition];
+    LBlockOffset := FDigestPosition and (Blake2SHashSize - 1);
 
-    System.Inc(FBlake2XSBufferPosition);
-    System.Dec(AOutputLength);
-    System.Inc(FDigestPosition);
-    System.Inc(LDestinationOffset);
+    LDiff := UInt64(System.Length(FBlake2XSBuffer)) - LBlockOffset;
+
+    // Math.Min
+    if LOutputLength < LDiff then
+    begin
+      LCount := LOutputLength
+    end
+    else
+    begin
+      LCount := LDiff;
+    end;
+
+    System.Move(FBlake2XSBuffer[LBlockOffset],
+      ADestination[LDestinationOffset], LCount);
+
+    System.Dec(LOutputLength, LCount);
+    System.Inc(LDestinationOffset, LCount);
+    System.Inc(FDigestPosition, UInt64(LCount));
   end;
 end;
 
