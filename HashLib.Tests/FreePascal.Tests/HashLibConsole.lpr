@@ -4,11 +4,8 @@ program HashLib.Tests;
 
 uses
   consoletestrunner,
-  Blake2BTestVectors,
-  Blake2STestVectors,
-  Blake2BPTestVectors,
-  Blake2SPTestVectors,
   HashLibTestBase,
+  TestVectors,
   ChecksumTests,
   NullDigestTests,
   Hash32Tests,

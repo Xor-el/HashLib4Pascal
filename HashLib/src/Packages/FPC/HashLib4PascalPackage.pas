@@ -28,7 +28,7 @@ uses
   HlpCRC32Fast, HlpArgon2TypeAndVersion, HlpPBKDF_Argon2NotBuildInAdapter, 
   HlpPBKDF_ScryptNotBuildInAdapter, HlpArrayUtils, HlpBlake2BP, HlpBlake2SP, 
   HlpSipHash128, HlpBlake2SParams, HlpBlake2BParams, HlpIBlake2SParams, 
-  HlpIBlake2BParams;
+  HlpIBlake2BParams, HlpBlake3;
 
 implementation
 

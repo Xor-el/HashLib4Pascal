@@ -137,6 +137,7 @@ contains
   HlpBlake2SParams in '..\..\Crypto\Blake2SParams\HlpBlake2SParams.pas',
   HlpBlake2BParams in '..\..\Crypto\Blake2BParams\HlpBlake2BParams.pas',
   HlpIBlake2SParams in '..\..\Interfaces\IBlake2SParams\HlpIBlake2SParams.pas',
-  HlpIBlake2BParams in '..\..\Interfaces\IBlake2BParams\HlpIBlake2BParams.pas';
+  HlpIBlake2BParams in '..\..\Interfaces\IBlake2BParams\HlpIBlake2BParams.pas',
+  HlpBlake3 in '..\..\Crypto\HlpBlake3.pas';
 
 end.

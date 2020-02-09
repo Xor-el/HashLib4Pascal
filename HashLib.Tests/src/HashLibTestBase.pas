@@ -333,6 +333,7 @@ type
 
     property HMACInstance: IHMAC read GetHMACInstance write SetHMACInstance;
   published
+    procedure TestSplits();
     procedure TestHMACWithDefaultDataShortKey;
     procedure TestHMACWithDefaultDataLongKey;
     procedure TestHMACCloneWorks;
@@ -340,12 +341,28 @@ type
   end;
 
 type
-  TBlakeCryptoAlgorithmTestCase = class abstract(TCryptoAlgorithmTestCase)
+  TKeyedCryptoAlgorithmTestCase = class abstract(TCryptoAlgorithmTestCase)
+
+  strict private
+  var
+    FHashInstanceWithKey: IHash;
+
+    function GetHashInstanceWithKey: IHash; inline;
+    procedure SetHashInstanceWithKey(const AValue: IHash); inline;
+
+  strict protected
+
+    property HashInstanceWithKey: IHash read GetHashInstanceWithKey
+      write SetHashInstanceWithKey;
+
+  end;
+
+type
+  TBlakeCryptoAlgorithmTestCase = class abstract(TKeyedCryptoAlgorithmTestCase)
 
   strict private
   var
     FUnkeyedTestVectors, FKeyedTestVectors: THashLibStringArray;
-    FHashInstanceWithKey: IHash;
 
     function GetUnkeyedTestVectors: THashLibStringArray; inline;
     procedure SetUnkeyedTestVectors(const AValue: THashLibStringArray); inline;
@@ -353,20 +370,13 @@ type
     function GetKeyedTestVectors: THashLibStringArray; inline;
     procedure SetKeyedTestVectors(const AValue: THashLibStringArray); inline;
 
-    function GetHashInstanceWithKey: IHash; inline;
-    procedure SetHashInstanceWithKey(const AValue: IHash); inline;
-
   strict protected
     property UnkeyedTestVectors: THashLibStringArray read GetUnkeyedTestVectors
       write SetUnkeyedTestVectors;
     property KeyedTestVectors: THashLibStringArray read GetKeyedTestVectors
       write SetKeyedTestVectors;
 
-    property HashInstanceWithKey: IHash read GetHashInstanceWithKey
-      write SetHashInstanceWithKey;
-
   published
-    procedure TestSplits();
     procedure TestCheckKeyedTestVectors();
     procedure TestCheckUnkeyedTestVectors();
 
@@ -394,6 +404,7 @@ type
     property XofInstance: IXOF read GetXofInstance write SetXofInstance;
   published
     procedure TestOutputOverflow;
+    procedure TestOutputBufferTooShort;
     procedure TestVeryLongXofOfEmptyString;
     procedure TestVeryLongXofOfEmptyStringWithStreamingOutput;
     procedure TestXofShouldRaiseExceptionOnWriteAfterRead;
@@ -983,12 +994,57 @@ begin
     [ExpectedString, ActualString]));
 end;
 
-{ TBlakeCryptoAlgorithmTestCase }
+procedure TCryptoAlgorithmTestCase.TestSplits;
+var
+  LLen, LSplit1, LSplit2, LIdx: Int32;
+  LHash0, LHash1: String;
+  LInput: TBytes;
+begin
+  LInput := Nil;
+  System.SetLength(LInput, 20);
+  for LIdx := System.Low(LInput) to System.High(LInput) do
+  begin
+    LInput[LIdx] := LIdx;
+  end;
 
-function TBlakeCryptoAlgorithmTestCase.GetHashInstanceWithKey: IHash;
+  for LLen := System.Low(LInput) to System.High(LInput) do
+  begin
+    HashInstance.Initialize();
+    HashInstance.TransformBytes(LInput, 0, LLen);
+    LHash0 := HashInstance.TransformFinal.ToString();
+
+    for LSplit1 := 0 to LLen do
+    begin
+      for LSplit2 := LSplit1 to LLen do
+      begin
+        HashInstance.Initialize();
+        HashInstance.TransformBytes(LInput, 0, LSplit1);
+        HashInstance.TransformBytes(LInput, LSplit1, LSplit2 - LSplit1);
+        HashInstance.TransformBytes(LInput, LSplit2, LLen - LSplit2);
+        LHash1 := HashInstance.TransformFinal.ToString();
+        CheckEquals(LHash0, LHash1, Format('Expected %s but got %s.',
+          [LHash0, LHash1]));
+      end;
+    end;
+
+  end;
+
+end;
+
+{ TKeyedCryptoAlgorithmTestCase }
+
+function TKeyedCryptoAlgorithmTestCase.GetHashInstanceWithKey: IHash;
 begin
   Result := FHashInstanceWithKey;
 end;
+
+procedure TKeyedCryptoAlgorithmTestCase.SetHashInstanceWithKey
+  (const AValue: IHash);
+begin
+  FHashInstanceWithKey := AValue;
+end;
+
+{ TBlakeCryptoAlgorithmTestCase }
 
 function TBlakeCryptoAlgorithmTestCase.GetKeyedTestVectors: THashLibStringArray;
 begin
@@ -999,12 +1055,6 @@ function TBlakeCryptoAlgorithmTestCase.GetUnkeyedTestVectors
   : THashLibStringArray;
 begin
   Result := FUnkeyedTestVectors;
-end;
-
-procedure TBlakeCryptoAlgorithmTestCase.SetHashInstanceWithKey
-  (const AValue: IHash);
-begin
-  FHashInstanceWithKey := AValue;
 end;
 
 procedure TBlakeCryptoAlgorithmTestCase.SetKeyedTestVectors
@@ -1024,13 +1074,6 @@ var
   LLen, LIdx: Int32;
   LData: TBytes;
 begin
-  LData := Nil;
-  System.SetLength(LData, 20);
-  for LIdx := 0 to 19 do
-  begin
-    LData[LIdx] := LIdx;
-  end;
-
   for LLen := System.Low(KeyedTestVectors) to System.High(KeyedTestVectors) do
   begin
 
@@ -1086,43 +1129,6 @@ begin
 
 end;
 
-procedure TBlakeCryptoAlgorithmTestCase.TestSplits;
-var
-  LLen, LSplit1, LSplit2, LIdx: Int32;
-  LHash0, LHash1: String;
-  LInput: TBytes;
-begin
-  LInput := Nil;
-  System.SetLength(LInput, 20);
-  for LIdx := System.Low(LInput) to System.High(LInput) do
-  begin
-    LInput[LIdx] := LIdx;
-  end;
-
-  for LLen := System.Low(LInput) to System.High(LInput) do
-  begin
-    HashInstance.Initialize();
-    HashInstance.TransformBytes(LInput, 0, LLen);
-    LHash0 := HashInstance.TransformFinal.ToString();
-
-    for LSplit1 := 0 to LLen do
-    begin
-      for LSplit2 := LSplit1 to LLen do
-      begin
-        HashInstance.Initialize();
-        HashInstance.TransformBytes(LInput, 0, LSplit1);
-        HashInstance.TransformBytes(LInput, LSplit1, LSplit2 - LSplit1);
-        HashInstance.TransformBytes(LInput, LSplit2, LLen - LSplit2);
-        LHash1 := HashInstance.TransformFinal.ToString();
-        CheckEquals(LHash0, LHash1, Format('Expected %s but got %s.',
-          [LHash0, LHash1]));
-      end;
-    end;
-
-  end;
-
-end;
-
 { TXofAlgorithmTestCase }
 
 function TXofAlgorithmTestCase.GetXofInstance: IXOF;
@@ -1156,6 +1162,27 @@ begin
   XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
   // this call below should raise exception since we have already read from the Xof
   XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+end;
+
+procedure TXofAlgorithmTestCase.TestOutputBufferTooShort;
+var
+  LOutput: TBytes;
+begin
+  XofInstance.Initialize;
+  LOutput := Nil;
+  System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
+
+  try
+    XofInstance.DoOutput(LOutput, 1, System.Length(LOutput));
+    Fail('no exception');
+  except
+    on e: EArgumentOutOfRangeHashLibException do
+    begin
+      CheckEquals('Output Buffer Too Short', e.Message);
+    end;
+  end;
+
+  LOutput := XofInstance.TransformFinal().GetBytes();
 end;
 
 procedure TXofAlgorithmTestCase.TestOutputOverflow;

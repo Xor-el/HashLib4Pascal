@@ -62,7 +62,7 @@
         <PackageName Value="FCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="14">
       <Unit0>
         <Filename Value="HashLibConsole.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -77,61 +77,49 @@
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\src\Blake2BTestVectors.pas"/>
+        <Filename Value="..\src\CryptoTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\src\Blake2STestVectors.pas"/>
+        <Filename Value="..\src\Hash128Tests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\src\CryptoTests.pas"/>
+        <Filename Value="..\src\Hash64Tests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\src\Hash128Tests.pas"/>
+        <Filename Value="..\src\Hash32Tests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\src\Hash64Tests.pas"/>
+        <Filename Value="..\src\NullDigestTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\src\Hash32Tests.pas"/>
+        <Filename Value="..\src\ChecksumTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\src\NullDigestTests.pas"/>
+        <Filename Value="..\src\HashLibTestBase.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\src\ChecksumTests.pas"/>
+        <Filename Value="..\src\PBKDF_Argon2Tests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="..\src\HashLibTestBase.pas"/>
+        <Filename Value="..\src\PBKDF_ScryptTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="..\src\PBKDF_Argon2Tests.pas"/>
+        <Filename Value="..\src\CRCTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="..\src\PBKDF_ScryptTests.pas"/>
+        <Filename Value="..\src\TestVectors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
-      <Unit14>
-        <Filename Value="..\src\CRCTests.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="..\src\Blake2BPTestVectors.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="..\src\Blake2SPTestVectors.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit16>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

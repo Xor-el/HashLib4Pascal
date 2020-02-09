@@ -158,6 +158,8 @@ begin
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2SP(32, Nil)));
 
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake3_256(Nil)));
+
 end;
 
 class constructor TPerformanceBenchmark.PerformanceBenchmark;

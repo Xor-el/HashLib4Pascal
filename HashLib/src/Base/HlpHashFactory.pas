@@ -91,6 +91,7 @@ uses
   HlpBlake2SParams,
   HlpBlake2BP,
   HlpBlake2SP,
+  HlpBlake3,
   // HMAC Unit
   HlpHMACNotBuildInAdapter,
   // PBKDF2_HMAC Unit
@@ -413,6 +414,9 @@ type
       class function CreateBlake2SP(AHashSize: Int32;
         const AKey: THashLibByteArray): IHash; static;
 
+      class function CreateBlake3_256(const AKey: THashLibByteArray)
+        : IHash; static;
+
     end;
 
     // ====================== TXOF ====================== //
@@ -453,6 +457,9 @@ type
 
       class function CreateKMAC256XOF(const AKMACKey, ACustomization
         : THashLibByteArray; AXofSizeInBits: UInt64): IHash; static;
+
+      class function CreateBlake3XOF(const AKey: THashLibByteArray;
+        AXofSizeInBits: UInt64): IHash; overload; static;
 
     end;
 
@@ -1236,6 +1243,12 @@ begin
   Result := TBlake2SP.Create(AHashSize, AKey);
 end;
 
+class function THashFactory.TCrypto.CreateBlake3_256
+  (const AKey: THashLibByteArray): IHash;
+begin
+  Result := TBlake3.Create(THashSize.hsHashSize256, AKey);
+end;
+
 class function THashFactory.TCrypto.CreateSnefru(ASecurityLevel: Int32;
   AHashSize: THashSize): IHash;
 begin
@@ -1458,6 +1471,16 @@ begin
   LConfig.Key := AKey;
   Result := CreateBlake2XB(TBlake2XBConfig.Create(LConfig, Nil),
     AXofSizeInBits);
+end;
+
+class function THashFactory.TXOF.CreateBlake3XOF(const AKey: THashLibByteArray;
+  AXofSizeInBits: UInt64): IHash;
+var
+  LXof: IXOF;
+begin
+  LXof := (TBlake3XOF.Create(32, AKey) as IXOF);
+  LXof.XOFSizeInBits := AXofSizeInBits;
+  Result := LXof as IHash;
 end;
 
 class function THashFactory.TXOF.CreateKMAC128XOF(const AKMACKey,

@@ -28,6 +28,9 @@ type
     class procedure Fill(const ABuffer: THashLibUInt64Array; AFrom, ATo: Int32;
       AFiller: UInt64); overload; static;
 
+    class procedure FillMemory(ABufferPtr: Pointer; ASize: Int64;
+      AFiller: Byte); static;
+
     class procedure ZeroFill(const ABuffer: THashLibByteArray);
       overload; static;
 
@@ -134,6 +137,15 @@ begin
       System.Inc(AFrom);
     end;
 {$ENDIF}
+  end;
+end;
+
+class procedure TArrayUtils.FillMemory(ABufferPtr: Pointer; ASize: Int64;
+  AFiller: Byte);
+begin
+  if ABufferPtr <> Nil then
+  begin
+    System.FillChar(ABufferPtr^, ASize, AFiller);
   end;
 end;
 
