@@ -286,14 +286,6 @@ procedure TBlake3.TBlake3Node.G(APtrState: PCardinal; A, B, C, D, X, Y: UInt32);
 var
   LA, LB, LC, LD: UInt32;
 begin
-  // APtrState[A] := APtrState[A] + APtrState[B] + X;
-  // APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 16);
-  // APtrState[C] := APtrState[C] + APtrState[D];
-  // APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 12);
-  // APtrState[A] := APtrState[A] + APtrState[B] + Y;
-  // APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 8);
-  // APtrState[C] := APtrState[C] + APtrState[D];
-  // APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 7);
 
   LA := APtrState[A];
   LB := APtrState[B];
@@ -687,32 +679,6 @@ begin
 {$ENDIF FPC}
 end;
 
-class procedure TBlake3.DeriveKey(const ASrcKey, ACtx,
-  ASubKey: THashLibByteArray);
-const
-  derivationIVLen = Int32(32);
-var
-  LIVWords: THashLibUInt32Array;
-  LDerivationIV: THashLibByteArray;
-  LXof: IXOF;
-begin
-  System.SetLength(LIVWords, 8);
-  System.Move(IV, LIVWords[0], System.SizeOf(IV));
-  // construct the derivation Hasher and get the DerivationIV
-  LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, LIVWords,
-    flagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
-  TConverters.le32_copy(PByte(LDerivationIV), 0, PCardinal(LIVWords), 0,
-    KeyLengthInBytes);
-
-  // derive the SubKey
-  LXof := TBlake3XOF.Create(32, LIVWords, flagDeriveKeyMaterial) as IXOF;
-  LXof.XOFSizeInBits := System.Length(ASubKey) * 8;
-  LXof.Initialize;
-  LXof.TransformBytes(ASrcKey);
-  LXof.DoOutput(ASubKey, 0, System.Length(ASubKey));
-  LXof.Initialize;
-end;
-
 constructor TBlake3.CreateInternal(AHashSize: Int32;
   const AKeyWords: THashLibUInt32Array; AFlags: UInt32);
 var
@@ -852,7 +818,6 @@ var
   LCount: Int32;
   LPtrCV: PCardinal;
 begin
-  // LPtrAData := PByte(AData);
   LPtrAData := PByte(AData) + AIndex;
   System.SetLength(LCV, 8);
   LPtrCV := PCardinal(LCV);
@@ -871,8 +836,6 @@ begin
     end;
     // Compress input bytes into the current chunk state.
     LCount := Min(ChunkSize - FCS.BytesConsumed, ADataLength);
-    // FCS.Update(LPtrAData + AIndex, LCount);
-    // System.Inc(AIndex, LCount);
     FCS.Update(LPtrAData, LCount);
     System.Inc(LPtrAData, LCount);
     System.Dec(ADataLength, LCount);
@@ -888,6 +851,32 @@ begin
   InternalDoOutput(LBuffer, 0, System.Length(LBuffer));
   Result := THashResult.Create(LBuffer);
   Initialize();
+end;
+
+class procedure TBlake3.DeriveKey(const ASrcKey, ACtx,
+  ASubKey: THashLibByteArray);
+const
+  derivationIVLen = Int32(32);
+var
+  LIVWords: THashLibUInt32Array;
+  LDerivationIV: THashLibByteArray;
+  LXof: IXOF;
+begin
+  System.SetLength(LIVWords, 8);
+  System.Move(IV, LIVWords[0], System.SizeOf(IV));
+  // construct the derivation Hasher and get the DerivationIV
+  LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, LIVWords,
+    flagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
+  TConverters.le32_copy(PByte(LDerivationIV), 0, PCardinal(LIVWords), 0,
+    KeyLengthInBytes);
+
+  // derive the SubKey
+  LXof := TBlake3XOF.Create(32, LIVWords, flagDeriveKeyMaterial) as IXOF;
+  LXof.XOFSizeInBits := System.Length(ASubKey) * 8;
+  LXof.Initialize;
+  LXof.TransformBytes(ASrcKey);
+  LXof.DoOutput(ASubKey, 0, System.Length(ASubKey));
+  LXof.Initialize;
 end;
 
 { TBlake3XOF }
