@@ -94,6 +94,8 @@ Available Algorithms
 
  * `Blake2SP`
 
+ * `Blake3`
+
 ### Key Derivation Functions
 ----------------------------------------
 
@@ -126,6 +128,8 @@ Available Algorithms
 * `Blake2X (Blake2XS, Blake2XB)`
 
 * `KMACXOF (KMAC128XOF, KMAC256XOF)`
+
+* `Blake3XOF`
 
 ### Supported Compilers
 ----------------------------------------
