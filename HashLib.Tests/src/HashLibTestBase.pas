@@ -243,6 +243,7 @@ type
     procedure TestIndexChunkedDataIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
     procedure TestUntypedInterface;
+    procedure TestInitializeWorks;
 
   end;
 
@@ -711,6 +712,22 @@ begin
     CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
       [ExpectedString, ActualString]));
   end;
+end;
+
+procedure THashAlgorithmTestCase.TestInitializeWorks;
+var
+  LMainData, LResultOne, LResultTwo: TBytes;
+begin
+  LMainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
+  HashInstance.Initialize;
+  HashInstance.TransformBytes(LMainData);
+  LResultOne := HashInstance.TransformFinal().GetBytes();
+
+  HashInstance.Initialize;
+  HashInstance.TransformBytes(LMainData);
+  LResultTwo := HashInstance.TransformFinal().GetBytes();
+
+  CheckTrue(AreEqual(LResultOne, LResultTwo));
 end;
 
 procedure THashAlgorithmTestCase.TestAnotherChunkedDataIncrementalHash;
