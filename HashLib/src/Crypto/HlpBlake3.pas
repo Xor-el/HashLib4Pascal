@@ -153,7 +153,7 @@ type
   function HasSubTreeAtHeight(AIdx: Int32): Boolean; inline;
 
   // AddChunkChainingValue appends a chunk to the right edge of the Merkle tree.
-  procedure AddChunkChainingValue(const ACV: THashLibUInt32Array);
+  procedure AddChunkChainingValue(const ACV: THashLibUInt32Array); inline;
 
   class function Len64(AValue: UInt64): Int32; static;
 
