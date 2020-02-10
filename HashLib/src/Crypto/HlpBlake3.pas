@@ -283,15 +283,36 @@ begin
 end;
 
 procedure TBlake3.TBlake3Node.G(APtrState: PCardinal; A, B, C, D, X, Y: UInt32);
+var
+  LA, LB, LC, LD: UInt32;
 begin
-  APtrState[A] := APtrState[A] + APtrState[B] + X;
-  APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 16);
-  APtrState[C] := APtrState[C] + APtrState[D];
-  APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 12);
-  APtrState[A] := APtrState[A] + APtrState[B] + Y;
-  APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 8);
-  APtrState[C] := APtrState[C] + APtrState[D];
-  APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 7);
+  // APtrState[A] := APtrState[A] + APtrState[B] + X;
+  // APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 16);
+  // APtrState[C] := APtrState[C] + APtrState[D];
+  // APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 12);
+  // APtrState[A] := APtrState[A] + APtrState[B] + Y;
+  // APtrState[D] := TBits.RotateRight32(APtrState[D] xor APtrState[A], 8);
+  // APtrState[C] := APtrState[C] + APtrState[D];
+  // APtrState[B] := TBits.RotateRight32(APtrState[B] xor APtrState[C], 7);
+
+  LA := APtrState[A];
+  LB := APtrState[B];
+  LC := APtrState[C];
+  LD := APtrState[D];
+
+  LA := LA + LB + X;
+  LD := TBits.RotateRight32(LD xor LA, 16);
+  LC := LC + LD;
+  LB := TBits.RotateRight32(LB xor LC, 12);
+  LA := LA + LB + Y;
+  LD := TBits.RotateRight32(LD xor LA, 8);
+  LC := LC + LD;
+  LB := TBits.RotateRight32(LB xor LC, 7);
+
+  APtrState[A] := LA;
+  APtrState[B] := LB;
+  APtrState[C] := LC;
+  APtrState[D] := LD;
 end;
 
 procedure TBlake3.TBlake3Node.Compress(APtrState: PCardinal);
@@ -645,7 +666,6 @@ begin
     Result := Result + 8;
   end;
   Result := Result + Int32(Len8(AValue));
-
 end;
 
 class function TBlake3.TrailingZeros64(AValue: UInt64): Int32;
@@ -690,6 +710,7 @@ begin
   LXof.Initialize;
   LXof.TransformBytes(ASrcKey);
   LXof.DoOutput(ASubKey, 0, System.Length(ASubKey));
+  LXof.Initialize;
 end;
 
 constructor TBlake3.CreateInternal(AHashSize: Int32;
