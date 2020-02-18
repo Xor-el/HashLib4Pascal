@@ -171,7 +171,7 @@ type
   strict protected
   var
     FBlake2XBConfig: TBlake2XBConfig;
-    FDigestPosition, FBlockPosition: UInt64;
+    FDigestPosition: UInt64;
     FRootConfig, FOutputConfig: TBlake2XBConfig;
     FRootHashDigest, FBlake2XBBuffer: THashLibByteArray;
     FFinalized: Boolean;
@@ -2055,7 +2055,6 @@ begin
   LHashInstance := LXof as TBlake2XB;
   LHashInstance.FBlake2XBConfig := FBlake2XBConfig.Clone();
   LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FBlockPosition := FBlockPosition;
   LHashInstance.FRootConfig := FRootConfig.Clone();
   LHashInstance.FOutputConfig := FOutputConfig.Clone();
   LHashInstance.FRootHashDigest := System.Copy(FRootHashDigest);
@@ -2148,7 +2147,6 @@ begin
     (LXofSizeInBytes);
 
   FRootHashDigest := Nil;
-  FBlockPosition := 0;
   FDigestPosition := 0;
   FFinalized := False;
   TArrayUtils.ZeroFill(FBlake2XBBuffer);
@@ -2175,7 +2173,7 @@ begin
         (@SOutputLengthInvalid);
     end;
   end
-  else if ((FBlockPosition shl 5) >= UnknownMaxDigestLengthInBytes) then
+  else if (FDigestPosition = UnknownMaxDigestLengthInBytes) then
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes
       (@SMaximumOutputLengthExceeded);
