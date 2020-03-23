@@ -2285,7 +2285,7 @@ end;
 constructor TBlake2BMACNotBuildInAdapter.Create(const ABlake2BKey, ASalt,
   APersonalisation: THashLibByteArray; AOutputLengthInBits: Int32);
 var
-  LConfig: TBlake2BConfig;
+  LConfig: IBlake2BConfig;
 begin
   LConfig := TBlake2BConfig.Create(AOutputLengthInBits shr 3);
   LConfig.Key := ABlake2BKey;

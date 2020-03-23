@@ -1173,25 +1173,25 @@ end;
 class function THashFactory.TCrypto.CreateBlake2B_160: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize160));
+    (TBlake2BConfig.Create(THashSize.hsHashSize160) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_256: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize256));
+    (TBlake2BConfig.Create(THashSize.hsHashSize256) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_384: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize384));
+    (TBlake2BConfig.Create(THashSize.hsHashSize384) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_512: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize512));
+    (TBlake2BConfig.Create(THashSize.hsHashSize512) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S(const AConfig: IBlake2SConfig;
@@ -1210,25 +1210,25 @@ end;
 class function THashFactory.TCrypto.CreateBlake2S_128: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize128));
+    (TBlake2SConfig.Create(THashSize.hsHashSize128) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_160: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize160));
+    (TBlake2SConfig.Create(THashSize.hsHashSize160) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_224: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize224));
+    (TBlake2SConfig.Create(THashSize.hsHashSize224) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_256: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize256));
+    (TBlake2SConfig.Create(THashSize.hsHashSize256) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2BP(AHashSize: Int32;

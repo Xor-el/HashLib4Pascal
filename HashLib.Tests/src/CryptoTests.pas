@@ -2718,7 +2718,7 @@ end;
 procedure TTestBlake2B.SetUp;
 var
   LIdx: Int32;
-  LConfig: TBlake2BConfig;
+  LConfig: IBlake2BConfig;
   LKey: TBytes;
 begin
   inherited;
@@ -2857,7 +2857,7 @@ end;
 procedure TTestBlake2S.SetUp;
 var
   LIdx: Int32;
-  LConfig: TBlake2SConfig;
+  LConfig: IBlake2SConfig;
   LKey: TBytes;
 begin
   inherited;
