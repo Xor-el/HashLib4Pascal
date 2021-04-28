@@ -23,16 +23,7 @@ uses
   HlpArrayUtils;
 
 resourcestring
-  SImpossibleRepresentationInt32 =
-    'Current Data Structure cannot be Represented as an "Int32" Type.';
-  SImpossibleRepresentationUInt8 =
-    'Current Data Structure cannot be Represented as an "UInt8" Type.';
-  SImpossibleRepresentationUInt16 =
-    'Current Data Structure cannot be Represented as an "UInt16" Type.';
-  SImpossibleRepresentationUInt32 =
-    'Current Data Structure cannot be Represented as an "UInt32" Type.';
-  SImpossibleRepresentationUInt64 =
-    'Current Data Structure cannot be Represented as an "UInt64" Type.';
+  SDifferingSizeOfByteArrayAndIntType = 'The size of the byte array (%0:d) and integer type (%1:d) have to match.';
 
 type
   THashResult = class sealed(TInterfacedObject, IHashResult)
@@ -184,10 +175,11 @@ end;
 
 function THashResult.GetInt32: Int32;
 begin
-  if (System.Length(FHash) <> 4) then
+  if System.Length(FHash) <> sizeof(Int32) then
   begin
-    raise EInvalidOperationHashLibException.CreateRes
-      (@SImpossibleRepresentationInt32);
+    raise EInvalidOperationHashLibException.CreateResFmt(
+      @SDifferingSizeOfByteArrayAndIntType,
+      [System.Length(FHash), sizeof(Int32)]);
   end;
   result := Int32((Int32(FHash[0]) shl 24) or (Int32(FHash[1]) shl 16) or
     (Int32(FHash[2]) shl 8) or (Int32(FHash[3])));
@@ -195,40 +187,44 @@ end;
 
 function THashResult.GetUInt8: UInt8;
 begin
-  if (System.Length(FHash) <> 1) then
+  if System.Length(FHash) <> sizeof(UInt8) then
   begin
-    raise EInvalidOperationHashLibException.CreateRes
-      (@SImpossibleRepresentationUInt8);
+    raise EInvalidOperationHashLibException.CreateResFmt(
+      @SDifferingSizeOfByteArrayAndIntType,
+      [System.Length(FHash), sizeof(UInt8)]);
   end;
   result := (UInt8(FHash[0]));
 end;
 
 function THashResult.GetUInt16: UInt16;
 begin
-  if (System.Length(FHash) <> 2) then
+  if System.Length(FHash) <> sizeof(UInt16) then
   begin
-    raise EInvalidOperationHashLibException.CreateRes
-      (@SImpossibleRepresentationUInt16);
+    raise EInvalidOperationHashLibException.CreateResFmt(
+      @SDifferingSizeOfByteArrayAndIntType,
+      [System.Length(FHash), sizeof(UInt16)]);
   end;
   result := (UInt16(FHash[0]) shl 8) or (UInt16(FHash[1]));
 end;
 
 function THashResult.GetUInt32: UInt32;
 begin
-  if (System.Length(FHash) <> 4) then
+  if System.Length(FHash) <> sizeof(UInt32) then
   begin
-    raise EInvalidOperationHashLibException.CreateRes
-      (@SImpossibleRepresentationUInt32);
+    raise EInvalidOperationHashLibException.CreateResFmt(
+      @SDifferingSizeOfByteArrayAndIntType,
+      [System.Length(FHash), sizeof(UInt32)]);
   end;
   result := TConverters.ReadBytesAsUInt32BE(PByte(FHash), 0);
 end;
 
 function THashResult.GetUInt64: UInt64;
 begin
-  if (System.Length(FHash) <> 8) then
+  if System.Length(FHash) <> sizeof(UInt64) then
   begin
-    raise EInvalidOperationHashLibException.CreateRes
-      (@SImpossibleRepresentationUInt64);
+    raise EInvalidOperationHashLibException.CreateResFmt(
+      @SDifferingSizeOfByteArrayAndIntType,
+      [System.Length(FHash), sizeof(UInt64)]);
   end;
   result := TConverters.ReadBytesAsUInt64BE(PByte(FHash), 0);
 end;

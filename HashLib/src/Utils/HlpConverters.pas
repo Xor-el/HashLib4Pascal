@@ -13,7 +13,7 @@ uses
   HlpBitConverter;
 
 resourcestring
-  SEncodingInstanceNil = 'Encoding Instance Cannot Be Nil';
+  SAEncodingNilError = 'AEncoding cannot be nil';
 
 type
   TConverters = class sealed(TObject)
@@ -491,7 +491,7 @@ class function TConverters.ConvertStringToBytes(const AInput: String;
 begin
   if AEncoding = Nil then
   begin
-    raise EArgumentNilHashLibException.CreateRes(@SEncodingInstanceNil);
+    raise EArgumentNilHashLibException.CreateRes(@SAEncodingNilError);
   end;
 
 {$IFDEF FPC}
@@ -506,7 +506,7 @@ class function TConverters.ConvertBytesToString(const AInput: THashLibByteArray;
 begin
   if AEncoding = Nil then
   begin
-    raise EArgumentNilHashLibException.CreateRes(@SEncodingInstanceNil);
+    raise EArgumentNilHashLibException.CreateRes(@SAEncodingNilError);
   end;
 
 {$IFDEF FPC}
