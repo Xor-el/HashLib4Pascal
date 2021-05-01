@@ -13,11 +13,11 @@ uses
   HlpIHashResult;
 
 resourcestring
-  SIndexOutOfRange = 'Current Index Is Out Of Range';
-  SInvalidBufferSize = '"BufferSize" Must Be Greater Than Zero';
-  SUnAssignedStream = 'Input Stream Is Unassigned';
-  SFileNotExist = 'Specified File Not Found';
-  SCloneNotYetImplemented = 'Clone Not Yet Implemented For "%s"';
+  SReadBeyondStreamEndError = 'Cannot read beyond stream end';
+  SInvalidBufferSize = 'BufferSize must be greater than zero';
+  SAStreamNilError = 'AStream cannot be nil';
+  SFileNotFound = 'File "%s" not found';
+  SCloneNotImplemented = 'Clone function not implemented for "%s" hash';
 
 type
   THash = class abstract(TInterfacedObject, IHash)
@@ -211,8 +211,8 @@ end;
 
 function THash.Clone(): IHash;
 begin
-  raise ENotImplementedHashLibException.CreateResFmt
-    (@SCloneNotYetImplemented, [Name]);
+  raise ENotImplementedHashLibException.CreateResFmt(@SCloneNotImplemented,
+    [Name]);
 end;
 
 function THash.ComputeBytes(const AData: THashLibByteArray): IHashResult;
@@ -264,7 +264,8 @@ begin
     begin
       if ((AStream.Position + ALength) > AStream.Size) then
       begin
-        raise EIndexOutOfRangeHashLibException.CreateRes(@SIndexOutOfRange);
+        raise EIndexOutOfRangeHashLibException.CreateRes(
+          @SReadBeyondStreamEndError);
       end;
     end;
 
@@ -275,7 +276,7 @@ begin
   end
   else
   begin
-    raise EArgumentNilHashLibException.CreateRes(@SUnAssignedStream);
+    raise EArgumentNilHashLibException.CreateRes(@SAStreamNilError);
   end;
 
   if BufferSize > AStream.Size then // Sanity Check
@@ -342,7 +343,7 @@ begin
 {$ENDIF DEBUG}
   if not FileExists(AFileName) then
   begin
-    raise EArgumentHashLibException.CreateRes(@SFileNotExist);
+    raise EArgumentHashLibException.CreateResFmt(@SFileNotFound, [AFileName]);
   end;
 
   LFileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
