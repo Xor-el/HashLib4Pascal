@@ -1,0 +1,7 @@
+{
+    "app" : "HashLib.Benchmark",
+    "lib" : "HashLib/src/Packages/FPC/",
+    "tst" : "HashLib.Tests/FreePascal.Tests/HashLibConsole.Tests.lpi",
+    "pkg" : [
+    ]
+}
