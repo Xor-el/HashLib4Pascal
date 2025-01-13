@@ -9,7 +9,7 @@ Development is coordinated on [GitHub](https://github.com/Xor-el/HashLib4Pascal)
 
 
 **Build Status**
-[![Build Status](https://travis-ci.org/Xor-el/HashLib4Pascal.svg?branch=master)](https://travis-ci.org/Xor-el/HashLib4Pascal)
+[![Build Status](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml/badge.svg)](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml)
 
 Available Algorithms
 ----------------------------------------
