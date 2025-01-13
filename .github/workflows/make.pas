@@ -15,7 +15,7 @@ uses
 const
   Src: string = 'HashLib.Benchmark';
   Use: string = 'HashLib/src/Packages/FPC';
-  Tst: string = 'Console.Tests.lpi';
+  Tst: string = 'HashLibConsole.Tests.lpi';
   Pkg: array of string = ();
 
 var
