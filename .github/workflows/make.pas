@@ -1,4 +1,5 @@
 program Make;
+{$UNITPATH /usr/lib/lazarus/3.0/components/lazutils}
 {$mode objfpc}{$H+}
 
 uses
@@ -149,4 +150,5 @@ begin
   finally
     List.Free;
   end;
+  WriteLn('Errors: ', ExitCode);
 end.
