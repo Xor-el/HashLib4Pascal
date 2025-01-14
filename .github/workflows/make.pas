@@ -1,5 +1,4 @@
 program Make;
-{$UNITPATH /usr/lib/lazarus/3.0/components/lazutils}
 {$mode objfpc}{$H+}
 
 uses
@@ -20,9 +19,9 @@ const
   Pkg: array of string = ();
 
 var
+  Each, Item, PackagePath, TempFile, Url: string;
   Output, Line: ansistring;
   List: TStringList;
-  Each, Item, PackagePath, TempFile, Url: string;
   Zip: TStream;
 
 begin
@@ -51,8 +50,13 @@ begin
   end;
   for Each in Pkg do
   begin
-    PackagePath := GetEnvironmentVariable('HOME') +
-      '/.lazarus/onlinepackagemanager/packages/' + Each;
+    PackagePath :=
+      {$IFDEF MSWINDOWS}
+      GetEnvironmentVariable('APPDATA') + '\.lazarus\onlinepackagemanager\packages\'
+      {$ELSE}
+      GetEnvironmentVariable('HOME') + '/.lazarus/onlinepackagemanager/packages/'
+      {$ENDIF}
+      + Each;
     TempFile := GetTempFileName;
     Url := 'https://packages.lazarus-ide.org/' + Each + '.zip';
     if not DirectoryExists(PackagePath) then
@@ -110,7 +114,7 @@ begin
         begin
           if Pos('Linking', Line) <> 0 then
           begin
-            if not RunCommand('command', [SplitString(Line, ' ')[2],
+            if not RunCommand({$IFDEF MSWINDOWS}'&'{$ELSE}'command'{$ENDIF}, [SplitString(Line, ' ')[2],
               '--all', '--format=plain', '--progress'], Output) then
               ExitCode += 1;
             WriteLn(Output);
@@ -141,10 +145,10 @@ begin
         ExitCode += 1;
         for Line in SplitString(Output, LineEnding) do
           if Pos('Fatal:', Line) <> 0 or Pos('Error:', Line) then
-            begin
-              WriteLn();
-              Writeln(#27'[31m', Line, #27'[0m');
-            end;
+          begin
+            WriteLn();
+            Writeln(#27'[31m', Line, #27'[0m');
+          end;
       end;
     end;
   finally
