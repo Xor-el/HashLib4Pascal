@@ -8,6 +8,7 @@ uses
   FileUtil,
   Zipper,
   fphttpclient,
+  RegExpr,
   openssl,
   opensslsockets,
   Process;
@@ -111,7 +112,7 @@ var
 
   procedure BuildProject(Path: string);
   begin
-    Write(#27'[33m', 'build from ', Each, #27'[0m');
+    Write(stderr, #27'[33m', 'build from ', Each, #27'[0m');
     try
       if RunCommand('lazbuild', ['--build-all', '--recursive',
         '--no-write-project', Each], Answer.Output) then
@@ -134,14 +135,18 @@ var
       for Each in List do
       begin
         BuildProject(Each);
-        WriteLn(stderr);
         if Answer.Code <> 0 then
         begin
           for Line in SplitString(Answer.Output, LineEnding) do
-            if Pos('Fatal:', Line) <> 0 or Pos('Error:', Line) then
+            with TRegExpr.Create do
             begin
-              WriteLn(stderr);
-              Writeln(stderr, #27'[31m', Line, #27'[0m');
+              Expression := '(Fatal|Error):';
+              if Exec(Line) then
+              begin
+                WriteLn(stderr);
+                Writeln(stderr, #27'[31m', Line, #27'[0m');
+              end;
+              Free;
             end;
         end
         else
@@ -149,9 +154,10 @@ var
             if Pos('Linking', Line) <> 0 then
             try
               begin
-                if not RunCommand('command',
-                  [SplitString(Line, ' ')[2], '--all', '--format=plain',
-                  '--progress'], Answer.Output) then
+                Writeln(stderr, #27'[32m', ' to ', SplitString(Line, ' ')[2], #27'[0m');
+                if not RunCommand(ReplaceStr(SplitString(Line, ' ')[2],
+                  SplitString(Tst, '.')[0], './' + SplitString(Tst, '.')[0]),
+                  ['--all', '--format=plain', '--progress'], Answer.Output) then
                   ExitCode += 1;
                 WriteLn(stderr, Answer.Output);
                 break;
@@ -176,22 +182,28 @@ begin
   List := FindAllFiles(Src, '*.lpi', True);
   try
     for Each in List do
-    begin
-      BuildProject(Each);
-      if Answer.Code <> 0 then
+      if Pos(Tst, Each) = 0 then
       begin
-        for Line in SplitString(Answer.Output, LineEnding) do
-          if Pos('Fatal:', Line) <> 0 or Pos('Error:', Line) then
-          begin
-            WriteLn(stderr);
-            Writeln(stderr, #27'[31m', Line, #27'[0m');
-          end;
-      end
-      else
-        for Line in SplitString(Answer.Output, LineEnding) do
-          if Pos('Linking', Line) <> 0 then
-            Writeln(stderr, #27'[32m', ' to ', SplitString(Line, ' ')[2], #27'[0m');
-    end;
+        BuildProject(Each);
+        if Answer.Code <> 0 then
+        begin
+          for Line in SplitString(Answer.Output, LineEnding) do
+            with TRegExpr.Create do
+            begin
+              Expression := '(Fatal|Error):';
+              if Exec(Line) then
+              begin
+                WriteLn(stderr);
+                Writeln(stderr, #27'[31m', Line, #27'[0m');
+              end;
+              Free;
+            end;
+        end
+        else
+          for Line in SplitString(Answer.Output, LineEnding) do
+            if Pos('Linking', Line) <> 0 then
+              Writeln(stderr, #27'[32m', ' to ', SplitString(Line, ' ')[2], #27'[0m');
+      end;
   finally
     List.Free;
   end;

@@ -35,6 +35,7 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        set -xeuo pipefail
         sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
         instantfpc -Fu/usr/lib/lazarus/*/components/lazutils .github/workflows/make.pas
 
@@ -44,10 +45,12 @@ jobs:
       run: |
         New-Variable -Option Constant -Name VAR -Value @{
             Uri = 'https://fossies.org/windows/misc/lazarus-3.6-fpc-3.2.2-win64.exe'
-            OutFile = (New-TemporaryFile).FullName
+            OutFile = (New-TemporaryFile).FullName + '.exe'
         }
         Invoke-WebRequest @VAR
-        & $_.OutFile.Replace('Temp', 'Temp\.') /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART  | Out-Null
+        & $VAR.OutFile.Replace('Temp', 'Temp\.') /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART | Out-Null
         $Env:PATH+=';C:\Lazarus'
+        $Env:PATH+=';C:\Lazarus\fpc\3.2.2\bin\x86_64-win64'
         (Get-Command 'lazbuild').Source | Out-Host
+        (Get-Command 'instantfpc').Source | Out-Host
         instantfpc '-FuC:\Lazarus\components\lazutils' .github/workflows/make.pas
