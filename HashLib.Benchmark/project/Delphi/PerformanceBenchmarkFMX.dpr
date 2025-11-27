@@ -55,6 +55,7 @@ uses
   HlpHaval in '..\..\..\HashLib\src\Crypto\HlpHaval.pas',
   HlpBlake2BP in '..\..\..\HashLib\src\Crypto\HlpBlake2BP.pas',
   HlpBlake2SP in '..\..\..\HashLib\src\Crypto\HlpBlake2SP.pas',
+  HlpBlake3 in '..\..\..\HashLib\src\Crypto\HlpBlake3.pas',
   HlpIHash in '..\..\..\HashLib\src\Interfaces\HlpIHash.pas',
   HlpIHashResult in '..\..\..\HashLib\src\Interfaces\HlpIHashResult.pas',
   HlpIKDF in '..\..\..\HashLib\src\Interfaces\HlpIKDF.pas',
