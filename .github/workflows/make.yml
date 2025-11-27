@@ -1,9 +1,8 @@
----
 name: Make
 
 on:
   schedule:
-    - cron:  '0 0 1 * *'
+    - cron: '0 0 1 * *'
   push:
     branches:
       - "**"
@@ -25,32 +24,43 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: true
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - name: Build on Linux
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        set -xeuo pipefail
-        sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
-        instantfpc -Fu/usr/lib/lazarus/*/components/lazutils .github/workflows/make.pas
+      - name: Build on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -xeuo pipefail
+          sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
+          instantfpc -Fu/usr/lib/lazarus/*/components/lazutils .github/workflows/make.pas
 
-    - name: Build on Windows
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        New-Variable -Option Constant -Name VAR -Value @{
-            Uri = 'https://icolo.dl.sourceforge.net/project/lazarus/Lazarus%20Windows%2064%20bits/Lazarus%204.0/lazarus-4.0-fpc-3.2.2-win64.exe?viasf=1'
-            OutFile = (New-TemporaryFile).FullName + '.exe'
-        }
-        Invoke-WebRequest @VAR
-        & $VAR.OutFile.Replace('Temp', 'Temp\.') /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART | Out-Null
-        $Env:PATH+=';C:\Lazarus'
-        $Env:PATH+=';C:\Lazarus\fpc\3.2.2\bin\x86_64-win64'
-        (Get-Command 'lazbuild').Source | Out-Host
-        (Get-Command 'instantfpc').Source | Out-Host
-        instantfpc '-FuC:\Lazarus\components\lazutils' .github/workflows/make.pas
+      - name: Build on Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'stop'
+          Set-PSDebug -Strict
+
+          Write-Host "Installing Lazarus and OpenSSL 1.1 via Chocolatey..."
+          choco upgrade chocolatey -y
+          choco install lazarus -y
+          choco install openssl.light --version=1.1.1.20181020 -y
+
+          Write-Host "Verifying installed packages..."
+          choco list
+
+          # Lazarus installs to C:\Lazarus by default
+          # Add Lazarus and OpenSSL paths for instantfpc
+          $env:Path += ';C:\Lazarus;C:\Lazarus\fpc\3.2.2\bin\x86_64-win64;C:\ProgramData\chocolatey\lib\openssl.light\tools'
+
+          Write-Host "Checking lazbuild and instantfpc availability..."
+          Get-Command lazbuild
+          Get-Command instantfpc
+
+          Write-Host "Building make.pas..."
+          instantfpc '-FuC:\Lazarus\components\lazutils' .github/workflows/make.pas
