@@ -11,21 +11,29 @@
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
-
-{---------------------------- Compiler Family Switch --------------------------}
 {$IFDEF FPC}
-  {$I HashLibFPC.inc} // FPC-specific settings
-{$ELSE}
-  {$DEFINE DELPHI}
-  {$I ../../HashLib/src/Include/HashLibDelphi.inc} // Delphi-specific settings
+{$IFDEF FPC_LITTLE_ENDIAN}
+   {$DEFINE HASHLIB_LITTLE_ENDIAN}
 {$ENDIF}
 
-{-------------------------- Common Compiler Settings --------------------------}
-{$SCOPEDENUMS ON}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
-{$POINTERMATH ON}
-{$WARNINGS OFF}
-{$HINTS OFF}
+{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
+   {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+{$ENDIF}
 
-(* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
+{$IF FPC_FULLVERSION >= 30301}
+   {.$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
+{$IFEND}
+
+  {$DEFINE USE_UNROLLED_VARIANT}
+
+  {$MODE DELPHI}
+  {$MACRO ON}
+  {$NOTES OFF}
+  {$OPTIMIZATION LEVEL3}
+  {$OPTIMIZATION NOUSELOADMODIFYSTORE}
+  {$OPTIMIZATION ORDERFIELDS}
+  {$OPTIMIZATION DEADVALUES}
+  {$IFDEF CPUI386}  {$OPTIMIZATION USEEBP} {$ENDIF}
+  {$IFDEF CPUX86_64} {$OPTIMIZATION USERBP} {$ENDIF}
+{$ENDIF}
+

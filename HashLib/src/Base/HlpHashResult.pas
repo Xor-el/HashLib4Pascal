@@ -156,13 +156,9 @@ begin
   LTemp := AnsiUpperCase(LTemp);
 
   LResult := 0;
-{$IFDEF DELPHIXE3_UP}
-  LIdx := System.Low(LTemp);
-  LTop := System.High(LTemp);
-{$ELSE}
   LIdx := 1;
   LTop := System.Length(LTemp);
-{$ENDIF DELPHIXE3_UP}
+
   while LIdx <= LTop do
   begin
     LResult := TBits.RotateLeft32(LResult, 5);

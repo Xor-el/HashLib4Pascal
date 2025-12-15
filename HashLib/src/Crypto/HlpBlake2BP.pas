@@ -6,16 +6,9 @@ interface
 
 uses
   SysUtils,
-{$IFDEF USE_DELPHI_PPL}
-  System.Classes,
+{$IFDEF HASHLIB_USE_PPL}
   System.Threading,
-{$ENDIF USE_DELPHI_PPL}
-{$IFDEF USE_PASMP}
-  PasMP,
-{$ENDIF USE_PASMP}
-{$IFDEF USE_MTPROCS}
-  MTProcs,
-{$ENDIF USE_MTPROCS}
+{$ENDIF HASHLIB_USE_PPL}
   HlpHash,
   HlpIHashResult,
   HlpBlake2B,
@@ -29,19 +22,11 @@ uses
 type
   TBlake2BP = class sealed(THash, ICryptoNotBuildIn, ITransformBlock)
   strict private
-
-  type
-    PDataContainer = ^TDataContainer;
-
-    TDataContainer = record
-      PtrData: PByte;
-      Counter: UInt64;
-    end;
-
   const
-    BlockSizeInBytes = Int32(128);
-    OutSizeInBytes = Int32(64);
-    ParallelismDegree = Int32(4);
+    BlockSizeInBytes   = 128;
+    OutSizeInBytes     = 64;
+    ParallelismDegree  = 4;
+    StripeSize         = ParallelismDegree * BlockSizeInBytes;
 
   var
     // had to use the classes directly for performance purposes
@@ -61,26 +46,20 @@ type
       const ABlake2BTreeConfig: IBlake2BTreeConfig): TBlake2B;
     function Blake2BPCreateLeaf(AOffset: UInt64): TBlake2B;
     function Blake2BPCreateRoot(): TBlake2B;
-    procedure ParallelComputation(AIdx: Int32; ADataContainer: PDataContainer);
 
-    procedure DoParallelComputation(ADataContainer: PDataContainer);
+    // Each lane processes its own "stripe" of the input
+    procedure ProcessLeafLane(AIdx: Int32; APtrData: PByte;
+      ADataLength: UInt64);
+
+    // Dispatch computation across all lanes (parallel or sequential)
+    procedure ProcessLeafLanesInParallel(APtrData: PByte; ADataLength: UInt64);
 
     function DeepCloneBlake2BInstances(const ALeafHashes
       : THashLibGenericArray<TBlake2B>): THashLibGenericArray<TBlake2B>;
 
-    procedure Clear();
+    procedure Clear;
 
     constructor CreateInternal(AHashSize: Int32);
-
-{$IFDEF USE_PASMP}
-    procedure PasMPParallelComputationWrapper(const AJob: PPasMPJob;
-      const AThreadIndex: LongInt; const ADataContainer: Pointer;
-      const AFromIndex, AToIndex: TPasMPNativeInt); inline;
-{$ENDIF USE_PASMP}
-{$IFDEF USE_MTPROCS}
-    procedure MTProcsParallelComputationWrapper(AIdx: PtrInt;
-      ADataContainer: Pointer; AItem: TMultiThreadProcItem); inline;
-{$ENDIF USE_MTPROCS}
   strict protected
     function GetName: String; override;
 
@@ -111,17 +90,20 @@ var
 begin
   LBlake2BConfig := TBlake2BConfig.Create(HashSize);
   LBlake2BConfig.Key := FKey;
+
   LBlake2BTreeConfig := TBlake2BTreeConfig.Create();
-  LBlake2BTreeConfig.FanOut := ParallelismDegree;
-  LBlake2BTreeConfig.MaxDepth := 2;
-  LBlake2BTreeConfig.NodeDepth := 0;
-  LBlake2BTreeConfig.LeafSize := 0;
-  LBlake2BTreeConfig.NodeOffset := AOffset;
+  LBlake2BTreeConfig.FanOut        := ParallelismDegree;
+  LBlake2BTreeConfig.MaxDepth      := 2;
+  LBlake2BTreeConfig.NodeDepth     := 0;
+  LBlake2BTreeConfig.LeafSize      := 0;
+  LBlake2BTreeConfig.NodeOffset    := AOffset;
   LBlake2BTreeConfig.InnerHashSize := OutSizeInBytes;
+
   if AOffset = (ParallelismDegree - 1) then
   begin
     LBlake2BTreeConfig.IsLastNode := True;
   end;
+
   Result := Blake2BPCreateLeafParam(LBlake2BConfig, LBlake2BTreeConfig);
 end;
 
@@ -132,14 +114,16 @@ var
 begin
   LBlake2BConfig := TBlake2BConfig.Create(HashSize);
   LBlake2BConfig.Key := FKey;
+
   LBlake2BTreeConfig := TBlake2BTreeConfig.Create();
-  LBlake2BTreeConfig.FanOut := ParallelismDegree;
-  LBlake2BTreeConfig.MaxDepth := 2;
-  LBlake2BTreeConfig.NodeDepth := 1;
-  LBlake2BTreeConfig.LeafSize := 0;
-  LBlake2BTreeConfig.NodeOffset := 0;
+  LBlake2BTreeConfig.FanOut        := ParallelismDegree;
+  LBlake2BTreeConfig.MaxDepth      := 2;
+  LBlake2BTreeConfig.NodeDepth     := 1;
+  LBlake2BTreeConfig.LeafSize      := 0;
+  LBlake2BTreeConfig.NodeOffset    := 0;
   LBlake2BTreeConfig.InnerHashSize := OutSizeInBytes;
-  LBlake2BTreeConfig.IsLastNode := True;
+  LBlake2BTreeConfig.IsLastNode    := True;
+
   Result := TBlake2B.Create(LBlake2BConfig, LBlake2BTreeConfig, False);
 end;
 
@@ -166,13 +150,16 @@ var
 begin
   LHashInstance := TBlake2BP.CreateInternal(HashSize);
   LHashInstance.FKey := System.Copy(FKey);
+
   if FRootHash <> Nil then
   begin
     LHashInstance.FRootHash := FRootHash.CloneInternal();
   end;
-  LHashInstance.FLeafHashes := DeepCloneBlake2BInstances(FLeafHashes);
-  LHashInstance.FBuffer := System.Copy(FBuffer);
+
+  LHashInstance.FLeafHashes   := DeepCloneBlake2BInstances(FLeafHashes);
+  LHashInstance.FBuffer       := System.Copy(FBuffer);
   LHashInstance.FBufferLength := FBufferLength;
+
   Result := LHashInstance as IHash;
   Result.BufferSize := BufferSize;
 end;
@@ -187,10 +174,13 @@ var
   LIdx: Int32;
 begin
   Inherited Create(AHashSize, BlockSizeInBytes);
+
   System.SetLength(FBuffer, ParallelismDegree * BlockSizeInBytes);
   System.SetLength(FLeafHashes, ParallelismDegree);
-  FKey := System.Copy(AKey);
+
+  FKey      := System.Copy(AKey);
   FRootHash := Blake2BPCreateRoot;
+
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
     FLeafHashes[LIdx] := Blake2BPCreateLeaf(LIdx);
@@ -202,14 +192,18 @@ var
   LIdx: Int32;
 begin
   Clear();
+
   FRootHash.Free;
   FRootHash := Nil;
+
   for LIdx := System.Low(FLeafHashes) to System.High(FLeafHashes) do
   begin
     FLeafHashes[LIdx].Free;
     FLeafHashes[LIdx] := Nil;
   end;
+
   FLeafHashes := Nil;
+
   inherited Destroy;
 end;
 
@@ -223,17 +217,19 @@ var
   LIdx: Int32;
 begin
   FRootHash.Initialize;
+
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
     FLeafHashes[LIdx].Initialize;
     FLeafHashes[LIdx].HashSize := OutSizeInBytes;
   end;
+
   TArrayUtils.ZeroFill(FBuffer);
   FBufferLength := 0;
 end;
 
-procedure TBlake2BP.ParallelComputation(AIdx: Int32;
-  ADataContainer: PDataContainer);
+procedure TBlake2BP.ProcessLeafLane(AIdx: Int32; APtrData: PByte;
+  ADataLength: UInt64);
 var
   LLeafHashes: THashLibGenericArray<TBlake2B>;
   LTemp: THashLibByteArray;
@@ -241,106 +237,74 @@ var
   LPtrData: PByte;
 begin
   System.SetLength(LTemp, BlockSizeInBytes);
-  LPtrData := ADataContainer^.PtrData;
-  LCounter := ADataContainer^.Counter;
-  System.Inc(LPtrData, AIdx * BlockSizeInBytes);
+
+  LPtrData    := APtrData;
+  LCounter    := ADataLength;
   LLeafHashes := FLeafHashes;
-  while (LCounter >= (ParallelismDegree * BlockSizeInBytes)) do
+
+  // Start at lane offset
+  Inc(LPtrData, AIdx * BlockSizeInBytes);
+
+  // Process all full "stripes" of ParallelismDegree * BlockSizeInBytes
+  while (LCounter >= StripeSize) do
   begin
     System.Move(LPtrData^, LTemp[0], BlockSizeInBytes);
     LLeafHashes[AIdx].TransformBytes(LTemp, 0, BlockSizeInBytes);
-    System.Inc(LPtrData, UInt64(ParallelismDegree * BlockSizeInBytes));
-    LCounter := LCounter - UInt64(ParallelismDegree * BlockSizeInBytes);
+
+    Inc(LPtrData, UInt64(StripeSize));
+    LCounter := LCounter - UInt64(StripeSize);
   end;
 end;
 
-{$IFDEF USE_PASMP}
-
-procedure TBlake2BP.PasMPParallelComputationWrapper(const AJob: PPasMPJob;
-  const AThreadIndex: LongInt; const ADataContainer: Pointer;
-  const AFromIndex, AToIndex: TPasMPNativeInt);
-begin
-  ParallelComputation(AFromIndex, ADataContainer);
-end;
-{$ENDIF}
-{$IFDEF USE_MTPROCS}
-
-procedure TBlake2BP.MTProcsParallelComputationWrapper(AIdx: PtrInt;
-  ADataContainer: Pointer; AItem: TMultiThreadProcItem);
-begin
-  ParallelComputation(AIdx, ADataContainer);
-end;
-{$ENDIF}
-{$IF DEFINED(USE_DELPHI_PPL)}
-
-procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
-
-  function CreateTask(AIdx: Int32; ADataContainer: PDataContainer): ITask;
-  begin
-    Result := TTask.Create(
-      procedure()
-      begin
-        ParallelComputation(AIdx, ADataContainer);
-      end);
-  end;
-
+procedure TBlake2BP.ProcessLeafLanesInParallel(APtrData: PByte;
+  ADataLength: UInt64);
 var
-  LArrayTasks: array of ITask;
+  LFullStripeLength: UInt64;
+{$IFNDEF HASHLIB_USE_PPL}
   LIdx: Int32;
+{$ENDIF}
 begin
-  System.SetLength(LArrayTasks, ParallelismDegree);
+  // Only full stripes are processed here
+  LFullStripeLength := (ADataLength div StripeSize) * StripeSize;
+  if LFullStripeLength = 0 then
+    Exit;
+
+{$IFDEF HASHLIB_USE_PPL}
+  // parallel processing of each lane
+  TParallel.&For(
+    0,
+    ParallelismDegree - 1,
+    procedure(AIdx: Integer)
+    begin
+      ProcessLeafLane(AIdx, APtrData, LFullStripeLength);
+    end
+  );
+{$ELSE}
+  // Fallback: simple sequential processing of each lane
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    LArrayTasks[LIdx] := CreateTask(LIdx, ADataContainer);
-    LArrayTasks[LIdx].Start;
+    ProcessLeafLane(LIdx, APtrData, LFullStripeLength);
   end;
-  TTask.WaitForAll(LArrayTasks);
+{$ENDIF HASHLIB_USE_PPL}
 end;
-
-{$ELSEIF DEFINED(USE_PASMP) OR DEFINED(USE_MTPROCS)}
-
-procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
-begin
-{$IF DEFINED(USE_PASMP)}
-  TPasMP.CreateGlobalInstance;
-  GlobalPasMP.Invoke(GlobalPasMP.ParallelFor(ADataContainer, 0,
-    ParallelismDegree - 1, PasMPParallelComputationWrapper));
-{$ELSEIF DEFINED(USE_MTPROCS)}
-  ProcThreadPool.DoParallel(MTProcsParallelComputationWrapper, 0,
-    ParallelismDegree - 1, ADataContainer);
-{$ELSE}
-{$MESSAGE ERROR 'Unsupported Threading Library.'}
-{$IFEND USE_PASMP}
-end;
-
-{$ELSE}
-
-procedure TBlake2BP.DoParallelComputation(ADataContainer: PDataContainer);
-var
-  LIdx: Int32;
-begin
-  for LIdx := 0 to System.Pred(ParallelismDegree) do
-  begin
-    ParallelComputation(LIdx, ADataContainer);
-  end;
-end;
-{$IFEND USE_DELPHI_PPL}
 
 procedure TBlake2BP.TransformBytes(const AData: THashLibByteArray;
-AIndex, ADataLength: Int32);
+  AIndex, ADataLength: Int32);
 var
   LLeft, LFill, LDataLength: UInt64;
   LPtrData: PByte;
   LIdx: Int32;
   LLeafHashes: THashLibGenericArray<TBlake2B>;
-  LPtrDataContainer: PDataContainer;
+  LProcessed: UInt64;
 begin
   LLeafHashes := FLeafHashes;
   LDataLength := UInt64(ADataLength);
-  LPtrData := PByte(AData) + AIndex;
+  LPtrData    := PByte(AData) + AIndex;
+
   LLeft := FBufferLength;
   LFill := UInt64(System.Length(FBuffer)) - LLeft;
 
+  // Fill existing buffer to a full "parallel chunk" if possible
   if (LLeft > 0) and (LDataLength >= LFill) then
   begin
     System.Move(LPtrData^, FBuffer[LLeft], LFill);
@@ -356,18 +320,15 @@ begin
     LLeft := 0;
   end;
 
-  LPtrDataContainer := New(PDataContainer);
-  try
-    LPtrDataContainer^.PtrData := LPtrData;
-    LPtrDataContainer^.Counter := LDataLength;
-    DoParallelComputation(LPtrDataContainer);
-  finally
-    Dispose(LPtrDataContainer);
-  end;
+  // Process as many full "parallel stripes" as possible
+  ProcessLeafLanesInParallel(LPtrData, LDataLength);
 
-  System.Inc(LPtrData, LDataLength - (LDataLength mod UInt64(ParallelismDegree *
-    BlockSizeInBytes)));
-  LDataLength := LDataLength mod UInt64(ParallelismDegree * BlockSizeInBytes);
+  // Move pointer past processed data (everything except the remainder)
+  LProcessed := (LDataLength div StripeSize) * StripeSize;
+  Inc(LPtrData, LProcessed);
+
+  // Keep the remainder in the buffer
+  LDataLength := LDataLength - LProcessed;
 
   if (LDataLength > 0) then
   begin
@@ -386,35 +347,44 @@ var
   LRootHash: TBlake2B;
 begin
   LLeafHashes := FLeafHashes;
-  LRootHash := FRootHash;
+  LRootHash   := FRootHash;
+
   System.SetLength(LHash, ParallelismDegree);
   for LIdx := System.Low(LHash) to System.High(LHash) do
   begin
     System.SetLength(LHash[LIdx], OutSizeInBytes);
   end;
 
+  // Finalize each leaf with the remaining buffered bytes
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    if (FBufferLength > (LIdx * BlockSizeInBytes)) then
+    if (FBufferLength > (UInt64(LIdx) * BlockSizeInBytes)) then
     begin
       LLeft := FBufferLength - UInt64(LIdx * BlockSizeInBytes);
       if (LLeft > BlockSizeInBytes) then
       begin
         LLeft := BlockSizeInBytes;
       end;
-      LLeafHashes[LIdx].TransformBytes(FBuffer, LIdx * BlockSizeInBytes,
-        Int32(LLeft));
+
+      LLeafHashes[LIdx].TransformBytes(
+        FBuffer,
+        LIdx * BlockSizeInBytes,
+        Int32(LLeft)
+      );
     end;
 
     LHash[LIdx] := LLeafHashes[LIdx].TransformFinal().GetBytes();
   end;
 
+  // Feed all leaf hashes into the root
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
     LRootHash.TransformBytes(LHash[LIdx], 0, OutSizeInBytes);
   end;
+
   Result := LRootHash.TransformFinal();
   Initialize();
 end;
 
 end.
+

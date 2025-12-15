@@ -5,17 +5,10 @@ unit HlpPBKDF_ScryptNotBuildInAdapter;
 interface
 
 uses
-{$IFDEF USE_DELPHI_PPL}
-  System.Classes,
-  System.SysUtils,
+  SysUtils,
+{$IFDEF HASHLIB_USE_PPL}
   System.Threading,
-{$ENDIF USE_DELPHI_PPL}
-{$IFDEF USE_PASMP}
-  PasMP,
-{$ENDIF USE_PASMP}
-{$IFDEF USE_MTPROCS}
-  MTProcs,
-{$ENDIF USE_MTPROCS}
+{$ENDIF HASHLIB_USE_PPL}
   HlpIHash,
   HlpKDF,
   HlpBits,
@@ -46,14 +39,6 @@ type
     IPBKDF_ScryptNotBuildIn)
 
   strict private
-  type
-    PDataContainer = ^TDataContainer;
-
-    TDataContainer = record
-      PtrB: PCardinal;
-      Parallelism, Cost, BlockSize: Int32;
-    end;
-
   var
     FPasswordBytes, FSaltBytes: THashLibByteArray;
     FCost, FBlockSize, FParallelism: Int32;
@@ -97,23 +82,15 @@ type
     class procedure &Xor(const Aa, Ab: THashLibUInt32Array; AbOff: Int32;
       const AOutput: THashLibUInt32Array); static;
 
-    class procedure SMix(AIdx: Int32;
-      APtrDataContainer: PDataContainer); static;
+    class procedure SMixLane(AIdx: Int32; APtrB: PCardinal;
+      ACost, ABlockSize: Int32); static;
 
     class procedure BlockMix(const Ab, AX1, AX2, Ay: THashLibUInt32Array;
       AR: Int32); static;
 
-    class procedure DoParallelSMix(ADataContainer: PDataContainer); static;
+    class procedure DoParallelSMix(APtrB: PCardinal; AParallelism, ACost,
+      ABlockSize: Int32); static;
 
-{$IFDEF USE_PASMP}
-    class procedure PasMPSMixWrapper(const AJob: PPasMPJob;
-      const AThreadIndex: LongInt; const ADataContainer: Pointer;
-      const AFromIndex, AToIndex: TPasMPNativeInt); inline;
-{$ENDIF USE_PASMP}
-{$IFDEF USE_MTPROCS}
-    class procedure MTProcsSMixWrapper(AIdx: PtrInt; ADataContainer: Pointer;
-      AItem: TMultiThreadProcItem); inline;
-{$ENDIF USE_MTPROCS}
     class function MFCrypt(const APasswordBytes, ASaltBytes: THashLibByteArray;
       ACost, ABlockSize, AParallelism, AOutputLength: Int32)
       : THashLibByteArray; static;
@@ -322,57 +299,52 @@ begin
   end;
 end;
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.SMix(AIdx: Int32;
-  APtrDataContainer: PDataContainer);
+class procedure TPBKDF_ScryptNotBuildInAdapter.SMixLane(AIdx: Int32;
+  APtrB: PCardinal; ACost, ABlockSize: Int32);
 var
-  LBCount, LIdx, LJdx, LOffset, LBlockSize, LCost: Int32;
+  LBCount, LIdx, LJdx, LOffset: Int32;
   LMask: UInt32;
   LBlockX1, LBlockX2, LBlockY, LX, LV: THashLibUInt32Array;
-  LPtrB: PCardinal;
 begin
-  LPtrB := APtrDataContainer^.PtrB;
-  LCost := APtrDataContainer^.Cost;
-  LBlockSize := APtrDataContainer^.BlockSize;
-  AIdx := AIdx * 32 * LBlockSize;
-  LBCount := LBlockSize * 32;
+  AIdx := AIdx * 32 * ABlockSize;
+  LBCount := ABlockSize * 32;
+
   System.SetLength(LBlockX1, 16);
   System.SetLength(LBlockX2, 16);
   System.SetLength(LBlockY, LBCount);
-
   System.SetLength(LX, LBCount);
-
-  System.SetLength(LV, LCost * LBCount);
+  System.SetLength(LV, ACost * LBCount);
 
   try
-    System.Move(LPtrB[AIdx], LX[0], LBCount * System.SizeOf(UInt32));
+    System.Move(APtrB[AIdx], LX[0], LBCount * System.SizeOf(UInt32));
 
     LOffset := 0;
     LIdx := 0;
-    while LIdx < LCost do
+    while LIdx < ACost do
     begin
       System.Move(LX[0], LV[LOffset], LBCount * System.SizeOf(UInt32));
       LOffset := LOffset + LBCount;
-      BlockMix(LX, LBlockX1, LBlockX2, LBlockY, LBlockSize);
+      BlockMix(LX, LBlockX1, LBlockX2, LBlockY, ABlockSize);
       System.Move(LBlockY[0], LV[LOffset], LBCount * System.SizeOf(UInt32));
       LOffset := LOffset + LBCount;
-      BlockMix(LBlockY, LBlockX1, LBlockX2, LX, LBlockSize);
+      BlockMix(LBlockY, LBlockX1, LBlockX2, LX, ABlockSize);
       System.Inc(LIdx, 2);
     end;
 
-    LMask := UInt32(LCost) - 1;
+    LMask := UInt32(ACost) - 1;
 
     LIdx := 0;
-    while LIdx < LCost do
+    while LIdx < ACost do
     begin
       LJdx := Int32(LX[LBCount - 16] and LMask);
       System.Move(LV[LJdx * LBCount], LBlockY[0],
         LBCount * System.SizeOf(UInt32));
       &Xor(LBlockY, LX, 0, LBlockY);
-      BlockMix(LBlockY, LBlockX1, LBlockX2, LX, LBlockSize);
+      BlockMix(LBlockY, LBlockX1, LBlockX2, LX, ABlockSize);
       System.Inc(LIdx);
     end;
 
-    System.Move(LX[0], LPtrB[AIdx], LBCount * System.SizeOf(UInt32));
+    System.Move(LX[0], APtrB[AIdx], LBCount * System.SizeOf(UInt32));
   finally
     ClearArray(LV);
     ClearAllArrays(THashLibMatrixUInt32Array.Create(LX, LBlockX1, LBlockX2,
@@ -380,86 +352,29 @@ begin
   end;
 end;
 
-{$IFDEF USE_PASMP}
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.PasMPSMixWrapper
-  (const AJob: PPasMPJob; const AThreadIndex: LongInt;
-  const ADataContainer: Pointer; const AFromIndex, AToIndex: TPasMPNativeInt);
-begin
-  SMix(AFromIndex, ADataContainer);
-end;
+class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix(
+  APtrB: PCardinal; AParallelism, ACost, ABlockSize: Int32);
+{$IFNDEF HASHLIB_USE_PPL}
+var
+  LIdx: Int32;
 {$ENDIF}
-{$IFDEF USE_MTPROCS}
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.MTProcsSMixWrapper(AIdx: PtrInt;
-  ADataContainer: Pointer; AItem: TMultiThreadProcItem);
 begin
-  SMix(AIdx, ADataContainer);
-end;
-{$ENDIF}
-{$IF DEFINED(USE_DELPHI_PPL)}
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
-  (ADataContainer: PDataContainer);
-
-  function CreateTask(AIdx: Int32; ADataContainer: PDataContainer): ITask;
-  begin
-    result := TTask.Create(
-      procedure()
-      begin
-        SMix(AIdx, ADataContainer);
-      end);
-  end;
-
-var
-  LIdx, LParallelism: Int32;
-  LArrayTasks: array of ITask;
-begin
-  LParallelism := ADataContainer^.Parallelism;
-  System.SetLength(LArrayTasks, LParallelism);
-  for LIdx := 0 to System.Pred(LParallelism) do
-  begin
-    LArrayTasks[LIdx] := CreateTask(LIdx, ADataContainer);
-    LArrayTasks[LIdx].Start;
-  end;
-  TTask.WaitForAll(LArrayTasks);
-end;
-
-{$ELSEIF DEFINED(USE_PASMP) OR DEFINED(USE_MTPROCS)}
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
-  (ADataContainer: PDataContainer);
-var
-  LParallelism: Int32;
-begin
-  LParallelism := ADataContainer^.Parallelism;
-{$IF DEFINED(USE_PASMP)}
-  TPasMP.CreateGlobalInstance;
-  GlobalPasMP.Invoke(GlobalPasMP.ParallelFor(ADataContainer, 0,
-    LParallelism - 1, PasMPSMixWrapper));
-{$ELSEIF DEFINED(USE_MTPROCS)}
-  ProcThreadPool.DoParallel(MTProcsSMixWrapper, 0, LParallelism - 1,
-    ADataContainer);
+{$IFDEF HASHLIB_USE_PPL}
+  TParallel.&For(
+    0,
+    AParallelism - 1,
+    procedure(AIdx: Integer)
+    begin
+      SMixLane(AIdx, APtrB, ACost, ABlockSize);
+    end
+  );
 {$ELSE}
-{$MESSAGE ERROR 'Unsupported Threading Library.'}
-{$IFEND USE_PASMP}
-end;
-
-{$ELSE}
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.DoParallelSMix
-  (ADataContainer: PDataContainer);
-var
-  LIdx, LParallelism: Int32;
-begin
-  LParallelism := ADataContainer^.Parallelism;
-  for LIdx := 0 to System.Pred(LParallelism) do
+  for LIdx := 0 to AParallelism - 1 do
   begin
-    SMix(LIdx, ADataContainer);
+    SMixLane(LIdx, APtrB, ACost, ABlockSize);
   end;
+{$ENDIF HASHLIB_USE_PPL}
 end;
-
-{$IFEND USE_DELPHI_PPL}
 
 class function TPBKDF_ScryptNotBuildInAdapter.MFCrypt(const APasswordBytes,
   ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism,
@@ -468,7 +383,6 @@ var
   LMFLenBytes, LBLen: Int32;
   LBytes: THashLibByteArray;
   Lb: THashLibUInt32Array;
-  LPtrDataContainer: PDataContainer;
 begin
   LMFLenBytes := ABlockSize * 128;
   LBytes := SingleIterationPBKDF2(APasswordBytes, ASaltBytes,
@@ -481,16 +395,7 @@ begin
     TConverters.le32_copy(PByte(LBytes), 0, PCardinal(Lb), 0,
       System.Length(LBytes) * System.SizeOf(Byte));
 
-    LPtrDataContainer := New(PDataContainer);
-    try
-      LPtrDataContainer^.PtrB := PCardinal(Lb);
-      LPtrDataContainer^.Parallelism := AParallelism;
-      LPtrDataContainer^.Cost := ACost;
-      LPtrDataContainer^.BlockSize := ABlockSize;
-      DoParallelSMix(LPtrDataContainer);
-    finally
-      Dispose(LPtrDataContainer);
-    end;
+    DoParallelSMix(PCardinal(Lb), AParallelism, ACost, ABlockSize);
 
     TConverters.le32_copy(PCardinal(Lb), 0, PByte(LBytes), 0,
       System.Length(Lb) * System.SizeOf(UInt32));
@@ -571,3 +476,4 @@ begin
 end;
 
 end.
+

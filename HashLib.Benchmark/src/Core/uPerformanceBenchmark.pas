@@ -4,7 +4,6 @@ unit uPerformanceBenchmark;
 {$MODE DELPHI}
 {$WARNINGS OFF}
 {$ENDIF FPC}
-{$ZEROBASEDSTRINGS OFF}
 
 interface
 

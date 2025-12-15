@@ -73,7 +73,7 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\..\src\Core\uPerformanceBenchmark.pas"/>
+        <Filename Value="..\src\Core\uPerformanceBenchmark.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
     </Units>
@@ -86,7 +86,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\src\Core"/>
+      <OtherUnitFiles Value="..\src\Core"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
   </CompilerOptions>
