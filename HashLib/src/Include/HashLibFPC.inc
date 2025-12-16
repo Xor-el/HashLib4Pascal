@@ -12,17 +12,22 @@
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
 {$IFDEF FPC}
-{$IFDEF FPC_LITTLE_ENDIAN}
-   {$DEFINE HASHLIB_LITTLE_ENDIAN}
-{$ENDIF}
+  // FPC 3.0.0 and Above
+  {$IF FPC_FULLVERSION < 30000}
+     {$MESSAGE ERROR 'This Library requires FreePascal 3.0.0 or higher.'}
+  {$IFEND}
 
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-   {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-{$ENDIF}
+  {$IFDEF FPC_LITTLE_ENDIAN}
+     {$DEFINE HASHLIB_LITTLE_ENDIAN}
+  {$ENDIF}
 
-{$IF FPC_FULLVERSION >= 30301}
-   {.$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
-{$IFEND}
+  {$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
+     {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  {$ENDIF}
+
+  {$IF FPC_FULLVERSION >= 30301}
+     {.$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
+  {$IFEND}
 
   {$DEFINE USE_UNROLLED_VARIANT}
 
