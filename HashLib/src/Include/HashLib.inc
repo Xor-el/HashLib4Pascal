@@ -11,21 +11,56 @@
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
+{========================== Common Compiler Settings ==========================}
 
-{---------------------------- Compiler Family Switch --------------------------}
-{$IFDEF FPC}
-  {$I HashLibFPC.inc} // FPC-specific settings
-{$ELSE}
-  {$DEFINE DELPHI}
-  {$I ../../HashLib/src/Include/HashLibDelphi.inc} // Delphi-specific settings
-{$ENDIF}
-
-{-------------------------- Common Compiler Settings --------------------------}
-{$SCOPEDENUMS ON}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
-{$POINTERMATH ON}
-{$WARNINGS OFF}
 {$HINTS OFF}
+{$WARNINGS OFF}
+{$RANGECHECKS OFF}
+{$OVERFLOWCHECKS OFF}
+{$SCOPEDENUMS ON}
+{$POINTERMATH ON}
+
+{========================= Compiler Specific Settings =========================}
+
+{$IFDEF FPC}
+  {$I HashLibFPC.inc}
+{$ELSE}
+   // Delphi 2010 and Above
+  {$IF CompilerVersion < 21.0}
+    {$MESSAGE ERROR 'This Library requires Delphi 2010 or higher.'}
+  {$IFEND}
+  
+  {$DEFINE DELPHI}
+
+  {$DEFINITIONINFO ON} // Enable code browsing (Ctrl+Click)
+  {$STRINGCHECKS OFF}
+  {$WARN DUPLICATE_CTOR_DTOR OFF}
+
+  {$DEFINE HASHLIB_LITTLE_ENDIAN}
+
+  {$IFDEF CPUARM}
+    {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  {$ENDIF}
+
+  {$DEFINE USE_UNROLLED_VARIANT}
+
+  {$IF CompilerVersion = 21.0}
+    {$DEFINE DELPHI2010}
+  {$IFEND}
+
+  {$IF CompilerVersion >= 22.0}
+    {$DEFINE DELPHIXE_UP}
+  {$IFEND}
+
+  {$IF CompilerVersion >= 25.0}
+    {$DEFINE SHIFT_OVERFLOW_BUG_FIXED}
+  {$IFEND}
+
+  {$IF CompilerVersion >= 28.0}
+    {$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
+    {$DEFINE HAS_DELPHI_NET_ENCODING}
+  {$IFEND}
+
+{$ENDIF}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
