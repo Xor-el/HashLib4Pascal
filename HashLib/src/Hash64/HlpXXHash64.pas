@@ -28,21 +28,13 @@ type
 
   const
     CKEY = UInt64(0);
-
-{$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
     PRIME64_1: UInt64 = (11400714785074694791);
     PRIME64_2: UInt64 = (14029467366897019727);
     PRIME64_3: UInt64 = (1609587929392839161);
     PRIME64_4: UInt64 = (9650029242287828579);
     PRIME64_5: UInt64 = (2870177450012600261);
-{$ELSE}
-    PRIME64_1 = UInt64(11400714785074694791);
-    PRIME64_2 = UInt64(14029467366897019727);
-    PRIME64_3 = UInt64(1609587929392839161);
-    PRIME64_4 = UInt64(9650029242287828579);
-    PRIME64_5 = UInt64(2870177450012600261);
-{$ENDIF FPC}
+
     function GetKeyLength(): TNullableInteger;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;

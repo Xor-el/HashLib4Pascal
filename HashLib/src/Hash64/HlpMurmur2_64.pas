@@ -28,14 +28,8 @@ type
 
   const
     CKEY = UInt64($0);
-{$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
-
     M: UInt64 = UInt64($C6A4A7935BD1E995);
-
-{$ELSE}
-    M = UInt64($C6A4A7935BD1E995);
-{$ENDIF FPC}
     R = Int32(47);
 
     function GetKeyLength(): TNullableInteger;
