@@ -11,15 +11,22 @@ program HashLib.Tests;
 }
 
 {$WARN DUPLICATE_CTOR_DTOR OFF}
-{$IFDEF CONSOLE_TESTRUNNER}
-{$APPTYPE CONSOLE}
+
+{$IFNDEF TESTINSIGHT}
+  {$IFDEF CONSOLE_TESTRUNNER}
+    {$APPTYPE CONSOLE}
+  {$ENDIF}
 {$ENDIF}
 
 uses
-  Forms,
-  TestFramework,
-  GUITestRunner,
-  TextTestRunner,
+{$IFDEF TESTINSIGHT}
+   TestInsight.DUnit,
+{$ELSE}
+   Forms,
+   TestFramework,
+   GUITestRunner,
+   TextTestRunner,
+{$ENDIF}
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
@@ -117,7 +124,6 @@ uses
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
   HlpArgon2TypeAndVersion in '..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
-  HlpNullable in '..\..\HashLib\src\Nullable\HlpNullable.pas',
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
@@ -139,10 +145,14 @@ uses
 
 begin
 
+{$IFDEF TESTINSIGHT}
+   TestInsight.DUnit.RunRegisteredTests;
+{$ELSE}
   Application.Initialize;
   if IsConsole then
     TextTestRunner.RunRegisteredTests
   else
     GUITestRunner.RunRegisteredTests;
+{$ENDIF}
 
 end.

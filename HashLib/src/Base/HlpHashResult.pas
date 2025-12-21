@@ -6,16 +6,6 @@ interface
 
 uses
   SysUtils,
-{$IFDEF FPC}
-  base64,
-{$ELSE}
-{$IFDEF HAS_DELPHI_NET_ENCODING}
-  System.NetEncoding,
-{$ELSE}
-  Classes,
-  EncdDecd,
-{$ENDIF HAS_DELPHI_NET_ENCODING}
-{$ENDIF FPC}
   HlpBits,
   HlpHashLibTypes,
   HlpIHashResult,
@@ -49,8 +39,6 @@ type
     function GetUInt64(): UInt64;
     function ToString(AGroup: Boolean = False): String; reintroduce;
     function Equals(const AHashResult: IHashResult): Boolean; reintroduce;
-    function GetHashCode(): {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
-{$ENDIF DELPHI}override;
 
   end;
 
@@ -105,68 +93,6 @@ end;
 function THashResult.GetBytes: THashLibByteArray;
 begin
   result := FHash;
-end;
-
-function THashResult.GetHashCode: {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
-{$ENDIF DELPHI}
-
-var
-  LResult: UInt32;
-  LIdx, LTop: Int32;
-  LTemp: String;
-{$IFDEF HAS_DELPHI_NET_ENCODING}
-  LTempHolder: THashLibByteArray;
-{$ELSE}
-{$IFDEF DELPHI}
-  LTempHolder: TBytesStream;
-{$ENDIF DELPHI}
-{$ENDIF HAS_DELPHI_NET_ENCODING}
-{$IFDEF FPC}
-  LTempHolder: String;
-{$ENDIF FPC}
-begin
-
-{$IFDEF HAS_DELPHI_NET_ENCODING}
-  LTempHolder := Self.FHash;
-{$ELSE}
-{$IFDEF DELPHI}
-  LTempHolder := TBytesStream.Create(Self.FHash);
-{$ENDIF DELPHI}
-{$ENDIF HAS_DELPHI_NET_ENCODING}
-{$IFDEF FPC}
-  LTempHolder := EncodeStringBase64(TConverters.ConvertBytesToString(Self.FHash,
-    TEncoding.UTF8));
-{$ENDIF FPC}
-{$IFDEF HAS_DELPHI_NET_ENCODING}
-  LTemp := StringReplace(TNetEncoding.base64.EncodeBytesToString(LTempHolder),
-    sLineBreak, '', [rfReplaceAll]);
-{$ELSE}
-{$IFDEF DELPHI}
-  try
-    LTemp := StringReplace(String(EncodeBase64(LTempHolder.Memory,
-      LTempHolder.Size)), sLineBreak, '', [rfReplaceAll]);
-  finally
-    LTempHolder.Free;
-  end;
-{$ENDIF DELPHI}
-{$ENDIF HAS_DELPHI_NET_ENCODING}
-{$IFDEF FPC}
-  LTemp := LTempHolder;
-{$ENDIF FPC}
-  LTemp := AnsiUpperCase(LTemp);
-
-  LResult := 0;
-  LIdx := 1;
-  LTop := System.Length(LTemp);
-
-  while LIdx <= LTop do
-  begin
-    LResult := TBits.RotateLeft32(LResult, 5);
-    LResult := LResult xor UInt32(LTemp[LIdx]);
-    System.Inc(LIdx);
-  end;
-
-  result := LResult;
 end;
 
 function THashResult.GetInt32: Int32;

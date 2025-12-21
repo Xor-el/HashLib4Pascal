@@ -17,6 +17,10 @@
      {$MESSAGE ERROR 'This Library requires FreePascal 3.0.0 or higher.'}
   {$IFEND}
 
+  {$IFDEF ENDIAN_BIG}
+    {$MESSAGE FATAL 'This Library does not support "Big Endian" processors yet.'}
+  {$ENDIF}
+
   {$IFDEF FPC_LITTLE_ENDIAN}
      {$DEFINE HASHLIB_LITTLE_ENDIAN}
   {$ENDIF}

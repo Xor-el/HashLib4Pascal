@@ -5,20 +5,13 @@ unit HlpMurmur2;
 interface
 
 uses
-{$IFDEF DELPHI2010}
-  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
-{$ENDIF DELPHI2010}
   HlpHashLibTypes,
-{$IFDEF DELPHI}
-  HlpHash,
-{$ENDIF DELPHI}
   HlpIHash,
   HlpConverters,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpMultipleTransformNonBlock,
-  HlpNullable;
+  HlpMultipleTransformNonBlock;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -37,7 +30,7 @@ type
     M = UInt32($5BD1E995);
     R = Int32(24);
 
-    function GetKeyLength(): TNullableInteger;
+    function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;
 
@@ -49,7 +42,7 @@ type
     constructor Create();
     procedure Initialize(); override;
     function Clone(): IHash; override;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    property KeyLength: Int32 read GetKeyLength;
     property Key: THashLibByteArray read GetKey write SetKey;
 
   end;
@@ -77,16 +70,16 @@ begin
   end
   else
   begin
-    if System.Length(AValue) <> KeyLength.value then
+    if System.Length(AValue) <> KeyLength then
     begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength.value]);
+        [KeyLength]);
     end;
     FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
   end;
 end;
 
-function TMurmur2.GetKeyLength: TNullableInteger;
+function TMurmur2.GetKeyLength: Int32;
 begin
   result := 4;
 end;

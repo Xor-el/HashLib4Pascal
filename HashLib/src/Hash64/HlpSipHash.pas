@@ -5,14 +5,9 @@ unit HlpSipHash;
 interface
 
 uses
-
-{$IFDEF DELPHI2010}
-  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
-{$ENDIF DELPHI2010}
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
-  HlpNullable,
   HlpHash,
   HlpIHash,
   HlpHashResult,
@@ -44,7 +39,7 @@ type
     function ProcessFinalBlock(): UInt64;
     procedure Finish();
 
-    function GetKeyLength(): TNullableInteger;
+    function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray;
     procedure SetKey(const AValue: THashLibByteArray);
 
@@ -62,7 +57,7 @@ type
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ALength: Int32); override;
     function TransformFinal: IHashResult; override;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    property KeyLength: Int32 read GetKeyLength;
     property Key: THashLibByteArray read GetKey write SetKey;
 
   end;
@@ -262,7 +257,7 @@ function TSipHash.GetKey: THashLibByteArray;
 var
   LKey: THashLibByteArray;
 begin
-  System.SetLength(LKey, KeyLength.value);
+  System.SetLength(LKey, KeyLength);
 
   TConverters.ReadUInt64AsBytesLE(FKey0, LKey, 0);
   TConverters.ReadUInt64AsBytesLE(FKey1, LKey, 8);
@@ -270,7 +265,7 @@ begin
   Result := LKey;
 end;
 
-function TSipHash.GetKeyLength: TNullableInteger;
+function TSipHash.GetKeyLength: Int32;
 begin
   Result := 16;
 end;
@@ -309,10 +304,10 @@ begin
   end
   else
   begin
-    if System.Length(AValue) <> KeyLength.value then
+    if System.Length(AValue) <> KeyLength then
     begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength.value]);
+        [KeyLength]);
     end;
 
     FKey0 := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);

@@ -3,7 +3,6 @@ unit CRCTests;
 interface
 
 uses
-  Classes,
   SysUtils,
 {$IFDEF FPC}
   fpcunit,

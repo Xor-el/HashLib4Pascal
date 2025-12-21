@@ -5,14 +5,7 @@ unit HlpRIPEMD;
 interface
 
 uses
-{$IFDEF DELPHI2010}
-  SysUtils, // to get rid of compiler hint "not inlined" on Delphi 2010.
-{$ENDIF DELPHI2010}
   HlpBits,
-{$IFDEF DELPHI}
-  HlpHashBuffer,
-  HlpHash,
-{$ENDIF DELPHI}
   HlpMDBase,
   HlpConverters,
   HlpIHash,

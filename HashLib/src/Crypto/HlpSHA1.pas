@@ -6,10 +6,6 @@ interface
 
 uses
   HlpBits,
-{$IFDEF DELPHI}
-  HlpHashBuffer,
-  HlpHash,
-{$ENDIF DELPHI}
   HlpSHA0,
   HlpIHash;
 

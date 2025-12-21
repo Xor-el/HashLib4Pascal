@@ -7,10 +7,6 @@ interface
 uses
   HlpHashLibTypes,
   HlpBits,
-{$IFDEF DELPHI}
-  HlpHashBuffer,
-  HlpHash,
-{$ENDIF DELPHI}
   HlpConverters,
   HlpIHash,
   HlpIHashInfo,

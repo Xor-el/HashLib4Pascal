@@ -6,7 +6,6 @@ interface
 
 uses
   Classes,
-  StrUtils,
   SysUtils,
   HlpHashLibTypes,
   HlpBits,

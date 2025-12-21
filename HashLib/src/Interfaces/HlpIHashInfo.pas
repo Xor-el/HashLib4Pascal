@@ -8,8 +8,7 @@ uses
   HlpHashLibTypes,
   HlpIKDF,
   HlpIHash,
-  HlpArgon2TypeAndVersion,
-  HlpNullable;
+  HlpArgon2TypeAndVersion;
 
 type
 
@@ -43,8 +42,8 @@ type
     function GetKey(): THashLibByteArray;
     procedure SetKey(const AValue: THashLibByteArray);
     property Key: THashLibByteArray read GetKey write SetKey;
-    function GetKeyLength(): TNullableInteger;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    function GetKeyLength(): Int32;
+    property KeyLength: Int32 read GetKeyLength;
 
   end;
 

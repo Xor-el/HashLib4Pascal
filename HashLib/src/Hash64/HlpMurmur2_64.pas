@@ -6,16 +6,12 @@ interface
 
 uses
   HlpHashLibTypes,
-{$IFDEF DELPHI}
-  HlpHash,
-{$ENDIF DELPHI}
   HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpMultipleTransformNonBlock,
-  HlpNullable;
+  HlpMultipleTransformNonBlock;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -31,17 +27,11 @@ type
 
   const
     CKEY = UInt64($0);
-{$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
-
     M: UInt64 = UInt64($C6A4A7935BD1E995);
-
-{$ELSE}
-    M = UInt64($C6A4A7935BD1E995);
-{$ENDIF FPC}
     R = Int32(47);
 
-    function GetKeyLength(): TNullableInteger;
+    function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;
 
@@ -53,7 +43,7 @@ type
     constructor Create();
     procedure Initialize(); override;
     function Clone(): IHash; override;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    property KeyLength: Int32 read GetKeyLength;
     property Key: THashLibByteArray read GetKey write SetKey;
 
   end;
@@ -223,7 +213,7 @@ begin
   result := TConverters.ReadUInt64AsBytesLE(FKey);
 end;
 
-function TMurmur2_64.GetKeyLength: TNullableInteger;
+function TMurmur2_64.GetKeyLength: Int32;
 begin
   result := 8;
 end;
@@ -242,10 +232,10 @@ begin
   end
   else
   begin
-    if System.length(AValue) <> KeyLength.value then
+    if System.length(AValue) <> KeyLength then
     begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength.value]);
+        [KeyLength]);
     end;
     FKey := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
   end;

@@ -32,8 +32,7 @@ package HashLib4PascalPackage;
 {$IMPLICITBUILD ON}
 
 requires
-  rtl,
-  soaprtl;
+  rtl;
 
 contains
   HlpHash in '..\..\Base\HlpHash.pas',
@@ -128,7 +127,6 @@ contains
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
   HlpArgon2TypeAndVersion in '..\..\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
-  HlpNullable in '..\..\Nullable\HlpNullable.pas',
   HlpConverters in '..\..\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\Utils\HlpBits.pas',

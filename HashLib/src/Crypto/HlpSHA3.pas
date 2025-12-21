@@ -8,9 +8,6 @@ uses
   SysUtils,
   HlpBits,
   HlpHash,
-{$IFDEF DELPHI}
-  HlpHashBuffer,
-{$ENDIF DELPHI}
   HlpIHashInfo,
   HlpIHash,
   HlpHashResult,

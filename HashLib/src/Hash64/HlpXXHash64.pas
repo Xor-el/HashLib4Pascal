@@ -12,7 +12,6 @@ uses
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpNullable,
   HlpBits;
 
 resourcestring
@@ -28,22 +27,14 @@ type
 
   const
     CKEY = UInt64(0);
-
-{$IFDEF FPC}
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
     PRIME64_1: UInt64 = (11400714785074694791);
     PRIME64_2: UInt64 = (14029467366897019727);
     PRIME64_3: UInt64 = (1609587929392839161);
     PRIME64_4: UInt64 = (9650029242287828579);
     PRIME64_5: UInt64 = (2870177450012600261);
-{$ELSE}
-    PRIME64_1 = UInt64(11400714785074694791);
-    PRIME64_2 = UInt64(14029467366897019727);
-    PRIME64_3 = UInt64(1609587929392839161);
-    PRIME64_4 = UInt64(9650029242287828579);
-    PRIME64_5 = UInt64(2870177450012600261);
-{$ENDIF FPC}
-    function GetKeyLength(): TNullableInteger;
+
+    function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;
 
@@ -72,7 +63,7 @@ type
       AIndex, ALength: Int32); override;
     function TransformFinal(): IHashResult; override;
     function Clone(): IHash; override;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    property KeyLength: Int32 read GetKeyLength;
     property Key: THashLibByteArray read GetKey write SetKey;
 
   end;
@@ -119,7 +110,7 @@ begin
   result := TConverters.ReadUInt64AsBytesLE(FKey);
 end;
 
-function TXXHash64.GetKeyLength: TNullableInteger;
+function TXXHash64.GetKeyLength: Int32;
 begin
   result := 8;
 end;
@@ -143,10 +134,10 @@ begin
   end
   else
   begin
-    if System.Length(AValue) <> KeyLength.value then
+    if System.Length(AValue) <> KeyLength then
     begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength.value]);
+        [KeyLength]);
     end;
     FKey := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
   end;

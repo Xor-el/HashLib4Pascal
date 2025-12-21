@@ -5,9 +5,6 @@ unit HlpSipHash128;
 interface
 
 uses
-{$IFDEF DELPHI}
-  HlpHash,
-{$ENDIF DELPHI}
   HlpIHash,
   HlpSipHash;
 

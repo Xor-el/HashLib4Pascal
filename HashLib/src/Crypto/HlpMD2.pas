@@ -6,10 +6,6 @@ interface
 
 uses
   HlpHashLibTypes,
-{$IFDEF DELPHI}
-  HlpHashBuffer,
-  HlpHash,
-{$ENDIF DELPHI}
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
