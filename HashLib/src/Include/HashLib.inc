@@ -41,7 +41,6 @@
 
   {$IF CompilerVersion >= 28.0}
     {$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
-    {$DEFINE HAS_DELPHI_NET_ENCODING}
   {$IFEND}
 
 {$ENDIF}
