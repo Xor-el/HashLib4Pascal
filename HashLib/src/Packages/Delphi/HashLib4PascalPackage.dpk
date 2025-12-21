@@ -32,8 +32,7 @@ package HashLib4PascalPackage;
 {$IMPLICITBUILD ON}
 
 requires
-  rtl,
-  soaprtl;
+  rtl;
 
 contains
   HlpHash in '..\..\Base\HlpHash.pas',

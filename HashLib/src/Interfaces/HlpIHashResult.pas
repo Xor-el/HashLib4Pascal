@@ -19,8 +19,6 @@ type
     function GetUInt64(): UInt64;
     function ToString(AGroup: Boolean = False): String;
     function Equals(const AHashResult: IHashResult): Boolean; overload;
-    function GetHashCode(): {$IFDEF DELPHI}Int32; {$ELSE}PtrInt;
-{$ENDIF DELPHI}
   end;
 
 implementation
