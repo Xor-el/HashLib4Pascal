@@ -145,10 +145,14 @@ uses
 
 begin
 
+{$IFDEF TESTINSIGHT}
+   TestInsight.DUnit.RunRegisteredTests;
+{$ELSE}
   Application.Initialize;
   if IsConsole then
     TextTestRunner.RunRegisteredTests
   else
     GUITestRunner.RunRegisteredTests;
+{$ENDIF}
 
 end.
