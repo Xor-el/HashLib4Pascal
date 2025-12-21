@@ -8,7 +8,6 @@ uses
   HlpHashLibTypes,
   HlpConverters,
   HlpIHashInfo,
-  HlpNullable,
   HlpHash,
   HlpIHash,
   HlpHashResult,
@@ -45,7 +44,7 @@ type
     C3 = UInt32($52DCE729);
     C4 = UInt32($38495AB5);
 {$ENDREGION}
-    function GetKeyLength(): TNullableInteger;
+    function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;
 
@@ -56,7 +55,7 @@ type
       AIndex, ALength: Int32); override;
     function TransformFinal: IHashResult; override;
     function Clone(): IHash; override;
-    property KeyLength: TNullableInteger read GetKeyLength;
+    property KeyLength: Int32 read GetKeyLength;
     property Key: THashLibByteArray read GetKey write SetKey;
   end;
 
@@ -366,7 +365,7 @@ begin
   result := TConverters.ReadUInt32AsBytesLE(FKey);
 end;
 
-function TMurmurHash3_x64_128.GetKeyLength: TNullableInteger;
+function TMurmurHash3_x64_128.GetKeyLength: Int32;
 begin
   result := 4;
 end;
@@ -388,10 +387,10 @@ begin
   end
   else
   begin
-    if System.length(AValue) <> KeyLength.value then
+    if System.length(AValue) <> KeyLength then
     begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength.value]);
+        [KeyLength]);
     end;
     FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
   end;

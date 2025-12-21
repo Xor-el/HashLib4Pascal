@@ -22,7 +22,7 @@ uses
   HlpMurmur2, HlpMurmurHash3_x86_32, HlpOneAtTime, HlpPJW, HlpRotating, HlpRS, 
   HlpSDBM, HlpShiftAndXor, HlpSuperFast, HlpXXHash32, HlpFNV1a64, HlpFNV64, 
   HlpMurmur2_64, HlpSipHash, HlpXXHash64, HlpIHash, HlpIHashInfo, 
-  HlpIHashResult, HlpNullable, HlpConverters, HlpBitConverter, HlpBits, 
+  HlpIHashResult, HlpConverters, HlpBitConverter, HlpBits,
   HlpHashLibTypes, HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, 
   HlpIKDF, HlpKDF, HlpICRC, HlpBlake2B, HlpBlake2S, HlpGOST3411_2012, 
   HlpCRC32Fast, HlpArgon2TypeAndVersion, HlpPBKDF_Argon2NotBuildInAdapter, 
