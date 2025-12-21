@@ -11,15 +11,22 @@ program HashLib.Tests;
 }
 
 {$WARN DUPLICATE_CTOR_DTOR OFF}
-{$IFDEF CONSOLE_TESTRUNNER}
-{$APPTYPE CONSOLE}
+
+{$IFNDEF TESTINSIGHT}
+  {$IFDEF CONSOLE_TESTRUNNER}
+    {$APPTYPE CONSOLE}
+  {$ENDIF}
 {$ENDIF}
 
 uses
-  Forms,
-  TestFramework,
-  GUITestRunner,
-  TextTestRunner,
+{$IFDEF TESTINSIGHT}
+   TestInsight.DUnit,
+{$ELSE}
+   Forms,
+   TestFramework,
+   GUITestRunner,
+   TextTestRunner,
+{$ENDIF}
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
