@@ -35,14 +35,6 @@
 
   {$DEFINE USE_UNROLLED_VARIANT}
 
-  {$IF CompilerVersion = 21.0}
-    {$DEFINE DELPHI2010}
-  {$IFEND}
-
-  {$IF CompilerVersion >= 22.0}
-    {$DEFINE DELPHIXE_UP}
-  {$IFEND}
-
   {$IF CompilerVersion >= 25.0}
     {$DEFINE SHIFT_OVERFLOW_BUG_FIXED}
   {$IFEND}

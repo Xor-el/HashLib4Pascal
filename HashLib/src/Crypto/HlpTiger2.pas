@@ -6,10 +6,6 @@ interface
 
 uses
   SysUtils,
-{$IFDEF DELPHI}
-  HlpHash,
-  HlpHashBuffer,
-{$ENDIF DELPHI}
   HlpHashLibTypes,
   HlpConverters,
   HlpHashRounds,

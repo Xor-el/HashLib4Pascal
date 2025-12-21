@@ -38,43 +38,6 @@ type
   /// </summary>
   THashLibMatrixGenericArray<T> = array of THashLibGenericArray<T>;
 
-{$IFDEF DELPHIXE_UP}
-  /// <summary>
-  /// Represents a dynamic array of UInt32.
-  /// </summary>
-  THashLibUInt32Array = TArray<UInt32>;
-
-  /// <summary>
-  /// Represents a dynamic array of UInt64.
-  /// </summary>
-  THashLibUInt64Array = TArray<UInt64>;
-
-  /// <summary>
-  /// Represents a dynamic array of String.
-  /// </summary>
-  THashLibStringArray = TArray<String>;
-
-  /// <summary>
-  /// Represents a dynamic array of Char.
-  /// </summary>
-  THashLibCharArray = TArray<Char>;
-
-  /// <summary>
-  /// Represents a dynamic array of array of Byte.
-  /// </summary>
-  THashLibMatrixByteArray = TArray<THashLibByteArray>;
-
-  /// <summary>
-  /// Represents a dynamic array of array of UInt32.
-  /// </summary>
-  THashLibMatrixUInt32Array = TArray<THashLibUInt32Array>;
-
-  /// <summary>
-  /// Represents a dynamic array of array of UInt64.
-  /// </summary>
-  THashLibMatrixUInt64Array = TArray<THashLibUInt64Array>;
-
-{$ELSE}
   /// <summary>
   /// Represents a dynamic array of UInt32.
   /// </summary>
@@ -109,7 +72,6 @@ type
   /// Represents a dynamic array of array of UInt64.
   /// </summary>
   THashLibMatrixUInt64Array = array of THashLibUInt64Array;
-{$ENDIF DELPHIXE_UP}
 
 implementation
 
