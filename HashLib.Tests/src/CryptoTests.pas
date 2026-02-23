@@ -21,11 +21,21 @@ uses
   HlpBlake2SParams,
   HlpBlake3,
   HlpHashLibTypes,
+  HlpGost,
   TestVectors;
 
 // Crypto
 type
   TTestGost = class(TCryptoAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  end;
+
+type
+  TTestGost_CryptoProParamSet = class(TCryptoAlgorithmTestCase)
 
   protected
     procedure SetUp; override;
@@ -916,6 +926,34 @@ begin
 end;
 
 procedure TTestGost.TearDown;
+begin
+  HashInstance := Nil;
+  HMACInstance := Nil;
+  inherited;
+end;
+
+{ TTestGost_CryptoProParamSet }
+
+procedure TTestGost_CryptoProParamSet.SetUp;
+begin
+  inherited;
+  HashInstance := THashFactory.TCrypto.CreateGost(TGostSBox.gsbCryptoProParamSet);
+  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HashOfEmptyData :=
+    '981E5F3CA30C841487830F84FB433E13AC1101569B9C13584AC483234CD656C0';
+  HashOfDefaultData :=
+    '7CBD0B4823450AAB69AA9A6A913ACACB147C29AA03FB7B7FDEF9D0107654C7D4';
+  HashOfOnetoNine :=
+    '8FC38C2C1911DF7986994F73F5CCA49520224A568F50610B12E47DCFFF4A2D20';
+  HashOfABCDE :=
+    '6FEA528ACC59F14581537A5DFB410ADC10983DCC4904DEA87A0AA7AD718D9632';
+  HashOfDefaultDataHMACWithShortKey :=
+    '3A85BF8460EAF9430F45926E7585C49EB7E14C5C4200FAB8424B4E837D296CF6';
+  HashOfDefaultDataHMACWithLongKey :=
+    '02DB400F81889DECE2DB429A34E1EA15A6C22C3960B14C2EDED079EDA6A86FD6';
+end;
+
+procedure TTestGost_CryptoProParamSet.TearDown;
 begin
   HashInstance := Nil;
   HMACInstance := Nil;
@@ -4023,6 +4061,7 @@ initialization
 {$IFDEF FPC}
 // Crypto
 RegisterTest(TTestGost);
+RegisterTest(TTestGost_CryptoProParamSet);
 RegisterTest(TTestGOST3411_2012_256);
 RegisterTest(TTestGOST3411_2012_512);
 RegisterTest(TTestGrindahl256);
@@ -4111,6 +4150,7 @@ RegisterTest(TTestBlake3XOF);
 {$ELSE}
 // Crypto
 RegisterTest(TTestGost.Suite);
+RegisterTest(TTestGost_CryptoProParamSet.Suite);
 RegisterTest(TTestGOST3411_2012_256.Suite);
 RegisterTest(TTestGOST3411_2012_512.Suite);
 RegisterTest(TTestGrindahl256.Suite);
