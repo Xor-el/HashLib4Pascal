@@ -365,7 +365,9 @@ type
       class function CreateHaval_4_256(): IHash; static;
       class function CreateHaval_5_256(): IHash; static;
 
-      class function CreateGost(): IHash; static;
+      class function CreateGost(ASBoxType: TGostSBox = TGostSBox.gsbTestParamSet)
+        : IHash; static;
+      class function CreateGost_CryptoProParamSet(): IHash; static;
 
       // Streebog 256
       class function CreateGOST3411_2012_256(): IHash; static;
@@ -855,9 +857,14 @@ end;
 
 { THashFactory.TCrypto }
 
-class function THashFactory.TCrypto.CreateGost: IHash;
+class function THashFactory.TCrypto.CreateGost(ASBoxType: TGostSBox): IHash;
 begin
-  Result := TGost.Create();
+  Result := TGost.Create(ASBoxType);
+end;
+
+class function THashFactory.TCrypto.CreateGost_CryptoProParamSet: IHash;
+begin
+  Result := TGost.Create(TGostSBox.gsbCryptoProParamSet);
 end;
 
 class function THashFactory.TCrypto.CreateGOST3411_2012_256: IHash;

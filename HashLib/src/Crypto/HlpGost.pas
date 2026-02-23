@@ -15,18 +15,28 @@ uses
 
 type
 
+{$SCOPEDENUMS ON}
+  TGostSBox = (gsbTestParamSet, gsbCryptoProParamSet);
+{$SCOPEDENUMS OFF}
+
   TGost = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
   strict private
 
     class var
 
-      FSBox1, FSBox2, FSBox3, FSBox4: THashLibUInt32Array;
+      FSBox1_Test, FSBox2_Test, FSBox3_Test, FSBox4_Test: THashLibUInt32Array;
+      FSBox1_CryptoPro, FSBox2_CryptoPro, FSBox3_CryptoPro,
+        FSBox4_CryptoPro: THashLibUInt32Array;
 
   var
     FState, FHash: THashLibUInt32Array;
+    FSBox1, FSBox2, FSBox3, FSBox4: THashLibUInt32Array;
+    FSBoxType: TGostSBox;
 
     procedure Compress(APtr: PCardinal);
+    class procedure ComputeSBoxes(const ASBox: THashLibMatrixUInt32Array;
+      out ASBox1, ASBox2, ASBox3, ASBox4: THashLibUInt32Array); static;
     class constructor Gost();
 
   strict protected
@@ -36,7 +46,7 @@ type
       AIndex: Int32); override;
 
   public
-    constructor Create();
+    constructor Create(ASBoxType: TGostSBox = TGostSBox.gsbTestParamSet);
     procedure Initialize(); override;
     function Clone(): IHash; override;
 
@@ -50,7 +60,7 @@ function TGost.Clone(): IHash;
 var
   LHashInstance: TGost;
 begin
-  LHashInstance := TGost.Create();
+  LHashInstance := TGost.Create(FSBoxType);
   LHashInstance.FState := System.Copy(FState);
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
@@ -336,11 +346,60 @@ begin
 
 end;
 
-constructor TGost.Create;
+class procedure TGost.ComputeSBoxes(const ASBox: THashLibMatrixUInt32Array;
+  out ASBox1, ASBox2, ASBox3, ASBox4: THashLibUInt32Array);
+var
+  LIdx, LA, LB: Int32;
+  ax, bx, cx, dx: UInt32;
+begin
+  System.SetLength(ASBox1, 256);
+  System.SetLength(ASBox2, 256);
+  System.SetLength(ASBox3, 256);
+  System.SetLength(ASBox4, 256);
+
+  LIdx := 0;
+
+  for LA := 0 to 15 do
+  begin
+    ax := ASBox[1, LA] shl 15;
+    bx := ASBox[3, LA] shl 23;
+    cx := ASBox[5, LA];
+    cx := TBits.RotateRight32(cx, 1);
+    dx := ASBox[7, LA] shl 7;
+
+    for LB := 0 to 15 do
+    begin
+      ASBox1[LIdx] := ax or (ASBox[0, LB] shl 11);
+      ASBox2[LIdx] := bx or (ASBox[2, LB] shl 19);
+      ASBox3[LIdx] := cx or (ASBox[4, LB] shl 27);
+      ASBox4[LIdx] := dx or (ASBox[6, LB] shl 3);
+      System.Inc(LIdx);
+    end;
+  end;
+end;
+
+constructor TGost.Create(ASBoxType: TGostSBox);
 begin
   Inherited Create(32, 32);
   System.SetLength(FState, 8);
   System.SetLength(FHash, 8);
+  FSBoxType := ASBoxType;
+  case ASBoxType of
+    TGostSBox.gsbTestParamSet:
+      begin
+        FSBox1 := FSBox1_Test;
+        FSBox2 := FSBox2_Test;
+        FSBox3 := FSBox3_Test;
+        FSBox4 := FSBox4_Test;
+      end;
+    TGostSBox.gsbCryptoProParamSet:
+      begin
+        FSBox1 := FSBox1_CryptoPro;
+        FSBox2 := FSBox2_CryptoPro;
+        FSBox3 := FSBox3_CryptoPro;
+        FSBox4 := FSBox4_CryptoPro;
+      end;
+  end;
 end;
 
 procedure TGost.Finish;
@@ -375,9 +434,8 @@ end;
 class constructor TGost.Gost;
 var
   LSBox: THashLibMatrixUInt32Array;
-  LIdx, LA, LB: Int32;
-  ax, bx, cx, dx: UInt32;
 begin
+  // DSbox_Test (id-GostR3411-94-TestParamSet)
   LSBox := THashLibMatrixUInt32Array.Create(THashLibUInt32Array.Create(4, 10, 9,
     2, 13, 8, 0, 14, 6, 11, 1, 12, 7, 15, 5, 3), THashLibUInt32Array.Create(14,
     11, 4, 12, 6, 13, 15, 10, 2, 3, 8, 1, 0, 7, 5, 9),
@@ -389,31 +447,22 @@ begin
     9, 0, 10, 14, 7, 6, 8, 2, 12), THashLibUInt32Array.Create(1, 15, 13, 0, 5,
     7, 10, 4, 9, 2, 3, 14, 6, 11, 8, 12));
 
-  System.SetLength(FSBox1, 256);
-  System.SetLength(FSBox2, 256);
-  System.SetLength(FSBox3, 256);
-  System.SetLength(FSBox4, 256);
+  ComputeSBoxes(LSBox, FSBox1_Test, FSBox2_Test, FSBox3_Test, FSBox4_Test);
 
-  LIdx := 0;
+  // DSbox_A (id-GostR3411-94-CryptoProParamSet)
+  LSBox := THashLibMatrixUInt32Array.Create(THashLibUInt32Array.Create(10, 4, 5,
+    6, 8, 1, 3, 7, 13, 12, 14, 0, 9, 2, 11, 15), THashLibUInt32Array.Create(5,
+    15, 4, 0, 2, 13, 11, 9, 1, 7, 6, 3, 12, 14, 10, 8),
+    THashLibUInt32Array.Create(7, 15, 12, 14, 9, 4, 1, 0, 3, 11, 5, 2, 6, 10, 8,
+    13), THashLibUInt32Array.Create(4, 10, 7, 12, 0, 15, 2, 8, 14, 1, 6, 5, 13,
+    11, 9, 3), THashLibUInt32Array.Create(7, 6, 4, 11, 9, 12, 2, 10, 1, 8, 0,
+    14, 15, 13, 3, 5), THashLibUInt32Array.Create(7, 6, 2, 4, 13, 9, 15, 0, 10,
+    1, 5, 11, 8, 14, 12, 3), THashLibUInt32Array.Create(13, 14, 4, 1, 7, 0, 5,
+    10, 3, 12, 8, 15, 6, 2, 9, 11), THashLibUInt32Array.Create(1, 3, 10, 9, 5,
+    11, 4, 15, 8, 6, 7, 14, 13, 0, 2, 12));
 
-  for LA := 0 to 15 do
-  begin
-    ax := LSBox[1, LA] shl 15;
-    bx := LSBox[3, LA] shl 23;
-    cx := LSBox[5, LA];
-    cx := TBits.RotateRight32(cx, 1);
-    dx := LSBox[7, LA] shl 7;
-
-    for LB := 0 to 15 do
-    begin
-      FSBox1[LIdx] := ax or (LSBox[0, LB] shl 11);
-      FSBox2[LIdx] := bx or (LSBox[2, LB] shl 19);
-      FSBox3[LIdx] := cx or (LSBox[4, LB] shl 27);
-      FSBox4[LIdx] := dx or (LSBox[6, LB] shl 3);
-      System.Inc(LIdx);
-    end;
-  end;
-
+  ComputeSBoxes(LSBox, FSBox1_CryptoPro, FSBox2_CryptoPro, FSBox3_CryptoPro,
+    FSBox4_CryptoPro);
 end;
 
 procedure TGost.Initialize;
