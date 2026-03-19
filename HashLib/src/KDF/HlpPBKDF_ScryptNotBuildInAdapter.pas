@@ -97,11 +97,40 @@ type
 
   public
 
+    /// <summary>
+    /// Validates Scrypt input parameters.
+    /// </summary>
+    /// <param name="ACost">CPU/Memory cost parameter N.</param>
+    /// <param name="ABlockSize">Block size parameter r.</param>
+    /// <param name="AParallelism">Parallelization parameter p.</param>
+    /// <param name="ARelaxCostRestriction">
+    /// When <c>True</c>, skips the <c>N &lt; 2^(128*r/8)</c> constraint
+    /// from RFC 7914 (which rejects <c>r=1</c> when <c>N &gt;= 65536</c>).
+    /// Colin Percival (Scrypt creator and RFC co-author) confirmed this
+    /// constraint was an accidental error; the intended bound was
+    /// <c>N &lt; 2^(128*r*8)</c>, which is trivially satisfied.
+    /// The Scrypt reference implementation (Tarsnap) does not enforce it,
+    /// and the Ethereum Web3 Secret Storage standard depends on
+    /// <c>N=262144, r=1, p=8</c> which violates this erroneous constraint.
+    /// <list type="bullet">
+    ///   <item>RFC errata:          https://www.rfc-editor.org/errata/rfc7914 (5971, 5972, 5973)</item>
+    ///   <item>Author confirmation: https://github.com/golang/go/issues/33703#issuecomment-568198927</item>
+    ///   <item>OpenSSL:             https://github.com/openssl/openssl/issues/24650</item>
+    ///   <item>Go:                  https://github.com/golang/go/issues/33703</item>
+    ///   <item>geth:                https://github.com/ethereum/go-ethereum/issues/19977</item>
+    ///   <item>eth-account:         https://github.com/ethereum/eth-account/issues/181</item>
+    ///   <item>noble-hashes:        https://github.com/paulmillr/noble-hashes/issues/61</item>
+    ///   <item>RustCrypto:          https://github.com/RustCrypto/password-hashes/issues/546</item>
+    ///   <item>Rustic:              https://github.com/rustic-rs/rustic/issues/1394</item>
+    ///   <item>Node.js:             https://github.com/nodejs/node/pull/28799</item>
+    /// </list>
+    /// </param>
     class procedure ValidatePBKDF_ScryptInputs(ACost, ABlockSize,
-      AParallelism: Int32); static;
+      AParallelism: Int32; ARelaxCostRestriction: Boolean = False); static;
 
     constructor Create(const APasswordBytes, ASaltBytes: THashLibByteArray;
-      ACost, ABlockSize, AParallelism: Int32);
+      ACost, ABlockSize, AParallelism: Int32;
+      ARelaxCostRestriction: Boolean = False);
 
     destructor Destroy; override;
 
@@ -409,7 +438,7 @@ begin
 end;
 
 class procedure TPBKDF_ScryptNotBuildInAdapter.ValidatePBKDF_ScryptInputs(ACost,
-  ABlockSize, AParallelism: Int32);
+  ABlockSize, AParallelism: Int32; ARelaxCostRestriction: Boolean);
 var
   LMaxParallel: Int32;
 begin
@@ -419,10 +448,12 @@ begin
     raise EArgumentHashLibException.CreateRes(@SInvalidCost);
   end;
 
-  // Only value of ABlockSize that cost (as an int) could be exceeded for is 1
-  if ((ABlockSize = 1) and (ACost >= 65536)) then
+  if (not ARelaxCostRestriction) then
   begin
-    raise EArgumentHashLibException.CreateRes(@SBlockSizeAndCostIncompatible);
+    if ((ABlockSize = 1) and (ACost >= 65536)) then
+    begin
+      raise EArgumentHashLibException.CreateRes(@SBlockSizeAndCostIncompatible);
+    end;
   end;
 
   if (ABlockSize < 1) then
@@ -446,10 +477,11 @@ begin
 end;
 
 constructor TPBKDF_ScryptNotBuildInAdapter.Create(const APasswordBytes,
-  ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32);
+  ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32;
+  ARelaxCostRestriction: Boolean);
 begin
   Inherited Create();
-  ValidatePBKDF_ScryptInputs(ACost, ABlockSize, AParallelism);
+  ValidatePBKDF_ScryptInputs(ACost, ABlockSize, AParallelism, ARelaxCostRestriction);
   FPasswordBytes := System.Copy(APasswordBytes);
   FSaltBytes := System.Copy(ASaltBytes);
   FCost := ACost;
