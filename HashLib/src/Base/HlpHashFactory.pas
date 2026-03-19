@@ -611,6 +611,11 @@ type
       /// <param name="ABlockSize">the block size, must be >= 1.</param>
       /// <param name="AParallelism">Parallelization parameter. Must be a positive integer less than or equal to
       /// <code>(System.High(Int32) div (128 * ABlockSize * 8))</code>.</param>
+      /// <param name="ARelaxCostRestriction">
+      /// When <c>True</c>, skips the <c>N &lt; 2^(128*r/8)</c> constraint
+      /// from RFC 7914 that rejects <c>r=1</c> when <c>N &gt;= 65536</c>.
+      /// See <c>ValidatePBKDF_ScryptInputs</c> for details and references.
+      /// </param>
       /// <returns>
       /// The PBKDF_Scrypt KDF Interface Instance <br />
       /// </returns>
@@ -621,8 +626,8 @@ type
       /// The cost, blocksize or parallelism is Invalid.
       /// </exception>
       class function CreatePBKDF_Scrypt(const APasswordBytes,
-        ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32)
-        : IPBKDF_Scrypt; static;
+        ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32;
+        ARelaxCostRestriction: Boolean = False): IPBKDF_Scrypt; static;
 
     end;
 
@@ -1569,11 +1574,11 @@ end;
 { TKDF.TPBKDF_Scrypt }
 
 class function TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(const APasswordBytes,
-  ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32)
-  : IPBKDF_Scrypt;
+  ASaltBytes: THashLibByteArray; ACost, ABlockSize, AParallelism: Int32;
+  ARelaxCostRestriction: Boolean): IPBKDF_Scrypt;
 begin
   Result := TPBKDF_ScryptNotBuildInAdapter.Create(APasswordBytes, ASaltBytes,
-    ACost, ABlockSize, AParallelism);
+    ACost, ABlockSize, AParallelism, ARelaxCostRestriction);
 end;
 
 end.
