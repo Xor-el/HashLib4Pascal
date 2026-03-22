@@ -48,51 +48,51 @@ implementation
 
 constructor THashResult.Create(AHash: UInt64);
 begin
-  Inherited Create();
+  inherited Create();
   System.SetLength(FHash, System.SizeOf(UInt64));
   TConverters.ReadUInt64AsBytesBE(AHash, FHash, 0);
 end;
 
 constructor THashResult.Create(const AHash: THashLibByteArray);
 begin
-  Inherited Create();
+  inherited Create();
   FHash := AHash;
 end;
 
 constructor THashResult.Create(AHash: UInt32);
 begin
-  Inherited Create();
+  inherited Create();
   System.SetLength(FHash, System.SizeOf(UInt32));
   TConverters.ReadUInt32AsBytesBE(AHash, FHash, 0);
 end;
 
 constructor THashResult.Create(AHash: UInt8);
 begin
-  Inherited Create();
+  inherited Create();
   FHash := THashLibByteArray.Create(AHash);
 end;
 
 constructor THashResult.Create(AHash: UInt16);
 begin
-  Inherited Create();
+  inherited Create();
   FHash := THashLibByteArray.Create(Byte(AHash shr 8), Byte(AHash));
 end;
 
 constructor THashResult.Create(AHash: Int32);
 begin
-  Inherited Create();
+  inherited Create();
   FHash := THashLibByteArray.Create(Byte(TBits.Asr32(AHash, 24)),
     Byte(TBits.Asr32(AHash, 16)), Byte(TBits.Asr32(AHash, 8)), Byte(AHash));
 end;
 
 function THashResult.Equals(const AHashResult: IHashResult): Boolean;
 begin
-  result := TArrayUtils.ConstantTimeAreEqual(AHashResult.GetBytes(), FHash);
+  Result := TArrayUtils.ConstantTimeAreEqual(AHashResult.GetBytes(), FHash);
 end;
 
 function THashResult.GetBytes: THashLibByteArray;
 begin
-  result := FHash;
+  Result := FHash;
 end;
 
 function THashResult.GetInt32: Int32;
@@ -103,7 +103,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(Int32)]);
   end;
-  result := Int32((Int32(FHash[0]) shl 24) or (Int32(FHash[1]) shl 16) or
+  Result := Int32((Int32(FHash[0]) shl 24) or (Int32(FHash[1]) shl 16) or
     (Int32(FHash[2]) shl 8) or (Int32(FHash[3])));
 end;
 
@@ -115,7 +115,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt8)]);
   end;
-  result := (UInt8(FHash[0]));
+  Result := (UInt8(FHash[0]));
 end;
 
 function THashResult.GetUInt16: UInt16;
@@ -126,7 +126,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt16)]);
   end;
-  result := (UInt16(FHash[0]) shl 8) or (UInt16(FHash[1]));
+  Result := (UInt16(FHash[0]) shl 8) or (UInt16(FHash[1]));
 end;
 
 function THashResult.GetUInt32: UInt32;
@@ -137,7 +137,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt32)]);
   end;
-  result := TConverters.ReadBytesAsUInt32BE(PByte(FHash), 0);
+  Result := TConverters.ReadBytesAsUInt32BE(PByte(FHash), 0);
 end;
 
 function THashResult.GetUInt64: UInt64;
@@ -148,12 +148,12 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt64)]);
   end;
-  result := TConverters.ReadBytesAsUInt64BE(PByte(FHash), 0);
+  Result := TConverters.ReadBytesAsUInt64BE(PByte(FHash), 0);
 end;
 
 function THashResult.ToString(AGroup: Boolean): String;
 begin
-  result := TConverters.ConvertBytesToHexString(FHash, AGroup);
+  Result := TConverters.ConvertBytesToHexString(FHash, AGroup);
 end;
 
 end.

@@ -56,15 +56,15 @@ begin
   LHashInstance.FTap := FTap;
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TPanama.Create;
 var
   LIdx: Int32;
 begin
-  Inherited Create(32, 32);
+  inherited Create(32, 32);
   System.SetLength(FState, 17);
 
   System.SetLength(FStages, 32);
@@ -152,9 +152,9 @@ end;
 
 function TPanama.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 8 * System.SizeOf(UInt32));
+  System.SetLength(Result, 8 * System.SizeOf(UInt32));
   TConverters.le32_copy(PCardinal(FState), 9 * System.SizeOf(UInt32),
-    PByte(result), 0, System.Length(result));
+    PByte(Result), 0, System.Length(Result));
 end;
 
 procedure TPanama.GPT(APtrTheta: PCardinal);
@@ -225,7 +225,7 @@ begin
 
   TArrayUtils.ZeroFill(FStages);
 
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TPanama.TransformBlock(AData: PByte; ADataLength: Int32;

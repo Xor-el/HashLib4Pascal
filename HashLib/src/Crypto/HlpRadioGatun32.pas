@@ -49,15 +49,15 @@ begin
   LHashInstance.FBelt := TArrayUtils.Clone(FBelt);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TRadioGatun32.Create;
 var
   LIdx: Int32;
 begin
-  Inherited Create(32, 12);
+  inherited Create(32, 12);
   System.SetLength(FMill, 19);
 
   System.SetLength(FBelt, 13);
@@ -95,7 +95,7 @@ var
 begin
   System.SetLength(LBuffer, 8);
 
-  System.SetLength(result, System.Length(LBuffer) * System.SizeOf(UInt32));
+  System.SetLength(Result, System.Length(LBuffer) * System.SizeOf(UInt32));
 
   LIdx := 0;
 
@@ -107,24 +107,24 @@ begin
     System.Inc(LIdx);
   end;
 
-  TConverters.le32_copy(PCardinal(LBuffer), 0, PByte(result), 0,
-    System.Length(result));
+  TConverters.le32_copy(PCardinal(LBuffer), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TRadioGatun32.Initialize;
 begin
   TArrayUtils.ZeroFill(FMill);
   TArrayUtils.ZeroFill(FBelt);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TRadioGatun32.RoundFunction;
 var
-  LQ: THashLibUInt32Array;
-  LA: array [0 .. 18] of UInt32;
+  LBeltQRow: THashLibUInt32Array;
+  LMillScratch: array [0 .. 18] of UInt32;
   LIdx: Int32;
 begin
-  LQ := FBelt[12];
+  LBeltQRow := FBelt[12];
   LIdx := 12;
   while LIdx > 0 do
   begin
@@ -132,7 +132,7 @@ begin
     System.Dec(LIdx);
   end;
 
-  FBelt[0] := LQ;
+  FBelt[0] := LBeltQRow;
 
   LIdx := 0;
   while LIdx < 12 do
@@ -145,7 +145,7 @@ begin
   LIdx := 0;
   while LIdx < 19 do
   begin
-    LA[LIdx] := FMill[LIdx] xor (FMill[(LIdx + 1) mod 19] or
+    LMillScratch[LIdx] := FMill[LIdx] xor (FMill[(LIdx + 1) mod 19] or
       not FMill[(LIdx + 2) mod 19]);
     System.Inc(LIdx);
   end;
@@ -153,7 +153,7 @@ begin
   LIdx := 0;
   while LIdx < 19 do
   begin
-    FMill[LIdx] := TBits.RotateRight32(LA[(7 * LIdx) mod 19],
+    FMill[LIdx] := TBits.RotateRight32(LMillScratch[(7 * LIdx) mod 19],
       (LIdx * (LIdx + 1)) shr 1);
     System.Inc(LIdx);
   end;
@@ -161,24 +161,24 @@ begin
   LIdx := 0;
   while LIdx < 19 do
   begin
-    LA[LIdx] := FMill[LIdx] xor FMill[(LIdx + 1) mod 19] xor FMill
+    LMillScratch[LIdx] := FMill[LIdx] xor FMill[(LIdx + 1) mod 19] xor FMill
       [(LIdx + 4) mod 19];
     System.Inc(LIdx);
   end;
 
-  LA[0] := LA[0] xor 1;
+  LMillScratch[0] := LMillScratch[0] xor 1;
 
   LIdx := 0;
   while LIdx < 19 do
   begin
-    FMill[LIdx] := LA[LIdx];
+    FMill[LIdx] := LMillScratch[LIdx];
     System.Inc(LIdx);
   end;
 
   LIdx := 0;
   while LIdx < 3 do
   begin
-    FMill[LIdx + 13] := FMill[LIdx + 13] xor LQ[LIdx];
+    FMill[LIdx + 13] := FMill[LIdx + 13] xor LBeltQRow[LIdx];
     System.Inc(LIdx);
   end;
 

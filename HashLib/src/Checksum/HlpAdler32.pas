@@ -18,10 +18,10 @@ type
 
   strict private
   var
-    FA, FB: UInt32;
+    FSumA, FSumB: UInt32;
 
   const
-    MOD_ADLER = UInt32(65521);
+    ModAdler = UInt32(65521);
 
   public
     constructor Create();
@@ -42,29 +42,29 @@ var
   LHashInstance: TAdler32;
 begin
   LHashInstance := TAdler32.Create();
-  LHashInstance.FA := FA;
-  LHashInstance.FB := FB;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  LHashInstance.FSumA := FSumA;
+  LHashInstance.FSumB := FSumB;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TAdler32.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TAdler32.Initialize;
 begin
-  FA := 1;
-  FB := 0;
+  FSumA := 1;
+  FSumB := 0;
 end;
 
 procedure TAdler32.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
-  LN: Int32;
+  LChunkLength: Int32;
   LPtrData: PByte;
-  LA, LB: UInt32;
+  LSumA, LSumB: UInt32;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -74,17 +74,17 @@ begin
   LPtrData := PByte(AData) + AIndex;
 
   {
-    LA := FA;
-    LB := FB;
+    LSumA := FSumA;
+    LSumB := FSumB;
     while ALength > 0 do
     begin
-    LA := (LA + LPtrData^) mod MOD_ADLER;
-    LB := (LB + LA) mod MOD_ADLER;
+    LSumA := (LSumA + LPtrData^) mod ModAdler;
+    LSumB := (LSumB + LSumA) mod ModAdler;
     System.Inc(LPtrData);
     System.Dec(ALength);
     end;
-    FA := LA;
-    FB := LB;
+    FSumA := LSumA;
+    FSumB := LSumB;
   }
 
   // lifted from PngEncoder Adler32.cs
@@ -92,29 +92,29 @@ begin
   while ALength > 0 do
   begin
     // We can defer the modulo operation:
-    // FA maximally grows from 65521 to 65521 + 255 * 3800
-    // FB maximally grows by 3800 * median(FA) = 2090079800 < 2^31
-    LN := 3800;
-    if (LN > ALength) then
+    // FSumA maximally grows from 65521 to 65521 + 255 * 3800
+    // FSumB maximally grows by 3800 * median(FSumA) = 2090079800 < 2^31
+    LChunkLength := 3800;
+    if (LChunkLength > ALength) then
     begin
-      LN := ALength;
+      LChunkLength := ALength;
     end;
-    ALength := ALength - LN;
+    ALength := ALength - LChunkLength;
 
-    LA := FA;
-    LB := FB;
-    while (LN - 1) >= 0 do
+    LSumA := FSumA;
+    LSumB := FSumB;
+    while (LChunkLength - 1) >= 0 do
     begin
-      LA := (LA + LPtrData^);
-      LB := (LB + LA);
+      LSumA := (LSumA + LPtrData^);
+      LSumB := (LSumB + LSumA);
       System.Inc(LPtrData);
-      System.Dec(LN);
+      System.Dec(LChunkLength);
     end;
-    LA := LA mod MOD_ADLER;
-    LB := LB mod MOD_ADLER;
+    LSumA := LSumA mod ModAdler;
+    LSumB := LSumB mod ModAdler;
 
-    FA := LA;
-    FB := LB;
+    FSumA := LSumA;
+    FSumB := LSumB;
   end;
 end;
 
@@ -123,9 +123,9 @@ var
   LBufferBytes: THashLibByteArray;
 begin
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt32AsBytesBE(UInt32((FB shl 16) or FA), LBufferBytes, 0);
+  TConverters.ReadUInt32AsBytesBE(UInt32((FSumB shl 16) or FSumA), LBufferBytes, 0);
 
-  result := THashResult.Create(LBufferBytes);
+  Result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 

@@ -80,7 +80,7 @@ end;
 
 procedure TTestFNV64.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -98,7 +98,7 @@ end;
 
 procedure TTestFNV1a64.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -117,7 +117,7 @@ end;
 
 procedure TTestMurmur2_64.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -136,7 +136,7 @@ end;
 
 procedure TTestSipHash2_4.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -155,7 +155,7 @@ end;
 
 procedure TTestXXHash64.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 

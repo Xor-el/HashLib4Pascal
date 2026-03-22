@@ -44,7 +44,7 @@ implementation
 
 function TMultipleTransformNonBlock.Aggregate: THashLibByteArray;
 begin
-  Result := Nil;
+  Result := nil;
   if FBuffer.Size > 0 then
   begin
     FBuffer.Position := 0;
@@ -55,7 +55,7 @@ end;
 
 constructor TMultipleTransformNonBlock.Create(AHashSize, ABlockSize: Int32);
 begin
-  Inherited Create(AHashSize, ABlockSize);
+  inherited Create(AHashSize, ABlockSize);
   FBuffer := TMemoryStream.Create();
 end;
 

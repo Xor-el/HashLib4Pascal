@@ -37,13 +37,13 @@ var
 begin
   LHashInstance := TFNV64.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TFNV64.Create;
 begin
-  Inherited Create(8, 1);
+  inherited Create(8, 1);
 end;
 
 procedure TFNV64.Initialize;
@@ -73,7 +73,7 @@ end;
 
 function TFNV64.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

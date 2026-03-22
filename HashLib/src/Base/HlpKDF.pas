@@ -42,7 +42,7 @@ implementation
 
 constructor TKDF.Create;
 begin
-  Inherited Create();
+  inherited Create();
 end;
 
 end.

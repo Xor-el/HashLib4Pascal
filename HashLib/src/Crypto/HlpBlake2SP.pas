@@ -42,10 +42,10 @@ type
     /// of these instances is given by <c>TBlake2STreeConfig.InnerSize</c>
     /// instead. <br />
     /// </summary>
-    function Blake2SPCreateLeafParam(const ABlake2SConfig: IBlake2SConfig;
+    function CreateLeafParam(const ABlake2SConfig: IBlake2SConfig;
       const ABlake2STreeConfig: IBlake2STreeConfig): TBlake2S;
-    function Blake2SPCreateLeaf(AOffset: UInt64): TBlake2S;
-    function Blake2SPCreateRoot(): TBlake2S;
+    function CreateLeaf(AOffset: UInt64): TBlake2S;
+    function CreateRoot(): TBlake2S;
 
     // Each lane processes its own "stripe" of the input
     procedure ProcessLeafLane(AIdx: Int32; APtrData: PByte;
@@ -77,13 +77,13 @@ implementation
 
 { TBlake2SP }
 
-function TBlake2SP.Blake2SPCreateLeafParam(const ABlake2SConfig: IBlake2SConfig;
+function TBlake2SP.CreateLeafParam(const ABlake2SConfig: IBlake2SConfig;
   const ABlake2STreeConfig: IBlake2STreeConfig): TBlake2S;
 begin
   Result := TBlake2S.Create(ABlake2SConfig, ABlake2STreeConfig);
 end;
 
-function TBlake2SP.Blake2SPCreateLeaf(AOffset: UInt64): TBlake2S;
+function TBlake2SP.CreateLeaf(AOffset: UInt64): TBlake2S;
 var
   LBlake2SConfig: IBlake2SConfig;
   LBlake2STreeConfig: IBlake2STreeConfig;
@@ -104,10 +104,10 @@ begin
     LBlake2STreeConfig.IsLastNode := True;
   end;
 
-  Result := Blake2SPCreateLeafParam(LBlake2SConfig, LBlake2STreeConfig);
+  Result := CreateLeafParam(LBlake2SConfig, LBlake2STreeConfig);
 end;
 
-function TBlake2SP.Blake2SPCreateRoot(): TBlake2S;
+function TBlake2SP.CreateRoot(): TBlake2S;
 var
   LBlake2SConfig: IBlake2SConfig;
   LBlake2STreeConfig: IBlake2STreeConfig;
@@ -151,7 +151,7 @@ begin
   LHashInstance := TBlake2SP.CreateInternal(HashSize);
   LHashInstance.FKey := System.Copy(FKey);
 
-  if FRootHash <> Nil then
+  if FRootHash <> nil then
   begin
     LHashInstance.FRootHash := FRootHash.CloneInternal();
   end;
@@ -160,30 +160,30 @@ begin
   LHashInstance.FBuffer       := System.Copy(FBuffer);
   LHashInstance.FBufferLength := FBufferLength;
 
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TBlake2SP.CreateInternal(AHashSize: Int32);
 begin
-  Inherited Create(AHashSize, BlockSizeInBytes);
+  inherited Create(AHashSize, BlockSizeInBytes);
 end;
 
 constructor TBlake2SP.Create(AHashSize: Int32; const AKey: THashLibByteArray);
 var
   LIdx: Int32;
 begin
-  Inherited Create(AHashSize, BlockSizeInBytes);
+  inherited Create(AHashSize, BlockSizeInBytes);
 
   System.SetLength(FBuffer, ParallelismDegree * BlockSizeInBytes);
   System.SetLength(FLeafHashes, ParallelismDegree);
 
   FKey      := System.Copy(AKey);
-  FRootHash := Blake2SPCreateRoot;
+  FRootHash := CreateRoot;
 
   for LIdx := 0 to System.Pred(ParallelismDegree) do
   begin
-    FLeafHashes[LIdx] := Blake2SPCreateLeaf(LIdx);
+    FLeafHashes[LIdx] := CreateLeaf(LIdx);
   end;
 end;
 
@@ -194,15 +194,15 @@ begin
   Clear();
 
   FRootHash.Free;
-  FRootHash := Nil;
+  FRootHash := nil;
 
   for LIdx := System.Low(FLeafHashes) to System.High(FLeafHashes) do
   begin
     FLeafHashes[LIdx].Free;
-    FLeafHashes[LIdx] := Nil;
+    FLeafHashes[LIdx] := nil;
   end;
 
-  FLeafHashes := Nil;
+  FLeafHashes := nil;
 
   inherited Destroy;
 end;
@@ -243,7 +243,7 @@ begin
   LLeafHashes := FLeafHashes;
 
   // Start at lane offset
-  Inc(LPtrData, AIdx * BlockSizeInBytes);
+  System.Inc(LPtrData, AIdx * BlockSizeInBytes);
 
   // Process all full "stripes" of ParallelismDegree * BlockSizeInBytes
   while (LCounter >= StripeSize) do
@@ -251,7 +251,7 @@ begin
     System.Move(LPtrData^, LTemp[0], BlockSizeInBytes);
     LLeafHashes[AIdx].TransformBytes(LTemp, 0, BlockSizeInBytes);
 
-    Inc(LPtrData, UInt64(StripeSize));
+    System.Inc(LPtrData, UInt64(StripeSize));
     LCounter := LCounter - UInt64(StripeSize);
   end;
 end;
@@ -315,7 +315,7 @@ begin
         BlockSizeInBytes);
     end;
 
-    Inc(LPtrData, LFill);
+    System.Inc(LPtrData, LFill);
     LDataLength := LDataLength - LFill;
     LLeft := 0;
   end;
@@ -325,7 +325,7 @@ begin
 
   // Move pointer past processed data (everything except the remainder)
   LProcessed := (LDataLength div StripeSize) * StripeSize;
-  Inc(LPtrData, LProcessed);
+  System.Inc(LPtrData, LProcessed);
 
   // Keep the remainder in the buffer
   LDataLength := LDataLength - LProcessed;
@@ -350,10 +350,6 @@ begin
   LRootHash   := FRootHash;
 
   System.SetLength(LHash, ParallelismDegree);
-  for LIdx := System.Low(LHash) to System.High(LHash) do
-  begin
-    System.SetLength(LHash[LIdx], OutSizeInBytes);
-  end;
 
   // Finalize each leaf with the remaining buffered bytes
   for LIdx := 0 to System.Pred(ParallelismDegree) do

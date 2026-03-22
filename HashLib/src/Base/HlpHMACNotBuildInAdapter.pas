@@ -64,19 +64,19 @@ end;
 
 function THMACNotBuildInAdapter.Clone(): IHash;
 var
-  HmacInstance: THMACNotBuildInAdapter;
+  LHmacInstance: THMACNotBuildInAdapter;
 begin
-  HmacInstance := THMACNotBuildInAdapter.Create(FHash.Clone(), FKey);
-  HmacInstance.FOpad := System.Copy(FOpad);
-  HmacInstance.FIpad := System.Copy(FIpad);
-  result := HmacInstance as IHash;
-  result.BufferSize := BufferSize;
+  LHmacInstance := THMACNotBuildInAdapter.Create(FHash.Clone(), FKey);
+  LHmacInstance.FOpad := System.Copy(FOpad);
+  LHmacInstance.FIpad := System.Copy(FIpad);
+  Result := LHmacInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor THMACNotBuildInAdapter.Create(const AUnderlyingHash: IHash;
   const AHMACKey: THashLibByteArray);
 begin
-  Inherited Create(AUnderlyingHash.HashSize, AUnderlyingHash.BlockSize);
+  inherited Create(AUnderlyingHash.HashSize, AUnderlyingHash.BlockSize);
   FHash := AUnderlyingHash;
   SetKey(AHMACKey);
   System.SetLength(FIpad, FHash.BlockSize);
@@ -91,14 +91,14 @@ end;
 
 function THMACNotBuildInAdapter.GetKey: THashLibByteArray;
 begin
-  result := System.Copy(FKey);
+  Result := System.Copy(FKey);
 end;
 
 procedure THMACNotBuildInAdapter.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
-    FKey := Nil;
+    FKey := nil;
   end
   else
   begin
@@ -143,10 +143,10 @@ end;
 
 function THMACNotBuildInAdapter.TransformFinal: IHashResult;
 begin
-  result := FHash.TransformFinal();
+  Result := FHash.TransformFinal();
   FHash.TransformBytes(FOpad);
-  FHash.TransformBytes(result.GetBytes());
-  result := FHash.TransformFinal();
+  FHash.TransformBytes(Result.GetBytes());
+  Result := FHash.TransformFinal();
   Initialize();
 end;
 
@@ -163,19 +163,21 @@ end;
 
 function THMACNotBuildInAdapter.GetName: String;
 begin
-  result := Format('%s(%s)', ['THMAC', FHash.Name]);
+  Result := Format('%s(%s)', ['THMAC', FHash.Name]);
 end;
 
 class function THMACNotBuildInAdapter.CreateHMAC(const AHash: IHash;
   const AHMACKey: THashLibByteArray): IHMAC;
+var
+  LExisting: IHMAC;
 begin
-  if Supports(AHash, IHMAC) then
+  if Supports(AHash, IHMAC, LExisting) then
   begin
-    result := AHash as IHMAC;
+    Result := LExisting;
   end
   else
   begin
-    result := THMACNotBuildInAdapter.Create(AHash, AHMACKey);
+    Result := THMACNotBuildInAdapter.Create(AHash, AHMACKey);
   end;
 end;
 

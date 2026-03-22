@@ -652,42 +652,42 @@ implementation
 
 function TCRC.GetCheckValue: UInt64;
 begin
-  result := FCheckValue;
+  Result := FCheckValue;
 end;
 
 function TCRC.GetInitialValue: UInt64;
 begin
-  result := FInitialValue;
+  Result := FInitialValue;
 end;
 
 function TCRC.GetNames: THashLibStringArray;
 begin
-  result := FNames;
+  Result := FNames;
 end;
 
 function TCRC.GetPolynomial: UInt64;
 begin
-  result := FPolynomial;
+  Result := FPolynomial;
 end;
 
 function TCRC.GetIsInputReflected: Boolean;
 begin
-  result := FIsInputReflected;
+  Result := FIsInputReflected;
 end;
 
 function TCRC.GetIsOutputReflected: Boolean;
 begin
-  result := FIsOutputReflected;
+  Result := FIsOutputReflected;
 end;
 
 function TCRC.GetWidth: Int32;
 begin
-  result := FWidth;
+  Result := FWidth;
 end;
 
 function TCRC.GetOutputXor: UInt64;
 begin
-  result := FOutputXor;
+  Result := FOutputXor;
 end;
 
 procedure TCRC.SetCheckValue(AValue: UInt64);
@@ -732,7 +732,7 @@ end;
 
 function TCRC.GetName: String;
 begin
-  result := Format('T%s', [(Self as ICRC).Names[0]]);
+  Result := Format('T%s', [Names[0]]);
 end;
 
 procedure TCRC.CalculateCRCbyTable(AData: PByte; ADataLength, AIndex: Int32);
@@ -816,8 +816,8 @@ begin
   LHashInstance.FHash := FHash;
   LHashInstance.FIsTableGenerated := FIsTableGenerated;
   LHashInstance.FCRCTable := System.Copy(FCRCTable);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TCRC.Create(AWidth: Int32; APolynomial, AInitial: UInt64;
@@ -833,7 +833,7 @@ begin
 
   FIsTableGenerated := False;
 
-  Inherited Create(-1, -1); // Dummy State
+  inherited Create(-1, -1); // Dummy State
 
   case AWidth of
     0 .. 7:
@@ -880,452 +880,452 @@ begin
   case AValue of
 
     TCRCStandard.CRC3_GSM:
-      result := TCRC.Create(3, $3, $0, False, False, $7, $4,
+      Result := TCRC.Create(3, $3, $0, False, False, $7, $4,
         THashLibStringArray.Create('CRC-3/GSM'));
 
     TCRCStandard.CRC3_ROHC:
-      result := TCRC.Create(3, $3, $7, True, True, $0, $6,
+      Result := TCRC.Create(3, $3, $7, True, True, $0, $6,
         THashLibStringArray.Create('CRC-3/ROHC'));
 
     TCRCStandard.CRC4_INTERLAKEN:
-      result := TCRC.Create(4, $3, $F, False, False, $F, $B,
+      Result := TCRC.Create(4, $3, $F, False, False, $F, $B,
         THashLibStringArray.Create('CRC-4/INTERLAKEN'));
 
     TCRCStandard.CRC4_ITU:
-      result := TCRC.Create(4, $3, $0, True, True, $0, $7,
+      Result := TCRC.Create(4, $3, $0, True, True, $0, $7,
         THashLibStringArray.Create('CRC-4/ITU', 'CRC-4/G-704'));
 
     TCRCStandard.CRC5_EPC:
-      result := TCRC.Create(5, $9, $9, False, False, $00, $00,
+      Result := TCRC.Create(5, $9, $9, False, False, $00, $00,
         THashLibStringArray.Create('CRC-5/EPC', 'CRC-5/EPC-C1G2'));
 
     TCRCStandard.CRC5_ITU:
-      result := TCRC.Create(5, $15, $00, True, True, $00, $07,
+      Result := TCRC.Create(5, $15, $00, True, True, $00, $07,
         THashLibStringArray.Create('CRC-5/ITU', 'CRC-5/G-704'));
 
     TCRCStandard.CRC5_USB:
-      result := TCRC.Create(5, $05, $1F, True, True, $1F, $19,
+      Result := TCRC.Create(5, $05, $1F, True, True, $1F, $19,
         THashLibStringArray.Create('CRC-5/USB'));
 
     TCRCStandard.CRC6_CDMA2000A:
-      result := TCRC.Create(6, $27, $3F, False, False, $00, $0D,
+      Result := TCRC.Create(6, $27, $3F, False, False, $00, $0D,
         THashLibStringArray.Create('CRC-6/CDMA2000-A'));
 
     TCRCStandard.CRC6_CDMA2000B:
-      result := TCRC.Create(6, $07, $3F, False, False, $00, $3B,
+      Result := TCRC.Create(6, $07, $3F, False, False, $00, $3B,
         THashLibStringArray.Create('CRC-6/CDMA2000-B'));
 
     TCRCStandard.CRC6_DARC:
-      result := TCRC.Create(6, $19, $00, True, True, $00, $26,
+      Result := TCRC.Create(6, $19, $00, True, True, $00, $26,
         THashLibStringArray.Create('CRC-6/DARC'));
 
     TCRCStandard.CRC6_GSM:
-      result := TCRC.Create(6, $2F, $00, False, False, $3F, $13,
+      Result := TCRC.Create(6, $2F, $00, False, False, $3F, $13,
         THashLibStringArray.Create('CRC-6/GSM'));
 
     TCRCStandard.CRC6_ITU:
-      result := TCRC.Create(6, $03, $00, True, True, $00, $06,
+      Result := TCRC.Create(6, $03, $00, True, True, $00, $06,
         THashLibStringArray.Create('CRC-6/ITU', 'CRC-6/G-704'));
 
     TCRCStandard.CRC7:
-      result := TCRC.Create(7, $09, $00, False, False, $00, $75,
+      Result := TCRC.Create(7, $09, $00, False, False, $00, $75,
         THashLibStringArray.Create('CRC-7', 'CRC-7/MMC'));
 
     TCRCStandard.CRC7_ROHC:
-      result := TCRC.Create(7, $4F, $7F, True, True, $00, $53,
+      Result := TCRC.Create(7, $4F, $7F, True, True, $00, $53,
         THashLibStringArray.Create('CRC-7/ROHC'));
 
     TCRCStandard.CRC7_UMTS:
-      result := TCRC.Create(7, $45, $00, False, False, $00, $61,
+      Result := TCRC.Create(7, $45, $00, False, False, $00, $61,
         THashLibStringArray.Create('CRC-7/UMTS'));
 
     TCRCStandard.CRC8:
-      result := TCRC.Create(8, $07, $00, False, False, $00, $F4,
+      Result := TCRC.Create(8, $07, $00, False, False, $00, $F4,
         THashLibStringArray.Create('CRC-8', 'CRC-8/SMBUS'));
 
     TCRCStandard.CRC8_AUTOSAR:
-      result := TCRC.Create(8, $2F, $FF, False, False, $FF, $DF,
+      Result := TCRC.Create(8, $2F, $FF, False, False, $FF, $DF,
         THashLibStringArray.Create('CRC-8/AUTOSAR'));
 
     TCRCStandard.CRC8_BLUETOOTH:
-      result := TCRC.Create(8, $A7, $00, True, True, $00, $26,
+      Result := TCRC.Create(8, $A7, $00, True, True, $00, $26,
         THashLibStringArray.Create('CRC-8/BLUETOOTH'));
 
     TCRCStandard.CRC8_CDMA2000:
-      result := TCRC.Create(8, $9B, $FF, False, False, $00, $DA,
+      Result := TCRC.Create(8, $9B, $FF, False, False, $00, $DA,
         THashLibStringArray.Create('CRC-8/CDMA2000'));
 
     TCRCStandard.CRC8_DARC:
-      result := TCRC.Create(8, $39, $00, True, True, $00, $15,
+      Result := TCRC.Create(8, $39, $00, True, True, $00, $15,
         THashLibStringArray.Create('CRC-8/DARC'));
 
     TCRCStandard.CRC8_DVBS2:
-      result := TCRC.Create(8, $D5, $00, False, False, $00, $BC,
+      Result := TCRC.Create(8, $D5, $00, False, False, $00, $BC,
         THashLibStringArray.Create('CRC-8/DVB-S2'));
 
     TCRCStandard.CRC8_EBU:
-      result := TCRC.Create(8, $1D, $FF, True, True, $00, $97,
+      Result := TCRC.Create(8, $1D, $FF, True, True, $00, $97,
         THashLibStringArray.Create('CRC-8/EBU', 'CRC-8/AES',
         'CRC-8/TECH-3250'));
 
     TCRCStandard.CRC8_GSMA:
-      result := TCRC.Create(8, $1D, $00, False, False, $00, $37,
+      Result := TCRC.Create(8, $1D, $00, False, False, $00, $37,
         THashLibStringArray.Create('CRC-8/GSM-A'));
 
     TCRCStandard.CRC8_GSMB:
-      result := TCRC.Create(8, $49, $00, False, False, $FF, $94,
+      Result := TCRC.Create(8, $49, $00, False, False, $FF, $94,
         THashLibStringArray.Create('CRC-8/GSM-B'));
 
     TCRCStandard.CRC8_ICODE:
-      result := TCRC.Create(8, $1D, $FD, False, False, $00, $7E,
+      Result := TCRC.Create(8, $1D, $FD, False, False, $00, $7E,
         THashLibStringArray.Create('CRC-8/I-CODE'));
 
     TCRCStandard.CRC8_ITU:
-      result := TCRC.Create(8, $07, $00, False, False, $55, $A1,
+      Result := TCRC.Create(8, $07, $00, False, False, $55, $A1,
         THashLibStringArray.Create('CRC-8/ITU', 'CRC-8/I-432-1'));
 
     TCRCStandard.CRC8_LTE:
-      result := TCRC.Create(8, $9B, $00, False, False, $00, $EA,
+      Result := TCRC.Create(8, $9B, $00, False, False, $00, $EA,
         THashLibStringArray.Create('CRC-8/LTE'));
 
     TCRCStandard.CRC8_MAXIM:
-      result := TCRC.Create(8, $31, $00, True, True, $00, $A1,
+      Result := TCRC.Create(8, $31, $00, True, True, $00, $A1,
         THashLibStringArray.Create('CRC-8/MAXIM', 'DOW-CRC',
         'CRC-8/MAXIM-DOW'));
 
     TCRCStandard.CRC8_OPENSAFETY:
-      result := TCRC.Create(8, $2F, $00, False, False, $00, $3E,
+      Result := TCRC.Create(8, $2F, $00, False, False, $00, $3E,
         THashLibStringArray.Create('CRC-8/OPENSAFETY'));
 
     TCRCStandard.CRC8_ROHC:
-      result := TCRC.Create(8, $07, $FF, True, True, $00, $D0,
+      Result := TCRC.Create(8, $07, $FF, True, True, $00, $D0,
         THashLibStringArray.Create('CRC-8/ROHC'));
 
     TCRCStandard.CRC8_SAEJ1850:
-      result := TCRC.Create(8, $1D, $FF, False, False, $FF, $4B,
+      Result := TCRC.Create(8, $1D, $FF, False, False, $FF, $4B,
         THashLibStringArray.Create('CRC-8/SAE-J1850'));
 
     TCRCStandard.CRC8_WCDMA:
-      result := TCRC.Create(8, $9B, $00, True, True, $00, $25,
+      Result := TCRC.Create(8, $9B, $00, True, True, $00, $25,
         THashLibStringArray.Create('CRC-8/WCDMA'));
 
     TCRCStandard.CRC8_MIFAREMAD:
-      result := TCRC.Create(8, $1D, $C7, False, False, $00, $99,
+      Result := TCRC.Create(8, $1D, $C7, False, False, $00, $99,
         THashLibStringArray.Create('CRC-8/MIFARE-MAD'));
 
     TCRCStandard.CRC8_NRSC5:
-      result := TCRC.Create(8, $31, $FF, False, False, $00, $F7,
+      Result := TCRC.Create(8, $31, $FF, False, False, $00, $F7,
         THashLibStringArray.Create('CRC-8/NRSC-5'));
 
     TCRCStandard.CRC10:
-      result := TCRC.Create(10, $233, $000, False, False, $000, $199,
+      Result := TCRC.Create(10, $233, $000, False, False, $000, $199,
         THashLibStringArray.Create('CRC-10', 'CRC-10/ATM', 'CRC-10/I-610'));
 
     TCRCStandard.CRC10_CDMA2000:
-      result := TCRC.Create(10, $3D9, $3FF, False, False, $000, $233,
+      Result := TCRC.Create(10, $3D9, $3FF, False, False, $000, $233,
         THashLibStringArray.Create('CRC-10/CDMA2000'));
 
     TCRCStandard.CRC10_GSM:
-      result := TCRC.Create(10, $175, $000, False, False, $3FF, $12A,
+      Result := TCRC.Create(10, $175, $000, False, False, $3FF, $12A,
         THashLibStringArray.Create('CRC-10/GSM'));
 
     TCRCStandard.CRC11:
-      result := TCRC.Create(11, $385, $01A, False, False, $000, $5A3,
+      Result := TCRC.Create(11, $385, $01A, False, False, $000, $5A3,
         THashLibStringArray.Create('CRC-11', 'CRC-11/FLEXRAY'));
 
     TCRCStandard.CRC11_UMTS:
-      result := TCRC.Create(11, $307, $000, False, False, $000, $061,
+      Result := TCRC.Create(11, $307, $000, False, False, $000, $061,
         THashLibStringArray.Create('CRC-11/UMTS'));
 
     TCRCStandard.CRC12_CDMA2000:
-      result := TCRC.Create(12, $F13, $FFF, False, False, $000, $D4D,
+      Result := TCRC.Create(12, $F13, $FFF, False, False, $000, $D4D,
         THashLibStringArray.Create('CRC-12/CDMA2000'));
 
     TCRCStandard.CRC12_DECT:
-      result := TCRC.Create(12, $80F, $000, False, False, $000, $F5B,
+      Result := TCRC.Create(12, $80F, $000, False, False, $000, $F5B,
         THashLibStringArray.Create('CRC-12/DECT', 'X-CRC-12'));
 
     TCRCStandard.CRC12_GSM:
-      result := TCRC.Create(12, $D31, $000, False, False, $FFF, $B34,
+      Result := TCRC.Create(12, $D31, $000, False, False, $FFF, $B34,
         THashLibStringArray.Create('CRC-12/GSM'));
 
     TCRCStandard.CRC12_UMTS:
-      result := TCRC.Create(12, $80F, $000, False, True, $000, $DAF,
+      Result := TCRC.Create(12, $80F, $000, False, True, $000, $DAF,
         THashLibStringArray.Create('CRC-12/UMTS', 'CRC-12/3GPP'));
 
     TCRCStandard.CRC13_BBC:
-      result := TCRC.Create(13, $1CF5, $0000, False, False, $0000, $04FA,
+      Result := TCRC.Create(13, $1CF5, $0000, False, False, $0000, $04FA,
         THashLibStringArray.Create('CRC-13/BBC'));
 
     TCRCStandard.CRC14_DARC:
-      result := TCRC.Create(14, $0805, $0000, True, True, $0000, $082D,
+      Result := TCRC.Create(14, $0805, $0000, True, True, $0000, $082D,
         THashLibStringArray.Create('CRC-14/DARC'));
 
     TCRCStandard.CRC14_GSM:
-      result := TCRC.Create(14, $202D, $0000, False, False, $3FFF, $30AE,
+      Result := TCRC.Create(14, $202D, $0000, False, False, $3FFF, $30AE,
         THashLibStringArray.Create('CRC-14/GSM'));
 
     TCRCStandard.CRC15:
-      result := TCRC.Create(15, $4599, $0000, False, False, $0000, $059E,
+      Result := TCRC.Create(15, $4599, $0000, False, False, $0000, $059E,
         THashLibStringArray.Create('CRC-15', 'CRC-15/CAN'));
 
     TCRCStandard.CRC15_MPT1327:
-      result := TCRC.Create(15, $6815, $0000, False, False, $0001, $2566,
+      Result := TCRC.Create(15, $6815, $0000, False, False, $0001, $2566,
         THashLibStringArray.Create('CRC-15/MPT1327'));
 
     TCRCStandard.ARC:
-      result := TCRC.Create(16, $8005, $0000, True, True, $0000, $BB3D,
+      Result := TCRC.Create(16, $8005, $0000, True, True, $0000, $BB3D,
         THashLibStringArray.Create('CRC-16', 'ARC', 'CRC-IBM', 'CRC-16/ARC',
         'CRC-16/LHA'));
 
     TCRCStandard.CRC16_AUGCCITT:
-      result := TCRC.Create(16, $1021, $1D0F, False, False, $0000, $E5CC,
+      Result := TCRC.Create(16, $1021, $1D0F, False, False, $0000, $E5CC,
         THashLibStringArray.Create('CRC-16/AUG-CCITT', 'CRC-16/SPI-FUJITSU'));
 
     TCRCStandard.CRC16_BUYPASS:
-      result := TCRC.Create(16, $8005, $0000, False, False, $0000, $FEE8,
+      Result := TCRC.Create(16, $8005, $0000, False, False, $0000, $FEE8,
         THashLibStringArray.Create('CRC-16/BUYPASS', 'CRC-16/VERIFONE',
         'CRC-16/UMTS'));
 
     TCRCStandard.CRC16_CCITTFALSE:
-      result := TCRC.Create(16, $1021, $FFFF, False, False, $0000, $29B1,
-        THashLibStringArray.Create('CRC-16/CCITT-FALSE', 'CRC-16/AUTOSAR',
+      Result := TCRC.Create(16, $1021, $FFFF, False, False, $0000, $29B1,
+        THashLibStringArray.Create('CRC-16/CCITT-False', 'CRC-16/AUTOSAR',
         'CRC-16/IBM-3740'));
 
     TCRCStandard.CRC16_CDMA2000:
-      result := TCRC.Create(16, $C867, $FFFF, False, False, $0000, $4C06,
+      Result := TCRC.Create(16, $C867, $FFFF, False, False, $0000, $4C06,
         THashLibStringArray.Create('CRC-16/CDMA2000'));
 
     TCRCStandard.CRC16_CMS:
-      result := TCRC.Create(16, $8005, $FFFF, False, False, $0000, $AEE7,
+      Result := TCRC.Create(16, $8005, $FFFF, False, False, $0000, $AEE7,
         THashLibStringArray.Create('CRC-16/CMS'));
 
     TCRCStandard.CRC16_DDS110:
-      result := TCRC.Create(16, $8005, $800D, False, False, $0000, $9ECF,
+      Result := TCRC.Create(16, $8005, $800D, False, False, $0000, $9ECF,
         THashLibStringArray.Create('CRC-16/DDS-110'));
 
     TCRCStandard.CRC16_DECTR:
-      result := TCRC.Create(16, $0589, $0000, False, False, $0001, $007E,
+      Result := TCRC.Create(16, $0589, $0000, False, False, $0001, $007E,
         THashLibStringArray.Create('CRC-16/DECT-R', 'R-CRC-16'));
 
     TCRCStandard.CRC16_DECTX:
-      result := TCRC.Create(16, $0589, $0000, False, False, $0000, $007F,
+      Result := TCRC.Create(16, $0589, $0000, False, False, $0000, $007F,
         THashLibStringArray.Create('CRC-16/DECT-X', 'X-CRC-16'));
 
     TCRCStandard.CRC16_DNP:
-      result := TCRC.Create(16, $3D65, $0000, True, True, $FFFF, $EA82,
+      Result := TCRC.Create(16, $3D65, $0000, True, True, $FFFF, $EA82,
         THashLibStringArray.Create('CRC-16/DNP'));
 
     TCRCStandard.CRC16_EN13757:
-      result := TCRC.Create(16, $3D65, $0000, False, False, $FFFF, $C2B7,
+      Result := TCRC.Create(16, $3D65, $0000, False, False, $FFFF, $C2B7,
         THashLibStringArray.Create('CRC-16/EN13757'));
 
     TCRCStandard.CRC16_GENIBUS:
-      result := TCRC.Create(16, $1021, $FFFF, False, False, $FFFF, $D64E,
+      Result := TCRC.Create(16, $1021, $FFFF, False, False, $FFFF, $D64E,
         THashLibStringArray.Create('CRC-16/GENIBUS', 'CRC-16/EPC',
         'CRC-16/I-CODE', 'CRC-16/DARC', 'CRC-16/EPC-C1G2'));
 
     TCRCStandard.CRC16_GSM:
-      result := TCRC.Create(16, $1021, $0000, False, False, $FFFF, $CE3C,
+      Result := TCRC.Create(16, $1021, $0000, False, False, $FFFF, $CE3C,
         THashLibStringArray.Create('CRC-16/GSM'));
 
     TCRCStandard.CRC16_LJ1200:
-      result := TCRC.Create(16, $6F63, $0000, False, False, $0000, $BDF4,
+      Result := TCRC.Create(16, $6F63, $0000, False, False, $0000, $BDF4,
         THashLibStringArray.Create('CRC-16/LJ1200'));
 
     TCRCStandard.CRC16_MAXIM:
-      result := TCRC.Create(16, $8005, $0000, True, True, $FFFF, $44C2,
+      Result := TCRC.Create(16, $8005, $0000, True, True, $FFFF, $44C2,
         THashLibStringArray.Create('CRC-16/MAXIM', 'CRC-16/MAXIM-DOW'));
 
     TCRCStandard.CRC16_MCRF4XX:
-      result := TCRC.Create(16, $1021, $FFFF, True, True, $0000, $6F91,
+      Result := TCRC.Create(16, $1021, $FFFF, True, True, $0000, $6F91,
         THashLibStringArray.Create('CRC-16/MCRF4XX'));
 
     TCRCStandard.CRC16_OPENSAFETYA:
-      result := TCRC.Create(16, $5935, $0000, False, False, $0000, $5D38,
+      Result := TCRC.Create(16, $5935, $0000, False, False, $0000, $5D38,
         THashLibStringArray.Create('CRC-16/OPENSAFETY-A'));
 
     TCRCStandard.CRC16_OPENSAFETYB:
-      result := TCRC.Create(16, $755B, $0000, False, False, $0000, $20FE,
+      Result := TCRC.Create(16, $755B, $0000, False, False, $0000, $20FE,
         THashLibStringArray.Create('CRC-16/OPENSAFETY-B'));
 
     TCRCStandard.CRC16_PROFIBUS:
-      result := TCRC.Create(16, $1DCF, $FFFF, False, False, $FFFF, $A819,
+      Result := TCRC.Create(16, $1DCF, $FFFF, False, False, $FFFF, $A819,
         THashLibStringArray.Create('CRC-16/PROFIBUS', 'CRC-16/IEC-61158-2'));
 
     TCRCStandard.CRC16_RIELLO:
-      result := TCRC.Create(16, $1021, $B2AA, True, True, $0000, $63D0,
+      Result := TCRC.Create(16, $1021, $B2AA, True, True, $0000, $63D0,
         THashLibStringArray.Create('CRC-16/RIELLO'));
 
     TCRCStandard.CRC16_T10DIF:
-      result := TCRC.Create(16, $8BB7, $0000, False, False, $0000, $D0DB,
+      Result := TCRC.Create(16, $8BB7, $0000, False, False, $0000, $D0DB,
         THashLibStringArray.Create('CRC-16/T10-DIF'));
 
     TCRCStandard.CRC16_TELEDISK:
-      result := TCRC.Create(16, $A097, $0000, False, False, $0000, $0FB3,
+      Result := TCRC.Create(16, $A097, $0000, False, False, $0000, $0FB3,
         THashLibStringArray.Create('CRC-16/TELEDISK'));
 
     TCRCStandard.CRC16_TMS37157:
-      result := TCRC.Create(16, $1021, $89EC, True, True, $0000, $26B1,
+      Result := TCRC.Create(16, $1021, $89EC, True, True, $0000, $26B1,
         THashLibStringArray.Create('CRC-16/TMS37157'));
 
     TCRCStandard.CRC16_USB:
-      result := TCRC.Create(16, $8005, $FFFF, True, True, $FFFF, $B4C8,
+      Result := TCRC.Create(16, $8005, $FFFF, True, True, $FFFF, $B4C8,
         THashLibStringArray.Create('CRC-16/USB'));
 
     TCRCStandard.CRCA:
-      result := TCRC.Create(16, $1021, $C6C6, True, True, $0000, $BF05,
+      Result := TCRC.Create(16, $1021, $C6C6, True, True, $0000, $BF05,
         THashLibStringArray.Create('CRC-A', 'CRC-16/ISO-IEC-14443-3-A'));
 
     TCRCStandard.KERMIT:
-      result := TCRC.Create(16, $1021, $0000, True, True, $0000, $2189,
+      Result := TCRC.Create(16, $1021, $0000, True, True, $0000, $2189,
         THashLibStringArray.Create('KERMIT', 'CRC-16/CCITT',
-        'CRC-16/CCITT-TRUE', 'CRC-CCITT', 'CRC-16/KERMIT', 'CRC-16/V-41-LSB'));
+        'CRC-16/CCITT-True', 'CRC-CCITT', 'CRC-16/KERMIT', 'CRC-16/V-41-LSB'));
 
     TCRCStandard.MODBUS:
-      result := TCRC.Create(16, $8005, $FFFF, True, True, $0000, $4B37,
+      Result := TCRC.Create(16, $8005, $FFFF, True, True, $0000, $4B37,
         THashLibStringArray.Create('MODBUS', 'CRC-16/MODBUS'));
 
     TCRCStandard.X25:
-      result := TCRC.Create(16, $1021, $FFFF, True, True, $FFFF, $906E,
+      Result := TCRC.Create(16, $1021, $FFFF, True, True, $FFFF, $906E,
         THashLibStringArray.Create('X-25', 'CRC-16/IBM-SDLC', 'CRC-16/ISO-HDLC',
         'CRC-16/ISO-IEC-14443-3-B', 'CRC-B', 'CRC-16/X-25'));
 
     TCRCStandard.XMODEM:
-      result := TCRC.Create(16, $1021, $0000, False, False, $0000, $31C3,
+      Result := TCRC.Create(16, $1021, $0000, False, False, $0000, $31C3,
         THashLibStringArray.Create('XMODEM', 'ZMODEM', 'CRC-16/ACORN',
         'CRC-16/XMODEM', 'CRC-16/V-41-MSB'));
 
     TCRCStandard.CRC16_NRSC5:
-      result := TCRC.Create(16, $080B, $FFFF, True, True, $0000, $A066,
+      Result := TCRC.Create(16, $080B, $FFFF, True, True, $0000, $A066,
         THashLibStringArray.Create('CRC-16/NRSC-5'));
 
     TCRCStandard.CRC17_CANFD:
-      result := TCRC.Create(17, $1685B, $00000, False, False, $00000, $04F03,
+      Result := TCRC.Create(17, $1685B, $00000, False, False, $00000, $04F03,
         THashLibStringArray.Create('CRC-17/CAN-FD'));
 
     TCRCStandard.CRC21_CANFD:
-      result := TCRC.Create(21, $102899, $00000, False, False, $00000, $0ED841,
+      Result := TCRC.Create(21, $102899, $00000, False, False, $00000, $0ED841,
         THashLibStringArray.Create('CRC-21/CAN-FD'));
 
     TCRCStandard.CRC24:
-      result := TCRC.Create(24, $864CFB, $B704CE, False, False, $000000,
+      Result := TCRC.Create(24, $864CFB, $B704CE, False, False, $000000,
         $21CF02, THashLibStringArray.Create('CRC-24', 'CRC-24/OPENPGP'));
 
     TCRCStandard.CRC24_BLE:
-      result := TCRC.Create(24, $00065B, $555555, True, True, $000000, $C25A56,
+      Result := TCRC.Create(24, $00065B, $555555, True, True, $000000, $C25A56,
         THashLibStringArray.Create('CRC-24/BLE'));
 
     TCRCStandard.CRC24_FLEXRAYA:
-      result := TCRC.Create(24, $5D6DCB, $FEDCBA, False, False, $000000,
+      Result := TCRC.Create(24, $5D6DCB, $FEDCBA, False, False, $000000,
         $7979BD, THashLibStringArray.Create('CRC-24/FLEXRAY-A'));
 
     TCRCStandard.CRC24_FLEXRAYB:
-      result := TCRC.Create(24, $5D6DCB, $ABCDEF, False, False, $000000,
+      Result := TCRC.Create(24, $5D6DCB, $ABCDEF, False, False, $000000,
         $1F23B8, THashLibStringArray.Create('CRC-24/FLEXRAY-B'));
 
     TCRCStandard.CRC24_INTERLAKEN:
-      result := TCRC.Create(24, $328B63, $FFFFFF, False, False, $FFFFFF,
+      Result := TCRC.Create(24, $328B63, $FFFFFF, False, False, $FFFFFF,
         $B4F3E6, THashLibStringArray.Create('CRC-24/INTERLAKEN'));
 
     TCRCStandard.CRC24_LTEA:
-      result := TCRC.Create(24, $864CFB, $000000, False, False, $000000,
+      Result := TCRC.Create(24, $864CFB, $000000, False, False, $000000,
         $CDE703, THashLibStringArray.Create('CRC-24/LTE-A'));
 
     TCRCStandard.CRC24_LTEB:
-      result := TCRC.Create(24, $800063, $000000, False, False, $000000,
+      Result := TCRC.Create(24, $800063, $000000, False, False, $000000,
         $23EF52, THashLibStringArray.Create('CRC-24/LTE-B'));
 
     TCRCStandard.CRC24_OS9:
-      result := TCRC.Create(24, $800063, $FFFFFF, False, False, $FFFFFF,
+      Result := TCRC.Create(24, $800063, $FFFFFF, False, False, $FFFFFF,
         $200FA5, THashLibStringArray.Create('CRC-24/OS-9'));
 
     TCRCStandard.CRC30_CDMA:
-      result := TCRC.Create(30, $2030B9C7, $3FFFFFFF, False, False, $3FFFFFFF,
+      Result := TCRC.Create(30, $2030B9C7, $3FFFFFFF, False, False, $3FFFFFFF,
         $04C34ABF, THashLibStringArray.Create('CRC-30/CDMA'));
 
     TCRCStandard.CRC31_PHILIPS:
-      result := TCRC.Create(31, $04C11DB7, $7FFFFFFF, False, False, $7FFFFFFF,
+      Result := TCRC.Create(31, $04C11DB7, $7FFFFFFF, False, False, $7FFFFFFF,
         $0CE9E46C, THashLibStringArray.Create('CRC-31/PHILLIPS'));
 
     TCRCStandard.CRC32:
-      result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $FFFFFFFF,
+      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $FFFFFFFF,
         $CBF43926, THashLibStringArray.Create('CRC-32', 'CRC-32/ADCCP',
         'CRC-32/V-42', 'CRC-32/XZ', 'PKZIP', 'CRC-32/ISO-HDLC'));
 
     TCRCStandard.CRC32_AUTOSAR:
-      result := TCRC.Create(32, $F4ACFB13, $FFFFFFFF, True, True, $FFFFFFFF,
+      Result := TCRC.Create(32, $F4ACFB13, $FFFFFFFF, True, True, $FFFFFFFF,
         $1697D06A, THashLibStringArray.Create('CRC-32/AUTOSAR'));
 
     TCRCStandard.CRC32_BZIP2:
-      result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $FFFFFFFF,
+      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $FFFFFFFF,
         $FC891918, THashLibStringArray.Create('CRC-32/BZIP2', 'CRC-32/AAL5',
         'CRC-32/DECT-B', 'B-CRC-32'));
 
     TCRCStandard.CRC32C:
-      result := TCRC.Create(32, $1EDC6F41, $FFFFFFFF, True, True, $FFFFFFFF,
+      Result := TCRC.Create(32, $1EDC6F41, $FFFFFFFF, True, True, $FFFFFFFF,
         $E3069283, THashLibStringArray.Create('CRC-32C', 'CRC-32/BASE91-C',
         'CRC-32/CASTAGNOLI', 'CRC-32/INTERLAKEN', 'CRC-32/ISCSI'));
 
     TCRCStandard.CRC32D:
-      result := TCRC.Create(32, $A833982B, $FFFFFFFF, True, True, $FFFFFFFF,
+      Result := TCRC.Create(32, $A833982B, $FFFFFFFF, True, True, $FFFFFFFF,
         $87315576, THashLibStringArray.Create('CRC-32D', 'CRC-32/BASE91-D'));
 
     TCRCStandard.CRC32_MPEG2:
-      result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
+      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
         $0376E6E7, THashLibStringArray.Create('CRC-32/MPEG-2'));
 
     TCRCStandard.CRC32_POSIX:
-      result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
+      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
         $0376E6E7, THashLibStringArray.Create('CRC-32/POSIX', 'CKSUM'));
 
     TCRCStandard.CRC32Q:
-      result := TCRC.Create(32, $814141AB, $00000000, False, False, $00000000,
+      Result := TCRC.Create(32, $814141AB, $00000000, False, False, $00000000,
         $3010BF7F, THashLibStringArray.Create('CRC-32Q', 'CRC-32/AIXM'));
 
     TCRCStandard.JAMCRC:
-      result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $00000000,
+      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $00000000,
         $340BC6D9, THashLibStringArray.Create('JAMCRC', 'CRC-32/JAMCRC'));
 
     TCRCStandard.XFER:
-      result := TCRC.Create(32, $000000AF, $00000000, False, False, $00000000,
+      Result := TCRC.Create(32, $000000AF, $00000000, False, False, $00000000,
         $BD0BE338, THashLibStringArray.Create('XFER', 'CRC-32/XFER'));
 
     TCRCStandard.CRC32_CDROMEDC:
-      result := TCRC.Create(32, $8001801B, $00000000, True, True, $00000000,
+      Result := TCRC.Create(32, $8001801B, $00000000, True, True, $00000000,
         $6EC2EDC4, THashLibStringArray.Create('CRC-32/CD-ROM-EDC'));
 
     TCRCStandard.CRC40_GSM:
-      result := TCRC.Create(40, $0004820009, $0000000000, False, False,
+      Result := TCRC.Create(40, $0004820009, $0000000000, False, False,
         $FFFFFFFFFF, $D4164FC646, THashLibStringArray.Create('CRC-40/GSM'));
 
     TCRCStandard.CRC64:
-      result := TCRC.Create(64, $42F0E1EBA9EA3693, $0000000000000000, False,
+      Result := TCRC.Create(64, $42F0E1EBA9EA3693, $0000000000000000, False,
         False, $0000000000000000, $6C40DF5F0B497347,
         THashLibStringArray.Create('CRC-64', 'CRC-64/ECMA-182'));
 
     TCRCStandard.CRC64_GOISO:
-      result := TCRC.Create(64, $000000000000001B, UInt64($FFFFFFFFFFFFFFFF),
+      Result := TCRC.Create(64, $000000000000001B, UInt64($FFFFFFFFFFFFFFFF),
         True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($B90956C775A41001),
         THashLibStringArray.Create('CRC-64/GO-ISO'));
 
     TCRCStandard.CRC64_WE:
-      result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
+      Result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
         False, False, UInt64($FFFFFFFFFFFFFFFF), $62EC59E3F1A4F00A,
         THashLibStringArray.Create('CRC-64/WE'));
 
     TCRCStandard.CRC64_XZ:
-      result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
+      Result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
         True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($995DC9BBDF1939FA),
         THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'));
 
     TCRCStandard.CRC64_1B:
-      result := TCRC.Create(64, $000000000000001B, UInt64($0000000000000000),
+      Result := TCRC.Create(64, $000000000000001B, UInt64($0000000000000000),
         True, True, UInt64($0000000000000000), $46A5A9388A5BEFFE,
         THashLibStringArray.Create('CRC-64/1B'));
 
     TCRCStandard.CRC64_Jones:
-      result := TCRC.Create(64, UInt64($AD93D23594C935A9),
+      Result := TCRC.Create(64, UInt64($AD93D23594C935A9),
         UInt64($FFFFFFFFFFFFFFFF), True, True, UInt64($0000000000000000),
         UInt64($CAA717168609F281), THashLibStringArray.Create('CRC-64/Jones'))
 
@@ -1403,13 +1403,13 @@ var
   LIdx, LJdx: UInt64;
 begin
   LJdx := 1;
-  result := 0;
+  Result := 0;
   LIdx := UInt64(1) shl (AWidth - 1);
   while LIdx <> 0 do
   begin
     if ((AValue and LIdx) <> 0) then
     begin
-      result := result or LJdx;
+      Result := Result or LJdx;
     end;
     LJdx := LJdx shl 1;
     LIdx := LIdx shr 1;
@@ -1420,7 +1420,7 @@ procedure TCRC.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LIdx: Int32;
-  PtrAData: PByte;
+  LPtrAData: PByte;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -1434,15 +1434,15 @@ begin
 
   LIdx := AIndex;
 
-  PtrAData := PByte(AData);
+  LPtrAData := PByte(AData);
 
   if (Width > Delta) then
   begin
-    CalculateCRCbyTable(PtrAData, ALength, LIdx);
+    CalculateCRCbyTable(LPtrAData, ALength, LIdx);
   end
   else
   begin
-    CalculateCRCdirect(PtrAData, ALength, LIdx);
+    CalculateCRCdirect(LPtrAData, ALength, LIdx);
   end;
 
 end;
@@ -1478,7 +1478,7 @@ begin
   begin
     LUInt32 := UInt32(FHash);
 
-    result := THashResult.Create(LUInt32);
+    Result := THashResult.Create(LUInt32);
 
     Initialize();
 
@@ -1489,7 +1489,7 @@ begin
     0:
       begin
         LUInt8 := UInt8(FHash);
-        result := THashResult.Create(LUInt8);
+        Result := THashResult.Create(LUInt8);
 
       end;
 
@@ -1497,20 +1497,20 @@ begin
       begin
         LUInt16 := UInt16(FHash);
 
-        result := THashResult.Create(LUInt16);
+        Result := THashResult.Create(LUInt16);
       end;
 
     3 .. 4:
       begin
         LUInt32 := UInt32(FHash);
 
-        result := THashResult.Create(LUInt32);
+        Result := THashResult.Create(LUInt32);
       end
   else
     begin
       LUInt64 := (FHash);
 
-      result := THashResult.Create(LUInt64);
+      Result := THashResult.Create(LUInt64);
     end;
   end;
 

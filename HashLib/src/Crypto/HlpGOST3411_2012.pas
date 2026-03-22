@@ -23,12 +23,14 @@ type
     FT: THashLibMatrixUInt64Array;
 
     procedure InternalUpdate(AInput: Byte); inline;
-    procedure xor512(const A, B: THashLibByteArray); inline;
-    procedure E(const K, M: THashLibByteArray);
-    procedure F(const V: THashLibByteArray);
-    procedure GN(const AH, AN, AM: THashLibByteArray); inline;
-    procedure AddMod512(const A: THashLibByteArray; Num: Int32); overload;
-    procedure AddMod512(const A, B: THashLibByteArray); overload;
+    procedure Xor512(const ADest, AXorWith: THashLibByteArray); inline;
+    procedure E(const ARoundKey, AMessage: THashLibByteArray);
+    procedure F(const AVector: THashLibByteArray);
+    procedure GN(const AHashState, ACounter, AMessageBlock
+      : THashLibByteArray); inline;
+    procedure AddMod512(const ADest: THashLibByteArray;
+      AIncrement: Int32); overload;
+    procedure AddMod512(const ADest, AAddend: THashLibByteArray); overload;
     procedure Reverse(const ASource, ADestination: THashLibByteArray);
 
     class constructor GOST3411_2012();
@@ -40,7 +42,7 @@ type
 
     FBOff: Int32;
 
-    constructor Create(AHashSize: Int32; const IV: THashLibByteArray);
+    constructor Create(AHashSize: Int32; const AIV: THashLibByteArray);
 
   public
     procedure Initialize; override;
@@ -83,56 +85,59 @@ implementation
 
 { TGOST3411_2012Base }
 
-procedure TGOST3411_2012.xor512(const A, B: THashLibByteArray);
+procedure TGOST3411_2012.Xor512(const ADest, AXorWith: THashLibByteArray);
 var
-  i: Int32;
+  LIdx: Int32;
 begin
-  for i := 0 to System.Pred(64) do
+  for LIdx := 0 to System.Pred(64) do
   begin
-    A[i] := A[i] xor B[i];
+    ADest[LIdx] := ADest[LIdx] xor AXorWith[LIdx];
   end;
 end;
 
-procedure TGOST3411_2012.AddMod512(const A: THashLibByteArray; Num: Int32);
+procedure TGOST3411_2012.AddMod512(const ADest: THashLibByteArray;
+  AIncrement: Int32);
 var
-  c, i: Int32;
+  LCarry, LIdx: Int32;
 begin
-  c := (A[63] and $FF) + (Num and $FF);
-  A[63] := Byte(c);
+  LCarry := (ADest[63] and $FF) + (AIncrement and $FF);
+  ADest[63] := Byte(LCarry);
 
-  c := (A[62] and $FF) + ((TBits.Asr32(Num, 8)) and $FF) + (TBits.Asr32(c, 8));
-  A[62] := Byte(c);
+  LCarry := (ADest[62] and $FF) +
+    ((TBits.Asr32(AIncrement, 8)) and $FF) + (TBits.Asr32(LCarry, 8));
+  ADest[62] := Byte(LCarry);
 
-  i := 61;
+  LIdx := 61;
 
-  while ((i >= 0) and (c > 0)) do
+  while ((LIdx >= 0) and (LCarry > 0)) do
   begin
-    c := (A[i] and $FF) + (TBits.Asr32(c, 8));
-    A[i] := Byte(c);
-    System.Dec(i);
+    LCarry := (ADest[LIdx] and $FF) + (TBits.Asr32(LCarry, 8));
+    ADest[LIdx] := Byte(LCarry);
+    System.Dec(LIdx);
   end;
 
 end;
 
-procedure TGOST3411_2012.AddMod512(const A, B: THashLibByteArray);
+procedure TGOST3411_2012.AddMod512(const ADest, AAddend: THashLibByteArray);
 var
-  i, c: Int32;
+  LIdx, LCarry: Int32;
 begin
-  c := 0;
-  i := 63;
+  LCarry := 0;
+  LIdx := 63;
 
-  while i >= 0 do
+  while LIdx >= 0 do
   begin
-    c := Int32(A[i] and $FF) + Int32(B[i] and $FF) + (TBits.Asr32(c, 8));
-    A[i] := Byte(c);
-    System.Dec(i);
+    LCarry := Int32(ADest[LIdx] and $FF) + Int32(AAddend[LIdx] and $FF) +
+      (TBits.Asr32(LCarry, 8));
+    ADest[LIdx] := Byte(LCarry);
+    System.Dec(LIdx);
   end;
 end;
 
 constructor TGOST3411_2012.Create(AHashSize: Int32;
-  const IV: THashLibByteArray);
+  const AIV: THashLibByteArray);
 begin
-  Inherited Create(AHashSize, 64);
+  inherited Create(AHashSize, 64);
   System.SetLength(FIV, 64);
   System.SetLength(FN, 64);
   System.SetLength(FSigma, 64);
@@ -146,204 +151,204 @@ begin
 
   FBOff := 64;
 
-  System.Move(IV[0], FIV[0], 64 * System.SizeOf(Byte));
-  System.Move(IV[0], FH[0], 64 * System.SizeOf(Byte));
+  System.Move(AIV[0], FIV[0], 64 * System.SizeOf(Byte));
+  System.Move(AIV[0], FH[0], 64 * System.SizeOf(Byte));
 end;
 
-procedure TGOST3411_2012.E(const K, M: THashLibByteArray);
+procedure TGOST3411_2012.E(const ARoundKey, AMessage: THashLibByteArray);
 var
-  i: Int32;
+  LRound: Int32;
 begin
-  System.Move(K[0], FKi[0], 64 * System.SizeOf(Byte));
-  xor512(K, M);
-  F(K);
-  for i := 0 to System.Pred(11) do
+  System.Move(ARoundKey[0], FKi[0], 64 * System.SizeOf(Byte));
+  Xor512(ARoundKey, AMessage);
+  F(ARoundKey);
+  for LRound := 0 to System.Pred(11) do
   begin
-    xor512(FKi, FC[i]);
+    Xor512(FKi, FC[LRound]);
     F(FKi);
-    xor512(K, FKi);
-    F(K);
+    Xor512(ARoundKey, FKi);
+    F(ARoundKey);
   end;
-  xor512(FKi, FC[11]);
+  Xor512(FKi, FC[11]);
   F(FKi);
-  xor512(K, FKi);
+  Xor512(ARoundKey, FKi);
 end;
 
-procedure TGOST3411_2012.F(const V: THashLibByteArray);
+procedure TGOST3411_2012.F(const AVector: THashLibByteArray);
 var
-  res: array [0 .. 7] of UInt64;
-  r: UInt64;
+  LQWords: array [0 .. 7] of UInt64;
+  LAcc: UInt64;
 begin
 
-  r := 0;
-  r := r xor (FT[0][(V[56] and $FF)]);
-  r := r xor (FT[1][(V[48] and $FF)]);
-  r := r xor (FT[2][(V[40] and $FF)]);
-  r := r xor (FT[3][(V[32] and $FF)]);
-  r := r xor (FT[4][(V[24] and $FF)]);
-  r := r xor (FT[5][(V[16] and $FF)]);
-  r := r xor (FT[6][(V[8] and $FF)]);
-  r := r xor (FT[7][(V[0] and $FF)]);
-  res[0] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[56] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[48] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[40] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[32] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[24] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[16] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[8] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[0] and $FF)]);
+  LQWords[0] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[57] and $FF)]);
-  r := r xor (FT[1][(V[49] and $FF)]);
-  r := r xor (FT[2][(V[41] and $FF)]);
-  r := r xor (FT[3][(V[33] and $FF)]);
-  r := r xor (FT[4][(V[25] and $FF)]);
-  r := r xor (FT[5][(V[17] and $FF)]);
-  r := r xor (FT[6][(V[9] and $FF)]);
-  r := r xor (FT[7][(V[1] and $FF)]);
-  res[1] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[57] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[49] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[41] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[33] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[25] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[17] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[9] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[1] and $FF)]);
+  LQWords[1] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[58] and $FF)]);
-  r := r xor (FT[1][(V[50] and $FF)]);
-  r := r xor (FT[2][(V[42] and $FF)]);
-  r := r xor (FT[3][(V[34] and $FF)]);
-  r := r xor (FT[4][(V[26] and $FF)]);
-  r := r xor (FT[5][(V[18] and $FF)]);
-  r := r xor (FT[6][(V[10] and $FF)]);
-  r := r xor (FT[7][(V[2] and $FF)]);
-  res[2] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[58] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[50] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[42] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[34] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[26] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[18] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[10] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[2] and $FF)]);
+  LQWords[2] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[59] and $FF)]);
-  r := r xor (FT[1][(V[51] and $FF)]);
-  r := r xor (FT[2][(V[43] and $FF)]);
-  r := r xor (FT[3][(V[35] and $FF)]);
-  r := r xor (FT[4][(V[27] and $FF)]);
-  r := r xor (FT[5][(V[19] and $FF)]);
-  r := r xor (FT[6][(V[11] and $FF)]);
-  r := r xor (FT[7][(V[3] and $FF)]);
-  res[3] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[59] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[51] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[43] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[35] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[27] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[19] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[11] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[3] and $FF)]);
+  LQWords[3] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[60] and $FF)]);
-  r := r xor (FT[1][(V[52] and $FF)]);
-  r := r xor (FT[2][(V[44] and $FF)]);
-  r := r xor (FT[3][(V[36] and $FF)]);
-  r := r xor (FT[4][(V[28] and $FF)]);
-  r := r xor (FT[5][(V[20] and $FF)]);
-  r := r xor (FT[6][(V[12] and $FF)]);
-  r := r xor (FT[7][(V[4] and $FF)]);
-  res[4] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[60] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[52] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[44] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[36] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[28] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[20] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[12] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[4] and $FF)]);
+  LQWords[4] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[61] and $FF)]);
-  r := r xor (FT[1][(V[53] and $FF)]);
-  r := r xor (FT[2][(V[45] and $FF)]);
-  r := r xor (FT[3][(V[37] and $FF)]);
-  r := r xor (FT[4][(V[29] and $FF)]);
-  r := r xor (FT[5][(V[21] and $FF)]);
-  r := r xor (FT[6][(V[13] and $FF)]);
-  r := r xor (FT[7][(V[5] and $FF)]);
-  res[5] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[61] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[53] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[45] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[37] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[29] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[21] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[13] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[5] and $FF)]);
+  LQWords[5] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[62] and $FF)]);
-  r := r xor (FT[1][(V[54] and $FF)]);
-  r := r xor (FT[2][(V[46] and $FF)]);
-  r := r xor (FT[3][(V[38] and $FF)]);
-  r := r xor (FT[4][(V[30] and $FF)]);
-  r := r xor (FT[5][(V[22] and $FF)]);
-  r := r xor (FT[6][(V[14] and $FF)]);
-  r := r xor (FT[7][(V[6] and $FF)]);
-  res[6] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[62] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[54] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[46] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[38] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[30] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[22] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[14] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[6] and $FF)]);
+  LQWords[6] := LAcc;
 
-  r := 0;
-  r := r xor (FT[0][(V[63] and $FF)]);
-  r := r xor (FT[1][(V[55] and $FF)]);
-  r := r xor (FT[2][(V[47] and $FF)]);
-  r := r xor (FT[3][(V[39] and $FF)]);
-  r := r xor (FT[4][(V[31] and $FF)]);
-  r := r xor (FT[5][(V[23] and $FF)]);
-  r := r xor (FT[6][(V[15] and $FF)]);
-  r := r xor (FT[7][(V[7] and $FF)]);
-  res[7] := r;
+  LAcc := 0;
+  LAcc := LAcc xor (FT[0][(AVector[63] and $FF)]);
+  LAcc := LAcc xor (FT[1][(AVector[55] and $FF)]);
+  LAcc := LAcc xor (FT[2][(AVector[47] and $FF)]);
+  LAcc := LAcc xor (FT[3][(AVector[39] and $FF)]);
+  LAcc := LAcc xor (FT[4][(AVector[31] and $FF)]);
+  LAcc := LAcc xor (FT[5][(AVector[23] and $FF)]);
+  LAcc := LAcc xor (FT[6][(AVector[15] and $FF)]);
+  LAcc := LAcc xor (FT[7][(AVector[7] and $FF)]);
+  LQWords[7] := LAcc;
 
-  r := res[0];
-  V[7] := Byte(r shr 56);
-  V[6] := Byte(r shr 48);
-  V[5] := Byte(r shr 40);
-  V[4] := Byte(r shr 32);
-  V[3] := Byte(r shr 24);
-  V[2] := Byte(r shr 16);
-  V[1] := Byte(r shr 8);
-  V[0] := Byte(r);
+  LAcc := LQWords[0];
+  AVector[7] := Byte(LAcc shr 56);
+  AVector[6] := Byte(LAcc shr 48);
+  AVector[5] := Byte(LAcc shr 40);
+  AVector[4] := Byte(LAcc shr 32);
+  AVector[3] := Byte(LAcc shr 24);
+  AVector[2] := Byte(LAcc shr 16);
+  AVector[1] := Byte(LAcc shr 8);
+  AVector[0] := Byte(LAcc);
 
-  r := res[1];
-  V[15] := Byte(r shr 56);
-  V[14] := Byte(r shr 48);
-  V[13] := Byte(r shr 40);
-  V[12] := Byte(r shr 32);
-  V[11] := Byte(r shr 24);
-  V[10] := Byte(r shr 16);
-  V[9] := Byte(r shr 8);
-  V[8] := Byte(r);
+  LAcc := LQWords[1];
+  AVector[15] := Byte(LAcc shr 56);
+  AVector[14] := Byte(LAcc shr 48);
+  AVector[13] := Byte(LAcc shr 40);
+  AVector[12] := Byte(LAcc shr 32);
+  AVector[11] := Byte(LAcc shr 24);
+  AVector[10] := Byte(LAcc shr 16);
+  AVector[9] := Byte(LAcc shr 8);
+  AVector[8] := Byte(LAcc);
 
-  r := res[2];
-  V[23] := Byte(r shr 56);
-  V[22] := Byte(r shr 48);
-  V[21] := Byte(r shr 40);
-  V[20] := Byte(r shr 32);
-  V[19] := Byte(r shr 24);
-  V[18] := Byte(r shr 16);
-  V[17] := Byte(r shr 8);
-  V[16] := Byte(r);
+  LAcc := LQWords[2];
+  AVector[23] := Byte(LAcc shr 56);
+  AVector[22] := Byte(LAcc shr 48);
+  AVector[21] := Byte(LAcc shr 40);
+  AVector[20] := Byte(LAcc shr 32);
+  AVector[19] := Byte(LAcc shr 24);
+  AVector[18] := Byte(LAcc shr 16);
+  AVector[17] := Byte(LAcc shr 8);
+  AVector[16] := Byte(LAcc);
 
-  r := res[3];
-  V[31] := Byte(r shr 56);
-  V[30] := Byte(r shr 48);
-  V[29] := Byte(r shr 40);
-  V[28] := Byte(r shr 32);
-  V[27] := Byte(r shr 24);
-  V[26] := Byte(r shr 16);
-  V[25] := Byte(r shr 8);
-  V[24] := Byte(r);
+  LAcc := LQWords[3];
+  AVector[31] := Byte(LAcc shr 56);
+  AVector[30] := Byte(LAcc shr 48);
+  AVector[29] := Byte(LAcc shr 40);
+  AVector[28] := Byte(LAcc shr 32);
+  AVector[27] := Byte(LAcc shr 24);
+  AVector[26] := Byte(LAcc shr 16);
+  AVector[25] := Byte(LAcc shr 8);
+  AVector[24] := Byte(LAcc);
 
-  r := res[4];
-  V[39] := Byte(r shr 56);
-  V[38] := Byte(r shr 48);
-  V[37] := Byte(r shr 40);
-  V[36] := Byte(r shr 32);
-  V[35] := Byte(r shr 24);
-  V[34] := Byte(r shr 16);
-  V[33] := Byte(r shr 8);
-  V[32] := Byte(r);
+  LAcc := LQWords[4];
+  AVector[39] := Byte(LAcc shr 56);
+  AVector[38] := Byte(LAcc shr 48);
+  AVector[37] := Byte(LAcc shr 40);
+  AVector[36] := Byte(LAcc shr 32);
+  AVector[35] := Byte(LAcc shr 24);
+  AVector[34] := Byte(LAcc shr 16);
+  AVector[33] := Byte(LAcc shr 8);
+  AVector[32] := Byte(LAcc);
 
-  r := res[5];
-  V[47] := Byte(r shr 56);
-  V[46] := Byte(r shr 48);
-  V[45] := Byte(r shr 40);
-  V[44] := Byte(r shr 32);
-  V[43] := Byte(r shr 24);
-  V[42] := Byte(r shr 16);
-  V[41] := Byte(r shr 8);
-  V[40] := Byte(r);
+  LAcc := LQWords[5];
+  AVector[47] := Byte(LAcc shr 56);
+  AVector[46] := Byte(LAcc shr 48);
+  AVector[45] := Byte(LAcc shr 40);
+  AVector[44] := Byte(LAcc shr 32);
+  AVector[43] := Byte(LAcc shr 24);
+  AVector[42] := Byte(LAcc shr 16);
+  AVector[41] := Byte(LAcc shr 8);
+  AVector[40] := Byte(LAcc);
 
-  r := res[6];
-  V[55] := Byte(r shr 56);
-  V[54] := Byte(r shr 48);
-  V[53] := Byte(r shr 40);
-  V[52] := Byte(r shr 32);
-  V[51] := Byte(r shr 24);
-  V[50] := Byte(r shr 16);
-  V[49] := Byte(r shr 8);
-  V[48] := Byte(r);
+  LAcc := LQWords[6];
+  AVector[55] := Byte(LAcc shr 56);
+  AVector[54] := Byte(LAcc shr 48);
+  AVector[53] := Byte(LAcc shr 40);
+  AVector[52] := Byte(LAcc shr 32);
+  AVector[51] := Byte(LAcc shr 24);
+  AVector[50] := Byte(LAcc shr 16);
+  AVector[49] := Byte(LAcc shr 8);
+  AVector[48] := Byte(LAcc);
 
-  r := res[7];
-  V[63] := Byte(r shr 56);
-  V[62] := Byte(r shr 48);
-  V[61] := Byte(r shr 40);
-  V[60] := Byte(r shr 32);
-  V[59] := Byte(r shr 24);
-  V[58] := Byte(r shr 16);
-  V[57] := Byte(r shr 8);
-  V[56] := Byte(r);
+  LAcc := LQWords[7];
+  AVector[63] := Byte(LAcc shr 56);
+  AVector[62] := Byte(LAcc shr 48);
+  AVector[61] := Byte(LAcc shr 40);
+  AVector[60] := Byte(LAcc shr 32);
+  AVector[59] := Byte(LAcc shr 24);
+  AVector[58] := Byte(LAcc shr 16);
+  AVector[57] := Byte(LAcc shr 8);
+  AVector[56] := Byte(LAcc);
 
-  System.FillChar(res, System.SizeOf(res), UInt64(0));
+  System.FillChar(LQWords, System.SizeOf(LQWords), UInt64(0));
 end;
 
 class constructor TGOST3411_2012.GOST3411_2012;
@@ -1515,16 +1520,17 @@ begin
 {$ENDREGION}
 end;
 
-procedure TGOST3411_2012.GN(const AH, AN, AM: THashLibByteArray);
+procedure TGOST3411_2012.GN(const AHashState, ACounter, AMessageBlock
+  : THashLibByteArray);
 begin
-  System.Move(AH[0], FTemp[0], 64 * System.SizeOf(Byte));
+  System.Move(AHashState[0], FTemp[0], 64 * System.SizeOf(Byte));
 
-  xor512(AH, AN);
-  F(AH);
+  Xor512(AHashState, ACounter);
+  F(AHashState);
 
-  E(AH, AM);
-  xor512(AH, FTemp);
-  xor512(AH, AM);
+  E(AHashState, AMessageBlock);
+  Xor512(AHashState, FTemp);
+  Xor512(AHashState, AMessageBlock);
 end;
 
 procedure TGOST3411_2012.Initialize;
@@ -1554,12 +1560,12 @@ end;
 procedure TGOST3411_2012.Reverse(const ASource, ADestination
   : THashLibByteArray);
 var
-  len, i: Int32;
+  LLength, LIdx: Int32;
 begin
-  len := System.Length(ASource);
-  for i := 0 to System.Pred(len) do
+  LLength := System.Length(ASource);
+  for LIdx := 0 to System.Pred(LLength) do
   begin
-    ADestination[len - 1 - i] := ASource[i];
+    ADestination[LLength - 1 - LIdx] := ASource[LIdx];
   end;
 end;
 
@@ -1594,38 +1600,39 @@ end;
 
 function TGOST3411_2012.TransformFinal: IHashResult;
 var
-  tempRes: THashLibByteArray;
-  lenM, i: Int32;
+  LTempResult: THashLibByteArray;
+  LMessageByteCount, LIdx: Int32;
 begin
-  lenM := 64 - FBOff;
+  LMessageByteCount := 64 - FBOff;
 
-  // At this point it is certain that lenM is smaller than 64
-  i := 0;
-  while i <> (64 - lenM) do
+  // At this point it is certain that LMessageByteCount is smaller than 64
+  LIdx := 0;
+  while LIdx <> (64 - LMessageByteCount) do
   begin
-    FM[i] := 0;
-    System.Inc(i);
+    FM[LIdx] := 0;
+    System.Inc(LIdx);
   end;
 
-  FM[63 - lenM] := 1;
+  FM[63 - LMessageByteCount] := 1;
 
   if (FBOff <> 64) then
   begin
-    System.Move(FBlock[FBOff], FM[64 - lenM], lenM * System.SizeOf(Byte));
+    System.Move(FBlock[FBOff], FM[64 - LMessageByteCount],
+      LMessageByteCount * System.SizeOf(Byte));
   end;
 
   GN(FH, FN, FM);
-  AddMod512(FN, lenM * 8);
+  AddMod512(FN, LMessageByteCount * 8);
   AddMod512(FSigma, FM);
   GN(FH, FZero, FN);
   GN(FH, FZero, FSigma);
 
   Reverse(FH, FTemp);
 
-  System.SetLength(tempRes, 64);
-  System.Move(FTemp[0], tempRes[0], 64 * System.SizeOf(Byte));
+  System.SetLength(LTempResult, 64);
+  System.Move(FTemp[0], LTempResult[0], 64 * System.SizeOf(Byte));
 
-  result := THashResult.Create(tempRes);
+  Result := THashResult.Create(LTempResult);
 
   Initialize();
 end;
@@ -1646,8 +1653,8 @@ begin
   LHashInstance.FTemp := System.Copy(FTemp);
   LHashInstance.FBlock := System.Copy(FBlock);
   LHashInstance.FBOff := FBOff;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TGOST3411_2012_256.Create();
@@ -1671,7 +1678,7 @@ begin
   LOutput := inherited TransformFinal().GetBytes;
   System.SetLength(LTempRes, HashSize);
   System.Move(LOutput[32], LTempRes[0], 32 * System.SizeOf(Byte));
-  result := THashResult.Create(LTempRes);
+  Result := THashResult.Create(LTempRes);
 end;
 
 { TGOST3411_2012_512 }
@@ -1690,8 +1697,8 @@ begin
   LHashInstance.FTemp := System.Copy(FTemp);
   LHashInstance.FBlock := System.Copy(FBlock);
   LHashInstance.FBOff := FBOff;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TGOST3411_2012_512.Create();

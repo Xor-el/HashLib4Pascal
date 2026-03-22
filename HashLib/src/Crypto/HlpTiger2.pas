@@ -640,7 +640,7 @@ end;
 
 constructor TTiger2.Create(AHashSize: Int32; ARounds: THashRounds);
 begin
-  Inherited Create(AHashSize, 64);
+  inherited Create(AHashSize, 64);
   System.SetLength(FHash, 3);
   FRounds := Int32(ARounds);
 end;
@@ -691,150 +691,77 @@ begin
   FHash[0] := $0123456789ABCDEF;
   FHash[1] := UInt64($FEDCBA9876543210);
   FHash[2] := UInt64($F096A5B4C3B2E187);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TTiger2.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 var
-  LA, LB, LC, LTempA: UInt64;
+  LRegA, LRegB, LRegC, LShuffleTemp: UInt64;
   LRounds: Int32;
   LData: array [0 .. 7] of UInt64;
 begin
   TConverters.le64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
 
-  LA := FHash[0];
-  LB := FHash[1];
-  LC := FHash[2];
+  LRegA := FHash[0];
+  LRegB := FHash[1];
+  LRegC := FHash[2];
 
-  LC := LC xor LData[0];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 5;
+  LRegC := LRegC xor LData[0];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 5;
 
-  LA := LA xor LData[1];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 5;
+  LRegA := LRegA xor LData[1];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 5;
 
-  LB := LB xor LData[2];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 5;
+  LRegB := LRegB xor LData[2];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 5;
 
-  LC := LC xor LData[3];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 5;
+  LRegC := LRegC xor LData[3];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 5;
 
-  LA := LA xor LData[4];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 5;
+  LRegA := LRegA xor LData[4];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 5;
 
-  LB := LB xor LData[5];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 5;
+  LRegB := LRegB xor LData[5];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 5;
 
-  LC := LC xor LData[6];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 5;
+  LRegC := LRegC xor LData[6];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 5;
 
-  LA := LA xor LData[7];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 5;
-
-  LData[0] := LData[0] - (LData[7] xor C1);
-  LData[1] := LData[1] xor LData[0];
-  LData[2] := LData[2] + LData[1];
-  LData[3] := LData[3] - (LData[2] xor (not LData[1] shl 19));
-  LData[4] := LData[4] xor LData[3];
-  LData[5] := LData[5] + LData[4];
-  LData[6] := LData[6] - (LData[5] xor (not LData[4] shr 23));
-  LData[7] := LData[7] xor LData[6];
-  LData[0] := LData[0] + LData[7];
-  LData[1] := LData[1] - (LData[0] xor (not LData[7] shl 19));
-  LData[2] := LData[2] xor LData[1];
-  LData[3] := LData[3] + LData[2];
-  LData[4] := LData[4] - (LData[3] xor (not LData[2] shr 23));
-  LData[5] := LData[5] xor LData[4];
-  LData[6] := LData[6] + LData[5];
-  LData[7] := LData[7] - (LData[6] xor C2);
-
-  LB := LB xor LData[0];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 7;
-
-  LC := LC xor LData[1];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 7;
-
-  LA := LA xor LData[2];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 7;
-
-  LB := LB xor LData[3];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 7;
-
-  LC := LC xor LData[4];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 7;
-
-  LA := LA xor LData[5];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 7;
-
-  LB := LB xor LData[6];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 7;
-
-  LC := LC xor LData[7];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 7;
+  LRegA := LRegA xor LData[7];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 5;
 
   LData[0] := LData[0] - (LData[7] xor C1);
   LData[1] := LData[1] xor LData[0];
@@ -853,61 +780,134 @@ begin
   LData[6] := LData[6] + LData[5];
   LData[7] := LData[7] - (LData[6] xor C2);
 
-  LA := LA xor LData[0];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 9;
+  LRegB := LRegB xor LData[0];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 7;
 
-  LB := LB xor LData[1];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 9;
+  LRegC := LRegC xor LData[1];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 7;
 
-  LC := LC xor LData[2];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 9;
+  LRegA := LRegA xor LData[2];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 7;
 
-  LA := LA xor LData[3];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 9;
+  LRegB := LRegB xor LData[3];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 7;
 
-  LB := LB xor LData[4];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 9;
+  LRegC := LRegC xor LData[4];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 7;
 
-  LC := LC xor LData[5];
-  LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-    ] xor ST4[Byte(LC shr 48)]);
-  LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-    ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-  LB := LB * 9;
+  LRegA := LRegA xor LData[5];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 7;
 
-  LA := LA xor LData[6];
-  LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-    ] xor ST4[Byte(LA shr 48)]);
-  LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-    ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-  LC := LC * 9;
+  LRegB := LRegB xor LData[6];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 7;
 
-  LB := LB xor LData[7];
-  LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-    ] xor ST4[Byte(LB shr 48)]);
-  LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-    ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-  LA := LA * 9;
+  LRegC := LRegC xor LData[7];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 7;
+
+  LData[0] := LData[0] - (LData[7] xor C1);
+  LData[1] := LData[1] xor LData[0];
+  LData[2] := LData[2] + LData[1];
+  LData[3] := LData[3] - (LData[2] xor (not LData[1] shl 19));
+  LData[4] := LData[4] xor LData[3];
+  LData[5] := LData[5] + LData[4];
+  LData[6] := LData[6] - (LData[5] xor (not LData[4] shr 23));
+  LData[7] := LData[7] xor LData[6];
+  LData[0] := LData[0] + LData[7];
+  LData[1] := LData[1] - (LData[0] xor (not LData[7] shl 19));
+  LData[2] := LData[2] xor LData[1];
+  LData[3] := LData[3] + LData[2];
+  LData[4] := LData[4] - (LData[3] xor (not LData[2] shr 23));
+  LData[5] := LData[5] xor LData[4];
+  LData[6] := LData[6] + LData[5];
+  LData[7] := LData[7] - (LData[6] xor C2);
+
+  LRegA := LRegA xor LData[0];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 9;
+
+  LRegB := LRegB xor LData[1];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 9;
+
+  LRegC := LRegC xor LData[2];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 9;
+
+  LRegA := LRegA xor LData[3];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 9;
+
+  LRegB := LRegB xor LData[4];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 9;
+
+  LRegC := LRegC xor LData[5];
+  LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+    ] xor ST4[Byte(LRegC shr 48)]);
+  LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+    ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+  LRegB := LRegB * 9;
+
+  LRegA := LRegA xor LData[6];
+  LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+    ] xor ST4[Byte(LRegA shr 48)]);
+  LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+    ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+  LRegC := LRegC * 9;
+
+  LRegB := LRegB xor LData[7];
+  LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+    ] xor ST4[Byte(LRegB shr 48)]);
+  LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+    ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+  LRegA := LRegA * 9;
 
   LRounds := 3;
   while LRounds < FRounds do
@@ -929,73 +929,73 @@ begin
     LData[6] := LData[6] + LData[5];
     LData[7] := LData[7] - (LData[6] xor C2);
 
-    LC := LC xor LData[0];
-    LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-      ] xor ST4[Byte(LC shr 48)]);
-    LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-      ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-    LB := LB * 9;
+    LRegC := LRegC xor LData[0];
+    LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+      ] xor ST4[Byte(LRegC shr 48)]);
+    LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+      ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+    LRegB := LRegB * 9;
 
-    LA := LA xor LData[1];
-    LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-      ] xor ST4[Byte(LA shr 48)]);
-    LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-      ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-    LC := LC * 9;
+    LRegA := LRegA xor LData[1];
+    LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+      ] xor ST4[Byte(LRegA shr 48)]);
+    LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+      ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+    LRegC := LRegC * 9;
 
-    LB := LB xor LData[2];
-    LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-      ] xor ST4[Byte(LB shr 48)]);
-    LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-      ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-    LA := LA * 9;
+    LRegB := LRegB xor LData[2];
+    LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+      ] xor ST4[Byte(LRegB shr 48)]);
+    LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+      ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+    LRegA := LRegA * 9;
 
-    LC := LC xor LData[3];
-    LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-      ] xor ST4[Byte(LC shr 48)]);
-    LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-      ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-    LB := LB * 9;
+    LRegC := LRegC xor LData[3];
+    LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+      ] xor ST4[Byte(LRegC shr 48)]);
+    LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+      ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+    LRegB := LRegB * 9;
 
-    LA := LA xor LData[4];
-    LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-      ] xor ST4[Byte(LA shr 48)]);
-    LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-      ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-    LC := LC * 9;
+    LRegA := LRegA xor LData[4];
+    LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+      ] xor ST4[Byte(LRegA shr 48)]);
+    LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+      ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+    LRegC := LRegC * 9;
 
-    LB := LB xor LData[5];
-    LC := LC - (ST1[Byte(LB)] xor ST2[Byte(LB shr 16)] xor ST3[Byte(LB shr 32)
-      ] xor ST4[Byte(LB shr 48)]);
-    LA := LA + (ST4[Byte(LB shr 8)] xor ST3[Byte(LB shr 24)
-      ] xor ST2[Byte(LB shr 40)] xor ST1[Byte(LB shr 56)]);
-    LA := LA * 9;
+    LRegB := LRegB xor LData[5];
+    LRegC := LRegC - (ST1[Byte(LRegB)] xor ST2[Byte(LRegB shr 16)] xor ST3[Byte(LRegB shr 32)
+      ] xor ST4[Byte(LRegB shr 48)]);
+    LRegA := LRegA + (ST4[Byte(LRegB shr 8)] xor ST3[Byte(LRegB shr 24)
+      ] xor ST2[Byte(LRegB shr 40)] xor ST1[Byte(LRegB shr 56)]);
+    LRegA := LRegA * 9;
 
-    LC := LC xor LData[6];
-    LA := LA - (ST1[Byte(LC)] xor ST2[Byte(LC shr 16)] xor ST3[Byte(LC shr 32)
-      ] xor ST4[Byte(LC shr 48)]);
-    LB := LB + (ST4[Byte(LC shr 8) and $FF] xor ST3[Byte(LC shr 24)
-      ] xor ST2[Byte(LC shr 40)] xor ST1[Byte(LC shr 56)]);
-    LB := LB * 9;
+    LRegC := LRegC xor LData[6];
+    LRegA := LRegA - (ST1[Byte(LRegC)] xor ST2[Byte(LRegC shr 16)] xor ST3[Byte(LRegC shr 32)
+      ] xor ST4[Byte(LRegC shr 48)]);
+    LRegB := LRegB + (ST4[Byte(LRegC shr 8) and $FF] xor ST3[Byte(LRegC shr 24)
+      ] xor ST2[Byte(LRegC shr 40)] xor ST1[Byte(LRegC shr 56)]);
+    LRegB := LRegB * 9;
 
-    LA := LA xor LData[7];
-    LB := LB - (ST1[Byte(LA)] xor ST2[Byte(LA shr 16)] xor ST3[Byte(LA shr 32)
-      ] xor ST4[Byte(LA shr 48)]);
-    LC := LC + (ST4[Byte(LA shr 8)] xor ST3[Byte(LA shr 24)
-      ] xor ST2[Byte(LA shr 40)] xor ST1[Byte(LA shr 56)]);
-    LC := LC * 9;
+    LRegA := LRegA xor LData[7];
+    LRegB := LRegB - (ST1[Byte(LRegA)] xor ST2[Byte(LRegA shr 16)] xor ST3[Byte(LRegA shr 32)
+      ] xor ST4[Byte(LRegA shr 48)]);
+    LRegC := LRegC + (ST4[Byte(LRegA shr 8)] xor ST3[Byte(LRegA shr 24)
+      ] xor ST2[Byte(LRegA shr 40)] xor ST1[Byte(LRegA shr 56)]);
+    LRegC := LRegC * 9;
 
-    LTempA := LA;
-    LA := LC;
-    LC := LB;
-    LB := LTempA;
+    LShuffleTemp := LRegA;
+    LRegA := LRegC;
+    LRegC := LRegB;
+    LRegB := LShuffleTemp;
 
     System.Inc(LRounds);
   end;
 
-  FHash[0] := FHash[0] xor LA;
-  FHash[1] := LB - FHash[1];
-  FHash[2] := FHash[2] + LC;
+  FHash[0] := FHash[0] xor LRegA;
+  FHash[1] := LRegB - FHash[1];
+  FHash[2] := FHash[2] + LRegC;
 
   System.FillChar(LData, System.SizeOf(LData), UInt64(0));
 end;
@@ -1010,23 +1010,23 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TTiger2_128.CreateRound3;
 begin
-  Inherited Create(16, THashRounds.hrRounds3);
+  inherited Create(16, THashRounds.hrRounds3);
 end;
 
 constructor TTiger2_128.CreateRound4;
 begin
-  Inherited Create(16, THashRounds.hrRounds4);
+  inherited Create(16, THashRounds.hrRounds4);
 end;
 
 constructor TTiger2_128.CreateRound5;
 begin
-  Inherited Create(16, THashRounds.hrRounds5);
+  inherited Create(16, THashRounds.hrRounds5);
 end;
 
 { TTiger2_160 }
@@ -1039,23 +1039,23 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TTiger2_160.CreateRound3;
 begin
-  Inherited Create(20, THashRounds.hrRounds3);
+  inherited Create(20, THashRounds.hrRounds3);
 end;
 
 constructor TTiger2_160.CreateRound4;
 begin
-  Inherited Create(20, THashRounds.hrRounds4);
+  inherited Create(20, THashRounds.hrRounds4);
 end;
 
 constructor TTiger2_160.CreateRound5;
 begin
-  Inherited Create(20, THashRounds.hrRounds5);
+  inherited Create(20, THashRounds.hrRounds5);
 end;
 
 { TTiger2_192 }
@@ -1068,23 +1068,23 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TTiger2_192.CreateRound3;
 begin
-  Inherited Create(24, THashRounds.hrRounds3);
+  inherited Create(24, THashRounds.hrRounds3);
 end;
 
 constructor TTiger2_192.CreateRound4;
 begin
-  Inherited Create(24, THashRounds.hrRounds4);
+  inherited Create(24, THashRounds.hrRounds4);
 end;
 
 constructor TTiger2_192.CreateRound5;
 begin
-  Inherited Create(24, THashRounds.hrRounds5);
+  inherited Create(24, THashRounds.hrRounds5);
 end;
 
 { TTiger2_Base }
@@ -1097,13 +1097,13 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TTiger2_Base.Create(AHashSize: Int32; ARounds: THashRounds);
 begin
-  Inherited Create(AHashSize, ARounds);
+  inherited Create(AHashSize, ARounds);
 end;
 
 end.

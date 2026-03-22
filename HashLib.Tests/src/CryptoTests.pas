@@ -910,7 +910,7 @@ procedure TTestGost.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGost();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'CE85B99CC46752FFFEE35CAB9A7B0278ABB4C2D2055CFF685AF4912C49490F8D';
   HashOfDefaultData :=
@@ -927,8 +927,8 @@ end;
 
 procedure TTestGost.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -938,7 +938,7 @@ procedure TTestGost_CryptoProParamSet.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGost(TGostSBox.gsbCryptoProParamSet);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '981E5F3CA30C841487830F84FB433E13AC1101569B9C13584AC483234CD656C0';
   HashOfDefaultData :=
@@ -955,8 +955,8 @@ end;
 
 procedure TTestGost_CryptoProParamSet.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -966,7 +966,7 @@ procedure TTestGrindahl256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGrindahl256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '45A7600159AF54AE110FCB6EA0F38AD57875EAC814F74D2CBC247D28C89923E6';
   HashOfDefaultData :=
@@ -983,8 +983,8 @@ end;
 
 procedure TTestGrindahl256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -994,7 +994,7 @@ procedure TTestGrindahl512.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGrindahl512();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'EE0BA85F90B6D232430BA43DD0EDD008462591816962A355602ED214FAAE54A9A4607D6F577CE950421FF58AEA53F51A7A9F5CCA894C3776104D43568FEA1207';
   HashOfDefaultData :=
@@ -1011,8 +1011,8 @@ end;
 
 procedure TTestGrindahl512.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1022,7 +1022,7 @@ procedure TTestHAS160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHAS160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '307964EF34151D37C8047ADEC7AB50F4FF89762D';
   HashOfDefaultData := '2773EDAC4501514254D7B1DF091D6B7652250A52';
   HashOfOnetoNine := 'A0DA48CCD36C9D24AA630D4B3673525E9109A83C';
@@ -1035,8 +1035,8 @@ end;
 
 procedure TTestHAS160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1046,7 +1046,7 @@ procedure TTestHaval_3_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_3_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'C68F39913F901F3DDF44C707357A7D70';
   HashOfDefaultData := '04AF7562BA75D5767ADE2A71E4BE33DE';
   HashOfOnetoNine := 'F2F92D4E5CA6B92A5B5FC5AC822C39D2';
@@ -1057,8 +1057,8 @@ end;
 
 procedure TTestHaval_3_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1068,7 +1068,7 @@ procedure TTestHaval_4_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_4_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'EE6BBF4D6A46A679B3A856C88538BB98';
   HashOfDefaultData := 'C815192C498CF266D0EB32E90D60892E';
   HashOfOnetoNine := '52DFE2F3DA02591061B02DBDC1510F1C';
@@ -1079,8 +1079,8 @@ end;
 
 procedure TTestHaval_4_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1090,7 +1090,7 @@ procedure TTestHaval_5_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_5_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '184B8482A0C050DCA54B59C7F05BF5DD';
   HashOfDefaultData := 'B335D2DC38EFB9D937B803F7581AF88D';
   HashOfOnetoNine := '8AA1C1CA3A7E4F983654C4F689DE6F8D';
@@ -1101,8 +1101,8 @@ end;
 
 procedure TTestHaval_5_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1112,7 +1112,7 @@ procedure TTestHaval_3_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_3_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'D353C3AE22A25401D257643836D7231A9A95F953';
   HashOfDefaultData := '4A5E28CA30029D2D04287E6C807E74D297A7FC74';
   HashOfOnetoNine := '39A83AF3293CDAC04DE1DF3D0BE7A1F9D8AAB923';
@@ -1125,8 +1125,8 @@ end;
 
 procedure TTestHaval_3_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1136,7 +1136,7 @@ procedure TTestHaval_4_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_4_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '1D33AAE1BE4146DBAACA0B6E70D7A11F10801525';
   HashOfDefaultData := '9E86A9E2D964CCF9019593C88F40AA5C725E0912';
   HashOfOnetoNine := 'B03439BE6F2A3EBED93AC86846D029D76F62FD99';
@@ -1149,8 +1149,8 @@ end;
 
 procedure TTestHaval_4_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1160,7 +1160,7 @@ procedure TTestHaval_5_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_5_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '255158CFC1EED1A7BE7C55DDD64D9790415B933B';
   HashOfDefaultData := 'A9AB9AB152BB4413B717228C3A65E75644542A35';
   HashOfOnetoNine := '11F592B3A1A1A9C0F9C638C33B69E442D06C1D99';
@@ -1173,8 +1173,8 @@ end;
 
 procedure TTestHaval_5_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1184,7 +1184,7 @@ procedure TTestHaval_3_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_3_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'E9C48D7903EAF2A91C5B350151EFCB175C0FC82DE2289A4E';
   HashOfDefaultData := '4235822851EB1B63D6B1DB56CF18EBD28E0BC2327416D5D1';
   HashOfOnetoNine := '6B92F078E73AF2E0F9F049FAA5016D32173A3D62D2F08554';
@@ -1197,8 +1197,8 @@ end;
 
 procedure TTestHaval_3_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1208,7 +1208,7 @@ procedure TTestHaval_4_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_4_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4A8372945AFA55C7DEAD800311272523CA19D42EA47B72DA';
   HashOfDefaultData := '54D4FD0DE4228D55F826B627A128A765378B1DC1F8E6CD75';
   HashOfOnetoNine := 'A5C285EAD0FF2F47C15C27B991C4A3A5007BA57137B18D07';
@@ -1221,8 +1221,8 @@ end;
 
 procedure TTestHaval_4_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1232,7 +1232,7 @@ procedure TTestHaval_5_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_5_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4839D0626F95935E17EE2FC4509387BBE2CC46CB382FFE85';
   HashOfDefaultData := 'ED197F026B20DB6362CBC62BDD28E0B34F1E287966D84E3B';
   HashOfOnetoNine := 'EC32312AA79775539675C9BA83D079FFC7EA498FA6173A46';
@@ -1245,8 +1245,8 @@ end;
 
 procedure TTestHaval_5_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1256,7 +1256,7 @@ procedure TTestHaval_3_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_3_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'C5AAE9D47BFFCAAF84A8C6E7CCACD60A0DD1932BE7B1A192B9214B6D';
   HashOfDefaultData :=
     '12B7BFA1D36D0163E876A1474EB33CF5BC24C1BBBB181F28ACEE8D36';
@@ -1270,8 +1270,8 @@ end;
 
 procedure TTestHaval_3_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1281,7 +1281,7 @@ procedure TTestHaval_4_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_4_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '3E56243275B3B81561750550E36FCD676AD2F5DD9E15F2E89E6ED78E';
   HashOfDefaultData :=
     'DA7AB9D08D42C1819C04C7064891DB700DD05C960C3192CB615758B0';
@@ -1295,8 +1295,8 @@ end;
 
 procedure TTestHaval_4_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1306,7 +1306,7 @@ procedure TTestHaval_5_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_5_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4A0513C032754F5582A758D35917AC9ADF3854219B39E3AC77D1837E';
   HashOfDefaultData :=
     'D5FEA825ED7B8CBF23938425BAFDBEE9AD127A685EFCA4559BD54892';
@@ -1320,8 +1320,8 @@ end;
 
 procedure TTestHaval_5_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1331,7 +1331,7 @@ procedure TTestHaval_3_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_3_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '4F6938531F0BC8991F62DA7BBD6F7DE3FAD44562B8C6F4EBF146D5B4E46F7C17';
   HashOfDefaultData :=
@@ -1348,8 +1348,8 @@ end;
 
 procedure TTestHaval_3_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1359,7 +1359,7 @@ procedure TTestHaval_4_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_4_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'C92B2E23091E80E375DADCE26982482D197B1A2521BE82DA819F8CA2C579B99B';
   HashOfDefaultData :=
@@ -1376,8 +1376,8 @@ end;
 
 procedure TTestHaval_4_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1387,7 +1387,7 @@ procedure TTestHaval_5_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateHaval_5_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'BE417BB4DD5CFB76C7126F4F8EEB1553A449039307B1A3CD451DBFDC0FBBE330';
   HashOfDefaultData :=
@@ -1404,8 +1404,8 @@ end;
 
 procedure TTestHaval_5_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1415,7 +1415,7 @@ procedure TTestMD2.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateMD2();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '8350E5A3E24C153DF2275C9F80692773';
   HashOfDefaultData := 'DFBE28FF5A3C23CAA85BE5848F16524E';
   HashOfOnetoNine := '12BD4EFDD922B5C8C7B773F26EF4E35F';
@@ -1426,8 +1426,8 @@ end;
 
 procedure TTestMD2.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1437,7 +1437,7 @@ procedure TTestMD4.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateMD4();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '31D6CFE0D16AE931B73C59D7E0C089C0';
   HashOfDefaultData := 'A77EAB8C3432FD9DD1B87C3C5C2E9C3C';
   HashOfOnetoNine := '2AE523785D0CAF4D2FB557C12016185C';
@@ -1448,8 +1448,8 @@ end;
 
 procedure TTestMD4.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1459,7 +1459,7 @@ procedure TTestMD5.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateMD5();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'D41D8CD98F00B204E9800998ECF8427E';
   HashOfDefaultData := '462EC1E50C8F2D5C387682E98F9BC842';
   HashOfOnetoNine := '25F9E794323B453885F5181F1B624D0B';
@@ -1470,8 +1470,8 @@ end;
 
 procedure TTestMD5.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1481,7 +1481,7 @@ procedure TTestPanama.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreatePanama();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'AA0CC954D757D7AC7779CA3342334CA471ABD47D5952AC91ED837ECD5B16922B';
   HashOfDefaultData :=
@@ -1498,8 +1498,8 @@ end;
 
 procedure TTestPanama.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1509,7 +1509,7 @@ procedure TTestRadioGatun32.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRadioGatun32();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'F30028B54AFAB6B3E55355D277711109A19BEDA7091067E9A492FB5ED9F20117';
   HashOfDefaultData :=
@@ -1526,8 +1526,8 @@ end;
 
 procedure TTestRadioGatun32.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1537,7 +1537,7 @@ procedure TTestRadioGatun64.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRadioGatun64();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '64A9A7FA139905B57BDAB35D33AA216370D5EAE13E77BFCDD85513408311A584';
   HashOfDefaultData :=
@@ -1554,8 +1554,8 @@ end;
 
 procedure TTestRadioGatun64.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1565,7 +1565,7 @@ procedure TTestRIPEMD.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRIPEMD();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '9F73AA9B372A9DACFB86A6108852E2D9';
   HashOfDefaultData := 'B3F629A9786744AA105A2C150869C236';
   HashOfOnetoNine := 'C905B44C6429AD0A1934550037D4816F';
@@ -1576,8 +1576,8 @@ end;
 
 procedure TTestRIPEMD.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1587,7 +1587,7 @@ procedure TTestRIPEMD128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRIPEMD128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'CDF26213A150DC3ECB610F18F6B38B46';
   HashOfDefaultData := '75891B00B2874EDCAF7002CA98264193';
   HashOfOnetoNine := '1886DB8ACDCBFEAB1E7EE3780400536F';
@@ -1598,8 +1598,8 @@ end;
 
 procedure TTestRIPEMD128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1609,7 +1609,7 @@ procedure TTestRIPEMD160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRIPEMD160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '9C1185A5C5E9FC54612808977EE8F548B2258D31';
   HashOfDefaultData := '0B8EAC9A2EA1E267750CE639D83A84B92631462B';
   HashOfOnetoNine := 'D3D0379126C1E5E0BA70AD6E5E53FF6AEAB9F4FA';
@@ -1622,8 +1622,8 @@ end;
 
 procedure TTestRIPEMD160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1633,7 +1633,7 @@ procedure TTestRIPEMD256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRIPEMD256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '02BA4C4E5F8ECD1877FC52D64D30E37A2D9774FB1E5D026380AE0168E3C5522D';
   HashOfDefaultData :=
@@ -1650,8 +1650,8 @@ end;
 
 procedure TTestRIPEMD256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1661,7 +1661,7 @@ procedure TTestRIPEMD320.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateRIPEMD320();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '22D65D5661536CDC75C1FDF5C6DE7B41B9F27325EBC61E8557177D705A0EC880151C3A32A00899B8';
   HashOfDefaultData :=
@@ -1678,8 +1678,8 @@ end;
 
 procedure TTestRIPEMD320.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1689,7 +1689,7 @@ procedure TTestSHA0.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA0();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'F96CEA198AD1DD5617AC084A3D92C6107708C0EF';
   HashOfDefaultData := 'C9CBBE593DE122CA36B13CC37FE2CA8D5606FEED';
   HashOfOnetoNine := 'F0360779D2AF6615F306BB534223CF762A92E988';
@@ -1702,8 +1702,8 @@ end;
 
 procedure TTestSHA0.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1713,7 +1713,7 @@ procedure TTestSHA1.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA1();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'DA39A3EE5E6B4B0D3255BFEF95601890AFD80709';
   HashOfDefaultData := 'C8389876E94C043C47BA4BFF3D359884071DC310';
   HashOfOnetoNine := 'F7C3BC1D808E04732ADF679965CCC34CA7AE3441';
@@ -1726,8 +1726,8 @@ end;
 
 procedure TTestSHA1.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1737,7 +1737,7 @@ procedure TTestSHA2_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'D14A028C2A3A2BC9476102BB288234C415A2B01F828EA62AC5B3E42F';
   HashOfDefaultData :=
     'DF2B86ED008508F542443C4B1810AA5A0F5658692B808EEB1D0A2F7E';
@@ -1751,8 +1751,8 @@ end;
 
 procedure TTestSHA2_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1762,7 +1762,7 @@ procedure TTestSHA2_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855';
   HashOfDefaultData :=
@@ -1779,8 +1779,8 @@ end;
 
 procedure TTestSHA2_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1790,7 +1790,7 @@ procedure TTestSHA2_384.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_384();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B';
   HashOfDefaultData :=
@@ -1807,8 +1807,8 @@ end;
 
 procedure TTestSHA2_384.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1818,7 +1818,7 @@ procedure TTestSHA2_512.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_512();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'CF83E1357EEFB8BDF1542850D66D8007D620E4050B5715DC83F4A921D36CE9CE47D0D13C5D85F2B0FF8318D2877EEC2F63B931BD47417A81A538327AF927DA3E';
   HashOfDefaultData :=
@@ -1835,8 +1835,8 @@ end;
 
 procedure TTestSHA2_512.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1846,7 +1846,7 @@ procedure TTestSHA2_512_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_512_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '6ED0DD02806FA89E25DE060C19D3AC86CABB87D6A0DDD05C333B84F4';
   HashOfDefaultData :=
     '7A95749FB7F4489A45275556F5D905D28E1B637DCDD6537336AB6234';
@@ -1860,8 +1860,8 @@ end;
 
 procedure TTestSHA2_512_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1871,7 +1871,7 @@ procedure TTestSHA2_512_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA2_512_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'C672B8D1EF56ED28AB87C3622C5114069BDD3AD7B8F9737498D0C01ECEF0967A';
   HashOfDefaultData :=
@@ -1888,8 +1888,8 @@ end;
 
 procedure TTestSHA2_512_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1899,7 +1899,7 @@ procedure TTestSHA3_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA3_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7';
   HashOfDefaultData :=
     '1D2BDFB95B0203C2BB7C739D813D69521EC7A3047E3FCA15CD305C95';
@@ -1913,8 +1913,8 @@ end;
 
 procedure TTestSHA3_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1924,7 +1924,7 @@ procedure TTestSHA3_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA3_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'A7FFC6F8BF1ED76651C14756A061D662F580FF4DE43B49FA82D80A4B80F8434A';
   HashOfDefaultData :=
@@ -1941,8 +1941,8 @@ end;
 
 procedure TTestSHA3_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1952,7 +1952,7 @@ procedure TTestSHA3_384.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA3_384();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '0C63A75B845E4F7D01107D852E4C2485C51A50AAAA94FC61995E71BBEE983A2AC3713831264ADB47FB6BD1E058D5F004';
   HashOfDefaultData :=
@@ -1969,8 +1969,8 @@ end;
 
 procedure TTestSHA3_384.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -1980,7 +1980,7 @@ procedure TTestSHA3_512.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSHA3_512();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'A69F73CCA23A9AC5C8B567DC185A756E97C982164FE25859E0D1DCC1475C80A615B2123AF1F5F94C11E3E9402C3AC558F500199D95B6D3E301758586281DCD26';
   HashOfDefaultData :=
@@ -1997,8 +1997,8 @@ end;
 
 procedure TTestSHA3_512.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2031,8 +2031,8 @@ end;
 
 procedure TTestShake_128.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
   inherited;
 end;
 
@@ -2070,8 +2070,8 @@ end;
 
 procedure TTestShake_256.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
   inherited;
 end;
 
@@ -2080,10 +2080,10 @@ end;
 procedure TTestCShake_128.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TXOF.CreateCShake_128(Nil, Nil, 128);
-  XofInstance := THashFactory.TXOF.CreateCShake_128(Nil, Nil, 8000) as IXOF;
+  HashInstance := THashFactory.TXOF.CreateCShake_128(nil, nil, 128);
+  XofInstance := THashFactory.TXOF.CreateCShake_128(nil, nil, 8000) as IXOF;
   XofInstanceShake := THashFactory.TXOF.CreateShake_128(8000) as IXOF;
-  XofInstanceTestVector := THashFactory.TXOF.CreateCShake_128(Nil,
+  XofInstanceTestVector := THashFactory.TXOF.CreateCShake_128(nil,
     TConverters.ConvertStringToBytes('Email Signature', TEncoding.UTF8),
     128) as IXOF;
   HashOfEmptyData := '7F9C2BA4E88F827D616045507605853E';
@@ -2108,10 +2108,10 @@ end;
 
 procedure TTestCShake_128.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
-  XofInstanceShake := Nil;
-  XofInstanceTestVector := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
+  XofInstanceShake := nil;
+  XofInstanceTestVector := nil;
   inherited;
 end;
 
@@ -2120,10 +2120,10 @@ end;
 procedure TTestCShake_256.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TXOF.CreateCShake_256(Nil, Nil, 256);
-  XofInstance := THashFactory.TXOF.CreateCShake_256(Nil, Nil, 8000) as IXOF;
+  HashInstance := THashFactory.TXOF.CreateCShake_256(nil, nil, 256);
+  XofInstance := THashFactory.TXOF.CreateCShake_256(nil, nil, 8000) as IXOF;
   XofInstanceShake := THashFactory.TXOF.CreateShake_256(8000) as IXOF;
-  XofInstanceTestVector := THashFactory.TXOF.CreateCShake_256(Nil,
+  XofInstanceTestVector := THashFactory.TXOF.CreateCShake_256(nil,
     TConverters.ConvertStringToBytes('Email Signature', TEncoding.UTF8),
     256) as IXOF;
   HashOfEmptyData :=
@@ -2155,10 +2155,10 @@ end;
 
 procedure TTestCShake_256.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
-  XofInstanceShake := Nil;
-  XofInstanceTestVector := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
+  XofInstanceShake := nil;
+  XofInstanceTestVector := nil;
   inherited;
 end;
 
@@ -2168,7 +2168,7 @@ procedure TTestSnefru_8_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSnefru_8_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '8617F366566A011837F4FB4BA5BEDEA2';
   HashOfDefaultData := '1EA32485C121D07D1BD22FC4EDCF554F';
   HashOfOnetoNine := '486D27B1F5F4A20DEE14CC466EDA9069';
@@ -2179,8 +2179,8 @@ end;
 
 procedure TTestSnefru_8_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2190,7 +2190,7 @@ procedure TTestSnefru_8_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateSnefru_8_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '8617F366566A011837F4FB4BA5BEDEA2B892F3ED8B894023D16AE344B2BE5881';
   HashOfDefaultData :=
@@ -2207,8 +2207,8 @@ end;
 
 procedure TTestSnefru_8_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2218,7 +2218,7 @@ procedure TTestTiger_3_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_3_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '3293AC630C13F0245F92BBB1766E1616';
   HashOfDefaultData := 'C76C85CE853F6E9858B507DA64E33DA2';
   HashOfOnetoNine := '0672665140A491BB35040AA9943D769A';
@@ -2229,8 +2229,8 @@ end;
 
 procedure TTestTiger_3_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2240,7 +2240,7 @@ procedure TTestTiger_4_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_4_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '24CC78A7F6FF3546E7984E59695CA13D';
   HashOfDefaultData := '42CAAEB3A7218E379A78E4F1F7FBADA4';
   HashOfOnetoNine := 'D9902D13011BD217DE965A3BA709F5CE';
@@ -2251,8 +2251,8 @@ end;
 
 procedure TTestTiger_4_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2262,7 +2262,7 @@ procedure TTestTiger_5_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_5_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'E765EBE4C351724A1B99F96F2D7E62C9';
   HashOfDefaultData := 'D6B8DCEA252160A4CBBF6A57DA9ABA78';
   HashOfOnetoNine := 'BCCCB6421B3EC291A062A33DFF21BA76';
@@ -2273,8 +2273,8 @@ end;
 
 procedure TTestTiger_5_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2284,7 +2284,7 @@ procedure TTestTiger_3_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_3_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '3293AC630C13F0245F92BBB1766E16167A4E5849';
   HashOfDefaultData := 'C76C85CE853F6E9858B507DA64E33DA27DE49F86';
   HashOfOnetoNine := '0672665140A491BB35040AA9943D769A47BE83FE';
@@ -2297,8 +2297,8 @@ end;
 
 procedure TTestTiger_3_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2308,7 +2308,7 @@ procedure TTestTiger_4_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_4_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '24CC78A7F6FF3546E7984E59695CA13D804E0B68';
   HashOfDefaultData := '42CAAEB3A7218E379A78E4F1F7FBADA432E1D4B6';
   HashOfOnetoNine := 'D9902D13011BD217DE965A3BA709F5CE7E75ED2C';
@@ -2321,8 +2321,8 @@ end;
 
 procedure TTestTiger_4_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2332,7 +2332,7 @@ procedure TTestTiger_5_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_5_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'E765EBE4C351724A1B99F96F2D7E62C9AACBE64C';
   HashOfDefaultData := 'D6B8DCEA252160A4CBBF6A57DA9ABA78E4564864';
   HashOfOnetoNine := 'BCCCB6421B3EC291A062A33DFF21BA764596C58E';
@@ -2345,8 +2345,8 @@ end;
 
 procedure TTestTiger_5_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2356,7 +2356,7 @@ procedure TTestTiger_3_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_3_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '3293AC630C13F0245F92BBB1766E16167A4E58492DDE73F3';
   HashOfDefaultData := 'C76C85CE853F6E9858B507DA64E33DA27DE49F8601F6A830';
   HashOfOnetoNine := '0672665140A491BB35040AA9943D769A47BE83FEF2126E50';
@@ -2369,8 +2369,8 @@ end;
 
 procedure TTestTiger_3_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2380,7 +2380,7 @@ procedure TTestTiger_4_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_4_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '24CC78A7F6FF3546E7984E59695CA13D804E0B686E255194';
   HashOfDefaultData := '42CAAEB3A7218E379A78E4F1F7FBADA432E1D4B6A41827B0';
   HashOfOnetoNine := 'D9902D13011BD217DE965A3BA709F5CE7E75ED2CB791FEA6';
@@ -2393,8 +2393,8 @@ end;
 
 procedure TTestTiger_4_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2404,7 +2404,7 @@ procedure TTestTiger_5_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger_5_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'E765EBE4C351724A1B99F96F2D7E62C9AACBE64C63B5BCA2';
   HashOfDefaultData := 'D6B8DCEA252160A4CBBF6A57DA9ABA78E45648645715E3CE';
   HashOfOnetoNine := 'BCCCB6421B3EC291A062A33DFF21BA764596C58E30854A92';
@@ -2417,8 +2417,8 @@ end;
 
 procedure TTestTiger_5_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2428,7 +2428,7 @@ procedure TTestTiger2_3_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_3_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4441BE75F6018773C206C22745374B92';
   HashOfDefaultData := 'DEB1924D290E3D5567792A8171BFC44F';
   HashOfOnetoNine := '82FAF69673762B9FD8A0C902BDB395C1';
@@ -2439,8 +2439,8 @@ end;
 
 procedure TTestTiger2_3_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2450,7 +2450,7 @@ procedure TTestTiger2_4_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_4_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '6A7201A47AAC2065913811175553489A';
   HashOfDefaultData := '22EE5BFE174B8C1C23361306C3E8F32C';
   HashOfOnetoNine := '75B7D71ACD40FE5B5D3263C1F68F4CF5';
@@ -2461,8 +2461,8 @@ end;
 
 procedure TTestTiger2_4_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2472,7 +2472,7 @@ procedure TTestTiger2_5_128.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_5_128();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '61C657CC0C3C147ED90779B36A1E811F';
   HashOfDefaultData := '7F71F95B346733E7022D4B85BDA9C51E';
   HashOfOnetoNine := 'F720446C9BFDC8479D9FA53BC8B9144F';
@@ -2483,8 +2483,8 @@ end;
 
 procedure TTestTiger2_5_128.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2494,7 +2494,7 @@ procedure TTestTiger2_3_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_3_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4441BE75F6018773C206C22745374B924AA8313F';
   HashOfDefaultData := 'DEB1924D290E3D5567792A8171BFC44F70B5CD13';
   HashOfOnetoNine := '82FAF69673762B9FD8A0C902BDB395C12B0CBDDC';
@@ -2507,8 +2507,8 @@ end;
 
 procedure TTestTiger2_3_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2518,7 +2518,7 @@ procedure TTestTiger2_4_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_4_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '6A7201A47AAC2065913811175553489ADD0F8B99';
   HashOfDefaultData := '22EE5BFE174B8C1C23361306C3E8F32C92075577';
   HashOfOnetoNine := '75B7D71ACD40FE5B5D3263C1F68F4CF5A5DA963B';
@@ -2531,8 +2531,8 @@ end;
 
 procedure TTestTiger2_4_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2542,7 +2542,7 @@ procedure TTestTiger2_5_160.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_5_160();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '61C657CC0C3C147ED90779B36A1E811F1D27F406';
   HashOfDefaultData := '7F71F95B346733E7022D4B85BDA9C51E904825F7';
   HashOfOnetoNine := 'F720446C9BFDC8479D9FA53BC8B9144FC3FE42ED';
@@ -2555,8 +2555,8 @@ end;
 
 procedure TTestTiger2_5_160.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2566,7 +2566,7 @@ procedure TTestTiger2_3_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_3_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '4441BE75F6018773C206C22745374B924AA8313FEF919F41';
   HashOfDefaultData := 'DEB1924D290E3D5567792A8171BFC44F70B5CD13480D6D5C';
   HashOfOnetoNine := '82FAF69673762B9FD8A0C902BDB395C12B0CBDDC66957838';
@@ -2579,8 +2579,8 @@ end;
 
 procedure TTestTiger2_3_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2590,7 +2590,7 @@ procedure TTestTiger2_4_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_4_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '6A7201A47AAC2065913811175553489ADD0F8B99E65A0955';
   HashOfDefaultData := '22EE5BFE174B8C1C23361306C3E8F32C92075577F9115C2A';
   HashOfOnetoNine := '75B7D71ACD40FE5B5D3263C1F68F4CF5A5DA963B39413ACA';
@@ -2603,8 +2603,8 @@ end;
 
 procedure TTestTiger2_4_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2614,7 +2614,7 @@ procedure TTestTiger2_5_192.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateTiger2_5_192();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := '61C657CC0C3C147ED90779B36A1E811F1D27F406E3F37010';
   HashOfDefaultData := '7F71F95B346733E7022D4B85BDA9C51E904825F73AF0E8AE';
   HashOfOnetoNine := 'F720446C9BFDC8479D9FA53BC8B9144FC3FE42ED1440C213';
@@ -2627,8 +2627,8 @@ end;
 
 procedure TTestTiger2_5_192.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2638,7 +2638,7 @@ procedure TTestWhirlPool.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateWhirlPool();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '19FA61D75522A4669B44E39C1D2E1726C530232130D407F89AFEE0964997F7A73E83BE698B288FEBCF88E3E03C4F0757EA8964E59B63D93708B138CC42A66EB3';
   HashOfDefaultData :=
@@ -2655,8 +2655,8 @@ end;
 
 procedure TTestWhirlPool.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2670,58 +2670,58 @@ const
   INNER_SIZE = Byte(64);
 var
   LBuffer: TBytes;
-  Blake2BTreeConfigh00, Blake2BTreeConfigh01, Blake2BTreeConfigh10
+  LBlake2BTreeConfigH00, LBlake2BTreeConfigH01, LBlake2BTreeConfigH10
     : IBlake2BTreeConfig;
-  h00, h01, h10: IHash;
+  LH00, LH01, LH10: IHash;
 begin
-  LBuffer := Nil;
+  LBuffer := nil;
   System.SetLength(LBuffer, 6000);
   // Left leaf
-  Blake2BTreeConfigh00 := TBlake2BTreeConfig.Create();
-  Blake2BTreeConfigh00.FanOut := FAN_OUT;
-  Blake2BTreeConfigh00.MaxDepth := DEPTH;
-  Blake2BTreeConfigh00.LeafSize := LEAF_SIZE;
-  Blake2BTreeConfigh00.InnerHashSize := INNER_SIZE;
-  Blake2BTreeConfigh00.NodeOffset := 0;
-  Blake2BTreeConfigh00.NodeDepth := 0;
-  Blake2BTreeConfigh00.IsLastNode := False;
-  h00 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
-    as IBlake2BConfig, Blake2BTreeConfigh00);
-  h00.Initialize;
+  LBlake2BTreeConfigH00 := TBlake2BTreeConfig.Create();
+  LBlake2BTreeConfigH00.FanOut := FAN_OUT;
+  LBlake2BTreeConfigH00.MaxDepth := DEPTH;
+  LBlake2BTreeConfigH00.LeafSize := LEAF_SIZE;
+  LBlake2BTreeConfigH00.InnerHashSize := INNER_SIZE;
+  LBlake2BTreeConfigH00.NodeOffset := 0;
+  LBlake2BTreeConfigH00.NodeDepth := 0;
+  LBlake2BTreeConfigH00.IsLastNode := False;
+  LH00 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
+    as IBlake2BConfig, LBlake2BTreeConfigH00);
+  LH00.Initialize;
 
   // Right leaf
-  Blake2BTreeConfigh01 := TBlake2BTreeConfig.Create();
-  Blake2BTreeConfigh01.FanOut := FAN_OUT;
-  Blake2BTreeConfigh01.MaxDepth := DEPTH;
-  Blake2BTreeConfigh01.LeafSize := LEAF_SIZE;
-  Blake2BTreeConfigh01.InnerHashSize := INNER_SIZE;
-  Blake2BTreeConfigh01.NodeOffset := 1;
-  Blake2BTreeConfigh01.NodeDepth := 0;
-  Blake2BTreeConfigh01.IsLastNode := True;
-  h01 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
-    as IBlake2BConfig, Blake2BTreeConfigh01);
-  h01.Initialize;
+  LBlake2BTreeConfigH01 := TBlake2BTreeConfig.Create();
+  LBlake2BTreeConfigH01.FanOut := FAN_OUT;
+  LBlake2BTreeConfigH01.MaxDepth := DEPTH;
+  LBlake2BTreeConfigH01.LeafSize := LEAF_SIZE;
+  LBlake2BTreeConfigH01.InnerHashSize := INNER_SIZE;
+  LBlake2BTreeConfigH01.NodeOffset := 1;
+  LBlake2BTreeConfigH01.NodeDepth := 0;
+  LBlake2BTreeConfigH01.IsLastNode := True;
+  LH01 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create()
+    as IBlake2BConfig, LBlake2BTreeConfigH01);
+  LH01.Initialize;
 
   // Root node
-  Blake2BTreeConfigh10 := TBlake2BTreeConfig.Create();
-  Blake2BTreeConfigh10.FanOut := FAN_OUT;
-  Blake2BTreeConfigh10.MaxDepth := DEPTH;
-  Blake2BTreeConfigh10.LeafSize := LEAF_SIZE;
-  Blake2BTreeConfigh10.InnerHashSize := INNER_SIZE;
-  Blake2BTreeConfigh10.NodeOffset := 0;
-  Blake2BTreeConfigh10.NodeDepth := 1;
-  Blake2BTreeConfigh10.IsLastNode := True;
-  h10 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create(32)
-    as IBlake2BConfig, Blake2BTreeConfigh10);
-  h10.Initialize;
+  LBlake2BTreeConfigH10 := TBlake2BTreeConfig.Create();
+  LBlake2BTreeConfigH10.FanOut := FAN_OUT;
+  LBlake2BTreeConfigH10.MaxDepth := DEPTH;
+  LBlake2BTreeConfigH10.LeafSize := LEAF_SIZE;
+  LBlake2BTreeConfigH10.InnerHashSize := INNER_SIZE;
+  LBlake2BTreeConfigH10.NodeOffset := 0;
+  LBlake2BTreeConfigH10.NodeDepth := 1;
+  LBlake2BTreeConfigH10.IsLastNode := True;
+  LH10 := THashFactory.TCrypto.CreateBlake2B(TBlake2BConfig.Create(32)
+    as IBlake2BConfig, LBlake2BTreeConfigH10);
+  LH10.Initialize;
 
-  h10.TransformBytes(h00.ComputeBytes(System.Copy(LBuffer, 0, LEAF_SIZE))
+  LH10.TransformBytes(LH00.ComputeBytes(System.Copy(LBuffer, 0, LEAF_SIZE))
     .GetBytes());
 
-  h10.TransformBytes(h01.ComputeBytes(System.Copy(LBuffer, LEAF_SIZE,
+  LH10.TransformBytes(LH01.ComputeBytes(System.Copy(LBuffer, LEAF_SIZE,
     UInt32(System.Length(LBuffer)) - LEAF_SIZE)).GetBytes());
 
-  ActualString := h10.TransformFinal().ToString();
+  ActualString := LH10.TransformFinal().ToString();
   ExpectedString := Blake2BTreeHashingMode;
 
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
@@ -2739,7 +2739,7 @@ begin
   begin
     LConfigNoKeyed := TBlake2BConfig.Create(LIdx);
     LConfigNullKeyed := TBlake2BConfig.Create(LIdx);
-    LConfigNullKeyed.Key := Nil;
+    LConfigNullKeyed.Key := nil;
 
     ExpectedString := THashFactory.TCrypto.CreateBlake2B(LConfigNoKeyed)
       .ComputeBytes(LMainData).ToString();
@@ -2762,7 +2762,7 @@ begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateBlake2B();
   LConfig := TBlake2BConfig.Create();
-  LKey := Nil;
+  LKey := nil;
   System.SetLength(LKey, 64);
 
   for LIdx := 0 to 63 do
@@ -2772,7 +2772,7 @@ begin
 
   LConfig.Key := LKey;
   HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2B(LConfig);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '786A02F742015903C6C6FD852552D272912F4740E15847618A86E217F71F5419D25E1031AFEE585313896444934EB04B903A685B1448B755D56F701AFE9BE2CE';
   HashOfDefaultData :=
@@ -2792,9 +2792,9 @@ end;
 
 procedure TTestBlake2B.TearDown;
 begin
-  HashInstance := Nil;
-  HashInstanceWithKey := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HashInstanceWithKey := nil;
+  HmacInstance := nil;
   inherited;
 
 end;
@@ -2809,58 +2809,58 @@ const
   INNER_SIZE = Byte(32);
 var
   LBuffer: TBytes;
-  Blake2STreeConfigh00, Blake2STreeConfigh01, Blake2STreeConfigh10
+  LBlake2STreeConfigH00, LBlake2STreeConfigH01, LBlake2STreeConfigH10
     : IBlake2STreeConfig;
-  h00, h01, h10: IHash;
+  LH00, LH01, LH10: IHash;
 begin
-  LBuffer := Nil;
+  LBuffer := nil;
   System.SetLength(LBuffer, 6000);
   // Left leaf
-  Blake2STreeConfigh00 := TBlake2STreeConfig.Create();
-  Blake2STreeConfigh00.FanOut := FAN_OUT;
-  Blake2STreeConfigh00.MaxDepth := DEPTH;
-  Blake2STreeConfigh00.LeafSize := LEAF_SIZE;
-  Blake2STreeConfigh00.InnerHashSize := INNER_SIZE;
-  Blake2STreeConfigh00.NodeOffset := 0;
-  Blake2STreeConfigh00.NodeDepth := 0;
-  Blake2STreeConfigh00.IsLastNode := False;
-  h00 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
-    as IBlake2SConfig, Blake2STreeConfigh00);
-  h00.Initialize;
+  LBlake2STreeConfigH00 := TBlake2STreeConfig.Create();
+  LBlake2STreeConfigH00.FanOut := FAN_OUT;
+  LBlake2STreeConfigH00.MaxDepth := DEPTH;
+  LBlake2STreeConfigH00.LeafSize := LEAF_SIZE;
+  LBlake2STreeConfigH00.InnerHashSize := INNER_SIZE;
+  LBlake2STreeConfigH00.NodeOffset := 0;
+  LBlake2STreeConfigH00.NodeDepth := 0;
+  LBlake2STreeConfigH00.IsLastNode := False;
+  LH00 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
+    as IBlake2SConfig, LBlake2STreeConfigH00);
+  LH00.Initialize;
 
   // Right leaf
-  Blake2STreeConfigh01 := TBlake2STreeConfig.Create();
-  Blake2STreeConfigh01.FanOut := FAN_OUT;
-  Blake2STreeConfigh01.MaxDepth := DEPTH;
-  Blake2STreeConfigh01.LeafSize := LEAF_SIZE;
-  Blake2STreeConfigh01.InnerHashSize := INNER_SIZE;
-  Blake2STreeConfigh01.NodeOffset := 1;
-  Blake2STreeConfigh01.NodeDepth := 0;
-  Blake2STreeConfigh01.IsLastNode := True;
-  h01 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
-    as IBlake2SConfig, Blake2STreeConfigh01);
-  h01.Initialize;
+  LBlake2STreeConfigH01 := TBlake2STreeConfig.Create();
+  LBlake2STreeConfigH01.FanOut := FAN_OUT;
+  LBlake2STreeConfigH01.MaxDepth := DEPTH;
+  LBlake2STreeConfigH01.LeafSize := LEAF_SIZE;
+  LBlake2STreeConfigH01.InnerHashSize := INNER_SIZE;
+  LBlake2STreeConfigH01.NodeOffset := 1;
+  LBlake2STreeConfigH01.NodeDepth := 0;
+  LBlake2STreeConfigH01.IsLastNode := True;
+  LH01 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create()
+    as IBlake2SConfig, LBlake2STreeConfigH01);
+  LH01.Initialize;
 
   // Root node
-  Blake2STreeConfigh10 := TBlake2STreeConfig.Create();
-  Blake2STreeConfigh10.FanOut := FAN_OUT;
-  Blake2STreeConfigh10.MaxDepth := DEPTH;
-  Blake2STreeConfigh10.LeafSize := LEAF_SIZE;
-  Blake2STreeConfigh10.InnerHashSize := INNER_SIZE;
-  Blake2STreeConfigh10.NodeOffset := 0;
-  Blake2STreeConfigh10.NodeDepth := 1;
-  Blake2STreeConfigh10.IsLastNode := True;
-  h10 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create(16)
-    as IBlake2SConfig, Blake2STreeConfigh10);
-  h10.Initialize;
+  LBlake2STreeConfigH10 := TBlake2STreeConfig.Create();
+  LBlake2STreeConfigH10.FanOut := FAN_OUT;
+  LBlake2STreeConfigH10.MaxDepth := DEPTH;
+  LBlake2STreeConfigH10.LeafSize := LEAF_SIZE;
+  LBlake2STreeConfigH10.InnerHashSize := INNER_SIZE;
+  LBlake2STreeConfigH10.NodeOffset := 0;
+  LBlake2STreeConfigH10.NodeDepth := 1;
+  LBlake2STreeConfigH10.IsLastNode := True;
+  LH10 := THashFactory.TCrypto.CreateBlake2S(TBlake2SConfig.Create(16)
+    as IBlake2SConfig, LBlake2STreeConfigH10);
+  LH10.Initialize;
 
-  h10.TransformBytes(h00.ComputeBytes(System.Copy(LBuffer, 0, LEAF_SIZE))
+  LH10.TransformBytes(LH00.ComputeBytes(System.Copy(LBuffer, 0, LEAF_SIZE))
     .GetBytes());
 
-  h10.TransformBytes(h01.ComputeBytes(System.Copy(LBuffer, LEAF_SIZE,
+  LH10.TransformBytes(LH01.ComputeBytes(System.Copy(LBuffer, LEAF_SIZE,
     UInt32(System.Length(LBuffer)) - LEAF_SIZE)).GetBytes());
 
-  ActualString := h10.TransformFinal().ToString();
+  ActualString := LH10.TransformFinal().ToString();
   ExpectedString := Blake2STreeHashingMode;
 
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
@@ -2878,7 +2878,7 @@ begin
   begin
     LConfigNoKeyed := TBlake2SConfig.Create(LIdx);
     LConfigNullKeyed := TBlake2SConfig.Create(LIdx);
-    LConfigNullKeyed.Key := Nil;
+    LConfigNullKeyed.Key := nil;
 
     ExpectedString := THashFactory.TCrypto.CreateBlake2S(LConfigNoKeyed)
       .ComputeBytes(LMainData).ToString();
@@ -2901,7 +2901,7 @@ begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateBlake2S();
   LConfig := TBlake2SConfig.Create();
-  LKey := Nil;
+  LKey := nil;
   System.SetLength(LKey, 32);
 
   for LIdx := 0 to 31 do
@@ -2911,7 +2911,7 @@ begin
 
   LConfig.Key := LKey;
   HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2S(LConfig);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '69217A3079908094E11121D042354A7C1F55B6482CA1A51E1B250DFD1ED0EEF9';
   HashOfDefaultData :=
@@ -2931,9 +2931,9 @@ end;
 
 procedure TTestBlake2S.TearDown;
 begin
-  HashInstance := Nil;
-  HashInstanceWithKey := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HashInstanceWithKey := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2943,7 +2943,7 @@ procedure TTestKeccak_224.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateKeccak_224();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData := 'F71837502BA8E10837BDD8D365ADB85591895602FC552B48B7390ABD';
   HashOfDefaultData :=
     '1BA678212F840E95F076B4E3E75310D4DA4308E04396E07EF1683ACE';
@@ -2957,8 +2957,8 @@ end;
 
 procedure TTestKeccak_224.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2968,7 +2968,7 @@ procedure TTestKeccak_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateKeccak_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'C5D2460186F7233C927E7DB2DCC703C0E500B653CA82273B7BFAD8045D85A470';
   HashOfDefaultData :=
@@ -2985,8 +2985,8 @@ end;
 
 procedure TTestKeccak_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -2996,7 +2996,7 @@ procedure TTestKeccak_288.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateKeccak_288();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '6753E3380C09E385D0339EB6B050A68F66CFD60A73476E6FD6ADEB72F5EDD7C6F04A5D01';
   HashOfDefaultData :=
@@ -3013,8 +3013,8 @@ end;
 
 procedure TTestKeccak_288.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3024,7 +3024,7 @@ procedure TTestKeccak_384.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateKeccak_384();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '2C23146A63A29ACF99E73B88F8C24EAA7DC60AA771780CCC006AFBFA8FE2479B2DD2B21362337441AC12B515911957FF';
   HashOfDefaultData :=
@@ -3041,8 +3041,8 @@ end;
 
 procedure TTestKeccak_384.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3052,7 +3052,7 @@ procedure TTestKeccak_512.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateKeccak_512();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '0EAB42DE4C3CEB9235FC91ACFFE746B29C29A8C366B7C60E4E67C466F36A4304C00FA9CAF9D87976BA469BCBE06713B435F091EF2769FB160CDAB33D3670680E';
   HashOfDefaultData :=
@@ -3069,8 +3069,8 @@ end;
 
 procedure TTestKeccak_512.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3080,7 +3080,7 @@ procedure TTestGOST3411_2012_256.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGOST3411_2012_256();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '3F539A213E97C802CC229D474C6AA32A825A360B2A933A949FD925208D9CE1BB';
   HashOfDefaultData :=
@@ -3097,8 +3097,8 @@ end;
 
 procedure TTestGOST3411_2012_256.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3108,7 +3108,7 @@ procedure TTestGOST3411_2012_512.SetUp;
 begin
   inherited;
   HashInstance := THashFactory.TCrypto.CreateGOST3411_2012_512();
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '8E945DA209AA869F0455928529BCAE4679E9873AB707B55315F56CEB98BEF0A7362F715528356EE83CDA5F2AAC4C6AD2BA3A715C1BCD81CB8E9F90BF4C1C1A8A';
   HashOfDefaultData :=
@@ -3125,8 +3125,8 @@ end;
 
 procedure TTestGOST3411_2012_512.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3135,8 +3135,8 @@ end;
 procedure TTestBlake2XS.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TXOF.CreateBlake2XS(Nil, 256);
-  XofInstance := THashFactory.TXOF.CreateBlake2XS(Nil, 8000) as IXOF;
+  HashInstance := THashFactory.TXOF.CreateBlake2XS(nil, 256);
+  XofInstance := THashFactory.TXOF.CreateBlake2XS(nil, 8000) as IXOF;
   HashOfEmptyData :=
     'F4B358457E5563FB54DF3060AEC26EA3AA1C959CF89F55A22538117ECF708BFC';
   HashOfDefaultData :=
@@ -3164,8 +3164,8 @@ end;
 
 procedure TTestBlake2XS.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
   inherited;
 end;
 
@@ -3230,8 +3230,8 @@ end;
 procedure TTestBlake2XB.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TXOF.CreateBlake2XB(Nil, 512);
-  XofInstance := THashFactory.TXOF.CreateBlake2XB(Nil, 8000) as IXOF;
+  HashInstance := THashFactory.TXOF.CreateBlake2XB(nil, 512);
+  XofInstance := THashFactory.TXOF.CreateBlake2XB(nil, 8000) as IXOF;
   HashOfEmptyData :=
     'C5EF3D8845B9B2BA8EA28E9326C9E46E7A5843AD42BACAF927798BEAF554A43CA0830CCF8BB4A24CE1B1D82BD2DA971AFB2BE73919CC5FFF8E7C6A20F87284FA';
   HashOfDefaultData :=
@@ -3259,8 +3259,8 @@ end;
 
 procedure TTestBlake2XB.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
   inherited;
 end;
 
@@ -3325,8 +3325,8 @@ end;
 procedure TTestBlake3.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TCrypto.CreateBlake3_256(Nil);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HashInstance := THashFactory.TCrypto.CreateBlake3_256(nil);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
 
   HashOfEmptyData :=
     'AF1349B9F5F9A1A6A0404DEA36DCC9499BCB25C9ADC112B7CC9A93CAE41F3262';
@@ -3344,8 +3344,8 @@ end;
 
 procedure TTestBlake3.TearDown;
 begin
-  HashInstance := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -3354,8 +3354,8 @@ end;
 procedure TTestBlake3XOF.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TXOF.CreateBlake3XOF(Nil, 512);
-  XofInstance := THashFactory.TXOF.CreateBlake3XOF(Nil, 8000) as IXOF;
+  HashInstance := THashFactory.TXOF.CreateBlake3XOF(nil, 512);
+  XofInstance := THashFactory.TXOF.CreateBlake3XOF(nil, 8000) as IXOF;
   HashOfEmptyData :=
     'AF1349B9F5F9A1A6A0404DEA36DCC9499BCB25C9ADC112B7CC9A93CAE41F3262E00F03E7B69AF26B7FAAF09FCD333050338DDFE085B8CC869CA98B206C08243A';
   HashOfDefaultData :=
@@ -3384,8 +3384,8 @@ end;
 
 procedure TTestBlake3XOF.TearDown;
 begin
-  HashInstance := Nil;
-  XofInstance := Nil;
+  HashInstance := nil;
+  XofInstance := nil;
   inherited;
 end;
 
@@ -3408,7 +3408,7 @@ begin
   LCtxAsString := 'BLAKE3 2019-12-27 16:29:52 test vectors context';
 
   LKey := TConverters.ConvertStringToBytes(LKeyAsString, TEncoding.UTF8);
-  LNilKey := Nil;
+  LNilKey := nil;
   LCtx := TConverters.ConvertStringToBytes(LCtxAsString, TEncoding.UTF8);
 
   for LIdx := 0 to System.Pred
@@ -3545,8 +3545,8 @@ begin
 
   LClone := LHash.Clone();
 
-  LActualResult := Nil;
-  LActualResultClone := Nil;
+  LActualResult := nil;
+  LActualResultClone := nil;
 
   if IsXOF then
   begin
@@ -3589,7 +3589,7 @@ var
   LTemp: TBytes;
 begin
   inherited;
-  LTemp := Nil;
+  LTemp := nil;
   System.SetLength(LTemp, 200);
   for LIdx := 0 to 199 do
   begin
@@ -3685,8 +3685,8 @@ begin
 
   LClone := LHash.Clone();
 
-  LActualResult := Nil;
-  LActualResultClone := Nil;
+  LActualResult := nil;
+  LActualResultClone := nil;
 
   if IsXOF then
   begin
@@ -3729,7 +3729,7 @@ var
   LTemp: TBytes;
 begin
   inherited;
-  LTemp := Nil;
+  LTemp := nil;
   System.SetLength(LTemp, 200);
   for LIdx := 0 to 199 do
   begin
@@ -3974,8 +3974,8 @@ var
   LKey: TBytes;
 begin
   inherited;
-  HashInstance := THashFactory.TCrypto.CreateBlake2BP(64, Nil);
-  LKey := Nil;
+  HashInstance := THashFactory.TCrypto.CreateBlake2BP(64, nil);
+  LKey := nil;
   System.SetLength(LKey, 64);
 
   for LIdx := 0 to 63 do
@@ -3984,7 +3984,7 @@ begin
   end;
 
   HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2BP(64, LKey);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'B5EF811A8038F70B628FA8B294DAAE7492B1EBE343A80EAABBF1F6AE664DD67B9D90B0120791EAB81DC96985F28849F6A305186A85501B405114BFA678DF9380';
   HashOfDefaultData :=
@@ -4004,9 +4004,9 @@ end;
 
 procedure TTestBlake2BP.TearDown;
 begin
-  HashInstance := Nil;
-  HashInstanceWithKey := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HashInstanceWithKey := nil;
+  HmacInstance := nil;
   inherited;
 end;
 
@@ -4018,8 +4018,8 @@ var
   LKey: TBytes;
 begin
   inherited;
-  HashInstance := THashFactory.TCrypto.CreateBlake2SP(32, Nil);
-  LKey := Nil;
+  HashInstance := THashFactory.TCrypto.CreateBlake2SP(32, nil);
+  LKey := nil;
   System.SetLength(LKey, 32);
 
   for LIdx := 0 to 31 do
@@ -4028,7 +4028,7 @@ begin
   end;
 
   HashInstanceWithKey := THashFactory.TCrypto.CreateBlake2SP(32, LKey);
-  HMACInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
+  HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     'DD0E891776933F43C7D032B08A917E25741F8AA9A12C12E1CAC8801500F2CA4F';
   HashOfDefaultData :=
@@ -4048,9 +4048,9 @@ end;
 
 procedure TTestBlake2SP.TearDown;
 begin
-  HashInstance := Nil;
-  HashInstanceWithKey := Nil;
-  HMACInstance := Nil;
+  HashInstance := nil;
+  HashInstanceWithKey := nil;
+  HmacInstance := nil;
   inherited;
 end;
 

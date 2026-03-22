@@ -32,7 +32,7 @@ implementation
 
 constructor TSuperFast.Create;
 begin
-  Inherited Create(4, 4);
+  inherited Create(4, 4);
 end;
 
 function TSuperFast.Clone(): IHash;
@@ -42,21 +42,21 @@ begin
   LHashInstance := TSuperFast.Create();
   FBuffer.Position := 0;
   LHashInstance.FBuffer.CopyFrom(FBuffer, FBuffer.Size);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 function TSuperFast.ComputeAggregatedBytes(const AData: THashLibByteArray)
   : IHashResult;
 var
-  LHash, LTemp, U1: UInt32;
-  LLength, LCurrentIndex, I1, I2: Int32;
+  LHash, LTemp, LU1: UInt32;
+  LLength, LCurrentIndex, LI1, LI2: Int32;
 begin
   LLength := System.length(AData);
 
   if (LLength = 0) then
   begin
-    result := THashResult.Create(Int32(0));
+    Result := THashResult.Create(Int32(0));
     Exit;
   end;
 
@@ -66,14 +66,14 @@ begin
 
   while (LLength >= 4) do
   begin
-    I1 := AData[LCurrentIndex];
+    LI1 := AData[LCurrentIndex];
     System.Inc(LCurrentIndex);
-    I2 := AData[LCurrentIndex] shl 8;
+    LI2 := AData[LCurrentIndex] shl 8;
     System.Inc(LCurrentIndex);
-    LHash := UInt16(LHash + UInt32(I1 or I2));
-    U1 := UInt32(AData[LCurrentIndex]);
+    LHash := UInt16(LHash + UInt32(LI1 or LI2));
+    LU1 := UInt32(AData[LCurrentIndex]);
     System.Inc(LCurrentIndex);
-    LTemp := UInt32((Byte(U1) or AData[LCurrentIndex] shl 8) shl 11) xor LHash;
+    LTemp := UInt32((Byte(LU1) or AData[LCurrentIndex] shl 8) shl 11) xor LHash;
     System.Inc(LCurrentIndex);
     LHash := (LHash shl 16) xor LTemp;
     LHash := LHash + (LHash shr 11);
@@ -84,11 +84,11 @@ begin
   case LLength of
     3:
       begin
-        I1 := AData[LCurrentIndex];
+        LI1 := AData[LCurrentIndex];
         System.Inc(LCurrentIndex);
-        I2 := AData[LCurrentIndex];
+        LI2 := AData[LCurrentIndex];
         System.Inc(LCurrentIndex);
-        LHash := LHash + UInt16(I1 or I2 shl 8);
+        LHash := LHash + UInt16(LI1 or LI2 shl 8);
         LHash := LHash xor (LHash shl 16);
         LHash := LHash xor (UInt32(AData[LCurrentIndex]) shl 18);
         LHash := LHash + (LHash shr 11);
@@ -96,19 +96,19 @@ begin
 
     2:
       begin
-        I1 := AData[LCurrentIndex];
+        LI1 := AData[LCurrentIndex];
         System.Inc(LCurrentIndex);
-        I2 := AData[LCurrentIndex];
-        LHash := LHash + UInt16(I1 or I2 shl 8);
+        LI2 := AData[LCurrentIndex];
+        LHash := LHash + UInt16(LI1 or LI2 shl 8);
         LHash := LHash xor (LHash shl 11);
         LHash := LHash + (LHash shr 17);
       end;
 
     1:
       begin
-        I1 := AData[LCurrentIndex];
+        LI1 := AData[LCurrentIndex];
 
-        LHash := LHash + UInt32(I1);
+        LHash := LHash + UInt32(LI1);
         LHash := LHash xor (LHash shl 10);
         LHash := LHash + (LHash shr 1);
       end;
@@ -122,7 +122,7 @@ begin
   LHash := LHash xor (LHash shl 25);
   LHash := LHash + (LHash shr 6);
 
-  result := THashResult.Create(LHash);
+  Result := THashResult.Create(LHash);
 end;
 
 end.

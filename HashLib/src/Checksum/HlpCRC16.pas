@@ -57,7 +57,7 @@ constructor TCRC16.Create(APolynomial, AInitial: UInt64;
   AIsInputReflected, AIsOutputReflected: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray);
 begin
-  Inherited Create(2, 1);
+  inherited Create(2, 1);
   FCRCAlgorithm := TCRC.Create(16, APolynomial, AInitial, AIsInputReflected,
     AIsOutputReflected, AOutputXor, ACheckValue, ANames);
 end;
@@ -75,14 +75,14 @@ end;
 
 function TCRC16.TransformFinal: IHashResult;
 begin
-  result := FCRCAlgorithm.TransformFinal();
+  Result := FCRCAlgorithm.TransformFinal();
 end;
 
 { TCRC16_BUYPASS }
 
 constructor TCRC16_BUYPASS.Create;
 begin
-  Inherited Create(TCRC16Polynomials.BUYPASS, $0000, false, false, $0000, $FEE8,
+  inherited Create(TCRC16Polynomials.BUYPASS, $0000, False, False, $0000, $FEE8,
     THashLibStringArray.Create('CRC-16/BUYPASS', 'CRC-16/VERIFONE',
     'CRC-16/UMTS'));
 end;

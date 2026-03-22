@@ -65,292 +65,292 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 procedure TGost.Compress(APtr: PCardinal);
 var
-  u0, u1, u2, u3, u4, u5, u6, u7, v0, v1, v2, v3, v4, v5, v6, v7, w0, w1, w2,
-    w3, w4, w5, w6, w7, key0, key1, key2, key3, key4, key5, key6, key7, r, l,
-    t: UInt32;
-  i: Int32;
-  s: array [0 .. 7] of UInt32;
+  LUWord0, LUWord1, LUWord2, LUWord3, LUWord4, LUWord5, LUWord6, LUWord7, LVWord0, LVWord1, LVWord2, LVWord3, LVWord4, LVWord5, LVWord6, LVWord7, LWWord0, LWWord1, LWWord2,
+    LWWord3, LWWord4, LWWord5, LWWord6, LWWord7, LKey0, LKey1, LKey2, LKey3, LKey4, LKey5, LKey6, LKey7, LRight, LLeft,
+    LTemp: UInt32;
+  LStep: Int32;
+  LScratch: array [0 .. 7] of UInt32;
 begin
-  u0 := FHash[0];
-  u1 := FHash[1];
-  u2 := FHash[2];
-  u3 := FHash[3];
-  u4 := FHash[4];
-  u5 := FHash[5];
-  u6 := FHash[6];
-  u7 := FHash[7];
+  LUWord0 := FHash[0];
+  LUWord1 := FHash[1];
+  LUWord2 := FHash[2];
+  LUWord3 := FHash[3];
+  LUWord4 := FHash[4];
+  LUWord5 := FHash[5];
+  LUWord6 := FHash[6];
+  LUWord7 := FHash[7];
 
-  v0 := APtr[0];
-  v1 := APtr[1];
-  v2 := APtr[2];
-  v3 := APtr[3];
-  v4 := APtr[4];
-  v5 := APtr[5];
-  v6 := APtr[6];
-  v7 := APtr[7];
+  LVWord0 := APtr[0];
+  LVWord1 := APtr[1];
+  LVWord2 := APtr[2];
+  LVWord3 := APtr[3];
+  LVWord4 := APtr[4];
+  LVWord5 := APtr[5];
+  LVWord6 := APtr[6];
+  LVWord7 := APtr[7];
 
-  i := 0;
+  LStep := 0;
 
-  while i < 8 do
+  while LStep < 8 do
   begin
-    w0 := u0 xor v0;
-    w1 := u1 xor v1;
-    w2 := u2 xor v2;
-    w3 := u3 xor v3;
-    w4 := u4 xor v4;
-    w5 := u5 xor v5;
-    w6 := u6 xor v6;
-    w7 := u7 xor v7;
+    LWWord0 := LUWord0 xor LVWord0;
+    LWWord1 := LUWord1 xor LVWord1;
+    LWWord2 := LUWord2 xor LVWord2;
+    LWWord3 := LUWord3 xor LVWord3;
+    LWWord4 := LUWord4 xor LVWord4;
+    LWWord5 := LUWord5 xor LVWord5;
+    LWWord6 := LUWord6 xor LVWord6;
+    LWWord7 := LUWord7 xor LVWord7;
 
-    key0 := UInt32(Byte(w0)) or (UInt32(Byte(w2)) shl 8) or
-      (UInt32(Byte(w4)) shl 16) or (UInt32(Byte(w6)) shl 24);
-    key1 := UInt32(Byte(w0 shr 8)) or (w2 and $0000FF00) or
-      ((w4 and $0000FF00) shl 8) or ((w6 and $0000FF00) shl 16);
-    key2 := UInt32(Byte(w0 shr 16)) or ((w2 and $00FF0000) shr 8) or
-      (w4 and $00FF0000) or ((w6 and $00FF0000) shl 8);
-    key3 := (w0 shr 24) or ((w2 and $FF000000) shr 16) or
-      ((w4 and $FF000000) shr 8) or (w6 and $FF000000);
-    key4 := UInt32(Byte(w1)) or ((w3 and $000000FF) shl 8) or
-      ((w5 and $000000FF) shl 16) or ((w7 and $000000FF) shl 24);
-    key5 := UInt32(Byte(w1 shr 8)) or (w3 and $0000FF00) or
-      ((w5 and $0000FF00) shl 8) or ((w7 and $0000FF00) shl 16);
-    key6 := UInt32(Byte(w1 shr 16)) or ((w3 and $00FF0000) shr 8) or
-      (w5 and $00FF0000) or ((w7 and $00FF0000) shl 8);
-    key7 := (w1 shr 24) or ((w3 and $FF000000) shr 16) or
-      ((w5 and $FF000000) shr 8) or (w7 and $FF000000);
+    LKey0 := UInt32(Byte(LWWord0)) or (UInt32(Byte(LWWord2)) shl 8) or
+      (UInt32(Byte(LWWord4)) shl 16) or (UInt32(Byte(LWWord6)) shl 24);
+    LKey1 := UInt32(Byte(LWWord0 shr 8)) or (LWWord2 and $0000FF00) or
+      ((LWWord4 and $0000FF00) shl 8) or ((LWWord6 and $0000FF00) shl 16);
+    LKey2 := UInt32(Byte(LWWord0 shr 16)) or ((LWWord2 and $00FF0000) shr 8) or
+      (LWWord4 and $00FF0000) or ((LWWord6 and $00FF0000) shl 8);
+    LKey3 := (LWWord0 shr 24) or ((LWWord2 and $FF000000) shr 16) or
+      ((LWWord4 and $FF000000) shr 8) or (LWWord6 and $FF000000);
+    LKey4 := UInt32(Byte(LWWord1)) or ((LWWord3 and $000000FF) shl 8) or
+      ((LWWord5 and $000000FF) shl 16) or ((LWWord7 and $000000FF) shl 24);
+    LKey5 := UInt32(Byte(LWWord1 shr 8)) or (LWWord3 and $0000FF00) or
+      ((LWWord5 and $0000FF00) shl 8) or ((LWWord7 and $0000FF00) shl 16);
+    LKey6 := UInt32(Byte(LWWord1 shr 16)) or ((LWWord3 and $00FF0000) shr 8) or
+      (LWWord5 and $00FF0000) or ((LWWord7 and $00FF0000) shl 8);
+    LKey7 := (LWWord1 shr 24) or ((LWWord3 and $FF000000) shr 16) or
+      ((LWWord5 and $FF000000) shr 8) or (LWWord7 and $FF000000);
 
-    r := FHash[i];
-    l := FHash[i + 1];
+    LRight := FHash[LStep];
+    LLeft := FHash[LStep + 1];
 
-    t := key0 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key1 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key2 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key3 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key4 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key5 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key6 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key7 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key0 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key1 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key2 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key3 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key4 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key5 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key6 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key7 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key0 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key1 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key2 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key3 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key4 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key5 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key6 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key7 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key7 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key6 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key5 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key4 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key3 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key2 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key1 + r;
-    l := l xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
-    t := key0 + l;
-    r := r xor (FSBox1[Byte(t)] xor FSBox2[Byte(t shr 8)] xor FSBox3
-      [Byte(t shr 16)] xor FSBox4[t shr 24]);
+    LTemp := LKey0 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey1 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey2 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey3 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey4 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey5 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey6 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey7 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey0 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey1 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey2 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey3 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey4 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey5 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey6 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey7 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey0 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey1 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey2 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey3 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey4 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey5 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey6 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey7 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey7 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey6 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey5 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey4 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey3 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey2 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey1 + LRight;
+    LLeft := LLeft xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
+    LTemp := LKey0 + LLeft;
+    LRight := LRight xor (FSBox1[Byte(LTemp)] xor FSBox2[Byte(LTemp shr 8)] xor FSBox3
+      [Byte(LTemp shr 16)] xor FSBox4[LTemp shr 24]);
 
-    t := r;
-    r := l;
-    l := t;
+    LTemp := LRight;
+    LRight := LLeft;
+    LLeft := LTemp;
 
-    s[i] := r;
-    s[i + 1] := l;
+    LScratch[LStep] := LRight;
+    LScratch[LStep + 1] := LLeft;
 
-    if (i = 6) then
+    if (LStep = 6) then
       break;
 
-    l := u0 xor u2;
-    r := u1 xor u3;
-    u0 := u2;
-    u1 := u3;
-    u2 := u4;
-    u3 := u5;
-    u4 := u6;
-    u5 := u7;
-    u6 := l;
-    u7 := r;
+    LLeft := LUWord0 xor LUWord2;
+    LRight := LUWord1 xor LUWord3;
+    LUWord0 := LUWord2;
+    LUWord1 := LUWord3;
+    LUWord2 := LUWord4;
+    LUWord3 := LUWord5;
+    LUWord4 := LUWord6;
+    LUWord5 := LUWord7;
+    LUWord6 := LLeft;
+    LUWord7 := LRight;
 
-    if (i = 2) then
+    if (LStep = 2) then
     begin
-      u0 := u0 xor $FF00FF00;
-      u1 := u1 xor $FF00FF00;
-      u2 := u2 xor $00FF00FF;
-      u3 := u3 xor $00FF00FF;
-      u4 := u4 xor $00FFFF00;
-      u5 := u5 xor $FF0000FF;
-      u6 := u6 xor $000000FF;
-      u7 := u7 xor $FF00FFFF;
+      LUWord0 := LUWord0 xor $FF00FF00;
+      LUWord1 := LUWord1 xor $FF00FF00;
+      LUWord2 := LUWord2 xor $00FF00FF;
+      LUWord3 := LUWord3 xor $00FF00FF;
+      LUWord4 := LUWord4 xor $00FFFF00;
+      LUWord5 := LUWord5 xor $FF0000FF;
+      LUWord6 := LUWord6 xor $000000FF;
+      LUWord7 := LUWord7 xor $FF00FFFF;
     end;
 
-    l := v0;
-    r := v2;
-    v0 := v4;
-    v2 := v6;
-    v4 := l xor r;
-    v6 := v0 xor r;
-    l := v1;
-    r := v3;
-    v1 := v5;
-    v3 := v7;
-    v5 := l xor r;
-    v7 := v1 xor r;
+    LLeft := LVWord0;
+    LRight := LVWord2;
+    LVWord0 := LVWord4;
+    LVWord2 := LVWord6;
+    LVWord4 := LLeft xor LRight;
+    LVWord6 := LVWord0 xor LRight;
+    LLeft := LVWord1;
+    LRight := LVWord3;
+    LVWord1 := LVWord5;
+    LVWord3 := LVWord7;
+    LVWord5 := LLeft xor LRight;
+    LVWord7 := LVWord1 xor LRight;
 
-    System.Inc(i, 2);
+    System.Inc(LStep, 2);
   end;
 
-  u0 := APtr[0] xor s[6];
-  u1 := APtr[1] xor s[7];
-  u2 := APtr[2] xor (s[0] shl 16) xor (s[0] shr 16) xor (s[0] and $FFFF)
-    xor (s[1] and $FFFF) xor (s[1] shr 16) xor (s[2] shl 16)
-    xor s[6] xor (s[6] shl 16) xor (s[7] and $FFFF0000) xor (s[7] shr 16);
-  u3 := APtr[3] xor (s[0] and $FFFF) xor (s[0] shl 16) xor (s[1] and $FFFF)
-    xor (s[1] shl 16) xor (s[1] shr 16) xor (s[2] shl 16) xor (s[2] shr 16)
-    xor (s[3] shl 16) xor s[6] xor (s[6] shl 16) xor (s[6] shr 16)
-    xor (s[7] and $FFFF) xor (s[7] shl 16) xor (s[7] shr 16);
-  u4 := APtr[4] xor (s[0] and $FFFF0000) xor (s[0] shl 16) xor (s[0] shr 16)
-    xor (s[1] and $FFFF0000) xor (s[1] shr 16) xor (s[2] shl 16)
-    xor (s[2] shr 16) xor (s[3] shl 16) xor (s[3] shr 16) xor (s[4] shl 16)
-    xor (s[6] shl 16) xor (s[6] shr 16) xor (s[7] and $FFFF) xor (s[7] shl 16)
-    xor (s[7] shr 16);
-  u5 := APtr[5] xor (s[0] shl 16) xor (s[0] shr 16) xor (s[0] and $FFFF0000)
-    xor (s[1] and $FFFF) xor s[2] xor (s[2] shr 16) xor (s[3] shl 16)
-    xor (s[3] shr 16) xor (s[4] shl 16) xor (s[4] shr 16) xor (s[5] shl 16)
-    xor (s[6] shl 16) xor (s[6] shr 16) xor (s[7] and $FFFF0000)
-    xor (s[7] shl 16) xor (s[7] shr 16);
-  u6 := APtr[6] xor s[0] xor (s[1] shr 16) xor (s[2] shl 16)
-    xor s[3] xor (s[3] shr 16) xor (s[4] shl 16) xor (s[4] shr 16)
-    xor (s[5] shl 16) xor (s[5] shr 16) xor s[6] xor (s[6] shl 16)
-    xor (s[6] shr 16) xor (s[7] shl 16);
-  u7 := APtr[7] xor (s[0] and $FFFF0000) xor (s[0] shl 16) xor (s[1] and $FFFF)
-    xor (s[1] shl 16) xor (s[2] shr 16) xor (s[3] shl 16)
-    xor s[4] xor (s[4] shr 16) xor (s[5] shl 16) xor (s[5] shr 16)
-    xor (s[6] shr 16) xor (s[7] and $FFFF) xor (s[7] shl 16) xor (s[7] shr 16);
+  LUWord0 := APtr[0] xor LScratch[6];
+  LUWord1 := APtr[1] xor LScratch[7];
+  LUWord2 := APtr[2] xor (LScratch[0] shl 16) xor (LScratch[0] shr 16) xor (LScratch[0] and $FFFF)
+    xor (LScratch[1] and $FFFF) xor (LScratch[1] shr 16) xor (LScratch[2] shl 16)
+    xor LScratch[6] xor (LScratch[6] shl 16) xor (LScratch[7] and $FFFF0000) xor (LScratch[7] shr 16);
+  LUWord3 := APtr[3] xor (LScratch[0] and $FFFF) xor (LScratch[0] shl 16) xor (LScratch[1] and $FFFF)
+    xor (LScratch[1] shl 16) xor (LScratch[1] shr 16) xor (LScratch[2] shl 16) xor (LScratch[2] shr 16)
+    xor (LScratch[3] shl 16) xor LScratch[6] xor (LScratch[6] shl 16) xor (LScratch[6] shr 16)
+    xor (LScratch[7] and $FFFF) xor (LScratch[7] shl 16) xor (LScratch[7] shr 16);
+  LUWord4 := APtr[4] xor (LScratch[0] and $FFFF0000) xor (LScratch[0] shl 16) xor (LScratch[0] shr 16)
+    xor (LScratch[1] and $FFFF0000) xor (LScratch[1] shr 16) xor (LScratch[2] shl 16)
+    xor (LScratch[2] shr 16) xor (LScratch[3] shl 16) xor (LScratch[3] shr 16) xor (LScratch[4] shl 16)
+    xor (LScratch[6] shl 16) xor (LScratch[6] shr 16) xor (LScratch[7] and $FFFF) xor (LScratch[7] shl 16)
+    xor (LScratch[7] shr 16);
+  LUWord5 := APtr[5] xor (LScratch[0] shl 16) xor (LScratch[0] shr 16) xor (LScratch[0] and $FFFF0000)
+    xor (LScratch[1] and $FFFF) xor LScratch[2] xor (LScratch[2] shr 16) xor (LScratch[3] shl 16)
+    xor (LScratch[3] shr 16) xor (LScratch[4] shl 16) xor (LScratch[4] shr 16) xor (LScratch[5] shl 16)
+    xor (LScratch[6] shl 16) xor (LScratch[6] shr 16) xor (LScratch[7] and $FFFF0000)
+    xor (LScratch[7] shl 16) xor (LScratch[7] shr 16);
+  LUWord6 := APtr[6] xor LScratch[0] xor (LScratch[1] shr 16) xor (LScratch[2] shl 16)
+    xor LScratch[3] xor (LScratch[3] shr 16) xor (LScratch[4] shl 16) xor (LScratch[4] shr 16)
+    xor (LScratch[5] shl 16) xor (LScratch[5] shr 16) xor LScratch[6] xor (LScratch[6] shl 16)
+    xor (LScratch[6] shr 16) xor (LScratch[7] shl 16);
+  LUWord7 := APtr[7] xor (LScratch[0] and $FFFF0000) xor (LScratch[0] shl 16) xor (LScratch[1] and $FFFF)
+    xor (LScratch[1] shl 16) xor (LScratch[2] shr 16) xor (LScratch[3] shl 16)
+    xor LScratch[4] xor (LScratch[4] shr 16) xor (LScratch[5] shl 16) xor (LScratch[5] shr 16)
+    xor (LScratch[6] shr 16) xor (LScratch[7] and $FFFF) xor (LScratch[7] shl 16) xor (LScratch[7] shr 16);
 
-  v0 := FHash[0] xor (u1 shl 16) xor (u0 shr 16);
-  v1 := FHash[1] xor (u2 shl 16) xor (u1 shr 16);
-  v2 := FHash[2] xor (u3 shl 16) xor (u2 shr 16);
-  v3 := FHash[3] xor (u4 shl 16) xor (u3 shr 16);
-  v4 := FHash[4] xor (u5 shl 16) xor (u4 shr 16);
-  v5 := FHash[5] xor (u6 shl 16) xor (u5 shr 16);
-  v6 := FHash[6] xor (u7 shl 16) xor (u6 shr 16);
-  v7 := FHash[7] xor (u0 and $FFFF0000) xor (u0 shl 16) xor (u7 shr 16)
-    xor (u1 and $FFFF0000) xor (u1 shl 16) xor (u6 shl 16)
-    xor (u7 and $FFFF0000);
+  LVWord0 := FHash[0] xor (LUWord1 shl 16) xor (LUWord0 shr 16);
+  LVWord1 := FHash[1] xor (LUWord2 shl 16) xor (LUWord1 shr 16);
+  LVWord2 := FHash[2] xor (LUWord3 shl 16) xor (LUWord2 shr 16);
+  LVWord3 := FHash[3] xor (LUWord4 shl 16) xor (LUWord3 shr 16);
+  LVWord4 := FHash[4] xor (LUWord5 shl 16) xor (LUWord4 shr 16);
+  LVWord5 := FHash[5] xor (LUWord6 shl 16) xor (LUWord5 shr 16);
+  LVWord6 := FHash[6] xor (LUWord7 shl 16) xor (LUWord6 shr 16);
+  LVWord7 := FHash[7] xor (LUWord0 and $FFFF0000) xor (LUWord0 shl 16) xor (LUWord7 shr 16)
+    xor (LUWord1 and $FFFF0000) xor (LUWord1 shl 16) xor (LUWord6 shl 16)
+    xor (LUWord7 and $FFFF0000);
 
-  FHash[0] := (v0 and $FFFF0000) xor (v0 shl 16) xor (v0 shr 16) xor (v1 shr 16)
-    xor (v1 and $FFFF0000) xor (v2 shl 16) xor (v3 shr 16) xor (v4 shl 16)
-    xor (v5 shr 16) xor v5 xor (v6 shr 16) xor (v7 shl 16) xor (v7 shr 16)
-    xor (v7 and $FFFF);
-  FHash[1] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
-    xor (v1 and $FFFF) xor v2 xor (v2 shr 16) xor (v3 shl 16) xor (v4 shr 16)
-    xor (v5 shl 16) xor (v6 shl 16) xor v6 xor (v7 and $FFFF0000)
-    xor (v7 shr 16);
-  FHash[2] := (v0 and $FFFF) xor (v0 shl 16) xor (v1 shl 16) xor (v1 shr 16)
-    xor (v1 and $FFFF0000) xor (v2 shl 16) xor (v3 shr 16)
-    xor v3 xor (v4 shl 16) xor (v5 shr 16) xor v6 xor (v6 shr 16)
-    xor (v7 and $FFFF) xor (v7 shl 16) xor (v7 shr 16);
-  FHash[3] := (v0 shl 16) xor (v0 shr 16) xor (v0 and $FFFF0000)
-    xor (v1 and $FFFF0000) xor (v1 shr 16) xor (v2 shl 16) xor (v2 shr 16)
-    xor v2 xor (v3 shl 16) xor (v4 shr 16) xor v4 xor (v5 shl 16)
-    xor (v6 shl 16) xor (v7 and $FFFF) xor (v7 shr 16);
-  FHash[4] := (v0 shr 16) xor (v1 shl 16) xor v1 xor (v2 shr 16)
-    xor v2 xor (v3 shl 16) xor (v3 shr 16) xor v3 xor (v4 shl 16)
-    xor (v5 shr 16) xor v5 xor (v6 shl 16) xor (v6 shr 16) xor (v7 shl 16);
-  FHash[5] := (v0 shl 16) xor (v0 and $FFFF0000) xor (v1 shl 16) xor (v1 shr 16)
-    xor (v1 and $FFFF0000) xor (v2 shl 16) xor v2 xor (v3 shr 16)
-    xor v3 xor (v4 shl 16) xor (v4 shr 16) xor v4 xor (v5 shl 16)
-    xor (v6 shl 16) xor (v6 shr 16) xor v6 xor (v7 shl 16) xor (v7 shr 16)
-    xor (v7 and $FFFF0000);
-  FHash[6] := v0 xor v2 xor (v2 shr 16) xor v3 xor (v3 shl 16)
-    xor v4 xor (v4 shr 16) xor (v5 shl 16) xor (v5 shr 16)
-    xor v5 xor (v6 shl 16) xor (v6 shr 16) xor v6 xor (v7 shl 16) xor v7;
-  FHash[7] := v0 xor (v0 shr 16) xor (v1 shl 16) xor (v1 shr 16) xor (v2 shl 16)
-    xor (v3 shr 16) xor v3 xor (v4 shl 16) xor v4 xor (v5 shr 16)
-    xor v5 xor (v6 shl 16) xor (v6 shr 16) xor (v7 shl 16) xor v7;
+  FHash[0] := (LVWord0 and $FFFF0000) xor (LVWord0 shl 16) xor (LVWord0 shr 16) xor (LVWord1 shr 16)
+    xor (LVWord1 and $FFFF0000) xor (LVWord2 shl 16) xor (LVWord3 shr 16) xor (LVWord4 shl 16)
+    xor (LVWord5 shr 16) xor LVWord5 xor (LVWord6 shr 16) xor (LVWord7 shl 16) xor (LVWord7 shr 16)
+    xor (LVWord7 and $FFFF);
+  FHash[1] := (LVWord0 shl 16) xor (LVWord0 shr 16) xor (LVWord0 and $FFFF0000)
+    xor (LVWord1 and $FFFF) xor LVWord2 xor (LVWord2 shr 16) xor (LVWord3 shl 16) xor (LVWord4 shr 16)
+    xor (LVWord5 shl 16) xor (LVWord6 shl 16) xor LVWord6 xor (LVWord7 and $FFFF0000)
+    xor (LVWord7 shr 16);
+  FHash[2] := (LVWord0 and $FFFF) xor (LVWord0 shl 16) xor (LVWord1 shl 16) xor (LVWord1 shr 16)
+    xor (LVWord1 and $FFFF0000) xor (LVWord2 shl 16) xor (LVWord3 shr 16)
+    xor LVWord3 xor (LVWord4 shl 16) xor (LVWord5 shr 16) xor LVWord6 xor (LVWord6 shr 16)
+    xor (LVWord7 and $FFFF) xor (LVWord7 shl 16) xor (LVWord7 shr 16);
+  FHash[3] := (LVWord0 shl 16) xor (LVWord0 shr 16) xor (LVWord0 and $FFFF0000)
+    xor (LVWord1 and $FFFF0000) xor (LVWord1 shr 16) xor (LVWord2 shl 16) xor (LVWord2 shr 16)
+    xor LVWord2 xor (LVWord3 shl 16) xor (LVWord4 shr 16) xor LVWord4 xor (LVWord5 shl 16)
+    xor (LVWord6 shl 16) xor (LVWord7 and $FFFF) xor (LVWord7 shr 16);
+  FHash[4] := (LVWord0 shr 16) xor (LVWord1 shl 16) xor LVWord1 xor (LVWord2 shr 16)
+    xor LVWord2 xor (LVWord3 shl 16) xor (LVWord3 shr 16) xor LVWord3 xor (LVWord4 shl 16)
+    xor (LVWord5 shr 16) xor LVWord5 xor (LVWord6 shl 16) xor (LVWord6 shr 16) xor (LVWord7 shl 16);
+  FHash[5] := (LVWord0 shl 16) xor (LVWord0 and $FFFF0000) xor (LVWord1 shl 16) xor (LVWord1 shr 16)
+    xor (LVWord1 and $FFFF0000) xor (LVWord2 shl 16) xor LVWord2 xor (LVWord3 shr 16)
+    xor LVWord3 xor (LVWord4 shl 16) xor (LVWord4 shr 16) xor LVWord4 xor (LVWord5 shl 16)
+    xor (LVWord6 shl 16) xor (LVWord6 shr 16) xor LVWord6 xor (LVWord7 shl 16) xor (LVWord7 shr 16)
+    xor (LVWord7 and $FFFF0000);
+  FHash[6] := LVWord0 xor LVWord2 xor (LVWord2 shr 16) xor LVWord3 xor (LVWord3 shl 16)
+    xor LVWord4 xor (LVWord4 shr 16) xor (LVWord5 shl 16) xor (LVWord5 shr 16)
+    xor LVWord5 xor (LVWord6 shl 16) xor (LVWord6 shr 16) xor LVWord6 xor (LVWord7 shl 16) xor LVWord7;
+  FHash[7] := LVWord0 xor (LVWord0 shr 16) xor (LVWord1 shl 16) xor (LVWord1 shr 16) xor (LVWord2 shl 16)
+    xor (LVWord3 shr 16) xor LVWord3 xor (LVWord4 shl 16) xor LVWord4 xor (LVWord5 shr 16)
+    xor LVWord5 xor (LVWord6 shl 16) xor (LVWord6 shr 16) xor (LVWord7 shl 16) xor LVWord7;
 
 end;
 
 class procedure TGost.ComputeSBoxes(const ASBox: THashLibMatrixUInt32Array;
   out ASBox1, ASBox2, ASBox3, ASBox4: THashLibUInt32Array);
 var
-  LIdx, LA, LB: Int32;
-  ax, bx, cx, dx: UInt32;
+  LIdx, LRowIdx, LColIdx: Int32;
+  LWordA, LWordB, LWordC, LWordD: UInt32;
 begin
   System.SetLength(ASBox1, 256);
   System.SetLength(ASBox2, 256);
@@ -359,20 +359,20 @@ begin
 
   LIdx := 0;
 
-  for LA := 0 to 15 do
+  for LRowIdx := 0 to 15 do
   begin
-    ax := ASBox[1, LA] shl 15;
-    bx := ASBox[3, LA] shl 23;
-    cx := ASBox[5, LA];
-    cx := TBits.RotateRight32(cx, 1);
-    dx := ASBox[7, LA] shl 7;
+    LWordA := ASBox[1, LRowIdx] shl 15;
+    LWordB := ASBox[3, LRowIdx] shl 23;
+    LWordC := ASBox[5, LRowIdx];
+    LWordC := TBits.RotateRight32(LWordC, 1);
+    LWordD := ASBox[7, LRowIdx] shl 7;
 
-    for LB := 0 to 15 do
+    for LColIdx := 0 to 15 do
     begin
-      ASBox1[LIdx] := ax or (ASBox[0, LB] shl 11);
-      ASBox2[LIdx] := bx or (ASBox[2, LB] shl 19);
-      ASBox3[LIdx] := cx or (ASBox[4, LB] shl 27);
-      ASBox4[LIdx] := dx or (ASBox[6, LB] shl 3);
+      ASBox1[LIdx] := LWordA or (ASBox[0, LColIdx] shl 11);
+      ASBox2[LIdx] := LWordB or (ASBox[2, LColIdx] shl 19);
+      ASBox3[LIdx] := LWordC or (ASBox[4, LColIdx] shl 27);
+      ASBox4[LIdx] := LWordD or (ASBox[6, LColIdx] shl 3);
       System.Inc(LIdx);
     end;
   end;
@@ -380,7 +380,7 @@ end;
 
 constructor TGost.Create(ASBoxType: TGostSBox);
 begin
-  Inherited Create(32, 32);
+  inherited Create(32, 32);
   System.SetLength(FState, 8);
   System.SetLength(FHash, 8);
   FSBoxType := ASBoxType;
@@ -426,9 +426,9 @@ end;
 
 function TGost.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 8 * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FHash), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, 8 * System.SizeOf(UInt32));
+  TConverters.le32_copy(PCardinal(FHash), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 class constructor TGost.Gost;
@@ -469,39 +469,39 @@ procedure TGost.Initialize;
 begin
   TArrayUtils.ZeroFill(FState);
   TArrayUtils.ZeroFill(FHash);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TGost.TransformBlock(AData: PByte; ADataLength: Int32; AIndex: Int32);
 var
-  LData, LM: array [0 .. 7] of UInt32;
-  LC, LA, LB: UInt32;
+  LData, LCompressBuffer: array [0 .. 7] of UInt32;
+  LCarry, LBlockWord, LPriorState: UInt32;
   LIdx: Int32;
 begin
-  LC := 0;
+  LCarry := 0;
 
   TConverters.le32_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
 
   for LIdx := 0 to 7 do
   begin
-    LA := LData[LIdx];
-    LM[LIdx] := LA;
-    LB := FState[LIdx];
-    LC := LA + LC + FState[LIdx];
-    FState[LIdx] := LC;
-    if ((LC < LA) or (LC < LB)) then
+    LBlockWord := LData[LIdx];
+    LCompressBuffer[LIdx] := LBlockWord;
+    LPriorState := FState[LIdx];
+    LCarry := LBlockWord + LCarry + FState[LIdx];
+    FState[LIdx] := LCarry;
+    if ((LCarry < LBlockWord) or (LCarry < LPriorState)) then
     begin
-      LC := UInt32(1)
+      LCarry := UInt32(1)
     end
     else
     begin
-      LC := UInt32(0);
+      LCarry := UInt32(0);
     end;
   end;
 
-  Compress(@(LM[0]));
+  Compress(@(LCompressBuffer[0]));
 
-  System.FillChar(LM, System.SizeOf(LM), UInt32(0));
+  System.FillChar(LCompressBuffer, System.SizeOf(LCompressBuffer), UInt32(0));
   System.FillChar(LData, System.SizeOf(LData), UInt32(0));
 end;
 

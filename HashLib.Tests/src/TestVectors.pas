@@ -5263,7 +5263,7 @@ end;
 
 class constructor TBlake2BPTestVectors.Blake2BPTestVectors;
 begin
-  FUnkeyedBlake2BP := Nil;
+  FUnkeyedBlake2BP := nil;
 
   FKeyedBlake2BP := THashLibStringArray.Create
     ('9D9461073E4EB640A255357B839F394B838C6FF57C9B686A3F76107C1066728F3C9956BD785CBC3BF79DC2AB578C5A0C063B9D9C405848DE1DBE821CD05C940A',
@@ -5528,7 +5528,7 @@ end;
 
 class constructor TBlake2SPTestVectors.Blake2SPTestVectors;
 begin
-  FUnkeyedBlake2SP := Nil;
+  FUnkeyedBlake2SP := nil;
 
   FKeyedBlake2SP := THashLibStringArray.Create
     ('715CB13895AEB678F6124160BFF21465B30F4F6874193FC851B4621043F09CC6',

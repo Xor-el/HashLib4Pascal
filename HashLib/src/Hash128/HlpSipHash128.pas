@@ -52,14 +52,14 @@ begin
   LHashInstance.FFinalizationRounds := FFinalizationRounds;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TSipHash128_2_4.Create(ACompressionRounds,
   AFinalizationRounds: Int32);
 begin
-  Inherited Create(16, 8);
+  inherited Create(16, 8);
   FCompressionRounds := ACompressionRounds;
   FFinalizationRounds := AFinalizationRounds;
 end;

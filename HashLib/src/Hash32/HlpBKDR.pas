@@ -20,7 +20,7 @@ type
     FHash: UInt32;
 
   const
-    SEED = Int32(131);
+    Seed = Int32(131);
 
   public
     constructor Create();
@@ -41,13 +41,13 @@ var
 begin
   LHashInstance := TBKDR.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TBKDR.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TBKDR.Initialize;
@@ -68,7 +68,7 @@ begin
   LIdx := AIndex;
   while ALength > 0 do
   begin
-    FHash := (FHash * UInt32(SEED)) + AData[LIdx];
+    FHash := (FHash * UInt32(Seed)) + AData[LIdx];
     System.Inc(LIdx);
     System.Dec(ALength);
   end;
@@ -76,7 +76,7 @@ end;
 
 function TBKDR.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

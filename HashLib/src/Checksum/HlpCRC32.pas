@@ -74,7 +74,7 @@ constructor TCRC32.Create(APolynomial, AInitial: UInt64;
   AIsInputReflected, AIsOutputReflected: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray);
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
   FCRCAlgorithm := TCRC.Create(32, APolynomial, AInitial, AIsInputReflected,
     AIsOutputReflected, AOutputXor, ACheckValue, ANames);
 end;
@@ -99,7 +99,7 @@ end;
 
 constructor TCRC32_PKZIP.Create;
 begin
-  Inherited Create(TCRC32Polynomials.PKZIP, $FFFFFFFF, true, true, $FFFFFFFF,
+  inherited Create(TCRC32Polynomials.PKZIP, $FFFFFFFF, True, True, $FFFFFFFF,
     $CBF43926, THashLibStringArray.Create('CRC-32', 'CRC-32/ADCCP',
     'CRC-32/V-42', 'CRC-32/XZ', 'PKZIP', 'CRC-32/ISO-HDLC'));
 
@@ -109,7 +109,7 @@ end;
 
 constructor TCRC32_CASTAGNOLI.Create;
 begin
-  Inherited Create(TCRC32Polynomials.Castagnoli, $FFFFFFFF, true, true,
+  inherited Create(TCRC32Polynomials.Castagnoli, $FFFFFFFF, True, True,
     $FFFFFFFF, $E3069283, THashLibStringArray.Create('CRC-32C',
     'CRC-32/BASE91-C', 'CRC-32/CASTAGNOLI', 'CRC-32/INTERLAKEN',
     'CRC-32/ISCSI'));

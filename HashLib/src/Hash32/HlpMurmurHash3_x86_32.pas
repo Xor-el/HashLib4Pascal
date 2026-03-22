@@ -24,7 +24,7 @@ type
 
   strict private
   var
-    FKey, FH, FTotalLength: UInt32;
+    FKey, FHashValue, FTotalLength: UInt32;
     FIdx: Int32;
     FBuffer: THashLibByteArray;
 
@@ -66,17 +66,17 @@ var
 begin
   LHashInstance := TMurmurHash3_x86_32.Create();
   LHashInstance.FKey := FKey;
-  LHashInstance.FH := FH;
+  LHashInstance.FHashValue := FHashValue;
   LHashInstance.FTotalLength := FTotalLength;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TMurmurHash3_x86_32.Create;
 begin
-  Inherited Create(4, 4);
+  inherited Create(4, 4);
   FKey := CKEY;
   System.SetLength(FBuffer, 4);
 end;
@@ -102,7 +102,7 @@ begin
           LFinalBlock := LFinalBlock * C1;
           LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
-          FH := FH xor LFinalBlock;
+          FHashValue := FHashValue xor LFinalBlock;
 
         end;
       2:
@@ -113,7 +113,7 @@ begin
           LFinalBlock := LFinalBlock * C1;
           LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
-          FH := FH xor LFinalBlock;
+          FHashValue := FHashValue xor LFinalBlock;
 
         end;
       1:
@@ -123,7 +123,7 @@ begin
           LFinalBlock := LFinalBlock * C1;
           LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
-          FH := FH xor LFinalBlock;
+          FHashValue := FHashValue xor LFinalBlock;
 
         end;
     end;
@@ -131,13 +131,13 @@ begin
 
   // finalization
 
-  FH := FH xor FTotalLength;
+  FHashValue := FHashValue xor FTotalLength;
 
-  FH := FH xor (FH shr 16);
-  FH := FH * C4;
-  FH := FH xor (FH shr 13);
-  FH := FH * C5;
-  FH := FH xor (FH shr 16);
+  FHashValue := FHashValue xor (FHashValue shr 16);
+  FHashValue := FHashValue * C4;
+  FHashValue := FHashValue xor (FHashValue shr 13);
+  FHashValue := FHashValue * C5;
+  FHashValue := FHashValue xor (FHashValue shr 16);
 end;
 
 procedure TMurmurHash3_x86_32.ByteUpdate(AByte: Byte);
@@ -156,9 +156,9 @@ begin
     LBlock := TBits.RotateLeft32(LBlock, 15);
     LBlock := LBlock * C2;
 
-    FH := FH xor LBlock;
-    FH := TBits.RotateLeft32(FH, 13);
-    FH := (FH * 5) + C3;
+    FHashValue := FHashValue xor LBlock;
+    FHashValue := TBits.RotateLeft32(FHashValue, 13);
+    FHashValue := (FHashValue * 5) + C3;
 
     FIdx := 0;
   end;
@@ -166,12 +166,12 @@ end;
 
 function TMurmurHash3_x86_32.GetKey: THashLibByteArray;
 begin
-  result := TConverters.ReadUInt32AsBytesLE(FKey);
+  Result := TConverters.ReadUInt32AsBytesLE(FKey);
 end;
 
 procedure TMurmurHash3_x86_32.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
     FKey := CKEY;
   end
@@ -188,12 +188,12 @@ end;
 
 function TMurmurHash3_x86_32.GetKeyLength: Int32;
 begin
-  result := 4;
+  Result := 4;
 end;
 
 procedure TMurmurHash3_x86_32.Initialize;
 begin
-  FH := FKey;
+  FHashValue := FKey;
   FTotalLength := 0;
   FIdx := 0;
 end;
@@ -202,7 +202,7 @@ procedure TMurmurHash3_x86_32.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LLength, LNBlocks, LIdx, LOffset: Int32;
-  LBlock, LH: UInt32;
+  LBlock, LHashAcc: UInt32;
   LPtrData, LPtrBuffer: PByte;
   LPtrDataCardinal: PCardinal;
 begin
@@ -250,9 +250,9 @@ begin
       LBlock := TBits.RotateLeft32(LBlock, 15);
       LBlock := LBlock * C2;
 
-      FH := FH xor LBlock;
-      FH := TBits.RotateLeft32(FH, 13);
-      FH := (FH * 5) + C3;
+      FHashValue := FHashValue xor LBlock;
+      FHashValue := TBits.RotateLeft32(FHashValue, 13);
+      FHashValue := (FHashValue * 5) + C3;
 
       FIdx := 0;
     end;
@@ -266,7 +266,7 @@ begin
 
   // body
 
-  LH := FH;
+  LHashAcc := FHashValue;
   LPtrDataCardinal := PCardinal(LPtrData + AIndex);
   while LIdx < LNBlocks do
   begin
@@ -276,14 +276,14 @@ begin
     LBlock := TBits.RotateLeft32(LBlock, 15);
     LBlock := LBlock * C2;
 
-    LH := LH xor LBlock;
-    LH := TBits.RotateLeft32(LH, 13);
-    LH := (LH * 5) + C3;
+    LHashAcc := LHashAcc xor LBlock;
+    LHashAcc := TBits.RotateLeft32(LHashAcc, 13);
+    LHashAcc := (LHashAcc * 5) + C3;
 
     System.Inc(LIdx);
   end;
 
-  FH := LH;
+  FHashValue := LHashAcc;
 
   // save pending end bytes
   LOffset := AIndex + (LIdx * 4);
@@ -301,9 +301,9 @@ begin
   Finish();
 
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt32AsBytesBE(FH, LBufferBytes, 0);
+  TConverters.ReadUInt32AsBytesBE(FHashValue, LBufferBytes, 0);
 
-  result := THashResult.Create(LBufferBytes);
+  Result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 

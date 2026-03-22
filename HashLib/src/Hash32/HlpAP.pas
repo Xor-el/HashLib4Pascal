@@ -40,13 +40,13 @@ begin
   LHashInstance := TAP.Create();
   LHashInstance.FHash := FHash;
   LHashInstance.FIndex := FIndex;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TAP.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TAP.Initialize;
@@ -87,7 +87,7 @@ end;
 
 function TAP.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

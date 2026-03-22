@@ -69,7 +69,7 @@ class function TArrayUtils.AreEqual(const ABuffer1,
 begin
   if System.Length(ABuffer1) <> System.Length(ABuffer2) then
   begin
-    Result := false;
+    Result := False;
     Exit;
   end;
   Result := CompareMem(ABuffer1, ABuffer2, System.Length(ABuffer1) *
@@ -99,7 +99,7 @@ end;
 class procedure TArrayUtils.Fill(const ABuffer: THashLibByteArray;
   AFrom, ATo: Int32; AFiller: Byte);
 begin
-  if ABuffer <> Nil then
+  if ABuffer <> nil then
   begin
     System.FillChar(ABuffer[AFrom], (ATo - AFrom) *
       System.SizeOf(Byte), AFiller);
@@ -109,7 +109,7 @@ end;
 class procedure TArrayUtils.Fill(const ABuffer: THashLibUInt32Array;
   AFrom, ATo: Int32; AFiller: UInt32);
 begin
-  if ABuffer <> Nil then
+  if ABuffer <> nil then
   begin
 {$IFDEF FPC}
     System.FillDWord(ABuffer[AFrom], (ATo - AFrom), AFiller);
@@ -126,7 +126,7 @@ end;
 class procedure TArrayUtils.Fill(const ABuffer: THashLibUInt64Array;
   AFrom, ATo: Int32; AFiller: UInt64);
 begin
-  if ABuffer <> Nil then
+  if ABuffer <> nil then
   begin
 {$IFDEF FPC}
     System.FillQWord(ABuffer[AFrom], (ATo - AFrom), AFiller);
@@ -143,7 +143,7 @@ end;
 class procedure TArrayUtils.FillMemory(ABufferPtr: Pointer; ASize: Int64;
   AFiller: Byte);
 begin
-  if ABufferPtr <> Nil then
+  if ABufferPtr <> nil then
   begin
     System.FillChar(ABufferPtr^, ASize, AFiller);
   end;
@@ -193,11 +193,11 @@ var
 begin
   LABuffer1Length := System.Length(ABuffer1);
   System.SetLength(Result, LABuffer1Length + System.Length(ABuffer2));
-  if ABuffer1 <> Nil then
+  if ABuffer1 <> nil then
   begin
     System.Move(ABuffer1[0], Result[0], LABuffer1Length * System.SizeOf(Byte));
   end;
-  if ABuffer2 <> Nil then
+  if ABuffer2 <> nil then
   begin
     System.Move(ABuffer2[0], Result[LABuffer1Length], System.Length(ABuffer2) *
       System.SizeOf(Byte));
@@ -211,12 +211,12 @@ var
 begin
   LABuffer1Length := System.Length(ABuffer1);
   System.SetLength(Result, LABuffer1Length + System.Length(ABuffer2));
-  if ABuffer1 <> Nil then
+  if ABuffer1 <> nil then
   begin
     System.Move(ABuffer1[0], Result[0], LABuffer1Length *
       System.SizeOf(UInt32));
   end;
-  if ABuffer2 <> Nil then
+  if ABuffer2 <> nil then
   begin
     System.Move(ABuffer2[0], Result[LABuffer1Length], System.Length(ABuffer2) *
       System.SizeOf(UInt32));

@@ -53,7 +53,7 @@ end;
 
 procedure TTestPBKDF2_HMACSHA1.TearDown;
 begin
-  PBKDF2_HMACInstance := Nil;
+  PBKDF2_HMACInstance := nil;
   inherited;
 end;
 
@@ -75,7 +75,7 @@ end;
 
 procedure TTestPBKDF2_HMACSHA2_256.TearDown;
 begin
-  PBKDF2_HMACInstance := Nil;
+  PBKDF2_HMACInstance := nil;
   inherited;
 end;
 

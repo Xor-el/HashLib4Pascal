@@ -58,13 +58,13 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor THAS160.Create;
 begin
-  Inherited Create(20, 64);
+  inherited Create(20, 64);
   System.SetLength(FHash, 5);
 end;
 
@@ -99,9 +99,9 @@ end;
 
 function THAS160.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 5 * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FHash), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, 5 * System.SizeOf(UInt32));
+  TConverters.le32_copy(PCardinal(FHash), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure THAS160.Initialize;
@@ -111,21 +111,21 @@ begin
   FHash[2] := $98BADCFE;
   FHash[3] := $10325476;
   FHash[4] := $C3D2E1F0;
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure THAS160.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 var
-  A, B, C, D, E, T: UInt32;
-  R: Int32;
+  LRegA, LRegB, LRegC, LRegD, LRegE, LTemp: UInt32;
+  LRoundIdx: Int32;
   LData: array [0 .. 19] of UInt32;
 begin
-  A := FHash[0];
-  B := FHash[1];
-  C := FHash[2];
-  D := FHash[3];
-  E := FHash[4];
+  LRegA := FHash[0];
+  LRegB := FHash[1];
+  LRegC := FHash[2];
+  LRegD := FHash[3];
+  LRegE := FHash[4];
 
   TConverters.le32_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
 
@@ -134,17 +134,17 @@ begin
   LData[18] := LData[8] xor LData[9] xor LData[10] xor LData[11];
   LData[19] := LData[12] xor LData[13] xor LData[14] xor LData[15];
 
-  R := 0;
-  while R < 20 do
+  LRoundIdx := 0;
+  while LRoundIdx < 20 do
   begin
-    T := LData[SIndex[R]] + (A shl SRot[R] or A shr Stor[R]) +
-      ((B and C) or (not B and D)) + E;
-    E := D;
-    D := C;
-    C := B shl 10 or B shr 22;
-    B := A;
-    A := T;
-    System.Inc(R);
+    LTemp := LData[SIndex[LRoundIdx]] + (LRegA shl SRot[LRoundIdx] or LRegA shr Stor[LRoundIdx]) +
+      ((LRegB and LRegC) or (not LRegB and LRegD)) + LRegE;
+    LRegE := LRegD;
+    LRegD := LRegC;
+    LRegC := LRegB shl 10 or LRegB shr 22;
+    LRegB := LRegA;
+    LRegA := LTemp;
+    System.Inc(LRoundIdx);
   end;
 
   LData[16] := LData[3] xor LData[6] xor LData[9] xor LData[12];
@@ -152,17 +152,17 @@ begin
   LData[18] := LData[1] xor LData[4] xor LData[11] xor LData[14];
   LData[19] := LData[0] xor LData[7] xor LData[10] xor LData[13];
 
-  R := 20;
-  while R < 40 do
+  LRoundIdx := 20;
+  while LRoundIdx < 40 do
   begin
-    T := LData[SIndex[R]] + $5A827999 +
-      (A shl SRot[R - 20] or A shr Stor[R - 20]) + (B xor C xor D) + E;
-    E := D;
-    D := C;
-    C := B shl 17 or B shr 15;
-    B := A;
-    A := T;
-    System.Inc(R);
+    LTemp := LData[SIndex[LRoundIdx]] + $5A827999 +
+      (LRegA shl SRot[LRoundIdx - 20] or LRegA shr Stor[LRoundIdx - 20]) + (LRegB xor LRegC xor LRegD) + LRegE;
+    LRegE := LRegD;
+    LRegD := LRegC;
+    LRegC := LRegB shl 17 or LRegB shr 15;
+    LRegB := LRegA;
+    LRegA := LTemp;
+    System.Inc(LRoundIdx);
   end;
 
   LData[16] := LData[5] xor LData[7] xor LData[12] xor LData[14];
@@ -170,17 +170,17 @@ begin
   LData[18] := LData[4] xor LData[6] xor LData[13] xor LData[15];
   LData[19] := LData[1] xor LData[3] xor LData[8] xor LData[10];
 
-  R := 40;
-  while R < 60 do
+  LRoundIdx := 40;
+  while LRoundIdx < 60 do
   begin
-    T := LData[SIndex[R]] + $6ED9EBA1 +
-      (A shl SRot[R - 40] or A shr Stor[R - 40]) + (C xor (B or not D)) + E;
-    E := D;
-    D := C;
-    C := B shl 25 or B shr 7;
-    B := A;
-    A := T;
-    System.Inc(R);
+    LTemp := LData[SIndex[LRoundIdx]] + $6ED9EBA1 +
+      (LRegA shl SRot[LRoundIdx - 40] or LRegA shr Stor[LRoundIdx - 40]) + (LRegC xor (LRegB or not LRegD)) + LRegE;
+    LRegE := LRegD;
+    LRegD := LRegC;
+    LRegC := LRegB shl 25 or LRegB shr 7;
+    LRegB := LRegA;
+    LRegA := LTemp;
+    System.Inc(LRoundIdx);
   end;
 
   LData[16] := LData[2] xor LData[7] xor LData[8] xor LData[13];
@@ -188,24 +188,24 @@ begin
   LData[18] := LData[0] xor LData[5] xor LData[10] xor LData[15];
   LData[19] := LData[1] xor LData[6] xor LData[11] xor LData[12];
 
-  R := 60;
-  while R < 80 do
+  LRoundIdx := 60;
+  while LRoundIdx < 80 do
   begin
-    T := LData[SIndex[R]] + $8F1BBCDC +
-      (A shl SRot[R - 60] or A shr Stor[R - 60]) + (B xor C xor D) + E;
-    E := D;
-    D := C;
-    C := (B shl 30) or (B shr 2);
-    B := A;
-    A := T;
-    System.Inc(R);
+    LTemp := LData[SIndex[LRoundIdx]] + $8F1BBCDC +
+      (LRegA shl SRot[LRoundIdx - 60] or LRegA shr Stor[LRoundIdx - 60]) + (LRegB xor LRegC xor LRegD) + LRegE;
+    LRegE := LRegD;
+    LRegD := LRegC;
+    LRegC := (LRegB shl 30) or (LRegB shr 2);
+    LRegB := LRegA;
+    LRegA := LTemp;
+    System.Inc(LRoundIdx);
   end;
 
-  FHash[0] := FHash[0] + A;
-  FHash[1] := FHash[1] + B;
-  FHash[2] := FHash[2] + C;
-  FHash[3] := FHash[3] + D;
-  FHash[4] := FHash[4] + E;
+  FHash[0] := FHash[0] + LRegA;
+  FHash[1] := FHash[1] + LRegB;
+  FHash[2] := FHash[2] + LRegC;
+  FHash[3] := FHash[3] + LRegD;
+  FHash[4] := FHash[4] + LRegE;
 
   System.FillChar(LData, System.SizeOf(LData), UInt32(0));
 end;

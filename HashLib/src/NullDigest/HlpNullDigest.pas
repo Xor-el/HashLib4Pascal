@@ -61,13 +61,13 @@ begin
   LHashInstance := TNullDigest.Create();
   FOut.Position := 0;
   LHashInstance.FOut.CopyFrom(FOut, FOut.Size);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TNullDigest.Create;
 begin
-  Inherited Create(-1, -1); // Dummy State
+  inherited Create(-1, -1); // Dummy State
   FOut := TMemoryStream.Create();
 end;
 
@@ -85,7 +85,7 @@ end;
 procedure TNullDigest.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 begin
-  if AData <> Nil then
+  if AData <> nil then
   begin
     FOut.Write(AData[AIndex], ALength);
   end;
@@ -102,7 +102,7 @@ begin
       System.SetLength(LResult, FOut.Size);
       FOut.Read(LResult[0], FOut.Size);
     end;
-    result := THashResult.Create(LResult);
+    Result := THashResult.Create(LResult);
   finally
     Initialize();
   end;

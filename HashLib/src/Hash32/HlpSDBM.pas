@@ -37,13 +37,13 @@ var
 begin
   LHashInstance := TSDBM.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TSDBM.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TSDBM.Initialize;
@@ -73,7 +73,7 @@ end;
 
 function TSDBM.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

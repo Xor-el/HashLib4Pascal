@@ -220,7 +220,7 @@ end;
 
 procedure TTestAP.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -238,7 +238,7 @@ end;
 
 procedure TTestBernstein.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -256,7 +256,7 @@ end;
 
 procedure TTestBernstein1.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -274,7 +274,7 @@ end;
 
 procedure TTestBKDR.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -292,7 +292,7 @@ end;
 
 procedure TTestDEK.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -310,7 +310,7 @@ end;
 
 procedure TTestDJB.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -328,7 +328,7 @@ end;
 
 procedure TTestELF.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -346,7 +346,7 @@ end;
 
 procedure TTestFNV.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -364,7 +364,7 @@ end;
 
 procedure TTestFNV1a.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -382,7 +382,7 @@ end;
 
 procedure TTestJenkins3.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -400,7 +400,7 @@ end;
 
 procedure TTestJS.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -419,7 +419,7 @@ end;
 
 procedure TTestMurmur2.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -438,7 +438,7 @@ end;
 
 procedure TTestMurmurHash3_x86_32.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -456,7 +456,7 @@ end;
 
 procedure TTestOneAtTime.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -474,7 +474,7 @@ end;
 
 procedure TTestPJW.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -492,7 +492,7 @@ end;
 
 procedure TTestRotating.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -510,7 +510,7 @@ end;
 
 procedure TTestRS.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -528,7 +528,7 @@ end;
 
 procedure TTestSDBM.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -546,7 +546,7 @@ end;
 
 procedure TTestShiftAndXor.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -564,7 +564,7 @@ end;
 
 procedure TTestSuperFast.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -583,7 +583,7 @@ end;
 
 procedure TTestXXHash32.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 

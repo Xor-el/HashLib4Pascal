@@ -35,20 +35,20 @@ begin
   LHashInstance.FState := System.Copy(FState);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TSHA2_224.Create;
 begin
-  Inherited Create(28);
+  inherited Create(28);
 end;
 
 function TSHA2_224.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 7 * System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(FState), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, 7 * System.SizeOf(UInt32));
+  TConverters.be32_copy(PCardinal(FState), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TSHA2_224.Initialize;
@@ -61,7 +61,7 @@ begin
   FState[5] := $68581511;
   FState[6] := $64F98FA7;
   FState[7] := $BEFA4FA4;
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 end.

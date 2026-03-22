@@ -67,41 +67,41 @@ implementation
 
 procedure TTestCRCModel.TearDown;
 begin
-  FCRC := Nil;
+  FCRC := nil;
   inherited;
 end;
 
 procedure TTestCRCModel.TestAnotherChunkedDataIncrementalHash;
 var
-  Idx: TCRCStandard;
-  temp: String;
-  x, size, i: Int32;
+  LIdx: TCRCStandard;
+  LTemp: String;
+  LX, LSize, LI: Int32;
 begin
 
-  for x := 0 to System.Pred(System.SizeOf(ChunkSizes)
+  for LX := 0 to System.Pred(System.SizeOf(ChunkSizes)
     div System.SizeOf(Int32)) do
   begin
-    size := ChunkSizes[x];
-    for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+    LSize := ChunkSizes[LX];
+    for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
     begin
-      FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
+      FCRC := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
       FCRC.Initialize;
 
-      i := size;
-      while i < System.Length(ChunkedData) do
+      LI := LSize;
+      while LI < System.Length(ChunkedData) do
       begin
-        temp := System.Copy(ChunkedData, (i - size) + 1, size);
-        FCRC.TransformString(temp, TEncoding.UTF8);
+        LTemp := System.Copy(ChunkedData, (LI - LSize) + 1, LSize);
+        FCRC.TransformString(LTemp, TEncoding.UTF8);
 
-        System.Inc(i, size);
+        System.Inc(LI, LSize);
       end;
-      temp := System.Copy(ChunkedData, (i - size) + 1,
-        System.Length(ChunkedData) - ((i - size)));
-      FCRC.TransformString(temp, TEncoding.UTF8);
+      LTemp := System.Copy(ChunkedData, (LI - LSize) + 1,
+        System.Length(ChunkedData) - ((LI - LSize)));
+      FCRC.TransformString(LTemp, TEncoding.UTF8);
 
       ActualString := FCRC.TransformFinal().ToString();
 
-      ExpectedString := THashFactory.TChecksum.TCRC.CreateCRC(Idx)
+      ExpectedString := THashFactory.TChecksum.TCRC.CreateCRC(LIdx)
         .ComputeString(ChunkedData, TEncoding.UTF8).ToString();
 
       CheckEquals(ExpectedString, ActualString,
@@ -115,18 +115,21 @@ end;
 
 procedure TTestCRCModel.TestCheckValue;
 var
-  Idx: TCRCStandard;
-  tmp: String;
+  LIdx: TCRCStandard;
+  LTmp: String;
+  LCRC: ICRC;
 begin
-  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
+    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
 
-    ExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
+    CheckTrue(Supports(FCRC, ICRC, LCRC), Format('Expected ICRC from %s',
+      [FCRC.Name]));
+    ExpectedString := IntToHex(LCRC.CheckValue, 16);
 
-    tmp := FCRC.ComputeString(OneToNine, TEncoding.UTF8).ToString();
+    LTmp := FCRC.ComputeString(OneToNine, TEncoding.UTF8).ToString();
 
-    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(LTmp)) + LTmp;
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
@@ -138,24 +141,27 @@ end;
 
 procedure TTestCRCModel.TestCheckValueWithIncrementalHash;
 var
-  Idx: TCRCStandard;
-  tmp: String;
+  LIdx: TCRCStandard;
+  LTmp: String;
+  LCRC: ICRC;
 begin
-  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
+    FCRC := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
 
     FCRC.Initialize();
 
-    ExpectedString := IntToHex(((FCRC as ICRC).CheckValue), 16);
+    CheckTrue(Supports(FCRC, ICRC, LCRC), Format('Expected ICRC from %s',
+      [FCRC.Name]));
+    ExpectedString := IntToHex(LCRC.CheckValue, 16);
 
     FCRC.TransformString(System.Copy(OneToNine, 1, 3), TEncoding.UTF8);
     FCRC.TransformString(System.Copy(OneToNine, 4, 3), TEncoding.UTF8);
     FCRC.TransformString(System.Copy(OneToNine, 7, 3), TEncoding.UTF8);
 
-    tmp := FCRC.TransformFinal().ToString();
+    LTmp := FCRC.TransformFinal().ToString();
 
-    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(LTmp)) + LTmp;
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
@@ -167,52 +173,52 @@ end;
 
 procedure TTestCRCModel.TestHashCloneIsCorrect;
 var
-  Original, Copy: IHash;
-  MainData, ChunkOne, ChunkTwo: TBytes;
-  Count: Int32;
-  Idx: TCRCStandard;
+  LOriginal, LCopy: IHash;
+  LMainData, LChunkOne, LChunkTwo: TBytes;
+  LCount: Int32;
+  LIdx: TCRCStandard;
 begin
-  MainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
-  Count := System.Length(MainData) - 3;
-  ChunkOne := System.Copy(MainData, 0, Count);
-  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  LMainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
+  LCount := System.Length(LMainData) - 3;
+  LChunkOne := System.Copy(LMainData, 0, LCount);
+  LChunkTwo := System.Copy(LMainData, LCount, System.Length(LMainData) - LCount);
 
-  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    Original := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
-    Original.Initialize;
+    LOriginal := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
+    LOriginal.Initialize;
 
-    Original.TransformBytes(ChunkOne);
+    LOriginal.TransformBytes(LChunkOne);
     // Make Copy Of Current State
-    Copy := Original.Clone();
-    Original.TransformBytes(ChunkTwo);
-    ExpectedString := Original.TransformFinal().ToString();
-    Copy.TransformBytes(ChunkTwo);
-    ActualString := Copy.TransformFinal().ToString();
+    LCopy := LOriginal.Clone();
+    LOriginal.TransformBytes(LChunkTwo);
+    ExpectedString := LOriginal.TransformFinal().ToString();
+    LCopy.TransformBytes(LChunkTwo);
+    ActualString := LCopy.TransformFinal().ToString();
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
-      Original.Name]));
+      LOriginal.Name]));
   end;
 end;
 
 procedure TTestCRCModel.TestHashCloneIsUnique;
 var
-  Original, Copy: IHash;
-  Idx: TCRCStandard;
+  LOriginal, LCopy: IHash;
+  LIdx: TCRCStandard;
 begin
-  for Idx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
   begin
-    Original := THashFactory.TChecksum.TCRC.CreateCRC(Idx);
-    Original.Initialize;
-    Original.BufferSize := (64 * 1024); // 64Kb
+    LOriginal := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
+    LOriginal.Initialize;
+    LOriginal.BufferSize := (64 * 1024); // 64Kb
     // Make Copy Of Current State
-    Copy := Original.Clone();
-    Copy.BufferSize := (128 * 1024); // 128Kb
+    LCopy := LOriginal.Clone();
+    LCopy.BufferSize := (128 * 1024); // 128Kb
 
-    CheckNotEquals(Original.BufferSize, Copy.BufferSize,
-      Format('Expected %d but got %d. %s', [Original.BufferSize,
-      Copy.BufferSize, Original.Name]));
+    CheckNotEquals(LOriginal.BufferSize, LCopy.BufferSize,
+      Format('Expected %d but got %d. %s', [LOriginal.BufferSize,
+      LCopy.BufferSize, LOriginal.Name]));
   end;
 end;
 
@@ -240,39 +246,39 @@ end;
 
 procedure TTestCRC32FastModel.TearDown;
 begin
-  FCRC32Fast := Nil;
+  FCRC32Fast := nil;
   inherited;
 end;
 
 procedure TTestCRC32FastModel.TestAnotherChunkedDataIncrementalHash;
 var
-  temp: String;
-  x, size, i, Idx: Int32;
+  LTemp: String;
+  LX, LSize, LI, LIdx: Int32;
 begin
 
-  for x := 0 to System.Pred(System.SizeOf(ChunkSizes)
+  for LX := 0 to System.Pred(System.SizeOf(ChunkSizes)
     div System.SizeOf(Int32)) do
   begin
-    size := ChunkSizes[x];
+    LSize := ChunkSizes[LX];
 
-    for Idx := LOW_INDEX to HIGH_INDEX do
+    for LIdx := LOW_INDEX to HIGH_INDEX do
     begin
 
-      GetWorkingValue(Idx);
+      GetWorkingValue(LIdx);
 
       FCRC32Fast.Initialize;
 
-      i := size;
-      while i < System.Length(ChunkedData) do
+      LI := LSize;
+      while LI < System.Length(ChunkedData) do
       begin
-        temp := System.Copy(ChunkedData, (i - size) + 1, size);
-        FCRC32Fast.TransformString(temp, TEncoding.UTF8);
+        LTemp := System.Copy(ChunkedData, (LI - LSize) + 1, LSize);
+        FCRC32Fast.TransformString(LTemp, TEncoding.UTF8);
 
-        System.Inc(i, size);
+        System.Inc(LI, LSize);
       end;
-      temp := System.Copy(ChunkedData, (i - size) + 1,
-        System.Length(ChunkedData) - ((i - size)));
-      FCRC32Fast.TransformString(temp, TEncoding.UTF8);
+      LTemp := System.Copy(ChunkedData, (LI - LSize) + 1,
+        System.Length(ChunkedData) - ((LI - LSize)));
+      FCRC32Fast.TransformString(LTemp, TEncoding.UTF8);
 
       ActualString := FCRC32Fast.TransformFinal().ToString();
 
@@ -291,21 +297,21 @@ end;
 
 procedure TTestCRC32FastModel.TestCheckValue;
 var
-  Idx: Int32;
-  Check_Value: UInt32;
-  tmp: String;
+  LIdx: Int32;
+  LCheckValue: UInt32;
+  LTmp: String;
 begin
 
-  for Idx := LOW_INDEX to HIGH_INDEX do
+  for LIdx := LOW_INDEX to HIGH_INDEX do
   begin
 
-    Check_Value := GetWorkingValue(Idx);
+    LCheckValue := GetWorkingValue(LIdx);
 
-    ExpectedString := IntToHex(Check_Value, 16);
+    ExpectedString := IntToHex(LCheckValue, 16);
 
-    tmp := FCRC32Fast.ComputeString(OneToNine, TEncoding.UTF8).ToString();
+    LTmp := FCRC32Fast.ComputeString(OneToNine, TEncoding.UTF8).ToString();
 
-    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(LTmp)) + LTmp;
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
@@ -317,27 +323,27 @@ end;
 
 procedure TTestCRC32FastModel.TestCheckValueWithIncrementalHash;
 var
-  Idx: Int32;
-  Check_Value: UInt32;
-  tmp: String;
+  LIdx: Int32;
+  LCheckValue: UInt32;
+  LTmp: String;
 begin
 
-  for Idx := LOW_INDEX to HIGH_INDEX do
+  for LIdx := LOW_INDEX to HIGH_INDEX do
   begin
 
-    Check_Value := GetWorkingValue(Idx);
+    LCheckValue := GetWorkingValue(LIdx);
 
     FCRC32Fast.Initialize();
 
-    ExpectedString := IntToHex(Check_Value, 16);
+    ExpectedString := IntToHex(LCheckValue, 16);
 
     FCRC32Fast.TransformString(System.Copy(OneToNine, 1, 3), TEncoding.UTF8);
     FCRC32Fast.TransformString(System.Copy(OneToNine, 4, 3), TEncoding.UTF8);
     FCRC32Fast.TransformString(System.Copy(OneToNine, 7, 3), TEncoding.UTF8);
 
-    tmp := FCRC32Fast.TransformFinal().ToString();
+    LTmp := FCRC32Fast.TransformFinal().ToString();
 
-    ActualString := System.StringOfChar('0', 16 - System.Length(tmp)) + tmp;
+    ActualString := System.StringOfChar('0', 16 - System.Length(LTmp)) + LTmp;
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
@@ -349,53 +355,53 @@ end;
 
 procedure TTestCRC32FastModel.TestHashCloneIsCorrect;
 var
-  Original, Copy: IHash;
-  MainData, ChunkOne, ChunkTwo: TBytes;
-  Count, Idx: Int32;
+  LOriginal, LCopy: IHash;
+  LMainData, LChunkOne, LChunkTwo: TBytes;
+  LCount, LIdx: Int32;
 begin
-  MainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
-  Count := System.Length(MainData) - 3;
-  ChunkOne := System.Copy(MainData, 0, Count);
-  ChunkTwo := System.Copy(MainData, Count, System.Length(MainData) - Count);
+  LMainData := TConverters.ConvertStringToBytes(DefaultData, TEncoding.UTF8);
+  LCount := System.Length(LMainData) - 3;
+  LChunkOne := System.Copy(LMainData, 0, LCount);
+  LChunkTwo := System.Copy(LMainData, LCount, System.Length(LMainData) - LCount);
 
-  for Idx := LOW_INDEX to HIGH_INDEX do
+  for LIdx := LOW_INDEX to HIGH_INDEX do
   begin
-    GetWorkingValue(Idx);
-    Original := FCRC32Fast;
-    Original.Initialize;
+    GetWorkingValue(LIdx);
+    LOriginal := FCRC32Fast;
+    LOriginal.Initialize;
 
-    Original.TransformBytes(ChunkOne);
+    LOriginal.TransformBytes(LChunkOne);
     // Make Copy Of Current State
-    Copy := Original.Clone();
-    Original.TransformBytes(ChunkTwo);
-    ExpectedString := Original.TransformFinal().ToString();
-    Copy.TransformBytes(ChunkTwo);
-    ActualString := Copy.TransformFinal().ToString();
+    LCopy := LOriginal.Clone();
+    LOriginal.TransformBytes(LChunkTwo);
+    ExpectedString := LOriginal.TransformFinal().ToString();
+    LCopy.TransformBytes(LChunkTwo);
+    ActualString := LCopy.TransformFinal().ToString();
 
     CheckEquals(ExpectedString, ActualString,
       Format('Expected %s but got %s. %s', [ExpectedString, ActualString,
-      Original.Name]));
+      LOriginal.Name]));
   end;
 end;
 
 procedure TTestCRC32FastModel.TestHashCloneIsUnique;
 var
-  Original, Copy: IHash;
-  Idx: Int32;
+  LOriginal, LCopy: IHash;
+  LIdx: Int32;
 begin
-  for Idx := LOW_INDEX to HIGH_INDEX do
+  for LIdx := LOW_INDEX to HIGH_INDEX do
   begin
-    GetWorkingValue(Idx);
-    Original := FCRC32Fast;
-    Original.Initialize;
-    Original.BufferSize := (64 * 1024); // 64Kb
+    GetWorkingValue(LIdx);
+    LOriginal := FCRC32Fast;
+    LOriginal.Initialize;
+    LOriginal.BufferSize := (64 * 1024); // 64Kb
     // Make Copy Of Current State
-    Copy := Original.Clone();
-    Copy.BufferSize := (128 * 1024); // 128Kb
+    LCopy := LOriginal.Clone();
+    LCopy.BufferSize := (128 * 1024); // 128Kb
 
-    CheckNotEquals(Original.BufferSize, Copy.BufferSize,
-      Format('Expected %d but got %d. %s', [Original.BufferSize,
-      Copy.BufferSize, Original.Name]));
+    CheckNotEquals(LOriginal.BufferSize, LCopy.BufferSize,
+      Format('Expected %d but got %d. %s', [LOriginal.BufferSize,
+      LCopy.BufferSize, LOriginal.Name]));
   end;
 end;
 

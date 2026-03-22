@@ -310,7 +310,7 @@ type
   TCryptoAlgorithmTestCase = class abstract(THashAlgorithmTestCase)
   strict private
   var
-    FHMACInstance: IHMAC;
+    FHmacInstance: IHMAC;
     FHashOfDefaultDataHMACWithShortKey,
       FHashOfDefaultDataHMACWithLongKey: String;
 
@@ -320,8 +320,8 @@ type
       : String); inline;
     procedure SetHashOfDefaultDataHMACWithLongKey(const AValue: String); inline;
 
-    function GetHMACInstance: IHMAC; inline;
-    procedure SetHMACInstance(const AValue: IHMAC); inline;
+    function GetHmacInstance: IHMAC; inline;
+    procedure SetHmacInstance(const AValue: IHMAC); inline;
 
   strict protected
     property HashOfDefaultDataHMACWithShortKey: String
@@ -332,7 +332,7 @@ type
       read GetHashOfDefaultDataHMACWithLongKey
       write SetHashOfDefaultDataHMACWithLongKey;
 
-    property HMACInstance: IHMAC read GetHMACInstance write SetHMACInstance;
+    property HmacInstance: IHMAC read GetHmacInstance write SetHmacInstance;
   published
     procedure TestSplits();
     procedure TestHMACWithDefaultDataShortKey;
@@ -766,7 +766,7 @@ procedure THashAlgorithmTestCase.TestBytesABCDE;
 var
   LBuffer: TBytes;
 begin
-  LBuffer := Nil;
+  LBuffer := nil;
   System.SetLength(LBuffer, System.SizeOf(BytesABCDE));
   System.Move(BytesABCDE, Pointer(LBuffer)^, System.SizeOf(BytesABCDE));
   ExpectedString := HashOfABCDE;
@@ -836,7 +836,7 @@ procedure THashAlgorithmTestCase.TestUntypedInterface;
 var
   LBuffer, LResultA, LResultB: TBytes;
 begin
-  LBuffer := Nil;
+  LBuffer := nil;
   System.SetLength(LBuffer, System.SizeOf(BytesABCDE));
   System.Move(BytesABCDE, Pointer(LBuffer)^, System.SizeOf(BytesABCDE));
   LResultA := HashInstance.ComputeBytes(LBuffer).GetBytes();
@@ -865,7 +865,8 @@ var
   LIHashWithKey: IHashWithKey;
 begin
   ExpectedString := HashOfDefaultDataWithMaxUInt32AsKey;
-  LIHashWithKey := (HashInstance as IHashWithKey);
+  CheckTrue(Supports(HashInstance, IHashWithKey, LIHashWithKey),
+    'HashInstance must support IHashWithKey');
   LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
   ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
@@ -892,7 +893,7 @@ var
   LIHashWithKey: IHashWithKey;
 begin
   ExpectedString := HashOfDefaultDataWithMaxUInt64AsKey;
-  LIHashWithKey := (HashInstance as IHashWithKey);
+  LIHashWithKey := HashInstance as IHashWithKey;
   LIHashWithKey.Key := TConverters.ReadUInt64AsBytesLE(System.High(UInt64));
   ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
@@ -919,7 +920,8 @@ var
   LIHashWithKey: IHashWithKey;
 begin
   ExpectedString := HashOfDefaultDataWithExternalKey;
-  LIHashWithKey := (HashInstance as IHashWithKey);
+  CheckTrue(Supports(HashInstance, IHashWithKey, LIHashWithKey),
+    'HashInstance must support IHashWithKey');
   LIHashWithKey.Key := TConverters.ConvertHexStringToBytes(ZeroToFifteenInHex);
   ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
@@ -951,22 +953,22 @@ begin
   FHashOfDefaultDataHMACWithShortKey := AValue;
 end;
 
-function TCryptoAlgorithmTestCase.GetHMACInstance: IHMAC;
+function TCryptoAlgorithmTestCase.GetHmacInstance: IHMAC;
 begin
-  Result := FHMACInstance;
+  Result := FHmacInstance;
 end;
 
-procedure TCryptoAlgorithmTestCase.SetHMACInstance(const AValue: IHMAC);
+procedure TCryptoAlgorithmTestCase.SetHmacInstance(const AValue: IHMAC);
 begin
-  FHMACInstance := AValue;
+  FHmacInstance := AValue;
 end;
 
 procedure TCryptoAlgorithmTestCase.TestHMACWithDefaultDataShortKey;
 begin
   ExpectedString := HashOfDefaultDataHMACWithShortKey;
-  HMACInstance.Key := TConverters.ConvertStringToBytes(HMACShortStringKey,
+  HmacInstance.Key := TConverters.ConvertStringToBytes(HMACShortStringKey,
     TEncoding.UTF8);
-  ActualString := HMACInstance.ComputeString(DefaultData, TEncoding.UTF8)
+  ActualString := HmacInstance.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
     [ExpectedString, ActualString]));
@@ -975,9 +977,9 @@ end;
 procedure TCryptoAlgorithmTestCase.TestHMACWithDefaultDataLongKey;
 begin
   ExpectedString := HashOfDefaultDataHMACWithLongKey;
-  HMACInstance.Key := TConverters.ConvertStringToBytes(HMACLongStringKey,
+  HmacInstance.Key := TConverters.ConvertStringToBytes(HMACLongStringKey,
     TEncoding.UTF8);
-  ActualString := HMACInstance.ComputeString(DefaultData, TEncoding.UTF8)
+  ActualString := HmacInstance.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
     [ExpectedString, ActualString]));
@@ -994,14 +996,15 @@ begin
   LChunkOne := System.Copy(LMainData, 0, LCount);
   LChunkTwo := System.Copy(LMainData, LCount, System.Length(LMainData)
     - LCount);
-  LOriginal := HMACInstance;
-  (LOriginal as IHMAC).Key := TConverters.ConvertStringToBytes
+  LOriginal := HmacInstance;
+  LOriginal.Key := TConverters.ConvertStringToBytes
     (HMACLongStringKey, TEncoding.UTF8);
   LOriginal.Initialize;
 
   LOriginal.TransformBytes(LChunkOne);
   // Make Copy Of Current State
-  LCopy := LOriginal.Clone() as IHMAC;
+  CheckTrue(Supports(LOriginal.Clone(), IHMAC, LCopy),
+    'Clone must support IHMAC');
   LOriginal.TransformBytes(LChunkTwo);
   ExpectedString := LOriginal.TransformFinal().ToString();
   LCopy.TransformBytes(LChunkTwo);
@@ -1017,7 +1020,7 @@ var
   LHash0, LHash1: String;
   LInput: TBytes;
 begin
-  LInput := Nil;
+  LInput := nil;
   System.SetLength(LInput, 20);
   for LIdx := System.Low(LInput) to System.High(LInput) do
   begin
@@ -1096,7 +1099,7 @@ begin
 
     if LLen = 0 then
     begin
-      LData := Nil;
+      LData := nil;
     end
     else
     begin
@@ -1126,7 +1129,7 @@ begin
 
     if LIdx = 0 then
     begin
-      LInput := Nil;
+      LInput := nil;
     end
     else
     begin
@@ -1173,7 +1176,7 @@ var
   LOutput: TBytes;
 begin
   XofInstance.Initialize;
-  LOutput := Nil;
+  LOutput := nil;
   System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
   XofInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
   XofInstance.DoOutput(LOutput, 0, System.Length(LOutput));
@@ -1186,7 +1189,7 @@ var
   LOutput: TBytes;
 begin
   XofInstance.Initialize;
-  LOutput := Nil;
+  LOutput := nil;
   System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3));
 
   try
@@ -1207,7 +1210,7 @@ var
   LOutput: TBytes;
 begin
   XofInstance.Initialize;
-  LOutput := Nil;
+  LOutput := nil;
   System.SetLength(LOutput, (XofInstance.XOFSizeInBits shr 3) + 1);
 
   try
@@ -1236,7 +1239,7 @@ procedure TXofAlgorithmTestCase.TestVeryLongXofOfEmptyStringWithStreamingOutput;
 var
   LTempResult, LExpectedChunk, LActualChunk: TBytes;
 begin
-  LTempResult := Nil;
+  LTempResult := nil;
   System.SetLength(LTempResult, 1000);
   XofInstance.Initialize;
   XofInstance.TransformString(EmptyData, TEncoding.UTF8);

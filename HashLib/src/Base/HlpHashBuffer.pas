@@ -53,9 +53,9 @@ implementation
 
 function THashBuffer.Clone(): THashBuffer;
 begin
-  result := Default (THashBuffer);
-  result.FData := System.Copy(FData);
-  result.FPosition := FPosition;
+  Result := Default(THashBuffer);
+  Result.FData := System.Copy(FData);
+  Result.FPosition := FPosition;
 end;
 
 constructor THashBuffer.Create(ALength: Int32);
@@ -69,7 +69,7 @@ end;
 
 function THashBuffer.GetIsFull: Boolean;
 begin
-  result := FPosition = System.Length(FData);
+  Result := FPosition = System.Length(FData);
 end;
 
 function THashBuffer.Feed(AData: PByte; ADataLength: Int32;
@@ -84,13 +84,13 @@ begin
 {$ENDIF DEBUG}
   if (ADataLength = 0) then
   begin
-    result := false;
+    Result := False;
     Exit;
   end;
 
   if (ALength = 0) then
   begin
-    result := false;
+    Result := False;
     Exit;
   end;
   LLength := System.Length(FData) - FPosition;
@@ -103,7 +103,7 @@ begin
 
   FPosition := FPosition + LLength;
 
-  result := IsFull;
+  Result := IsFull;
 end;
 
 function THashBuffer.Feed(AData: PByte; ADataLength: Int32;
@@ -119,13 +119,13 @@ begin
 {$ENDIF DEBUG}
   if (ADataLength = 0) then
   begin
-    result := false;
+    Result := False;
     Exit;
   end;
 
   if (ALength = 0) then
   begin
-    result := false;
+    Result := False;
     Exit;
   end;
 
@@ -143,7 +143,7 @@ begin
   ALength := ALength - LLength;
   AProcessedBytesCount := AProcessedBytesCount + UInt64(LLength);
 
-  result := IsFull;
+  Result := IsFull;
 end;
 
 function THashBuffer.GetBytes: THashLibByteArray;
@@ -152,7 +152,7 @@ begin
   System.Assert(IsFull);
 {$ENDIF DEBUG}
   FPosition := 0;
-  result := FData;
+  Result := FData;
 end;
 
 function THashBuffer.GetBytesZeroPadded: THashLibByteArray;
@@ -160,22 +160,22 @@ begin
   TArrayUtils.Fill(FData, FPosition, (System.Length(FData) - FPosition) +
     FPosition, Byte(0));
   FPosition := 0;
-  result := FData;
+  Result := FData;
 end;
 
 function THashBuffer.GetIsEmpty: Boolean;
 begin
-  result := FPosition = 0;
+  Result := FPosition = 0;
 end;
 
 function THashBuffer.GetLength: Int32;
 begin
-  result := System.Length(FData);
+  Result := System.Length(FData);
 end;
 
 function THashBuffer.GetPosition: Int32;
 begin
-  result := FPosition;
+  Result := FPosition;
 end;
 
 procedure THashBuffer.Initialize;
@@ -186,7 +186,7 @@ end;
 
 function THashBuffer.ToString: String;
 begin
-  result := Format(SHashBufferMessage, [Self.Length, Self.Position,
+  Result := Format(SHashBufferMessage, [Self.Length, Self.Position,
     BoolToStr(Self.IsEmpty, True)]);
 end;
 

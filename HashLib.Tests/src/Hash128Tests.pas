@@ -60,7 +60,7 @@ end;
 
 procedure TTestMurmurHash3_x86_128.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -79,7 +79,7 @@ end;
 
 procedure TTestMurmurHash3_x64_128.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 
@@ -98,7 +98,7 @@ end;
 
 procedure TTestSipHash128_2_4.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 

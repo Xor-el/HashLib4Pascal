@@ -201,18 +201,18 @@ end;
 class function TBits.ReverseBytesInt32(AValue: Int32): Int32;
 {$IFNDEF FPC}
 var
-  i1, i2, i3, i4: Int32;
+  LByte1, LByte2, LByte3, LByte4: Int32;
 {$ENDIF FPC}
 begin
 {$IFDEF FPC}
   Result := SwapEndian(AValue);
 {$ELSE}
-  i1 := AValue and $FF;
-  i2 := TBits.Asr32(AValue, 8) and $FF;
-  i3 := TBits.Asr32(AValue, 16) and $FF;
-  i4 := TBits.Asr32(AValue, 24) and $FF;
+  LByte1 := AValue and $FF;
+  LByte2 := TBits.Asr32(AValue, 8) and $FF;
+  LByte3 := TBits.Asr32(AValue, 16) and $FF;
+  LByte4 := TBits.Asr32(AValue, 24) and $FF;
 
-  Result := (i1 shl 24) or (i2 shl 16) or (i3 shl 8) or (i4 shl 0);
+  Result := (LByte1 shl 24) or (LByte2 shl 16) or (LByte3 shl 8) or (LByte4 shl 0);
 {$ENDIF FPC}
 end;
 
