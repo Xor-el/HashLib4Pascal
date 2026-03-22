@@ -1,153 +1,236 @@
-HashLib4Pascal: Hashing for Modern Object Pascal [![License](http://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Xor-el/HashLib4Pascal/blob/master/LICENSE)
-========================================
+# HashLib4Pascal
 
-``HashLib4Pascal`` is an Object Pascal hashing library released under the permissive [MIT License](https://github.com/Xor-el/HashLib4Pascal/blob/master/LICENSE) which provides an easy to use interface for computing hashes and checksums of data. It also supports state based (incremental) hashing.
-
-``HashLib4Pascal's`` goal is to be the best option for hashing in Object Pascal by offering various hashing primitives via an easy to use API to Object Pascal developers.
-
-Development is coordinated on [GitHub](https://github.com/Xor-el/HashLib4Pascal) and contributions are welcome. If you need help, please open an issue [here](https://github.com/Xor-el/HashLib4Pascal/issues).
-
-
-**Build Status**
 [![Build Status](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml/badge.svg)](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Xor-el/HashLib4Pascal/blob/master/LICENSE)
+[![Delphi](https://img.shields.io/badge/Delphi-2010%2B-red.svg)](https://www.embarcadero.com/products/delphi)
+[![FreePascal](https://img.shields.io/badge/FreePascal-3.2.2%2B-blue.svg)](https://www.freepascal.org/)
 
-Available Algorithms
-----------------------------------------
+HashLib4Pascal is a comprehensive hashing library for Object Pascal, providing an easy-to-use interface for computing hashes, checksums, MACs, KDFs, and XOFs with support for state-based (incremental) hashing, released under the permissive [MIT License](LICENSE).
 
- ### Hashes
-----------------------------------------
-##### Cyclic Redundancy Checks
+## Table of Contents
 
-* `All CRC Variants from CRC3 to CRC64` 
+- [Features](#features)
+- [Available Algorithms](#available-algorithms)
+- [Getting Started](#getting-started)
+- [Quick Examples](#quick-examples)
+- [Running Tests](#running-tests)
+- [Contributing](#contributing)
+- [Other Implementations](#other-implementations)
+- [Tip Jar](#tip-jar)
+- [License](#license)
 
-##### Checksums
+## Features
 
-* `Adler32`
+- **Extensive hash coverage** -- CRC (all standard variants from CRC3 to CRC64), non-cryptographic (Murmur, XXHash, SipHash, etc.), and cryptographic (SHA-2, SHA-3, Blake2, Blake3, and more)
+- **State-based (incremental) hashing** -- feed data in chunks via `TransformBytes` / `TransformString`, then finalize with `TransformFinal`
+- **One-shot convenience** -- `ComputeString`, `ComputeBytes`, `ComputeFile`, `ComputeStream` for single-call hashing
+- **Password hashing / KDFs** -- Argon2 (2i/2d/2id), Scrypt, PBKDF2-HMAC
+- **MACs** -- HMAC (all supported hashes), KMAC (128/256), Blake2BMAC, Blake2SMAC
+- **Extendable output functions (XOFs)** -- Shake, CShake, Blake2X, KMACXOF, Blake3XOF
+- **Cloneable state** -- clone any hash instance mid-computation for parallel/divergent processing
+- **Cross-platform** -- Delphi and FreePascal on Windows, Linux, macOS, and more
 
-##### Non-Cryptographic Hash Functions 
-----------------------------------------
+## Available Algorithms
 
-###### 32 bit hashes
+<details>
+<summary>Checksums</summary>
 
-* `AP` `BKDR` `Bernstein` `Bernstein1` `DEK` `DJB` `ELF` `FNV` 
+#### CRC
+`All CRC variants from CRC3 to CRC64`
 
-* `FNV1a` `JS` `Jenkins3` `Murmur2` `MurmurHash3_x86_32` `OneAtTime`
+#### Other
+`Adler32`
 
-*  `PJW` `RS` `Rotating` `SDBM` `ShiftAndXor` `SuperFast` `XXHash32`
+</details>
 
-###### 64 bit hashes
+<details>
+<summary>Non-Cryptographic Hash Functions</summary>
 
-* `FNV64` `FNV1a64` `Murmur2_64` `SipHash2_4` `XXHash64`
+#### 32-bit
+`AP` | `BKDR` | `Bernstein` | `Bernstein1` | `DEK` | `DJB` | `ELF` | `FNV` | `FNV1a` | `Jenkins3` | `JS` | `Murmur2` | `MurmurHash3_x86_32` | `OneAtTime` | `PJW` | `Rotating` | `RS` | `SDBM` | `ShiftAndXor` | `SuperFast` | `XXHash32`
 
-###### 128 bit hashes
+#### 64-bit
+`FNV64` | `FNV1a64` | `Murmur2_64` | `SipHash2_4` | `XXHash64`
 
-* `MurmurHash3_x86_128` `MurmurHash3_x64_128` 
+#### 128-bit
+`SipHash128_2_4` | `MurmurHash3_x86_128` | `MurmurHash3_x64_128`
 
-##### Cryptographic Hash Functions 
-----------------------------------------
+</details>
 
- * `MD2`
+<details>
+<summary>Cryptographic Hash Functions</summary>
 
- * `MD4`
+| Family | Variants |
+|---|---|
+| MD | MD2, MD4, MD5 |
+| SHA-0 | SHA-0 |
+| SHA-1 | SHA-1 |
+| SHA-2 | 224, 256, 384, 512, 512-224, 512-256 |
+| SHA-3 | 224, 256, 384, 512 |
+| Keccak | 224, 256, 288, 384, 512 |
+| Blake2B | 160, 256, 384, 512 |
+| Blake2S | 128, 160, 224, 256 |
+| Blake2BP | Blake2BP |
+| Blake2SP | Blake2SP |
+| Blake3 | Blake3 |
+| GOST | 34.11-94, R 34.11-2012 (256, 512) |
+| Grindahl | 256, 512 |
+| HAS160 | HAS160 |
+| RIPEMD | 128, 160, 256, 320 |
+| Tiger | 128, 160, 192 (Rounds 3, 4, 5) |
+| Tiger2 | 128, 160, 192 (Rounds 3, 4, 5) |
+| Snefru | 128, 256 |
+| Haval | 128, 160, 192, 224, 256 (Rounds 3, 4, 5) |
+| Panama | Panama |
+| RadioGatun | RadioGatun32, RadioGatun64 |
+| WhirlPool | WhirlPool |
 
- * `MD5`
+</details>
 
- * `SHA-0`
+<details>
+<summary>Key Derivation Functions</summary>
 
- * `SHA-1`
+#### Password Hashing
+`PBKDF2-HMAC` | `Argon2 (2i, 2d, 2id)` | `Scrypt`
 
- * `SHA-2 (224, 256, 384, 512, 512-224, 512-256)`
+</details>
 
- * `GOST 34.11-94`
+<details>
+<summary>MACs</summary>
 
- * `GOST R 34.11-2012 (AKA Streebog) (256, 512)`
- 
- * `Grindahl (256, 512)`
- 
- * `Has160`
+`HMAC (all supported hashes)` | `KMAC (128, 256)` | `Blake2BMAC` | `Blake2SMAC`
 
- * `RIPEMD (128, 160, 256, 256, 320)`
+</details>
 
- * `Tiger (128, 160, 192 (Rounds 3, 4, 5))` 
+<details>
+<summary>XOF (Extendable Output Functions)</summary>
 
- * `Tiger2 (128, 160, 192 (Rounds 3, 4, 5))` 
- 
- * `Snefru (128, 256)`
- 
- * `Haval (128, 160, 192, 224, 256 (Rounds 3, 4, 5))`
- 
- * `Panama`
- 
- * `RadioGatun (RadioGatun32, RadioGatun64)`
+`Shake (128, 256)` | `CShake (128, 256)` | `Blake2XS` | `Blake2XB` | `KMAC128XOF` | `KMAC256XOF` | `Blake3XOF`
 
- * `WhirlPool`
+</details>
 
- * `Blake2B (160, 256, 384, 512)`
- 
- * `Blake2S (128, 160, 224, 256)`
+## Getting Started
 
- * `SHA-3 (224, 256, 384, 512)`
- 
- * `Keccak (224, 256, 288, 384, 512)`
+### Prerequisites
 
- * `Blake2BP`
+| Compiler | Minimum Version |
+|---|---|
+| Delphi | 2010 or later |
+| FreePascal | 3.2.2 or later |
 
- * `Blake2SP`
+### Installation
 
- * `Blake3`
+#### Delphi
 
-### Key Derivation Functions
-----------------------------------------
+1. Open and install the package: `HashLib/src/Packages/Delphi/HashLib4PascalPackage.dpk`
+2. Add the `HashLib/src` subdirectories to your project's search path.
 
-###### Password Hashing Schemes (Password Based Key Derivation Functions)
+#### FreePascal / Lazarus
 
-----------------------------------------
+1. Open and install the package: `HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk`
 
-* `PBKDF2`
- 
-* `Argon2 (2i, 2d and 2id variants)`
+## Quick Examples
 
-* `Scrypt`
+### SHA-256 Hash
 
-### MAC
-----------------------------------------
+```pascal
+uses
+  SysUtils, HlpHashFactory;
 
-* `HMAC (all supported hashes)`
+var
+  LHash: String;
+begin
+  LHash := THashFactory.TCrypto.CreateSHA2_256()
+    .ComputeString('Hello HashLib4Pascal', TEncoding.UTF8)
+    .ToString();
 
-* `KMAC (KMAC128, KMAC256)`
+  WriteLn(LHash);
+end;
+```
 
-* `Blake2MAC (Blake2BMAC, Blake2SMAC)`
+### Incremental (Streaming) Hash
 
-### XOF (Extendable Output Function)
-----------------------------------------
+```pascal
+uses
+  SysUtils, HlpIHash, HlpHashFactory;
 
-* `Shake (Shake-128, Shake-256)`
+var
+  LHashInstance: IHash;
+begin
+  LHashInstance := THashFactory.TCrypto.CreateBlake2B_256();
+  LHashInstance.Initialize();
 
-* `CShake (CShake-128, CShake-256)`
+  LHashInstance.TransformString('chunk one', TEncoding.UTF8);
+  LHashInstance.TransformString('chunk two', TEncoding.UTF8);
+  LHashInstance.TransformString('chunk three', TEncoding.UTF8);
 
-* `Blake2X (Blake2XS, Blake2XB)`
+  WriteLn(LHashInstance.TransformFinal().ToString());
+end;
+```
 
-* `KMACXOF (KMAC128XOF, KMAC256XOF)`
+### HMAC
 
-* `Blake3XOF`
+```pascal
+uses
+  SysUtils, HlpIHashInfo, HlpHashFactory, HlpConverters;
 
-### Supported Compilers
-----------------------------------------
+var
+  LHMAC: IHMAC;
+begin
+  LHMAC := THashFactory.THMAC.CreateHMAC(
+    THashFactory.TCrypto.CreateSHA2_256(),
+    TConverters.ConvertStringToBytes('secret key', TEncoding.UTF8));
 
-* `FreePascal 3.0.0+`
+  WriteLn(LHMAC.ComputeString('message', TEncoding.UTF8).ToString());
+end;
+```
 
-* `Delphi 2010+`
+### Scrypt KDF
 
-### Other Implementations
-----------------------------------------
+```pascal
+uses
+  SysUtils, HlpIHashInfo, HlpHashFactory, HlpConverters;
 
-If you want implementations in other languages, you can check out these
+var
+  LDerivedKey: TBytes;
+begin
+  LDerivedKey := TKDF.TPBKDF_Scrypt.CreatePBKDF_Scrypt(
+    TConverters.ConvertStringToBytes('password', TEncoding.UTF8),
+    TConverters.ConvertStringToBytes('salt', TEncoding.UTF8),
+    1024, 8, 1)
+    .GetBytes(32);
 
-* [HashLib4CPP](https://github.com/ron4fun/HashLib4CPP) by Mbadiwe Nnaemeka Ronald
+  WriteLn(TConverters.ConvertBytesToHexString(LDerivedKey));
+end;
+```
 
-### Tip Jar
-----------------------------------------
+## Running Tests
 
-* :dollar: **Bitcoin**: `1MhFfW7tDuEHQSgie65uJcAfJgCNchGeKf`
-* :euro: **Ethereum**: `0x6c1DC21aeC49A822A4f1E3bf07c623C2C1978a98`
-* :pound: **Pascalcoin**: `345367-40`
+Tests use **DUnit** (Delphi) and **FPCUnit** (FreePascal).
+
+- **Delphi:** Open `HashLib.Tests/Delphi.Tests/HashLib.Tests.dpr` in the IDE and run.
+- **FreePascal / Lazarus:** Open `HashLib.Tests/FreePascal.Tests/HashLib.Tests.lpi` in the IDE and run.
+
+## Contributing
+
+Contributions are welcome. Please open an [issue](https://github.com/Xor-el/HashLib4Pascal/issues) for bug reports or feature requests, and submit pull requests.
+
+## Other Implementations
+
+If you want implementations in other languages, you can check out these:
+
+- [HashLib4CPP](https://github.com/ron4fun/HashLib4CPP) by Mbadiwe Nnaemeka Ronald
+
+## Tip Jar
+
+If you find this library useful and would like to support its continued development, tips are greatly appreciated! 🙏
+
+| Cryptocurrency | Wallet Address |
+|---|---|
+| <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/btc.png" width="20" alt="Bitcoin" /> **Bitcoin (BTC)** | `bc1quqhe342vw4ml909g334w9ygade64szqupqulmu` |
+| <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/eth.png" width="20" alt="Ethereum" /> **Ethereum (ETH)** | `0x53651185b7467c27facab542da5868bfebe2bb69` |
+| <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/sol.png" width="20" alt="Solana" /> **Solana (SOL)** | `BPZHjY1eYCdQjLecumvrTJRi5TXj3Yz1vAWcmyEB9Miu` |
+
+## License
+
+HashLib4Pascal is released under the [MIT License](LICENSE).
