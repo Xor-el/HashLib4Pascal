@@ -189,7 +189,7 @@ end;
 
 ```pascal
 uses
-  SysUtils, HlpIHashInfo, HlpHashFactory, HlpConverters;
+  SysUtils, HlpHashFactory, HlpConverters;
 
 var
   LDerivedKey: TBytes;
