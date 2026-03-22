@@ -44,7 +44,7 @@ implementation
 
 constructor TMDBase.Create(AStateLength, AHashSize: Int32);
 begin
-  Inherited Create(AHashSize, 64);
+  inherited Create(AHashSize, 64);
   System.SetLength(FState, AStateLength);
 end;
 
@@ -78,9 +78,9 @@ end;
 
 function TMDBase.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, System.Length(FState) * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FState), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, System.Length(FState) * System.SizeOf(UInt32));
+  TConverters.le32_copy(PCardinal(FState), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TMDBase.Initialize;

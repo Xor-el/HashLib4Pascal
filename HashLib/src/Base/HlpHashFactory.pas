@@ -394,16 +394,16 @@ type
       class function CreateKeccak_384(): IHash; static;
       class function CreateKeccak_512(): IHash; static;
 
-      class function CreateBlake2B(const AConfig: IBlake2BConfig = Nil;
-        const ATreeConfig: IBlake2BTreeConfig = Nil): IHash; static;
+      class function CreateBlake2B(const AConfig: IBlake2BConfig = nil;
+        const ATreeConfig: IBlake2BTreeConfig = nil): IHash; static;
 
       class function CreateBlake2B_160(): IHash; static;
       class function CreateBlake2B_256(): IHash; static;
       class function CreateBlake2B_384(): IHash; static;
       class function CreateBlake2B_512(): IHash; static;
 
-      class function CreateBlake2S(const AConfig: IBlake2SConfig = Nil;
-        const ATreeConfig: IBlake2STreeConfig = Nil): IHash; static;
+      class function CreateBlake2S(const AConfig: IBlake2SConfig = nil;
+        const ATreeConfig: IBlake2STreeConfig = nil): IHash; static;
 
       class function CreateBlake2S_128(): IHash; static;
       class function CreateBlake2S_160(): IHash; static;
@@ -473,7 +473,7 @@ type
     public
 
       class function CreateHMAC(const AHash: IHash;
-        const AHMACKey: THashLibByteArray = Nil): IHMAC; static;
+        const AHMACKey: THashLibByteArray = nil): IHMAC; static;
 
     end;
 
@@ -551,7 +551,7 @@ type
       /// The PKDF2_HMAC KDF Interface Instance <br />
       /// </returns>
       /// <exception cref="EArgumentNilHashLibException">
-      /// The password, salt or algorithm is Nil.
+      /// The password, salt or algorithm is nil.
       /// </exception>
       /// <exception cref="EArgumentHashLibException">
       /// The iteration is less than 1.
@@ -585,7 +585,7 @@ type
       /// The Argon2 KDF Interface Instance
       /// </returns>
       /// /// <exception cref="EArgumentNilHashLibException">
-      /// The password or builder instance is Nil.
+      /// The password or builder instance is nil.
       /// </exception>
       class function CreatePBKDF_Argon2(const APassword: THashLibByteArray;
         const AArgon2Parameters: IArgon2Parameters): IPBKDF_Argon2; static;
@@ -620,7 +620,7 @@ type
       /// The PBKDF_Scrypt KDF Interface Instance <br />
       /// </returns>
       /// <exception cref="EArgumentNilHashLibException">
-      /// The password, salt is Nil.
+      /// The password, salt is nil.
       /// </exception>
       /// <exception cref="EArgumentHashLibException">
       /// The cost, blocksize or parallelism is Invalid.
@@ -1175,7 +1175,7 @@ var
   LConfig: IBlake2BConfig;
 begin
   LConfig := AConfig;
-  if (LConfig = Nil) then
+  if (LConfig = nil) then
   begin
     LConfig := TBlake2BConfig.Create();
   end;
@@ -1212,7 +1212,7 @@ var
   LConfig: IBlake2SConfig;
 begin
   LConfig := AConfig;
-  if (LConfig = Nil) then
+  if (LConfig = nil) then
   begin
     LConfig := TBlake2SConfig.Create();
   end;
@@ -1409,18 +1409,18 @@ class function THashFactory.TXOF.CreateShake_128(AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
-  LXof := (TShake_128.Create() as IXOF);
+  LXof := TShake_128.Create();
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateShake_256(AXofSizeInBits: UInt64): IHash;
 var
   LXof: IXOF;
 begin
-  LXof := (TShake_256.Create() as IXOF);
+  LXof := TShake_256.Create();
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateCShake_128(const AN,
@@ -1428,9 +1428,9 @@ class function THashFactory.TXOF.CreateCShake_128(const AN,
 var
   LXof: IXOF;
 begin
-  LXof := (TCShake_128.Create(AN, &AS) as IXOF);
+  LXof := TCShake_128.Create(AN, &AS);
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateCShake_256(const AN,
@@ -1438,9 +1438,9 @@ class function THashFactory.TXOF.CreateCShake_256(const AN,
 var
   LXof: IXOF;
 begin
-  LXof := (TCShake_256.Create(AN, &AS) as IXOF);
+  LXof := TCShake_256.Create(AN, &AS);
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateBlake2XS(const ABlake2XSConfig
@@ -1448,9 +1448,9 @@ class function THashFactory.TXOF.CreateBlake2XS(const ABlake2XSConfig
 var
   LXof: IXOF;
 begin
-  LXof := (TBlake2XS.Create(ABlake2XSConfig) as IXOF);
+  LXof := TBlake2XS.Create(ABlake2XSConfig);
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateBlake2XS(const AKey: THashLibByteArray;
@@ -1460,7 +1460,7 @@ var
 begin
   LConfig := TBlake2SConfig.Create(32);
   LConfig.Key := AKey;
-  Result := CreateBlake2XS(TBlake2XSConfig.Create(LConfig, Nil),
+  Result := CreateBlake2XS(TBlake2XSConfig.Create(LConfig, nil),
     AXofSizeInBits);
 end;
 
@@ -1469,9 +1469,9 @@ class function THashFactory.TXOF.CreateBlake2XB(const ABlake2XBConfig
 var
   LXof: IXOF;
 begin
-  LXof := (TBlake2XB.Create(ABlake2XBConfig) as IXOF);
+  LXof := TBlake2XB.Create(ABlake2XBConfig);
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateBlake2XB(const AKey: THashLibByteArray;
@@ -1481,7 +1481,7 @@ var
 begin
   LConfig := TBlake2BConfig.Create(64);
   LConfig.Key := AKey;
-  Result := CreateBlake2XB(TBlake2XBConfig.Create(LConfig, Nil),
+  Result := CreateBlake2XB(TBlake2XBConfig.Create(LConfig, nil),
     AXofSizeInBits);
 end;
 
@@ -1490,9 +1490,9 @@ class function THashFactory.TXOF.CreateBlake3XOF(const AKey: THashLibByteArray;
 var
   LXof: IXOF;
 begin
-  LXof := (TBlake3XOF.Create(32, AKey) as IXOF);
+  LXof := TBlake3XOF.Create(32, AKey);
   LXof.XOFSizeInBits := AXofSizeInBits;
-  Result := LXof as IHash;
+  Result := LXof;
 end;
 
 class function THashFactory.TXOF.CreateKMAC128XOF(const AKMACKey,

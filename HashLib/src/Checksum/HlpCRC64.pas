@@ -57,14 +57,14 @@ implementation
 
 function TCRC64.Clone(): IHash;
 begin
-  result := FCRCAlgorithm.Clone();
+  Result := FCRCAlgorithm.Clone();
 end;
 
 constructor TCRC64.Create(APolynomial, AInitial: UInt64;
   AIsInputReflected, AIsOutputReflected: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray);
 begin
-  Inherited Create(8, 1);
+  inherited Create(8, 1);
   FCRCAlgorithm := TCRC.Create(64, APolynomial, AInitial, AIsInputReflected,
     AIsOutputReflected, AOutputXor, ACheckValue, ANames);
 end;
@@ -82,14 +82,14 @@ end;
 
 function TCRC64.TransformFinal: IHashResult;
 begin
-  result := FCRCAlgorithm.TransformFinal();
+  Result := FCRCAlgorithm.TransformFinal();
 end;
 
 { TCRC64_ECMA_182 }
 
 constructor TCRC64_ECMA_182.Create;
 begin
-  Inherited Create(TCRC64Polynomials.ECMA_182, $0000000000000000, false, false,
+  inherited Create(TCRC64Polynomials.ECMA_182, $0000000000000000, False, False,
     $0000000000000000, $6C40DF5F0B497347, THashLibStringArray.Create('CRC-64',
     'CRC-64/ECMA-182'));
 end;

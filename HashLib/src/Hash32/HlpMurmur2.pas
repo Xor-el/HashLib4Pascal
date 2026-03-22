@@ -27,8 +27,8 @@ type
 
   const
     CKEY = UInt32($0);
-    M = UInt32($5BD1E995);
-    R = Int32(24);
+    CMul = UInt32($5BD1E995);
+    CShift = Int32(24);
 
     function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
@@ -53,18 +53,18 @@ implementation
 
 constructor TMurmur2.Create;
 begin
-  Inherited Create(4, 4);
+  inherited Create(4, 4);
   FKey := CKEY;
 end;
 
 function TMurmur2.GetKey: THashLibByteArray;
 begin
-  result := TConverters.ReadUInt32AsBytesLE(FKey);
+  Result := TConverters.ReadUInt32AsBytesLE(FKey);
 end;
 
 procedure TMurmur2.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
     FKey := CKEY;
   end
@@ -81,7 +81,7 @@ end;
 
 function TMurmur2.GetKeyLength: Int32;
 begin
-  result := 4;
+  Result := 4;
 end;
 
 procedure TMurmur2.Initialize;
@@ -99,15 +99,15 @@ begin
   LHashInstance.FWorkingKey := FWorkingKey;
   FBuffer.Position := 0;
   LHashInstance.FBuffer.CopyFrom(FBuffer, FBuffer.Size);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 function TMurmur2.ComputeAggregatedBytes(const AData: THashLibByteArray)
   : IHashResult;
 var
   LLength, LCurrentIndex, LNBlocks, LIdx: Int32;
-  LBlock, LH: UInt32;
+  LBlock, LHashAcc: UInt32;
   LPtrData: PByte;
   LPtrDataCardinal: PCardinal;
 begin
@@ -116,11 +116,11 @@ begin
 
   if (LLength = 0) then
   begin
-    result := THashResult.Create(Int32(0));
+    Result := THashResult.Create(Int32(0));
     Exit;
   end;
 
-  LH := FWorkingKey xor UInt32(LLength);
+  LHashAcc := FWorkingKey xor UInt32(LLength);
 
   LCurrentIndex := 0;
   LIdx := 0;
@@ -131,12 +131,12 @@ begin
   begin
     LBlock := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
 
-    LBlock := LBlock * M;
-    LBlock := LBlock xor (LBlock shr R);
-    LBlock := LBlock * M;
+    LBlock := LBlock * CMul;
+    LBlock := LBlock xor (LBlock shr CShift);
+    LBlock := LBlock * CMul;
 
-    LH := LH * M;
-    LH := LH xor LBlock;
+    LHashAcc := LHashAcc * CMul;
+    LHashAcc := LHashAcc xor LBlock;
 
     System.Inc(LIdx);
     System.Inc(LCurrentIndex, 4);
@@ -146,38 +146,38 @@ begin
   case LLength of
     3:
       begin
-        LH := LH xor (AData[LCurrentIndex + 2] shl 16);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex + 2] shl 16);
 
-        LH := LH xor (AData[LCurrentIndex + 1] shl 8);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex + 1] shl 8);
 
-        LH := LH xor (AData[LCurrentIndex]);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex]);
 
-        LH := LH * M;
+        LHashAcc := LHashAcc * CMul;
       end;
 
     2:
       begin
-        LH := LH xor (AData[LCurrentIndex + 1] shl 8);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex + 1] shl 8);
 
-        LH := LH xor (AData[LCurrentIndex]);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex]);
 
-        LH := LH * M;
+        LHashAcc := LHashAcc * CMul;
       end;
 
     1:
       begin
-        LH := LH xor (AData[LCurrentIndex]);
+        LHashAcc := LHashAcc xor (AData[LCurrentIndex]);
 
-        LH := LH * M;
+        LHashAcc := LHashAcc * CMul;
       end;
   end;
 
-  LH := LH xor (LH shr 13);
+  LHashAcc := LHashAcc xor (LHashAcc shr 13);
 
-  LH := LH * M;
-  LH := LH xor (LH shr 15);
+  LHashAcc := LHashAcc * CMul;
+  LHashAcc := LHashAcc xor (LHashAcc shr 15);
 
-  result := THashResult.Create(Int32(LH));
+  Result := THashResult.Create(Int32(LHashAcc));
 end;
 
 end.

@@ -42,7 +42,7 @@ type
 
     function TransformFinal(): IHashResult;
 
-    function ComputeString(const AData: String; AEncoding: TEncoding)
+    function ComputeString(const AData: String; const AEncoding: TEncoding)
       : IHashResult;
     function ComputeBytes(const AData: THashLibByteArray): IHashResult;
     function ComputeUntyped(const AData; ALength: Int64): IHashResult;

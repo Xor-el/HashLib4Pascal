@@ -37,7 +37,7 @@ end;
 
 procedure TTestAlder32.TearDown;
 begin
-  HashInstance := Nil;
+  HashInstance := nil;
   inherited;
 end;
 

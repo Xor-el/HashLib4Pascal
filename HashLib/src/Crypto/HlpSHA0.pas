@@ -54,13 +54,13 @@ begin
   LHashInstance.FState := System.Copy(FState);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TSHA0.Create;
 begin
-  Inherited Create(20, 64);
+  inherited Create(20, 64);
   System.SetLength(FState, 5);
 end;
 
@@ -240,9 +240,9 @@ end;
 
 function TSHA0.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 5 * System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(FState), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, 5 * System.SizeOf(UInt32));
+  TConverters.be32_copy(PCardinal(FState), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TSHA0.Initialize;
@@ -252,12 +252,12 @@ begin
   FState[2] := $98BADCFE;
   FState[3] := $10325476;
   FState[4] := $C3D2E1F0;
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TSHA0.TransformBlock(AData: PByte; ADataLength: Int32; AIndex: Int32);
 var
-  A, B, C, D, E: UInt32;
+  LRegA, LRegB, LRegC, LRegD, LRegE: UInt32;
   LData: array [0 .. 79] of UInt32;
   LPtrData: PCardinal;
 begin
@@ -267,298 +267,298 @@ begin
 
   Expand(LPtrData);
 
-  A := FState[0];
-  B := FState[1];
-  C := FState[2];
-  D := FState[3];
-  E := FState[4];
+  LRegA := FState[0];
+  LRegB := FState[1];
+  LRegC := FState[2];
+  LRegD := FState[3];
+  LRegE := FState[4];
 
-  E := (LData[0] + C1 + TBits.RotateLeft32(A, 5) +
-    (D xor (B and (C xor D)))) + E;
+  LRegE := (LData[0] + C1 + TBits.RotateLeft32(LRegA, 5) +
+    (LRegD xor (LRegB and (LRegC xor LRegD)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[1] + C1 + TBits.RotateLeft32(E, 5) +
-    (C xor (A and (B xor C)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[1] + C1 + TBits.RotateLeft32(LRegE, 5) +
+    (LRegC xor (LRegA and (LRegB xor LRegC)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[2] + C1 + TBits.RotateLeft32(D, 5) +
-    (B xor (E and (A xor B)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[2] + C1 + TBits.RotateLeft32(LRegD, 5) +
+    (LRegB xor (LRegE and (LRegA xor LRegB)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[3] + C1 + TBits.RotateLeft32(C, 5) +
-    (A xor (D and (E xor A)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[3] + C1 + TBits.RotateLeft32(LRegC, 5) +
+    (LRegA xor (LRegD and (LRegE xor LRegA)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[4] + C1 + TBits.RotateLeft32(B, 5) +
-    (E xor (C and (D xor E)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[4] + C1 + TBits.RotateLeft32(LRegB, 5) +
+    (LRegE xor (LRegC and (LRegD xor LRegE)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[5] + C1 + TBits.RotateLeft32(A, 5) +
-    (D xor (B and (C xor D)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[5] + C1 + TBits.RotateLeft32(LRegA, 5) +
+    (LRegD xor (LRegB and (LRegC xor LRegD)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[6] + C1 + TBits.RotateLeft32(E, 5) +
-    (C xor (A and (B xor C)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[6] + C1 + TBits.RotateLeft32(LRegE, 5) +
+    (LRegC xor (LRegA and (LRegB xor LRegC)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[7] + C1 + TBits.RotateLeft32(D, 5) +
-    (B xor (E and (A xor B)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[7] + C1 + TBits.RotateLeft32(LRegD, 5) +
+    (LRegB xor (LRegE and (LRegA xor LRegB)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[8] + C1 + TBits.RotateLeft32(C, 5) +
-    (A xor (D and (E xor A)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[8] + C1 + TBits.RotateLeft32(LRegC, 5) +
+    (LRegA xor (LRegD and (LRegE xor LRegA)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[9] + C1 + TBits.RotateLeft32(B, 5) +
-    (E xor (C and (D xor E)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[9] + C1 + TBits.RotateLeft32(LRegB, 5) +
+    (LRegE xor (LRegC and (LRegD xor LRegE)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[10] + C1 + TBits.RotateLeft32(A, 5) +
-    (D xor (B and (C xor D)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[10] + C1 + TBits.RotateLeft32(LRegA, 5) +
+    (LRegD xor (LRegB and (LRegC xor LRegD)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[11] + C1 + TBits.RotateLeft32(E, 5) +
-    (C xor (A and (B xor C)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[11] + C1 + TBits.RotateLeft32(LRegE, 5) +
+    (LRegC xor (LRegA and (LRegB xor LRegC)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[12] + C1 + TBits.RotateLeft32(D, 5) +
-    (B xor (E and (A xor B)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[12] + C1 + TBits.RotateLeft32(LRegD, 5) +
+    (LRegB xor (LRegE and (LRegA xor LRegB)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[13] + C1 + TBits.RotateLeft32(C, 5) +
-    (A xor (D and (E xor A)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[13] + C1 + TBits.RotateLeft32(LRegC, 5) +
+    (LRegA xor (LRegD and (LRegE xor LRegA)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[14] + C1 + TBits.RotateLeft32(B, 5) +
-    (E xor (C and (D xor E)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[14] + C1 + TBits.RotateLeft32(LRegB, 5) +
+    (LRegE xor (LRegC and (LRegD xor LRegE)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[15] + C1 + TBits.RotateLeft32(A, 5) +
-    (D xor (B and (C xor D)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[15] + C1 + TBits.RotateLeft32(LRegA, 5) +
+    (LRegD xor (LRegB and (LRegC xor LRegD)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[16] + C1 + TBits.RotateLeft32(E, 5) +
-    (C xor (A and (B xor C)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[16] + C1 + TBits.RotateLeft32(LRegE, 5) +
+    (LRegC xor (LRegA and (LRegB xor LRegC)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[17] + C1 + TBits.RotateLeft32(D, 5) +
-    (B xor (E and (A xor B)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[17] + C1 + TBits.RotateLeft32(LRegD, 5) +
+    (LRegB xor (LRegE and (LRegA xor LRegB)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[18] + C1 + TBits.RotateLeft32(C, 5) +
-    (A xor (D and (E xor A)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[18] + C1 + TBits.RotateLeft32(LRegC, 5) +
+    (LRegA xor (LRegD and (LRegE xor LRegA)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[19] + C1 + TBits.RotateLeft32(B, 5) +
-    (E xor (C and (D xor E)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[19] + C1 + TBits.RotateLeft32(LRegB, 5) +
+    (LRegE xor (LRegC and (LRegD xor LRegE)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[20] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[20] + C2 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[21] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[21] + C2 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[22] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[22] + C2 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[23] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[23] + C2 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[24] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[24] + C2 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[25] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[25] + C2 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[26] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[26] + C2 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[27] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[27] + C2 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[28] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[28] + C2 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[29] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[29] + C2 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[30] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[30] + C2 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[31] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[31] + C2 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[32] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[32] + C2 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[33] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[33] + C2 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[34] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[34] + C2 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[35] + C2 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[35] + C2 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[36] + C2 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[36] + C2 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[37] + C2 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[37] + C2 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[38] + C2 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[38] + C2 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[39] + C2 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[39] + C2 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[40] + C3 + TBits.RotateLeft32(A, 5) +
-    ((B and C) or (D and (B or C)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[40] + C3 + TBits.RotateLeft32(LRegA, 5) +
+    ((LRegB and LRegC) or (LRegD and (LRegB or LRegC)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[41] + C3 + TBits.RotateLeft32(E, 5) +
-    ((A and B) or (C and (A or B)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[41] + C3 + TBits.RotateLeft32(LRegE, 5) +
+    ((LRegA and LRegB) or (LRegC and (LRegA or LRegB)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[42] + C3 + TBits.RotateLeft32(D, 5) +
-    ((E and A) or (B and (E or A)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[42] + C3 + TBits.RotateLeft32(LRegD, 5) +
+    ((LRegE and LRegA) or (LRegB and (LRegE or LRegA)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[43] + C3 + TBits.RotateLeft32(C, 5) +
-    ((D and E) or (A and (D or E)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[43] + C3 + TBits.RotateLeft32(LRegC, 5) +
+    ((LRegD and LRegE) or (LRegA and (LRegD or LRegE)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[44] + C3 + TBits.RotateLeft32(B, 5) +
-    ((C and D) or (E and (C or D)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[44] + C3 + TBits.RotateLeft32(LRegB, 5) +
+    ((LRegC and LRegD) or (LRegE and (LRegC or LRegD)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[45] + C3 + TBits.RotateLeft32(A, 5) +
-    ((B and C) or (D and (B or C)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[45] + C3 + TBits.RotateLeft32(LRegA, 5) +
+    ((LRegB and LRegC) or (LRegD and (LRegB or LRegC)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[46] + C3 + TBits.RotateLeft32(E, 5) +
-    ((A and B) or (C and (A or B)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[46] + C3 + TBits.RotateLeft32(LRegE, 5) +
+    ((LRegA and LRegB) or (LRegC and (LRegA or LRegB)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[47] + C3 + TBits.RotateLeft32(D, 5) +
-    ((E and A) or (B and (E or A)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[47] + C3 + TBits.RotateLeft32(LRegD, 5) +
+    ((LRegE and LRegA) or (LRegB and (LRegE or LRegA)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[48] + C3 + TBits.RotateLeft32(C, 5) +
-    ((D and E) or (A and (D or E)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[48] + C3 + TBits.RotateLeft32(LRegC, 5) +
+    ((LRegD and LRegE) or (LRegA and (LRegD or LRegE)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[49] + C3 + TBits.RotateLeft32(B, 5) +
-    ((C and D) or (E and (C or D)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[49] + C3 + TBits.RotateLeft32(LRegB, 5) +
+    ((LRegC and LRegD) or (LRegE and (LRegC or LRegD)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[50] + C3 + TBits.RotateLeft32(A, 5) +
-    ((B and C) or (D and (B or C)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[50] + C3 + TBits.RotateLeft32(LRegA, 5) +
+    ((LRegB and LRegC) or (LRegD and (LRegB or LRegC)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[51] + C3 + TBits.RotateLeft32(E, 5) +
-    ((A and B) or (C and (A or B)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[51] + C3 + TBits.RotateLeft32(LRegE, 5) +
+    ((LRegA and LRegB) or (LRegC and (LRegA or LRegB)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[52] + C3 + TBits.RotateLeft32(D, 5) +
-    ((E and A) or (B and (E or A)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[52] + C3 + TBits.RotateLeft32(LRegD, 5) +
+    ((LRegE and LRegA) or (LRegB and (LRegE or LRegA)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[53] + C3 + TBits.RotateLeft32(C, 5) +
-    ((D and E) or (A and (D or E)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[53] + C3 + TBits.RotateLeft32(LRegC, 5) +
+    ((LRegD and LRegE) or (LRegA and (LRegD or LRegE)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[54] + C3 + TBits.RotateLeft32(B, 5) +
-    ((C and D) or (E and (C or D)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[54] + C3 + TBits.RotateLeft32(LRegB, 5) +
+    ((LRegC and LRegD) or (LRegE and (LRegC or LRegD)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[55] + C3 + TBits.RotateLeft32(A, 5) +
-    ((B and C) or (D and (B or C)))) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[55] + C3 + TBits.RotateLeft32(LRegA, 5) +
+    ((LRegB and LRegC) or (LRegD and (LRegB or LRegC)))) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[56] + C3 + TBits.RotateLeft32(E, 5) +
-    ((A and B) or (C and (A or B)))) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[56] + C3 + TBits.RotateLeft32(LRegE, 5) +
+    ((LRegA and LRegB) or (LRegC and (LRegA or LRegB)))) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[57] + C3 + TBits.RotateLeft32(D, 5) +
-    ((E and A) or (B and (E or A)))) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[57] + C3 + TBits.RotateLeft32(LRegD, 5) +
+    ((LRegE and LRegA) or (LRegB and (LRegE or LRegA)))) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[58] + C3 + TBits.RotateLeft32(C, 5) +
-    ((D and E) or (A and (D or E)))) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[58] + C3 + TBits.RotateLeft32(LRegC, 5) +
+    ((LRegD and LRegE) or (LRegA and (LRegD or LRegE)))) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[59] + C3 + TBits.RotateLeft32(B, 5) +
-    ((C and D) or (E and (C or D)))) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[59] + C3 + TBits.RotateLeft32(LRegB, 5) +
+    ((LRegC and LRegD) or (LRegE and (LRegC or LRegD)))) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[60] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[60] + C4 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[61] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[61] + C4 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[62] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[62] + C4 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[63] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[63] + C4 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[64] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[64] + C4 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[65] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[65] + C4 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[66] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[66] + C4 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[67] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[67] + C4 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[68] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[68] + C4 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[69] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[69] + C4 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[70] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[70] + C4 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[71] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[71] + C4 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[72] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[72] + C4 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[73] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[73] + C4 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[74] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[74] + C4 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
-  E := (LData[75] + C4 + TBits.RotateLeft32(A, 5) + (B xor C xor D)) + E;
+  LRegC := TBits.RotateLeft32(LRegC, 30);
+  LRegE := (LData[75] + C4 + TBits.RotateLeft32(LRegA, 5) + (LRegB xor LRegC xor LRegD)) + LRegE;
 
-  B := TBits.RotateLeft32(B, 30);
-  D := (LData[76] + C4 + TBits.RotateLeft32(E, 5) + (A xor B xor C)) + D;
+  LRegB := TBits.RotateLeft32(LRegB, 30);
+  LRegD := (LData[76] + C4 + TBits.RotateLeft32(LRegE, 5) + (LRegA xor LRegB xor LRegC)) + LRegD;
 
-  A := TBits.RotateLeft32(A, 30);
-  C := (LData[77] + C4 + TBits.RotateLeft32(D, 5) + (E xor A xor B)) + C;
+  LRegA := TBits.RotateLeft32(LRegA, 30);
+  LRegC := (LData[77] + C4 + TBits.RotateLeft32(LRegD, 5) + (LRegE xor LRegA xor LRegB)) + LRegC;
 
-  E := TBits.RotateLeft32(E, 30);
-  B := (LData[78] + C4 + TBits.RotateLeft32(C, 5) + (D xor E xor A)) + B;
+  LRegE := TBits.RotateLeft32(LRegE, 30);
+  LRegB := (LData[78] + C4 + TBits.RotateLeft32(LRegC, 5) + (LRegD xor LRegE xor LRegA)) + LRegB;
 
-  D := TBits.RotateLeft32(D, 30);
-  A := (LData[79] + C4 + TBits.RotateLeft32(B, 5) + (C xor D xor E)) + A;
+  LRegD := TBits.RotateLeft32(LRegD, 30);
+  LRegA := (LData[79] + C4 + TBits.RotateLeft32(LRegB, 5) + (LRegC xor LRegD xor LRegE)) + LRegA;
 
-  C := TBits.RotateLeft32(C, 30);
+  LRegC := TBits.RotateLeft32(LRegC, 30);
 
-  FState[0] := FState[0] + A;
-  FState[1] := FState[1] + B;
-  FState[2] := FState[2] + C;
-  FState[3] := FState[3] + D;
-  FState[4] := FState[4] + E;
+  FState[0] := FState[0] + LRegA;
+  FState[1] := FState[1] + LRegB;
+  FState[2] := FState[2] + LRegC;
+  FState[3] := FState[3] + LRegD;
+  FState[4] := FState[4] + LRegE;
 
   System.FillChar(LData, System.SizeOf(LData), UInt32(0));
 end;

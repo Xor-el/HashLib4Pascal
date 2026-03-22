@@ -51,8 +51,8 @@ type
 {$ENDREGION}
     class constructor WhirlPool;
 
-    class function PackIntoUInt64(b7, b6, b5, b4, b3, b2, b1, b0: UInt32)
-      : UInt64; static; inline;
+    class function PackIntoUInt64(AByte7, AByte6, AByte5, AByte4, AByte3,
+      AByte2, AByte1, AByte0: UInt32): UInt64; static; inline;
     class function MaskWithReductionPolynomial(AInput: UInt32): UInt32;
       static; inline;
 
@@ -81,13 +81,13 @@ begin
   LHashInstance.FHash := System.Copy(FHash);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TWhirlPool.Create;
 begin
-  Inherited Create(64, 64);
+  inherited Create(64, 64);
   System.SetLength(FHash, 8);
 end;
 
@@ -122,15 +122,15 @@ end;
 
 function TWhirlPool.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, System.Length(FHash) * System.SizeOf(UInt64));
-  TConverters.be64_copy(PUInt64(FHash), 0, PByte(result), 0,
-    System.Length(result));
+  System.SetLength(Result, System.Length(FHash) * System.SizeOf(UInt64));
+  TConverters.be64_copy(PUInt64(FHash), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TWhirlPool.Initialize;
 begin
   TArrayUtils.ZeroFill(FHash);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 class function TWhirlPool.MaskWithReductionPolynomial(AInput: UInt32): UInt32;
@@ -139,21 +139,22 @@ begin
   begin
     AInput := AInput xor REDUCTION_POLYNOMIAL;
   end;
-  result := AInput;
+  Result := AInput;
 end;
 
-class function TWhirlPool.PackIntoUInt64(b7, b6, b5, b4, b3, b2, b1,
-  b0: UInt32): UInt64;
+class function TWhirlPool.PackIntoUInt64(AByte7, AByte6, AByte5, AByte4,
+  AByte3, AByte2, AByte1, AByte0: UInt32): UInt64;
 begin
-  result := (UInt64(b7) shl 56) xor (UInt64(b6) shl 48) xor (UInt64(b5) shl 40)
-    xor (UInt64(b4) shl 32) xor (UInt64(b3) shl 24) xor (UInt64(b2) shl 16)
-    xor (UInt64(b1) shl 8) xor b0;
+  Result := (UInt64(AByte7) shl 56) xor (UInt64(AByte6) shl 48)
+    xor (UInt64(AByte5) shl 40) xor (UInt64(AByte4) shl 32)
+    xor (UInt64(AByte3) shl 24) xor (UInt64(AByte2) shl 16)
+    xor (UInt64(AByte1) shl 8) xor AByte0;
 end;
 
 procedure TWhirlPool.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 var
-  LData, LK, LM, LTemp: array [0 .. 7] of UInt64;
+  LData, LKeyState, LMixState, LTemp: array [0 .. 7] of UInt64;
   LIdx, LRound: Int32;
 begin
   TConverters.be64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
@@ -161,8 +162,8 @@ begin
   LIdx := 0;
   while LIdx < 8 do
   begin
-    LK[LIdx] := FHash[LIdx];
-    LTemp[LIdx] := LData[LIdx] xor LK[LIdx];
+    LKeyState[LIdx] := FHash[LIdx];
+    LTemp[LIdx] := LData[LIdx] xor LKeyState[LIdx];
     System.Inc(LIdx);
   end;
 
@@ -174,42 +175,42 @@ begin
 
     while LIdx < 8 do
     begin
-      LM[LIdx] := 0;
-      LM[LIdx] := LM[LIdx] xor (FSC0[Byte(LK[(LIdx - 0) and 7] shr 56)]);
-      LM[LIdx] := LM[LIdx] xor (FSC1[Byte(LK[(LIdx - 1) and 7] shr 48)]);
-      LM[LIdx] := LM[LIdx] xor (FSC2[Byte(LK[(LIdx - 2) and 7] shr 40)]);
-      LM[LIdx] := LM[LIdx] xor (FSC3[Byte(LK[(LIdx - 3) and 7] shr 32)]);
-      LM[LIdx] := LM[LIdx] xor (FSC4[Byte(LK[(LIdx - 4) and 7] shr 24)]);
-      LM[LIdx] := LM[LIdx] xor (FSC5[Byte(LK[(LIdx - 5) and 7] shr 16)]);
-      LM[LIdx] := LM[LIdx] xor (FSC6[Byte(LK[(LIdx - 6) and 7] shr 8)]);
-      LM[LIdx] := LM[LIdx] xor (FSC7[Byte(LK[(LIdx - 7) and 7])]);
+      LMixState[LIdx] := 0;
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC0[Byte(LKeyState[(LIdx - 0) and 7] shr 56)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC1[Byte(LKeyState[(LIdx - 1) and 7] shr 48)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC2[Byte(LKeyState[(LIdx - 2) and 7] shr 40)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC3[Byte(LKeyState[(LIdx - 3) and 7] shr 32)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC4[Byte(LKeyState[(LIdx - 4) and 7] shr 24)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC5[Byte(LKeyState[(LIdx - 5) and 7] shr 16)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC6[Byte(LKeyState[(LIdx - 6) and 7] shr 8)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC7[Byte(LKeyState[(LIdx - 7) and 7])]);
 
       System.Inc(LIdx);
     end;
 
-    System.Move(LM[0], LK[0], 8 * System.SizeOf(UInt64));
+    System.Move(LMixState[0], LKeyState[0], 8 * System.SizeOf(UInt64));
 
-    LK[0] := LK[0] xor FSRC[LRound];
+    LKeyState[0] := LKeyState[0] xor FSRC[LRound];
 
     LIdx := 0;
 
     while LIdx < 8 do
     begin
-      LM[LIdx] := LK[LIdx];
+      LMixState[LIdx] := LKeyState[LIdx];
 
-      LM[LIdx] := LM[LIdx] xor (FSC0[Byte(LTemp[(LIdx - 0) and 7] shr 56)]);
-      LM[LIdx] := LM[LIdx] xor (FSC1[Byte(LTemp[(LIdx - 1) and 7] shr 48)]);
-      LM[LIdx] := LM[LIdx] xor (FSC2[Byte(LTemp[(LIdx - 2) and 7] shr 40)]);
-      LM[LIdx] := LM[LIdx] xor (FSC3[Byte(LTemp[(LIdx - 3) and 7] shr 32)]);
-      LM[LIdx] := LM[LIdx] xor (FSC4[Byte(LTemp[(LIdx - 4) and 7] shr 24)]);
-      LM[LIdx] := LM[LIdx] xor (FSC5[Byte(LTemp[(LIdx - 5) and 7] shr 16)]);
-      LM[LIdx] := LM[LIdx] xor (FSC6[Byte(LTemp[(LIdx - 6) and 7] shr 8)]);
-      LM[LIdx] := LM[LIdx] xor (FSC7[Byte(LTemp[(LIdx - 7) and 7])]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC0[Byte(LTemp[(LIdx - 0) and 7] shr 56)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC1[Byte(LTemp[(LIdx - 1) and 7] shr 48)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC2[Byte(LTemp[(LIdx - 2) and 7] shr 40)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC3[Byte(LTemp[(LIdx - 3) and 7] shr 32)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC4[Byte(LTemp[(LIdx - 4) and 7] shr 24)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC5[Byte(LTemp[(LIdx - 5) and 7] shr 16)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC6[Byte(LTemp[(LIdx - 6) and 7] shr 8)]);
+      LMixState[LIdx] := LMixState[LIdx] xor (FSC7[Byte(LTemp[(LIdx - 7) and 7])]);
 
       System.Inc(LIdx);
     end;
 
-    System.Move(LM[0], LTemp[0], System.Length(LTemp) * System.SizeOf(UInt64));
+    System.Move(LMixState[0], LTemp[0], System.Length(LTemp) * System.SizeOf(UInt64));
 
     System.Inc(LRound);
   end;
@@ -228,8 +229,8 @@ end;
 
 class constructor TWhirlPool.WhirlPool;
 var
-  LIdx, LR: Int32;
-  v1, v2, v4, v5, v8, v9: UInt32;
+  LIdx, LRound: Int32;
+  LVal1, LVal2, LVal4, LVal5, LVal8, LVal9: UInt32;
 begin
   System.SetLength(FSC0, 256);
   System.SetLength(FSC1, 256);
@@ -245,33 +246,41 @@ begin
   LIdx := 0;
   while LIdx < 256 do
   begin
-    v1 := SSBOX[LIdx];
-    v2 := MaskWithReductionPolynomial(v1 shl 1);
-    v4 := MaskWithReductionPolynomial(v2 shl 1);
-    v5 := v4 xor v1;
-    v8 := MaskWithReductionPolynomial(v4 shl 1);
-    v9 := v8 xor v1;
+    LVal1 := SSBOX[LIdx];
+    LVal2 := MaskWithReductionPolynomial(LVal1 shl 1);
+    LVal4 := MaskWithReductionPolynomial(LVal2 shl 1);
+    LVal5 := LVal4 xor LVal1;
+    LVal8 := MaskWithReductionPolynomial(LVal4 shl 1);
+    LVal9 := LVal8 xor LVal1;
 
-    FSC0[LIdx] := PackIntoUInt64(v1, v1, v4, v1, v8, v5, v2, v9);
-    FSC1[LIdx] := PackIntoUInt64(v9, v1, v1, v4, v1, v8, v5, v2);
-    FSC2[LIdx] := PackIntoUInt64(v2, v9, v1, v1, v4, v1, v8, v5);
-    FSC3[LIdx] := PackIntoUInt64(v5, v2, v9, v1, v1, v4, v1, v8);
-    FSC4[LIdx] := PackIntoUInt64(v8, v5, v2, v9, v1, v1, v4, v1);
-    FSC5[LIdx] := PackIntoUInt64(v1, v8, v5, v2, v9, v1, v1, v4);
-    FSC6[LIdx] := PackIntoUInt64(v4, v1, v8, v5, v2, v9, v1, v1);
-    FSC7[LIdx] := PackIntoUInt64(v1, v4, v1, v8, v5, v2, v9, v1);
+    FSC0[LIdx] := PackIntoUInt64(LVal1, LVal1, LVal4, LVal1, LVal8, LVal5,
+      LVal2, LVal9);
+    FSC1[LIdx] := PackIntoUInt64(LVal9, LVal1, LVal1, LVal4, LVal1, LVal8,
+      LVal5, LVal2);
+    FSC2[LIdx] := PackIntoUInt64(LVal2, LVal9, LVal1, LVal1, LVal4, LVal1,
+      LVal8, LVal5);
+    FSC3[LIdx] := PackIntoUInt64(LVal5, LVal2, LVal9, LVal1, LVal1, LVal4,
+      LVal1, LVal8);
+    FSC4[LIdx] := PackIntoUInt64(LVal8, LVal5, LVal2, LVal9, LVal1, LVal1,
+      LVal4, LVal1);
+    FSC5[LIdx] := PackIntoUInt64(LVal1, LVal8, LVal5, LVal2, LVal9, LVal1,
+      LVal1, LVal4);
+    FSC6[LIdx] := PackIntoUInt64(LVal4, LVal1, LVal8, LVal5, LVal2, LVal9,
+      LVal1, LVal1);
+    FSC7[LIdx] := PackIntoUInt64(LVal1, LVal4, LVal1, LVal8, LVal5, LVal2,
+      LVal9, LVal1);
 
     System.Inc(LIdx);
   end;
 
   FSRC[0] := 0;
 
-  LR := 1;
+  LRound := 1;
 
-  while LR <= ROUNDS do
+  while LRound <= ROUNDS do
   begin
-    LIdx := 8 * (LR - 1);
-    FSRC[LR] := (FSC0[LIdx] and $FF00000000000000)
+    LIdx := 8 * (LRound - 1);
+    FSRC[LRound] := (FSC0[LIdx] and $FF00000000000000)
       xor (FSC1[LIdx + 1] and $00FF000000000000)
       xor (FSC2[LIdx + 2] and $0000FF0000000000)
       xor (FSC3[LIdx + 3] and $000000FF00000000)
@@ -280,7 +289,7 @@ begin
       xor (FSC6[LIdx + 6] and $000000000000FF00)
       xor (FSC7[LIdx + 7] and $00000000000000FF);
 
-    System.Inc(LR);
+    System.Inc(LRound);
   end;
 end;
 

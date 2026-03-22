@@ -27,7 +27,7 @@ type
     FBufferSize, FBlockSize, FHashSize: Int32;
 
   const
-    BUFFER_SIZE = Int32(64 * 1024); // 64Kb
+    DefaultBufferSize = Int32(64 * 1024); // 64Kb
 
   strict protected
 
@@ -61,7 +61,7 @@ type
 
     function TransformFinal(): IHashResult; virtual; abstract;
 
-    function ComputeString(const AData: String; AEncoding: TEncoding)
+    function ComputeString(const AData: String; const AEncoding: TEncoding)
       : IHashResult; virtual;
     function ComputeBytes(const AData: THashLibByteArray): IHashResult; virtual;
     function ComputeUntyped(const AData; ALength: Int64): IHashResult;
@@ -84,24 +84,24 @@ implementation
 
 constructor THash.Create(AHashSize, ABlockSize: Int32);
 begin
-  Inherited Create();
+  inherited Create();
 {$IFDEF DEBUG}
   System.Assert((ABlockSize > 0) or (ABlockSize = -1));
   System.Assert((AHashSize > 0) or (AHashSize = -1));
 {$ENDIF DEBUG}
   FBlockSize := ABlockSize;
   FHashSize := AHashSize;
-  FBufferSize := BUFFER_SIZE;
+  FBufferSize := DefaultBufferSize;
 end;
 
 function THash.GetName: String;
 begin
-  result := Self.ClassName;
+  Result := Self.ClassName;
 end;
 
 function THash.GetBufferSize: Int32;
 begin
-  result := FBufferSize;
+  Result := FBufferSize;
 end;
 
 procedure THash.SetBufferSize(AValue: Int32);
@@ -118,7 +118,7 @@ end;
 
 function THash.GetBlockSize: Int32;
 begin
-  result := FBlockSize;
+  Result := FBlockSize;
 end;
 
 procedure THash.SetBlockSize(AValue: Int32);
@@ -128,7 +128,7 @@ end;
 
 function THash.GetHashSize: Int32;
 begin
-  result := FHashSize;
+  Result := FHashSize;
 end;
 
 procedure THash.SetHashSize(AValue: Int32);
@@ -136,17 +136,17 @@ begin
   FHashSize := AValue;
 end;
 
-function THash.ComputeString(const AData: String; AEncoding: TEncoding)
+function THash.ComputeString(const AData: String; const AEncoding: TEncoding)
   : IHashResult;
 begin
-  result := ComputeBytes(TConverters.ConvertStringToBytes(AData, AEncoding));
+  Result := ComputeBytes(TConverters.ConvertStringToBytes(AData, AEncoding));
 end;
 
 function THash.ComputeUntyped(const AData; ALength: Int64): IHashResult;
 begin
   Initialize();
   TransformUntyped(AData, ALength);
-  result := TransformFinal();
+  Result := TransformFinal();
 end;
 
 procedure THash.TransformUntyped(const AData; ALength: Int64);
@@ -159,14 +159,14 @@ begin
 
   if BufferSize > ALength then // Sanity Check
   begin
-    LBufferSize := BUFFER_SIZE;
+    LBufferSize := BufferSize;
   end
   else
   begin
     LBufferSize := BufferSize;
   end;
 
-  if LPtrStart <> Nil then
+  if LPtrStart <> nil then
   begin
     System.SetLength(LBuffer, LBufferSize);
     LPtrEnd := LPtrStart + ALength;
@@ -198,7 +198,7 @@ function THash.ComputeStream(const AStream: TStream; ALength: Int64)
 begin
   Initialize();
   TransformStream(AStream, ALength);
-  result := TransformFinal();
+  Result := TransformFinal();
 end;
 
 function THash.ComputeFile(const AFileName: String; AFrom, ALength: Int64)
@@ -206,7 +206,7 @@ function THash.ComputeFile(const AFileName: String; AFrom, ALength: Int64)
 begin
   Initialize();
   TransformFile(AFileName, AFrom, ALength);
-  result := TransformFinal();
+  Result := TransformFinal();
 end;
 
 function THash.Clone(): IHash;
@@ -219,7 +219,7 @@ function THash.ComputeBytes(const AData: THashLibByteArray): IHashResult;
 begin
   Initialize();
   TransformBytes(AData);
-  result := TransformFinal();
+  Result := TransformFinal();
 end;
 
 procedure THash.TransformString(const AData: String;
@@ -258,7 +258,7 @@ begin
   System.Assert((ALength = -1) or (ALength > 0));
 {$ENDIF DEBUG}
   LTotal := 0;
-  if (AStream <> Nil) then
+  if (AStream <> nil) then
   begin
     if (ALength > -1) then
     begin
@@ -281,7 +281,7 @@ begin
 
   if BufferSize > AStream.Size then // Sanity Check
   begin
-    LBufferSize := BUFFER_SIZE;
+    LBufferSize := BufferSize;
   end
   else
   begin
@@ -293,7 +293,7 @@ begin
   if (ALength = -1) then
   begin
 
-    while true do
+    while True do
     begin
 
       LRead := AStream.Read(LData[0], LBufferSize);
@@ -312,7 +312,7 @@ begin
   end
   else
   begin
-    while true do
+    while True do
     begin
 
       LRead := AStream.Read(LData[0], LBufferSize);

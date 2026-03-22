@@ -32,7 +32,7 @@ type
     FSecurityLevel: Int32;
 
   const
-    SShifts: array [0 .. 3] of Int32 = (16, 8, 16, 24);
+    Shifts: array [0 .. 3] of Int32 = (16, 8, 16, 24);
 
     class var
 
@@ -89,13 +89,13 @@ begin
   LHashInstance.FState := System.Copy(FState);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TSnefru.Create(ASecurityLevel: Int32; AHashSize: THashSize);
 begin
-  Inherited Create(Int32(AHashSize), 64 - (Int32(AHashSize)));
+  inherited Create(Int32(AHashSize), 64 - (Int32(AHashSize)));
   FSecurityLevel := Int32(ASecurityLevel);
   System.SetLength(FState, HashSize shr 2);
 end;
@@ -143,14 +143,14 @@ end;
 procedure TSnefru.Initialize;
 begin
   TArrayUtils.ZeroFill(FState);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TSnefru.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 var
   LSBox0, LSBox1: THashLibUInt32Array;
-  LIdx, LJdx, LKdx, LShift: Int32;
+  LIdx, LInnerIdx, LWordIdx, LShift: Int32;
   LWork: array [0 .. 15] of UInt32;
   LPtrWork: PCardinal;
 begin
@@ -168,8 +168,8 @@ begin
     LSBox0 := FSBoxes[LIdx * 2 + 0];
     LSBox1 := FSBoxes[LIdx * 2 + 1];
 
-    LJdx := 0;
-    while LJdx < 4 do
+    LInnerIdx := 0;
+    while LInnerIdx < 4 do
     begin
       LWork[15] := LWork[15] xor LSBox0[Byte(LWork[0])];
       LWork[1] := LWork[1] xor LSBox0[Byte(LWork[0])];
@@ -204,17 +204,17 @@ begin
       LWork[14] := LWork[14] xor LSBox1[Byte(LWork[15])];
       LWork[0] := LWork[0] xor LSBox1[Byte(LWork[15])];
 
-      LShift := SShifts[LJdx];
+      LShift := Shifts[LInnerIdx];
 
-      LKdx := 0;
+      LWordIdx := 0;
 
-      while LKdx < 16 do
+      while LWordIdx < 16 do
       begin
-        LWork[LKdx] := TBits.RotateRight32(LWork[LKdx], LShift);
-        System.Inc(LKdx);
+        LWork[LWordIdx] := TBits.RotateRight32(LWork[LWordIdx], LShift);
+        System.Inc(LWordIdx);
       end;
 
-      System.Inc(LJdx);
+      System.Inc(LInnerIdx);
     end;
 
     System.Inc(LIdx);

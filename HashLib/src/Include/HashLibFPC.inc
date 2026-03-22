@@ -12,9 +12,9 @@
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
 
 {$IFDEF FPC}
-  // FPC 3.0.0 and Above
-  {$IF FPC_FULLVERSION < 30000}
-     {$MESSAGE ERROR 'This Library requires FreePascal 3.0.0 or higher.'}
+  // FPC 3.2.2 and Above
+  {$IF FPC_FULLVERSION < 30202}
+     {$MESSAGE ERROR 'This Library requires FreePascal 3.2.2 or higher.'}
   {$IFEND}
 
   {$IFDEF ENDIAN_BIG}

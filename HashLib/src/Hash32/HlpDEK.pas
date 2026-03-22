@@ -32,7 +32,7 @@ implementation
 
 constructor TDEK.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 function TDEK.Clone(): IHash;
@@ -42,8 +42,8 @@ begin
   LHashInstance := TDEK.Create();
   FBuffer.Position := 0;
   LHashInstance.FBuffer.CopyFrom(FBuffer, FBuffer.Size);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 function TDEK.ComputeAggregatedBytes(const AData: THashLibByteArray)
@@ -57,7 +57,7 @@ begin
   begin
     LHash := TBits.RotateLeft32(LHash, 5) xor AData[LIdx];
   end;
-  result := THashResult.Create(LHash);
+  Result := THashResult.Create(LHash);
 end;
 
 end.

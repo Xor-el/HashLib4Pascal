@@ -44,13 +44,13 @@ var
 begin
   LHashInstance := TPJW.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TPJW.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TPJW.Initialize;
@@ -85,7 +85,7 @@ end;
 
 function TPJW.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

@@ -21,7 +21,7 @@ type
 {$REGION 'Consts'}
 
   const
-    SPi: array [0 .. 255] of Byte = (41, 46, 67, 201, 162, 216, 124, 1, 61, 54,
+    Pi: array [0 .. 255] of Byte = (41, 46, 67, 201, 162, 216, 124, 1, 61, 54,
       84, 161, 236, 240, 6, 19,
 
       98, 167, 5, 243, 192, 199, 115, 140, 152, 147, 43, 217, 188, 76, 130, 202,
@@ -84,13 +84,13 @@ begin
   LHashInstance.FChecksum := System.Copy(FChecksum);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TMD2.Create;
 begin
-  Inherited Create(16, 16);
+  inherited Create(16, 16);
   System.SetLength(FState, 16);
   System.SetLength(FChecksum, 16);
 end;
@@ -116,20 +116,20 @@ end;
 
 function TMD2.GetResult: THashLibByteArray;
 begin
-  result := System.Copy(FState);
+  Result := System.Copy(FState);
 end;
 
 procedure TMD2.Initialize;
 begin
   TArrayUtils.ZeroFill(FState);
   TArrayUtils.ZeroFill(FChecksum);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TMD2.TransformBlock(AData: PByte; ADataLength: Int32; AIndex: Int32);
 var
   LIdx, LJdx: Int32;
-  LT: UInt32;
+  LChainByte: UInt32;
   LTemp: array [0 .. 47] of Byte;
 begin
   System.Move(FState[0], LTemp[0], ADataLength);
@@ -141,28 +141,28 @@ begin
     LTemp[LIdx + 32] := Byte(FState[LIdx] xor AData[LIdx + AIndex]);
   end;
 
-  LT := 0;
+  LChainByte := 0;
 
   for LIdx := 0 to 17 do
   begin
 
     for LJdx := 0 to 47 do
     begin
-      LTemp[LJdx] := Byte(LTemp[LJdx] xor SPi[LT]);
-      LT := LTemp[LJdx];
+      LTemp[LJdx] := Byte(LTemp[LJdx] xor Pi[LChainByte]);
+      LChainByte := LTemp[LJdx];
     end;
 
-    LT := Byte(LT + UInt32(LIdx));
+    LChainByte := Byte(LChainByte + UInt32(LIdx));
   end;
 
   System.Move(LTemp[0], FState[0], 16);
 
-  LT := FChecksum[15];
+  LChainByte := FChecksum[15];
 
   for LIdx := 0 to 15 do
   begin
-    FChecksum[LIdx] := FChecksum[LIdx] xor (SPi[AData[LIdx + AIndex] xor LT]);
-    LT := FChecksum[LIdx];
+    FChecksum[LIdx] := FChecksum[LIdx] xor (Pi[AData[LIdx + AIndex] xor LChainByte]);
+    LChainByte := FChecksum[LIdx];
   end;
 
   System.FillChar(LTemp, System.SizeOf(LTemp), Byte(0));

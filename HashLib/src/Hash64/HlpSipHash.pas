@@ -28,8 +28,8 @@ type
     V1 = UInt64($646F72616E646F6D);
     V2 = UInt64($6C7967656E657261);
     V3 = UInt64($7465646279746573);
-    KEY0 = UInt64($0706050403020100);
-    KEY1 = UInt64($0F0E0D0C0B0A0908);
+    Key0 = UInt64($0706050403020100);
+    Key1 = UInt64($0F0E0D0C0B0A0908);
 
 {$ENDREGION}
     procedure Compress(); inline;
@@ -102,13 +102,13 @@ begin
   LHashInstance.FFinalizationRounds := FFinalizationRounds;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TSipHash2_4.Create(ACompressionRounds, AFinalizationRounds: Int32);
 begin
-  Inherited Create(8, 8);
+  inherited Create(8, 8);
   FCompressionRounds := ACompressionRounds;
   FFinalizationRounds := AFinalizationRounds;
 end;
@@ -247,9 +247,9 @@ end;
 
 constructor TSipHash.Create(AHashSize, ABlockSize: Int32);
 begin
-  Inherited Create(AHashSize, ABlockSize);
-  FKey0 := KEY0;
-  FKey1 := KEY1;
+  inherited Create(AHashSize, ABlockSize);
+  FKey0 := Key0;
+  FKey1 := Key1;
   System.SetLength(FBuffer, 8);
 end;
 
@@ -297,10 +297,10 @@ end;
 
 procedure TSipHash.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
-    FKey0 := KEY0;
-    FKey1 := KEY1;
+    FKey0 := Key0;
+    FKey1 := Key1;
   end
   else
   begin

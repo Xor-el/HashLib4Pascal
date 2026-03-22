@@ -37,13 +37,13 @@ var
 begin
   LHashInstance := TELF.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TELF.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TELF.Initialize;
@@ -55,7 +55,7 @@ procedure TELF.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LIdx: Int32;
-  LG: UInt32;
+  LHighNibble: UInt32;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -66,14 +66,14 @@ begin
   while ALength > 0 do
   begin
     FHash := (FHash shl 4) + AData[LIdx];
-    LG := FHash and $F0000000;
+    LHighNibble := FHash and $F0000000;
 
-    if (LG <> 0) then
+    if (LHighNibble <> 0) then
     begin
-      FHash := FHash xor (LG shr 24);
+      FHash := FHash xor (LHighNibble shr 24);
     end;
 
-    FHash := FHash and (not LG);
+    FHash := FHash and (not LHighNibble);
     System.Inc(LIdx);
     System.Dec(ALength);
   end;
@@ -81,7 +81,7 @@ end;
 
 function TELF.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

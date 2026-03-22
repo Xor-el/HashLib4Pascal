@@ -180,15 +180,15 @@ end;
 
 procedure TBlake2BConfig.ValidateKeyLength(const AKey: THashLibByteArray);
 var
-  KeyLength: Int32;
+  LKeyLength: Int32;
 begin
-  if (AKey <> Nil) then
+  if (AKey <> nil) then
   begin
-    KeyLength := System.Length(AKey);
-    if (KeyLength > 64) then
+    LKeyLength := System.Length(AKey);
+    if (LKeyLength > 64) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength]);
+        [LKeyLength]);
     end;
   end;
 end;
@@ -198,7 +198,7 @@ procedure TBlake2BConfig.ValidatePersonalisationLength(const APersonalisation
 var
   PersonalisationLength: Int32;
 begin
-  if (APersonalisation <> Nil) then
+  if (APersonalisation <> nil) then
   begin
     PersonalisationLength := System.Length(APersonalisation);
     if (PersonalisationLength <> 16) then
@@ -211,15 +211,15 @@ end;
 
 procedure TBlake2BConfig.ValidateSaltLength(const ASalt: THashLibByteArray);
 var
-  SaltLength: Int32;
+  LSaltLength: Int32;
 begin
-  if (ASalt <> Nil) then
+  if (ASalt <> nil) then
   begin
-    SaltLength := System.Length(ASalt);
-    if (SaltLength <> 16) then
+    LSaltLength := System.Length(ASalt);
+    if (LSaltLength <> 16) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt
-        (@SInvalidSaltLength, [SaltLength]);
+        (@SInvalidSaltLength, [LSaltLength]);
     end;
   end;
 end;
@@ -272,7 +272,7 @@ constructor TBlake2BConfig.Create(AHashSize: THashSize);
 var
   LHashSize: Int32;
 begin
-  Inherited Create();
+  inherited Create();
   LHashSize := Int32(AHashSize);
   ValidateHashSize(LHashSize);
   FHashSize := LHashSize;
@@ -280,7 +280,7 @@ end;
 
 constructor TBlake2BConfig.Create(AHashSize: Int32);
 begin
-  Inherited Create();
+  inherited Create();
   ValidateHashSize(AHashSize);
   FHashSize := AHashSize;
 end;
@@ -428,7 +428,7 @@ end;
 
 constructor TBlake2BTreeConfig.Create;
 begin
-  Inherited Create();
+  inherited Create();
   FFanOut := 0;
   FMaxDepth := 0;
   FLeafSize := 64;
@@ -479,7 +479,7 @@ begin
   end;
 
   // Key length
-  if (AConfig.Key <> Nil) then
+  if (AConfig.Key <> nil) then
   begin
     if (System.Length(AConfig.Key) > 64) then
     begin
@@ -489,7 +489,7 @@ begin
   end;
 
   // Personalisation length
-  if (AConfig.Personalisation <> Nil) then
+  if (AConfig.Personalisation <> nil) then
   begin
     if (System.Length(AConfig.Personalisation) <> 16) then
     begin
@@ -500,7 +500,7 @@ begin
   end;
 
   // Salt length
-  if (AConfig.Salt <> Nil) then
+  if (AConfig.Salt <> nil) then
   begin
     if (System.Length(AConfig.Salt) <> 16) then
     begin
@@ -510,7 +510,7 @@ begin
   end;
 
   // Tree InnerHashSize
-  if (ATreeConfig <> Nil) then
+  if (ATreeConfig <> nil) then
   begin
 
     if ((AIsSequential) and ((ATreeConfig.InnerHashSize <> 0))) then
@@ -534,7 +534,7 @@ var
   LIsSequential: Boolean;
   LBuffer: THashLibByteArray;
 begin
-  LIsSequential := ATreeConfig = Nil;
+  LIsSequential := ATreeConfig = nil;
   if (LIsSequential) then
   begin
     ATreeConfig := TBlake2BTreeConfig.SequentialTreeConfig;
@@ -547,7 +547,7 @@ begin
   LBuffer[0] := AConfig.HashSize;
   LBuffer[1] := System.Length(AConfig.Key);
 
-  if ATreeConfig <> Nil then
+  if ATreeConfig <> nil then
   begin
     LBuffer[2] := ATreeConfig.FanOut;
     LBuffer[3] := ATreeConfig.MaxDepth;
@@ -557,12 +557,12 @@ begin
     LBuffer[17] := ATreeConfig.InnerHashSize;
   end;
 
-  if AConfig.Salt <> Nil then
+  if AConfig.Salt <> nil then
   begin
     System.Move(AConfig.Salt[0], LBuffer[32], 16 * System.SizeOf(Byte));
   end;
 
-  if AConfig.Personalisation <> Nil then
+  if AConfig.Personalisation <> nil then
   begin
     System.Move(AConfig.Personalisation[0], LBuffer[48],
       16 * System.SizeOf(Byte));

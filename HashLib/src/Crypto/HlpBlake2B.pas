@@ -20,7 +20,7 @@ uses
 
 resourcestring
   SInvalidConfigLength = 'Config Length Must Be 8 Words';
-  SConfigNil = 'Config Cannot Be Nil';
+  SConfigNil = 'Config Cannot Be nil';
   SInvalidXOFSize =
     'XOFSize in Bits must be Multiples of 8 and be Between %u and %u Bytes.';
   SOutputLengthInvalid = 'Output Length is above the Digest Length';
@@ -71,7 +71,8 @@ type
     procedure Blake2BIncrementCounter(AIncrementCount: UInt64); inline;
 
 {$IFNDEF USE_UNROLLED_VARIANT}
-    procedure G(a, b, c, d, r, i: Int32); inline;
+    procedure G(AStateIdx0, AStateIdx1, AStateIdx2, AStateIdx3, ARound,
+      AMixIdx: Int32); inline;
 {$ENDIF USE_UNROLLED_VARIANT}
     procedure MixScalar();
     procedure Compress(ABlock: PByte; AStart: Int32); inline;
@@ -250,22 +251,23 @@ end;
 
 {$IFNDEF USE_UNROLLED_VARIANT}
 
-procedure TBlake2B.G(a, b, c, d, r, i: Int32);
+procedure TBlake2B.G(AStateIdx0, AStateIdx1, AStateIdx2, AStateIdx3, ARound,
+  AMixIdx: Int32);
 var
-  p, p0, p1: Int32;
+  LSigmaBase, LSigmaIdx0, LSigmaIdx1: Int32;
 begin
-  p := (r shl 4) + i;
-  p0 := Sigma[p];
-  p1 := Sigma[p + 1];
+  LSigmaBase := (ARound shl 4) + AMixIdx;
+  LSigmaIdx0 := Sigma[LSigmaBase];
+  LSigmaIdx1 := Sigma[LSigmaBase + 1];
 
-  FV[a] := FV[a] + (FV[b] + FM[p0]);
-  FV[d] := TBits.RotateRight64(FV[d] xor FV[a], 32);
-  FV[c] := FV[c] + FV[d];
-  FV[b] := TBits.RotateRight64(FV[b] xor FV[c], 24);
-  FV[a] := FV[a] + (FV[b] + FM[p1]);
-  FV[d] := TBits.RotateRight64(FV[d] xor FV[a], 16);
-  FV[c] := FV[c] + FV[d];
-  FV[b] := TBits.RotateRight64(FV[b] xor FV[c], 63);
+  FV[AStateIdx0] := FV[AStateIdx0] + (FV[AStateIdx1] + FM[LSigmaIdx0]);
+  FV[AStateIdx3] := TBits.RotateRight64(FV[AStateIdx3] xor FV[AStateIdx0], 32);
+  FV[AStateIdx2] := FV[AStateIdx2] + FV[AStateIdx3];
+  FV[AStateIdx1] := TBits.RotateRight64(FV[AStateIdx1] xor FV[AStateIdx2], 24);
+  FV[AStateIdx0] := FV[AStateIdx0] + (FV[AStateIdx1] + FM[LSigmaIdx1]);
+  FV[AStateIdx3] := TBits.RotateRight64(FV[AStateIdx3] xor FV[AStateIdx0], 16);
+  FV[AStateIdx2] := FV[AStateIdx2] + FV[AStateIdx3];
+  FV[AStateIdx1] := TBits.RotateRight64(FV[AStateIdx1] xor FV[AStateIdx2], 63);
 end;
 
 {$ENDIF USE_UNROLLED_VARIANT}
@@ -274,8 +276,8 @@ function TBlake2B.CloneInternal(): TBlake2B;
 var
   LTreeConfig: IBlake2BTreeConfig;
 begin
-  LTreeConfig := Nil;
-  if FTreeConfig <> Nil then
+  LTreeConfig := nil;
+  if FTreeConfig <> nil then
   begin
     LTreeConfig := FTreeConfig.Clone();
   end;
@@ -296,1423 +298,1423 @@ end;
 
 function TBlake2B.Clone(): IHash;
 begin
-  Result := CloneInternal() as IHash;
+  Result := CloneInternal();
 end;
 
 procedure TBlake2B.MixScalar;
 var
 {$IFDEF USE_UNROLLED_VARIANT}
-  m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, v0, v1,
-    v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15: UInt64;
+  LBlock0, LBlock1, LBlock2, LBlock3, LBlock4, LBlock5, LBlock6, LBlock7, LBlock8, LBlock9, LBlock10, LBlock11, LBlock12, LBlock13, LBlock14, LBlock15, LWorking0, LWorking1,
+    LWorking2, LWorking3, LWorking4, LWorking5, LWorking6, LWorking7, LWorking8, LWorking9, LWorking10, LWorking11, LWorking12, LWorking13, LWorking14, LWorking15: UInt64;
 
 {$ELSE}
-  i, r: Int32;
+  LWordIdx, LRound: Int32;
 
 {$ENDIF USE_UNROLLED_VARIANT}
 begin
 {$IFDEF USE_UNROLLED_VARIANT}
-  m0 := FM[0];
-  m1 := FM[1];
-  m2 := FM[2];
-  m3 := FM[3];
-  m4 := FM[4];
-  m5 := FM[5];
-  m6 := FM[6];
-  m7 := FM[7];
-  m8 := FM[8];
-  m9 := FM[9];
-  m10 := FM[10];
-  m11 := FM[11];
-  m12 := FM[12];
-  m13 := FM[13];
-  m14 := FM[14];
-  m15 := FM[15];
+  LBlock0 := FM[0];
+  LBlock1 := FM[1];
+  LBlock2 := FM[2];
+  LBlock3 := FM[3];
+  LBlock4 := FM[4];
+  LBlock5 := FM[5];
+  LBlock6 := FM[6];
+  LBlock7 := FM[7];
+  LBlock8 := FM[8];
+  LBlock9 := FM[9];
+  LBlock10 := FM[10];
+  LBlock11 := FM[11];
+  LBlock12 := FM[12];
+  LBlock13 := FM[13];
+  LBlock14 := FM[14];
+  LBlock15 := FM[15];
 
-  v0 := FState[0];
-  v1 := FState[1];
-  v2 := FState[2];
-  v3 := FState[3];
-  v4 := FState[4];
-  v5 := FState[5];
-  v6 := FState[6];
-  v7 := FState[7];
+  LWorking0 := FState[0];
+  LWorking1 := FState[1];
+  LWorking2 := FState[2];
+  LWorking3 := FState[3];
+  LWorking4 := FState[4];
+  LWorking5 := FState[5];
+  LWorking6 := FState[6];
+  LWorking7 := FState[7];
 
-  v8 := IV0;
-  v9 := IV1;
-  v10 := IV2;
-  v11 := IV3;
-  v12 := IV4 xor FCounter0;
-  v13 := IV5 xor FCounter1;
-  v14 := IV6 xor FFinalizationFlag0;
-  v15 := IV7 xor FFinalizationFlag1;
+  LWorking8 := IV0;
+  LWorking9 := IV1;
+  LWorking10 := IV2;
+  LWorking11 := IV3;
+  LWorking12 := IV4 xor FCounter0;
+  LWorking13 := IV5 xor FCounter1;
+  LWorking14 := IV6 xor FFinalizationFlag0;
+  LWorking15 := IV7 xor FFinalizationFlag1;
 
   // Rounds
 
   // ##### Round(0)
-  // G(0, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m0;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m1;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(0, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock0;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock1;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(0, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m2;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m3;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(0, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock2;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock3;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(0, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m4;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m5;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(0, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock4;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(0, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m6;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m7;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(0, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock6;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock7;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(0, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m8;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m9;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(0, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock8;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock9;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(0, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m10;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m11;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(0, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock11;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(0, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m12;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m13;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(0, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock12;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock13;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(0, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m14;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m15;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(0, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock14;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock15;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(1)
-  // G(1, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m14;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m10;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(1, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock14;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(1, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m4;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m8;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(1, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock4;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock8;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(1, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m9;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m15;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(1, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock9;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock15;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(1, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m13;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m6;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(1, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock13;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock6;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(1, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m1;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m12;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(1, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock1;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock12;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(1, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m0;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m2;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(1, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock0;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock2;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(1, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m11;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m7;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(1, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock11;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock7;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(1, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m5;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m3;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(1, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock3;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(2)
-  // G(2, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m11;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m8;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(2, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock11;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock8;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(2, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m12;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m0;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(2, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock12;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock0;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(2, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m5;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m2;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(2, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock2;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(2, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m15;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m13;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(2, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock15;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock13;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(2, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m10;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m14;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(2, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock10;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock14;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(2, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m3;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m6;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(2, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock3;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock6;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(2, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m7;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m1;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(2, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock7;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock1;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(2, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m9;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m4;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(2, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock9;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock4;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(3)
-  // G(3, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m7;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m9;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(3, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock7;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock9;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(3, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m3;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m1;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(3, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock3;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock1;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(3, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m13;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m12;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(3, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock13;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock12;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(3, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m11;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m14;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(3, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock11;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock14;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(3, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m2;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m6;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(3, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock2;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock6;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(3, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m5;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m10;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(3, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock5;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(3, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m4;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m0;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(3, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock4;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock0;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(3, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m15;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m8;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(3, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock15;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock8;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(4)
-  // G(4, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m9;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m0;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(4, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock9;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock0;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(4, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m5;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m7;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(4, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock5;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock7;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(4, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m2;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m4;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(4, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock2;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock4;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(4, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m10;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m15;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(4, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock10;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock15;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(4, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m14;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m1;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(4, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock14;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock1;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(4, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m11;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m12;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(4, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock11;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock12;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(4, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m6;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m8;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(4, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock6;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock8;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(4, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m3;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m13;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(4, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock3;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock13;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(5)
-  // G(5, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m2;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m12;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(5, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock2;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock12;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(5, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m6;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m10;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(5, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock6;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock10;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(5, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m0;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m11;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(5, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock0;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock11;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(5, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m8;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m3;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(5, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock8;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock3;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(5, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m4;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m13;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(5, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock4;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock13;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(5, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m7;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m5;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(5, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock7;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock5;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(5, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m15;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m14;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(5, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock15;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock14;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(5, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m1;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m9;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(5, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock1;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock9;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(6)
-  // G(6, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m12;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m5;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(6, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock12;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock5;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(6, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m1;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m15;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(6, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock1;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock15;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(6, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m14;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m13;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(6, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock14;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock13;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(6, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m4;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m10;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(6, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock4;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock10;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(6, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m0;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m7;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(6, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock0;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock7;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(6, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m6;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m3;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(6, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock6;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock3;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(6, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m9;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m2;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(6, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock9;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock2;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(6, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m8;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m11;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(6, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock8;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock11;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(7)
-  // G(7, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m13;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m11;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(7, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock13;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock11;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(7, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m7;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m14;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(7, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock7;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock14;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(7, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m12;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m1;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(7, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock12;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock1;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(7, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m3;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m9;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(7, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock3;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock9;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(7, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m5;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m0;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(7, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock5;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock0;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(7, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m15;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m4;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(7, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock15;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock4;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(7, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m8;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m6;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(7, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock8;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock6;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(7, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m2;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m10;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(7, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock2;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock10;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(8)
-  // G(8, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m6;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m15;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(8, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock6;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock15;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(8, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m14;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m9;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(8, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock14;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock9;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(8, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m11;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m3;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(8, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock11;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock3;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(8, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m0;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m8;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(8, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock0;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock8;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(8, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m12;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m2;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(8, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock12;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock2;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(8, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m13;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m7;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(8, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock13;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock7;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(8, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m1;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m4;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(8, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock1;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock4;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(8, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m10;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m5;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(8, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock10;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(9)
-  // G(9, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m10;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m2;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(9, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock2;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(9, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m8;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m4;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(9, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock8;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock4;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(9, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m7;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m6;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(9, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock7;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock6;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(9, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m1;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m5;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(9, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock1;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock5;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(9, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m15;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m11;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(9, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock15;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock11;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(9, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m9;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m14;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(9, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock9;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock14;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(9, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m3;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m12;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(9, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock3;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock12;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(9, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m13;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m0;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(9, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock13;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock0;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(10)
-  // G(10, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m0;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m1;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(10, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock0;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock1;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(10, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m2;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m3;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(10, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock2;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock3;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(10, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m4;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m5;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(10, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock4;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(10, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m6;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m7;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(10, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock6;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock7;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(10, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m8;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m9;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(10, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock8;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock9;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(10, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m10;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m11;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(10, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock11;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(10, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m12;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m13;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(10, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock12;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock13;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(10, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m14;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m15;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(10, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock14;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock15;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // ##### Round(11)
-  // G(11, 0, v0, v4, v8, v12)
-  v0 := v0 + v4 + m14;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 32);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 24);
-  v0 := v0 + v4 + m10;
-  v12 := v12 xor v0;
-  v12 := TBits.RotateRight64(v12, 16);
-  v8 := v8 + v12;
-  v4 := v4 xor v8;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(11, 0, LWorking0, LWorking4, LWorking8, LWorking12)
+  LWorking0 := LWorking0 + LWorking4 + LBlock14;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking0 := LWorking0 + LWorking4 + LBlock10;
+  LWorking12 := LWorking12 xor LWorking0;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking8 := LWorking8 + LWorking12;
+  LWorking4 := LWorking4 xor LWorking8;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
-  // G(11, 1, v1, v5, v9, v13)
-  v1 := v1 + v5 + m4;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 32);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 24);
-  v1 := v1 + v5 + m8;
-  v13 := v13 xor v1;
-  v13 := TBits.RotateRight64(v13, 16);
-  v9 := v9 + v13;
-  v5 := v5 xor v9;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(11, 1, LWorking1, LWorking5, LWorking9, LWorking13)
+  LWorking1 := LWorking1 + LWorking5 + LBlock4;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking1 := LWorking1 + LWorking5 + LBlock8;
+  LWorking13 := LWorking13 xor LWorking1;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking9 := LWorking9 + LWorking13;
+  LWorking5 := LWorking5 xor LWorking9;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(11, 2, v2, v6, v10, v14)
-  v2 := v2 + v6 + m9;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 32);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 24);
-  v2 := v2 + v6 + m15;
-  v14 := v14 xor v2;
-  v14 := TBits.RotateRight64(v14, 16);
-  v10 := v10 + v14;
-  v6 := v6 xor v10;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(11, 2, LWorking2, LWorking6, LWorking10, LWorking14)
+  LWorking2 := LWorking2 + LWorking6 + LBlock9;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking2 := LWorking2 + LWorking6 + LBlock15;
+  LWorking14 := LWorking14 xor LWorking2;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking10 := LWorking10 + LWorking14;
+  LWorking6 := LWorking6 xor LWorking10;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(11, 3, v3, v7, v11, v15)
-  v3 := v3 + v7 + m13;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 32);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 24);
-  v3 := v3 + v7 + m6;
-  v15 := v15 xor v3;
-  v15 := TBits.RotateRight64(v15, 16);
-  v11 := v11 + v15;
-  v7 := v7 xor v11;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(11, 3, LWorking3, LWorking7, LWorking11, LWorking15)
+  LWorking3 := LWorking3 + LWorking7 + LBlock13;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking3 := LWorking3 + LWorking7 + LBlock6;
+  LWorking15 := LWorking15 xor LWorking3;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking11 := LWorking11 + LWorking15;
+  LWorking7 := LWorking7 xor LWorking11;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(11, 4, v0, v5, v10, v15)
-  v0 := v0 + v5 + m1;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 32);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 24);
-  v0 := v0 + v5 + m12;
-  v15 := v15 xor v0;
-  v15 := TBits.RotateRight64(v15, 16);
-  v10 := v10 + v15;
-  v5 := v5 xor v10;
-  v5 := TBits.RotateRight64(v5, 63);
+  // G(11, 4, LWorking0, LWorking5, LWorking10, LWorking15)
+  LWorking0 := LWorking0 + LWorking5 + LBlock1;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 32);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 24);
+  LWorking0 := LWorking0 + LWorking5 + LBlock12;
+  LWorking15 := LWorking15 xor LWorking0;
+  LWorking15 := TBits.RotateRight64(LWorking15, 16);
+  LWorking10 := LWorking10 + LWorking15;
+  LWorking5 := LWorking5 xor LWorking10;
+  LWorking5 := TBits.RotateRight64(LWorking5, 63);
 
-  // G(11, 5, v1, v6, v11, v12)
-  v1 := v1 + v6 + m0;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 32);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 24);
-  v1 := v1 + v6 + m2;
-  v12 := v12 xor v1;
-  v12 := TBits.RotateRight64(v12, 16);
-  v11 := v11 + v12;
-  v6 := v6 xor v11;
-  v6 := TBits.RotateRight64(v6, 63);
+  // G(11, 5, LWorking1, LWorking6, LWorking11, LWorking12)
+  LWorking1 := LWorking1 + LWorking6 + LBlock0;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 32);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 24);
+  LWorking1 := LWorking1 + LWorking6 + LBlock2;
+  LWorking12 := LWorking12 xor LWorking1;
+  LWorking12 := TBits.RotateRight64(LWorking12, 16);
+  LWorking11 := LWorking11 + LWorking12;
+  LWorking6 := LWorking6 xor LWorking11;
+  LWorking6 := TBits.RotateRight64(LWorking6, 63);
 
-  // G(11, 6, v2, v7, v8, v13)
-  v2 := v2 + v7 + m11;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 32);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 24);
-  v2 := v2 + v7 + m7;
-  v13 := v13 xor v2;
-  v13 := TBits.RotateRight64(v13, 16);
-  v8 := v8 + v13;
-  v7 := v7 xor v8;
-  v7 := TBits.RotateRight64(v7, 63);
+  // G(11, 6, LWorking2, LWorking7, LWorking8, LWorking13)
+  LWorking2 := LWorking2 + LWorking7 + LBlock11;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 32);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 24);
+  LWorking2 := LWorking2 + LWorking7 + LBlock7;
+  LWorking13 := LWorking13 xor LWorking2;
+  LWorking13 := TBits.RotateRight64(LWorking13, 16);
+  LWorking8 := LWorking8 + LWorking13;
+  LWorking7 := LWorking7 xor LWorking8;
+  LWorking7 := TBits.RotateRight64(LWorking7, 63);
 
-  // G(11, 7, v3, v4, v9, v14)
-  v3 := v3 + v4 + m5;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 32);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 24);
-  v3 := v3 + v4 + m3;
-  v14 := v14 xor v3;
-  v14 := TBits.RotateRight64(v14, 16);
-  v9 := v9 + v14;
-  v4 := v4 xor v9;
-  v4 := TBits.RotateRight64(v4, 63);
+  // G(11, 7, LWorking3, LWorking4, LWorking9, LWorking14)
+  LWorking3 := LWorking3 + LWorking4 + LBlock5;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 32);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 24);
+  LWorking3 := LWorking3 + LWorking4 + LBlock3;
+  LWorking14 := LWorking14 xor LWorking3;
+  LWorking14 := TBits.RotateRight64(LWorking14, 16);
+  LWorking9 := LWorking9 + LWorking14;
+  LWorking4 := LWorking4 xor LWorking9;
+  LWorking4 := TBits.RotateRight64(LWorking4, 63);
 
   // Finalization
-  FState[0] := FState[0] xor (v0 xor v8);
-  FState[1] := FState[1] xor (v1 xor v9);
-  FState[2] := FState[2] xor (v2 xor v10);
-  FState[3] := FState[3] xor (v3 xor v11);
-  FState[4] := FState[4] xor (v4 xor v12);
-  FState[5] := FState[5] xor (v5 xor v13);
-  FState[6] := FState[6] xor (v6 xor v14);
-  FState[7] := FState[7] xor (v7 xor v15);
+  FState[0] := FState[0] xor (LWorking0 xor LWorking8);
+  FState[1] := FState[1] xor (LWorking1 xor LWorking9);
+  FState[2] := FState[2] xor (LWorking2 xor LWorking10);
+  FState[3] := FState[3] xor (LWorking3 xor LWorking11);
+  FState[4] := FState[4] xor (LWorking4 xor LWorking12);
+  FState[5] := FState[5] xor (LWorking5 xor LWorking13);
+  FState[6] := FState[6] xor (LWorking6 xor LWorking14);
+  FState[7] := FState[7] xor (LWorking7 xor LWorking15);
 
 {$ELSE}
   FV[0] := FState[0];
@@ -1735,22 +1737,22 @@ begin
 
   FV[15] := IV7 xor FFinalizationFlag1;
 
-  for r := 0 to System.Pred(NumberOfRounds) do
+  for LRound := 0 to System.Pred(NumberOfRounds) do
 
   begin
-    G(0, 4, 8, 12, r, 0);
-    G(1, 5, 9, 13, r, 2);
-    G(2, 6, 10, 14, r, 4);
-    G(3, 7, 11, 15, r, 6);
-    G(3, 4, 9, 14, r, 14);
-    G(2, 7, 8, 13, r, 12);
-    G(0, 5, 10, 15, r, 8);
-    G(1, 6, 11, 12, r, 10);
+    G(0, 4, 8, 12, LRound, 0);
+    G(1, 5, 9, 13, LRound, 2);
+    G(2, 6, 10, 14, LRound, 4);
+    G(3, 7, 11, 15, LRound, 6);
+    G(3, 4, 9, 14, LRound, 14);
+    G(2, 7, 8, 13, LRound, 12);
+    G(0, 5, 10, 15, LRound, 8);
+    G(1, 6, 11, 12, LRound, 10);
   end;
 
-  for i := 0 to 7 do
+  for LWordIdx := 0 to 7 do
   begin
-    FState[i] := FState[i] xor (FV[i] xor FV[i + 8]);
+    FState[LWordIdx] := FState[LWordIdx] xor (FV[LWordIdx] xor FV[LWordIdx + 8]);
   end;
 
 {$ENDIF USE_UNROLLED_VARIANT}
@@ -1764,7 +1766,7 @@ end;
 
 constructor TBlake2B.Create(const AConfig: IBlake2BConfig);
 begin
-  Create(AConfig, Nil);
+  Create(AConfig, nil);
 end;
 
 constructor TBlake2B.Create(const AConfig: IBlake2BConfig;
@@ -1774,7 +1776,7 @@ begin
   FTreeConfig := ATreeConfig;
   FDoTransformKeyBlock := ADoTransformKeyBlock;
 
-  if (FConfig = Nil) then
+  if (FConfig = nil) then
   begin
     FConfig := TBlake2BConfig.DefaultConfig;
   end;
@@ -1783,7 +1785,7 @@ begin
 
   System.SetLength(FBuffer, BlockSizeInBytes);
 
-  Inherited Create(FConfig.HashSize, BlockSizeInBytes);
+  inherited Create(FConfig.HashSize, BlockSizeInBytes);
 end;
 
 procedure TBlake2B.Finish;
@@ -1796,7 +1798,7 @@ begin
 
   FFinalizationFlag0 := System.High(UInt64);
 
-  if (FTreeConfig <> Nil) and (FTreeConfig.IsLastNode) then
+  if (FTreeConfig <> nil) and (FTreeConfig.IsLastNode) then
   begin
     FFinalizationFlag1 := System.High(UInt64);
   end;
@@ -1819,11 +1821,11 @@ var
   LRawConfig: THashLibUInt64Array;
 begin
   LRawConfig := TBlake2BIvBuilder.ConfigB(FConfig, FTreeConfig);
-  LBlock := Nil;
+  LBlock := nil;
 
   if FDoTransformKeyBlock then
   begin
-    if ((FConfig.Key <> Nil) and (System.Length(FConfig.Key) <> 0)) then
+    if ((FConfig.Key <> nil) and (System.Length(FConfig.Key) <> 0)) then
     begin
       LBlock := System.Copy(FConfig.Key, System.Low(FConfig.Key),
         System.Length(FConfig.Key));
@@ -1831,7 +1833,7 @@ begin
     end;
   end;
 
-  if (LRawConfig = Nil) then
+  if (LRawConfig = nil) then
   begin
     raise EArgumentNilHashLibException.CreateRes(@SConfigNil);
   end;
@@ -1870,7 +1872,7 @@ begin
 
   if FDoTransformKeyBlock then
   begin
-    if (LBlock <> Nil) then
+    if (LBlock <> nil) then
     begin
       TransformBytes(LBlock, 0, System.Length(LBlock));
       TArrayUtils.ZeroFill(LBlock); // burn key from memory
@@ -1961,13 +1963,13 @@ end;
 
 function TBlake2XBConfig.Clone(): TBlake2XBConfig;
 begin
-  Result := Default (TBlake2XBConfig);
-  if FBlake2BConfig <> Nil then
+  Result := Default(TBlake2XBConfig);
+  if FBlake2BConfig <> nil then
   begin
     Result.Blake2BConfig := FBlake2BConfig.Clone();
   end;
 
-  if FBlake2BTreeConfig <> Nil then
+  if FBlake2BTreeConfig <> nil then
   begin
     Result.Blake2BTreeConfig := FBlake2BTreeConfig.Clone();
   end;
@@ -1997,7 +1999,7 @@ var
   LXofSizeInBytes: UInt64;
 begin
   LXofSizeInBytes := AXofSizeInBits shr 3;
-  If ((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1) or
+  if ((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1) or
     (LXofSizeInBytes > UInt64(UnknownDigestLengthInBytes)) then
   begin
     raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidXOFSize,
@@ -2074,7 +2076,7 @@ begin
   LHashInstance.FFinalizationFlag0 := FFinalizationFlag0;
   LHashInstance.FFinalizationFlag1 := FFinalizationFlag1;
 
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
@@ -2088,11 +2090,11 @@ constructor TBlake2XB.Create(const ABlake2XBConfig: TBlake2XBConfig);
 begin
   FBlake2XBConfig := ABlake2XBConfig;
   // Create root hash config.
-  FRootConfig := Default (TBlake2XBConfig);
+  FRootConfig := Default(TBlake2XBConfig);
 
   FRootConfig.Blake2BConfig := FBlake2XBConfig.Blake2BConfig;
 
-  if FRootConfig.Blake2BConfig = Nil then
+  if FRootConfig.Blake2BConfig = nil then
   begin
     FRootConfig.Blake2BConfig := TBlake2BConfig.Create();
   end
@@ -2106,7 +2108,7 @@ begin
 
   FRootConfig.Blake2BTreeConfig := FBlake2XBConfig.Blake2BTreeConfig;
 
-  if FRootConfig.Blake2BTreeConfig = Nil then
+  if FRootConfig.Blake2BTreeConfig = nil then
   begin
     FRootConfig.Blake2BTreeConfig := TBlake2BTreeConfig.Create();
     FRootConfig.Blake2BTreeConfig.FanOut := 1;
@@ -2120,7 +2122,7 @@ begin
   end;
 
   // Create initial config for output hashes.
-  FOutputConfig := Default (TBlake2XBConfig);
+  FOutputConfig := Default(TBlake2XBConfig);
 
   FOutputConfig.Blake2BConfig := TBlake2BConfig.Create();
   FOutputConfig.Blake2BConfig.Salt := FRootConfig.Blake2BConfig.Salt;
@@ -2146,7 +2148,7 @@ begin
   FOutputConfig.Blake2BTreeConfig.NodeOffset := NodeOffsetWithXOFDigestLength
     (LXofSizeInBytes);
 
-  FRootHashDigest := Nil;
+  FRootHashDigest := nil;
   FDigestPosition := 0;
   FFinalized := False;
   TArrayUtils.ZeroFill(FBlake2XBBuffer);
@@ -2157,6 +2159,7 @@ procedure TBlake2XB.DoOutput(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 var
   LDiff, LCount, LBlockOffset: UInt64;
+  LHash: IHash;
 begin
 
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -2185,7 +2188,7 @@ begin
     FFinalized := True;
   end;
 
-  if (FRootHashDigest = Nil) then
+  if (FRootHashDigest = nil) then
   begin
     // Get root digest
     System.SetLength(FRootHashDigest, Blake2BHashSize);
@@ -2200,9 +2203,8 @@ begin
       FOutputConfig.Blake2BConfig.HashSize := ComputeStepLength();
       FOutputConfig.Blake2BTreeConfig.InnerHashSize := Blake2BHashSize;
 
-      FBlake2XBBuffer := (TBlake2B.Create(FOutputConfig.Blake2BConfig,
-        FOutputConfig.Blake2BTreeConfig) as IHash).ComputeBytes(FRootHashDigest)
-        .GetBytes();
+      LHash := TBlake2B.Create(FOutputConfig.Blake2BConfig, FOutputConfig.Blake2BTreeConfig);
+      FBlake2XBBuffer := LHash.ComputeBytes(FRootHashDigest).GetBytes();
       FOutputConfig.Blake2BTreeConfig.NodeOffset :=
         FOutputConfig.Blake2BTreeConfig.NodeOffset + 1;
     end;
@@ -2278,7 +2280,7 @@ var
   LHashInstance: TBlake2BMACNotBuildInAdapter;
 begin
   LHashInstance := TBlake2BMACNotBuildInAdapter.Create(FHash.Clone(), FKey);
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
@@ -2291,13 +2293,13 @@ begin
   LConfig.Key := ABlake2BKey;
   LConfig.Salt := ASalt;
   LConfig.Personalisation := APersonalisation;
-  Create(TBlake2B.Create(LConfig, Nil) as IHash, ABlake2BKey);
+  Create(TBlake2B.Create(LConfig, nil) as IHash, ABlake2BKey);
 end;
 
 constructor TBlake2BMACNotBuildInAdapter.Create(const AHash: IHash;
   const ABlake2BKey: THashLibByteArray);
 begin
-  Inherited Create(AHash.HashSize, AHash.BlockSize);
+  inherited Create(AHash.HashSize, AHash.BlockSize);
   SetKey(ABlake2BKey);
   FHash := AHash;
 end;
@@ -2333,9 +2335,9 @@ end;
 
 procedure TBlake2BMACNotBuildInAdapter.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
-    FKey := Nil;
+    FKey := nil;
   end
   else
   begin

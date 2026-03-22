@@ -36,13 +36,13 @@ type
     BlockSizeInBytes = Int32(64);
     KeyLengthInBytes = Int32(32);
 
-    flagChunkStart = UInt32(1 shl 0);
-    flagChunkEnd = UInt32(1 shl 1);
-    flagParent = UInt32(1 shl 2);
-    flagRoot = UInt32(1 shl 3);
-    flagKeyedHash = UInt32(1 shl 4);
-    flagDeriveKeyContext = UInt32(1 shl 5);
-    flagDeriveKeyMaterial = UInt32(1 shl 6);
+    FlagChunkStart = UInt32(1 shl 0);
+    FlagChunkEnd = UInt32(1 shl 1);
+    FlagParent = UInt32(1 shl 2);
+    FlagRoot = UInt32(1 shl 3);
+    FlagKeyedHash = UInt32(1 shl 4);
+    FlagDeriveKeyContext = UInt32(1 shl 5);
+    FlagDeriveKeyMaterial = UInt32(1 shl 6);
 
     // maximum size in bytes this digest output reader can produce
     MaxDigestLengthInBytes = UInt64(System.High(UInt64));
@@ -186,7 +186,7 @@ type
 
   public
     constructor Create(AHashSize: THashSize = THashSize.hsHashSize256;
-      const AKey: THashLibByteArray = Nil); overload;
+      const AKey: THashLibByteArray = nil); overload;
     procedure Initialize; override;
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ADataLength: Int32); override;
@@ -253,7 +253,7 @@ implementation
 
 class function TBlake3.TBlake3Node.DefaultBlake3Node: TBlake3Node;
 begin
-  Result := Default (TBlake3Node);
+  Result := Default(TBlake3Node);
   Result.Counter := 0;
   Result.BlockLen := 0;
   Result.Flags := 0;
@@ -284,27 +284,27 @@ end;
 
 procedure TBlake3.TBlake3Node.G(APtrState: PCardinal; A, B, C, D, X, Y: UInt32);
 var
-  LA, LB, LC, LD: UInt32;
+  LRegA, LRegB, LRegC, LRegD: UInt32;
 begin
 
-  LA := APtrState[A];
-  LB := APtrState[B];
-  LC := APtrState[C];
-  LD := APtrState[D];
+  LRegA := APtrState[A];
+  LRegB := APtrState[B];
+  LRegC := APtrState[C];
+  LRegD := APtrState[D];
 
-  LA := LA + LB + X;
-  LD := TBits.RotateRight32(LD xor LA, 16);
-  LC := LC + LD;
-  LB := TBits.RotateRight32(LB xor LC, 12);
-  LA := LA + LB + Y;
-  LD := TBits.RotateRight32(LD xor LA, 8);
-  LC := LC + LD;
-  LB := TBits.RotateRight32(LB xor LC, 7);
+  LRegA := LRegA + LRegB + X;
+  LRegD := TBits.RotateRight32(LRegD xor LRegA, 16);
+  LRegC := LRegC + LRegD;
+  LRegB := TBits.RotateRight32(LRegB xor LRegC, 12);
+  LRegA := LRegA + LRegB + Y;
+  LRegD := TBits.RotateRight32(LRegD xor LRegA, 8);
+  LRegC := LRegC + LRegD;
+  LRegB := TBits.RotateRight32(LRegB xor LRegC, 7);
 
-  APtrState[A] := LA;
-  APtrState[B] := LB;
-  APtrState[C] := LC;
-  APtrState[D] := LD;
+  APtrState[A] := LRegA;
+  APtrState[B] := LRegB;
+  APtrState[C] := LRegC;
+  APtrState[D] := LRegD;
 end;
 
 procedure TBlake3.TBlake3Node.Compress(APtrState: PCardinal);
@@ -455,7 +455,7 @@ var
 begin
   LBlockWords := TArrayUtils.Concatenate(ALeft, ARight);
   Result := TBlake3Node.CreateBlake3Node(AKey, LBlockWords, 0, BlockSizeInBytes,
-    AFlags or flagParent);
+    AFlags or FlagParent);
 end;
 
 { TBlake3.TBlake3ChunkState }
@@ -463,7 +463,7 @@ end;
 class function TBlake3.TBlake3ChunkState.DefaultBlake3ChunkState
   : TBlake3ChunkState;
 begin
-  Result := Default (TBlake3ChunkState);
+  Result := Default(TBlake3ChunkState);
   Result.N := TBlake3Node.DefaultBlake3Node;
   Result.BlockLen := 0;
   Result.BytesConsumed := 0;
@@ -484,7 +484,7 @@ begin
   Result.N.Counter := AChunkCounter;
   Result.N.BlockLen := BlockSizeInBytes;
   // compress the first block with the start flag set
-  Result.N.Flags := AFlags or flagChunkStart;
+  Result.N.Flags := AFlags or FlagChunkStart;
 end;
 
 function TBlake3.TBlake3ChunkState.ChunkCounter: UInt64;
@@ -510,7 +510,7 @@ begin
   TConverters.le32_copy(@(Block[0]), 0, @(Result.Block[0]), 0,
     BlockSizeInBytes);
   Result.BlockLen := UInt32(BlockLen);
-  Result.Flags := Result.Flags or flagChunkEnd;
+  Result.Flags := Result.Flags or FlagChunkEnd;
 end;
 
 procedure TBlake3.TBlake3ChunkState.Update(APtrData: PByte; ADataLength: Int32);
@@ -534,7 +534,7 @@ begin
       TConverters.le32_copy(LBytePtr, 0, LCardinalPtr, 0, BlockSizeInBytes);
       N.ChainingValue(LCVPtr);
       // clear the start flag for all but the first block
-      N.Flags := N.Flags and (N.Flags xor flagChunkStart);
+      N.Flags := N.Flags and (N.Flags xor FlagChunkStart);
       BlockLen := 0;
     end;
 
@@ -554,7 +554,7 @@ end;
 class function TBlake3.TBlake3OutputReader.DefaultBlake3OutputReader
   : TBlake3OutputReader;
 begin
-  Result := Default (TBlake3OutputReader);
+  Result := Default(TBlake3OutputReader);
   Result.N := TBlake3Node.DefaultBlake3Node();
   Result.Offset := 0;
 end;
@@ -627,7 +627,7 @@ end;
 
 { TBlake3 }
 
-// Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
+// Len64 returns the minimum number of bits required to represent x; zero yields 0.
 class function TBlake3.Len64(AValue: UInt64): Int32;
 
   function Len8(AValue: Byte): Byte; inline;
@@ -684,7 +684,7 @@ constructor TBlake3.CreateInternal(AHashSize: Int32;
 var
   LIdx: Int32;
 begin
-  Inherited Create(AHashSize, BlockSizeInBytes);
+  inherited Create(AHashSize, BlockSizeInBytes);
   FKey := System.Copy(AKeyWords);
   FFlags := AFlags;
   System.SetLength(FStack, 54);
@@ -700,7 +700,7 @@ var
   LKeyLength: Int32;
 begin
   System.SetLength(LKeyWords, 8);
-  if AKey = Nil then
+  if AKey = nil then
   begin
     System.Move(IV, LKeyWords[0], System.SizeOf(IV));
     CreateInternal(AHashSize, LKeyWords, 0);
@@ -714,7 +714,7 @@ begin
         [KeyLengthInBytes, LKeyLength]);
     end;
     TConverters.le32_copy(PByte(AKey), 0, PCardinal(LKeyWords), 0, LKeyLength);
-    CreateInternal(AHashSize, LKeyWords, flagKeyedHash);
+    CreateInternal(AHashSize, LKeyWords, FlagKeyedHash);
   end;
 end;
 
@@ -746,7 +746,7 @@ begin
   LHashInstance.FOutputReader := FOutputReader.Clone();
   LHashInstance.FStack := TArrayUtils.Clone(FStack);
   LHashInstance.FUsed := FUsed;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
@@ -807,7 +807,7 @@ begin
       Result := TBlake3Node.ParentNode(FStack[LIdx], LTemp, FKey, FFlags);
     end;
   end;
-  Result.Flags := Result.Flags or flagRoot;
+  Result.Flags := Result.Flags or FlagRoot;
 end;
 
 procedure TBlake3.TransformBytes(const AData: THashLibByteArray;
@@ -866,12 +866,12 @@ begin
   System.Move(IV, LIVWords[0], System.SizeOf(IV));
   // construct the derivation Hasher and get the DerivationIV
   LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, LIVWords,
-    flagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
+    FlagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
   TConverters.le32_copy(PByte(LDerivationIV), 0, PCardinal(LIVWords), 0,
     KeyLengthInBytes);
 
   // derive the SubKey
-  LXof := TBlake3XOF.Create(32, LIVWords, flagDeriveKeyMaterial) as IXOF;
+  LXof := TBlake3XOF.Create(32, LIVWords, FlagDeriveKeyMaterial);
   LXof.XOFSizeInBits := System.Length(ASubKey) * 8;
   LXof.Initialize;
   LXof.TransformBytes(ASrcKey);
@@ -897,8 +897,8 @@ var
   LXof: IXOF;
 begin
   // Xof Cloning
-  LXof := (TBlake3XOF.Create(HashSize, Nil) as IXOF);
-  LXof.XOFSizeInBits := (Self as IXOF).XOFSizeInBits;
+  LXof := TBlake3XOF.Create(HashSize, nil);
+  LXof.XOFSizeInBits := XOFSizeInBits;
 
   // Blake3XOF Cloning
   LHashInstance := LXof as TBlake3XOF;
@@ -912,20 +912,20 @@ begin
   LHashInstance.FFlags := FFlags;
   LHashInstance.FKey := System.Copy(FKey);
 
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TBlake3XOF.Create(AHashSize: Int32; const AKey: THashLibByteArray);
 begin
-  Inherited Create(AHashSize, AKey);
+  inherited Create(AHashSize, AKey);
   FFinalized := False;
 end;
 
 constructor TBlake3XOF.Create(AHashSize: Int32;
   const AKeyWords: THashLibUInt32Array; AFlags: UInt32);
 begin
-  Inherited CreateInternal(AHashSize, AKeyWords, AFlags);
+  inherited CreateInternal(AHashSize, AKeyWords, AFlags);
   FFinalized := False;
 end;
 
@@ -980,7 +980,7 @@ var
   LXofSizeInBytes: UInt64;
 begin
   LXofSizeInBytes := AXofSizeInBits shr 3;
-  If (((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1)) then
+  if (((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1)) then
   begin
     raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
   end;

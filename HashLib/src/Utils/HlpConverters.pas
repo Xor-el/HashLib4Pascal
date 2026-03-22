@@ -5,11 +5,13 @@ unit HlpConverters;
 interface
 
 uses
+{$IFDEF FPC}
+  StrUtils, // FPC needs StrUtils for BinToHex/HexToBin
+{$ENDIF}
   Classes,
   SysUtils,
   HlpHashLibTypes,
-  HlpBits,
-  HlpBitConverter;
+  HlpBits;
 
 resourcestring
   SAEncodingNilError = 'AEncoding cannot be nil';
@@ -195,18 +197,18 @@ end;
 class function TConverters.be2me_32(AInput: UInt32): UInt32;
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  result := TBits.ReverseBytesUInt32(AInput);
+  Result := TBits.ReverseBytesUInt32(AInput);
 {$ELSE}
-  result := AInput;
+  Result := AInput;
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.be2me_64(AInput: UInt64): UInt64;
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  result := TBits.ReverseBytesUInt64(AInput);
+  Result := TBits.ReverseBytesUInt64(AInput);
 {$ELSE}
-  result := AInput;
+  Result := AInput;
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
@@ -237,18 +239,18 @@ end;
 class function TConverters.le2me_32(AInput: UInt32): UInt32;
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  result := AInput;
+  Result := AInput;
 {$ELSE}
-  result := TBits.ReverseBytesUInt32(AInput);
+  Result := TBits.ReverseBytesUInt32(AInput);
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
 class function TConverters.le2me_64(AInput: UInt64): UInt64;
 begin
 {$IFDEF HASHLIB_LITTLE_ENDIAN}
-  result := AInput;
+  Result := AInput;
 {$ELSE}
-  result := TBits.ReverseBytesUInt64(AInput);
+  Result := TBits.ReverseBytesUInt64(AInput);
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
 end;
 
@@ -355,56 +357,56 @@ end;
 class function TConverters.ReadPCardinalAsUInt32(AInput: PCardinal): UInt32;
 begin
 {$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput^, result, System.SizeOf(UInt32));
+  System.Move(AInput^, Result, System.SizeOf(UInt32));
 {$ELSE}
-  result := AInput^;
+  Result := AInput^;
 {$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
 end;
 
 class function TConverters.ReadPUInt64AsUInt64(AInput: PUInt64): UInt64;
 begin
 {$IFDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  System.Move(AInput^, result, System.SizeOf(UInt64));
+  System.Move(AInput^, Result, System.SizeOf(UInt64));
 {$ELSE}
-  result := AInput^;
+  Result := AInput^;
 {$ENDIF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
 end;
 
 class function TConverters.ReadPCardinalAsUInt32LE(AInput: PCardinal): UInt32;
 begin
-  result := le2me_32(ReadPCardinalAsUInt32(AInput));
+  Result := le2me_32(ReadPCardinalAsUInt32(AInput));
 end;
 
 class function TConverters.ReadPUInt64AsUInt64LE(AInput: PUInt64): UInt64;
 begin
-  result := le2me_64(ReadPUInt64AsUInt64(AInput));
+  Result := le2me_64(ReadPUInt64AsUInt64(AInput));
 end;
 
 class function TConverters.ReadPCardinalAsUInt32BE(AInput: PCardinal): UInt32;
 begin
-  result := be2me_32(ReadPCardinalAsUInt32(AInput));
+  Result := be2me_32(ReadPCardinalAsUInt32(AInput));
 end;
 
 class function TConverters.ReadPUInt64AsUInt64BE(AInput: PUInt64): UInt64;
 begin
-  result := be2me_64(ReadPUInt64AsUInt64(AInput));
+  Result := be2me_64(ReadPUInt64AsUInt64(AInput));
 end;
 
 class function TConverters.ReadBytesAsUInt32LE(AInput: PByte;
   AIndex: Int32): UInt32;
 begin
-  result := ReadPCardinalAsUInt32LE(PCardinal(AInput + AIndex));
+  Result := ReadPCardinalAsUInt32LE(PCardinal(AInput + AIndex));
   // while this below is slower, it's portable
-  // result := (UInt32(AInput[AIndex])) or (UInt32(AInput[AIndex + 1]) shl 8) or
+  // Result := (UInt32(AInput[AIndex])) or (UInt32(AInput[AIndex + 1]) shl 8) or
   // (UInt32(AInput[AIndex + 2]) shl 16) or (UInt32(AInput[AIndex + 3]) shl 24);
 end;
 
 class function TConverters.ReadBytesAsUInt64LE(AInput: PByte;
   AIndex: Int32): UInt64;
 begin
-  result := ReadPUInt64AsUInt64LE(PUInt64(AInput + AIndex));
+  Result := ReadPUInt64AsUInt64LE(PUInt64(AInput + AIndex));
   // while this below is slower, it's portable
-  // result := (UInt64(AInput[AIndex])) or (UInt64(AInput[AIndex + 1]) shl 8) or
+  // Result := (UInt64(AInput[AIndex])) or (UInt64(AInput[AIndex + 1]) shl 8) or
   // (UInt64(AInput[AIndex + 2]) shl 16) or (UInt64(AInput[AIndex + 3]) shl 24)
   // or (UInt64(AInput[AIndex + 4]) shl 32) or
   // (UInt64(AInput[AIndex + 5]) shl 40) or (UInt64(AInput[AIndex + 6]) shl 48)
@@ -414,9 +416,9 @@ end;
 class function TConverters.ReadBytesAsUInt32BE(AInput: PByte;
   AIndex: Int32): UInt32;
 begin
-  result := ReadPCardinalAsUInt32BE(PCardinal(AInput + AIndex));
+  Result := ReadPCardinalAsUInt32BE(PCardinal(AInput + AIndex));
   // while this below is slower, it's portable
-  // result := (UInt32(AInput[AIndex]) shl 24) or
+  // Result := (UInt32(AInput[AIndex]) shl 24) or
   // (UInt32(AInput[AIndex + 1]) shl 16) or (UInt32(AInput[AIndex + 2]) shl 8) or
   // (UInt32(AInput[AIndex + 3]));
 end;
@@ -424,9 +426,9 @@ end;
 class function TConverters.ReadBytesAsUInt64BE(AInput: PByte;
   AIndex: Int32): UInt64;
 begin
-  result := ReadPUInt64AsUInt64BE(PUInt64(AInput + AIndex));
+  Result := ReadPUInt64AsUInt64BE(PUInt64(AInput + AIndex));
   // while this below is slower, it's portable
-  // result := (UInt64(AInput[AIndex]) shl 56) or
+  // Result := (UInt64(AInput[AIndex]) shl 56) or
   // (UInt64(AInput[AIndex + 1]) shl 48) or (UInt64(AInput[AIndex + 2]) shl 40)
   // or (UInt64(AInput[AIndex + 3]) shl 32) or
   // (UInt64(AInput[AIndex + 4]) shl 24) or (UInt64(AInput[AIndex + 5]) shl 16)
@@ -436,33 +438,57 @@ end;
 class function TConverters.ReadUInt32AsBytesLE(AInput: UInt32)
   : THashLibByteArray;
 begin
-  System.SetLength(result, System.SizeOf(UInt32));
-  TConverters.ReadUInt32AsBytesLE(AInput, result, 0);
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TConverters.ReadUInt32AsBytesLE(AInput, Result, 0);
 end;
 
 class function TConverters.ReadUInt64AsBytesLE(AInput: UInt64)
   : THashLibByteArray;
 begin
-  System.SetLength(result, System.SizeOf(UInt64));
-  TConverters.ReadUInt64AsBytesLE(AInput, result, 0);
+  System.SetLength(Result, System.SizeOf(UInt64));
+  TConverters.ReadUInt64AsBytesLE(AInput, Result, 0);
 end;
 
 class function TConverters.ConvertBytesToHexString(const AInput
   : THashLibByteArray; AGroup: Boolean): String;
+var
+  LCount, LIdx: Int32;
+  LHex: String;
+  LPtrHex, LPtrResult: PChar;
 begin
-  result := UpperCase(TBitConverter.ToString(AInput));
-
-  if System.length(AInput) = 1 then
+  LCount := System.Length(AInput);
+  if LCount = 0 then
   begin
+    Result := '';
     Exit;
   end;
 
-  if (AGroup) then
+  System.SetLength(LHex, LCount * 2);
+  {$IFDEF FPC}StrUtils.{$ENDIF}BinToHex(@AInput[0], PChar(LHex), LCount);
+
+  if (not AGroup) or (LCount <= 1) then
   begin
+    Result := LHex;
     Exit;
   end;
 
-  result := StringReplace(result, '-', '', [rfIgnoreCase, rfReplaceAll]);
+  System.SetLength(Result, (LCount * 3) - 1);
+  LPtrHex := PChar(LHex);
+  LPtrResult := PChar(Result);
+  for LIdx := 0 to LCount - 1 do
+  begin
+    LPtrResult^ := LPtrHex^;
+    System.Inc(LPtrHex);
+    System.Inc(LPtrResult);
+    LPtrResult^ := LPtrHex^;
+    System.Inc(LPtrHex);
+    System.Inc(LPtrResult);
+    if LIdx < (LCount - 1) then
+    begin
+      LPtrResult^ := '-';
+      System.Inc(LPtrResult);
+    end;
+  end;
 end;
 
 class function TConverters.ConvertHexStringToBytes(const AInput: String)
@@ -474,44 +500,40 @@ begin
   LInput := StringReplace(LInput, '-', '', [rfIgnoreCase, rfReplaceAll]);
 
 {$IFDEF DEBUG}
-  System.Assert(System.length(LInput) and 1 = 0);
+  System.Assert(System.Length(LInput) and 1 = 0);
 {$ENDIF DEBUG}
-  System.SetLength(result, System.length(LInput) shr 1);
+  System.SetLength(Result, System.Length(LInput) shr 1);
 
-{$IFNDEF NEXTGEN}
-  HexToBin(PChar(LInput), @result[0], System.length(result));
-{$ELSE}
-  HexToBin(PChar(LInput), 0, result, 0, System.length(LInput));
-{$ENDIF !NEXTGEN}
+  {$IFDEF FPC}StrUtils.{$ENDIF}HexToBin(PChar(LInput), @Result[0], System.Length(Result));
 end;
 
 class function TConverters.ConvertStringToBytes(const AInput: String;
   const AEncoding: TEncoding): THashLibByteArray;
 begin
-  if AEncoding = Nil then
+  if AEncoding = nil then
   begin
     raise EArgumentNilHashLibException.CreateRes(@SAEncodingNilError);
   end;
 
 {$IFDEF FPC}
-  result := AEncoding.GetBytes(UnicodeString(AInput));
+  Result := AEncoding.GetBytes(UnicodeString(AInput));
 {$ELSE}
-  result := AEncoding.GetBytes(AInput);
+  Result := AEncoding.GetBytes(AInput);
 {$ENDIF FPC}
 end;
 
 class function TConverters.ConvertBytesToString(const AInput: THashLibByteArray;
   const AEncoding: TEncoding): String;
 begin
-  if AEncoding = Nil then
+  if AEncoding = nil then
   begin
     raise EArgumentNilHashLibException.CreateRes(@SAEncodingNilError);
   end;
 
 {$IFDEF FPC}
-  result := String(AEncoding.GetString(AInput));
+  Result := String(AEncoding.GetString(AInput));
 {$ELSE}
-  result := AEncoding.GetString(AInput);
+  Result := AEncoding.GetString(AInput);
 {$ENDIF FPC}
 end;
 

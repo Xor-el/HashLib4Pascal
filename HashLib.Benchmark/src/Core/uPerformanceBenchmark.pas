@@ -38,75 +38,76 @@ class function TPerformanceBenchmark.Calculate(const AHashInstance: IHash;
 const
   THREE_SECONDS_IN_MILLISECONDS = UInt32(3000);
 var
-  MaxRate: Double;
-  Data: TBytes;
-  Idx: Int32;
-  Total: Int64;
-  A, B, TotalMilliSeconds: UInt32;
-  NewName, BlockSizeAndUnit: String;
+  LMaxRate: Double;
+  LData: TBytes;
+  LIdx: Int32;
+  LTotal: Int64;
+  LTickStart, LTickEnd, LTotalMilliSeconds: UInt32;
+  LNewName, LBlockSizeAndUnit: String;
 begin
 
-  System.SetLength(Data, ASize);
+  System.SetLength(LData, ASize);
 
-  for Idx := System.Low(Data) to System.High(Data) do
+  for LIdx := System.Low(LData) to System.High(LData) do
   begin
-    Data[Idx] := Byte(Random(ASize));
+    LData[LIdx] := Byte(Random(ASize));
   end;
 
-  MaxRate := 0.0;
-  TotalMilliSeconds := 0;
+  LMaxRate := 0.0;
+  LTotalMilliSeconds := 0;
 
-  Idx := 3;
-  while Idx > 0 do
+  LIdx := 3;
+  while LIdx > 0 do
   begin
-    Total := 0;
+    LTotal := 0;
 
-    while (TotalMilliSeconds <= THREE_SECONDS_IN_MILLISECONDS) do
+    while (LTotalMilliSeconds <= THREE_SECONDS_IN_MILLISECONDS) do
     begin
-      A := TThread.GetTickCount;
-      AHashInstance.ComputeBytes(Data);
-      B := TThread.GetTickCount;
-      Total := Total + System.Length(Data);
-      TotalMilliSeconds := TotalMilliSeconds + (B - A);
+      LTickStart := TThread.GetTickCount;
+      AHashInstance.ComputeBytes(LData);
+      LTickEnd := TThread.GetTickCount;
+      LTotal := LTotal + System.Length(LData);
+      LTotalMilliSeconds := LTotalMilliSeconds + (LTickEnd - LTickStart);
     end;
 
-    MaxRate := Math.Max(Total / (TotalMilliSeconds div 1000) / 1024 /
-      1024, MaxRate);
+    LMaxRate := Math.Max(LTotal / (LTotalMilliSeconds div 1000) / 1024 /
+      1024, LMaxRate);
 
-    System.Dec(Idx);
+    System.Dec(LIdx);
   end;
 
   if ANamePrefix <> '' then
   begin
-    NewName := Format('%s_%s', [AHashInstance.Name, ANamePrefix]);
+    LNewName := Format('%s_%s', [AHashInstance.Name, ANamePrefix]);
   end
   else
   begin
-    NewName := AHashInstance.Name;
+    LNewName := AHashInstance.Name;
   end;
 
   if ASize >= 1024 * 1024 * 1024 then
   begin
-    BlockSizeAndUnit := Format('%d GB', [(ASize div (1024 * 1024 * 1024))]);
+    LBlockSizeAndUnit := Format('%d GB', [(ASize div (1024 * 1024 * 1024))]);
   end
   else if ASize >= 1024 * 1024 then
   begin
-    BlockSizeAndUnit := Format('%d MB', [(ASize div (1024 * 1024))]);
+    LBlockSizeAndUnit := Format('%d MB', [(ASize div (1024 * 1024))]);
   end
   else
   begin
-    BlockSizeAndUnit := Format('%d KB', [(ASize div 1024)]);
+    LBlockSizeAndUnit := Format('%d KB', [(ASize div 1024)]);
   end;
 
   Result := Format('%s Throughput: %.2f MB/s with Blocks of %s',
-    [Copy(NewName, 2, System.Length(NewName) - 1), MaxRate, BlockSizeAndUnit]);
+    [Copy(LNewName, 2, System.Length(LNewName) - 1), LMaxRate,
+    LBlockSizeAndUnit]);
 end;
 
 class procedure TPerformanceBenchmark.DoBenchmark(var AStringList: TStringList);
 begin
   if not Assigned(AStringList) then
   begin
-    raise Exception.Create('StringList Instance cannot be Nil');
+    raise Exception.Create('StringList Instance cannot be nil');
   end;
 
   AStringList.Clear;
@@ -153,11 +154,11 @@ begin
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2S_256));
 
-  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2BP(64, Nil)));
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2BP(64, nil)));
 
-  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2SP(32, Nil)));
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake2SP(32, nil)));
 
-  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake3_256(Nil)));
+  AStringList.Append(Calculate(THashFactory.TCrypto.CreateBlake3_256(nil)));
 
 end;
 

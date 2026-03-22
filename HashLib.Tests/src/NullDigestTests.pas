@@ -41,9 +41,9 @@ end;
 procedure TTestNullDigest.TearDown;
 begin
   inherited;
-  HashInstance := Nil;
-  FBlockSizeMethod := Nil;
-  FHashSizeMethod := Nil;
+  HashInstance := nil;
+  FBlockSizeMethod := nil;
+  FHashSizeMethod := nil;
 end;
 
 initialization

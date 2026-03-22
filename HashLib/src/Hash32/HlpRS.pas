@@ -16,10 +16,10 @@ type
   TRS = class sealed(THash, IHash32, ITransformBlock)
   strict private
   var
-    FHash, FA: UInt32;
+    FHash, FMultiplier: UInt32;
 
   const
-    B = UInt32(378551);
+    CMul = UInt32(378551);
 
   public
     constructor Create();
@@ -40,20 +40,20 @@ var
 begin
   LHashInstance := TRS.Create();
   LHashInstance.FHash := FHash;
-  LHashInstance.FA := FA;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  LHashInstance.FMultiplier := FMultiplier;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TRS.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TRS.Initialize;
 begin
   FHash := 0;
-  FA := 63689;
+  FMultiplier := 63689;
 end;
 
 procedure TRS.TransformBytes(const AData: THashLibByteArray;
@@ -69,8 +69,8 @@ begin
   LIdx := AIndex;
   while ALength > 0 do
   begin
-    FHash := (FHash * FA) + AData[LIdx];
-    FA := FA * B;
+    FHash := (FHash * FMultiplier) + AData[LIdx];
+    FMultiplier := FMultiplier * CMul;
     System.Inc(LIdx);
     System.Dec(ALength);
   end;
@@ -79,7 +79,7 @@ end;
 
 function TRS.TransformFinal: IHashResult;
 begin
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

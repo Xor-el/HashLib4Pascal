@@ -145,13 +145,13 @@ begin
   LHashInstance.FTotalLength := FTotalLength;
   LHashInstance.FIdx := FIdx;
   LHashInstance.FBuffer := System.Copy(FBuffer);
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TMurmurHash3_x86_128.Create;
 begin
-  Inherited Create(16, 16);
+  inherited Create(16, 16);
   FKey := CKEY;
   System.SetLength(FBuffer, 16);
 end;
@@ -421,12 +421,12 @@ end;
 
 function TMurmurHash3_x86_128.GetKey: THashLibByteArray;
 begin
-  result := TConverters.ReadUInt32AsBytesLE(FKey);
+  Result := TConverters.ReadUInt32AsBytesLE(FKey);
 end;
 
 function TMurmurHash3_x86_128.GetKeyLength: Int32;
 begin
-  result := 4;
+  Result := 4;
 end;
 
 procedure TMurmurHash3_x86_128.Initialize;
@@ -442,7 +442,7 @@ end;
 
 procedure TMurmurHash3_x86_128.SetKey(const AValue: THashLibByteArray);
 begin
-  if (AValue = Nil) then
+  if (AValue = nil) then
   begin
     FKey := CKEY;
   end
@@ -591,7 +591,7 @@ begin
   TConverters.ReadUInt32AsBytesBE(FH3, LBufferBytes, 8);
   TConverters.ReadUInt32AsBytesBE(FH4, LBufferBytes, 12);
 
-  result := THashResult.Create(LBufferBytes);
+  Result := THashResult.Create(LBufferBytes);
   Initialize();
 end;
 

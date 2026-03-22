@@ -26,7 +26,7 @@ type
 {$REGION 'Consts'}
 
   const
-    SMasterTable: array [0 .. 255] of UInt32 = ($C66363A5, $F87C7C84, $EE777799,
+    MasterTable: array [0 .. 255] of UInt32 = ($C66363A5, $F87C7C84, $EE777799,
       $F67B7B8D, $FFF2F20D, $D66B6BBD, $DE6F6FB1, $91C5C554, $60303050,
       $02010103, $CE6767A9, $562B2B7D, $E7FEFE19, $B5D7D762, $4DABABE6,
       $EC76769A, $8FCACA45, $1F82829D, $89C9C940, $FA7D7D87, $EFFAFA15,
@@ -97,15 +97,15 @@ implementation
 
 class function TGrindahl256.CalcTable(AI: Int32): THashLibUInt32Array;
 var
-  Jdx: Int32;
+  LJdx: Int32;
 begin
-  System.SetLength(result, 256);
-  Jdx := 0;
-  while Jdx < 256 do
+  System.SetLength(Result, 256);
+  LJdx := 0;
+  while LJdx < 256 do
   begin
-    result[Jdx] := UInt32((SMasterTable[Jdx] shr (AI * 8)) or
-      (SMasterTable[Jdx] shl (32 - AI * 8)));
-    System.Inc(Jdx);
+    Result[LJdx] := UInt32((MasterTable[LJdx] shr (AI * 8)) or
+      (MasterTable[LJdx] shl (32 - AI * 8)));
+    System.Inc(LJdx);
   end;
 end;
 
@@ -118,13 +118,13 @@ begin
   LHashInstance.FTemp := System.Copy(FTemp);
   LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TGrindahl256.Create;
 begin
-  Inherited Create(32, 4);
+  inherited Create(32, 4);
   System.SetLength(FState, 13);
   System.SetLength(FTemp, 13);
 end;
@@ -152,35 +152,35 @@ begin
 
   FState[0] := TConverters.be2me_32(FState[0]);
 
-  InjectMsg(true);
+  InjectMsg(True);
 
   LIdx := 0;
 
   while LIdx < 8 do
   begin
-    InjectMsg(true);
+    InjectMsg(True);
     System.Inc(LIdx);
   end;
 end;
 
 function TGrindahl256.GetResult: THashLibByteArray;
 begin
-  System.SetLength(result, 8 * System.SizeOf(UInt32));
+  System.SetLength(Result, 8 * System.SizeOf(UInt32));
   TConverters.be32_copy(PCardinal(FState), 5 * System.SizeOf(UInt32),
-    PByte(result), 0, System.Length(result));
+    PByte(Result), 0, System.Length(Result));
 end;
 
 class constructor TGrindahl256.Grindahl256;
 var
   LLowIndex1, LLowIndex2: Int32;
 begin
-  System.SetLength(FSTable0, System.Length(SMasterTable));
+  System.SetLength(FSTable0, System.Length(MasterTable));
 
-  LLowIndex1 := System.Low(SMasterTable);
+  LLowIndex1 := System.Low(MasterTable);
   LLowIndex2 := System.Low(FSTable0);
 
-  System.Move(SMasterTable[LLowIndex1], FSTable0[LLowIndex2],
-    System.SizeOf(SMasterTable));
+  System.Move(MasterTable[LLowIndex1], FSTable0[LLowIndex2],
+    System.SizeOf(MasterTable));
 
   FSTable1 := CalcTable(1);
   FSTable2 := CalcTable(2);
@@ -191,12 +191,12 @@ procedure TGrindahl256.Initialize;
 begin
   TArrayUtils.ZeroFill(FState);
   TArrayUtils.ZeroFill(FTemp);
-  Inherited Initialize();
+  inherited Initialize();
 end;
 
 procedure TGrindahl256.InjectMsg(AFullProcess: Boolean);
 var
-  LU: THashLibUInt32Array;
+  LSwapTemp: THashLibUInt32Array;
 begin
   FState[12] := FState[12] xor $01;
 
@@ -255,9 +255,9 @@ begin
     [Byte(FState[10] shr 16)] xor FSTable2[Byte(FState[8] shr 8)] xor FSTable3
     [Byte(FState[2])];
 
-  LU := FTemp;
+  LSwapTemp := FTemp;
   FTemp := FState;
-  FState := LU;
+  FState := LSwapTemp;
 end;
 
 procedure TGrindahl256.TransformBlock(AData: PByte; ADataLength: Int32;
@@ -265,7 +265,7 @@ procedure TGrindahl256.TransformBlock(AData: PByte; ADataLength: Int32;
 begin
   FState[0] := TConverters.ReadBytesAsUInt32LE(AData, AIndex);
   FState[0] := TConverters.be2me_32(FState[0]);
-  InjectMsg(false);
+  InjectMsg(False);
 end;
 
 end.

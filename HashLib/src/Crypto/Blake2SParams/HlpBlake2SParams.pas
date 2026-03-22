@@ -179,15 +179,15 @@ end;
 
 procedure TBlake2SConfig.ValidateKeyLength(const AKey: THashLibByteArray);
 var
-  KeyLength: Int32;
+  LKeyLength: Int32;
 begin
-  if (AKey <> Nil) then
+  if (AKey <> nil) then
   begin
-    KeyLength := System.Length(AKey);
-    if (KeyLength > 32) then
+    LKeyLength := System.Length(AKey);
+    if (LKeyLength > 32) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidKeyLength,
-        [KeyLength]);
+        [LKeyLength]);
     end;
   end;
 end;
@@ -195,30 +195,30 @@ end;
 procedure TBlake2SConfig.ValidatePersonalisationLength(const APersonalisation
   : THashLibByteArray);
 var
-  PersonalisationLength: Int32;
+  LPersonalisationLength: Int32;
 begin
-  if (APersonalisation <> Nil) then
+  if (APersonalisation <> nil) then
   begin
-    PersonalisationLength := System.Length(APersonalisation);
-    if (PersonalisationLength <> 8) then
+    LPersonalisationLength := System.Length(APersonalisation);
+    if (LPersonalisationLength <> 8) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt
-        (@SInvalidPersonalisationLength, [PersonalisationLength]);
+        (@SInvalidPersonalisationLength, [LPersonalisationLength]);
     end;
   end;
 end;
 
 procedure TBlake2SConfig.ValidateSaltLength(const ASalt: THashLibByteArray);
 var
-  SaltLength: Int32;
+  LSaltLength: Int32;
 begin
-  if (ASalt <> Nil) then
+  if (ASalt <> nil) then
   begin
-    SaltLength := System.Length(ASalt);
-    if (SaltLength <> 8) then
+    LSaltLength := System.Length(ASalt);
+    if (LSaltLength <> 8) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt
-        (@SInvalidSaltLength, [SaltLength]);
+        (@SInvalidSaltLength, [LSaltLength]);
     end;
   end;
 end;
@@ -271,7 +271,7 @@ constructor TBlake2SConfig.Create(AHashSize: THashSize);
 var
   LHashSize: Int32;
 begin
-  Inherited Create();
+  inherited Create();
   LHashSize := Int32(AHashSize);
   ValidateHashSize(LHashSize);
   FHashSize := LHashSize;
@@ -279,7 +279,7 @@ end;
 
 constructor TBlake2SConfig.Create(AHashSize: Int32);
 begin
-  Inherited Create();
+  inherited Create();
   ValidateHashSize(AHashSize);
   FHashSize := AHashSize;
 end;
@@ -426,7 +426,7 @@ end;
 
 constructor TBlake2STreeConfig.Create;
 begin
-  Inherited Create();
+  inherited Create();
   FFanOut := 0;
   FMaxDepth := 0;
   FLeafSize := 32;
@@ -477,7 +477,7 @@ begin
   end;
 
   // Key length
-  if (AConfig.Key <> Nil) then
+  if (AConfig.Key <> nil) then
   begin
     if (System.Length(AConfig.Key) > 32) then
     begin
@@ -487,7 +487,7 @@ begin
   end;
 
   // Personalisation length
-  if (AConfig.Personalisation <> Nil) then
+  if (AConfig.Personalisation <> nil) then
   begin
     if (System.Length(AConfig.Personalisation) <> 8) then
     begin
@@ -498,7 +498,7 @@ begin
   end;
 
   // Salt length
-  if (AConfig.Salt <> Nil) then
+  if (AConfig.Salt <> nil) then
   begin
     if (System.Length(AConfig.Salt) <> 8) then
     begin
@@ -508,7 +508,7 @@ begin
   end;
 
   // Tree InnerHashSize
-  if (ATreeConfig <> Nil) then
+  if (ATreeConfig <> nil) then
   begin
 
     if ((AIsSequential) and ((ATreeConfig.InnerHashSize <> 0))) then
@@ -532,7 +532,7 @@ var
   LIsSequential: Boolean;
   LBuffer: THashLibByteArray;
 begin
-  LIsSequential := ATreeConfig = Nil;
+  LIsSequential := ATreeConfig = nil;
   if (LIsSequential) then
   begin
     ATreeConfig := TBlake2STreeConfig.SequentialTreeConfig;
@@ -545,7 +545,7 @@ begin
   LBuffer[0] := AConfig.HashSize;
   LBuffer[1] := System.Length(AConfig.Key);
 
-  if ATreeConfig <> Nil then
+  if ATreeConfig <> nil then
   begin
     LBuffer[2] := ATreeConfig.FanOut;
     LBuffer[3] := ATreeConfig.MaxDepth;
@@ -560,12 +560,12 @@ begin
     LBuffer[15] := ATreeConfig.InnerHashSize;
   end;
 
-  if AConfig.Salt <> Nil then
+  if AConfig.Salt <> nil then
   begin
     System.Move(AConfig.Salt[0], LBuffer[16], 8 * System.SizeOf(Byte));
   end;
 
-  if AConfig.Personalisation <> Nil then
+  if AConfig.Personalisation <> nil then
   begin
     System.Move(AConfig.Personalisation[0], LBuffer[24],
       8 * System.SizeOf(Byte));

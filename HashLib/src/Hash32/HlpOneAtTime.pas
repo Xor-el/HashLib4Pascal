@@ -37,13 +37,13 @@ var
 begin
   LHashInstance := TOneAtTime.Create();
   LHashInstance.FHash := FHash;
-  result := LHashInstance as IHash;
-  result.BufferSize := BufferSize;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 constructor TOneAtTime.Create;
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TOneAtTime.Initialize;
@@ -78,7 +78,7 @@ begin
   FHash := FHash xor (FHash shr 11);
   FHash := FHash + (FHash shl 15);
 
-  result := THashResult.Create(FHash);
+  Result := THashResult.Create(FHash);
   Initialize();
 end;
 

@@ -20,7 +20,7 @@ type
     function GetPolynomial: UInt64;
     property Polynomial: UInt64 read GetPolynomial;
     function GetInitialValue: UInt64;
-    property InitialVlaue: UInt64 read GetInitialValue;
+    property InitialValue: UInt64 read GetInitialValue;
     function GetIsInputReflected: Boolean;
     property IsInputReflected: Boolean read GetIsInputReflected;
     function GetIsOutputReflected: Boolean;

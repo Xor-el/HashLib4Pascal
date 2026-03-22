@@ -24,7 +24,7 @@ type
     procedure LocalCRCCompute(const ACRCTable: THashLibMatrixUInt32Array;
       const AData: THashLibByteArray; AIndex, ALength: Int32);
 
-    class function Init_CRC_Table(APolynomial: UInt32)
+    class function InitCRCTable(APolynomial: UInt32)
       : THashLibMatrixUInt32Array; static;
 
   public
@@ -42,12 +42,12 @@ type
 
   const
     // Polynomial Reversed
-    CRC32_PKZIP_Polynomial = UInt32($EDB88320);
+    Crc32PkzipPolynomial = UInt32($EDB88320);
     class var
 
-      FCRC32_PKZIP_Table: THashLibMatrixUInt32Array;
+      FCrc32PkzipTable: THashLibMatrixUInt32Array;
 
-    class constructor CRC32_PKZIP();
+    class constructor Crc32Pkzip();
 
   public
     constructor Create();
@@ -62,12 +62,12 @@ type
   strict private
 
   const
-    CRC32_CASTAGNOLI_Polynomial = UInt32($82F63B78); // Polynomial Reversed
+    Crc32CastagnoliPolynomial = UInt32($82F63B78); // Polynomial Reversed
     class var
 
-      FCRC32_CASTAGNOLI_Table: THashLibMatrixUInt32Array;
+      FCrc32CastagnoliTable: THashLibMatrixUInt32Array;
 
-    class constructor CRC32_CASTAGNOLI();
+    class constructor Crc32Castagnoli();
 
   public
     constructor Create();
@@ -81,7 +81,7 @@ implementation
 
 { TCRC32Fast }
 
-class function TCRC32Fast.Init_CRC_Table(APolynomial: UInt32)
+class function TCRC32Fast.InitCRCTable(APolynomial: UInt32)
   : THashLibMatrixUInt32Array;
 var
   LIdx, LJIdx, LKIdx: Int32;
@@ -198,7 +198,7 @@ end;
 
 constructor TCRC32Fast.Create();
 begin
-  Inherited Create(4, 1);
+  inherited Create(4, 1);
 end;
 
 procedure TCRC32Fast.Initialize;
@@ -225,24 +225,24 @@ var
 begin
   LHashInstance := TCRC32_PKZIP.Create();
   LHashInstance.FCurrentCRC := FCurrentCRC;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TCRC32_PKZIP.Create;
 begin
-  Inherited Create();
+  inherited Create();
 end;
 
 procedure TCRC32_PKZIP.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 begin
-  LocalCRCCompute(FCRC32_PKZIP_Table, AData, AIndex, ALength);
+  LocalCRCCompute(FCrc32PkzipTable, AData, AIndex, ALength);
 end;
 
-class constructor TCRC32_PKZIP.CRC32_PKZIP();
+class constructor TCRC32_PKZIP.Crc32Pkzip();
 begin
-  FCRC32_PKZIP_Table := Init_CRC_Table(CRC32_PKZIP_Polynomial);
+  FCrc32PkzipTable := InitCRCTable(Crc32PkzipPolynomial);
 end;
 
 { TCRC32_CASTAGNOLI }
@@ -253,24 +253,24 @@ var
 begin
   LHashInstance := TCRC32_CASTAGNOLI.Create();
   LHashInstance.FCurrentCRC := FCurrentCRC;
-  Result := LHashInstance as IHash;
+  Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
 
 constructor TCRC32_CASTAGNOLI.Create;
 begin
-  Inherited Create();
+  inherited Create();
 end;
 
 procedure TCRC32_CASTAGNOLI.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 begin
-  LocalCRCCompute(FCRC32_CASTAGNOLI_Table, AData, AIndex, ALength);
+  LocalCRCCompute(FCrc32CastagnoliTable, AData, AIndex, ALength);
 end;
 
-class constructor TCRC32_CASTAGNOLI.CRC32_CASTAGNOLI();
+class constructor TCRC32_CASTAGNOLI.Crc32Castagnoli();
 begin
-  FCRC32_CASTAGNOLI_Table := Init_CRC_Table(CRC32_CASTAGNOLI_Polynomial);
+  FCrc32CastagnoliTable := InitCRCTable(Crc32CastagnoliPolynomial);
 end;
 
 end.

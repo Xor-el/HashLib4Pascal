@@ -39,7 +39,7 @@ implementation
 
 constructor TBlockHash.Create(AHashSize, ABlockSize, ABufferSize: Int32);
 begin
-  Inherited Create(AHashSize, ABlockSize);
+  inherited Create(AHashSize, ABlockSize);
   if (ABufferSize = -1) then
   begin
     ABufferSize := ABlockSize;
@@ -112,7 +112,7 @@ begin
 {$ENDIF DEBUG}
   Initialize();
 
-  result := THashResult.Create(LTempResult);
+  Result := THashResult.Create(LTempResult);
 end;
 
 end.

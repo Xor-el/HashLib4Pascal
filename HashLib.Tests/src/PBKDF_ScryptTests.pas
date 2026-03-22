@@ -106,21 +106,21 @@ end;
 
 procedure TTestPBKDF_Scrypt.TestParameters;
 begin
-  DoCheckOk('Minimal values', Nil, Nil, 2, 1, 1, 1);
-  DoCheckIllegal('Cost parameter must be > 1', Nil, Nil, 1, 1, 1, 1);
-  DoCheckOk('Cost parameter 32768 OK for r = 1', Nil, Nil, 32768, 1, 1, 1);
-  DoCheckIllegal('Cost parameter must < 65536 for r = 1', Nil, Nil,
+  DoCheckOk('Minimal values', nil, nil, 2, 1, 1, 1);
+  DoCheckIllegal('Cost parameter must be > 1', nil, nil, 1, 1, 1, 1);
+  DoCheckOk('Cost parameter 32768 OK for r = 1', nil, nil, 32768, 1, 1, 1);
+  DoCheckIllegal('Cost parameter must < 65536 for r = 1', nil, nil,
     65536, 1, 1, 1);
-  DoCheckIllegal('Block size must be >= 1', Nil, Nil, 2, 0, 2, 1);
-  DoCheckIllegal('Parallelisation parameter must be >= 1', Nil, Nil, 2,
+  DoCheckIllegal('Block size must be >= 1', nil, nil, 2, 0, 2, 1);
+  DoCheckIllegal('Parallelisation parameter must be >= 1', nil, nil, 2,
     1, 0, 1);
   // disabled test because it's very expensive
-  // DoCheckOk('Parallelisation parameter 65535 OK for r = 4', Nil, Nil, 2, 32,
+  // DoCheckOk('Parallelisation parameter 65535 OK for r = 4', nil, nil, 2, 32,
   // 65535, 1);
-  DoCheckIllegal('Parallelisation parameter must be < 65535 for r = 4', Nil,
-    Nil, 2, 32, 65536, 1);
+  DoCheckIllegal('Parallelisation parameter must be < 65535 for r = 4', nil,
+    nil, 2, 32, 65536, 1);
 
-  DoCheckIllegal('Len parameter must be > 1', Nil, Nil, 2, 1, 1, 0);
+  DoCheckIllegal('Len parameter must be > 1', nil, nil, 2, 1, 1, 0);
 end;
 
 procedure TTestPBKDF_Scrypt.TestVectors;
