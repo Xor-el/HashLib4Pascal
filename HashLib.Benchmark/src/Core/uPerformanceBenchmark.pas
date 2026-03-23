@@ -128,11 +128,16 @@ begin
 
   AStringList.Append(Calculate(THashFactory.THash64.CreateXXHash64));
 
+  AStringList.Append(Calculate(THashFactory.THash64.CreateXXHash3));
+
   AStringList.Append
     (Calculate(THashFactory.THash128.CreateMurmurHash3_x86_128));
 
   AStringList.Append
     (Calculate(THashFactory.THash128.CreateMurmurHash3_x64_128));
+
+  AStringList.Append
+    (Calculate(THashFactory.THash128.CreateXXHash128));
 
   AStringList.Append(Calculate(THashFactory.TCrypto.CreateMD5));
 
