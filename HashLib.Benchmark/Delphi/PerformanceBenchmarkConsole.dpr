@@ -55,6 +55,7 @@ uses
   HlpTiger2 in '..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
   HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas',
+  HlpBlake2BDispatch in '..\..\HashLib\src\Crypto\HlpBlake2BDispatch.pas',
   HlpBlake2B in '..\..\HashLib\src\Crypto\HlpBlake2B.pas',
   HlpBlake2S in '..\..\HashLib\src\Crypto\HlpBlake2S.pas',
   HlpBlake2BParams in '..\..\HashLib\src\Crypto\Blake2BParams\HlpBlake2BParams.pas',

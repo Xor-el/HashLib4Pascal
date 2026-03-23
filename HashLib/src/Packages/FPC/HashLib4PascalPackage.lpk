@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="108">
+    <Files Count="109">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -456,6 +456,10 @@
         <Filename Value="..\..\Hash64\HlpXXHash3Dispatch.pas"/>
         <UnitName Value="HlpXXHash3Dispatch"/>
       </Item108>
+      <Item109>
+        <Filename Value="..\..\Crypto\HlpBlake2BDispatch.pas"/>
+        <UnitName Value="HlpBlake2BDispatch"/>
+      </Item109>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>
