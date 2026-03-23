@@ -54,4 +54,24 @@
 {$SCOPEDENUMS ON}
 {$POINTERMATH ON}
 
+{============================== SIMD Settings =================================}
+
+{$IF DEFINED(CPUX86_64) OR DEFINED(CPUX64)}
+  {$DEFINE HASHLIB_X86_64}
+{$IFEND}
+
+{$IFDEF FPC}
+  {$IFDEF HASHLIB_X86_64}
+    {$DEFINE HASHLIB_AVX2_ASM_SUPPORTED}
+  {$ENDIF}
+{$ENDIF}
+
+// Uncomment ONE of the following to force a specific SIMD dispatch level:
+// {$DEFINE HASHLIB_FORCE_SCALAR}
+// {$DEFINE HASHLIB_FORCE_SSE2}
+
+{$IF DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2)}
+  {$MESSAGE ERROR 'HASHLIB_FORCE_SCALAR and HASHLIB_FORCE_SSE2 cannot both be defined. Enable only one.'}
+{$IFEND}
+
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)

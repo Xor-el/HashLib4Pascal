@@ -86,6 +86,7 @@ uses
   HlpMurmur2_64 in '..\..\HashLib\src\Hash64\HlpMurmur2_64.pas',
   HlpSipHash in '..\..\HashLib\src\Hash64\HlpSipHash.pas',
   HlpXXHash64 in '..\..\HashLib\src\Hash64\HlpXXHash64.pas',
+  HlpXXHash3Dispatch in '..\..\HashLib\src\Hash64\HlpXXHash3Dispatch.pas',
   HlpXXHash3 in '..\..\HashLib\src\Hash64\HlpXXHash3.pas',
   HlpMurmurHash3_x86_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x86_128.pas',
   HlpMurmurHash3_x64_128 in '..\..\HashLib\src\Hash128\HlpMurmurHash3_x64_128.pas',
@@ -108,6 +109,7 @@ uses
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
+  HlpSimd in '..\..\HashLib\src\Utils\HlpSimd.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 
