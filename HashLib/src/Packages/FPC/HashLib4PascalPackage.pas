@@ -22,13 +22,13 @@ uses
   HlpMurmur2, HlpMurmurHash3_x86_32, HlpOneAtTime, HlpPJW, HlpRotating, HlpRS, 
   HlpSDBM, HlpShiftAndXor, HlpSuperFast, HlpXXHash32, HlpFNV1a64, HlpFNV64, 
   HlpMurmur2_64, HlpSipHash, HlpXXHash64, HlpIHash, HlpIHashInfo, 
-  HlpIHashResult, HlpConverters, HlpBitConverter, HlpBits,
-  HlpHashLibTypes, HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, 
-  HlpIKDF, HlpKDF, HlpICRC, HlpBlake2B, HlpBlake2S, HlpGOST3411_2012, 
-  HlpCRC32Fast, HlpArgon2TypeAndVersion, HlpPBKDF_Argon2NotBuildInAdapter, 
+  HlpIHashResult, HlpConverters, HlpBitConverter, HlpBits, HlpHashLibTypes, 
+  HlpMurmurHash3_x86_128, HlpPBKDF2_HMACNotBuildInAdapter, HlpIKDF, HlpKDF, 
+  HlpICRC, HlpBlake2B, HlpBlake2S, HlpGOST3411_2012, HlpCRC32Fast, 
+  HlpArgon2TypeAndVersion, HlpPBKDF_Argon2NotBuildInAdapter, 
   HlpPBKDF_ScryptNotBuildInAdapter, HlpArrayUtils, HlpBlake2BP, HlpBlake2SP, 
   HlpSipHash128, HlpBlake2SParams, HlpBlake2BParams, HlpIBlake2SParams, 
-  HlpIBlake2BParams, HlpBlake3;
+  HlpIBlake2BParams, HlpBlake3, HlpXXHash3, HlpXXHash128;
 
 implementation
 

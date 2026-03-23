@@ -50,10 +50,10 @@ HashLib4Pascal is a comprehensive hashing library for Object Pascal, providing a
 `AP` | `BKDR` | `Bernstein` | `Bernstein1` | `DEK` | `DJB` | `ELF` | `FNV` | `FNV1a` | `Jenkins3` | `JS` | `Murmur2` | `MurmurHash3_x86_32` | `OneAtTime` | `PJW` | `Rotating` | `RS` | `SDBM` | `ShiftAndXor` | `SuperFast` | `XXHash32`
 
 #### 64-bit
-`FNV64` | `FNV1a64` | `Murmur2_64` | `SipHash2_4` | `XXHash64`
+`FNV64` | `FNV1a64` | `Murmur2_64` | `SipHash2_4` | `XXHash64` | `XXHash3`
 
 #### 128-bit
-`SipHash128_2_4` | `MurmurHash3_x86_128` | `MurmurHash3_x64_128`
+`SipHash128_2_4` | `MurmurHash3_x86_128` | `MurmurHash3_x64_128` | `XXHash128`
 
 </details>
 

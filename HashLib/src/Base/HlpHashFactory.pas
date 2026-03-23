@@ -49,9 +49,11 @@ uses
   HlpSipHash,
   HlpSipHash128,
   HlpXXHash64,
+  HlpXXHash3,
   // Hash128 Units //
   HlpMurmurHash3_x86_128,
   HlpMurmurHash3_x64_128,
+  HlpXXHash128,
   // Crypto Units
   HlpTiger,
   HlpTiger2,
@@ -238,6 +240,8 @@ type
 
       class function CreateXXHash64(): IHashWithKey; static;
 
+      class function CreateXXHash3(): IHashWithKey; static;
+
     end;
 
     // ====================== THash128 ====================== //
@@ -250,6 +254,8 @@ type
       class function CreateSipHash128_2_4(): IHashWithKey; static;
       class function CreateMurmurHash3_x86_128(): IHashWithKey; static;
       class function CreateMurmurHash3_x64_128(): IHashWithKey; static;
+
+      class function CreateXXHash128(): IHashWithKey; static;
 
     end;
 
@@ -843,6 +849,11 @@ begin
   Result := TXXHash64.Create();
 end;
 
+class function THashFactory.THash64.CreateXXHash3: IHashWithKey;
+begin
+  Result := TXXHash3.Create();
+end;
+
 { THashFactory.THash128 }
 
 class function THashFactory.THash128.CreateMurmurHash3_x86_128: IHashWithKey;
@@ -858,6 +869,11 @@ end;
 class function THashFactory.THash128.CreateMurmurHash3_x64_128: IHashWithKey;
 begin
   Result := TMurmurHash3_x64_128.Create();
+end;
+
+class function THashFactory.THash128.CreateXXHash128: IHashWithKey;
+begin
+  Result := TXXHash128.Create();
 end;
 
 { THashFactory.TCrypto }

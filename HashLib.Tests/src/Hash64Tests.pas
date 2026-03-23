@@ -62,6 +62,16 @@ type
 
   end;
 
+type
+
+  TTestXXHash3 = class(THashWithUInt64AsKeyAlgorithmTestCase)
+
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  end;
+
 implementation
 
 // Hash64
@@ -159,6 +169,25 @@ begin
   inherited;
 end;
 
+{ TTestXXHash3 }
+
+procedure TTestXXHash3.SetUp;
+begin
+  inherited;
+  HashInstance := THashFactory.THash64.CreateXXHash3();
+  HashOfEmptyData := '2D06800538D394C2';
+  HashOfDefaultData := '73B9276A6BAC2B49';
+  HashOfOnetoNine := '72DCB18B67A17DFF';
+  HashOfABCDE := '55C65158EE9E652D';
+  HashOfDefaultDataWithMaxUInt64AsKey := '153E26503A9470AF';
+end;
+
+procedure TTestXXHash3.TearDown;
+begin
+  HashInstance := nil;
+  inherited;
+end;
+
 initialization
 
 // Register any test cases with the test runner
@@ -170,6 +199,7 @@ RegisterTest(TTestFNV1a64);
 RegisterTest(TTestMurmur2_64);
 RegisterTest(TTestSipHash2_4);
 RegisterTest(TTestXXHash64);
+RegisterTest(TTestXXHash3);
 {$ELSE}
 // Hash64
 RegisterTest(TTestFNV64.Suite);
@@ -177,6 +207,7 @@ RegisterTest(TTestFNV1a64.Suite);
 RegisterTest(TTestMurmur2_64.Suite);
 RegisterTest(TTestSipHash2_4.Suite);
 RegisterTest(TTestXXHash64.Suite);
+RegisterTest(TTestXXHash3.Suite);
 {$ENDIF FPC}
 
 end.
