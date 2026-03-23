@@ -11,7 +11,6 @@ uses
   Classes,
   SysUtils,
   Math,
-  HlpCRC,
   HlpIHash,
   HlpHashFactory;
 

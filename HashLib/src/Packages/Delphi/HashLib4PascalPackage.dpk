@@ -86,6 +86,7 @@ contains
   HlpGOST3411_2012 in '..\..\Crypto\HlpGOST3411_2012.pas',
   HlpBlake2BDispatch in '..\..\Crypto\HlpBlake2BDispatch.pas',
   HlpBlake2B in '..\..\Crypto\HlpBlake2B.pas',
+  HlpBlake2SDispatch in '..\..\Crypto\HlpBlake2SDispatch.pas',
   HlpBlake2S in '..\..\Crypto\HlpBlake2S.pas',
   HlpBlake2BParams in '..\..\Crypto\Blake2BParams\HlpBlake2BParams.pas',
   HlpBlake2SParams in '..\..\Crypto\Blake2SParams\HlpBlake2SParams.pas',

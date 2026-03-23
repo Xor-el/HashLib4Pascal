@@ -56,6 +56,7 @@ uses
   HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas',
   HlpBlake2BDispatch in '..\..\HashLib\src\Crypto\HlpBlake2BDispatch.pas',
   HlpBlake2B in '..\..\HashLib\src\Crypto\HlpBlake2B.pas',
+  HlpBlake2SDispatch in '..\..\HashLib\src\Crypto\HlpBlake2SDispatch.pas',
   HlpBlake2S in '..\..\HashLib\src\Crypto\HlpBlake2S.pas',
   HlpBlake2BParams in '..\..\HashLib\src\Crypto\Blake2BParams\HlpBlake2BParams.pas',
   HlpBlake2SParams in '..\..\HashLib\src\Crypto\Blake2SParams\HlpBlake2SParams.pas',
