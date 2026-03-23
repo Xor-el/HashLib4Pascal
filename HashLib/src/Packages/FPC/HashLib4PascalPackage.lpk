@@ -9,7 +9,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\..\Include"/>
+        <IncludeFiles Value="..\..\Include;..\..\Include\Simd"/>
         <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams"/>
         <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="106">
+    <Files Count="108">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -448,6 +448,14 @@
         <Filename Value="..\..\Hash128\HlpXXHash128.pas"/>
         <UnitName Value="HlpXXHash128"/>
       </Item106>
+      <Item107>
+        <Filename Value="..\..\Utils\HlpSimd.pas"/>
+        <UnitName Value="HlpSimd"/>
+      </Item107>
+      <Item108>
+        <Filename Value="..\..\Hash64\HlpXXHash3Dispatch.pas"/>
+        <UnitName Value="HlpXXHash3Dispatch"/>
+      </Item108>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

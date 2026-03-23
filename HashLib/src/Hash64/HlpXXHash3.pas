@@ -179,6 +179,9 @@ type
 
 implementation
 
+uses
+  HlpXXHash3Dispatch;
+
 { TXXH3Core }
 
 class function TXXH3Core.XXH_mult32to64(AX, AY: UInt32): UInt64;
@@ -283,11 +286,8 @@ end;
 
 class procedure TXXH3Core.XXH3_accumulate_512(var AAcc: TXXH3AccArray;
   AInput, ASecret: PByte);
-var
-  I: Int32;
 begin
-  for I := 0 to XXH_ACC_NB - 1 do
-    XXH3_scalarRound(AAcc, AInput, ASecret, I);
+  HlpXXHash3Dispatch.XXH3_Accumulate512(@AAcc[0], AInput, ASecret);
 end;
 
 class procedure TXXH3Core.XXH3_scalarScrambleRound(var AAcc: TXXH3AccArray;
@@ -305,21 +305,14 @@ end;
 
 class procedure TXXH3Core.XXH3_scrambleAcc(var AAcc: TXXH3AccArray;
   ASecret: PByte);
-var
-  I: Int32;
 begin
-  for I := 0 to XXH_ACC_NB - 1 do
-    XXH3_scalarScrambleRound(AAcc, ASecret, I);
+  HlpXXHash3Dispatch.XXH3_ScrambleAcc(@AAcc[0], ASecret);
 end;
 
 class procedure TXXH3Core.XXH3_accumulate(var AAcc: TXXH3AccArray;
   AInput, ASecret: PByte; ANbStripes: Int32);
-var
-  N: Int32;
 begin
-  for N := 0 to ANbStripes - 1 do
-    XXH3_accumulate_512(AAcc, AInput + N * XXH_STRIPE_LEN,
-      ASecret + N * XXH_SECRET_CONSUME_RATE);
+  HlpXXHash3Dispatch.XXH3_Accumulate(@AAcc[0], AInput, ASecret, ANbStripes);
 end;
 
 class procedure TXXH3Core.XXH3_hashLong_internal_loop(
@@ -351,19 +344,8 @@ end;
 
 class procedure TXXH3Core.XXH3_initCustomSecret(ACustomSecret: PByte;
   ASeed: UInt64);
-var
-  I: Int32;
-  LLo, LHi: UInt64;
 begin
-  for I := 0 to (XXH3_SECRET_DEFAULT_SIZE div 16) - 1 do
-  begin
-    LLo := TConverters.ReadBytesAsUInt64LE(PByte(@XXH3_SECRET[0]),
-      16 * I) + ASeed;
-    LHi := TConverters.ReadBytesAsUInt64LE(PByte(@XXH3_SECRET[0]),
-      16 * I + 8) - ASeed;
-    PUInt64(ACustomSecret + 16 * I)^ := LLo;
-    PUInt64(ACustomSecret + 16 * I + 8)^ := LHi;
-  end;
+  HlpXXHash3Dispatch.XXH3_InitSecret(ACustomSecret, @XXH3_SECRET[0], ASeed);
 end;
 
 class procedure TXXH3Core.XXH3_consumeStripes(var AAcc: TXXH3AccArray;
