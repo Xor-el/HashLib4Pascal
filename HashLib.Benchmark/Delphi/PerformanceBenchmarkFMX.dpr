@@ -40,6 +40,7 @@ uses
   HlpRIPEMD320 in '..\..\HashLib\src\Crypto\HlpRIPEMD320.pas',
   HlpSHA0 in '..\..\HashLib\src\Crypto\HlpSHA0.pas',
   HlpSHA1 in '..\..\HashLib\src\Crypto\HlpSHA1.pas',
+  HlpSHA1Dispatch in '..\..\HashLib\src\Crypto\HlpSHA1Dispatch.pas',
   HlpSHA2_224 in '..\..\HashLib\src\Crypto\HlpSHA2_224.pas',
   HlpSHA2_256 in '..\..\HashLib\src\Crypto\HlpSHA2_256.pas',
   HlpSHA2_256Dispatch in '..\..\HashLib\src\Crypto\HlpSHA2_256Dispatch.pas',

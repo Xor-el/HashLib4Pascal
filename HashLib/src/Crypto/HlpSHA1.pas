@@ -6,21 +6,24 @@ interface
 
 uses
   HlpBits,
+  HlpHashLibTypes,
   HlpSHA0,
-  HlpIHash;
+  HlpIHash,
+  HlpSHA1Dispatch;
 
 type
   TSHA1 = class sealed(TSHA0)
 
   strict protected
     procedure Expand(AData: PCardinal); override;
+    procedure TransformBlock(AData: PByte; ADataLength: Int32;
+      AIndex: Int32); override;
 
   public
-    // Not really needed because there is an Intristic default constructor always
-    // called for classes if none is defined by the developer but I just put it
-    // for readability reasons.
     constructor Create();
     function Clone(): IHash; override;
+    procedure TransformBytes(const AData: THashLibByteArray;
+      AIndex, ALength: Int32); override;
 
   end;
 
@@ -43,6 +46,51 @@ end;
 constructor TSHA1.Create;
 begin
   inherited Create();
+end;
+
+procedure TSHA1.TransformBlock(AData: PByte; ADataLength: Int32;
+  AIndex: Int32);
+begin
+  SHA1_Compress(@FState[0], AData + AIndex, 1);
+end;
+
+procedure TSHA1.TransformBytes(const AData: THashLibByteArray;
+  AIndex, ALength: Int32);
+var
+  LPtrData: PByte;
+  LBlockCount: Int32;
+begin
+{$IFDEF DEBUG}
+  System.Assert(AIndex >= 0);
+  System.Assert(ALength >= 0);
+  System.Assert(AIndex + ALength <= System.Length(AData));
+{$ENDIF DEBUG}
+  LPtrData := PByte(AData);
+
+  if (not FBuffer.IsEmpty) then
+  begin
+    if (FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ALength,
+      FProcessedBytesCount)) then
+    begin
+      TransformBuffer();
+    end;
+  end;
+
+  LBlockCount := ALength div FBuffer.Length;
+  if LBlockCount > 0 then
+  begin
+    FProcessedBytesCount := FProcessedBytesCount +
+      UInt64(LBlockCount) * UInt64(FBuffer.Length);
+    SHA1_Compress(@FState[0], LPtrData + AIndex, UInt32(LBlockCount));
+    AIndex := AIndex + (LBlockCount * FBuffer.Length);
+    ALength := ALength - (LBlockCount * FBuffer.Length);
+  end;
+
+  if (ALength > 0) then
+  begin
+    FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ALength,
+      FProcessedBytesCount);
+  end;
 end;
 
 procedure TSHA1.Expand(AData: PCardinal);
