@@ -135,6 +135,7 @@ contains
   HlpBlake3 in '..\..\Crypto\HlpBlake3.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2Dispatch in '..\..\KDF\HlpArgon2Dispatch.pas',
   HlpArgon2TypeAndVersion in '..\..\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
   HlpConverters in '..\..\Utils\HlpConverters.pas',

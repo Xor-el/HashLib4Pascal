@@ -69,6 +69,7 @@ type
       const ATreeConfig: IBlake2STreeConfig;
       ADoTransformKeyBlock: Boolean = True); overload;
     procedure Initialize; override;
+    procedure TransformBlock(ABlock: PByte);
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ADataLength: Int32); override;
     function TransformFinal: IHashResult; override;
@@ -371,6 +372,18 @@ begin
       TArrayUtils.ZeroFill(LBlock); // burn key from memory
     end;
   end;
+end;
+
+procedure TBlake2S.TransformBlock(ABlock: PByte);
+begin
+  if FFilledBufferCount = BlockSizeInBytes then
+  begin
+    Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
+    Compress(PByte(FBuffer), 0);
+    FFilledBufferCount := 0;
+  end;
+  Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
+  Compress(ABlock, 0);
 end;
 
 procedure TBlake2S.TransformBytes(const AData: THashLibByteArray;

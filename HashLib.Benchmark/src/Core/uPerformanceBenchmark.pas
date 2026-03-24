@@ -20,7 +20,7 @@ type
   strict private
 
     class function Calculate(const AHashInstance: IHash;
-      const ANamePrefix: String = ''; ASize: Int32 = 64 * 1024): String;
+      const ANamePrefix: String = ''; ASize: Int32 = 1024 * 1024): String;
 
     class constructor PerformanceBenchmark();
 

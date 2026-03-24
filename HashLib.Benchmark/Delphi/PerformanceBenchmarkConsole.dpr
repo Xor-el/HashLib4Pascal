@@ -106,6 +106,7 @@ uses
   HlpBlake3 in '..\..\HashLib\src\Crypto\HlpBlake3.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2Dispatch in '..\..\HashLib\src\KDF\HlpArgon2Dispatch.pas',
   HlpArgon2TypeAndVersion in '..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
