@@ -124,6 +124,7 @@ uses
   HlpIBlake2SParams in '..\..\HashLib\src\Interfaces\IBlake2SParams\HlpIBlake2SParams.pas',
   HlpBlake2BP in '..\..\HashLib\src\Crypto\HlpBlake2BP.pas',
   HlpBlake2SP in '..\..\HashLib\src\Crypto\HlpBlake2SP.pas',
+  HlpBlake3Dispatch in '..\..\HashLib\src\Crypto\HlpBlake3Dispatch.pas',
   HlpBlake3 in '..\..\HashLib\src\Crypto\HlpBlake3.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',

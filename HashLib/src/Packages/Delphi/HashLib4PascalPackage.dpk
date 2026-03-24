@@ -132,6 +132,7 @@ contains
   HlpIBlake2SParams in '..\..\Interfaces\IBlake2SParams\HlpIBlake2SParams.pas',
   HlpBlake2BP in '..\..\Crypto\HlpBlake2BP.pas',
   HlpBlake2SP in '..\..\Crypto\HlpBlake2SP.pas',
+  HlpBlake3Dispatch in '..\..\Crypto\HlpBlake3Dispatch.pas',
   HlpBlake3 in '..\..\Crypto\HlpBlake3.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',

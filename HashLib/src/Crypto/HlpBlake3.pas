@@ -7,7 +7,6 @@ interface
 uses
   Math,
   SysUtils,
-  HlpBits,
   HlpHash,
   HlpHashResult,
   HlpIHashResult,
@@ -85,8 +84,6 @@ type
       // NOTE: we unroll all of the rounds, as well as the permutations that occur
       // between rounds.
       procedure Compress(APtrState: PCardinal);
-
-      procedure G(APtrState: PCardinal; A, B, C, D, X, Y: UInt32); inline;
 
       class function DefaultBlake3Node(): TBlake3Node; static;
 
@@ -249,6 +246,9 @@ type
 
 implementation
 
+uses
+  HlpBlake3Dispatch;
+
 { TBlake3.TBlake3Node }
 
 class function TBlake3.TBlake3Node.DefaultBlake3Node: TBlake3Node;
@@ -282,162 +282,15 @@ begin
   Result.Flags := Flags;
 end;
 
-procedure TBlake3.TBlake3Node.G(APtrState: PCardinal; A, B, C, D, X, Y: UInt32);
-var
-  LRegA, LRegB, LRegC, LRegD: UInt32;
-begin
-
-  LRegA := APtrState[A];
-  LRegB := APtrState[B];
-  LRegC := APtrState[C];
-  LRegD := APtrState[D];
-
-  LRegA := LRegA + LRegB + X;
-  LRegD := TBits.RotateRight32(LRegD xor LRegA, 16);
-  LRegC := LRegC + LRegD;
-  LRegB := TBits.RotateRight32(LRegB xor LRegC, 12);
-  LRegA := LRegA + LRegB + Y;
-  LRegD := TBits.RotateRight32(LRegD xor LRegA, 8);
-  LRegC := LRegC + LRegD;
-  LRegB := TBits.RotateRight32(LRegB xor LRegC, 7);
-
-  APtrState[A] := LRegA;
-  APtrState[B] := LRegB;
-  APtrState[C] := LRegC;
-  APtrState[D] := LRegD;
-end;
-
 procedure TBlake3.TBlake3Node.Compress(APtrState: PCardinal);
+var
+  LCounterFlags: array[0..3] of UInt32;
 begin
-  // initializes state here (in this case, APtrState)
-  APtrState[0] := CV[0];
-  APtrState[1] := CV[1];
-  APtrState[2] := CV[2];
-  APtrState[3] := CV[3];
-  APtrState[4] := CV[4];
-  APtrState[5] := CV[5];
-  APtrState[6] := CV[6];
-  APtrState[7] := CV[7];
-  APtrState[8] := IV[0];
-  APtrState[9] := IV[1];
-  APtrState[10] := IV[2];
-  APtrState[11] := IV[3];
-  APtrState[12] := UInt32(Counter);
-  APtrState[13] := UInt32(Counter shr 32);
-  APtrState[14] := BlockLen;
-  APtrState[15] := Flags;
-
-  // NOTE: we unroll all of the rounds, as well as the permutations that occur
-  // between rounds.
-  // Round 0
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[0], Block[1]);
-  G(APtrState, 1, 5, 9, 13, Block[2], Block[3]);
-  G(APtrState, 2, 6, 10, 14, Block[4], Block[5]);
-  G(APtrState, 3, 7, 11, 15, Block[6], Block[7]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[8], Block[9]);
-  G(APtrState, 1, 6, 11, 12, Block[10], Block[11]);
-  G(APtrState, 2, 7, 8, 13, Block[12], Block[13]);
-  G(APtrState, 3, 4, 9, 14, Block[14], Block[15]);
-
-  // Round 1
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[2], Block[6]);
-  G(APtrState, 1, 5, 9, 13, Block[3], Block[10]);
-  G(APtrState, 2, 6, 10, 14, Block[7], Block[0]);
-  G(APtrState, 3, 7, 11, 15, Block[4], Block[13]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[1], Block[11]);
-  G(APtrState, 1, 6, 11, 12, Block[12], Block[5]);
-  G(APtrState, 2, 7, 8, 13, Block[9], Block[14]);
-  G(APtrState, 3, 4, 9, 14, Block[15], Block[8]);
-
-  // Round 2
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[3], Block[4]);
-  G(APtrState, 1, 5, 9, 13, Block[10], Block[12]);
-  G(APtrState, 2, 6, 10, 14, Block[13], Block[2]);
-  G(APtrState, 3, 7, 11, 15, Block[7], Block[14]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[6], Block[5]);
-  G(APtrState, 1, 6, 11, 12, Block[9], Block[0]);
-  G(APtrState, 2, 7, 8, 13, Block[11], Block[15]);
-  G(APtrState, 3, 4, 9, 14, Block[8], Block[1]);
-
-  // Round 3
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[10], Block[7]);
-  G(APtrState, 1, 5, 9, 13, Block[12], Block[9]);
-  G(APtrState, 2, 6, 10, 14, Block[14], Block[3]);
-  G(APtrState, 3, 7, 11, 15, Block[13], Block[15]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[4], Block[0]);
-  G(APtrState, 1, 6, 11, 12, Block[11], Block[2]);
-  G(APtrState, 2, 7, 8, 13, Block[5], Block[8]);
-  G(APtrState, 3, 4, 9, 14, Block[1], Block[6]);
-
-  // Round 4
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[12], Block[13]);
-  G(APtrState, 1, 5, 9, 13, Block[9], Block[11]);
-  G(APtrState, 2, 6, 10, 14, Block[15], Block[10]);
-  G(APtrState, 3, 7, 11, 15, Block[14], Block[8]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[7], Block[2]);
-  G(APtrState, 1, 6, 11, 12, Block[5], Block[3]);
-  G(APtrState, 2, 7, 8, 13, Block[0], Block[1]);
-  G(APtrState, 3, 4, 9, 14, Block[6], Block[4]);
-
-  // Round 5
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[9], Block[14]);
-  G(APtrState, 1, 5, 9, 13, Block[11], Block[5]);
-  G(APtrState, 2, 6, 10, 14, Block[8], Block[12]);
-  G(APtrState, 3, 7, 11, 15, Block[15], Block[1]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[13], Block[3]);
-  G(APtrState, 1, 6, 11, 12, Block[0], Block[10]);
-  G(APtrState, 2, 7, 8, 13, Block[2], Block[6]);
-  G(APtrState, 3, 4, 9, 14, Block[4], Block[7]);
-
-  // Round 6
-  // Mix the columns.
-  G(APtrState, 0, 4, 8, 12, Block[11], Block[15]);
-  G(APtrState, 1, 5, 9, 13, Block[5], Block[0]);
-  G(APtrState, 2, 6, 10, 14, Block[1], Block[9]);
-  G(APtrState, 3, 7, 11, 15, Block[8], Block[6]);
-
-  // Mix the rows.
-  G(APtrState, 0, 5, 10, 15, Block[14], Block[10]);
-  G(APtrState, 1, 6, 11, 12, Block[2], Block[12]);
-  G(APtrState, 2, 7, 8, 13, Block[3], Block[4]);
-  G(APtrState, 3, 4, 9, 14, Block[7], Block[13]);
-
-  // compression finalization
-
-  APtrState[0] := APtrState[0] xor APtrState[8];
-  APtrState[1] := APtrState[1] xor APtrState[9];
-  APtrState[2] := APtrState[2] xor APtrState[10];
-  APtrState[3] := APtrState[3] xor APtrState[11];
-  APtrState[4] := APtrState[4] xor APtrState[12];
-  APtrState[5] := APtrState[5] xor APtrState[13];
-  APtrState[6] := APtrState[6] xor APtrState[14];
-  APtrState[7] := APtrState[7] xor APtrState[15];
-  APtrState[8] := APtrState[8] xor CV[0];
-  APtrState[9] := APtrState[9] xor CV[1];
-  APtrState[10] := APtrState[10] xor CV[2];
-  APtrState[11] := APtrState[11] xor CV[3];
-  APtrState[12] := APtrState[12] xor CV[4];
-  APtrState[13] := APtrState[13] xor CV[5];
-  APtrState[14] := APtrState[14] xor CV[6];
-  APtrState[15] := APtrState[15] xor CV[7];
+  LCounterFlags[0] := UInt32(Counter);
+  LCounterFlags[1] := UInt32(Counter shr 32);
+  LCounterFlags[2] := BlockLen;
+  LCounterFlags[3] := Flags;
+  Blake3_Compress(APtrState, @Block[0], @CV[0], @LCounterFlags[0]);
 end;
 
 procedure TBlake3.TBlake3Node.ChainingValue(AResult: PCardinal);
