@@ -137,8 +137,6 @@ begin
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 // ----- AVX2 -----
 
 procedure XXH3_accumulate_512_avx2(AAcc: Pointer; AInput: Pointer;
@@ -168,8 +166,6 @@ begin
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-
 {$ENDIF HASHLIB_X86_64}
 
 // =============================================================================
@@ -180,7 +176,6 @@ procedure InitDispatch();
 begin
   case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
-  {$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.AVX2:
     begin
       XXH3_Accumulate512 := @XXH3_accumulate_512_avx2;
@@ -188,7 +183,6 @@ begin
       XXH3_ScrambleAcc := @XXH3_scrambleAcc_avx2;
       XXH3_InitSecret := @XXH3_initSecret_avx2;
     end;
-  {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       XXH3_Accumulate512 := @XXH3_accumulate_512_sse2;

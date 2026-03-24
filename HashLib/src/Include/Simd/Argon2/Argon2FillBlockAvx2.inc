@@ -1,4 +1,5 @@
 // AVX2 implementation of Argon2 FillBlock.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Expects MS x64 ABI: rcx = Left ptr, rdx = Right ptr, r8 = Current ptr, r9 = WithXor (0 or 1).
 // Each pointer addresses 128 QWords (1024 bytes).
 // Uses ymm0-ymm9. Non-volatile ymm6-ymm9 saved/restored on Windows.
@@ -17,10 +18,10 @@
   sub rsp, 2184
 
 {$IFDEF MSWINDOWS}
-  vmovdqu yword [rsp], ymm6
-  vmovdqu yword [rsp + $20], ymm7
-  vmovdqu yword [rsp + $40], ymm8
-  vmovdqu yword [rsp + $60], ymm9
+  db $C5, $FE, $7F, $34, $24                    // vmovdqu yword [rsp], ymm6
+  db $C5, $FE, $7F, $7C, $24, $20               // vmovdqu yword [rsp + $20], ymm7
+  db $C5, $7E, $7F, $44, $24, $40               // vmovdqu yword [rsp + $40], ymm8
+  db $C5, $7E, $7F, $4C, $24, $60               // vmovdqu yword [rsp + $60], ymm9
 {$ENDIF}
 
   // =========================================================================
@@ -29,9 +30,9 @@
   lea rax, [rsp + 128]
   xor r10, r10
 @xor_loop:
-  vmovdqu ymm0, yword [rcx + r10]
-  vpxor ymm0, ymm0, yword [rdx + r10]
-  vmovdqu yword [rax + r10], ymm0
+  db $C4, $A1, $7E, $6F, $04, $11               // vmovdqu ymm0, yword [rcx + r10]
+  db $C4, $A1, $7D, $EF, $04, $12               // vpxor ymm0, ymm0, yword [rdx + r10]
+  db $C4, $A1, $7E, $7F, $04, $10               // vmovdqu yword [rax + r10], ymm0
   add r10, 32
   cmp r10, 1024
   jb @xor_loop
@@ -42,8 +43,8 @@
   lea r11, [rsp + 1152]
   xor r10, r10
 @copy_loop:
-  vmovdqu ymm0, yword [rax + r10]
-  vmovdqu yword [r11 + r10], ymm0
+  db $C4, $A1, $7E, $6F, $04, $10               // vmovdqu ymm0, yword [rax + r10]
+  db $C4, $81, $7E, $7F, $04, $13               // vmovdqu yword [r11 + r10], ymm0
   add r10, 32
   cmp r10, 1024
   jb @copy_loop
@@ -56,117 +57,117 @@
   xor r10, r10
 
 @col_loop:
-  vmovdqu ymm0, yword [r11 + r10]
-  vmovdqu ymm1, yword [r11 + r10 + $20]
-  vmovdqu ymm2, yword [r11 + r10 + $40]
-  vmovdqu ymm3, yword [r11 + r10 + $60]
+  db $C4, $81, $7E, $6F, $04, $13               // vmovdqu ymm0, yword [r11 + r10]
+  db $C4, $81, $7E, $6F, $4C, $13, $20          // vmovdqu ymm1, yword [r11 + r10 + $20]
+  db $C4, $81, $7E, $6F, $54, $13, $40          // vmovdqu ymm2, yword [r11 + r10 + $40]
+  db $C4, $81, $7E, $6F, $5C, $13, $60          // vmovdqu ymm3, yword [r11 + r10 + $60]
 
   // ----- Column G: G(A,B,C,D) across all 4 lanes -----
 
   // fBlaMka(a, b): a = a + b + 2*lo32(a)*lo32(b)
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
   // d = rotr64(d ^ a, 32)
-  vpxor ymm3, ymm3, ymm0
-  vpshufd ymm3, ymm3, $B1
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $FD, $70, $DB, $B1                    // vpshufd ymm3, ymm3, $B1
 
   // fBlaMka(c, d)
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
   // b = rotr64(b ^ c, 24)
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 24
-  vpsllq ymm1, ymm1, 40
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
+  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
   // fBlaMka(a, b)
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
   // d = rotr64(d ^ a, 16)
-  vpxor ymm3, ymm3, ymm0
-  vpsrlq ymm4, ymm3, 16
-  vpsllq ymm3, ymm3, 48
-  vpor ymm3, ymm3, ymm4
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
+  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
+  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
 
   // fBlaMka(c, d)
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
   // b = rotr64(b ^ c, 63)
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 63
-  vpaddq ymm1, ymm1, ymm1
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $3F                    // vpsrlq ymm4, ymm1, 63
+  db $C5, $F5, $D4, $C9                         // vpaddq ymm1, ymm1, ymm1
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
   // ----- Diagonalize -----
   // B: rotate left by 1 QWord position
-  vpermq ymm1, ymm1, $39
+  db $C4, $E3, $FD, $00, $C9, $39               // vpermq ymm1, ymm1, $39
   // C: swap halves (rotate by 2)
-  vpermq ymm2, ymm2, $4E
+  db $C4, $E3, $FD, $00, $D2, $4E               // vpermq ymm2, ymm2, $4E
   // D: rotate right by 1 QWord position
-  vpermq ymm3, ymm3, $93
+  db $C4, $E3, $FD, $00, $DB, $93               // vpermq ymm3, ymm3, $93
 
   // ----- Diagonal G -----
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpshufd ymm3, ymm3, $B1
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $FD, $70, $DB, $B1                    // vpshufd ymm3, ymm3, $B1
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 24
-  vpsllq ymm1, ymm1, 40
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
+  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpsrlq ymm4, ymm3, 16
-  vpsllq ymm3, ymm3, 48
-  vpor ymm3, ymm3, ymm4
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
+  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
+  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 63
-  vpaddq ymm1, ymm1, ymm1
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $3F                    // vpsrlq ymm4, ymm1, 63
+  db $C5, $F5, $D4, $C9                         // vpaddq ymm1, ymm1, ymm1
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
   // ----- Undiagonalize -----
-  vpermq ymm1, ymm1, $93
-  vpermq ymm2, ymm2, $4E
-  vpermq ymm3, ymm3, $39
+  db $C4, $E3, $FD, $00, $C9, $93               // vpermq ymm1, ymm1, $93
+  db $C4, $E3, $FD, $00, $D2, $4E               // vpermq ymm2, ymm2, $4E
+  db $C4, $E3, $FD, $00, $DB, $39               // vpermq ymm3, ymm3, $39
 
   // ----- Store back to Z_buf -----
-  vmovdqu yword [r11 + r10], ymm0
-  vmovdqu yword [r11 + r10 + $20], ymm1
-  vmovdqu yword [r11 + r10 + $40], ymm2
-  vmovdqu yword [r11 + r10 + $60], ymm3
+  db $C4, $81, $7E, $7F, $04, $13               // vmovdqu yword [r11 + r10], ymm0
+  db $C4, $81, $7E, $7F, $4C, $13, $20          // vmovdqu yword [r11 + r10 + $20], ymm1
+  db $C4, $81, $7E, $7F, $54, $13, $40          // vmovdqu yword [r11 + r10 + $40], ymm2
+  db $C4, $81, $7E, $7F, $5C, $13, $60          // vmovdqu yword [r11 + r10 + $60], ymm3
 
   add r10, 128
   cmp r10, 1024
@@ -186,114 +187,114 @@
   xor r10, r10
 
 @row_loop:
-  vmovdqu xmm0, oword [r11 + r10]
-  vinserti128 ymm0, ymm0, oword [r11 + r10 + 128], 1
-  vmovdqu xmm1, oword [r11 + r10 + 256]
-  vinserti128 ymm1, ymm1, oword [r11 + r10 + 384], 1
-  vmovdqu xmm2, oword [r11 + r10 + 512]
-  vinserti128 ymm2, ymm2, oword [r11 + r10 + 640], 1
-  vmovdqu xmm3, oword [r11 + r10 + 768]
-  vinserti128 ymm3, ymm3, oword [r11 + r10 + 896], 1
+  db $C4, $81, $7A, $6F, $04, $13               // vmovdqu xmm0, oword [r11 + r10]
+  db $C4, $83, $7D, $38, $84, $13, $80, $00, $00, $00, $01 // vinserti128 ymm0, ymm0, oword [r11 + r10 + 128], 1
+  db $C4, $81, $7A, $6F, $8C, $13, $00, $01, $00, $00 // vmovdqu xmm1, oword [r11 + r10 + 256]
+  db $C4, $83, $75, $38, $8C, $13, $80, $01, $00, $00, $01 // vinserti128 ymm1, ymm1, oword [r11 + r10 + 384], 1
+  db $C4, $81, $7A, $6F, $94, $13, $00, $02, $00, $00 // vmovdqu xmm2, oword [r11 + r10 + 512]
+  db $C4, $83, $6D, $38, $94, $13, $80, $02, $00, $00, $01 // vinserti128 ymm2, ymm2, oword [r11 + r10 + 640], 1
+  db $C4, $81, $7A, $6F, $9C, $13, $00, $03, $00, $00 // vmovdqu xmm3, oword [r11 + r10 + 768]
+  db $C4, $83, $65, $38, $9C, $13, $80, $03, $00, $00, $01 // vinserti128 ymm3, ymm3, oword [r11 + r10 + 896], 1
 
   // ----- Column G -----
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpshufd ymm3, ymm3, $B1
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $FD, $70, $DB, $B1                    // vpshufd ymm3, ymm3, $B1
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 24
-  vpsllq ymm1, ymm1, 40
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
+  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpsrlq ymm4, ymm3, 16
-  vpsllq ymm3, ymm3, 48
-  vpor ymm3, ymm3, ymm4
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
+  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
+  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 63
-  vpaddq ymm1, ymm1, ymm1
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $3F                    // vpsrlq ymm4, ymm1, 63
+  db $C5, $F5, $D4, $C9                         // vpaddq ymm1, ymm1, ymm1
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
   // ----- Diagonalize -----
-  vpermq ymm1, ymm1, $39
-  vpermq ymm2, ymm2, $4E
-  vpermq ymm3, ymm3, $93
+  db $C4, $E3, $FD, $00, $C9, $39               // vpermq ymm1, ymm1, $39
+  db $C4, $E3, $FD, $00, $D2, $4E               // vpermq ymm2, ymm2, $4E
+  db $C4, $E3, $FD, $00, $DB, $93               // vpermq ymm3, ymm3, $93
 
   // ----- Diagonal G -----
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpshufd ymm3, ymm3, $B1
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $FD, $70, $DB, $B1                    // vpshufd ymm3, ymm3, $B1
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 24
-  vpsllq ymm1, ymm1, 40
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
+  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
-  vpmuludq ymm4, ymm0, ymm1
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm0, ymm0, ymm1
-  vpaddq ymm0, ymm0, ymm4
+  db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
+  db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
-  vpxor ymm3, ymm3, ymm0
-  vpsrlq ymm4, ymm3, 16
-  vpsllq ymm3, ymm3, 48
-  vpor ymm3, ymm3, ymm4
+  db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
+  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
+  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
+  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
 
-  vpmuludq ymm4, ymm2, ymm3
-  vpsllq ymm4, ymm4, 1
-  vpaddq ymm2, ymm2, ymm3
-  vpaddq ymm2, ymm2, ymm4
+  db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
+  db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
+  db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
+  db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
-  vpxor ymm1, ymm1, ymm2
-  vpsrlq ymm4, ymm1, 63
-  vpaddq ymm1, ymm1, ymm1
-  vpor ymm1, ymm1, ymm4
+  db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
+  db $C5, $DD, $73, $D1, $3F                    // vpsrlq ymm4, ymm1, 63
+  db $C5, $F5, $D4, $C9                         // vpaddq ymm1, ymm1, ymm1
+  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
 
   // ----- Undiagonalize -----
-  vpermq ymm1, ymm1, $93
-  vpermq ymm2, ymm2, $4E
-  vpermq ymm3, ymm3, $39
+  db $C4, $E3, $FD, $00, $C9, $93               // vpermq ymm1, ymm1, $93
+  db $C4, $E3, $FD, $00, $D2, $4E               // vpermq ymm2, ymm2, $4E
+  db $C4, $E3, $FD, $00, $DB, $39               // vpermq ymm3, ymm3, $39
 
   // ----- Store back to Z_buf (scatter to stride offsets) -----
-  vmovdqu oword [r11 + r10], xmm0
-  vextracti128 oword [r11 + r10 + 128], ymm0, 1
-  vmovdqu oword [r11 + r10 + 256], xmm1
-  vextracti128 oword [r11 + r10 + 384], ymm1, 1
-  vmovdqu oword [r11 + r10 + 512], xmm2
-  vextracti128 oword [r11 + r10 + 640], ymm2, 1
-  vmovdqu oword [r11 + r10 + 768], xmm3
-  vextracti128 oword [r11 + r10 + 896], ymm3, 1
+  db $C4, $81, $7A, $7F, $04, $13               // vmovdqu oword [r11 + r10], xmm0
+  db $C4, $83, $7D, $39, $84, $13, $80, $00, $00, $00, $01 // vextracti128 oword [r11 + r10 + 128], ymm0, 1
+  db $C4, $81, $7A, $7F, $8C, $13, $00, $01, $00, $00 // vmovdqu oword [r11 + r10 + 256], xmm1
+  db $C4, $83, $7D, $39, $8C, $13, $80, $01, $00, $00, $01 // vextracti128 oword [r11 + r10 + 384], ymm1, 1
+  db $C4, $81, $7A, $7F, $94, $13, $00, $02, $00, $00 // vmovdqu oword [r11 + r10 + 512], xmm2
+  db $C4, $83, $7D, $39, $94, $13, $80, $02, $00, $00, $01 // vextracti128 oword [r11 + r10 + 640], ymm2, 1
+  db $C4, $81, $7A, $7F, $9C, $13, $00, $03, $00, $00 // vmovdqu oword [r11 + r10 + 768], xmm3
+  db $C4, $83, $7D, $39, $9C, $13, $80, $03, $00, $00, $01 // vextracti128 oword [r11 + r10 + 896], ymm3, 1
 
   add r10, 16
   cmp r10, 128
@@ -307,9 +308,9 @@
 
   xor r10, r10
 @final_noxor_loop:
-  vmovdqu ymm0, yword [rax + r10]
-  vpxor ymm0, ymm0, yword [r11 + r10]
-  vmovdqu yword [r8 + r10], ymm0
+  db $C4, $A1, $7E, $6F, $04, $10               // vmovdqu ymm0, yword [rax + r10]
+  db $C4, $81, $7D, $EF, $04, $13               // vpxor ymm0, ymm0, yword [r11 + r10]
+  db $C4, $81, $7E, $7F, $04, $10               // vmovdqu yword [r8 + r10], ymm0
   add r10, 32
   cmp r10, 1024
   jb @final_noxor_loop
@@ -318,21 +319,21 @@
 @final_with_xor:
   xor r10, r10
 @final_xor_loop:
-  vmovdqu ymm0, yword [rax + r10]
-  vpxor ymm0, ymm0, yword [r11 + r10]
-  vpxor ymm0, ymm0, yword [r8 + r10]
-  vmovdqu yword [r8 + r10], ymm0
+  db $C4, $A1, $7E, $6F, $04, $10               // vmovdqu ymm0, yword [rax + r10]
+  db $C4, $81, $7D, $EF, $04, $13               // vpxor ymm0, ymm0, yword [r11 + r10]
+  db $C4, $81, $7D, $EF, $04, $10               // vpxor ymm0, ymm0, yword [r8 + r10]
+  db $C4, $81, $7E, $7F, $04, $10               // vmovdqu yword [r8 + r10], ymm0
   add r10, 32
   cmp r10, 1024
   jb @final_xor_loop
 
 @epilogue:
 {$IFDEF MSWINDOWS}
-  vmovdqu ymm6, yword [rsp]
-  vmovdqu ymm7, yword [rsp + $20]
-  vmovdqu ymm8, yword [rsp + $40]
-  vmovdqu ymm9, yword [rsp + $60]
+  db $C5, $FE, $6F, $34, $24                    // vmovdqu ymm6, yword [rsp]
+  db $C5, $FE, $6F, $7C, $24, $20               // vmovdqu ymm7, yword [rsp + $20]
+  db $C5, $7E, $6F, $44, $24, $40               // vmovdqu ymm8, yword [rsp + $40]
+  db $C5, $7E, $6F, $4C, $24, $60               // vmovdqu ymm9, yword [rsp + $60]
 {$ENDIF}
 
   add rsp, 2184
-  vzeroupper
+  db $C5, $F8, $77                              // vzeroupper

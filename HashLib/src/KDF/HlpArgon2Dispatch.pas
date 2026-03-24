@@ -112,14 +112,10 @@ procedure Argon2_FillBlock_sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int3
   {$I ..\Include\Simd\Argon2\Argon2FillBlockSse2.inc}
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 procedure Argon2_FillBlock_avx2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Argon2\Argon2FillBlockAvx2.inc}
 end;
-
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
 
 {$ENDIF HASHLIB_X86_64}
 
@@ -131,12 +127,10 @@ procedure InitDispatch();
 begin
   case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
-  {$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.AVX2:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_avx2;
     end;
-  {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_sse2;

@@ -103,14 +103,10 @@ procedure Blake3_Compress_sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
   {$I ..\Include\Simd\Blake3\Blake3CompressSse2.inc}
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 procedure Blake3_Compress_avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Blake3\Blake3CompressAvx2.inc}
 end;
-
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
 
 {$ENDIF HASHLIB_X86_64}
 
@@ -122,12 +118,10 @@ procedure InitDispatch();
 begin
   case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
-  {$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.AVX2:
     begin
       Blake3_Compress := @Blake3_Compress_avx2;
     end;
-  {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Blake3_Compress := @Blake3_Compress_sse2;

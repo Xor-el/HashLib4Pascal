@@ -1,6 +1,7 @@
 // SHA-256 AVX2 (VEX-128) implementation.
 // Same algorithm as SSSE3 but using VEX-encoded instructions for 3-operand
 // non-destructive forms, shorter encoding, and no SSE/AVX transition penalties.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
 // K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
 //
@@ -26,8 +27,8 @@
   sub rsp, 376
 
 {$IFDEF MSWINDOWS}
-  vmovdqu oword [rsp], xmm6
-  vmovdqu oword [rsp + $10], xmm7
+  db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
+  db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
 {$ENDIF}
@@ -51,34 +52,34 @@
   // ========== Phase 1: Message Schedule (VEX-128) ==========
 
   mov rax, [rsp + $60]
-  vmovdqu xmm7, oword [rax + $100]
+  db $C5, $FA, $6F, $B8, $00, $01, $00, $00     // vmovdqu xmm7, oword [rax + $100]
 
-  vmovdqu xmm0, oword [r13]
-  vpshufb xmm0, xmm0, xmm7
-  vmovdqu xmm1, oword [r13 + $10]
-  vpshufb xmm1, xmm1, xmm7
-  vmovdqu xmm2, oword [r13 + $20]
-  vpshufb xmm2, xmm2, xmm7
-  vmovdqu xmm3, oword [r13 + $30]
-  vpshufb xmm3, xmm3, xmm7
+  db $C4, $C1, $7A, $6F, $45, $00               // vmovdqu xmm0, oword [r13]
+  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
+  db $C4, $C1, $7A, $6F, $4D, $10               // vmovdqu xmm1, oword [r13 + $10]
+  db $C4, $E2, $71, $00, $CF                    // vpshufb xmm1, xmm1, xmm7
+  db $C4, $C1, $7A, $6F, $55, $20               // vmovdqu xmm2, oword [r13 + $20]
+  db $C4, $E2, $69, $00, $D7                    // vpshufb xmm2, xmm2, xmm7
+  db $C4, $C1, $7A, $6F, $5D, $30               // vmovdqu xmm3, oword [r13 + $30]
+  db $C4, $E2, $61, $00, $DF                    // vpshufb xmm3, xmm3, xmm7
 
   lea rbp, [rsp + $70]
 
-  vmovdqu xmm4, oword [rax]
-  vpaddd  xmm4, xmm0, xmm4
-  vmovdqa oword [rbp], xmm4
+  db $C5, $FA, $6F, $20                         // vmovdqu xmm4, oword [rax]
+  db $C5, $F9, $FE, $E4                         // vpaddd  xmm4, xmm0, xmm4
+  db $C5, $F9, $7F, $65, $00                    // vmovdqa oword [rbp], xmm4
 
-  vmovdqu xmm4, oword [rax + $10]
-  vpaddd  xmm4, xmm1, xmm4
-  vmovdqa oword [rbp + $10], xmm4
+  db $C5, $FA, $6F, $60, $10                    // vmovdqu xmm4, oword [rax + $10]
+  db $C5, $F1, $FE, $E4                         // vpaddd  xmm4, xmm1, xmm4
+  db $C5, $F9, $7F, $65, $10                    // vmovdqa oword [rbp + $10], xmm4
 
-  vmovdqu xmm4, oword [rax + $20]
-  vpaddd  xmm4, xmm2, xmm4
-  vmovdqa oword [rbp + $20], xmm4
+  db $C5, $FA, $6F, $60, $20                    // vmovdqu xmm4, oword [rax + $20]
+  db $C5, $E9, $FE, $E4                         // vpaddd  xmm4, xmm2, xmm4
+  db $C5, $F9, $7F, $65, $20                    // vmovdqa oword [rbp + $20], xmm4
 
-  vmovdqu xmm4, oword [rax + $30]
-  vpaddd  xmm4, xmm3, xmm4
-  vmovdqa oword [rbp + $30], xmm4
+  db $C5, $FA, $6F, $60, $30                    // vmovdqu xmm4, oword [rax + $30]
+  db $C5, $E1, $FE, $E4                         // vpaddd  xmm4, xmm3, xmm4
+  db $C5, $F9, $7F, $65, $30                    // vmovdqa oword [rbp + $30], xmm4
 
   add rax, $40
   add rbp, $40
@@ -87,59 +88,59 @@
 @avx2_expand_loop:
 
   // sigma0(W[t-15..t-12])
-  vpalignr xmm4, xmm1, xmm0, 4
-  vpsrld  xmm5, xmm4, 7
-  vpslld  xmm6, xmm4, 14
-  vpsrld  xmm4, xmm4, 3
-  vpxor   xmm4, xmm4, xmm5
-  vpsrld  xmm5, xmm5, 11
-  vpxor   xmm4, xmm4, xmm6
-  vpslld  xmm6, xmm6, 11
-  vpxor   xmm4, xmm4, xmm5
-  vpxor   xmm4, xmm4, xmm6
+  db $C4, $E3, $71, $0F, $E0, $04               // vpalignr xmm4, xmm1, xmm0, 4
+  db $C5, $D1, $72, $D4, $07                    // vpsrld  xmm5, xmm4, 7
+  db $C5, $C9, $72, $F4, $0E                    // vpslld  xmm6, xmm4, 14
+  db $C5, $D9, $72, $D4, $03                    // vpsrld  xmm4, xmm4, 3
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D1, $72, $D5, $0B                    // vpsrld  xmm5, xmm5, 11
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
+  db $C5, $C9, $72, $F6, $0B                    // vpslld  xmm6, xmm6, 11
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
 
-  vpaddd  xmm0, xmm0, xmm4
+  db $C5, $F9, $FE, $C4                         // vpaddd  xmm0, xmm0, xmm4
 
   // W[t-7..t-4]
-  vpalignr xmm4, xmm3, xmm2, 4
-  vpaddd  xmm0, xmm0, xmm4
+  db $C4, $E3, $61, $0F, $E2, $04               // vpalignr xmm4, xmm3, xmm2, 4
+  db $C5, $F9, $FE, $C4                         // vpaddd  xmm0, xmm0, xmm4
 
   // sigma1 phase 1: W[t-2..t-1]
-  vpsrldq xmm4, xmm3, 8
-  vpsrld  xmm5, xmm4, 17
-  vpslld  xmm6, xmm4, 13
-  vpsrld  xmm4, xmm4, 10
-  vpxor   xmm4, xmm4, xmm5
-  vpsrld  xmm5, xmm5, 2
-  vpxor   xmm4, xmm4, xmm6
-  vpslld  xmm6, xmm6, 2
-  vpxor   xmm4, xmm4, xmm5
-  vpxor   xmm4, xmm4, xmm6
-  vpaddd  xmm0, xmm0, xmm4
+  db $C5, $D9, $73, $DB, $08                    // vpsrldq xmm4, xmm3, 8
+  db $C5, $D1, $72, $D4, $11                    // vpsrld  xmm5, xmm4, 17
+  db $C5, $C9, $72, $F4, $0D                    // vpslld  xmm6, xmm4, 13
+  db $C5, $D9, $72, $D4, $0A                    // vpsrld  xmm4, xmm4, 10
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D1, $72, $D5, $02                    // vpsrld  xmm5, xmm5, 2
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
+  db $C5, $C9, $72, $F6, $02                    // vpslld  xmm6, xmm6, 2
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
+  db $C5, $F9, $FE, $C4                         // vpaddd  xmm0, xmm0, xmm4
 
   // sigma1 phase 2: W[t..t+1]
-  vpslldq xmm4, xmm0, 8
-  vpsrld  xmm5, xmm4, 17
-  vpslld  xmm6, xmm4, 13
-  vpsrld  xmm4, xmm4, 10
-  vpxor   xmm4, xmm4, xmm5
-  vpsrld  xmm5, xmm5, 2
-  vpxor   xmm4, xmm4, xmm6
-  vpslld  xmm6, xmm6, 2
-  vpxor   xmm4, xmm4, xmm5
-  vpxor   xmm4, xmm4, xmm6
-  vpaddd  xmm0, xmm0, xmm4
+  db $C5, $D9, $73, $F8, $08                    // vpslldq xmm4, xmm0, 8
+  db $C5, $D1, $72, $D4, $11                    // vpsrld  xmm5, xmm4, 17
+  db $C5, $C9, $72, $F4, $0D                    // vpslld  xmm6, xmm4, 13
+  db $C5, $D9, $72, $D4, $0A                    // vpsrld  xmm4, xmm4, 10
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D1, $72, $D5, $02                    // vpsrld  xmm5, xmm5, 2
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
+  db $C5, $C9, $72, $F6, $02                    // vpslld  xmm6, xmm6, 2
+  db $C5, $D9, $EF, $E5                         // vpxor   xmm4, xmm4, xmm5
+  db $C5, $D9, $EF, $E6                         // vpxor   xmm4, xmm4, xmm6
+  db $C5, $F9, $FE, $C4                         // vpaddd  xmm0, xmm0, xmm4
 
-  vmovdqu xmm4, oword [rax]
-  vpaddd  xmm4, xmm0, xmm4
-  vmovdqa oword [rbp], xmm4
+  db $C5, $FA, $6F, $20                         // vmovdqu xmm4, oword [rax]
+  db $C5, $F9, $FE, $E4                         // vpaddd  xmm4, xmm0, xmm4
+  db $C5, $F9, $7F, $65, $00                    // vmovdqa oword [rbp], xmm4
 
   // Rotate message window
-  vmovdqa xmm4, xmm0
-  vmovdqa xmm0, xmm1
-  vmovdqa xmm1, xmm2
-  vmovdqa xmm2, xmm3
-  vmovdqa xmm3, xmm4
+  db $C5, $F9, $6F, $E0                         // vmovdqa xmm4, xmm0
+  db $C5, $F9, $6F, $C1                         // vmovdqa xmm0, xmm1
+  db $C5, $F9, $6F, $CA                         // vmovdqa xmm1, xmm2
+  db $C5, $F9, $6F, $D3                         // vmovdqa xmm2, xmm3
+  db $C5, $F9, $6F, $DC                         // vmovdqa xmm3, xmm4
 
   add rax, $10
   add rbp, $10
@@ -447,9 +448,9 @@
 {$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
-  vmovdqu xmm6, oword [rsp]
-  vmovdqu xmm7, oword [rsp + $10]
+  db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
+  db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
 {$ENDIF}
   add rsp, 376
 
-  vzeroupper
+  db $C5, $F8, $77                              // vzeroupper

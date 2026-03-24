@@ -1,6 +1,7 @@
 // SHA-1 AVX2 (VEX-128) implementation.
 // Same algorithm as SSSE3 but using VEX-encoded instructions for the SIMD byte-swap phase,
 // avoiding SSE/AVX transition penalties.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
 // K_SHA1 layout: BSWAP32 mask (16 bytes) at offset 0.
 //
@@ -14,8 +15,8 @@
   sub rsp, 440
 
 {$IFDEF MSWINDOWS}
-  vmovdqu oword [rsp], xmm6
-  vmovdqu oword [rsp + $10], xmm7
+  db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
+  db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
 {$ENDIF}
@@ -39,25 +40,25 @@
   // ========== Phase 1: VEX-128 byte-swap W[0..15] ==========
 
   mov rax, [rsp + $60]
-  vmovdqu xmm7, oword [rax]
+  db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
 
   lea r15, [rsp + $70]
 
-  vmovdqu xmm0, oword [r13]
-  vpshufb xmm0, xmm0, xmm7
-  vmovdqa oword [r15], xmm0
+  db $C4, $C1, $7A, $6F, $45, $00               // vmovdqu xmm0, oword [r13]
+  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
+  db $C4, $C1, $79, $7F, $07                    // vmovdqa oword [r15], xmm0
 
-  vmovdqu xmm0, oword [r13 + $10]
-  vpshufb xmm0, xmm0, xmm7
-  vmovdqa oword [r15 + $10], xmm0
+  db $C4, $C1, $7A, $6F, $45, $10               // vmovdqu xmm0, oword [r13 + $10]
+  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
+  db $C4, $C1, $79, $7F, $47, $10               // vmovdqa oword [r15 + $10], xmm0
 
-  vmovdqu xmm0, oword [r13 + $20]
-  vpshufb xmm0, xmm0, xmm7
-  vmovdqa oword [r15 + $20], xmm0
+  db $C4, $C1, $7A, $6F, $45, $20               // vmovdqu xmm0, oword [r13 + $20]
+  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
+  db $C4, $C1, $79, $7F, $47, $20               // vmovdqa oword [r15 + $20], xmm0
 
-  vmovdqu xmm0, oword [r13 + $30]
-  vpshufb xmm0, xmm0, xmm7
-  vmovdqa oword [r15 + $30], xmm0
+  db $C4, $C1, $7A, $6F, $45, $30               // vmovdqu xmm0, oword [r13 + $30]
+  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
+  db $C4, $C1, $79, $7F, $47, $30               // vmovdqa oword [r15 + $30], xmm0
 
   // ========== Phase 2: GPR expand W[16..79] ==========
 
@@ -407,9 +408,9 @@
 {$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
-  vmovdqu xmm6, oword [rsp]
-  vmovdqu xmm7, oword [rsp + $10]
+  db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
+  db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
 {$ENDIF}
   add rsp, 440
 
-  vzeroupper
+  db $C5, $F8, $77                              // vzeroupper

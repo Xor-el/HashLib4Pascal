@@ -137,8 +137,6 @@ begin
   SHA512_Compress_ssse3(AState, AData, ANumBlocks, @K512);
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 procedure SHA512_Compress_avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
@@ -150,8 +148,6 @@ begin
   SHA512_Compress_avx2(AState, AData, ANumBlocks, @K512);
 end;
 
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-
 {$ENDIF HASHLIB_X86_64}
 
 // =============================================================================
@@ -161,13 +157,11 @@ end;
 procedure InitDispatch();
 begin
 {$IFDEF HASHLIB_X86_64}
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
   if TSimd.GetActiveLevel() >= TSimdLevel.AVX2 then
   begin
     SHA512_Compress := @SHA512_Compress_avx2_wrap;
     Exit;
   end;
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
   if TSimd.GetActiveLevel() >= TSimdLevel.SSSE3 then
   begin
     SHA512_Compress := @SHA512_Compress_ssse3_wrap;

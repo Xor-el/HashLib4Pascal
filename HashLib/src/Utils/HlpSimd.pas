@@ -190,11 +190,6 @@ begin
 
   FHasSHANI := CPUHasSHANI();
 
-  // Cap based on compiler assembler capability
-{$IFNDEF HASHLIB_AVX2_ASM_SUPPORTED}
-  if FDetectedLevel > TSimdLevel.SSSE3 then
-    FDetectedLevel := TSimdLevel.SSSE3;
-{$ENDIF}
 
   // Cap based on user force defines
 {$IF DEFINED(HASHLIB_FORCE_SCALAR)}

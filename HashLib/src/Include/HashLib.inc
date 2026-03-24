@@ -60,11 +60,6 @@
   {$DEFINE HASHLIB_X86_64}
 {$IFEND}
 
-{$IFDEF FPC}
-  {$IFDEF HASHLIB_X86_64}
-    {$DEFINE HASHLIB_AVX2_ASM_SUPPORTED}
-  {$ENDIF}
-{$ENDIF}
 
 // Uncomment ONE of the following to force a specific SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SCALAR}

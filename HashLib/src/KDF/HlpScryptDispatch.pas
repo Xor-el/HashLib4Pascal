@@ -177,14 +177,10 @@ procedure Scrypt_SalsaXor_sse2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Sse2.inc}
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 procedure Scrypt_SalsaXor_avx2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Avx2.inc}
 end;
-
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
 
 {$ENDIF HASHLIB_X86_64}
 
@@ -196,12 +192,10 @@ procedure InitDispatch();
 begin
   case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
-  {$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.AVX2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_avx2;
     end;
-  {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_sse2;
