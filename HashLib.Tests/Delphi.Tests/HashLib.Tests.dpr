@@ -38,6 +38,7 @@ uses
   HlpHMACNotBuildInAdapter in '..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
   HlpMultipleTransformNonBlock in '..\..\HashLib\src\Base\HlpMultipleTransformNonBlock.pas',
   HlpAdler32 in '..\..\HashLib\src\Checksum\HlpAdler32.pas',
+  HlpAdler32Dispatch in '..\..\HashLib\src\Checksum\HlpAdler32Dispatch.pas',
   HlpCRC in '..\..\HashLib\src\Checksum\HlpCRC.pas',
   HlpCRC16 in '..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\HashLib\src\Checksum\HlpCRC32.pas',
