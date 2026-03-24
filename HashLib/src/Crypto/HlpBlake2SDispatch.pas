@@ -129,7 +129,7 @@ begin
       Blake2S_Compress := @Blake2S_Compress_avx2;
     end;
   {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-    TSimdLevel.SSE2:
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Blake2S_Compress := @Blake2S_Compress_sse2;
     end;

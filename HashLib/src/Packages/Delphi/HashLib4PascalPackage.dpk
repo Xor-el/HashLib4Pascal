@@ -72,6 +72,8 @@ contains
   HlpSHA1 in '..\..\Crypto\HlpSHA1.pas',
   HlpSHA2_224 in '..\..\Crypto\HlpSHA2_224.pas',
   HlpSHA2_256 in '..\..\Crypto\HlpSHA2_256.pas',
+  HlpSHA2_256Dispatch in '..\..\Crypto\HlpSHA2_256Dispatch.pas',
+  HlpSHA2_512Dispatch in '..\..\Crypto\HlpSHA2_512Dispatch.pas',
   HlpSHA2_256Base in '..\..\Crypto\HlpSHA2_256Base.pas',
   HlpSHA2_384 in '..\..\Crypto\HlpSHA2_384.pas',
   HlpSHA2_512 in '..\..\Crypto\HlpSHA2_512.pas',

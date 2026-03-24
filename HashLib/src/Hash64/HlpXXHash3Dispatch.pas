@@ -189,7 +189,7 @@ begin
       XXH3_InitSecret := @XXH3_initSecret_avx2;
     end;
   {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-    TSimdLevel.SSE2:
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       XXH3_Accumulate512 := @XXH3_accumulate_512_sse2;
       XXH3_Accumulate := @XXH3_accumulate_sse2;

@@ -137,7 +137,7 @@ begin
       Argon2_FillBlock := @Argon2_FillBlock_avx2;
     end;
   {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-    TSimdLevel.SSE2:
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_sse2;
     end;

@@ -64,6 +64,8 @@ uses
   HlpSHA1 in '..\..\HashLib\src\Crypto\HlpSHA1.pas',
   HlpSHA2_224 in '..\..\HashLib\src\Crypto\HlpSHA2_224.pas',
   HlpSHA2_256 in '..\..\HashLib\src\Crypto\HlpSHA2_256.pas',
+  HlpSHA2_256Dispatch in '..\..\HashLib\src\Crypto\HlpSHA2_256Dispatch.pas',
+  HlpSHA2_512Dispatch in '..\..\HashLib\src\Crypto\HlpSHA2_512Dispatch.pas',
   HlpSHA2_256Base in '..\..\HashLib\src\Crypto\HlpSHA2_256Base.pas',
   HlpSHA2_384 in '..\..\HashLib\src\Crypto\HlpSHA2_384.pas',
   HlpSHA2_512 in '..\..\HashLib\src\Crypto\HlpSHA2_512.pas',

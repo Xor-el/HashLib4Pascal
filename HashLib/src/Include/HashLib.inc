@@ -69,9 +69,12 @@
 // Uncomment ONE of the following to force a specific SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SCALAR}
 // {$DEFINE HASHLIB_FORCE_SSE2}
+// {$DEFINE HASHLIB_FORCE_SSSE3}
 
-{$IF DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2)}
-  {$MESSAGE ERROR 'HASHLIB_FORCE_SCALAR and HASHLIB_FORCE_SSE2 cannot both be defined. Enable only one.'}
+{$IF (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2))
+  OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSSE3))
+  OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
+  {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
