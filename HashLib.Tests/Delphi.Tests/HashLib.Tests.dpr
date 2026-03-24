@@ -130,6 +130,7 @@ uses
   HlpArgon2Dispatch in '..\..\HashLib\src\KDF\HlpArgon2Dispatch.pas',
   HlpArgon2TypeAndVersion in '..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
+  HlpScryptDispatch in '..\..\HashLib\src\KDF\HlpScryptDispatch.pas',
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',

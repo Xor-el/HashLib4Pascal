@@ -138,6 +138,7 @@ contains
   HlpArgon2Dispatch in '..\..\KDF\HlpArgon2Dispatch.pas',
   HlpArgon2TypeAndVersion in '..\..\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
+  HlpScryptDispatch in '..\..\KDF\HlpScryptDispatch.pas',
   HlpConverters in '..\..\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\Utils\HlpBits.pas',
