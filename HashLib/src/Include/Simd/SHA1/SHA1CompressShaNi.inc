@@ -42,16 +42,22 @@
   // Save state for final addition
   movdqa xmm8, xmm0                // ABCD_SAVE
 
-  // Load and byte-swap all 4 message blocks
+  // Load, byte-swap, and reverse dword order for all 4 message blocks.
+  // The per-dword BSWAP mask puts W[0] at [31:0], but sha1rnds4 reads
+  // W[0] from [127:96]. The pshufd $1B reverses the dword order.
   movdqu xmm7, oword [r9]          // BSWAP mask at offset 0
   movdqu xmm3, oword [rdx]
   pshufb xmm3, xmm7
+  pshufd xmm3, xmm3, $1B
   movdqu xmm4, oword [rdx + $10]
   pshufb xmm4, xmm7
+  pshufd xmm4, xmm4, $1B
   movdqu xmm5, oword [rdx + $20]
   pshufb xmm5, xmm7
+  pshufd xmm5, xmm5, $1B
   movdqu xmm6, oword [rdx + $30]
   pshufb xmm6, xmm7
+  pshufd xmm6, xmm6, $1B
 
   // Save E for final addition (reuse xmm7)
   movdqa xmm7, xmm1                // E_SAVE
