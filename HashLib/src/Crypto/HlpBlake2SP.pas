@@ -239,7 +239,7 @@ begin
 
   while (LCounter >= StripeSize) do
   begin
-    FLeafHashes[AIdx].TransformBlock(LPtrData);
+    FLeafHashes[AIdx].TransformBlock(LPtrData, BlockSizeInBytes, 0);
     System.Inc(LPtrData, StripeSize);
     LCounter := LCounter - StripeSize;
   end;

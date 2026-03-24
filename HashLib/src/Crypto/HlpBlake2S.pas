@@ -7,6 +7,7 @@ interface
 uses
   SysUtils,
   HlpHash,
+  HlpHashCryptoNotBuildIn,
   HlpHashResult,
   HlpIHashResult,
   HlpIBlake2SParams,
@@ -28,7 +29,7 @@ resourcestring
   SWritetoXofAfterReadError = '"%s" Write to Xof after Read not Allowed';
 
 type
-  TBlake2S = class(THash, ICryptoNotBuildIn, ITransformBlock)
+  TBlake2S = class(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
   strict private
 
   const
@@ -55,11 +56,10 @@ type
   var
     FState: THashLibUInt32Array;
     FM: array [0 .. 15] of UInt32;
-    FBuffer: THashLibByteArray;
-    FFilledBufferCount: Int32;
     FCounter0, FCounter1, FFinalizationFlag0, FFinalizationFlag1: UInt32;
 
-    procedure Finish();
+    procedure Finish(); override;
+    function GetResult(): THashLibByteArray; override;
     function GetName: String; override;
 
   public
@@ -69,10 +69,10 @@ type
       const ATreeConfig: IBlake2STreeConfig;
       ADoTransformKeyBlock: Boolean = True); overload;
     procedure Initialize; override;
-    procedure TransformBlock(ABlock: PByte);
+    procedure TransformBlock(AData: PByte; ADataLength: Int32;
+      AIndex: Int32); override;
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ADataLength: Int32); override;
-    function TransformFinal: IHashResult; override;
     function CloneInternal(): TBlake2S;
     function Clone(): IHash; override;
 
@@ -135,7 +135,7 @@ type
 
     function ComputeStepLength(): Int32; inline;
 
-    function GetResult(): THashLibByteArray;
+    function GetResult(): THashLibByteArray; reintroduce;
 
     constructor CreateInternal(const AConfig: IBlake2SConfig;
       const ATreeConfig: IBlake2STreeConfig);
@@ -234,12 +234,12 @@ begin
   Result := TBlake2S.Create(FConfig.Clone(), LTreeConfig, FDoTransformKeyBlock);
   System.Move(FM, Result.FM, System.SizeOf(FM));
   Result.FState := System.Copy(FState);
-  Result.FBuffer := System.Copy(FBuffer);
-  Result.FFilledBufferCount := FFilledBufferCount;
+  Result.FBuffer := FBuffer.Clone();
   Result.FCounter0 := FCounter0;
   Result.FCounter1 := FCounter1;
   Result.FFinalizationFlag0 := FFinalizationFlag0;
   Result.FFinalizationFlag1 := FFinalizationFlag1;
+  Result.FProcessedBytesCount := FProcessedBytesCount;
   Result.BufferSize := BufferSize;
 end;
 
@@ -280,18 +280,12 @@ begin
 
   System.SetLength(FState, 8);
 
-  System.SetLength(FBuffer, BlockSizeInBytes);
-
   inherited Create(FConfig.HashSize, BlockSizeInBytes);
 end;
 
 procedure TBlake2S.Finish;
-var
-  LCount: Int32;
-  LPtrBuffer: PByte;
 begin
-  // Last compression
-  Blake2SIncrementCounter(UInt32(FFilledBufferCount));
+  Blake2SIncrementCounter(UInt32(FBuffer.Position));
 
   FFinalizationFlag0 := System.High(UInt32);
 
@@ -300,15 +294,14 @@ begin
     FFinalizationFlag1 := System.High(UInt32);
   end;
 
-  LCount := System.Length(FBuffer) - FFilledBufferCount;
+  Compress(PByte(FBuffer.GetBytesZeroPadded()), 0);
+end;
 
-  if LCount > 0 then
-  begin
-    TArrayUtils.Fill(FBuffer, FFilledBufferCount,
-      LCount + FFilledBufferCount, Byte(0));
-  end;
-  LPtrBuffer := PByte(FBuffer);
-  Compress(LPtrBuffer, 0);
+function TBlake2S.GetResult: THashLibByteArray;
+begin
+  System.SetLength(Result, HashSize);
+  TConverters.le32_copy(PCardinal(FState), 0, PByte(Result), 0,
+    System.Length(Result));
 end;
 
 procedure TBlake2S.Initialize;
@@ -317,6 +310,8 @@ var
   LBlock: THashLibByteArray;
   LRawConfig: THashLibUInt32Array;
 begin
+  inherited Initialize();
+
   LRawConfig := TBlake2SIvBuilder.ConfigS(FConfig, FTreeConfig);
   LBlock := nil;
 
@@ -353,10 +348,6 @@ begin
   FFinalizationFlag0 := 0;
   FFinalizationFlag1 := 0;
 
-  FFilledBufferCount := 0;
-
-  TArrayUtils.ZeroFill(FBuffer);
-
   System.FillChar(FM, System.SizeOf(FM), UInt32(0));
 
   for LIdx := 0 to 7 do
@@ -369,74 +360,70 @@ begin
     if (LBlock <> nil) then
     begin
       TransformBytes(LBlock, 0, System.Length(LBlock));
-      TArrayUtils.ZeroFill(LBlock); // burn key from memory
+      TArrayUtils.ZeroFill(LBlock);
     end;
   end;
 end;
 
-procedure TBlake2S.TransformBlock(ABlock: PByte);
+procedure TBlake2S.TransformBlock(AData: PByte; ADataLength: Int32;
+  AIndex: Int32);
 begin
-  if FFilledBufferCount = BlockSizeInBytes then
+  if FBuffer.IsFull then
   begin
     Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
-    Compress(PByte(FBuffer), 0);
-    FFilledBufferCount := 0;
+    Compress(PByte(FBuffer.GetBytes()), 0);
   end;
   Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
-  Compress(ABlock, 0);
+  Compress(AData, AIndex);
 end;
 
 procedure TBlake2S.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 var
-  LOffset, LBufferRemaining: Int32;
-  LPtrData, LPtrBuffer: PByte;
+  LPtrData: PByte;
 begin
-  LOffset := AIndex;
-  LBufferRemaining := BlockSizeInBytes - FFilledBufferCount;
-
-  if ((FFilledBufferCount > 0) and (ADataLength > LBufferRemaining)) then
-  begin
-    if LBufferRemaining > 0 then
-    begin
-      System.Move(AData[LOffset], FBuffer[FFilledBufferCount],
-        LBufferRemaining);
-    end;
-    Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
-    LPtrBuffer := PByte(FBuffer);
-    Compress(LPtrBuffer, 0);
-    LOffset := LOffset + LBufferRemaining;
-    ADataLength := ADataLength - LBufferRemaining;
-    FFilledBufferCount := 0;
-  end;
+{$IFDEF DEBUG}
+  System.Assert(AIndex >= 0);
+  System.Assert(ADataLength >= 0);
+  System.Assert(AIndex + ADataLength <= System.Length(AData));
+{$ENDIF DEBUG}
+  if ADataLength <= 0 then
+    Exit;
 
   LPtrData := PByte(AData);
 
-  while (ADataLength > BlockSizeInBytes) do
+  if FBuffer.IsFull then
   begin
     Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
-    Compress(LPtrData, LOffset);
-    LOffset := LOffset + BlockSizeInBytes;
-    ADataLength := ADataLength - BlockSizeInBytes;
+    Compress(PByte(FBuffer.GetBytes()), 0);
+  end;
+
+  if (not FBuffer.IsEmpty) then
+  begin
+    if FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ADataLength,
+      FProcessedBytesCount) then
+    begin
+      if ADataLength > 0 then
+      begin
+        Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
+        Compress(PByte(FBuffer.GetBytes()), 0);
+      end;
+    end;
+  end;
+
+  while (ADataLength > FBuffer.Length) do
+  begin
+    Blake2SIncrementCounter(UInt32(BlockSizeInBytes));
+    Compress(LPtrData, AIndex);
+    AIndex := AIndex + FBuffer.Length;
+    ADataLength := ADataLength - FBuffer.Length;
   end;
 
   if (ADataLength > 0) then
   begin
-    System.Move(AData[LOffset], FBuffer[FFilledBufferCount], ADataLength);
-    FFilledBufferCount := FFilledBufferCount + ADataLength;
+    FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ADataLength,
+      FProcessedBytesCount);
   end;
-end;
-
-function TBlake2S.TransformFinal: IHashResult;
-var
-  LBuffer: THashLibByteArray;
-begin
-  Finish();
-  System.SetLength(LBuffer, HashSize);
-  TConverters.le32_copy(PCardinal(FState), 0, PByte(LBuffer), 0,
-    System.Length(LBuffer));
-  Result := THashResult.Create(LBuffer);
-  Initialize();
 end;
 
 function TBlake2S.GetName: String;
@@ -571,12 +558,12 @@ begin
   // Internal Blake2S Cloning
   System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
   LHashInstance.FState := System.Copy(FState);
-  LHashInstance.FBuffer := System.Copy(FBuffer);
-  LHashInstance.FFilledBufferCount := FFilledBufferCount;
+  LHashInstance.FBuffer := FBuffer.Clone();
   LHashInstance.FCounter0 := FCounter0;
   LHashInstance.FCounter1 := FCounter1;
   LHashInstance.FFinalizationFlag0 := FFinalizationFlag0;
   LHashInstance.FFinalizationFlag1 := FFinalizationFlag1;
+  LHashInstance.FProcessedBytesCount := FProcessedBytesCount;
 
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
