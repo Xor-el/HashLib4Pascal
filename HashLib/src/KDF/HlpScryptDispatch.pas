@@ -172,12 +172,12 @@ end;
 
 {$IFDEF HASHLIB_X86_64}
 
-procedure Scrypt_SalsaXor_sse2(AState, AInput: Pointer);
+procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Sse2.inc}
 end;
 
-procedure Scrypt_SalsaXor_avx2(AState, AInput: Pointer);
+procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Avx2.inc}
 end;
@@ -194,11 +194,11 @@ begin
 {$IFDEF HASHLIB_X86_64}
     TSimdLevel.AVX2:
     begin
-      Scrypt_SalsaXor := @Scrypt_SalsaXor_avx2;
+      Scrypt_SalsaXor := @Scrypt_SalsaXor_Avx2;
     end;
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
-      Scrypt_SalsaXor := @Scrypt_SalsaXor_sse2;
+      Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:

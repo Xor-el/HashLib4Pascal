@@ -98,12 +98,12 @@ end;
 
 {$IFDEF HASHLIB_X86_64}
 
-procedure Blake3_Compress_sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
+procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Blake3\Blake3CompressSse2.inc}
 end;
 
-procedure Blake3_Compress_avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
+procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Blake3\Blake3CompressAvx2.inc}
 end;
@@ -120,11 +120,11 @@ begin
 {$IFDEF HASHLIB_X86_64}
     TSimdLevel.AVX2:
     begin
-      Blake3_Compress := @Blake3_Compress_avx2;
+      Blake3_Compress := @Blake3_Compress_Avx2;
     end;
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
-      Blake3_Compress := @Blake3_Compress_sse2;
+      Blake3_Compress := @Blake3_Compress_Sse2;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:

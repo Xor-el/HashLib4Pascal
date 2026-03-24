@@ -44,7 +44,7 @@ const
 // Scalar fallback implementation
 // =============================================================================
 
-procedure Blake2B_Compress_scalar(AState, AMsg, ACounterFlags, AIV: Pointer);
+procedure Blake2B_Compress_Scalar(AState, AMsg, ACounterFlags, AIV: Pointer);
 var
   LV: array [0 .. 15] of UInt64;
   LPState, LPMsg, LPCounterFlags, LPIV: PByte;
@@ -101,12 +101,12 @@ end;
 
 {$IFDEF HASHLIB_X86_64}
 
-procedure Blake2B_Compress_sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
+procedure Blake2B_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2.inc}
 end;
 
-procedure Blake2B_Compress_avx2(AState, AMsg, ACounterFlags, AIV: Pointer);
+procedure Blake2B_Compress_Avx2(AState, AMsg, ACounterFlags, AIV: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressAvx2.inc}
 end;
@@ -123,16 +123,16 @@ begin
 {$IFDEF HASHLIB_X86_64}
     TSimdLevel.AVX2:
     begin
-      Blake2B_Compress := @Blake2B_Compress_avx2;
+      Blake2B_Compress := @Blake2B_Compress_Avx2;
     end;
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
-      Blake2B_Compress := @Blake2B_Compress_sse2;
+      Blake2B_Compress := @Blake2B_Compress_Sse2;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:
     begin
-      Blake2B_Compress := @Blake2B_Compress_scalar;
+      Blake2B_Compress := @Blake2B_Compress_Scalar;
     end;
   end;
 end;

@@ -101,37 +101,37 @@ end;
 
 {$IFDEF HASHLIB_X86_64}
 
-procedure SHA1_Compress_shani(AState, AData: Pointer; ANumBlocks: UInt32;
+procedure SHA1_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\SHA1\SHA1CompressShaNi.inc}
 end;
 
-procedure SHA1_Compress_shani_wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+procedure SHA1_Compress_ShaNi_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA1_Compress_shani(AState, AData, ANumBlocks, @K_SHA1);
+  SHA1_Compress_ShaNi(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
-procedure SHA1_Compress_ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
+procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\SHA1\SHA1CompressSsse3.inc}
 end;
 
-procedure SHA1_Compress_ssse3_wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+procedure SHA1_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA1_Compress_ssse3(AState, AData, ANumBlocks, @K_SHA1);
+  SHA1_Compress_Ssse3(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
-procedure SHA1_Compress_avx2(AState, AData: Pointer; ANumBlocks: UInt32;
+procedure SHA1_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\SHA1\SHA1CompressAvx2.inc}
 end;
 
-procedure SHA1_Compress_avx2_wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+procedure SHA1_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA1_Compress_avx2(AState, AData, ANumBlocks, @K_SHA1);
+  SHA1_Compress_Avx2(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
 {$ENDIF HASHLIB_X86_64}
@@ -145,17 +145,17 @@ begin
 {$IFDEF HASHLIB_X86_64}
   if TSimd.HasSHANI() and (TSimd.GetActiveLevel() >= TSimdLevel.SSSE3) then
   begin
-    SHA1_Compress := @SHA1_Compress_shani_wrap;
+    SHA1_Compress := @SHA1_Compress_ShaNi_Wrap;
     Exit;
   end;
   if TSimd.GetActiveLevel() >= TSimdLevel.AVX2 then
   begin
-    SHA1_Compress := @SHA1_Compress_avx2_wrap;
+    SHA1_Compress := @SHA1_Compress_Avx2_Wrap;
     Exit;
   end;
   if TSimd.GetActiveLevel() >= TSimdLevel.SSSE3 then
   begin
-    SHA1_Compress := @SHA1_Compress_ssse3_wrap;
+    SHA1_Compress := @SHA1_Compress_Ssse3_Wrap;
     Exit;
   end;
 {$ENDIF}

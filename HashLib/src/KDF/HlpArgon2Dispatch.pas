@@ -20,7 +20,7 @@ uses
 // Scalar fallback implementation
 // =============================================================================
 
-procedure Argon2_FillBlock_scalar(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
+procedure Argon2_FillBlock_Scalar(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
 var
   LR, LZ: array [0 .. 127] of UInt64;
   LPLeft, LPRight, LPCurrent: PUInt64;
@@ -107,12 +107,12 @@ end;
 
 {$IFDEF HASHLIB_X86_64}
 
-procedure Argon2_FillBlock_sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
+procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Argon2\Argon2FillBlockSse2.inc}
 end;
 
-procedure Argon2_FillBlock_avx2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
+procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\Argon2\Argon2FillBlockAvx2.inc}
 end;
@@ -129,16 +129,16 @@ begin
 {$IFDEF HASHLIB_X86_64}
     TSimdLevel.AVX2:
     begin
-      Argon2_FillBlock := @Argon2_FillBlock_avx2;
+      Argon2_FillBlock := @Argon2_FillBlock_Avx2;
     end;
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
-      Argon2_FillBlock := @Argon2_FillBlock_sse2;
+      Argon2_FillBlock := @Argon2_FillBlock_Sse2;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:
     begin
-      Argon2_FillBlock := @Argon2_FillBlock_scalar;
+      Argon2_FillBlock := @Argon2_FillBlock_Scalar;
     end;
   end;
 end;
