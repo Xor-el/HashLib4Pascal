@@ -1,14 +1,16 @@
-// SHA-1 AVX2 (VEX-128) implementation.
-// Same algorithm as SSSE3 but using VEX-encoded instructions for the SIMD byte-swap phase,
-// avoiding SSE/AVX transition penalties.
+// SHA-1 AVX2 (VEX-128) implementation with SIMD message schedule.
+// Inspired by OpenSSL sha1-x86_64.pl by Andy Polyakov (CRYPTOGAMS).
+// Same algorithm as SSSE3 but using VEX-encoded instructions for the byte-swap phase,
+// avoiding SSE/AVX transition penalties on Sandy Bridge/Ivy Bridge.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
-// K_SHA1 layout: BSWAP32 mask (16 bytes) at offset 0.
+// K_SHA1 layout: K_00_19 (16 bytes) at offset 0, K_20_39 at 16, K_40_59 at 32,
+//   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
 //
-// Three phases per block:
-//   Phase 1 (VEX-128 SIMD): Byte-swap W[0..15] using vpshufb, store to stack
-//   Phase 2 (GPR): Expand W[16..79] using ROL1 expansion
-//   Phase 3 (GPR): 80 compression rounds (identical to SSSE3)
+// Two phases per block:
+//   Phase 1 (SIMD): VEX byte-swap W[0..15] via vpshufb, then expand W[16..79]
+//     using SIMD message schedule (ROL1 for W[16..31], ROL2 for W[32..79]).
+//   Phase 2 (GPR): 80 compression rounds (identical to SSSE3)
 //
 // Stack layout (sub rsp, 440): same as SSSE3 version
 
@@ -37,10 +39,10 @@
 
 @avx2_sha1_block_loop:
 
-  // ========== Phase 1: VEX-128 byte-swap W[0..15] ==========
+  // ========== Phase 1: SIMD message schedule ==========
 
   mov rax, [rsp + $60]
-  db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
+  db $C5, $FA, $6F, $78, $40                    // vmovdqu xmm7, oword [rax + $40]
 
   lea r15, [rsp + $70]
 
@@ -48,35 +50,87 @@
   db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
   db $C4, $C1, $79, $7F, $07                    // vmovdqa oword [r15], xmm0
 
-  db $C4, $C1, $7A, $6F, $45, $10               // vmovdqu xmm0, oword [r13 + $10]
-  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
-  db $C4, $C1, $79, $7F, $47, $10               // vmovdqa oword [r15 + $10], xmm0
+  db $C4, $C1, $7A, $6F, $4D, $10               // vmovdqu xmm1, oword [r13 + $10]
+  db $C4, $E2, $71, $00, $CF                    // vpshufb xmm1, xmm1, xmm7
+  db $C4, $C1, $79, $7F, $4F, $10               // vmovdqa oword [r15 + $10], xmm1
 
-  db $C4, $C1, $7A, $6F, $45, $20               // vmovdqu xmm0, oword [r13 + $20]
-  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
-  db $C4, $C1, $79, $7F, $47, $20               // vmovdqa oword [r15 + $20], xmm0
+  db $C4, $C1, $7A, $6F, $55, $20               // vmovdqu xmm2, oword [r13 + $20]
+  db $C4, $E2, $69, $00, $D7                    // vpshufb xmm2, xmm2, xmm7
+  db $C4, $C1, $79, $7F, $57, $20               // vmovdqa oword [r15 + $20], xmm2
 
-  db $C4, $C1, $7A, $6F, $45, $30               // vmovdqu xmm0, oword [r13 + $30]
-  db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
-  db $C4, $C1, $79, $7F, $47, $30               // vmovdqa oword [r15 + $30], xmm0
+  db $C4, $C1, $7A, $6F, $5D, $30               // vmovdqu xmm3, oword [r13 + $30]
+  db $C4, $E2, $61, $00, $DF                    // vpshufb xmm3, xmm3, xmm7
+  db $C4, $C1, $79, $7F, $5F, $30               // vmovdqa oword [r15 + $30], xmm3
 
-  // ========== Phase 2: GPR expand W[16..79] ==========
+  // --- W[16..31]: ROL1 formula with cross-lane fix ---
 
   lea rbp, [r15 + $40]
+  lea r10, [r15 + $80]
+
+@avx2_sha1_expand_16_31:
+  movdqa xmm0, oword [rbp - $40]
+  movdqa xmm1, oword [rbp - $30]
+  movdqa xmm2, oword [rbp - $20]
+  movdqa xmm3, oword [rbp - $10]
+
+  pshufd xmm4, xmm0, $EE
+  punpcklqdq xmm4, xmm1
+
+  movdqa xmm5, xmm3
+  psrldq xmm5, 4
+
+  pxor xmm4, xmm0
+  pxor xmm5, xmm2
+  pxor xmm4, xmm5
+
+  movdqa xmm6, xmm4
+  movdqa xmm5, xmm4
+  pslldq xmm6, 12
+  paddd  xmm4, xmm4
+  psrld  xmm5, 31
+  por    xmm4, xmm5
+
+  movdqa xmm5, xmm6
+  psrld  xmm6, 30
+  pslld  xmm5, 2
+  pxor   xmm4, xmm6
+  pxor   xmm4, xmm5
+
+  movdqa oword [rbp], xmm4
+  add rbp, $10
+  cmp rbp, r10
+  jb @avx2_sha1_expand_16_31
+
+  // --- W[32..79]: ROL2 expanded recurrence ---
+
   lea r10, [r15 + $140]
 
-@avx2_sha1_expand:
-  mov eax, [rbp - 12]
-  xor eax, [rbp - 32]
-  xor eax, [rbp - 56]
-  xor eax, [rbp - 64]
-  rol eax, 1
-  mov [rbp], eax
-  add rbp, 4
-  cmp rbp, r10
-  jb @avx2_sha1_expand
+@avx2_sha1_expand_32_79:
+  movdqa xmm0, oword [rbp - $80]
+  movdqa xmm1, oword [rbp - $40]
+  movdqa xmm2, oword [rbp - $20]
+  movdqa xmm3, oword [rbp - $10]
+  movdqa xmm4, oword [rbp - $70]
 
-  // ========== Phase 3: 80 Compression Rounds (GPR, identical to SSSE3) ==========
+  pxor xmm0, xmm1
+
+  pshufd xmm5, xmm2, $EE
+  punpcklqdq xmm5, xmm3
+
+  pxor xmm0, xmm4
+  pxor xmm0, xmm5
+
+  movdqa xmm5, xmm0
+  pslld  xmm0, 2
+  psrld  xmm5, 30
+  por    xmm0, xmm5
+
+  movdqa oword [rbp], xmm0
+  add rbp, $10
+  cmp rbp, r10
+  jb @avx2_sha1_expand_32_79
+
+  // ========== Phase 2: 80 Compression Rounds ==========
 
   mov eax, [r12]
   mov ebx, [r12 + $04]
@@ -92,7 +146,6 @@
 
 @avx2_sha1_ch_loop:
 
-  // Round 0: a=eax b=ebx c=ecx d=edx e=r8d
   mov esi, ecx
   xor esi, edx
   and esi, ebx
@@ -105,7 +158,6 @@
   add r8d, $5A827999
   rol ebx, 30
 
-  // Round 1: a=r8d b=eax c=ebx d=ecx e=edx
   mov esi, ebx
   xor esi, ecx
   and esi, eax
@@ -118,7 +170,6 @@
   add edx, $5A827999
   rol eax, 30
 
-  // Round 2: a=edx b=r8d c=eax d=ebx e=ecx
   mov esi, eax
   xor esi, ebx
   and esi, r8d
@@ -131,7 +182,6 @@
   add ecx, $5A827999
   rol r8d, 30
 
-  // Round 3: a=ecx b=edx c=r8d d=eax e=ebx
   mov esi, r8d
   xor esi, eax
   and esi, edx
@@ -144,7 +194,6 @@
   add ebx, $5A827999
   rol edx, 30
 
-  // Round 4: a=ebx b=ecx c=edx d=r8d e=eax
   mov esi, edx
   xor esi, r8d
   and esi, ecx
@@ -167,7 +216,6 @@
 
 @avx2_sha1_par1_loop:
 
-  // Round 0: a=eax b=ebx c=ecx d=edx e=r8d
   mov esi, ebx
   xor esi, ecx
   xor esi, edx
@@ -179,7 +227,6 @@
   add r8d, $6ED9EBA1
   rol ebx, 30
 
-  // Round 1: a=r8d b=eax c=ebx d=ecx e=edx
   mov esi, eax
   xor esi, ebx
   xor esi, ecx
@@ -191,7 +238,6 @@
   add edx, $6ED9EBA1
   rol eax, 30
 
-  // Round 2: a=edx b=r8d c=eax d=ebx e=ecx
   mov esi, r8d
   xor esi, eax
   xor esi, ebx
@@ -203,7 +249,6 @@
   add ecx, $6ED9EBA1
   rol r8d, 30
 
-  // Round 3: a=ecx b=edx c=r8d d=eax e=ebx
   mov esi, edx
   xor esi, r8d
   xor esi, eax
@@ -215,7 +260,6 @@
   add ebx, $6ED9EBA1
   rol edx, 30
 
-  // Round 4: a=ebx b=ecx c=edx d=r8d e=eax
   mov esi, ecx
   xor esi, edx
   xor esi, r8d
@@ -237,7 +281,6 @@
 
 @avx2_sha1_maj_loop:
 
-  // Round 0: a=eax b=ebx c=ecx d=edx e=r8d
   mov esi, ebx
   or  esi, ecx
   and esi, edx
@@ -252,7 +295,6 @@
   add r8d, $8F1BBCDC
   rol ebx, 30
 
-  // Round 1: a=r8d b=eax c=ebx d=ecx e=edx
   mov esi, eax
   or  esi, ebx
   and esi, ecx
@@ -267,7 +309,6 @@
   add edx, $8F1BBCDC
   rol eax, 30
 
-  // Round 2: a=edx b=r8d c=eax d=ebx e=ecx
   mov esi, r8d
   or  esi, eax
   and esi, ebx
@@ -282,7 +323,6 @@
   add ecx, $8F1BBCDC
   rol r8d, 30
 
-  // Round 3: a=ecx b=edx c=r8d d=eax e=ebx
   mov esi, edx
   or  esi, r8d
   and esi, eax
@@ -297,7 +337,6 @@
   add ebx, $8F1BBCDC
   rol edx, 30
 
-  // Round 4: a=ebx b=ecx c=edx d=r8d e=eax
   mov esi, ecx
   or  esi, edx
   and esi, r8d
@@ -322,7 +361,6 @@
 
 @avx2_sha1_par2_loop:
 
-  // Round 0: a=eax b=ebx c=ecx d=edx e=r8d
   mov esi, ebx
   xor esi, ecx
   xor esi, edx
@@ -334,7 +372,6 @@
   add r8d, $CA62C1D6
   rol ebx, 30
 
-  // Round 1: a=r8d b=eax c=ebx d=ecx e=edx
   mov esi, eax
   xor esi, ebx
   xor esi, ecx
@@ -346,7 +383,6 @@
   add edx, $CA62C1D6
   rol eax, 30
 
-  // Round 2: a=edx b=r8d c=eax d=ebx e=ecx
   mov esi, r8d
   xor esi, eax
   xor esi, ebx
@@ -358,7 +394,6 @@
   add ecx, $CA62C1D6
   rol r8d, 30
 
-  // Round 3: a=ecx b=edx c=r8d d=eax e=ebx
   mov esi, edx
   xor esi, r8d
   xor esi, eax
@@ -370,7 +405,6 @@
   add ebx, $CA62C1D6
   rol edx, 30
 
-  // Round 4: a=ebx b=ecx c=edx d=r8d e=eax
   mov esi, ecx
   xor esi, edx
   xor esi, r8d

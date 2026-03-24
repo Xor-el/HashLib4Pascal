@@ -1,4 +1,4 @@
-// SHA-256 AVX2 (VEX-128) implementation.
+// SHA-256 AVX2 (VEX-128) implementation with SIMD message schedule.
 // Same algorithm as SSSE3 but using VEX-encoded instructions for 3-operand
 // non-destructive forms, shorter encoding, and no SSE/AVX transition penalties.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.

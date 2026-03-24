@@ -11,8 +11,14 @@ var
   SHA1_Compress: TSHA1CompressProc;
 
 const
-  // BSWAP32 mask for pshufb: reverses bytes within each dword (big-endian to little-endian)
-  K_SHA1: array [0 .. 3] of UInt32 = (
+  // K constants replicated 4x for SIMD, followed by BSWAP32 mask.
+  // Layout: K_00_19 (16B) at 0, K_20_39 at 16, K_40_59 at 32,
+  //   K_60_79 at 48, BSWAP32 mask at 64.
+  K_SHA1: array [0 .. 19] of UInt32 = (
+    $5A827999, $5A827999, $5A827999, $5A827999,
+    $6ED9EBA1, $6ED9EBA1, $6ED9EBA1, $6ED9EBA1,
+    $8F1BBCDC, $8F1BBCDC, $8F1BBCDC, $8F1BBCDC,
+    $CA62C1D6, $CA62C1D6, $CA62C1D6, $CA62C1D6,
     $00010203, $04050607, $08090A0B, $0C0D0E0F
   );
 
@@ -112,6 +118,11 @@ begin
   SHA1_Compress_ShaNi(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
+procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressSse2.inc}
+end;
+
 procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
@@ -143,23 +154,32 @@ end;
 procedure InitDispatch();
 begin
 {$IFDEF HASHLIB_X86_64}
-  if TSimd.HasSHANI() and (TSimd.GetActiveLevel() >= TSimdLevel.SSSE3) then
+  if TSimd.HasSHANI() then
   begin
     SHA1_Compress := @SHA1_Compress_ShaNi_Wrap;
     Exit;
   end;
-  if TSimd.GetActiveLevel() >= TSimdLevel.AVX2 then
-  begin
-    SHA1_Compress := @SHA1_Compress_Avx2_Wrap;
-    Exit;
-  end;
-  if TSimd.GetActiveLevel() >= TSimdLevel.SSSE3 then
-  begin
-    SHA1_Compress := @SHA1_Compress_Ssse3_Wrap;
-    Exit;
-  end;
 {$ENDIF}
-  SHA1_Compress := @SHA1_Compress_Scalar;
+  case TSimd.GetActiveLevel() of
+{$IFDEF HASHLIB_X86_64}
+    TSimdLevel.AVX2:
+    begin
+      SHA1_Compress := @SHA1_Compress_Avx2_Wrap;
+    end;
+    TSimdLevel.SSSE3:
+    begin
+      SHA1_Compress := @SHA1_Compress_Ssse3_Wrap;
+    end;
+    TSimdLevel.SSE2:
+    begin
+      SHA1_Compress := @SHA1_Compress_Sse2;
+    end;
+{$ENDIF}
+    TSimdLevel.Scalar:
+    begin
+      SHA1_Compress := @SHA1_Compress_Scalar;
+    end;
+  end;
 end;
 
 initialization
