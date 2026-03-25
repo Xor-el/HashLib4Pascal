@@ -1468,9 +1468,10 @@ begin
 
     if not FHasPclmulConstants then
     begin
-      if (Width >= 8) and (Width <= 32) and IsInputReflected then
+      if (Width >= 8) and (Width <= 64) then
       begin
-        TGF2.GenerateFoldConstants(Polynomial, Width, True, FPclmulConstants);
+        TGF2.GenerateFoldConstants(Polynomial, Width, IsInputReflected,
+          FPclmulConstants);
         FHasPclmulConstants := True;
       end;
     end;
@@ -1515,17 +1516,35 @@ begin
 
   if Width > Delta then
   begin
-    if FHasPclmulConstants and IsInputReflected and (ALength >= 64)
-      and Assigned(CRC_Fold_Lsb) then
+    if FHasPclmulConstants and (ALength >= 64) then
     begin
-      LState[0] := FHash;
-      LState[1] := 0;
-      LProcessed := ALength and (not Int32(15));
-      FHash := CRC_Fold_Lsb(LPtrAData + AIndex, UInt32(LProcessed),
-        @LState[0], @FPclmulConstants) and FCRCMask;
-      LTail := ALength - LProcessed;
-      if LTail > 0 then
-        CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
+      if IsInputReflected and Assigned(CRC_Fold_Lsb) then
+      begin
+        LState[0] := FHash;
+        LState[1] := 0;
+        LProcessed := ALength and (not Int32(15));
+        FHash := CRC_Fold_Lsb(LPtrAData + AIndex, UInt32(LProcessed),
+          @LState[0], @FPclmulConstants) and FCRCMask;
+        LTail := ALength - LProcessed;
+        if LTail > 0 then
+          CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
+      end
+      else if (not IsInputReflected) and Assigned(CRC_Fold_Msb) then
+      begin
+        if Width < 64 then
+          LState[0] := FHash shl (64 - Width)
+        else
+          LState[0] := FHash;
+        LState[1] := 0;
+        LProcessed := ALength and (not Int32(15));
+        FHash := CRC_Fold_Msb(LPtrAData + AIndex, UInt32(LProcessed),
+          @LState[0], @FPclmulConstants) and FCRCMask;
+        LTail := ALength - LProcessed;
+        if LTail > 0 then
+          CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
+      end
+      else
+        CalculateCRCbyTable(LPtrAData, ALength, AIndex);
     end
     else
       CalculateCRCbyTable(LPtrAData, ALength, AIndex);

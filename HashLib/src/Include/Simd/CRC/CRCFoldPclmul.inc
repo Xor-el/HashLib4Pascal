@@ -1,5 +1,5 @@
 // SSE2 + PCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..32 (CRC-64 requires a separate path).
+// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
 // PCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
 // Function signature (included after SimdProc4Begin.inc):
@@ -14,6 +14,8 @@
 //     [16..31] = Fold_1x128
 //     [32..47] = Barrett
 //     [48..63] = Fold_8x128 (unused by this path)
+//     [64..79] = BswapMask  (unused by this path)
+//     [80..87] = CrcBits
 //   Returns: final CRC in RAX.
 //
 // Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
@@ -143,19 +145,36 @@
   // Step 2: Barrett reduction.
   // Load Barrett constants into xmm6:
   //   xmm6.lo = bitreflect(floor(x^(63+n)/G), 64)
-  //   xmm6.hi = bitreflect((G - x^n) * x^(64-n-1), 64)
+  //   xmm6.hi:
+  //     n < 64: bitreflect((G - x^n) * x^(64-n-1), 64)
+  //     n = 64: bitreflect(((G - x^n) - x^0) / x, 64)
   movdqu xmm6, dqword ptr [r9 + 32]
 
-  // t1 = clmul(t0.lo, barrett[0])
+  // t1 = clmul(t0.lo, barrett[0])  =>  q = floor(t0 / G)
   movdqa xmm1, xmm0
   db $66, $0F, $3A, $44, $CE, $00              // pclmulqdq xmm1, xmm6, $00
 
-  // t2 = clmul(t1.lo, barrett[1]) = G * floor(t0 / G)
+  // Check if CRC-64: G is 65-bit, needs split multiplication
+  cmp qword ptr [r9 + 80], 64
+  je @barrett_64
+
+  // Standard Barrett (width < 64): single pclmulqdq covers full G
   db $66, $0F, $3A, $44, $CE, $10              // pclmulqdq xmm1, xmm6, $10
-
-  // xmm0 = t0 XOR t2, CRC is in bits 64..(64+n-1)
   pxor xmm0, xmm1
+  jmp @extract_crc
 
+@barrett_64:
+  // CRC-64 Barrett: G is 65-bit, split into 64-bit pclmulqdq + x^0 correction.
+  // Barrett[1] stores ((G - x^64) - x^0) / x; the x^0 term is handled
+  // separately by duplicating q.lo and XORing it into the result.
+  movdqa xmm2, xmm1                           // save q
+  db $66, $0F, $3A, $44, $CE, $10              // pclmulqdq xmm1, xmm6, $10
+  // punpcklqdq xmm2, xmm2: 66 0F 6C D2
+  db $66, $0F, $6C, $D2                        // xmm2 = {q.lo, q.lo}
+  pxor xmm0, xmm1
+  pxor xmm0, xmm2
+
+@extract_crc:
   // Extract high qword (bits 64..127) into rax.
   // pextrq rax, xmm0, 1: 66 48 0F 3A 16 C0 01
   db $66, $48, $0F, $3A, $16, $C0, $01

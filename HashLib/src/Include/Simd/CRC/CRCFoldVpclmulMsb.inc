@@ -1,25 +1,26 @@
-// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
-// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler compatibility.
+// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for non-reflected
+// (MSB-first) CRCs with width 8..64.
+// AVX2/VPCLMULQDQ/SSSE3 instructions are db-encoded for broad assembler
+// compatibility.
 //
 // Function signature (included after SimdProc4Begin.inc):
-//   function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Vpclmul_Msb(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):
 //   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
-//   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
+//   AState: [0..7] = initial CRC pre-shifted left by (64 - Width), [8..15] = 0.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128  (stride 512)
 //     [16..31] = Fold_1x128  (stride 128)
 //     [32..47] = Barrett
 //     [48..63] = Fold_8x128  (stride 1024)
-//     [64..79] = BswapMask   (unused by this path)
+//     [64..79] = BswapMask
 //     [80..87] = CrcBits
+//     [88..95] = BarrettShift
 //   Returns: final CRC in RAX.
 //
-// Reference: zlib-ng crc32_pclmulqdq_tpl.h (256-bit VPCLMULQDQ path)
-// and Linux kernel crc-pclmul-template.S by Eric Biggers (Barrett reduction).
+// Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
 //
 // VEX byte layout reference:
 //   2-byte: C5 [R.vvvv.L.pp]
@@ -30,17 +31,25 @@
 
   // ===== YMM PATH (>= 128 bytes) =====
 
+  // Broadcast BswapMask into ymm5 (kept throughout ymm path)
+  db $C4, $C2, $7D, $5A, $69, $40             // vbroadcasti128 ymm5, [r9 + 64]
+
   // Broadcast Fold_8x128 (stride 1024) into ymm6
   db $C4, $C2, $7D, $5A, $71, $30             // vbroadcasti128 ymm6, [r9 + 48]
 
-  // Load first 128 bytes into ymm0..ymm3
+  // Load first 128 bytes into ymm0..ymm3 and byte-swap
   db $C5, $FE, $6F, $01                       // vmovdqu ymm0, [rcx]
+  db $C4, $E2, $7D, $00, $C5                  // vpshufb ymm0, ymm0, ymm5
   db $C5, $FE, $6F, $49, $20                  // vmovdqu ymm1, [rcx + 32]
+  db $C4, $E2, $75, $00, $CD                  // vpshufb ymm1, ymm1, ymm5
   db $C5, $FE, $6F, $51, $40                  // vmovdqu ymm2, [rcx + 64]
+  db $C4, $E2, $6D, $00, $D5                  // vpshufb ymm2, ymm2, ymm5
   db $C5, $FE, $6F, $59, $60                  // vmovdqu ymm3, [rcx + 96]
+  db $C4, $E2, $65, $00, $DD                  // vpshufb ymm3, ymm3, ymm5
 
-  // XOR initial CRC into low 64 bits of ymm0
+  // XOR pre-shifted CRC into HIGH qword of first lane of ymm0
   db $C4, $C1, $7A, $7E, $20                  // vmovq xmm4, [r8]
+  db $C5, $D9, $73, $FC, $08                  // vpslldq xmm4, xmm4, 8
   db $C5, $FD, $EF, $C4                       // vpxor ymm0, ymm0, ymm4
 
   add rcx, 128
@@ -55,29 +64,33 @@
   db $C4, $E3, $7D, $44, $E6, $11             // vpclmulqdq ymm4, ymm0, ymm6, $11
   db $C4, $E3, $7D, $44, $C6, $00             // vpclmulqdq ymm0, ymm0, ymm6, $00
   db $C5, $FD, $EF, $C4                       // vpxor ymm0, ymm0, ymm4
-  db $C5, $FE, $6F, $29                       // vmovdqu ymm5, [rcx]
-  db $C5, $FD, $EF, $C5                       // vpxor ymm0, ymm0, ymm5
+  db $C5, $FE, $6F, $39                       // vmovdqu ymm7, [rcx]
+  db $C4, $E2, $45, $00, $FD                  // vpshufb ymm7, ymm7, ymm5
+  db $C5, $FD, $EF, $C7                       // vpxor ymm0, ymm0, ymm7
 
   // Fold ymm1
   db $C4, $E3, $75, $44, $E6, $11             // vpclmulqdq ymm4, ymm1, ymm6, $11
   db $C4, $E3, $75, $44, $CE, $00             // vpclmulqdq ymm1, ymm1, ymm6, $00
   db $C5, $F5, $EF, $CC                       // vpxor ymm1, ymm1, ymm4
-  db $C5, $FE, $6F, $69, $20                  // vmovdqu ymm5, [rcx + 32]
-  db $C5, $F5, $EF, $CD                       // vpxor ymm1, ymm1, ymm5
+  db $C5, $FE, $6F, $79, $20                  // vmovdqu ymm7, [rcx + 32]
+  db $C4, $E2, $45, $00, $FD                  // vpshufb ymm7, ymm7, ymm5
+  db $C5, $F5, $EF, $CF                       // vpxor ymm1, ymm1, ymm7
 
   // Fold ymm2
   db $C4, $E3, $6D, $44, $E6, $11             // vpclmulqdq ymm4, ymm2, ymm6, $11
   db $C4, $E3, $6D, $44, $D6, $00             // vpclmulqdq ymm2, ymm2, ymm6, $00
   db $C5, $ED, $EF, $D4                       // vpxor ymm2, ymm2, ymm4
-  db $C5, $FE, $6F, $69, $40                  // vmovdqu ymm5, [rcx + 64]
-  db $C5, $ED, $EF, $D5                       // vpxor ymm2, ymm2, ymm5
+  db $C5, $FE, $6F, $79, $40                  // vmovdqu ymm7, [rcx + 64]
+  db $C4, $E2, $45, $00, $FD                  // vpshufb ymm7, ymm7, ymm5
+  db $C5, $ED, $EF, $D7                       // vpxor ymm2, ymm2, ymm7
 
   // Fold ymm3
   db $C4, $E3, $65, $44, $E6, $11             // vpclmulqdq ymm4, ymm3, ymm6, $11
   db $C4, $E3, $65, $44, $DE, $00             // vpclmulqdq ymm3, ymm3, ymm6, $00
   db $C5, $E5, $EF, $DC                       // vpxor ymm3, ymm3, ymm4
-  db $C5, $FE, $6F, $69, $60                  // vmovdqu ymm5, [rcx + 96]
-  db $C5, $E5, $EF, $DD                       // vpxor ymm3, ymm3, ymm5
+  db $C5, $FE, $6F, $79, $60                  // vmovdqu ymm7, [rcx + 96]
+  db $C4, $E2, $45, $00, $FD                  // vpshufb ymm7, ymm7, ymm5
+  db $C5, $E5, $EF, $DF                       // vpxor ymm3, ymm3, ymm7
 
   add rcx, 128
   sub edx, 128
@@ -101,11 +114,9 @@
   db $C5, $F5, $EF, $CB                       // vpxor ymm1, ymm1, ymm3
 
   // --- Extract 4 xmm from 2 ymm ---
-  // ymm0 = [result0 | result1], ymm1 = [result2 | result3]
-  db $C5, $F9, $6F, $D1                       // vmovdqa xmm2, xmm1       (save low of ymm1 = result2)
-  db $C4, $E3, $7D, $39, $CB, $01             // vextracti128 xmm3, ymm1, 1 (high of ymm1 = result3)
-  db $C4, $E3, $7D, $39, $C1, $01             // vextracti128 xmm1, ymm0, 1 (high of ymm0 = result1)
-  // xmm0 = low(ymm0) = result0 (untouched)
+  db $C5, $F9, $6F, $D1                       // vmovdqa xmm2, xmm1       (low of ymm1)
+  db $C4, $E3, $7D, $39, $CB, $01             // vextracti128 xmm3, ymm1, 1
+  db $C4, $E3, $7D, $39, $C1, $01             // vextracti128 xmm1, ymm0, 1
 
   db $C5, $F8, $77                             // vzeroupper
   jmp @fold4to1
@@ -113,14 +124,22 @@
 @xmm_path:
   // ===== XMM PATH (64..127 bytes) =====
 
-  // Load first 64 bytes
-  db $C5, $FA, $6F, $01                       // vmovdqu xmm0, [rcx]
-  db $C5, $FA, $6F, $49, $10                  // vmovdqu xmm1, [rcx + 16]
-  db $C5, $FA, $6F, $51, $20                  // vmovdqu xmm2, [rcx + 32]
-  db $C5, $FA, $6F, $59, $30                  // vmovdqu xmm3, [rcx + 48]
+  // Load BswapMask into xmm5
+  db $C4, $C1, $7A, $6F, $69, $40             // vmovdqu xmm5, [r9 + 64]
 
-  // XOR initial CRC into low 64 bits of xmm0
+  // Load first 64 bytes with byte-swap
+  db $C5, $FA, $6F, $01                       // vmovdqu xmm0, [rcx]
+  db $C4, $E2, $79, $00, $C5                  // vpshufb xmm0, xmm0, xmm5
+  db $C5, $FA, $6F, $49, $10                  // vmovdqu xmm1, [rcx + 16]
+  db $C4, $E2, $71, $00, $CD                  // vpshufb xmm1, xmm1, xmm5
+  db $C5, $FA, $6F, $51, $20                  // vmovdqu xmm2, [rcx + 32]
+  db $C4, $E2, $69, $00, $D5                  // vpshufb xmm2, xmm2, xmm5
+  db $C5, $FA, $6F, $59, $30                  // vmovdqu xmm3, [rcx + 48]
+  db $C4, $E2, $61, $00, $DD                  // vpshufb xmm3, xmm3, xmm5
+
+  // XOR pre-shifted CRC into HIGH qword of xmm0
   db $C4, $C1, $7A, $7E, $20                  // vmovq xmm4, [r8]
+  db $C5, $D9, $73, $FC, $08                  // vpslldq xmm4, xmm4, 8
   db $C5, $F9, $EF, $C4                       // vpxor xmm0, xmm0, xmm4
 
   add rcx, 64
@@ -156,8 +175,9 @@
   db $C4, $E3, $79, $44, $E7, $11             // vpclmulqdq xmm4, xmm0, xmm7, $11
   db $C4, $E3, $79, $44, $C7, $00             // vpclmulqdq xmm0, xmm0, xmm7, $00
   db $C5, $F9, $EF, $C4                       // vpxor xmm0, xmm0, xmm4
-  db $C5, $FA, $6F, $29                       // vmovdqu xmm5, [rcx]
-  db $C5, $F9, $EF, $C5                       // vpxor xmm0, xmm0, xmm5
+  db $C5, $FA, $6F, $31                       // vmovdqu xmm6, [rcx]
+  db $C4, $E2, $49, $00, $F5                  // vpshufb xmm6, xmm6, xmm5
+  db $C5, $F9, $EF, $C6                       // vpxor xmm0, xmm0, xmm6
   add rcx, 16
   sub edx, 16
   cmp edx, 16
@@ -165,38 +185,40 @@
 
 @tail_done:
   // =================================================================
-  // Final reduction: 128-bit xmm0 -> CRC in rax
-  // Following Linux kernel crc-pclmul-template.S Barrett reduction.
+  // MSB Barrett reduction: 128-bit xmm0 -> CRC in rax
+  // Computes x^n * A mod G via two Barrett rounds, each on one 64-bit
+  // half.  Per Linux kernel crc-pclmul-template.S (Eric Biggers).
+  //
+  //   Round 1: crc := x^n * A_H mod G
+  //   Merge:   A_L := x^(64-n)*crc + A_L
+  //   Round 2: crc := x^n * A_L mod G  (= x^n * A mod G)
+  //
+  // Barrett[0] = mu_lo = floor(x^(64+n)/G) - x^64
+  // Barrett[1] = G  (for CRC-64: poly without x^64)
+  // BarrettShift = 64 - n  (at [r9 + 88])
   // =================================================================
 
-  // Step 1: Multiply by x^n and reduce 128 bits to 64+n bits.
-  db $C4, $E3, $79, $44, $CF, $10             // vpclmulqdq xmm1, xmm0, xmm7, $10
-  db $C5, $F9, $73, $D8, $08                  // vpsrldq xmm0, xmm0, 8
-  db $C5, $F9, $EF, $C1                       // vpxor xmm0, xmm0, xmm1
-
-  // Step 2: Barrett reduction.
   db $C4, $C1, $7A, $6F, $71, $20             // vmovdqu xmm6, [r9 + 32]
-  db $C4, $E3, $79, $44, $CE, $00             // vpclmulqdq xmm1, xmm0, xmm6, $00
 
-  // Check if CRC-64: G is 65-bit, needs split multiplication
-  cmp qword ptr [r9 + 80], 64
-  je @barrett_64
+  // --- Round 1: Barrett on A_H ---
+  db $C5, $F9, $6F, $C8                       // vmovdqa xmm1, xmm0
+  db $C4, $E3, $71, $44, $CE, $01             // vpclmulqdq xmm1, xmm1, xmm6, $01
+  db $C5, $F1, $EF, $C8                       // vpxor xmm1, xmm1, xmm0
+  db $C4, $E3, $71, $44, $CE, $11             // vpclmulqdq xmm1, xmm1, xmm6, $11
 
-  // Standard Barrett (width < 64): single vpclmulqdq covers full G
-  db $C4, $E3, $71, $44, $CE, $10             // vpclmulqdq xmm1, xmm1, xmm6, $10
+  // Merge: crc1 in xmm1.lo bits 0..n-1; shift left by (64-n) and XOR
+  db $C4, $C1, $7A, $7E, $51, $58             // vmovq xmm2, [r9 + 88]
+  db $C5, $F1, $F3, $CA                       // vpsllq xmm1, xmm1, xmm2
   db $C5, $F9, $EF, $C1                       // vpxor xmm0, xmm0, xmm1
-  jmp @extract_crc
 
-@barrett_64:
-  // CRC-64 Barrett: G is 65-bit, split into 64-bit vpclmulqdq + x^0 correction.
-  // Barrett[1] stores ((G - x^64) - x^0) / x; compensate x^0 via duplicate+XOR.
-  db $C5, $F9, $6F, $D1                       // vmovdqa xmm2, xmm1        (save q)
-  db $C4, $E3, $71, $44, $CE, $10             // vpclmulqdq xmm1, xmm1, xmm6, $10
-  db $C5, $E9, $6C, $D2                       // vpunpcklqdq xmm2, xmm2, xmm2  {q.lo, q.lo}
+  // --- Round 2: Barrett on modified A_L ---
+  db $C5, $F9, $6F, $C8                       // vmovdqa xmm1, xmm0
+  db $C4, $E3, $71, $44, $CE, $00             // vpclmulqdq xmm1, xmm1, xmm6, $00
+  db $C5, $F9, $70, $C0, $4E                  // vpshufd xmm0, xmm0, $4E
   db $C5, $F9, $EF, $C1                       // vpxor xmm0, xmm0, xmm1
-  db $C5, $F9, $EF, $C2                       // vpxor xmm0, xmm0, xmm2
+  db $C4, $E3, $79, $44, $C6, $11             // vpclmulqdq xmm0, xmm0, xmm6, $11
 
-@extract_crc:
-  // Extract high qword (bits 64..127) into rax and return.
+  // Extract low qword into rax and return
   db $C5, $F8, $77                             // vzeroupper
-  db $C4, $E3, $F9, $16, $C0, $01             // vpextrq rax, xmm0, 1
+  // movq rax, xmm0: 66 48 0F 7E C0
+  db $66, $48, $0F, $7E, $C0

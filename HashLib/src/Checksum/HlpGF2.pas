@@ -10,13 +10,15 @@ type
   end;
 
   // PCLMULQDQ / VPCLMULQDQ CRC folding and Barrett reduction constants.
-  // Layout must match the assembly expectations in CRCFoldPclmul.inc
-  // and CRCFoldVpclmul.inc.
+  // Layout must match the assembly expectations in the CRCFold*.inc files.
   TCRCFoldConstants = packed record
     Fold_4x128: array [0 .. 1] of UInt64;   // offset  0: fold-by-4 constants (stride 512)
     Fold_1x128: array [0 .. 1] of UInt64;   // offset 16: fold-by-1 constants (stride 128)
     Barrett: array [0 .. 1] of UInt64;       // offset 32: Barrett reduction constants
     Fold_8x128: array [0 .. 1] of UInt64;   // offset 48: fold-by-8 constants (stride 1024)
+    BswapMask: array [0 .. 15] of Byte;      // offset 64: byte-reverse mask for MSB-first CRCs
+    CrcBits: UInt64;                          // offset 80: CRC width (8..64)
+    BarrettShift: UInt64;                     // offset 88: = 64 - CrcBits (MSB psrlq alignment)
   end;
 
   TGF2 = class sealed
@@ -214,8 +216,8 @@ end;
 class procedure TGF2.GenerateFoldConstants(APoly: UInt64; ABits: Int32;
   AReflected: Boolean; out AConstants: TCRCFoldConstants);
 var
-  LK, LPowOfX: Int32;
-  LConst0, LConst1, LBarrett0, LBarrett1, LGMinusXn: UInt64;
+  LK, LPowOfX, I: Int32;
+  LConst0, LConst1, LBarrett0, LGMinusXn: UInt64;
   LDiv128: TUInt128;
 begin
   // Following the Linux kernel gen-crc-consts.py algorithm.
@@ -271,40 +273,61 @@ begin
   end;
 
   // --- Barrett reduction constants ---
-  // barrett[0] = floor(x^(63+n) / G)
-  LDiv128.Lo := 0;
-  LDiv128.Hi := 0;
-  if (63 + ABits) < 64 then
-    LDiv128.Lo := UInt64(1) shl (63 + ABits)
-  else if (63 + ABits) = 64 then
-    LDiv128.Hi := 1
-  else
-    LDiv128.Hi := UInt64(1) shl ((63 + ABits) - 64);
-  LBarrett0 := DivPoly(LDiv128, APoly, ABits);
-
-  // barrett[1] = (G - x^n) * x^(64-n-1) for n < 64
-  //            = ((G - x^n) - x^0) / x   for n = 64
   LGMinusXn := APoly;
-  if ABits < 64 then
-  begin
-    LPowOfX := 64 - ABits - 1;
-    LBarrett1 := LGMinusXn shl LPowOfX;
-  end
-  else
-  begin
-    LBarrett1 := LGMinusXn shr 1;
-  end;
 
   if AReflected then
   begin
+    // LSB-first: m = 63.
+    // Barrett[0] = bitreflect(floor(x^(63+n) / G), 64)
+    // Barrett[1] = bitreflect(G, n+1)  (truncated: for n=64, x^0 removed)
+    LDiv128.Lo := 0;
+    LDiv128.Hi := 0;
+    if (63 + ABits) < 64 then
+      LDiv128.Lo := UInt64(1) shl (63 + ABits)
+    else if (63 + ABits) = 64 then
+      LDiv128.Hi := 1
+    else
+      LDiv128.Hi := UInt64(1) shl ((63 + ABits) - 64);
+    LBarrett0 := DivPoly(LDiv128, APoly, ABits);
+
     AConstants.Barrett[0] := BitReverse(LBarrett0, 64);
-    AConstants.Barrett[1] := BitReverse(LBarrett1, 64);
+    if ABits < 64 then
+    begin
+      LPowOfX := 64 - ABits - 1;
+      AConstants.Barrett[1] := BitReverse(LGMinusXn shl LPowOfX, 64);
+    end
+    else
+      AConstants.Barrett[1] := BitReverse(LGMinusXn shr 1, 64);
   end
   else
   begin
-    AConstants.Barrett[0] := LBarrett1;
-    AConstants.Barrett[1] := LBarrett0;
+    // MSB-first: m = 64.  Two-round Barrett per Linux kernel.
+    // Barrett[0] = floor(x^(64+n) / G) - x^64  (mu, low 64 bits)
+    //   Since floor(x^(64+n)/G) = x^64 + floor(APoly*x^64 / G),
+    //   we compute Barrett[0] = DivPoly(APoly*x^64, G) to avoid the x^64 overflow.
+    // Barrett[1] = G  (full generator polynomial; for n=64, x^64 term implicit)
+    LDiv128.Hi := APoly;
+    LDiv128.Lo := 0;
+    AConstants.Barrett[0] := DivPoly(LDiv128, APoly, ABits);
+    if ABits < 64 then
+      AConstants.Barrett[1] := (UInt64(1) shl ABits) or APoly
+    else
+      AConstants.Barrett[1] := APoly;
   end;
+
+  // --- Byte-swap mask for MSB-first CRCs ---
+  if AReflected then
+    FillChar(AConstants.BswapMask[0], 16, 0)
+  else
+    for I := 0 to 15 do
+      AConstants.BswapMask[I] := Byte(15 - I);
+
+  // --- Metadata ---
+  AConstants.CrcBits := UInt64(ABits);
+  if ABits < 64 then
+    AConstants.BarrettShift := UInt64(64 - ABits)
+  else
+    AConstants.BarrettShift := 0;
 end;
 
 end.
