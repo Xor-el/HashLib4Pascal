@@ -39,7 +39,9 @@
 {========================= Compiler Mode & Optimizations ======================}
 
 {$MODE DELPHI}
-{$ASMMODE INTEL}
+{$IF DEFINED(CPU386) OR DEFINED(CPUX64)}
+  {$ASMMODE INTEL}
+{$IFEND}
 {$MACRO ON}
 {$NOTES OFF}
 

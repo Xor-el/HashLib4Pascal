@@ -56,7 +56,7 @@
 
 {============================== SIMD Settings =================================}
 
-{$IF DEFINED(CPUX86_64) OR DEFINED(CPUX64)}
+{$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
 {$IFEND}
 
