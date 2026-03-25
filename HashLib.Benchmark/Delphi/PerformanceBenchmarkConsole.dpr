@@ -55,6 +55,7 @@ uses
   HlpSHA2_512_224 in '..\..\HashLib\src\Crypto\HlpSHA2_512_224.pas',
   HlpSHA2_512_256 in '..\..\HashLib\src\Crypto\HlpSHA2_512_256.pas',
   HlpSHA2_512Base in '..\..\HashLib\src\Crypto\HlpSHA2_512Base.pas',
+  HlpSHA3Dispatch in '..\..\HashLib\src\Crypto\HlpSHA3Dispatch.pas',
   HlpSHA3 in '..\..\HashLib\src\Crypto\HlpSHA3.pas',
   HlpSnefru in '..\..\HashLib\src\Crypto\HlpSnefru.pas',
   HlpTiger in '..\..\HashLib\src\Crypto\HlpTiger.pas',

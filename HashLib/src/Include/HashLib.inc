@@ -54,11 +54,13 @@
 {$SCOPEDENUMS ON}
 {$POINTERMATH ON}
 
-{============================== SIMD Settings =================================}
+{============================== CPU Architecture ==============================}
 
 {$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
 {$IFEND}
+
+{============================== SIMD Settings =================================}
 
 
 // Uncomment ONE of the following to force a specific SIMD dispatch level:

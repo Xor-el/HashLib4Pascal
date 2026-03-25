@@ -84,6 +84,7 @@ contains
   HlpSHA2_512_224 in '..\..\Crypto\HlpSHA2_512_224.pas',
   HlpSHA2_512_256 in '..\..\Crypto\HlpSHA2_512_256.pas',
   HlpSHA2_512Base in '..\..\Crypto\HlpSHA2_512Base.pas',
+  HlpSHA3Dispatch in '..\..\Crypto\HlpSHA3Dispatch.pas',
   HlpSHA3 in '..\..\Crypto\HlpSHA3.pas',
   HlpSnefru in '..\..\Crypto\HlpSnefru.pas',
   HlpTiger in '..\..\Crypto\HlpTiger.pas',

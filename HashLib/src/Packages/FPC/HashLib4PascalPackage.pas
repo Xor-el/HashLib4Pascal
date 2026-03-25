@@ -32,7 +32,7 @@ uses
   HlpXXHash3Dispatch, HlpBlake2BDispatch, HlpBlake2SDispatch, 
   HlpArgon2Dispatch, HlpScryptDispatch, HlpBlake3Dispatch, 
   HlpSHA2_256Dispatch, HlpSHA2_512Dispatch, HlpSHA1Dispatch, 
-  HlpAdler32Dispatch, HlpGF2, HlpCRCDispatch;
+  HlpAdler32Dispatch, HlpGF2, HlpCRCDispatch, HlpSHA3Dispatch;
 
 implementation
 
