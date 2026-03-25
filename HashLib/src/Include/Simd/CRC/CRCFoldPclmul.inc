@@ -1,0 +1,159 @@
+// PCLMULQDQ-based CRC folding + Barrett reduction for reflected (LSB-first)
+// CRCs with width 8..32 (CRC-64 requires a separate path).
+//
+// Function signature (included after SimdProc4Begin.inc):
+//   function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;
+//     AState: Pointer; AConstants: Pointer): UInt64;
+//
+// Register mapping (MS x64 ABI after prologue):
+//   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
+//   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
+//   AConstants layout (TCRCFoldConstants):
+//     [0..15]  = fold_4x128
+//     [16..31] = fold_1x128
+//     [32..47] = barrett
+//   Returns: final CRC in RAX.
+//
+// Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
+//
+// pclmulqdq xmm_dst, xmm_src, imm8 (register-register, no REX for xmm0-7):
+//   66 0F 3A 44 ModRM imm8
+// ModRM for reg-reg: 11_dst_src
+//   xmm0=000 xmm1=001 xmm2=010 xmm3=011 xmm4=100
+//   xmm5=101 xmm6=110 xmm7=111
+
+  // --- Pre-load fold constants into registers ---
+  movdqu xmm6, dqword ptr [r9]        // fold_4x128
+  movdqu xmm7, dqword ptr [r9 + 16]   // fold_1x128
+
+  // --- Load first 64 bytes ---
+  movdqu xmm0, dqword ptr [rcx]
+  movdqu xmm1, dqword ptr [rcx + 16]
+  movdqu xmm2, dqword ptr [rcx + 32]
+  movdqu xmm3, dqword ptr [rcx + 48]
+
+  // XOR current CRC into the low bits of xmm0
+  movq xmm4, qword ptr [r8]
+  pxor xmm0, xmm4
+
+  add rcx, 64
+  sub edx, 64
+
+  // --- Main fold-by-4 loop ---
+  cmp edx, 64
+  jb @fold4_done
+
+@fold4_loop:
+  // Fold xmm0
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C6, $00              // pclmulqdq xmm0, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm0, xmm4
+  movdqu xmm5, dqword ptr [rcx]
+  pxor xmm0, xmm5
+
+  // Fold xmm1
+  movdqa xmm4, xmm1
+  db $66, $0F, $3A, $44, $CE, $00              // pclmulqdq xmm1, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm1, xmm4
+  movdqu xmm5, dqword ptr [rcx + 16]
+  pxor xmm1, xmm5
+
+  // Fold xmm2
+  movdqa xmm4, xmm2
+  db $66, $0F, $3A, $44, $D6, $00              // pclmulqdq xmm2, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm2, xmm4
+  movdqu xmm5, dqword ptr [rcx + 32]
+  pxor xmm2, xmm5
+
+  // Fold xmm3
+  movdqa xmm4, xmm3
+  db $66, $0F, $3A, $44, $DE, $00              // pclmulqdq xmm3, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm3, xmm4
+  movdqu xmm5, dqword ptr [rcx + 48]
+  pxor xmm3, xmm5
+
+  add rcx, 64
+  sub edx, 64
+  cmp edx, 64
+  jae @fold4_loop
+
+@fold4_done:
+  // --- Fold 4 accumulators to 1 using fold_1x128 (xmm7) ---
+
+  // xmm0 = fold(xmm0) XOR xmm1
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C7, $00              // pclmulqdq xmm0, xmm7, $00
+  db $66, $0F, $3A, $44, $E7, $11              // pclmulqdq xmm4, xmm7, $11
+  pxor xmm0, xmm4
+  pxor xmm0, xmm1
+
+  // xmm0 = fold(xmm0) XOR xmm2
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C7, $00              // pclmulqdq xmm0, xmm7, $00
+  db $66, $0F, $3A, $44, $E7, $11              // pclmulqdq xmm4, xmm7, $11
+  pxor xmm0, xmm4
+  pxor xmm0, xmm2
+
+  // xmm0 = fold(xmm0) XOR xmm3
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C7, $00              // pclmulqdq xmm0, xmm7, $00
+  db $66, $0F, $3A, $44, $E7, $11              // pclmulqdq xmm4, xmm7, $11
+  pxor xmm0, xmm4
+  pxor xmm0, xmm3
+
+  // --- Fold remaining 16-byte blocks ---
+  cmp edx, 16
+  jb @fold1_done
+
+@fold1_loop:
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C7, $00              // pclmulqdq xmm0, xmm7, $00
+  db $66, $0F, $3A, $44, $E7, $11              // pclmulqdq xmm4, xmm7, $11
+  pxor xmm0, xmm4
+  movdqu xmm5, dqword ptr [rcx]
+  pxor xmm0, xmm5
+  add rcx, 16
+  sub edx, 16
+  cmp edx, 16
+  jae @fold1_loop
+
+@fold1_done:
+  // =================================================================
+  // Final reduction: 128-bit xmm0 -> CRC in rax
+  // Following Linux kernel crc-pclmul-template.S Barrett reduction.
+  // =================================================================
+
+  // Step 1: Multiply by x^n and reduce 128 bits to 64+n bits.
+  //   t0 = ((x^(64+n) mod G) * floor(A / x^64)) + (x^n * (A mod x^64))
+  // The fold_1x128 LO64_TERMS constant (xmm7 high qword) encodes
+  // (x^(128+k) mod G) * x^(64-n) which makes the low (64-n) bits of
+  // the product zero. Selecting it via $10 = clmul(xmm0.lo, xmm7.hi).
+
+  movdqa xmm1, xmm0
+  db $66, $0F, $3A, $44, $CF, $10              // pclmulqdq xmm1, xmm7, $10
+  psrldq xmm0, 8                               // xmm0 = {0, A_hi}
+  pxor xmm0, xmm1                              // xmm0 = t0 (64+n bits)
+
+  // Step 2: Barrett reduction.
+  // Load Barrett constants into xmm6:
+  //   xmm6.lo = bitreflect(floor(x^(63+n)/G), 64)
+  //   xmm6.hi = bitreflect((G - x^n) * x^(64-n-1), 64)
+  movdqu xmm6, dqword ptr [r9 + 32]
+
+  // t1 = clmul(t0.lo, barrett[0])
+  movdqa xmm1, xmm0
+  db $66, $0F, $3A, $44, $CE, $00              // pclmulqdq xmm1, xmm6, $00
+
+  // t2 = clmul(t1.lo, barrett[1]) = G * floor(t0 / G)
+  db $66, $0F, $3A, $44, $CE, $10              // pclmulqdq xmm1, xmm6, $10
+
+  // xmm0 = t0 XOR t2, CRC is in bits 64..(64+n-1)
+  pxor xmm0, xmm1
+
+  // Extract high qword (bits 64..127) into rax.
+  // pextrq rax, xmm0, 1: 66 48 0F 3A 16 C0 01
+  db $66, $48, $0F, $3A, $16, $C0, $01

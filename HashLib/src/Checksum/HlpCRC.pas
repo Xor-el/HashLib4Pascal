@@ -16,7 +16,8 @@ uses
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpICRC;
+  HlpICRC,
+  HlpGF2;
 
 resourcestring
   SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';
@@ -582,8 +583,10 @@ type
     FPolynomial, FInitialValue, FOutputXor, FCheckValue, FCRCMask,
       FCRCHighBitMask, FHash: UInt64;
     FIsInputReflected, FIsOutputReflected, FIsTableGenerated: Boolean;
+    FHasPclmulConstants: Boolean;
 
-    FCRCTable: THashLibUInt64Array;
+    FCRCTable: THashLibMatrixUInt64Array;
+    FPclmulConstants: TCRCFoldConstants;
 
   const
     Delta = Int32(7);
@@ -647,6 +650,9 @@ type
   end;
 
 implementation
+
+uses
+  HlpCRCDispatch;
 
 { TCRC }
 
@@ -737,31 +743,90 @@ end;
 
 procedure TCRC.CalculateCRCbyTable(AData: PByte; ADataLength, AIndex: Int32);
 var
-  LLength, LIndex: Int32;
-  LTemp: UInt64;
-  LCRCTable: THashLibUInt64Array;
+  LLength: Int32;
+  LTemp, LQWord1, LQWord2, LNewTemp, LTempCopy: UInt64;
+  LCRCTable: THashLibMatrixUInt64Array;
+  LPtrData: PByte;
+  LBIdx, LCrcBytes: Int32;
+  LByte: Byte;
 begin
   LLength := ADataLength;
-  LIndex := AIndex;
+  LPtrData := AData + AIndex;
   LTemp := FHash;
   LCRCTable := FCRCTable;
 
-  if (IsInputReflected) then
+  if IsInputReflected then
   begin
+    // Slicing-by-16: process 16 bytes per iteration using UInt64 reads
+    while LLength >= 16 do
+    begin
+      LQWord1 := PUInt64(LPtrData)^ xor LTemp;
+      LQWord2 := PUInt64(LPtrData + 8)^;
+
+      LTemp := LCRCTable[15][Byte(LQWord1)]
+        xor LCRCTable[14][Byte(LQWord1 shr 8)]
+        xor LCRCTable[13][Byte(LQWord1 shr 16)]
+        xor LCRCTable[12][Byte(LQWord1 shr 24)]
+        xor LCRCTable[11][Byte(LQWord1 shr 32)]
+        xor LCRCTable[10][Byte(LQWord1 shr 40)]
+        xor LCRCTable[9][Byte(LQWord1 shr 48)]
+        xor LCRCTable[8][Byte(LQWord1 shr 56)]
+        xor LCRCTable[7][Byte(LQWord2)]
+        xor LCRCTable[6][Byte(LQWord2 shr 8)]
+        xor LCRCTable[5][Byte(LQWord2 shr 16)]
+        xor LCRCTable[4][Byte(LQWord2 shr 24)]
+        xor LCRCTable[3][Byte(LQWord2 shr 32)]
+        xor LCRCTable[2][Byte(LQWord2 shr 40)]
+        xor LCRCTable[1][Byte(LQWord2 shr 48)]
+        xor LCRCTable[0][Byte(LQWord2 shr 56)];
+
+      System.Inc(LPtrData, 16);
+      System.Dec(LLength, 16);
+    end;
+
+    // Remaining 1..15 bytes: byte-at-a-time using row 0
     while LLength > 0 do
     begin
-      LTemp := (LTemp shr 8) xor LCRCTable[Byte(LTemp xor AData[LIndex])];
-      System.Inc(LIndex);
+      LTemp := (LTemp shr 8) xor LCRCTable[0][Byte(LTemp xor LPtrData^)];
+      System.Inc(LPtrData);
       System.Dec(LLength);
     end;
   end
   else
   begin
+    // Non-reflected: slicing-by-16 with byte reads
+    LCrcBytes := (Width + 7) shr 3;
+
+    while LLength >= 16 do
+    begin
+      LNewTemp := UInt64(0);
+      LTempCopy := LTemp;
+
+      LBIdx := 0;
+      while LBIdx < LCrcBytes do
+      begin
+        LByte := LPtrData[LBIdx] xor Byte(LTempCopy shr (Width - 8));
+        LTempCopy := (LTempCopy shl 8) and FCRCMask;
+        LNewTemp := LNewTemp xor LCRCTable[15 - LBIdx][LByte];
+        System.Inc(LBIdx);
+      end;
+      while LBIdx < 16 do
+      begin
+        LNewTemp := LNewTemp xor LCRCTable[15 - LBIdx][LPtrData[LBIdx]];
+        System.Inc(LBIdx);
+      end;
+
+      LTemp := LNewTemp;
+      System.Inc(LPtrData, 16);
+      System.Dec(LLength, 16);
+    end;
+
+    // Remaining 1..15 bytes: byte-at-a-time using row 0
     while LLength > 0 do
     begin
-      LTemp := (LTemp shl 8) xor LCRCTable
-        [Byte((LTemp shr (Width - 8)) xor AData[LIndex])];
-      System.Inc(LIndex);
+      LTemp := (LTemp shl 8) xor LCRCTable[0]
+        [Byte((LTemp shr (Width - 8)) xor LPtrData^)];
+      System.Inc(LPtrData);
       System.Dec(LLength);
     end;
   end;
@@ -807,6 +872,7 @@ end;
 function TCRC.Clone(): IHash;
 var
   LHashInstance: TCRC;
+  LIdx: Int32;
 begin
   LHashInstance := TCRC.Create(Width, Polynomial, InitialValue,
     IsInputReflected, IsOutputReflected, OutputXor, CheckValue,
@@ -815,7 +881,11 @@ begin
   LHashInstance.FCRCHighBitMask := FCRCHighBitMask;
   LHashInstance.FHash := FHash;
   LHashInstance.FIsTableGenerated := FIsTableGenerated;
-  LHashInstance.FCRCTable := System.Copy(FCRCTable);
+  LHashInstance.FHasPclmulConstants := FHasPclmulConstants;
+  LHashInstance.FPclmulConstants := FPclmulConstants;
+  System.SetLength(LHashInstance.FCRCTable, System.Length(FCRCTable));
+  for LIdx := 0 to System.High(FCRCTable) do
+    LHashInstance.FCRCTable[LIdx] := System.Copy(FCRCTable[LIdx]);
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -832,6 +902,7 @@ begin
   end;
 
   FIsTableGenerated := False;
+  FHasPclmulConstants := False;
 
   inherited Create(-1, -1); // Dummy State
 
@@ -1340,37 +1411,45 @@ end;
 
 procedure TCRC.GenerateTable;
 var
-  LBit, LCRC: UInt64;
-  LIdx, LJdx: Int32;
+  LCRC: UInt64;
+  LIdx, LRow, LBit: Int32;
+  LReflectedPoly: UInt64;
 begin
-  System.SetLength(FCRCTable, 256);
-  LIdx := 0;
-  while LIdx < 256 do
+  System.SetLength(FCRCTable, 16);
+  for LIdx := 0 to 15 do
+    System.SetLength(FCRCTable[LIdx], 256);
+
+  if IsInputReflected then
   begin
-    LCRC := UInt64(LIdx);
-    if (IsInputReflected) then
+    LReflectedPoly := Reflect(Polynomial, Width);
+    for LIdx := 0 to 255 do
     begin
-      LCRC := Reflect(LCRC, 8);
+      LCRC := UInt64(LIdx);
+      for LRow := 0 to 15 do
+      begin
+        for LBit := 0 to 7 do
+          LCRC := (LCRC shr 1) xor (UInt64(-Int64(LCRC and 1)) and LReflectedPoly);
+        FCRCTable[LRow][LIdx] := LCRC;
+      end;
     end;
-    LCRC := LCRC shl (Width - 8);
-    LJdx := 0;
-    while LJdx < 8 do
+  end
+  else
+  begin
+    for LIdx := 0 to 255 do
     begin
-
-      LBit := LCRC and FCRCHighBitMask;
-      LCRC := LCRC shl 1;
-      if (LBit <> 0) then
-        LCRC := (LCRC xor Polynomial);
-      System.Inc(LJdx);
+      LCRC := UInt64(LIdx) shl (Width - 8);
+      for LRow := 0 to 15 do
+      begin
+        for LBit := 0 to 7 do
+        begin
+          if (LCRC and FCRCHighBitMask) <> 0 then
+            LCRC := ((LCRC shl 1) xor Polynomial) and FCRCMask
+          else
+            LCRC := (LCRC shl 1) and FCRCMask;
+        end;
+        FCRCTable[LRow][LIdx] := LCRC;
+      end;
     end;
-
-    if (IsInputReflected) then
-    begin
-      LCRC := Reflect(LCRC, Width);
-    end;
-    LCRC := LCRC and FCRCMask;
-    FCRCTable[LIdx] := LCRC;
-    System.Inc(LIdx);
   end;
 
   FIsTableGenerated := True;
@@ -1378,24 +1457,27 @@ end;
 
 procedure TCRC.Initialize;
 begin
-  // initialize some bitmasks
   FCRCHighBitMask := UInt64(1) shl (Width - 1);
   FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
   FHash := InitialValue;
 
-  if (Width > Delta) then // then use table
+  if Width > Delta then
   begin
-
     if not FIsTableGenerated then
-    begin
       GenerateTable();
+
+    if not FHasPclmulConstants then
+    begin
+      if (Width >= 8) and (Width <= 32) and IsInputReflected then
+      begin
+        TGF2.GenerateFoldConstants(Polynomial, Width, True, FPclmulConstants);
+        FHasPclmulConstants := True;
+      end;
     end;
 
-    if (IsInputReflected) then
+    if IsInputReflected then
       FHash := Reflect(FHash, Width);
-
   end;
-
 end;
 
 class function TCRC.Reflect(AValue: UInt64; AWidth: Int32): UInt64;
@@ -1419,8 +1501,9 @@ end;
 procedure TCRC.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
-  LIdx: Int32;
   LPtrAData: PByte;
+  LState: array [0 .. 1] of UInt64;
+  LProcessed, LTail: Int32;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -1428,23 +1511,27 @@ begin
   System.Assert(AIndex + ALength <= System.Length(AData));
 {$ENDIF DEBUG}
 
-  // table driven CRC reportedly only works for 8, 16, 24, 32 LBits
-  // HOWEVER, it seems to work for everything > 7 LBits, so use it
-  // accordingly
-
-  LIdx := AIndex;
-
   LPtrAData := PByte(AData);
 
-  if (Width > Delta) then
+  if Width > Delta then
   begin
-    CalculateCRCbyTable(LPtrAData, ALength, LIdx);
+    if FHasPclmulConstants and IsInputReflected and (ALength >= 64)
+      and Assigned(CRC_Fold_Lsb) then
+    begin
+      LState[0] := FHash;
+      LState[1] := 0;
+      LProcessed := ALength and (not Int32(15));
+      FHash := CRC_Fold_Lsb(LPtrAData + AIndex, UInt32(LProcessed),
+        @LState[0], @FPclmulConstants) and FCRCMask;
+      LTail := ALength - LProcessed;
+      if LTail > 0 then
+        CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
+    end
+    else
+      CalculateCRCbyTable(LPtrAData, ALength, AIndex);
   end
   else
-  begin
-    CalculateCRCdirect(LPtrAData, ALength, LIdx);
-  end;
-
+    CalculateCRCdirect(LPtrAData, ALength, AIndex);
 end;
 
 function TCRC.TransformFinal: IHashResult;

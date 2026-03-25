@@ -47,6 +47,8 @@ contains
   HlpMultipleTransformNonBlock in '..\..\Base\HlpMultipleTransformNonBlock.pas',
   HlpAdler32 in '..\..\Checksum\HlpAdler32.pas',
   HlpAdler32Dispatch in '..\..\Checksum\HlpAdler32Dispatch.pas',
+  HlpGF2 in '..\..\Checksum\HlpGF2.pas',
+  HlpCRCDispatch in '..\..\Checksum\HlpCRCDispatch.pas',
   HlpCRC in '..\..\Checksum\HlpCRC.pas',
   HlpCRC16 in '..\..\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\Checksum\HlpCRC32.pas',

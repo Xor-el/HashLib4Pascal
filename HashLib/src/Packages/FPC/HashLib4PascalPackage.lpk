@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="117">
+    <Files Count="119">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -492,6 +492,14 @@
         <Filename Value="..\..\Checksum\HlpAdler32Dispatch.pas"/>
         <UnitName Value="HlpAdler32Dispatch"/>
       </Item117>
+      <Item118>
+        <Filename Value="..\..\Checksum\HlpGF2.pas"/>
+        <UnitName Value="HlpGF2"/>
+      </Item118>
+      <Item119>
+        <Filename Value="..\..\Checksum\HlpCRCDispatch.pas"/>
+        <UnitName Value="HlpCRCDispatch"/>
+      </Item119>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

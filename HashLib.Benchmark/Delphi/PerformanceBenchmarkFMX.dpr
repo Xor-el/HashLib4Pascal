@@ -18,6 +18,8 @@ uses
   HlpAdler32 in '..\..\HashLib\src\Checksum\HlpAdler32.pas',
   HlpAdler32Dispatch in '..\..\HashLib\src\Checksum\HlpAdler32Dispatch.pas',
   HlpCRC in '..\..\HashLib\src\Checksum\HlpCRC.pas',
+  HlpCRCDispatch in '..\..\HashLib\src\Checksum\HlpCRCDispatch.pas',
+  HlpGF2 in '..\..\HashLib\src\Checksum\HlpGF2.pas',
   HlpCRC16 in '..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\HashLib\src\Checksum\HlpCRC32.pas',
   HlpCRC32Fast in '..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
