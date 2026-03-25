@@ -23,7 +23,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="108">
+    <Files Count="120">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -456,6 +456,54 @@
         <Filename Value="..\..\Hash64\HlpXXHash3Dispatch.pas"/>
         <UnitName Value="HlpXXHash3Dispatch"/>
       </Item108>
+      <Item109>
+        <Filename Value="..\..\Crypto\HlpBlake2BDispatch.pas"/>
+        <UnitName Value="HlpBlake2BDispatch"/>
+      </Item109>
+      <Item110>
+        <Filename Value="..\..\Crypto\HlpBlake2SDispatch.pas"/>
+        <UnitName Value="HlpBlake2SDispatch"/>
+      </Item110>
+      <Item111>
+        <Filename Value="..\..\KDF\HlpArgon2Dispatch.pas"/>
+        <UnitName Value="HlpArgon2Dispatch"/>
+      </Item111>
+      <Item112>
+        <Filename Value="..\..\KDF\HlpScryptDispatch.pas"/>
+        <UnitName Value="HlpScryptDispatch"/>
+      </Item112>
+      <Item113>
+        <Filename Value="..\..\Crypto\HlpBlake3Dispatch.pas"/>
+        <UnitName Value="HlpBlake3Dispatch"/>
+      </Item113>
+      <Item114>
+        <Filename Value="..\..\Crypto\HlpSHA2_256Dispatch.pas"/>
+        <UnitName Value="HlpSHA2_256Dispatch"/>
+      </Item114>
+      <Item115>
+        <Filename Value="..\..\Crypto\HlpSHA2_512Dispatch.pas"/>
+        <UnitName Value="HlpSHA2_512Dispatch"/>
+      </Item115>
+      <Item116>
+        <Filename Value="..\..\Crypto\HlpSHA1Dispatch.pas"/>
+        <UnitName Value="HlpSHA1Dispatch"/>
+      </Item116>
+      <Item117>
+        <Filename Value="..\..\Checksum\HlpAdler32Dispatch.pas"/>
+        <UnitName Value="HlpAdler32Dispatch"/>
+      </Item117>
+      <Item118>
+        <Filename Value="..\..\Checksum\HlpGF2.pas"/>
+        <UnitName Value="HlpGF2"/>
+      </Item118>
+      <Item119>
+        <Filename Value="..\..\Checksum\HlpCRCDispatch.pas"/>
+        <UnitName Value="HlpCRCDispatch"/>
+      </Item119>
+      <Item120>
+        <Filename Value="..\..\Crypto\HlpSHA3Dispatch.pas"/>
+        <UnitName Value="HlpSHA3Dispatch"/>
+      </Item120>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

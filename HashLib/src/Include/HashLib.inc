@@ -54,24 +54,24 @@
 {$SCOPEDENUMS ON}
 {$POINTERMATH ON}
 
-{============================== SIMD Settings =================================}
+{============================== CPU Architecture ==============================}
 
-{$IF DEFINED(CPUX86_64) OR DEFINED(CPUX64)}
+{$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
 {$IFEND}
 
-{$IFDEF FPC}
-  {$IFDEF HASHLIB_X86_64}
-    {$DEFINE HASHLIB_AVX2_ASM_SUPPORTED}
-  {$ENDIF}
-{$ENDIF}
+{============================== SIMD Settings =================================}
+
 
 // Uncomment ONE of the following to force a specific SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SCALAR}
 // {$DEFINE HASHLIB_FORCE_SSE2}
+// {$DEFINE HASHLIB_FORCE_SSSE3}
 
-{$IF DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2)}
-  {$MESSAGE ERROR 'HASHLIB_FORCE_SCALAR and HASHLIB_FORCE_SSE2 cannot both be defined. Enable only one.'}
+{$IF (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2))
+  OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSSE3))
+  OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
+  {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)

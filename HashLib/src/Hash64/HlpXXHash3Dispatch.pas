@@ -34,7 +34,7 @@ const
 // Scalar fallback implementations
 // =============================================================================
 
-procedure XXH3_accumulate_512_scalar(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate512_Scalar(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
 var
   LPAcc: PUInt64;
@@ -57,7 +57,7 @@ begin
   end;
 end;
 
-procedure XXH3_scrambleAcc_scalar(AAcc: Pointer; ASecret: Pointer);
+procedure XXH3_ScrambleAcc_Scalar(AAcc: Pointer; ASecret: Pointer);
 var
   LPAcc: PUInt64;
   LPSecret: PByte;
@@ -77,7 +77,7 @@ begin
   end;
 end;
 
-procedure XXH3_initSecret_scalar(ACustomSecret: Pointer;
+procedure XXH3_InitSecret_Scalar(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
 var
   I: Int32;
@@ -92,13 +92,13 @@ begin
   end;
 end;
 
-procedure XXH3_accumulate_scalar(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate_Scalar(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer; ANbStripes: Int32);
 var
   N: Int32;
 begin
   for N := 0 to ANbStripes - 1 do
-    XXH3_accumulate_512_scalar(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+    XXH3_Accumulate512_Scalar(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
@@ -110,65 +110,61 @@ end;
 
 // ----- SSE2 -----
 
-procedure XXH3_accumulate_512_sse2(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate512_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3Acc512Sse2.inc}
 end;
 
-procedure XXH3_scrambleAcc_sse2(AAcc: Pointer; ASecret: Pointer);
+procedure XXH3_ScrambleAcc_Sse2(AAcc: Pointer; ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3ScrambleSse2.inc}
 end;
 
-procedure XXH3_initSecret_sse2(ACustomSecret: Pointer;
+procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
   {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2.inc}
 end;
 
-procedure XXH3_accumulate_sse2(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer; ANbStripes: Int32);
 var
   N: Int32;
 begin
   for N := 0 to ANbStripes - 1 do
-    XXH3_accumulate_512_sse2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+    XXH3_Accumulate512_Sse2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
-{$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
-
 // ----- AVX2 -----
 
-procedure XXH3_accumulate_512_avx2(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3Acc512Avx2.inc}
 end;
 
-procedure XXH3_scrambleAcc_avx2(AAcc: Pointer; ASecret: Pointer);
+procedure XXH3_ScrambleAcc_Avx2(AAcc: Pointer; ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3ScrambleAvx2.inc}
 end;
 
-procedure XXH3_initSecret_avx2(ACustomSecret: Pointer;
+procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
   {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
   {$I ..\Include\Simd\XXH3\XXH3InitSecretAvx2.inc}
 end;
 
-procedure XXH3_accumulate_avx2(AAcc: Pointer; AInput: Pointer;
+procedure XXH3_Accumulate_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer; ANbStripes: Int32);
 var
   N: Int32;
 begin
   for N := 0 to ANbStripes - 1 do
-    XXH3_accumulate_512_avx2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+    XXH3_Accumulate512_Avx2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
-
-{$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
 
 {$ENDIF HASHLIB_X86_64}
 
@@ -180,29 +176,27 @@ procedure InitDispatch();
 begin
   case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
-  {$IFDEF HASHLIB_AVX2_ASM_SUPPORTED}
     TSimdLevel.AVX2:
     begin
-      XXH3_Accumulate512 := @XXH3_accumulate_512_avx2;
-      XXH3_Accumulate := @XXH3_accumulate_avx2;
-      XXH3_ScrambleAcc := @XXH3_scrambleAcc_avx2;
-      XXH3_InitSecret := @XXH3_initSecret_avx2;
+      XXH3_Accumulate512 := @XXH3_Accumulate512_Avx2;
+      XXH3_Accumulate := @XXH3_Accumulate_Avx2;
+      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Avx2;
+      XXH3_InitSecret := @XXH3_InitSecret_Avx2;
     end;
-  {$ENDIF HASHLIB_AVX2_ASM_SUPPORTED}
-    TSimdLevel.SSE2:
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
-      XXH3_Accumulate512 := @XXH3_accumulate_512_sse2;
-      XXH3_Accumulate := @XXH3_accumulate_sse2;
-      XXH3_ScrambleAcc := @XXH3_scrambleAcc_sse2;
-      XXH3_InitSecret := @XXH3_initSecret_sse2;
+      XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
+      XXH3_Accumulate := @XXH3_Accumulate_Sse2;
+      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Sse2;
+      XXH3_InitSecret := @XXH3_InitSecret_Sse2;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:
     begin
-      XXH3_Accumulate512 := @XXH3_accumulate_512_scalar;
-      XXH3_Accumulate := @XXH3_accumulate_scalar;
-      XXH3_ScrambleAcc := @XXH3_scrambleAcc_scalar;
-      XXH3_InitSecret := @XXH3_initSecret_scalar;
+      XXH3_Accumulate512 := @XXH3_Accumulate512_Scalar;
+      XXH3_Accumulate := @XXH3_Accumulate_Scalar;
+      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
+      XXH3_InitSecret := @XXH3_InitSecret_Scalar;
     end;
   end;
 end;

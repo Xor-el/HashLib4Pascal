@@ -10,13 +10,15 @@ interface
 uses
   SysUtils,
   TypInfo,
+  Generics.Collections,
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpICRC;
+  HlpICRC,
+  HlpGF2;
 
 resourcestring
   SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';
@@ -576,17 +578,36 @@ type
   TCRC = class sealed(THash, IChecksum, ICRC, ITransformBlock)
 
   strict private
+  type
+    TCRCCacheValue = record
+      Table: THashLibMatrixUInt64Array;
+      FoldConstants: TCRCFoldConstants;
+    end;
+
+  class var
+    FCache: TDictionary<String, TCRCCacheValue>;
+
   var
     FNames: THashLibStringArray;
     FWidth: Int32;
     FPolynomial, FInitialValue, FOutputXor, FCheckValue, FCRCMask,
       FCRCHighBitMask, FHash: UInt64;
-    FIsInputReflected, FIsOutputReflected, FIsTableGenerated: Boolean;
+    FIsInputReflected, FIsOutputReflected: Boolean;
 
-    FCRCTable: THashLibUInt64Array;
+    FCacheEntry: TCRCCacheValue;
 
   const
-    Delta = Int32(7);
+    MinTableWidth = Int32(7);
+
+    class constructor CreateCRCCache;
+    class destructor DestroyCRCCache;
+
+    class function MakeCacheKey(APoly: UInt64; AWidth: Int32;
+      AReflected: Boolean): String; static;
+    class function GetOrCreateCacheEntry(APoly: UInt64; AWidth: Int32;
+      AReflected: Boolean): TCRCCacheValue; static;
+    class function GenerateCRCTable(APoly: UInt64; AWidth: Int32;
+      AReflected: Boolean): THashLibMatrixUInt64Array; static;
 
     function GetNames: THashLibStringArray; inline;
     procedure SetNames(const AValue: THashLibStringArray); inline;
@@ -605,7 +626,6 @@ type
     function GetCheckValue: UInt64; inline;
     procedure SetCheckValue(AValue: UInt64); inline;
 
-    procedure GenerateTable();
     // tables work only for CRCs with width > 7
     procedure CalculateCRCbyTable(AData: PByte; ADataLength, AIndex: Int32);
     // fast bit by bit algorithm without augmented zero bytes.
@@ -647,6 +667,9 @@ type
   end;
 
 implementation
+
+uses
+  HlpCRCDispatch;
 
 { TCRC }
 
@@ -737,31 +760,90 @@ end;
 
 procedure TCRC.CalculateCRCbyTable(AData: PByte; ADataLength, AIndex: Int32);
 var
-  LLength, LIndex: Int32;
-  LTemp: UInt64;
-  LCRCTable: THashLibUInt64Array;
+  LLength: Int32;
+  LTemp, LQWord1, LQWord2, LNewTemp, LTempCopy: UInt64;
+  LCRCTable: THashLibMatrixUInt64Array;
+  LPtrData: PByte;
+  LBIdx, LCrcBytes: Int32;
+  LByte: Byte;
 begin
   LLength := ADataLength;
-  LIndex := AIndex;
+  LPtrData := AData + AIndex;
   LTemp := FHash;
-  LCRCTable := FCRCTable;
+  LCRCTable := FCacheEntry.Table;
 
-  if (IsInputReflected) then
+  if IsInputReflected then
   begin
+    // Slicing-by-16: process 16 bytes per iteration using UInt64 reads
+    while LLength >= 16 do
+    begin
+      LQWord1 := PUInt64(LPtrData)^ xor LTemp;
+      LQWord2 := PUInt64(LPtrData + 8)^;
+
+      LTemp := LCRCTable[15][Byte(LQWord1)]
+        xor LCRCTable[14][Byte(LQWord1 shr 8)]
+        xor LCRCTable[13][Byte(LQWord1 shr 16)]
+        xor LCRCTable[12][Byte(LQWord1 shr 24)]
+        xor LCRCTable[11][Byte(LQWord1 shr 32)]
+        xor LCRCTable[10][Byte(LQWord1 shr 40)]
+        xor LCRCTable[9][Byte(LQWord1 shr 48)]
+        xor LCRCTable[8][Byte(LQWord1 shr 56)]
+        xor LCRCTable[7][Byte(LQWord2)]
+        xor LCRCTable[6][Byte(LQWord2 shr 8)]
+        xor LCRCTable[5][Byte(LQWord2 shr 16)]
+        xor LCRCTable[4][Byte(LQWord2 shr 24)]
+        xor LCRCTable[3][Byte(LQWord2 shr 32)]
+        xor LCRCTable[2][Byte(LQWord2 shr 40)]
+        xor LCRCTable[1][Byte(LQWord2 shr 48)]
+        xor LCRCTable[0][Byte(LQWord2 shr 56)];
+
+      System.Inc(LPtrData, 16);
+      System.Dec(LLength, 16);
+    end;
+
+    // Remaining 1..15 bytes: byte-at-a-time using row 0
     while LLength > 0 do
     begin
-      LTemp := (LTemp shr 8) xor LCRCTable[Byte(LTemp xor AData[LIndex])];
-      System.Inc(LIndex);
+      LTemp := (LTemp shr 8) xor LCRCTable[0][Byte(LTemp xor LPtrData^)];
+      System.Inc(LPtrData);
       System.Dec(LLength);
     end;
   end
   else
   begin
+    // Non-reflected: slicing-by-16 with byte reads
+    LCrcBytes := (Width + 7) shr 3;
+
+    while LLength >= 16 do
+    begin
+      LNewTemp := UInt64(0);
+      LTempCopy := LTemp;
+
+      LBIdx := 0;
+      while LBIdx < LCrcBytes do
+      begin
+        LByte := LPtrData[LBIdx] xor Byte(LTempCopy shr (Width - 8));
+        LTempCopy := (LTempCopy shl 8) and FCRCMask;
+        LNewTemp := LNewTemp xor LCRCTable[15 - LBIdx][LByte];
+        System.Inc(LBIdx);
+      end;
+      while LBIdx < 16 do
+      begin
+        LNewTemp := LNewTemp xor LCRCTable[15 - LBIdx][LPtrData[LBIdx]];
+        System.Inc(LBIdx);
+      end;
+
+      LTemp := LNewTemp;
+      System.Inc(LPtrData, 16);
+      System.Dec(LLength, 16);
+    end;
+
+    // Remaining 1..15 bytes: byte-at-a-time using row 0
     while LLength > 0 do
     begin
-      LTemp := (LTemp shl 8) xor LCRCTable
-        [Byte((LTemp shr (Width - 8)) xor AData[LIndex])];
-      System.Inc(LIndex);
+      LTemp := (LTemp shl 8) xor LCRCTable[0]
+        [Byte((LTemp shr (Width - 8)) xor LPtrData^)];
+      System.Inc(LPtrData);
       System.Dec(LLength);
     end;
   end;
@@ -811,11 +893,7 @@ begin
   LHashInstance := TCRC.Create(Width, Polynomial, InitialValue,
     IsInputReflected, IsOutputReflected, OutputXor, CheckValue,
     System.Copy(Names));
-  LHashInstance.FCRCMask := FCRCMask;
-  LHashInstance.FCRCHighBitMask := FCRCHighBitMask;
   LHashInstance.FHash := FHash;
-  LHashInstance.FIsTableGenerated := FIsTableGenerated;
-  LHashInstance.FCRCTable := System.Copy(FCRCTable);
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -830,8 +908,6 @@ begin
     raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SWidthOutOfRange,
       [AWidth]);
   end;
-
-  FIsTableGenerated := False;
 
   inherited Create(-1, -1); // Dummy State
 
@@ -871,6 +947,11 @@ begin
   OutputXor := AOutputXor;
   CheckValue := ACheckValue;
 
+  FCRCHighBitMask := UInt64(1) shl (Width - 1);
+  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
+
+  if Width > MinTableWidth then
+    FCacheEntry := GetOrCreateCacheEntry(Polynomial, Width, IsInputReflected);
 end;
 
 {$REGION 'CRC Standards Implementation'}
@@ -1338,64 +1419,90 @@ end;
 
 {$ENDREGION}
 
-procedure TCRC.GenerateTable;
-var
-  LBit, LCRC: UInt64;
-  LIdx, LJdx: Int32;
+class constructor TCRC.CreateCRCCache;
 begin
-  System.SetLength(FCRCTable, 256);
-  LIdx := 0;
-  while LIdx < 256 do
+  FCache := TDictionary<String, TCRCCacheValue>.Create;
+end;
+
+class destructor TCRC.DestroyCRCCache;
+begin
+  FCache.Free;
+end;
+
+class function TCRC.MakeCacheKey(APoly: UInt64; AWidth: Int32;
+  AReflected: Boolean): String;
+begin
+  Result := Format('Poly-%x:Width-%d:Reflected-%s',
+    [APoly, AWidth, BoolToStr(AReflected, True)]);
+end;
+
+class function TCRC.GenerateCRCTable(APoly: UInt64; AWidth: Int32;
+  AReflected: Boolean): THashLibMatrixUInt64Array;
+var
+  LCRC: UInt64;
+  LIdx, LRow, LBit: Int32;
+  LReflectedPoly, LHighBitMask, LMask: UInt64;
+begin
+  System.SetLength(Result, 16);
+  for LIdx := 0 to 15 do
+    System.SetLength(Result[LIdx], 256);
+
+  if AReflected then
   begin
-    LCRC := UInt64(LIdx);
-    if (IsInputReflected) then
+    LReflectedPoly := Reflect(APoly, AWidth);
+    for LIdx := 0 to 255 do
     begin
-      LCRC := Reflect(LCRC, 8);
+      LCRC := UInt64(LIdx);
+      for LRow := 0 to 15 do
+      begin
+        for LBit := 0 to 7 do
+          LCRC := (LCRC shr 1) xor (UInt64(-Int64(LCRC and 1)) and LReflectedPoly);
+        Result[LRow][LIdx] := LCRC;
+      end;
     end;
-    LCRC := LCRC shl (Width - 8);
-    LJdx := 0;
-    while LJdx < 8 do
+  end
+  else
+  begin
+    LHighBitMask := UInt64(1) shl (AWidth - 1);
+    LMask := ((LHighBitMask - 1) shl 1) or 1;
+    for LIdx := 0 to 255 do
     begin
-
-      LBit := LCRC and FCRCHighBitMask;
-      LCRC := LCRC shl 1;
-      if (LBit <> 0) then
-        LCRC := (LCRC xor Polynomial);
-      System.Inc(LJdx);
+      LCRC := UInt64(LIdx) shl (AWidth - 8);
+      for LRow := 0 to 15 do
+      begin
+        for LBit := 0 to 7 do
+        begin
+          if (LCRC and LHighBitMask) <> 0 then
+            LCRC := ((LCRC shl 1) xor APoly) and LMask
+          else
+            LCRC := (LCRC shl 1) and LMask;
+        end;
+        Result[LRow][LIdx] := LCRC;
+      end;
     end;
-
-    if (IsInputReflected) then
-    begin
-      LCRC := Reflect(LCRC, Width);
-    end;
-    LCRC := LCRC and FCRCMask;
-    FCRCTable[LIdx] := LCRC;
-    System.Inc(LIdx);
   end;
+end;
 
-  FIsTableGenerated := True;
+class function TCRC.GetOrCreateCacheEntry(APoly: UInt64; AWidth: Int32;
+  AReflected: Boolean): TCRCCacheValue;
+var
+  LKey: String;
+begin
+  LKey := MakeCacheKey(APoly, AWidth, AReflected);
+  if not FCache.TryGetValue(LKey, Result) then
+  begin
+    Result.Table := GenerateCRCTable(APoly, AWidth, AReflected);
+    TGF2.GenerateFoldConstants(APoly, AWidth, AReflected,
+      Result.FoldConstants);
+    FCache.Add(LKey, Result);
+  end;
 end;
 
 procedure TCRC.Initialize;
 begin
-  // initialize some bitmasks
-  FCRCHighBitMask := UInt64(1) shl (Width - 1);
-  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
   FHash := InitialValue;
-
-  if (Width > Delta) then // then use table
-  begin
-
-    if not FIsTableGenerated then
-    begin
-      GenerateTable();
-    end;
-
-    if (IsInputReflected) then
-      FHash := Reflect(FHash, Width);
-
-  end;
-
+  if (Width > MinTableWidth) and IsInputReflected then
+    FHash := Reflect(FHash, Width);
 end;
 
 class function TCRC.Reflect(AValue: UInt64; AWidth: Int32): UInt64;
@@ -1419,8 +1526,10 @@ end;
 procedure TCRC.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
-  LIdx: Int32;
   LPtrAData: PByte;
+  LFoldFunc: TCRCFoldFunc;
+  LState: array [0 .. 1] of UInt64;
+  LProcessed, LTail: Int32;
 begin
 {$IFDEF DEBUG}
   System.Assert(AIndex >= 0);
@@ -1428,23 +1537,44 @@ begin
   System.Assert(AIndex + ALength <= System.Length(AData));
 {$ENDIF DEBUG}
 
-  // table driven CRC reportedly only works for 8, 16, 24, 32 LBits
-  // HOWEVER, it seems to work for everything > 7 LBits, so use it
-  // accordingly
-
-  LIdx := AIndex;
-
   LPtrAData := PByte(AData);
 
-  if (Width > Delta) then
+  if Width > MinTableWidth then
   begin
-    CalculateCRCbyTable(LPtrAData, ALength, LIdx);
+    if ALength >= MinSimdBytes then
+    begin
+      if IsInputReflected then
+      begin
+        LFoldFunc := CRC_Fold_Lsb;
+        LState[0] := FHash;
+      end
+      else
+      begin
+        LFoldFunc := CRC_Fold_Msb;
+        if Width < 64 then
+          LState[0] := FHash shl (64 - Width)
+        else
+          LState[0] := FHash;
+      end;
+
+      if Assigned(LFoldFunc) then
+      begin
+        LState[1] := 0;
+        LProcessed := ALength and (not Int32(15));
+        FHash := LFoldFunc(LPtrAData + AIndex, UInt32(LProcessed),
+          @LState[0], @FCacheEntry.FoldConstants) and FCRCMask;
+        LTail := ALength - LProcessed;
+        if LTail > 0 then
+          CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
+      end
+      else
+        CalculateCRCbyTable(LPtrAData, ALength, AIndex);
+    end
+    else
+      CalculateCRCbyTable(LPtrAData, ALength, AIndex);
   end
   else
-  begin
-    CalculateCRCdirect(LPtrAData, ALength, LIdx);
-  end;
-
+    CalculateCRCdirect(LPtrAData, ALength, AIndex);
 end;
 
 function TCRC.TransformFinal: IHashResult;
@@ -1456,7 +1586,7 @@ var
 
 begin
 
-  if Width > Delta then
+  if Width > MinTableWidth then
   begin
     if (IsInputReflected xor IsOutputReflected) then
     begin

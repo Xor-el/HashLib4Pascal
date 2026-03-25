@@ -11,10 +11,10 @@ uses
 {$ENDIF HASHLIB_USE_PPL}
   HlpIHash,
   HlpKDF,
-  HlpBits,
   HlpSHA2_256,
   HlpIHashInfo,
   HlpPBKDF2_HMACNotBuildInAdapter,
+  HlpScryptDispatch,
   HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
@@ -27,7 +27,6 @@ resourcestring
   SBlockSizeTooSmall = 'Block size must be >= 1.';
   SInvalidParallelism =
     'Parallelism parameter must be >= 1 and <= %d (based on block size of %d)';
-  SRoundsMustBeEven = 'Number of Rounds Must be Even';
 
 type
   /// <summary>Implementation of the scrypt a password-based key derivation function.</summary>
@@ -49,21 +48,12 @@ type
       ASaltBytes: THashLibByteArray; AOutputLength: Int32)
       : THashLibByteArray; static;
 
-    /// <summary>
-    /// lifted from <c>ClpSalsa20Engine.pas</c> in CryptoLib4Pascal with
-    /// minor modifications.
-    /// </summary>
-    class procedure SalsaCore(ARounds: Int32;
-      const AInput, AOutWords: THashLibUInt32Array); static;
-
-    class procedure &Xor(const ALeftWords, ARightWords: THashLibUInt32Array;
-      ARightWordOffset: Int32; const AOutput: THashLibUInt32Array); static;
-
     class procedure SMixLane(AIdx: Int32; APtrB: PCardinal;
       ACost, ABlockSize: Int32); static;
 
-    class procedure BlockMix(const ASourceBlock, AScratchX1, AScratchX2,
-      AMixedOut: THashLibUInt32Array; ABlockSize: Int32); static;
+    class procedure BlockMix(const ASourceBlock: THashLibUInt32Array;
+      AScratchState: PCardinal; const AMixedOut: THashLibUInt32Array;
+      ABlockSize: Int32); static;
 
     class procedure DoParallelSMix(APtrB: PCardinal; AParallelism, ACost,
       ABlockSize: Int32); static;
@@ -140,123 +130,13 @@ begin
     APasswordBytes, ASaltBytes, 1) as IPBKDF2_HMAC).GetBytes(AOutputLength);
 end;
 
-class procedure TPBKDF_ScryptNotBuildInAdapter.&Xor(const ALeftWords,
-  ARightWords: THashLibUInt32Array; ARightWordOffset: Int32;
-  const AOutput: THashLibUInt32Array);
-var
-  LIdx: Int32;
-begin
-  LIdx := System.Length(AOutput) - 1;
-  while LIdx >= 0 do
-  begin
-    AOutput[LIdx] := ALeftWords[LIdx] xor ARightWords[ARightWordOffset + LIdx];
-    System.Dec(LIdx);
-  end;
-end;
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.SalsaCore(ARounds: Int32;
-  const AInput, AOutWords: THashLibUInt32Array);
-var
-  LWord0, LWord1, LWord2, LWord3, LWord4, LWord5, LWord6, LWord7, LWord8, LWord9, LWord10, LWord11, LWord12, LWord13, LWord14,
-    LWord15: UInt32;
-  LIdx: Int32;
-begin
-  if (System.Length(AInput) <> 16) then
-  begin
-    raise EArgumentHashLibException.Create('AInput length must be 16');
-  end;
-  if (System.Length(AOutWords) <> 16) then
-  begin
-    raise EArgumentHashLibException.Create('AOutWords length must be 16');
-  end;
-  if ((ARounds mod 2) <> 0) then
-  begin
-    raise EArgumentHashLibException.CreateRes(@SRoundsMustBeEven);
-  end;
-
-  LWord0 := AInput[0];
-  LWord1 := AInput[1];
-  LWord2 := AInput[2];
-  LWord3 := AInput[3];
-  LWord4 := AInput[4];
-  LWord5 := AInput[5];
-  LWord6 := AInput[6];
-  LWord7 := AInput[7];
-  LWord8 := AInput[8];
-  LWord9 := AInput[9];
-  LWord10 := AInput[10];
-  LWord11 := AInput[11];
-  LWord12 := AInput[12];
-  LWord13 := AInput[13];
-  LWord14 := AInput[14];
-  LWord15 := AInput[15];
-
-  LIdx := ARounds;
-  while LIdx > 0 do
-  begin
-
-    LWord4 := LWord4 xor (TBits.RotateLeft32((LWord0 + LWord12), 7));
-    LWord8 := LWord8 xor (TBits.RotateLeft32((LWord4 + LWord0), 9));
-    LWord12 := LWord12 xor (TBits.RotateLeft32((LWord8 + LWord4), 13));
-    LWord0 := LWord0 xor (TBits.RotateLeft32((LWord12 + LWord8), 18));
-    LWord9 := LWord9 xor (TBits.RotateLeft32((LWord5 + LWord1), 7));
-    LWord13 := LWord13 xor (TBits.RotateLeft32((LWord9 + LWord5), 9));
-    LWord1 := LWord1 xor (TBits.RotateLeft32((LWord13 + LWord9), 13));
-    LWord5 := LWord5 xor (TBits.RotateLeft32((LWord1 + LWord13), 18));
-    LWord14 := LWord14 xor (TBits.RotateLeft32((LWord10 + LWord6), 7));
-    LWord2 := LWord2 xor (TBits.RotateLeft32((LWord14 + LWord10), 9));
-    LWord6 := LWord6 xor (TBits.RotateLeft32((LWord2 + LWord14), 13));
-    LWord10 := LWord10 xor (TBits.RotateLeft32((LWord6 + LWord2), 18));
-    LWord3 := LWord3 xor (TBits.RotateLeft32((LWord15 + LWord11), 7));
-    LWord7 := LWord7 xor (TBits.RotateLeft32((LWord3 + LWord15), 9));
-    LWord11 := LWord11 xor (TBits.RotateLeft32((LWord7 + LWord3), 13));
-    LWord15 := LWord15 xor (TBits.RotateLeft32((LWord11 + LWord7), 18));
-
-    LWord1 := LWord1 xor (TBits.RotateLeft32((LWord0 + LWord3), 7));
-    LWord2 := LWord2 xor (TBits.RotateLeft32((LWord1 + LWord0), 9));
-    LWord3 := LWord3 xor (TBits.RotateLeft32((LWord2 + LWord1), 13));
-    LWord0 := LWord0 xor (TBits.RotateLeft32((LWord3 + LWord2), 18));
-    LWord6 := LWord6 xor (TBits.RotateLeft32((LWord5 + LWord4), 7));
-    LWord7 := LWord7 xor (TBits.RotateLeft32((LWord6 + LWord5), 9));
-    LWord4 := LWord4 xor (TBits.RotateLeft32((LWord7 + LWord6), 13));
-    LWord5 := LWord5 xor (TBits.RotateLeft32((LWord4 + LWord7), 18));
-    LWord11 := LWord11 xor (TBits.RotateLeft32((LWord10 + LWord9), 7));
-    LWord8 := LWord8 xor (TBits.RotateLeft32((LWord11 + LWord10), 9));
-    LWord9 := LWord9 xor (TBits.RotateLeft32((LWord8 + LWord11), 13));
-    LWord10 := LWord10 xor (TBits.RotateLeft32((LWord9 + LWord8), 18));
-    LWord12 := LWord12 xor (TBits.RotateLeft32((LWord15 + LWord14), 7));
-    LWord13 := LWord13 xor (TBits.RotateLeft32((LWord12 + LWord15), 9));
-    LWord14 := LWord14 xor (TBits.RotateLeft32((LWord13 + LWord12), 13));
-    LWord15 := LWord15 xor (TBits.RotateLeft32((LWord14 + LWord13), 18));
-
-    System.Dec(LIdx, 2);
-  end;
-
-  AOutWords[0] := LWord0 + AInput[0];
-  AOutWords[1] := LWord1 + AInput[1];
-  AOutWords[2] := LWord2 + AInput[2];
-  AOutWords[3] := LWord3 + AInput[3];
-  AOutWords[4] := LWord4 + AInput[4];
-  AOutWords[5] := LWord5 + AInput[5];
-  AOutWords[6] := LWord6 + AInput[6];
-  AOutWords[7] := LWord7 + AInput[7];
-  AOutWords[8] := LWord8 + AInput[8];
-  AOutWords[9] := LWord9 + AInput[9];
-  AOutWords[10] := LWord10 + AInput[10];
-  AOutWords[11] := LWord11 + AInput[11];
-  AOutWords[12] := LWord12 + AInput[12];
-  AOutWords[13] := LWord13 + AInput[13];
-  AOutWords[14] := LWord14 + AInput[14];
-  AOutWords[15] := LWord15 + AInput[15];
-
-end;
-
-class procedure TPBKDF_ScryptNotBuildInAdapter.BlockMix(const ASourceBlock,
-  AScratchX1, AScratchX2, AMixedOut: THashLibUInt32Array; ABlockSize: Int32);
+class procedure TPBKDF_ScryptNotBuildInAdapter.BlockMix(
+  const ASourceBlock: THashLibUInt32Array; AScratchState: PCardinal;
+  const AMixedOut: THashLibUInt32Array; ABlockSize: Int32);
 var
   LBlockOffset, LYOffset, LHalfLength, LIdx: Int32;
 begin
-  System.Move(ASourceBlock[System.Length(ASourceBlock) - 16], AScratchX1[0],
+  System.Move(ASourceBlock[System.Length(ASourceBlock) - 16], AScratchState^,
     16 * System.SizeOf(UInt32));
 
   LBlockOffset := 0;
@@ -267,10 +147,8 @@ begin
 
   while LIdx > 0 do
   begin
-    &Xor(AScratchX1, ASourceBlock, LBlockOffset, AScratchX2);
-
-    SalsaCore(8, AScratchX2, AScratchX1);
-    System.Move(AScratchX1[0], AMixedOut[LYOffset], 16 * System.SizeOf(UInt32));
+    Scrypt_SalsaXor(AScratchState, @ASourceBlock[LBlockOffset]);
+    System.Move(AScratchState^, AMixedOut[LYOffset], 16 * System.SizeOf(UInt32));
 
     LYOffset := LHalfLength + LBlockOffset - LYOffset;
     LBlockOffset := LBlockOffset + 16;
@@ -283,19 +161,20 @@ class procedure TPBKDF_ScryptNotBuildInAdapter.SMixLane(AIdx: Int32;
 var
   LBCount, LIdx, LRandomIndex, LOffset: Int32;
   LMask: UInt32;
-  LBlockX1, LBlockX2, LBlockY, LWorkBlock, LScryptRom: THashLibUInt32Array;
+  LScratchState: array[0..15] of UInt32;
+  LBlockY, LWorkBlock, LScryptRom: THashLibUInt32Array;
+  LPY, LPW: PUInt64;
 begin
   AIdx := AIdx * 32 * ABlockSize;
   LBCount := ABlockSize * 32;
 
-  System.SetLength(LBlockX1, 16);
-  System.SetLength(LBlockX2, 16);
   System.SetLength(LBlockY, LBCount);
   System.SetLength(LWorkBlock, LBCount);
   System.SetLength(LScryptRom, ACost * LBCount);
 
   try
     System.Move(APtrB[AIdx], LWorkBlock[0], LBCount * System.SizeOf(UInt32));
+    Scrypt_Permute(@LWorkBlock[0], LBCount div 16);
 
     LOffset := 0;
     LIdx := 0;
@@ -303,10 +182,10 @@ begin
     begin
       System.Move(LWorkBlock[0], LScryptRom[LOffset], LBCount * System.SizeOf(UInt32));
       LOffset := LOffset + LBCount;
-      BlockMix(LWorkBlock, LBlockX1, LBlockX2, LBlockY, ABlockSize);
+      BlockMix(LWorkBlock, @LScratchState[0], LBlockY, ABlockSize);
       System.Move(LBlockY[0], LScryptRom[LOffset], LBCount * System.SizeOf(UInt32));
       LOffset := LOffset + LBCount;
-      BlockMix(LBlockY, LBlockX1, LBlockX2, LWorkBlock, ABlockSize);
+      BlockMix(LBlockY, @LScratchState[0], LWorkBlock, ABlockSize);
       System.Inc(LIdx, 2);
     end;
 
@@ -318,16 +197,26 @@ begin
       LRandomIndex := Int32(LWorkBlock[LBCount - 16] and LMask);
       System.Move(LScryptRom[LRandomIndex * LBCount], LBlockY[0],
         LBCount * System.SizeOf(UInt32));
-      &Xor(LBlockY, LWorkBlock, 0, LBlockY);
-      BlockMix(LBlockY, LBlockX1, LBlockX2, LWorkBlock, ABlockSize);
+
+      LPY := PUInt64(@LBlockY[0]);
+      LPW := PUInt64(@LWorkBlock[0]);
+      LOffset := (LBCount div 2) - 1;
+      while LOffset >= 0 do
+      begin
+        LPY[LOffset] := LPY[LOffset] xor LPW[LOffset];
+        System.Dec(LOffset);
+      end;
+
+      BlockMix(LBlockY, @LScratchState[0], LWorkBlock, ABlockSize);
       System.Inc(LIdx);
     end;
 
+    Scrypt_Unpermute(@LWorkBlock[0], LBCount div 16);
     System.Move(LWorkBlock[0], APtrB[AIdx], LBCount * System.SizeOf(UInt32));
   finally
     TArrayUtils.ZeroFill(LScryptRom);
-    TArrayUtils.ZeroFill(THashLibMatrixUInt32Array.Create(LWorkBlock, LBlockX1,
-      LBlockX2, LBlockY));
+    TArrayUtils.ZeroFill(THashLibMatrixUInt32Array.Create(LWorkBlock, LBlockY));
+    System.FillChar(LScratchState, System.SizeOf(LScratchState), 0);
   end;
 end;
 
@@ -458,4 +347,3 @@ begin
 end;
 
 end.
-
