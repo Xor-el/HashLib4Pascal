@@ -1,5 +1,6 @@
-// VPCLMULQDQ + AVX2 CRC folding + Barrett reduction for reflected (LSB-first)
+// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
 // CRCs with width 8..32 (CRC-64 requires a separate path).
+// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
 // Function signature (included after SimdProc4Begin.inc):
 //   function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
@@ -18,7 +19,6 @@
 // Reference: zlib-ng crc32_pclmulqdq_tpl.h (256-bit VPCLMULQDQ path)
 // and Linux kernel crc-pclmul-template.S by Eric Biggers (Barrett reduction).
 //
-// All VEX-encoded instructions are db-encoded for FPC compatibility.
 // VEX byte layout reference:
 //   2-byte: C5 [R.vvvv.L.pp]
 //   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]

@@ -15,7 +15,6 @@ uses
   HlpICRC,
   HlpHashFactory,
   HlpIHash,
-  HlpSimd,
   HlpConverters;
 
 type
@@ -26,7 +25,6 @@ type
     FCRC: IHash;
 
   protected
-    procedure Setup; override;
     procedure TearDown; override;
   published
     procedure TestCheckValue;
@@ -66,14 +64,6 @@ type
 implementation
 
 { TTestCRCModel }
-
-procedure TTestCRCModel.Setup;
-begin
-  inherited;
-  WriteLn('PCLMULQDQ  : ', TSimd.HasPCLMULQDQ());
-  WriteLn('VPCLMULQDQ : ', TSimd.HasVPCLMULQDQ());
-  WriteLn('SIMD Level : ', Ord(TSimd.GetActiveLevel()));
-end;
 
 procedure TTestCRCModel.TearDown;
 begin

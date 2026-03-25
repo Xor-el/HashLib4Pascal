@@ -1,5 +1,6 @@
-// PCLMULQDQ-based CRC folding + Barrett reduction for reflected (LSB-first)
+// SSE2 + PCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
 // CRCs with width 8..32 (CRC-64 requires a separate path).
+// PCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
 // Function signature (included after SimdProc4Begin.inc):
 //   function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;
