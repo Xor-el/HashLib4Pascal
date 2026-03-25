@@ -4,10 +4,14 @@ unit HlpCRCDispatch;
 
 interface
 
+const
+  MinSimdBytes = Int32(16);
+
 type
-  // AData: data pointer, ALength: byte count (>= 64), AState: pointer to
-  // 2 x UInt64 (input: [0]=CRC, [1]=0), AConstants: pointer to
-  // TCRCFoldConstants.  Returns the final CRC value.
+  // AData: data pointer, ALength: byte count (>= MinSimdBytes, rounded to
+  // 16-byte multiple), AState: pointer to 2 x UInt64 (input: [0]=CRC,
+  // [1]=0), AConstants: pointer to TCRCFoldConstants.
+  // Returns the final CRC value.
   TCRCFoldFunc = function(AData: PByte; ALength: UInt32;
     AState: Pointer; AConstants: Pointer): UInt64;
 

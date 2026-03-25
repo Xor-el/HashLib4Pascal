@@ -589,8 +589,7 @@ type
     FPclmulConstants: TCRCFoldConstants;
 
   const
-    Delta = Int32(7);
-    MinSimdBytes = Int32(16);
+    MinTableWidth = Int32(7);
 
     function GetNames: THashLibStringArray; inline;
     procedure SetNames(const AValue: THashLibStringArray); inline;
@@ -1462,7 +1461,7 @@ begin
   FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
   FHash := InitialValue;
 
-  if Width > Delta then
+  if Width > MinTableWidth then
   begin
     if not FIsTableGenerated then
       GenerateTable();
@@ -1504,6 +1503,7 @@ procedure TCRC.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 var
   LPtrAData: PByte;
+  LFoldFunc: TCRCFoldFunc;
   LState: array [0 .. 1] of UInt64;
   LProcessed, LTail: Int32;
 begin
@@ -1515,30 +1515,29 @@ begin
 
   LPtrAData := PByte(AData);
 
-  if Width > Delta then
+  if Width > MinTableWidth then
   begin
     if FHasPclmulConstants and (ALength >= MinSimdBytes) then
     begin
-      if IsInputReflected and Assigned(CRC_Fold_Lsb) then
+      if IsInputReflected then
       begin
+        LFoldFunc := CRC_Fold_Lsb;
         LState[0] := FHash;
-        LState[1] := 0;
-        LProcessed := ALength and (not Int32(15));
-        FHash := CRC_Fold_Lsb(LPtrAData + AIndex, UInt32(LProcessed),
-          @LState[0], @FPclmulConstants) and FCRCMask;
-        LTail := ALength - LProcessed;
-        if LTail > 0 then
-          CalculateCRCbyTable(LPtrAData, LTail, AIndex + LProcessed);
       end
-      else if (not IsInputReflected) and Assigned(CRC_Fold_Msb) then
+      else
       begin
+        LFoldFunc := CRC_Fold_Msb;
         if Width < 64 then
           LState[0] := FHash shl (64 - Width)
         else
           LState[0] := FHash;
+      end;
+
+      if Assigned(LFoldFunc) then
+      begin
         LState[1] := 0;
         LProcessed := ALength and (not Int32(15));
-        FHash := CRC_Fold_Msb(LPtrAData + AIndex, UInt32(LProcessed),
+        FHash := LFoldFunc(LPtrAData + AIndex, UInt32(LProcessed),
           @LState[0], @FPclmulConstants) and FCRCMask;
         LTail := ALength - LProcessed;
         if LTail > 0 then
@@ -1563,7 +1562,7 @@ var
 
 begin
 
-  if Width > Delta then
+  if Width > MinTableWidth then
   begin
     if (IsInputReflected xor IsOutputReflected) then
     begin

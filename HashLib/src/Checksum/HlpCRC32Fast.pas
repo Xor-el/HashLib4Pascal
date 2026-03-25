@@ -150,8 +150,7 @@ begin
   LCRC := not FCurrentCRC;
   LCRCTable := ACRCTable;
 
-  // PCLMULQDQ fast path for large buffers
-  if Assigned(CRC_Fold_Lsb) and (ALength >= 64) then
+  if Assigned(CRC_Fold_Lsb) and (ALength >= MinSimdBytes) then
   begin
     LState[0] := UInt64(LCRC);
     LState[1] := 0;
