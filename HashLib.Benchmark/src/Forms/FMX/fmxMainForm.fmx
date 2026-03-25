@@ -4,7 +4,7 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'PerformanceBenchmarkFMX'
   ClientHeight = 480
-  ClientWidth = 640
+  ClientWidth = 636
   Position = MainFormCenter
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -15,17 +15,17 @@ object MainForm: TMainForm
     DataDetectorTypes = []
     Position.X = 24.000000000000000000
     Position.Y = 24.000000000000000000
-    Size.Width = 593.000000000000000000
+    Size.Width = 585.000000000000000000
     Size.Height = 393.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
-    Viewport.Width = 589.000000000000000000
+    Viewport.Width = 581.000000000000000000
     Viewport.Height = 389.000000000000000000
   end
   object DoBenchmark: TButton
-    Position.X = 168.000000000000000000
+    Position.X = 136.000000000000000000
     Position.Y = 432.000000000000000000
-    Size.Width = 305.000000000000000000
+    Size.Width = 353.000000000000000000
     Size.Height = 41.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
