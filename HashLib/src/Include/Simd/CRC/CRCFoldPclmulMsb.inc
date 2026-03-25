@@ -7,7 +7,7 @@
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
+//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
 //   AState: [0..7] = initial CRC pre-shifted left by (64 - Width), [8..15] = 0.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128
@@ -29,11 +29,27 @@
 // pshufb xmm_dst, xmm_src (SSSE3):
 //   66 0F 38 00 ModRM
 
-  // --- Pre-load constants ---
-  movdqu xmm6, dqword ptr [r9 + 64]   // BswapMask into xmm6 (kept throughout)
+  // BswapMask is always needed (kept in xmm6 throughout)
+  movdqu xmm6, dqword ptr [r9 + 64]   // BswapMask
+
+  cmp edx, 64
+  jae @large_input
+
+  // --- Small input (16..63 bytes): load 1 block with byte-swap ---
+  movdqu xmm7, dqword ptr [r9 + 16]   // fold_1x128
+  movdqu xmm0, dqword ptr [rcx]
+  db $66, $0F, $38, $00, $C6                   // pshufb xmm0, xmm6
+  movq xmm4, qword ptr [r8]
+  pslldq xmm4, 8
+  pxor xmm0, xmm4
+  add rcx, 16
+  sub edx, 16
+  jmp @fold1_check
+
+@large_input:
+  // --- Large input (>= 64 bytes): load 4 blocks with byte-swap ---
   movdqu xmm7, dqword ptr [r9]        // fold_4x128
 
-  // --- Load first 64 bytes with byte-swap ---
   movdqu xmm0, dqword ptr [rcx]
   db $66, $0F, $38, $00, $C6                   // pshufb xmm0, xmm6
   movdqu xmm1, dqword ptr [rcx + 16]
@@ -43,7 +59,6 @@
   movdqu xmm3, dqword ptr [rcx + 48]
   db $66, $0F, $38, $00, $DE                   // pshufb xmm3, xmm6
 
-  // XOR pre-shifted CRC into the HIGH qword of xmm0 (MSB-first placement)
   movq xmm4, qword ptr [r8]
   pslldq xmm4, 8
   pxor xmm0, xmm4
@@ -123,6 +138,7 @@
   pxor xmm0, xmm3
 
   // --- Fold remaining 16-byte blocks ---
+@fold1_check:
   cmp edx, 16
   jb @fold1_done
 

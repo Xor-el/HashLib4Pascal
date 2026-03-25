@@ -7,7 +7,7 @@
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
+//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
 //   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128  (stride 512)
@@ -111,15 +111,27 @@
   jmp @fold4to1
 
 @xmm_path:
-  // ===== XMM PATH (64..127 bytes) =====
+  // ===== XMM PATH (16..127 bytes) =====
 
-  // Load first 64 bytes
+  cmp edx, 64
+  jae @xmm_large
+
+  // --- Small input (16..63 bytes): load 1 block ---
+  db $C5, $FA, $6F, $01                       // vmovdqu xmm0, [rcx]
+  db $C4, $C1, $7A, $7E, $20                  // vmovq xmm4, [r8]
+  db $C5, $F9, $EF, $C4                       // vpxor xmm0, xmm0, xmm4
+  add rcx, 16
+  sub edx, 16
+  db $C4, $C1, $7A, $6F, $79, $10             // vmovdqu xmm7, [r9 + 16]
+  jmp @tail_check
+
+@xmm_large:
+  // --- Large input (64..127 bytes): load 4 blocks ---
   db $C5, $FA, $6F, $01                       // vmovdqu xmm0, [rcx]
   db $C5, $FA, $6F, $49, $10                  // vmovdqu xmm1, [rcx + 16]
   db $C5, $FA, $6F, $51, $20                  // vmovdqu xmm2, [rcx + 32]
   db $C5, $FA, $6F, $59, $30                  // vmovdqu xmm3, [rcx + 48]
 
-  // XOR initial CRC into low 64 bits of xmm0
   db $C4, $C1, $7A, $7E, $20                  // vmovq xmm4, [r8]
   db $C5, $F9, $EF, $C4                       // vpxor xmm0, xmm0, xmm4
 
@@ -149,6 +161,7 @@
   db $C5, $F9, $EF, $C3                       // vpxor xmm0, xmm0, xmm3
 
   // ===== FOLD REMAINING 16-BYTE BLOCKS =====
+@tail_check:
   cmp edx, 16
   jb @tail_done
 

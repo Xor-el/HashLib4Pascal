@@ -590,6 +590,7 @@ type
 
   const
     Delta = Int32(7);
+    MinSimdBytes = Int32(16);
 
     function GetNames: THashLibStringArray; inline;
     procedure SetNames(const AValue: THashLibStringArray); inline;
@@ -1516,7 +1517,7 @@ begin
 
   if Width > Delta then
   begin
-    if FHasPclmulConstants and (ALength >= 64) then
+    if FHasPclmulConstants and (ALength >= MinSimdBytes) then
     begin
       if IsInputReflected and Assigned(CRC_Fold_Lsb) then
       begin

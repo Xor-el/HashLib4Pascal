@@ -7,7 +7,7 @@
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
+//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
 //   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128
@@ -26,17 +26,29 @@
 //   xmm0=000 xmm1=001 xmm2=010 xmm3=011 xmm4=100
 //   xmm5=101 xmm6=110 xmm7=111
 
-  // --- Pre-load fold constants into registers ---
-  movdqu xmm6, dqword ptr [r9]        // fold_4x128
+  // fold_1x128 is always needed (fold-by-1 loop and Barrett step 1)
   movdqu xmm7, dqword ptr [r9 + 16]   // fold_1x128
 
-  // --- Load first 64 bytes ---
+  cmp edx, 64
+  jae @large_input
+
+  // --- Small input (16..63 bytes): load 1 block ---
+  movdqu xmm0, dqword ptr [rcx]
+  movq xmm4, qword ptr [r8]
+  pxor xmm0, xmm4
+  add rcx, 16
+  sub edx, 16
+  jmp @fold1_check
+
+@large_input:
+  // --- Large input (>= 64 bytes): load 4 blocks ---
+  movdqu xmm6, dqword ptr [r9]        // fold_4x128
+
   movdqu xmm0, dqword ptr [rcx]
   movdqu xmm1, dqword ptr [rcx + 16]
   movdqu xmm2, dqword ptr [rcx + 32]
   movdqu xmm3, dqword ptr [rcx + 48]
 
-  // XOR current CRC into the low bits of xmm0
   movq xmm4, qword ptr [r8]
   pxor xmm0, xmm4
 
@@ -110,6 +122,7 @@
   pxor xmm0, xmm3
 
   // --- Fold remaining 16-byte blocks ---
+@fold1_check:
   cmp edx, 16
   jb @fold1_done
 
