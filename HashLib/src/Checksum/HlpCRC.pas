@@ -1453,7 +1453,6 @@ var
   LUInt32: UInt32;
   LUInt16: UInt16;
   LUInt8: UInt8;
-
 begin
 
   if Width > Delta then
@@ -1515,7 +1514,6 @@ begin
   end;
 
   Initialize();
-
 end;
 
 end.
