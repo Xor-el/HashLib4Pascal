@@ -11,7 +11,8 @@ uses
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpConverters;
+  HlpConverters,
+  HlpGF2;
 
 type
 
@@ -22,7 +23,8 @@ type
     FCurrentCRC: UInt32;
 
     procedure LocalCRCCompute(const ACRCTable: THashLibMatrixUInt32Array;
-      const AData: THashLibByteArray; AIndex, ALength: Int32);
+      const AData: THashLibByteArray; AIndex, ALength: Int32;
+      APclmulConstants: Pointer);
 
     class function InitCRCTable(APolynomial: UInt32)
       : THashLibMatrixUInt32Array; static;
@@ -41,11 +43,12 @@ type
   strict private
 
   const
-    // Polynomial Reversed
-    Crc32PkzipPolynomial = UInt32($EDB88320);
-    class var
+    Crc32PkzipPolynomial = UInt32($EDB88320); // Polynomial Reversed
+    Crc32PkzipMsbPoly = UInt32($04C11DB7);    // MSB-first form
 
+    class var
       FCrc32PkzipTable: THashLibMatrixUInt32Array;
+      FCrc32PkzipPclmul: TCRCFoldConstants;
 
     class constructor Crc32Pkzip();
 
@@ -63,9 +66,11 @@ type
 
   const
     Crc32CastagnoliPolynomial = UInt32($82F63B78); // Polynomial Reversed
-    class var
+    Crc32CastagnoliMsbPoly = UInt32($1EDC6F41);    // MSB-first form
 
+    class var
       FCrc32CastagnoliTable: THashLibMatrixUInt32Array;
+      FCrc32CastagnoliPclmul: TCRCFoldConstants;
 
     class constructor Crc32Castagnoli();
 
@@ -78,6 +83,9 @@ type
   end;
 
 implementation
+
+uses
+  HlpCRCDispatch;
 
 { TCRC32Fast }
 
@@ -125,7 +133,8 @@ begin
 end;
 
 procedure TCRC32Fast.LocalCRCCompute(const ACRCTable: THashLibMatrixUInt32Array;
-  const AData: THashLibByteArray; AIndex, ALength: Int32);
+  const AData: THashLibByteArray; AIndex, ALength: Int32;
+  APclmulConstants: Pointer);
 const
   Unroll = Int32(4);
   BytesAtOnce = Int32(16 * Unroll);
@@ -135,9 +144,23 @@ var
   LCurrent: PCardinal;
   LUnrolling: Int32;
   LCurrentPtr: PByte;
+  LState: array [0 .. 1] of UInt64;
+  LProcessed: Int32;
 begin
-  LCRC := not FCurrentCRC; // LCRC := System.High(UInt32) xor FCurrentCRC;
+  LCRC := not FCurrentCRC;
   LCRCTable := ACRCTable;
+
+  if Assigned(CRC_Fold_Lsb) and (ALength >= MinSimdBytes) then
+  begin
+    LState[0] := UInt64(LCRC);
+    LState[1] := 0;
+    LProcessed := ALength and (not Int32(15));
+    LCRC := UInt32(CRC_Fold_Lsb(PByte(AData) + AIndex, UInt32(LProcessed),
+      @LState[0], APclmulConstants));
+    System.Inc(AIndex, LProcessed);
+    System.Dec(ALength, LProcessed);
+  end;
+
   LCurrent := PCardinal(PByte(AData) + AIndex);
   while ALength >= BytesAtOnce do
   begin
@@ -185,7 +208,6 @@ begin
   end;
 
   LCurrentPtr := PByte(LCurrent);
-  // remaining 1 to 63 bytes (standard algorithm)
   while (ALength <> 0) do
   begin
     LCRC := (LCRC shr 8) xor LCRCTable[0][(LCRC and $FF) xor LCurrentPtr^];
@@ -193,7 +215,7 @@ begin
     System.Dec(ALength);
   end;
 
-  FCurrentCRC := not LCRC; // FCurrentCRC := LCRC xor System.High(UInt32);
+  FCurrentCRC := not LCRC;
 end;
 
 constructor TCRC32Fast.Create();
@@ -237,12 +259,15 @@ end;
 procedure TCRC32_PKZIP.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 begin
-  LocalCRCCompute(FCrc32PkzipTable, AData, AIndex, ALength);
+  LocalCRCCompute(FCrc32PkzipTable, AData, AIndex, ALength,
+    @FCrc32PkzipPclmul);
 end;
 
 class constructor TCRC32_PKZIP.Crc32Pkzip();
 begin
   FCrc32PkzipTable := InitCRCTable(Crc32PkzipPolynomial);
+  TGF2.GenerateFoldConstants(UInt64(Crc32PkzipMsbPoly), 32, True,
+    FCrc32PkzipPclmul);
 end;
 
 { TCRC32_CASTAGNOLI }
@@ -265,12 +290,15 @@ end;
 procedure TCRC32_CASTAGNOLI.TransformBytes(const AData: THashLibByteArray;
   AIndex, ALength: Int32);
 begin
-  LocalCRCCompute(FCrc32CastagnoliTable, AData, AIndex, ALength);
+  LocalCRCCompute(FCrc32CastagnoliTable, AData, AIndex, ALength,
+    @FCrc32CastagnoliPclmul);
 end;
 
 class constructor TCRC32_CASTAGNOLI.Crc32Castagnoli();
 begin
   FCrc32CastagnoliTable := InitCRCTable(Crc32CastagnoliPolynomial);
+  TGF2.GenerateFoldConstants(UInt64(Crc32CastagnoliMsbPoly), 32, True,
+    FCrc32CastagnoliPclmul);
 end;
 
 end.

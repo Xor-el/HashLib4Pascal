@@ -29,7 +29,10 @@ uses
   HlpPBKDF_ScryptNotBuildInAdapter, HlpArrayUtils, HlpBlake2BP, HlpBlake2SP, 
   HlpSipHash128, HlpBlake2SParams, HlpBlake2BParams, HlpIBlake2SParams, 
   HlpIBlake2BParams, HlpBlake3, HlpXXHash3, HlpXXHash128, HlpSimd, 
-  HlpXXHash3Dispatch;
+  HlpXXHash3Dispatch, HlpBlake2BDispatch, HlpBlake2SDispatch, 
+  HlpArgon2Dispatch, HlpScryptDispatch, HlpBlake3Dispatch, 
+  HlpSHA2_256Dispatch, HlpSHA2_512Dispatch, HlpSHA1Dispatch, 
+  HlpAdler32Dispatch, HlpGF2, HlpCRCDispatch, HlpSHA3Dispatch;
 
 implementation
 

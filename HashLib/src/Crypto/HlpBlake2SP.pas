@@ -231,28 +231,17 @@ end;
 procedure TBlake2SP.ProcessLeafLane(AIdx: Int32; APtrData: PByte;
   ADataLength: UInt64);
 var
-  LLeafHashes: THashLibGenericArray<TBlake2S>;
-  LTemp: THashLibByteArray;
-  LCounter: UInt64;
   LPtrData: PByte;
+  LCounter: UInt64;
 begin
-  System.SetLength(LTemp, BlockSizeInBytes);
+  LPtrData := APtrData + AIdx * BlockSizeInBytes;
+  LCounter := ADataLength;
 
-  LPtrData    := APtrData;
-  LCounter    := ADataLength;
-  LLeafHashes := FLeafHashes;
-
-  // Start at lane offset
-  System.Inc(LPtrData, AIdx * BlockSizeInBytes);
-
-  // Process all full "stripes" of ParallelismDegree * BlockSizeInBytes
   while (LCounter >= StripeSize) do
   begin
-    System.Move(LPtrData^, LTemp[0], BlockSizeInBytes);
-    LLeafHashes[AIdx].TransformBytes(LTemp, 0, BlockSizeInBytes);
-
-    System.Inc(LPtrData, UInt64(StripeSize));
-    LCounter := LCounter - UInt64(StripeSize);
+    FLeafHashes[AIdx].TransformBlock(LPtrData, BlockSizeInBytes, 0);
+    System.Inc(LPtrData, StripeSize);
+    LCounter := LCounter - StripeSize;
   end;
 end;
 

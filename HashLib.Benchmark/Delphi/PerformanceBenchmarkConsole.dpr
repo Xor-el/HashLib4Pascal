@@ -17,7 +17,10 @@ uses
   HlpHMACNotBuildInAdapter in '..\..\HashLib\src\Base\HlpHMACNotBuildInAdapter.pas',
   HlpMultipleTransformNonBlock in '..\..\HashLib\src\Base\HlpMultipleTransformNonBlock.pas',
   HlpAdler32 in '..\..\HashLib\src\Checksum\HlpAdler32.pas',
+  HlpAdler32Dispatch in '..\..\HashLib\src\Checksum\HlpAdler32Dispatch.pas',
   HlpCRC in '..\..\HashLib\src\Checksum\HlpCRC.pas',
+  HlpCRCDispatch in '..\..\HashLib\src\Checksum\HlpCRCDispatch.pas',
+  HlpGF2 in '..\..\HashLib\src\Checksum\HlpGF2.pas',
   HlpCRC16 in '..\..\HashLib\src\Checksum\HlpCRC16.pas',
   HlpCRC32 in '..\..\HashLib\src\Checksum\HlpCRC32.pas',
   HlpCRC32Fast in '..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
@@ -41,21 +44,27 @@ uses
   HlpRIPEMD320 in '..\..\HashLib\src\Crypto\HlpRIPEMD320.pas',
   HlpSHA0 in '..\..\HashLib\src\Crypto\HlpSHA0.pas',
   HlpSHA1 in '..\..\HashLib\src\Crypto\HlpSHA1.pas',
+  HlpSHA1Dispatch in '..\..\HashLib\src\Crypto\HlpSHA1Dispatch.pas',
   HlpSHA2_224 in '..\..\HashLib\src\Crypto\HlpSHA2_224.pas',
   HlpSHA2_256 in '..\..\HashLib\src\Crypto\HlpSHA2_256.pas',
+  HlpSHA2_256Dispatch in '..\..\HashLib\src\Crypto\HlpSHA2_256Dispatch.pas',
+  HlpSHA2_512Dispatch in '..\..\HashLib\src\Crypto\HlpSHA2_512Dispatch.pas',
   HlpSHA2_256Base in '..\..\HashLib\src\Crypto\HlpSHA2_256Base.pas',
   HlpSHA2_384 in '..\..\HashLib\src\Crypto\HlpSHA2_384.pas',
   HlpSHA2_512 in '..\..\HashLib\src\Crypto\HlpSHA2_512.pas',
   HlpSHA2_512_224 in '..\..\HashLib\src\Crypto\HlpSHA2_512_224.pas',
   HlpSHA2_512_256 in '..\..\HashLib\src\Crypto\HlpSHA2_512_256.pas',
   HlpSHA2_512Base in '..\..\HashLib\src\Crypto\HlpSHA2_512Base.pas',
+  HlpSHA3Dispatch in '..\..\HashLib\src\Crypto\HlpSHA3Dispatch.pas',
   HlpSHA3 in '..\..\HashLib\src\Crypto\HlpSHA3.pas',
   HlpSnefru in '..\..\HashLib\src\Crypto\HlpSnefru.pas',
   HlpTiger in '..\..\HashLib\src\Crypto\HlpTiger.pas',
   HlpTiger2 in '..\..\HashLib\src\Crypto\HlpTiger2.pas',
   HlpWhirlPool in '..\..\HashLib\src\Crypto\HlpWhirlPool.pas',
   HlpGOST3411_2012 in '..\..\HashLib\src\Crypto\HlpGOST3411_2012.pas',
+  HlpBlake2BDispatch in '..\..\HashLib\src\Crypto\HlpBlake2BDispatch.pas',
   HlpBlake2B in '..\..\HashLib\src\Crypto\HlpBlake2B.pas',
+  HlpBlake2SDispatch in '..\..\HashLib\src\Crypto\HlpBlake2SDispatch.pas',
   HlpBlake2S in '..\..\HashLib\src\Crypto\HlpBlake2S.pas',
   HlpBlake2BParams in '..\..\HashLib\src\Crypto\Blake2BParams\HlpBlake2BParams.pas',
   HlpBlake2SParams in '..\..\HashLib\src\Crypto\Blake2SParams\HlpBlake2SParams.pas',
@@ -101,11 +110,14 @@ uses
   HlpIBlake2SParams in '..\..\HashLib\src\Interfaces\IBlake2SParams\HlpIBlake2SParams.pas',
   HlpBlake2BP in '..\..\HashLib\src\Crypto\HlpBlake2BP.pas',
   HlpBlake2SP in '..\..\HashLib\src\Crypto\HlpBlake2SP.pas',
+  HlpBlake3Dispatch in '..\..\HashLib\src\Crypto\HlpBlake3Dispatch.pas',
   HlpBlake3 in '..\..\HashLib\src\Crypto\HlpBlake3.pas',
   HlpPBKDF2_HMACNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF2_HMACNotBuildInAdapter.pas',
   HlpPBKDF_Argon2NotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_Argon2NotBuildInAdapter.pas',
+  HlpArgon2Dispatch in '..\..\HashLib\src\KDF\HlpArgon2Dispatch.pas',
   HlpArgon2TypeAndVersion in '..\..\HashLib\src\KDF\HlpArgon2TypeAndVersion.pas',
   HlpPBKDF_ScryptNotBuildInAdapter in '..\..\HashLib\src\KDF\HlpPBKDF_ScryptNotBuildInAdapter.pas',
+  HlpScryptDispatch in '..\..\HashLib\src\KDF\HlpScryptDispatch.pas',
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
@@ -113,30 +125,17 @@ uses
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 
-var
-  StringList: TStringList;
-  Log: String;
+procedure ConsoleLog(const AMessage: String);
+begin
+  Writeln(AMessage);
+end;
 
 begin
   try
-    Writeln('Please be patient, this might take some time' + SLineBreak);
-    StringList := TStringList.Create;
-    try
-      TPerformanceBenchmark.DoBenchmark(StringList);
-
-      for Log in StringList do
-      begin
-        Writeln(Log);
-      end;
-
-    finally
-      StringList.Free;
-    end;
-    Writeln(SLineBreak + 'Performance Benchmark Finished');
+    TPerformanceBenchmark.Run(ConsoleLog);
     ReadLn;
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
   end;
-
 end.
