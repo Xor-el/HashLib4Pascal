@@ -893,10 +893,7 @@ begin
   LHashInstance := TCRC.Create(Width, Polynomial, InitialValue,
     IsInputReflected, IsOutputReflected, OutputXor, CheckValue,
     System.Copy(Names));
-  LHashInstance.FCRCMask := FCRCMask;
-  LHashInstance.FCRCHighBitMask := FCRCHighBitMask;
   LHashInstance.FHash := FHash;
-  LHashInstance.FCacheEntry := FCacheEntry;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -950,6 +947,11 @@ begin
   OutputXor := AOutputXor;
   CheckValue := ACheckValue;
 
+  FCRCHighBitMask := UInt64(1) shl (Width - 1);
+  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
+
+  if Width > MinTableWidth then
+    FCacheEntry := GetOrCreateCacheEntry(Polynomial, Width, IsInputReflected);
 end;
 
 {$REGION 'CRC Standards Implementation'}
@@ -1498,17 +1500,9 @@ end;
 
 procedure TCRC.Initialize;
 begin
-  FCRCHighBitMask := UInt64(1) shl (Width - 1);
-  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
   FHash := InitialValue;
-
-  if Width > MinTableWidth then
-  begin
-    FCacheEntry := GetOrCreateCacheEntry(Polynomial, Width, IsInputReflected);
-
-    if IsInputReflected then
-      FHash := Reflect(FHash, Width);
-  end;
+  if (Width > MinTableWidth) and IsInputReflected then
+    FHash := Reflect(FHash, Width);
 end;
 
 class function TCRC.Reflect(AValue: UInt64; AWidth: Int32): UInt64;
