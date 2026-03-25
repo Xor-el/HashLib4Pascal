@@ -27,16 +27,22 @@ function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;
   {$I ..\Include\Simd\CRC\CRCFoldPclmul.inc}
 end;
 
+function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldVpclmul.inc}
+end;
+
 {$ENDIF HASHLIB_X86_64}
 
 procedure InitDispatch();
 begin
   CRC_Fold_Lsb := nil;
 {$IFDEF HASHLIB_X86_64}
-  if TSimd.HasPCLMULQDQ() then
-  begin
+  if TSimd.HasVPCLMULQDQ() then
+    CRC_Fold_Lsb := @CRC_Fold_Vpclmul
+  else if TSimd.HasPCLMULQDQ() then
     CRC_Fold_Lsb := @CRC_Fold_Pclmul;
-  end;
 {$ENDIF}
 end;
 

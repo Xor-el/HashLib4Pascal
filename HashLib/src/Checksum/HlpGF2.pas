@@ -9,12 +9,14 @@ type
     Lo, Hi: UInt64;
   end;
 
-  // PCLMULQDQ CRC folding and Barrett reduction constants.
-  // Layout must match the assembly expectations in CRCFoldPclmul.inc.
+  // PCLMULQDQ / VPCLMULQDQ CRC folding and Barrett reduction constants.
+  // Layout must match the assembly expectations in CRCFoldPclmul.inc
+  // and CRCFoldVpclmul.inc.
   TCRCFoldConstants = packed record
-    Fold_4x128: array [0 .. 1] of UInt64;   // offset  0: fold-by-4 constants
-    Fold_1x128: array [0 .. 1] of UInt64;   // offset 16: fold-by-1 constants
+    Fold_4x128: array [0 .. 1] of UInt64;   // offset  0: fold-by-4 constants (stride 512)
+    Fold_1x128: array [0 .. 1] of UInt64;   // offset 16: fold-by-1 constants (stride 128)
     Barrett: array [0 .. 1] of UInt64;       // offset 32: Barrett reduction constants
+    Fold_8x128: array [0 .. 1] of UInt64;   // offset 48: fold-by-8 constants (stride 1024)
   end;
 
   TGF2 = class sealed
@@ -252,6 +254,20 @@ begin
   begin
     AConstants.Fold_1x128[0] := LConst1;
     AConstants.Fold_1x128[1] := LConst0;
+  end;
+
+  // --- Fold-by-8 constants (stride = 1024 bits, for VPCLMULQDQ) ---
+  LConst0 := PowerMod(1024 + 64 + LK, APoly, ABits);
+  LConst1 := PowerMod(1024 + LK, APoly, ABits);
+  if AReflected then
+  begin
+    AConstants.Fold_8x128[0] := BitReverse(LConst0 shl (64 - ABits), 64);
+    AConstants.Fold_8x128[1] := BitReverse(LConst1 shl (64 - ABits), 64);
+  end
+  else
+  begin
+    AConstants.Fold_8x128[0] := LConst1;
+    AConstants.Fold_8x128[1] := LConst0;
   end;
 
   // --- Barrett reduction constants ---

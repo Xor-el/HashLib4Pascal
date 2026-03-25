@@ -9,9 +9,10 @@
 //   rcx = AData, edx = ALength (>= 64), r8 = AState, r9 = AConstants
 //   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
 //   AConstants layout (TCRCFoldConstants):
-//     [0..15]  = fold_4x128
-//     [16..31] = fold_1x128
-//     [32..47] = barrett
+//     [0..15]  = Fold_4x128
+//     [16..31] = Fold_1x128
+//     [32..47] = Barrett
+//     [48..63] = Fold_8x128 (unused by this path)
 //   Returns: final CRC in RAX.
 //
 // Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
