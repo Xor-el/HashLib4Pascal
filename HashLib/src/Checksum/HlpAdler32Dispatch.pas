@@ -18,8 +18,7 @@ uses
 const
   ModAdler = UInt32(65521);
   NMAX = UInt32(5552);
-  BLOCK_SIZE = UInt32(32);
-  MAX_BLOCKS_PER_CHUNK = NMAX div BLOCK_SIZE; // 173
+ // MAX_BLOCKS_PER_CHUNK = NMAX div UInt32(32); // 173
 
   Adler32Constants: array [0 .. 63] of Byte = (
     // Offset 0..31: weights [32,31,...,1]
@@ -94,6 +93,8 @@ end;
 
 procedure Adler32_Update_Simd(AData: PByte; ALength: UInt32; ASums: Pointer;
   AProcessBlocks: TProcessBlocksProc);
+const
+  BLOCK_SIZE = UInt32(32);
 var
   LChunkLen, LBlocks: UInt32;
   LPSumA, LPSumB: PUInt32;

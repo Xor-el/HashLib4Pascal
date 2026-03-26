@@ -358,10 +358,8 @@ function TBlake3.TBlake3ChunkState.Node: TBlake3Node;
 begin
   Result := N.Clone();
   // pad the remaining space in the block with zeros
-  TArrayUtils.FillMemory(@(Block[BlockLen]), (System.Length(Block) - BlockLen) *
-    System.SizeOf(Byte), 0);
-  TConverters.le32_copy(@(Block[0]), 0, @(Result.Block[0]), 0,
-    BlockSizeInBytes);
+  TArrayUtils.FillMemory(@(Block[BlockLen]), (Int64(System.Length(Block)) - BlockLen) * System.SizeOf(Byte), 0);
+  TConverters.le32_copy(@(Block[0]), 0, @(Result.Block[0]), 0, BlockSizeInBytes);
   Result.BlockLen := UInt32(BlockLen);
   Result.Flags := Result.Flags or FlagChunkEnd;
 end;
