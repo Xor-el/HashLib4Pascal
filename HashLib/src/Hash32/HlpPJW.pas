@@ -23,7 +23,9 @@ type
     BitsInUnsignedInt = Int32(System.SizeOf(UInt32) * 8);
     ThreeQuarters = Int32(BitsInUnsignedInt * 3) shr 2;
     OneEighth = Int32(BitsInUnsignedInt shr 3);
-    HighBits = UInt32(UInt32MaxValue shl (BitsInUnsignedInt - OneEighth));
+    HighBits = UInt32(not ((UInt32(1) shl (BitsInUnsignedInt - OneEighth)) - 1));
+    //HighBits = UInt32(UInt32MaxValue shl (BitsInUnsignedInt - OneEighth));
+    NotHighBits = HighBits xor UInt32MaxValue;
 
   public
     constructor Create();
@@ -76,7 +78,7 @@ begin
     LTest := FHash and HighBits;
     if (LTest <> 0) then
     begin
-      FHash := ((FHash xor (LTest shr ThreeQuarters)) and (not HighBits));
+      FHash := ((FHash xor (LTest shr ThreeQuarters)) and NotHighBits);
     end;
     System.Inc(LIdx);
     System.Dec(ALength);

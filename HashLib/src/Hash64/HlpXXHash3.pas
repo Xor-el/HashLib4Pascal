@@ -639,10 +639,10 @@ var
 begin
   LSecret := PByte(FState.FCustomSecret);
 
-  if FState.FBufferedSize >= TXXH3Core.XXH_STRIPE_LEN then
+  if FState.FBufferedSize >= UInt32(TXXH3Core.XXH_STRIPE_LEN) then
   begin
     LNbStripes := Int32((FState.FBufferedSize - 1) div
-      TXXH3Core.XXH_STRIPE_LEN);
+      UInt32(TXXH3Core.XXH_STRIPE_LEN));
     LNbStripesSoFar := FState.FNbStripesSoFar;
     TXXH3Core.XXH3_consumeStripes(AAcc, LNbStripesSoFar,
       TXXH3Core.XXH3_STRIPES_PER_BLOCK, PByte(FState.FBuffer), LSecret,
