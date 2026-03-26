@@ -88,10 +88,7 @@ type
       class function DefaultBlake3Node(): TBlake3Node; static;
 
     public
-      class function CreateBlake3Node(const ACV, ABlock: THashLibUInt32Array;
-        ACounter: UInt64; ABlockLen, AFlags: UInt32): TBlake3Node; static;
-
-      class function ParentNode(const ALeft, ARight, AKey: THashLibUInt32Array;
+      class function ParentNode(ALeft, ARight, AKey: PCardinal;
         AFlags: UInt32): TBlake3Node; static;
     end;
 
@@ -122,7 +119,7 @@ type
       class function DefaultBlake3ChunkState(): TBlake3ChunkState; static;
 
     public
-      class function CreateBlake3ChunkState(const AIV: THashLibUInt32Array;
+      class function CreateBlake3ChunkState(AIV: PCardinal;
         AChunkCounter: UInt64; AFlags: UInt32): TBlake3ChunkState; static;
     end;
 
@@ -150,7 +147,7 @@ type
   function HasSubTreeAtHeight(AIdx: Int32): Boolean; inline;
 
   // AddChunkChainingValue appends a chunk to the right edge of the Merkle tree.
-  procedure AddChunkChainingValue(const ACV: THashLibUInt32Array); inline;
+  procedure AddChunkChainingValue(ACV: PCardinal); inline;
 
   class function Len64(AValue: UInt64): Int32; static;
 
@@ -160,12 +157,12 @@ type
   var
     FCS: TBlake3ChunkState;
     FOutputReader: TBlake3OutputReader;
-    FKey: THashLibUInt32Array;
+    FKey: array [0 .. 7] of UInt32;
     FFlags: UInt32;
 
     // log(n) set of Merkle subtree roots, at most one per height.
     // stack [54][8]uint32
-    FStack: THashLibMatrixUInt32Array; // 2^54 * chunkSize = 2^64
+    FStack: array [0 .. 53, 0 .. 7] of UInt32; // 2^54 * chunkSize = 2^64
     // bit vector indicating which stack elems are valid; also number of chunks added
     FUsed: UInt64;
 
@@ -179,7 +176,7 @@ type
       const AKey: THashLibByteArray); overload;
 
     constructor CreateInternal(AHashSize: Int32;
-      const AKeyWords: THashLibUInt32Array; AFlags: UInt32);
+      AKeyWords: PCardinal; AFlags: UInt32);
 
   public
     constructor Create(AHashSize: THashSize = THashSize.hsHashSize256;
@@ -230,7 +227,7 @@ type
     constructor Create(AHashSize: Int32;
       const AKey: THashLibByteArray); overload;
 
-    constructor Create(AHashSize: Int32; const AKeyWords: THashLibUInt32Array;
+    constructor Create(AHashSize: Int32; AKeyWords: PCardinal;
       AFlags: UInt32); overload;
 
     procedure Initialize(); override;
@@ -257,19 +254,6 @@ begin
   Result.Counter := 0;
   Result.BlockLen := 0;
   Result.Flags := 0;
-end;
-
-class function TBlake3.TBlake3Node.CreateBlake3Node(const ACV,
-  ABlock: THashLibUInt32Array; ACounter: UInt64; ABlockLen, AFlags: UInt32)
-  : TBlake3Node;
-begin
-  Result := DefaultBlake3Node();
-  System.Move(ACV[0], Result.CV, System.Length(ACV) * System.SizeOf(UInt32));
-  System.Move(ABlock[0], Result.Block, System.Length(ABlock) *
-    System.SizeOf(UInt32));
-  Result.Counter := ACounter;
-  Result.BlockLen := ABlockLen;
-  Result.Flags := AFlags;
 end;
 
 function TBlake3.TBlake3Node.Clone: TBlake3Node;
@@ -301,14 +285,16 @@ begin
   System.Move(LFull, AResult[0], 8 * System.SizeOf(UInt32));
 end;
 
-class function TBlake3.TBlake3Node.ParentNode(const ALeft, ARight,
-  AKey: THashLibUInt32Array; AFlags: UInt32): TBlake3Node;
-var
-  LBlockWords: THashLibUInt32Array;
+class function TBlake3.TBlake3Node.ParentNode(ALeft, ARight,
+  AKey: PCardinal; AFlags: UInt32): TBlake3Node;
 begin
-  LBlockWords := TArrayUtils.Concatenate(ALeft, ARight);
-  Result := TBlake3Node.CreateBlake3Node(AKey, LBlockWords, 0, BlockSizeInBytes,
-    AFlags or FlagParent);
+  Result := DefaultBlake3Node();
+  System.Move(AKey^, Result.CV[0], 8 * System.SizeOf(UInt32));
+  System.Move(ALeft^, Result.Block[0], 8 * System.SizeOf(UInt32));
+  System.Move(ARight^, Result.Block[8], 8 * System.SizeOf(UInt32));
+  Result.Counter := 0;
+  Result.BlockLen := BlockSizeInBytes;
+  Result.Flags := AFlags or FlagParent;
 end;
 
 { TBlake3.TBlake3ChunkState }
@@ -328,12 +314,11 @@ begin
 end;
 
 class function TBlake3.TBlake3ChunkState.CreateBlake3ChunkState
-  (const AIV: THashLibUInt32Array; AChunkCounter: UInt64; AFlags: UInt32)
+  (AIV: PCardinal; AChunkCounter: UInt64; AFlags: UInt32)
   : TBlake3ChunkState;
 begin
   Result := DefaultBlake3ChunkState;
-  System.Move(AIV[0], Result.N.CV[0], System.Length(AIV) *
-    System.SizeOf(UInt32));
+  System.Move(AIV^, Result.N.CV[0], 8 * System.SizeOf(UInt32));
   Result.N.Counter := AChunkCounter;
   Result.N.BlockLen := BlockSizeInBytes;
   // compress the first block with the start flag set
@@ -531,30 +516,22 @@ begin
 end;
 
 constructor TBlake3.CreateInternal(AHashSize: Int32;
-  const AKeyWords: THashLibUInt32Array; AFlags: UInt32);
-var
-  LIdx: Int32;
+  AKeyWords: PCardinal; AFlags: UInt32);
 begin
   inherited Create(AHashSize, BlockSizeInBytes);
-  FKey := System.Copy(AKeyWords);
+  System.Move(AKeyWords^, FKey[0], 8 * System.SizeOf(UInt32));
   FFlags := AFlags;
-  System.SetLength(FStack, 54);
-  for LIdx := System.Low(FStack) to System.High(FStack) do
-  begin
-    System.SetLength(FStack[LIdx], 8);
-  end;
 end;
 
 constructor TBlake3.Create(AHashSize: Int32; const AKey: THashLibByteArray);
 var
-  LKeyWords: THashLibUInt32Array;
+  LKeyWords: array [0 .. 7] of UInt32;
   LKeyLength: Int32;
 begin
-  System.SetLength(LKeyWords, 8);
   if AKey = nil then
   begin
     System.Move(IV, LKeyWords[0], System.SizeOf(IV));
-    CreateInternal(AHashSize, LKeyWords, 0);
+    CreateInternal(AHashSize, @LKeyWords[0], 0);
   end
   else
   begin
@@ -564,8 +541,8 @@ begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLengthInBytes, LKeyLength]);
     end;
-    TConverters.le32_copy(PByte(AKey), 0, PCardinal(LKeyWords), 0, LKeyLength);
-    CreateInternal(AHashSize, LKeyWords, FlagKeyedHash);
+    TConverters.le32_copy(PByte(AKey), 0, @LKeyWords[0], 0, LKeyLength);
+    CreateInternal(AHashSize, @LKeyWords[0], FlagKeyedHash);
   end;
 end;
 
@@ -576,9 +553,9 @@ end;
 
 procedure TBlake3.Initialize;
 begin
-  FCS := TBlake3ChunkState.CreateBlake3ChunkState(FKey, 0, FFlags);
+  FCS := TBlake3ChunkState.CreateBlake3ChunkState(@FKey[0], 0, FFlags);
   FOutputReader := TBlake3OutputReader.DefaultBlake3OutputReader();
-  TArrayUtils.ZeroFill(FStack);
+  FillChar(FStack, System.SizeOf(FStack), 0);
   FUsed := 0;
 end;
 
@@ -592,10 +569,10 @@ function TBlake3.Clone: IHash;
 var
   LHashInstance: TBlake3;
 begin
-  LHashInstance := TBlake3.CreateInternal(HashSize, FKey, FFlags);
+  LHashInstance := TBlake3.CreateInternal(HashSize, @FKey[0], FFlags);
   LHashInstance.FCS := FCS.Clone();
   LHashInstance.FOutputReader := FOutputReader.Clone();
-  LHashInstance.FStack := TArrayUtils.Clone(FStack);
+  System.Move(FStack, LHashInstance.FStack, System.SizeOf(FStack));
   LHashInstance.FUsed := FUsed;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
@@ -616,37 +593,30 @@ begin
   Result := (FUsed and (1 shl AIdx)) <> 0;
 end;
 
-procedure TBlake3.AddChunkChainingValue(const ACV: THashLibUInt32Array);
+procedure TBlake3.AddChunkChainingValue(ACV: PCardinal);
 var
   LIdx: Int32;
-  LFlags: UInt32;
-  LKey: THashLibUInt32Array;
-  LPtrCV: PCardinal;
 begin
-  LKey := FKey;
-  LFlags := FFlags;
-  LPtrCV := PCardinal(ACV);
   // seek to first open stack slot, merging subtrees as we go
   LIdx := 0;
   while HasSubTreeAtHeight(LIdx) do
   begin
-    TBlake3Node.ParentNode(FStack[LIdx], ACV, LKey, LFlags)
-      .ChainingValue(LPtrCV);
+    TBlake3Node.ParentNode(@FStack[LIdx, 0], ACV, @FKey[0], FFlags)
+      .ChainingValue(ACV);
     System.Inc(LIdx);
   end;
-  FStack[LIdx] := System.Copy(ACV);
+  System.Move(ACV^, FStack[LIdx, 0], 8 * System.SizeOf(UInt32));
   System.Inc(FUsed);
 end;
 
 function TBlake3.RootNode: TBlake3Node;
 var
   LIdx, LTrailingZeros64, LLen64: Int32;
-  LTemp: THashLibUInt32Array;
+  LTemp: array [0 .. 7] of UInt32;
   LPtrTemp: PCardinal;
 begin
   Result := FCS.Node();
-  System.SetLength(LTemp, 8);
-  LPtrTemp := PCardinal(LTemp);
+  LPtrTemp := @LTemp[0];
 
   LTrailingZeros64 := TrailingZeros64(FUsed);
   LLen64 := Len64(FUsed);
@@ -655,7 +625,8 @@ begin
     if HasSubTreeAtHeight(LIdx) then
     begin
       Result.ChainingValue(LPtrTemp);
-      Result := TBlake3Node.ParentNode(FStack[LIdx], LTemp, FKey, FFlags);
+      Result := TBlake3Node.ParentNode(@FStack[LIdx, 0], LPtrTemp,
+        @FKey[0], FFlags);
     end;
   end;
   Result.Flags := Result.Flags or FlagRoot;
@@ -665,27 +636,60 @@ procedure TBlake3.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 var
   LPtrAData: PByte;
-  LCV: THashLibUInt32Array;
-  LCount: Int32;
+  LCV: array [0 .. 7] of UInt32;
+  LCVs: array [0 .. 7, 0 .. 7] of UInt32;
+  LCount, LParDeg, I, LBatchBytes: Int32;
   LPtrCV: PCardinal;
 begin
   LPtrAData := PByte(AData) + AIndex;
-  System.SetLength(LCV, 8);
-  LPtrCV := PCardinal(LCV);
+  LPtrCV := @LCV[0];
+  LParDeg := Blake3_ParallelDegree;
+  LBatchBytes := LParDeg * ChunkSize;
 
+  // Step 1: Complete any partial chunk to reach a clean boundary
+  if (FCS.BytesConsumed > 0) and (ADataLength > 0) then
+  begin
+    LCount := Min(ChunkSize - FCS.BytesConsumed, ADataLength);
+    FCS.Update(LPtrAData, LCount);
+    System.Inc(LPtrAData, LCount);
+    System.Dec(ADataLength, LCount);
+  end;
+
+  // Flush the completed chunk if there's more data to process
+  if FCS.Complete() and (ADataLength > 0) then
+  begin
+    FCS.Node().ChainingValue(LPtrCV);
+    AddChunkChainingValue(LPtrCV);
+    FCS := TBlake3ChunkState.CreateBlake3ChunkState(@FKey[0],
+      FCS.ChunkCounter() + 1, FFlags);
+  end;
+
+  // Step 2: Process full chunk batches in parallel (4x SSE2, 8x AVX2)
+  // At this point FCS.BytesConsumed = 0 whenever ADataLength > 0.
+  // Always leave at least ChunkSize bytes for the sequential path so that
+  // the last chunk ends up in FCS (required by RootNode's invariant).
+  while ADataLength >= LBatchBytes + ChunkSize do
+  begin
+    Blake3_HashMany(LPtrAData, @FKey[0], @LCVs[0, 0],
+      LParDeg, FCS.ChunkCounter(), FFlags);
+    for I := 0 to LParDeg - 1 do
+      AddChunkChainingValue(@LCVs[I, 0]);
+    FCS := TBlake3ChunkState.CreateBlake3ChunkState(@FKey[0],
+      FCS.ChunkCounter() + UInt64(LParDeg), FFlags);
+    System.Inc(LPtrAData, LBatchBytes);
+    System.Dec(ADataLength, LBatchBytes);
+  end;
+
+  // Step 3: Process remaining data sequentially
   while ADataLength > 0 do
   begin
-    // If the current chunk is complete, finalize it and add it to the tree,
-    // then reset the chunk state (but keep incrementing the counter across
-    // chunks).
     if FCS.Complete() then
     begin
       FCS.Node().ChainingValue(LPtrCV);
-      AddChunkChainingValue(LCV);
-      FCS := TBlake3ChunkState.CreateBlake3ChunkState(FKey,
+      AddChunkChainingValue(LPtrCV);
+      FCS := TBlake3ChunkState.CreateBlake3ChunkState(@FKey[0],
         FCS.ChunkCounter() + 1, FFlags);
     end;
-    // Compress input bytes into the current chunk state.
     LCount := Min(ChunkSize - FCS.BytesConsumed, ADataLength);
     FCS.Update(LPtrAData, LCount);
     System.Inc(LPtrAData, LCount);
@@ -709,20 +713,19 @@ class procedure TBlake3.DeriveKey(const ASrcKey, ACtx,
 const
   derivationIVLen = Int32(32);
 var
-  LIVWords: THashLibUInt32Array;
+  LIVWords: array [0 .. 7] of UInt32;
   LDerivationIV: THashLibByteArray;
   LXof: IXOF;
 begin
-  System.SetLength(LIVWords, 8);
   System.Move(IV, LIVWords[0], System.SizeOf(IV));
   // construct the derivation Hasher and get the DerivationIV
-  LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, LIVWords,
+  LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, @LIVWords[0],
     FlagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
-  TConverters.le32_copy(PByte(LDerivationIV), 0, PCardinal(LIVWords), 0,
+  TConverters.le32_copy(PByte(LDerivationIV), 0, @LIVWords[0], 0,
     KeyLengthInBytes);
 
   // derive the SubKey
-  LXof := TBlake3XOF.Create(32, LIVWords, FlagDeriveKeyMaterial);
+  LXof := TBlake3XOF.Create(32, @LIVWords[0], FlagDeriveKeyMaterial);
   LXof.XOFSizeInBits := System.Length(ASubKey) * 8;
   LXof.Initialize;
   LXof.TransformBytes(ASrcKey);
@@ -758,10 +761,10 @@ begin
   // Internal Blake3 Cloning
   LHashInstance.FCS := FCS.Clone();
   LHashInstance.FOutputReader := FOutputReader.Clone();
-  LHashInstance.FStack := TArrayUtils.Clone(FStack);
+  System.Move(FStack, LHashInstance.FStack, System.SizeOf(FStack));
   LHashInstance.FUsed := FUsed;
   LHashInstance.FFlags := FFlags;
-  LHashInstance.FKey := System.Copy(FKey);
+  System.Move(FKey, LHashInstance.FKey, System.SizeOf(FKey));
 
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
@@ -774,7 +777,7 @@ begin
 end;
 
 constructor TBlake3XOF.Create(AHashSize: Int32;
-  const AKeyWords: THashLibUInt32Array; AFlags: UInt32);
+  AKeyWords: PCardinal; AFlags: UInt32);
 begin
   inherited CreateInternal(AHashSize, AKeyWords, AFlags);
   FFinalized := False;
