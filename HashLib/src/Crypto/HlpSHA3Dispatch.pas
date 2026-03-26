@@ -6,14 +6,18 @@ interface
 
 type
   TKeccakF1600Proc = procedure(AState: Pointer);
+  TKeccakF1600AbsorbProc = procedure(AState: Pointer; AData: PByte;
+    ABlockCount: Int32; ABlockSize: Int32);
 
 var
   KeccakF1600_Permute: TKeccakF1600Proc;
+  KeccakF1600_Absorb: TKeccakF1600AbsorbProc;
 
 implementation
 
 uses
   HlpBits,
+  HlpConverters,
   HlpSimd;
 
 // =============================================================================
@@ -378,6 +382,30 @@ begin
 end;
 
 // =============================================================================
+// Scalar absorb: XOR + permute loop (no SIMD)
+// =============================================================================
+
+procedure KeccakF1600_Absorb_Scalar(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32);
+var
+  LPState: PUInt64;
+  LData: array [0 .. 20] of UInt64;
+  LBlockSizeWords, I, J: Int32;
+begin
+  LPState := PUInt64(AState);
+  LBlockSizeWords := ABlockSize shr 3;
+  for I := 0 to ABlockCount - 1 do
+  begin
+    TConverters.le64_copy(AData, 0, @LData[0], 0, ABlockSize);
+    for J := 0 to LBlockSizeWords - 1 do
+      LPState[J] := LPState[J] xor LData[J];
+    KeccakF1600_Scalar(AState);
+    System.Inc(AData, ABlockSize);
+  end;
+  System.FillChar(LData, System.SizeOf(LData), UInt64(0));
+end;
+
+// =============================================================================
 // SIMD implementations (x86-64 only)
 // =============================================================================
 
@@ -388,6 +416,7 @@ const
     RhotatesLeft: array [0..23] of UInt64;
     RhotatesRight: array [0..23] of UInt64;
     Iotas: array [0..95] of UInt64;
+    Jagged: array [0..24] of Int32;
   end = (
     RhotatesLeft: (
        3, 18, 36, 41,   //  ymm2: [2][0] [4][0] [1][0] [3][0]
@@ -427,7 +456,11 @@ const
       $8000000080008081, $8000000080008081, $8000000080008081, $8000000080008081,
       $8000000000008080, $8000000000008080, $8000000000008080, $8000000000008080,
       $0000000080000001, $0000000080000001, $0000000080000001, $0000000080000001,
-      $8000000080008008, $8000000080008008, $8000000080008008, $8000000080008008)
+      $8000000080008008, $8000000080008008, $8000000080008008, $8000000080008008);
+    Jagged: (
+      0, 32, 40, 48, 56, 80, 192, 104, 144, 184,
+      64, 128, 200, 176, 120, 88, 96, 168, 208, 152,
+      72, 160, 136, 112, 216)
   );
 
 procedure KeccakF1600_Avx2(AState: Pointer; AConstants: Pointer);
@@ -438,6 +471,18 @@ end;
 procedure KeccakF1600_Avx2_Wrap(AState: Pointer);
 begin
   KeccakF1600_Avx2(AState, @K_KECCAK);
+end;
+
+procedure KeccakF1600_Avx2_Absorb(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin.inc}
+  {$I ..\Include\Simd\SHA3\KeccakF1600Avx2Absorb.inc}
+end;
+
+procedure KeccakF1600_Avx2_Absorb_Wrap(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32);
+begin
+  KeccakF1600_Avx2_Absorb(AState, AData, ABlockCount, ABlockSize, @K_KECCAK);
 end;
 
 {$ENDIF HASHLIB_X86_64}
@@ -453,11 +498,13 @@ begin
     TSimdLevel.AVX2:
     begin
       KeccakF1600_Permute := @KeccakF1600_Avx2_Wrap;
+      KeccakF1600_Absorb := @KeccakF1600_Avx2_Absorb_Wrap;
     end;
 {$ENDIF}
     TSimdLevel.Scalar:
     begin
       KeccakF1600_Permute := @KeccakF1600_Scalar;
+      KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
     end;
   end;
 end;

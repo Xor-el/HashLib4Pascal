@@ -48,6 +48,8 @@ type
 
   public
     procedure Initialize; override;
+    procedure TransformBytes(const AData: THashLibByteArray;
+      AIndex, ALength: Int32); override;
 
   end;
 
@@ -404,21 +406,47 @@ begin
 end;
 
 procedure TSHA3.TransformBlock(AData: PByte; ADataLength: Int32; AIndex: Int32);
-var
-  LData: array [0 .. 20] of UInt64;
-  LInnerIdx, LBlockCount: Int32;
 begin
-  TConverters.le64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
-  LInnerIdx := 0;
-  LBlockCount := BlockSize shr 3;
-  while LInnerIdx < LBlockCount do
+  KeccakF1600_Absorb(@FState[0], AData + AIndex, 1, BlockSize);
+end;
+
+procedure TSHA3.TransformBytes(const AData: THashLibByteArray;
+  AIndex, ALength: Int32);
+var
+  LPtrData: PByte;
+  LBlockCount: Int32;
+begin
+{$IFDEF DEBUG}
+  System.Assert(AIndex >= 0);
+  System.Assert(ALength >= 0);
+  System.Assert(AIndex + ALength <= System.Length(AData));
+{$ENDIF DEBUG}
+  LPtrData := PByte(AData);
+
+  if (not FBuffer.IsEmpty) then
   begin
-    FState[LInnerIdx] := FState[LInnerIdx] xor LData[LInnerIdx];
-    System.Inc(LInnerIdx);
+    if (FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ALength,
+      FProcessedBytesCount)) then
+    begin
+      TransformBuffer();
+    end;
   end;
 
-  KeccakF1600_Permute(@FState[0]);
-  System.FillChar(LData, System.SizeOf(LData), UInt64(0));
+  LBlockCount := ALength div FBuffer.Length;
+  if LBlockCount > 0 then
+  begin
+    FProcessedBytesCount := FProcessedBytesCount +
+      UInt64(LBlockCount) * UInt64(FBuffer.Length);
+    KeccakF1600_Absorb(@FState[0], LPtrData + AIndex, LBlockCount, BlockSize);
+    AIndex := AIndex + (LBlockCount * FBuffer.Length);
+    ALength := ALength - (LBlockCount * FBuffer.Length);
+  end;
+
+  if (ALength > 0) then
+  begin
+    FBuffer.Feed(LPtrData, System.Length(AData), AIndex, ALength,
+      FProcessedBytesCount);
+  end;
 end;
 
 { TSHA3_224 }
