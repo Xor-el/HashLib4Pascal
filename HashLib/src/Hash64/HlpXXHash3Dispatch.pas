@@ -174,8 +174,12 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  XXH3_Accumulate512 := @XXH3_Accumulate512_Scalar;
+  XXH3_Accumulate := @XXH3_Accumulate_Scalar;
+  XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
+  XXH3_InitSecret := @XXH3_InitSecret_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Avx2;
@@ -190,15 +194,8 @@ begin
       XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Sse2;
       XXH3_InitSecret := @XXH3_InitSecret_Sse2;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      XXH3_Accumulate512 := @XXH3_Accumulate512_Scalar;
-      XXH3_Accumulate := @XXH3_Accumulate_Scalar;
-      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
-      XXH3_InitSecret := @XXH3_InitSecret_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

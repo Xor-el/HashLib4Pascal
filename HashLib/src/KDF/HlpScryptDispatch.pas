@@ -190,8 +190,9 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  Scrypt_SalsaXor := @Scrypt_SalsaXor_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Avx2;
@@ -200,12 +201,8 @@ begin
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      Scrypt_SalsaXor := @Scrypt_SalsaXor_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

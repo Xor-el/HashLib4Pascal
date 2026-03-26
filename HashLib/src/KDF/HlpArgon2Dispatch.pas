@@ -125,8 +125,9 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  Argon2_FillBlock := @Argon2_FillBlock_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Avx2;
@@ -135,12 +136,8 @@ begin
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Sse2;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      Argon2_FillBlock := @Argon2_FillBlock_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

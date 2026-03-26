@@ -493,20 +493,17 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  KeccakF1600_Permute := @KeccakF1600_Scalar;
+  KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       KeccakF1600_Permute := @KeccakF1600_Avx2_Wrap;
       KeccakF1600_Absorb := @KeccakF1600_Avx2_Absorb_Wrap;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      KeccakF1600_Permute := @KeccakF1600_Scalar;
-      KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

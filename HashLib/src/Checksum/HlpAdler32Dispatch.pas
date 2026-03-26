@@ -153,8 +153,9 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  Adler32_Update := @Adler32_Update_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       Adler32_Update := @Adler32_Update_Avx2;
@@ -167,12 +168,8 @@ begin
     begin
       Adler32_Update := @Adler32_Update_Sse2;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      Adler32_Update := @Adler32_Update_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization
