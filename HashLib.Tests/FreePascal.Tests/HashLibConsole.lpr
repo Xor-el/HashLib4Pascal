@@ -3,6 +3,7 @@ program HashLib.Tests;
 {$mode objfpc}{$H+}
 
 uses
+  {$IFDEF UNIX}cwstring,{$ENDIF}
   consoletestrunner,
   HashLibTestBase,
   TestVectors,
