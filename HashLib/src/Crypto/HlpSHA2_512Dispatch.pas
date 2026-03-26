@@ -167,8 +167,9 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  SHA512_Compress := @SHA512_Compress_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       SHA512_Compress := @SHA512_Compress_Avx2_Wrap;
@@ -181,12 +182,8 @@ begin
     begin
       SHA512_Compress := @SHA512_Compress_Sse2_Wrap;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      SHA512_Compress := @SHA512_Compress_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

@@ -687,12 +687,11 @@ end;
 
 procedure InitDispatch();
 begin
-  // HashMany always has a scalar fallback available
+  Blake3_Compress := @Blake3_Compress_Scalar;
   Blake3_HashMany := @Blake3_HashMany_Scalar;
   Blake3_ParallelDegree := 1;
-
-  case TSimd.GetActiveLevel() of
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       Blake3_Compress := @Blake3_Compress_Avx2;
@@ -705,12 +704,8 @@ begin
       Blake3_HashMany := @Blake3_HashMany_Sse2;
       Blake3_ParallelDegree := 4;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      Blake3_Compress := @Blake3_Compress_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization

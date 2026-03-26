@@ -119,8 +119,9 @@ end;
 
 procedure InitDispatch();
 begin
-  case TSimd.GetActiveLevel() of
+  Blake2B_Compress := @Blake2B_Compress_Scalar;
 {$IFDEF HASHLIB_X86_64}
+  case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
       Blake2B_Compress := @Blake2B_Compress_Avx2;
@@ -129,12 +130,8 @@ begin
     begin
       Blake2B_Compress := @Blake2B_Compress_Sse2;
     end;
-{$ENDIF}
-    TSimdLevel.Scalar:
-    begin
-      Blake2B_Compress := @Blake2B_Compress_Scalar;
-    end;
   end;
+{$ENDIF}
 end;
 
 initialization
