@@ -43,6 +43,12 @@
     {$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
   {$IFEND}
 
+{============================== CPU Architecture ==============================}
+
+{$IF DEFINED(CPUX64)}
+  {$DEFINE HASHLIB_X86_64}
+{$IFEND}
+
 {$ENDIF}
 
 {========================== Common Compiler Settings ==========================}
@@ -54,14 +60,7 @@
 {$SCOPEDENUMS ON}
 {$POINTERMATH ON}
 
-{============================== CPU Architecture ==============================}
-
-{$IF DEFINED(CPUX64)}
-  {$DEFINE HASHLIB_X86_64}
-{$IFEND}
-
 {============================== SIMD Settings =================================}
-
 
 // Uncomment ONE of the following to force a specific SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SCALAR}

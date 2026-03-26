@@ -36,6 +36,12 @@
 
 {$DEFINE USE_UNROLLED_VARIANT}
 
+{============================== CPU Architecture ==============================}
+
+{$IF DEFINED(CPUX64)}
+  {$DEFINE HASHLIB_X86_64}
+{$IFEND}
+
 {========================= Compiler Mode & Optimizations ======================}
 
 {$MODE DELPHI}
