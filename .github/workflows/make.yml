@@ -23,6 +23,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - ubuntu-24.04-arm
           - windows-latest
 
     steps:
@@ -31,8 +32,16 @@ jobs:
         with:
           submodules: true
 
-      - name: Build on Linux
-        if: runner.os == 'Linux'
+      - name: Build on Linux (x86_64)
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        shell: bash
+        run: |
+          set -xeuo pipefail
+          sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
+          instantfpc -Fu/usr/lib/lazarus/*/components/lazutils .github/workflows/make.pas
+
+      - name: Build on Linux (AArch64)
+        if: runner.os == 'Linux' && runner.arch == 'ARM64'
         shell: bash
         run: |
           set -xeuo pipefail
