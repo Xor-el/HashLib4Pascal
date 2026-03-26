@@ -625,6 +625,60 @@ procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
   {$I ..\Include\Simd\Blake3\Blake3CompressAvx2.inc}
 end;
 
+procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2.inc}
+end;
+
+procedure Blake3_Hash8_Avx2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash8Avx2.inc}
+end;
+
+// Cascade wrappers matching the official BLAKE3 dispatch pattern:
+// AVX2 hash_many: hash8 -> delegate remainder to SSE2 hash_many
+// SSE2 hash_many: hash4 -> delegate remainder to scalar hash_many
+
+procedure Blake3_HashMany_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+var
+  LPInput, LPOut: PByte;
+begin
+  LPInput := PByte(AInput);
+  LPOut := PByte(AOut);
+  while ANumChunks >= 4 do
+  begin
+    Blake3_Hash4_Sse2(LPInput, AKey, LPOut, 4, ACounter, AFlags);
+    System.Inc(LPInput, 4 * 1024);
+    System.Inc(LPOut, 4 * 32);
+    System.Inc(ACounter, 4);
+    System.Dec(ANumChunks, 4);
+  end;
+  if ANumChunks > 0 then
+    Blake3_HashMany_Scalar(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
+end;
+
+procedure Blake3_HashMany_Avx2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+var
+  LPInput, LPOut: PByte;
+begin
+  LPInput := PByte(AInput);
+  LPOut := PByte(AOut);
+  while ANumChunks >= 8 do
+  begin
+    Blake3_Hash8_Avx2(LPInput, AKey, LPOut, 8, ACounter, AFlags);
+    System.Inc(LPInput, 8 * 1024);
+    System.Inc(LPOut, 8 * 32);
+    System.Inc(ACounter, 8);
+    System.Dec(ANumChunks, 8);
+  end;
+  if ANumChunks > 0 then
+    Blake3_HashMany_Sse2(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
+end;
+
 {$ENDIF HASHLIB_X86_64}
 
 // =============================================================================
@@ -642,11 +696,13 @@ begin
     TSimdLevel.AVX2:
     begin
       Blake3_Compress := @Blake3_Compress_Avx2;
+      Blake3_HashMany := @Blake3_HashMany_Avx2;
       Blake3_ParallelDegree := 8;
     end;
     TSimdLevel.SSE2, TSimdLevel.SSSE3:
     begin
       Blake3_Compress := @Blake3_Compress_Sse2;
+      Blake3_HashMany := @Blake3_HashMany_Sse2;
       Blake3_ParallelDegree := 4;
     end;
 {$ENDIF}

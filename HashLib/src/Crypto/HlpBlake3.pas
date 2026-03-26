@@ -638,13 +638,12 @@ var
   LPtrAData: PByte;
   LCV: array [0 .. 7] of UInt32;
   LCVs: array [0 .. 7, 0 .. 7] of UInt32;
-  LCount, LParDeg, I, LBatchBytes: Int32;
+  LCount, LParDeg, I, LBatchBytes, LNumChunks: Int32;
   LPtrCV: PCardinal;
 begin
   LPtrAData := PByte(AData) + AIndex;
   LPtrCV := @LCV[0];
   LParDeg := Blake3_ParallelDegree;
-  LBatchBytes := LParDeg * ChunkSize;
 
   // Step 1: Complete any partial chunk to reach a clean boundary
   if (FCS.BytesConsumed > 0) and (ADataLength > 0) then
@@ -668,14 +667,19 @@ begin
   // At this point FCS.BytesConsumed = 0 whenever ADataLength > 0.
   // Always leave at least ChunkSize bytes for the sequential path so that
   // the last chunk ends up in FCS (required by RootNode's invariant).
-  while ADataLength >= LBatchBytes + ChunkSize do
+  // HashMany cascades internally (e.g. AVX2: hash8 -> hash4 -> scalar).
+  while ADataLength >= 2 * ChunkSize do
   begin
+    LNumChunks := (ADataLength div ChunkSize) - 1;
+    if LNumChunks > LParDeg then
+      LNumChunks := LParDeg;
     Blake3_HashMany(LPtrAData, @FKey[0], @LCVs[0, 0],
-      LParDeg, FCS.ChunkCounter(), FFlags);
-    for I := 0 to LParDeg - 1 do
+      LNumChunks, FCS.ChunkCounter(), FFlags);
+    for I := 0 to LNumChunks - 1 do
       AddChunkChainingValue(@LCVs[I, 0]);
+    LBatchBytes := LNumChunks * ChunkSize;
     FCS := TBlake3ChunkState.CreateBlake3ChunkState(@FKey[0],
-      FCS.ChunkCounter() + UInt64(LParDeg), FFlags);
+      FCS.ChunkCounter() + UInt64(LNumChunks), FFlags);
     System.Inc(LPtrAData, LBatchBytes);
     System.Dec(ADataLength, LBatchBytes);
   end;
