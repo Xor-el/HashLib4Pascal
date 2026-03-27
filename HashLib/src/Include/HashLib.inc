@@ -62,8 +62,11 @@
 
 {============================== SIMD Settings =================================}
 
-// Uncomment ONE of the following to force a specific SIMD dispatch level:
+// Uncomment to force scalar dispatch (available on all platforms):
 // {$DEFINE HASHLIB_FORCE_SCALAR}
+
+{$IFDEF HASHLIB_X86_64}
+// Uncomment ONE to force a specific x86-64 SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SSE2}
 // {$DEFINE HASHLIB_FORCE_SSSE3}
 
@@ -72,5 +75,6 @@
   OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
   {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
+{$ENDIF}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)
