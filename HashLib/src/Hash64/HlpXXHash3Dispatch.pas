@@ -106,7 +106,7 @@ end;
 // SSE2 and AVX2 implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 // ----- SSE2 -----
 
@@ -166,7 +166,7 @@ begin
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -178,7 +178,7 @@ begin
   XXH3_Accumulate := @XXH3_Accumulate_Scalar;
   XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
   XXH3_InitSecret := @XXH3_InitSecret_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

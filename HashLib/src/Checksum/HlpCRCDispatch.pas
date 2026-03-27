@@ -24,7 +24,7 @@ implementation
 uses
   HlpSimd;
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
@@ -50,13 +50,13 @@ function CRC_Fold_Vpclmul_Msb(AData: PByte; ALength: UInt32;
   {$I ..\Include\Simd\CRC\CRCFoldVpclmulMsb.inc}
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 procedure InitDispatch();
 begin
   CRC_Fold_Lsb := nil;
   CRC_Fold_Msb := nil;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   if TSimd.HasVPCLMULQDQ() then
   begin
     CRC_Fold_Lsb := @CRC_Fold_Vpclmul;

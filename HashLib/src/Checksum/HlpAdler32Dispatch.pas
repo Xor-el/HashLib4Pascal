@@ -67,7 +67,7 @@ end;
 // SIMD implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 type
   TProcessBlocksProc = procedure(AData: PByte; ANumBlocks: UInt32;
@@ -145,7 +145,7 @@ begin
   Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Avx2);
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -154,7 +154,7 @@ end;
 procedure InitDispatch();
 begin
   Adler32_Update := @Adler32_Update_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

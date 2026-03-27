@@ -105,7 +105,7 @@ end;
 // SIMD implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA1_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
@@ -145,7 +145,7 @@ begin
   SHA1_Compress_Avx2(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -154,7 +154,7 @@ end;
 procedure InitDispatch();
 begin
   SHA1_Compress := @SHA1_Compress_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   if TSimd.HasSHANI() then
   begin
     SHA1_Compress := @SHA1_Compress_ShaNi_Wrap;
