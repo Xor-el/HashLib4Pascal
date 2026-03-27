@@ -40,6 +40,7 @@
 
 {$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
+  {$DEFINE HASHLIB_X86_64_ASM}
 {$IFEND}
 
 {========================= Compiler Mode & Optimizations ======================}

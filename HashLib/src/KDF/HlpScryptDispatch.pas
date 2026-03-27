@@ -170,7 +170,7 @@ end;
 // SSE2 and AVX2 implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
@@ -182,7 +182,7 @@ procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Avx2.inc}
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -191,7 +191,7 @@ end;
 procedure InitDispatch();
 begin
   Scrypt_SalsaXor := @Scrypt_SalsaXor_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

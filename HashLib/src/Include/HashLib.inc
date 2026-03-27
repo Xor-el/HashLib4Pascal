@@ -47,6 +47,9 @@
 
 {$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
+  {$IFDEF MSWINDOWS}
+    {$DEFINE HASHLIB_X86_64_ASM}
+  {$ENDIF}
 {$IFEND}
 
 {$ENDIF}
@@ -65,7 +68,7 @@
 // Uncomment to force scalar dispatch (available on all platforms):
 // {$DEFINE HASHLIB_FORCE_SCALAR}
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 // Uncomment ONE to force a specific x86-64 SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SSE2}
 // {$DEFINE HASHLIB_FORCE_SSSE3}

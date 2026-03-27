@@ -29,7 +29,7 @@ type
 
 implementation
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 type
   TCpuIdResult = record
@@ -101,17 +101,17 @@ asm
 end;
 {$ENDIF}
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 { TSimd }
 
 class function TSimd.CPUHasSSE2(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(1, 0, @LCpuId);
   Result := (LCpuId.RegEDX and (1 shl 26)) <> 0;
 {$ELSE}
@@ -120,12 +120,12 @@ begin
 end;
 
 class function TSimd.CPUHasSSSE3(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(1, 0, @LCpuId);
   // SSSE3: ECX bit 9
   Result := (LCpuId.RegECX and (1 shl 9)) <> 0;
@@ -135,13 +135,13 @@ begin
 end;
 
 class function TSimd.CPUHasAVX2(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
   LXcr0: UInt64;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(1, 0, @LCpuId);
 
   // OSXSAVE: ECX bit 27 (required for OS AVX state saving)
@@ -164,12 +164,12 @@ begin
 end;
 
 class function TSimd.CPUHasSHANI(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(7, 0, @LCpuId);
   // SHA-NI: EBX bit 29
   Result := (LCpuId.RegEBX and (1 shl 29)) <> 0;
@@ -179,12 +179,12 @@ begin
 end;
 
 class function TSimd.CPUHasPCLMULQDQ(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(1, 0, @LCpuId);
   // PCLMULQDQ: ECX bit 1
   Result := (LCpuId.RegECX and (1 shl 1)) <> 0;
@@ -194,12 +194,12 @@ begin
 end;
 
 class function TSimd.CPUHasVPCLMULQDQ(): Boolean;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   CpuIdQuery(7, 0, @LCpuId);
   // VPCLMULQDQ: ECX bit 10
   Result := (LCpuId.RegECX and (1 shl 10)) <> 0;

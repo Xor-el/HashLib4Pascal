@@ -105,7 +105,7 @@ end;
 // SSE2 and AVX2 implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
@@ -117,7 +117,7 @@ procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int3
   {$I ..\Include\Simd\Argon2\Argon2FillBlockAvx2.inc}
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -126,7 +126,7 @@ end;
 procedure InitDispatch();
 begin
   Argon2_FillBlock := @Argon2_FillBlock_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

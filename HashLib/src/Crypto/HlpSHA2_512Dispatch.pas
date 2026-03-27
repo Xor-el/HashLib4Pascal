@@ -124,7 +124,7 @@ end;
 // SIMD implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
@@ -159,7 +159,7 @@ begin
   SHA512_Compress_Avx2(AState, AData, ANumBlocks, @K512);
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -168,7 +168,7 @@ end;
 procedure InitDispatch();
 begin
   SHA512_Compress := @SHA512_Compress_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

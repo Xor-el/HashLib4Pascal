@@ -97,7 +97,7 @@ end;
 // SSE2 and AVX2 implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Blake2S_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
@@ -109,7 +109,7 @@ procedure Blake2S_Compress_Avx2(AState, AMsg, ACounterFlags, AIV: Pointer);
   {$I ..\Include\Simd\Blake2S\Blake2SCompressAvx2.inc}
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -118,7 +118,7 @@ end;
 procedure InitDispatch();
 begin
   Blake2S_Compress := @Blake2S_Compress_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin

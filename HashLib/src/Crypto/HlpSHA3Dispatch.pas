@@ -409,7 +409,7 @@ end;
 // SIMD implementations (x86-64 only)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
 
 const
   K_KECCAK: packed record
@@ -485,7 +485,7 @@ begin
   KeccakF1600_Avx2_Absorb(AState, AData, ABlockCount, ABlockSize, @K_KECCAK);
 end;
 
-{$ENDIF HASHLIB_X86_64}
+{$ENDIF HASHLIB_X86_64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -495,7 +495,7 @@ procedure InitDispatch();
 begin
   KeccakF1600_Permute := @KeccakF1600_Scalar;
   KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
-{$IFDEF HASHLIB_X86_64}
+{$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
     begin
