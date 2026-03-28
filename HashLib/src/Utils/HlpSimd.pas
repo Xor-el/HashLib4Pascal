@@ -36,70 +36,13 @@ type
     RegEAX, RegEBX, RegECX, RegEDX: UInt32;
   end;
 
-{$IFDEF FPC}
 procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; AResult: Pointer);
-  assembler; nostackframe;
-asm
-  push rbx
-  {$IFDEF MSWINDOWS}
-  mov eax, ecx
-  mov ecx, edx
-  cpuid
-  mov dword ptr [r8], eax
-  mov dword ptr [r8 + 4], ebx
-  mov dword ptr [r8 + 8], ecx
-  mov dword ptr [r8 + 12], edx
-  {$ELSE}
-  mov eax, edi
-  mov ecx, esi
-  mov r8, rdx
-  cpuid
-  mov dword ptr [r8], eax
-  mov dword ptr [r8 + 4], ebx
-  mov dword ptr [r8 + 8], ecx
-  mov dword ptr [r8 + 12], edx
-  {$ENDIF}
-  pop rbx
+  {$I ..\Include\Simd\CpuDetect\CpuIdQuery.inc}
 end;
-{$ELSE}
-procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; AResult: Pointer);
-asm
-  .PUSHNV RBX
-  mov eax, ecx
-  mov ecx, edx
-  cpuid
-  mov dword ptr [r8], eax
-  mov dword ptr [r8 + 4], ebx
-  mov dword ptr [r8 + 8], ecx
-  mov dword ptr [r8 + 12], edx
-end;
-{$ENDIF}
 
-{$IFDEF FPC}
 procedure XGetBvQuery(AResult: Pointer);
-  assembler; nostackframe;
-asm
-  {$IFDEF MSWINDOWS}
-  mov r8, rcx
-  {$ELSE}
-  mov r8, rdi
-  {$ENDIF}
-  xor ecx, ecx
-  xgetbv
-  mov dword ptr [r8], eax
-  mov dword ptr [r8 + 4], edx
+  {$I ..\Include\Simd\CpuDetect\XGetBvQuery.inc}
 end;
-{$ELSE}
-procedure XGetBvQuery(AResult: Pointer);
-asm
-  .noframe
-  mov r8, rcx
-  xor ecx, ecx
-  xgetbv
-  mov dword ptr [r8], eax
-  mov dword ptr [r8 + 4], edx
-end;
-{$ENDIF}
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
