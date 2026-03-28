@@ -29,7 +29,6 @@ resourcestring
 type
   TBlake3 = class(THash, ICryptoNotBuildIn, ITransformBlock)
   strict private
-{$REGION 'Consts'}
   const
     ChunkSize = Int32(1024);
     BlockSizeInBytes = Int32(64);
@@ -48,7 +47,6 @@ type
 
     IV: array [0 .. 7] of UInt32 = ($6A09E667, $BB67AE85, $3C6EF372, $A54FF53A,
       $510E527F, $9B05688C, $1F83D9AB, $5BE0CD19);
-{$ENDREGION}
 
     // A TBlake3Node represents a chunk or parent in the BLAKE3 Merkle tree. In BLAKE3
     // terminology, the elements of the bottom layer (aka "leaves") of the tree are

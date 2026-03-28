@@ -32,8 +32,6 @@ type
     procedure Finish();
     procedure ProcessPendings();
 
-{$REGION 'Consts'}
-
   const
     CKEY = UInt32($0);
     // to bypass Internal error (200706094) on FPC, We use "Typed Constant".
@@ -43,7 +41,6 @@ type
     C2 = UInt64($4CF5AD432745937F);
     C3 = UInt32($52DCE729);
     C4 = UInt32($38495AB5);
-{$ENDREGION}
     function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;

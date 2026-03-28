@@ -18,8 +18,6 @@ type
   var
     FHash: THashLibUInt32Array;
 
-{$REGION 'Consts'}
-
   const
     SRot: array [0 .. 19] of Int32 = (5, 11, 7, 15, 6, 13, 8, 14, 7, 12, 9, 11,
       8, 15, 6, 12, 9, 14, 5, 13);
@@ -33,7 +31,6 @@ type
       6, 15, 17, 8, 1, 10, 3, 18, 7, 2, 13, 8, 19, 3, 14, 9, 4, 16, 15, 10, 5,
       0, 17, 11, 6, 1, 12);
 
-{$ENDREGION}
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;

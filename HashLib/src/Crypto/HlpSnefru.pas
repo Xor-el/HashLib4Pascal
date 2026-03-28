@@ -238,7 +238,6 @@ end;
 
 class constructor TSnefru.Snefru;
 begin
-{$REGION 'Consts'}
   FSBoxes := THashLibMatrixUInt32Array.Create
     (THashLibUInt32Array.Create($64F9001B, $FEDDCDF6, $7C8FF1E2, $11D71514,
     $8B8C18D3, $DDDF881E, $6EAB5056, $88CED8E1, $49148959, $69C56FD5, $B7994F03,
@@ -834,7 +833,6 @@ begin
     $D03B24C9, $F412601E, $6D72A243, $0E018DFD, $89F3721A, $C94F4134, $2F992F20,
     $4D87253C));
 
-{$ENDREGION}
 end;
 
 end.

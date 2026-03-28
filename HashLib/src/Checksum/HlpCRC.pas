@@ -24,8 +24,6 @@ resourcestring
   SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';
   SWidthOutOfRange = 'Width Must be Between 3 and 64. "%d"';
 
-{$REGION 'CRC Standards'}
-
 type
   /// <summary>
   /// Enum of all defined and implemented CRC standards.
@@ -572,8 +570,6 @@ type
     /// </summary>
     CRC64_Jones);
 
-{$ENDREGION}
-
 type
   TCRC = class sealed(THash, IChecksum, ICRC, ITransformBlock)
 
@@ -953,8 +949,6 @@ begin
   if Width > MinTableWidth then
     FCacheEntry := GetOrCreateCacheEntry(Polynomial, Width, IsInputReflected);
 end;
-
-{$REGION 'CRC Standards Implementation'}
 
 class function TCRC.CreateCRCObject(AValue: TCRCStandard): ICRC;
 begin
@@ -1416,8 +1410,6 @@ begin
 
   end;
 end;
-
-{$ENDREGION}
 
 class constructor TCRC.CreateCRCCache;
 begin

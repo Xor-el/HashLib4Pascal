@@ -353,7 +353,6 @@ end;
 
 class constructor TGOST3411_2012.GOST3411_2012;
 begin
-{$REGION 'Consts'}
   FC := THashLibMatrixByteArray.Create(THashLibByteArray.Create(Byte($B1),
     Byte($08), Byte($5B), Byte($DA), Byte($1E), Byte($CA), Byte($DA), Byte($E9),
     Byte($EB), Byte($CB), Byte($2F), Byte($81), Byte($C0), Byte($65), Byte($7C),
@@ -1517,7 +1516,6 @@ begin
     UInt64($938290A9ECD1DBB3), UInt64($88E3B293344DD172),
     UInt64($2734158C250FA3D6)));
 
-{$ENDREGION}
 end;
 
 procedure TGOST3411_2012.GN(const AHashState, ACounter, AMessageBlock

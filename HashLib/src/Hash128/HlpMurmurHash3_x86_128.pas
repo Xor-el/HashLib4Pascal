@@ -31,8 +31,6 @@ type
     procedure Finish();
     procedure ProcessPendings();
 
-{$REGION 'Consts'}
-
   const
     CKEY = UInt32($0);
 
@@ -48,7 +46,6 @@ type
     C9 = UInt32($96CD1C35);
     C10 = UInt32($32AC3B17);
 
-{$ENDREGION}
     function GetKeyLength(): Int32;
     function GetKey: THashLibByteArray; inline;
     procedure SetKey(const AValue: THashLibByteArray); inline;

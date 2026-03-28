@@ -18,8 +18,6 @@ type
   var
     FState, FChecksum: THashLibByteArray;
 
-{$REGION 'Consts'}
-
   const
     Pi: array [0 .. 255] of Byte = (41, 46, 67, 201, 162, 216, 124, 1, 61, 54,
       84, 161, 236, 240, 6, 19,
@@ -57,7 +55,6 @@ type
 
       49, 68, 80, 180, 143, 237, 31, 26, 219, 153, 141, 51, 159, 17, 131, 20);
 
-{$ENDREGION}
   strict protected
     procedure Finish(); override;
     function GetResult(): THashLibByteArray; override;

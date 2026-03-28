@@ -23,7 +23,6 @@ type
 
   strict private
 
-{$REGION 'Consts'}
   const
 
     C1 = UInt64($A5A5A5A5A5A5A5A5);
@@ -549,7 +548,6 @@ type
       UInt64($C12591D7535F5065), UInt64($C83223F1720AEF96),
       UInt64($C3A0396F7363A51F));
 
-{$ENDREGION}
   strict protected
   var
     FRounds: Int32;

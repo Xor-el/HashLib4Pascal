@@ -22,7 +22,6 @@ type
 
   strict private
 
-{$REGION 'Consts'}
   const
     V0 = UInt64($736F6D6570736575);
     V1 = UInt64($646F72616E646F6D);
@@ -31,7 +30,6 @@ type
     Key0 = UInt64($0706050403020100);
     Key1 = UInt64($0F0E0D0C0B0A0908);
 
-{$ENDREGION}
     procedure Compress(); inline;
     procedure CompressTimes(ATimes: Int32); inline;
     procedure ProcessBlock(ABlock: UInt64); inline;

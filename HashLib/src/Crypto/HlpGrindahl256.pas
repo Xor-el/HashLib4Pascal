@@ -23,8 +23,6 @@ type
 
       FSTable0, FSTable1, FSTable2, FSTable3: THashLibUInt32Array;
 
-{$REGION 'Consts'}
-
   const
     MasterTable: array [0 .. 255] of UInt32 = ($C66363A5, $F87C7C84, $EE777799,
       $F67B7B8D, $FFF2F20D, $D66B6BBD, $DE6F6FB1, $91C5C554, $60303050,
@@ -71,7 +69,6 @@ type
       $299999B0, $5A2D2D77, $1E0F0F11, $7BB0B0CB, $A85454FC, $6DBBBBD6,
       $2C16163A);
 
-{$ENDREGION}
     class function CalcTable(AI: Int32): THashLibUInt32Array;
 
     procedure InjectMsg(AFullProcess: Boolean);

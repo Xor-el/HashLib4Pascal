@@ -19,8 +19,6 @@ type
   var
     FState: THashLibUInt32Array;
 
-{$REGION 'Consts'}
-
   const
 
     C1 = UInt32($5A827999);
@@ -28,7 +26,6 @@ type
     C3 = UInt32($8F1BBCDC);
     C4 = UInt32($CA62C1D6);
 
-{$ENDREGION}
     procedure Finish(); override;
     procedure Expand(AData: PCardinal); virtual;
     procedure TransformBlock(AData: PByte; ADataLength: Int32;

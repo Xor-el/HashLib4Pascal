@@ -23,8 +23,6 @@ type
 
       FSC0, FSC1, FSC2, FSC3, FSC4, FSC5, FSC6, FSC7, FSRC: THashLibUInt64Array;
 
-{$REGION 'Consts'}
-
   const
     ROUNDS = Int32(10);
     REDUCTION_POLYNOMIAL = UInt32($011D);
@@ -48,7 +46,6 @@ type
       $74, $F6, $46, $AC, $89, $14, $E1, $16, $3A, $69, $09, $70, $B6, $D0, $ED,
       $CC, $42, $98, $A4, $28, $5C, $F8, $86);
 
-{$ENDREGION}
     class constructor WhirlPool;
 
     class function PackIntoUInt64(AByte7, AByte6, AByte5, AByte4, AByte3,
