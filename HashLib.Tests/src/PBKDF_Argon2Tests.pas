@@ -117,7 +117,7 @@ begin
   LPassword :=
     '0101010101010101010101010101010101010101010101010101010101010101';
 
-  Argon2Version := TArgon2Version.a2vARGON2_VERSION_13;
+  Argon2Version := TArgon2Version.Version13;
 
   Argon2ParametersBuilder := TArgon2dParametersBuilder.Builder();
 
@@ -185,7 +185,7 @@ var
   Argon2Version: TArgon2Version;
 begin
 
-  Argon2Version := TArgon2Version.a2vARGON2_VERSION_10;
+  Argon2Version := TArgon2Version.Version10;
   Argon2ParametersBuilder := TArgon2iParametersBuilder.Builder();
   // Multiple test cases for various input values
   HashTestOthers(Argon2ParametersBuilder, Argon2Version, 2, 16, 1, 'password',
@@ -234,7 +234,7 @@ begin
     + '39FEBA4A9CD9CC5B4C798F2AAF70EB4BD044C8D148DECB569870DBD923430B82A083F284BEAE777812CCE18CDAC68EE8CCEF'
     + 'C6EC9789F30A6B5A034591F51AF830F4', 112);
 
-  Argon2Version := TArgon2Version.a2vARGON2_VERSION_13;
+  Argon2Version := TArgon2Version.Version13;
   Argon2ParametersBuilder := TArgon2iParametersBuilder.Builder();
   // Multiple test cases for various input values
 

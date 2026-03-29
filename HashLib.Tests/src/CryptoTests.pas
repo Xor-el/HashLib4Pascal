@@ -937,7 +937,7 @@ end;
 procedure TTestGost_CryptoProParamSet.SetUp;
 begin
   inherited;
-  HashInstance := THashFactory.TCrypto.CreateGost(TGostSBox.gsbCryptoProParamSet);
+  HashInstance := THashFactory.TCrypto.CreateGost(TGost.TSBoxType.CryptoProParamSet);
   HmacInstance := THashFactory.THMAC.CreateHMAC(HashInstance);
   HashOfEmptyData :=
     '981E5F3CA30C841487830F84FB433E13AC1101569B9C13584AC483234CD656C0';

@@ -70,9 +70,9 @@ function TSnefru.GetSnefruHashSize(AHashSize: Int32): THashSize;
 begin
   case AHashSize of
     16:
-      Result := THashSize.hsHashSize128;
+      Result := THashSize.Size128;
     32:
-      Result := THashSize.hsHashSize256
+      Result := THashSize.Size256
   else
     begin
       raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashSize,

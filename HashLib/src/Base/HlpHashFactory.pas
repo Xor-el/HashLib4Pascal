@@ -371,8 +371,8 @@ type
       class function CreateHaval_4_256(): IHash; static;
       class function CreateHaval_5_256(): IHash; static;
 
-      class function CreateGost(ASBoxType: TGostSBox = TGostSBox.gsbTestParamSet)
-        : IHash; static;
+      class function CreateGost(
+        ASBoxType: TGost.TSBoxType = TGost.TSBoxType.TestParamSet): IHash; static;
       class function CreateGost_CryptoProParamSet(): IHash; static;
 
       // Streebog 256
@@ -878,14 +878,14 @@ end;
 
 { THashFactory.TCrypto }
 
-class function THashFactory.TCrypto.CreateGost(ASBoxType: TGostSBox): IHash;
+class function THashFactory.TCrypto.CreateGost(ASBoxType: TGost.TSBoxType): IHash;
 begin
   Result := TGost.Create(ASBoxType);
 end;
 
 class function THashFactory.TCrypto.CreateGost_CryptoProParamSet: IHash;
 begin
-  Result := TGost.Create(TGostSBox.gsbCryptoProParamSet);
+  Result := TGost.Create(TGost.TSBoxType.CryptoProParamSet);
 end;
 
 class function THashFactory.TCrypto.CreateGOST3411_2012_256: IHash;
@@ -917,49 +917,49 @@ class function THashFactory.TCrypto.CreateHaval(ARounds: THashRounds;
   AHashSize: THashSize): IHash;
 begin
   case ARounds of
-    THashRounds.hrRounds3:
+    THashRounds.Rounds3:
       case AHashSize of
-        THashSize.hsHashSize128:
+        THashSize.Size128:
           Result := CreateHaval_3_128();
-        THashSize.hsHashSize160:
+        THashSize.Size160:
           Result := CreateHaval_3_160();
-        THashSize.hsHashSize192:
+        THashSize.Size192:
           Result := CreateHaval_3_192();
-        THashSize.hsHashSize224:
+        THashSize.Size224:
           Result := CreateHaval_3_224();
-        THashSize.hsHashSize256:
+        THashSize.Size256:
           Result := CreateHaval_3_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
 
-    THashRounds.hrRounds4:
+    THashRounds.Rounds4:
       case AHashSize of
-        THashSize.hsHashSize128:
+        THashSize.Size128:
           Result := CreateHaval_4_128();
-        THashSize.hsHashSize160:
+        THashSize.Size160:
           Result := CreateHaval_4_160();
-        THashSize.hsHashSize192:
+        THashSize.Size192:
           Result := CreateHaval_4_192();
-        THashSize.hsHashSize224:
+        THashSize.Size224:
           Result := CreateHaval_4_224();
-        THashSize.hsHashSize256:
+        THashSize.Size256:
           Result := CreateHaval_4_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
       end;
 
-    THashRounds.hrRounds5:
+    THashRounds.Rounds5:
       case AHashSize of
-        THashSize.hsHashSize128:
+        THashSize.Size128:
           Result := CreateHaval_5_128();
-        THashSize.hsHashSize160:
+        THashSize.Size160:
           Result := CreateHaval_5_160();
-        THashSize.hsHashSize192:
+        THashSize.Size192:
           Result := CreateHaval_5_192();
-        THashSize.hsHashSize224:
+        THashSize.Size224:
           Result := CreateHaval_5_224();
-        THashSize.hsHashSize256:
+        THashSize.Size256:
           Result := CreateHaval_5_256();
       else
         raise EArgumentHashLibException.CreateRes(@SInvalidHavalHashSize);
@@ -1201,25 +1201,25 @@ end;
 class function THashFactory.TCrypto.CreateBlake2B_160: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize160) as IBlake2BConfig);
+    (TBlake2BConfig.Create(THashSize.Size160) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_256: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize256) as IBlake2BConfig);
+    (TBlake2BConfig.Create(THashSize.Size256) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_384: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize384) as IBlake2BConfig);
+    (TBlake2BConfig.Create(THashSize.Size384) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2B_512: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2B
-    (TBlake2BConfig.Create(THashSize.hsHashSize512) as IBlake2BConfig);
+    (TBlake2BConfig.Create(THashSize.Size512) as IBlake2BConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S(const AConfig: IBlake2SConfig;
@@ -1238,25 +1238,25 @@ end;
 class function THashFactory.TCrypto.CreateBlake2S_128: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize128) as IBlake2SConfig);
+    (TBlake2SConfig.Create(THashSize.Size128) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_160: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize160) as IBlake2SConfig);
+    (TBlake2SConfig.Create(THashSize.Size160) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_224: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize224) as IBlake2SConfig);
+    (TBlake2SConfig.Create(THashSize.Size224) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2S_256: IHash;
 begin
   Result := THashFactory.TCrypto.CreateBlake2S
-    (TBlake2SConfig.Create(THashSize.hsHashSize256) as IBlake2SConfig);
+    (TBlake2SConfig.Create(THashSize.Size256) as IBlake2SConfig);
 end;
 
 class function THashFactory.TCrypto.CreateBlake2BP(AHashSize: Int32;
@@ -1274,7 +1274,7 @@ end;
 class function THashFactory.TCrypto.CreateBlake3_256
   (const AKey: THashLibByteArray): IHash;
 begin
-  Result := TBlake3.Create(THashSize.hsHashSize256, AKey);
+  Result := TBlake3.Create(THashSize.Size256, AKey);
 end;
 
 class function THashFactory.TCrypto.CreateSnefru(ASecurityLevel: Int32;
@@ -1284,7 +1284,7 @@ begin
     raise EArgumentHashLibException.CreateRes(@SInvalidSnefruLevel);
 
   case AHashSize of
-    THashSize.hsHashSize128, THashSize.hsHashSize256:
+    THashSize.Size128, THashSize.Size256:
       Result := TSnefru.Create(ASecurityLevel, AHashSize);
   else
     raise EArgumentHashLibException.CreateRes(@SInvalidSnefruHashSize);
@@ -1294,12 +1294,12 @@ end;
 
 class function THashFactory.TCrypto.CreateSnefru_8_128: IHash;
 begin
-  Result := CreateSnefru(8, THashSize.hsHashSize128);
+  Result := CreateSnefru(8, THashSize.Size128);
 end;
 
 class function THashFactory.TCrypto.CreateSnefru_8_256: IHash;
 begin
-  Result := CreateSnefru(8, THashSize.hsHashSize256);
+  Result := CreateSnefru(8, THashSize.Size256);
 end;
 
 class function THashFactory.TCrypto.CreateTiger_3_128: IHash;

@@ -177,7 +177,7 @@ type
       AKeyWords: PCardinal; AFlags: UInt32);
 
   public
-    constructor Create(AHashSize: THashSize = THashSize.hsHashSize256;
+    constructor Create(AHashSize: THashSize = THashSize.Size256;
       const AKey: THashLibByteArray = nil); overload;
     procedure Initialize; override;
     procedure TransformBytes(const AData: THashLibByteArray;

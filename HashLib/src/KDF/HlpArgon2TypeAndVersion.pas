@@ -5,10 +5,8 @@ unit HlpArgon2TypeAndVersion;
 interface
 
 type
-{$SCOPEDENUMS ON}
-  TArgon2Type = (a2tARGON2_d = $00, a2tARGON2_i = $01, a2tARGON2_id = $02);
-  TArgon2Version = (a2vARGON2_VERSION_10 = $10, a2vARGON2_VERSION_13 = $13);
-{$SCOPEDENUMS OFF}
+  TArgon2Type = (TypeD = $00, TypeI = $01, TypeID = $02);
+  TArgon2Version = (Version10 = $10, Version13 = $13);
 
 implementation
 

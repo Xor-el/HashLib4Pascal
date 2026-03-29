@@ -64,7 +64,7 @@ type
     procedure SetHashSize(AValue: Int32); inline;
 
   public
-    constructor Create(AHashSize: THashSize = THashSize.hsHashSize512);
+    constructor Create(AHashSize: THashSize = THashSize.Size512);
       overload;
     constructor Create(AHashSize: Int32); overload;
     destructor Destroy; override;

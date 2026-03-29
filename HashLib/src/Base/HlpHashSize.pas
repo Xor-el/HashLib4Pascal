@@ -5,11 +5,8 @@ unit HlpHashSize;
 interface
 
 type
-{$SCOPEDENUMS ON}
-  THashSize = (hsHashSize128 = 16, hsHashSize160 = 20, hsHashSize192 = 24,
-    hsHashSize224 = 28, hsHashSize256 = 32, hsHashSize288 = 36,
-    hsHashSize384 = 48, hsHashSize512 = 64);
-{$SCOPEDENUMS OFF}
+  THashSize = (Size128 = 16, Size160 = 20, Size192 = 24, Size224 = 28,
+    Size256 = 32, Size288 = 36, Size384 = 48, Size512 = 64);
 
 implementation
 
