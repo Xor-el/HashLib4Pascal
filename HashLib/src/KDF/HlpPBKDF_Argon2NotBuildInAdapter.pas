@@ -42,8 +42,8 @@ type
     DefaultIterations = Int32(3);
     DefaultMemoryCost = Int32(12);
     DefaultLanes = Int32(1);
-    DefaultType: TArgon2Type = TArgon2Type.a2tARGON2_i;
-    DefaultVersion: TArgon2Version = TArgon2Version.a2vARGON2_VERSION_13;
+    DefaultType: TArgon2Type = TArgon2Type.TypeI;
+    DefaultVersion: TArgon2Version = TArgon2Version.Version13;
 
   var
     FSalt, FSecret, FAdditional: THashLibByteArray;
@@ -664,7 +664,7 @@ end;
 
 constructor TArgon2iParametersBuilder.Create;
 begin
-  inherited Create(TArgon2Type.a2tARGON2_i);
+  inherited Create(TArgon2Type.TypeI);
 end;
 
 class function TArgon2iParametersBuilder.Builder: IArgon2ParametersBuilder;
@@ -676,7 +676,7 @@ end;
 
 constructor TArgon2dParametersBuilder.Create;
 begin
-  inherited Create(TArgon2Type.a2tARGON2_d);
+  inherited Create(TArgon2Type.TypeD);
 end;
 
 class function TArgon2dParametersBuilder.Builder: IArgon2ParametersBuilder;
@@ -688,7 +688,7 @@ end;
 
 constructor TArgon2idParametersBuilder.Create;
 begin
-  inherited Create(TArgon2Type.a2tARGON2_id);
+  inherited Create(TArgon2Type.TypeID);
 end;
 
 class function TArgon2idParametersBuilder.Builder: IArgon2ParametersBuilder;
@@ -968,8 +968,8 @@ end;
 function TPBKDF_Argon2NotBuildInAdapter.IsDataIndependentAddressing
   (const APosition: TPosition): Boolean;
 begin
-  Result := (FParameters.&Type = TArgon2Type.a2tARGON2_i) or
-    ((FParameters.&Type = TArgon2Type.a2tARGON2_id) and (APosition.Pass = 0)
+  Result := (FParameters.&Type = TArgon2Type.TypeI) or
+    ((FParameters.&Type = TArgon2Type.TypeID) and (APosition.Pass = 0)
     and (APosition.Slice < (Argon2SyncPoints div 2)));
 end;
 
@@ -1102,7 +1102,7 @@ function TPBKDF_Argon2NotBuildInAdapter.IsWithXor(const APosition
   : TPosition): Boolean;
 begin
   Result := not((APosition.Pass = 0) or
-    (FParameters.Version = TArgon2Version.a2vARGON2_VERSION_10));
+    (FParameters.Version = TArgon2Version.Version10));
 end;
 
 function TPBKDF_Argon2NotBuildInAdapter.GetPrevOffset(ACurrentOffset

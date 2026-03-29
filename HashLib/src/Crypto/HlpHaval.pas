@@ -376,7 +376,7 @@ end;
 
 constructor THaval3.Create(AHashSize: THashSize);
 begin
-  inherited Create(THashRounds.hrRounds3, AHashSize);
+  inherited Create(THashRounds.Rounds3, AHashSize);
 end;
 
 procedure THaval3.TransformBlock(AData: PByte; ADataLength: Int32;
@@ -796,7 +796,7 @@ end;
 
 constructor THaval4.Create(AHashSize: THashSize);
 begin
-  inherited Create(THashRounds.hrRounds4, AHashSize);
+  inherited Create(THashRounds.Rounds4, AHashSize);
 end;
 
 procedure THaval4.TransformBlock(AData: PByte; ADataLength: Int32;
@@ -1376,7 +1376,7 @@ end;
 
 constructor THaval5.Create(AHashSize: THashSize);
 begin
-  inherited Create(THashRounds.hrRounds5, AHashSize);
+  inherited Create(THashRounds.Rounds5, AHashSize);
 end;
 
 procedure THaval5.TransformBlock(AData: PByte; ADataLength: Int32;
@@ -2095,7 +2095,7 @@ end;
 
 constructor THaval_3_128.Create;
 begin
-  inherited Create(THashSize.hsHashSize128);
+  inherited Create(THashSize.Size128);
 end;
 
 { THaval_4_128 }
@@ -2114,7 +2114,7 @@ end;
 
 constructor THaval_4_128.Create;
 begin
-  inherited Create(THashSize.hsHashSize128);
+  inherited Create(THashSize.Size128);
 end;
 
 { THaval_5_128 }
@@ -2133,7 +2133,7 @@ end;
 
 constructor THaval_5_128.Create;
 begin
-  inherited Create(THashSize.hsHashSize128);
+  inherited Create(THashSize.Size128);
 end;
 
 { THaval_3_160 }
@@ -2152,7 +2152,7 @@ end;
 
 constructor THaval_3_160.Create;
 begin
-  inherited Create(THashSize.hsHashSize160);
+  inherited Create(THashSize.Size160);
 end;
 
 { THaval_4_160 }
@@ -2171,7 +2171,7 @@ end;
 
 constructor THaval_4_160.Create;
 begin
-  inherited Create(THashSize.hsHashSize160);
+  inherited Create(THashSize.Size160);
 end;
 
 { THaval_5_160 }
@@ -2190,7 +2190,7 @@ end;
 
 constructor THaval_5_160.Create;
 begin
-  inherited Create(THashSize.hsHashSize160);
+  inherited Create(THashSize.Size160);
 end;
 
 { THaval_3_192 }
@@ -2209,7 +2209,7 @@ end;
 
 constructor THaval_3_192.Create;
 begin
-  inherited Create(THashSize.hsHashSize192);
+  inherited Create(THashSize.Size192);
 end;
 
 { THaval_4_192 }
@@ -2228,7 +2228,7 @@ end;
 
 constructor THaval_4_192.Create;
 begin
-  inherited Create(THashSize.hsHashSize192);
+  inherited Create(THashSize.Size192);
 end;
 
 { THaval_5_192 }
@@ -2247,7 +2247,7 @@ end;
 
 constructor THaval_5_192.Create;
 begin
-  inherited Create(THashSize.hsHashSize192);
+  inherited Create(THashSize.Size192);
 end;
 
 { THaval_3_224 }
@@ -2266,7 +2266,7 @@ end;
 
 constructor THaval_3_224.Create;
 begin
-  inherited Create(THashSize.hsHashSize224);
+  inherited Create(THashSize.Size224);
 end;
 
 { THaval_4_224 }
@@ -2285,7 +2285,7 @@ end;
 
 constructor THaval_4_224.Create;
 begin
-  inherited Create(THashSize.hsHashSize224);
+  inherited Create(THashSize.Size224);
 end;
 
 { THaval_5_224 }
@@ -2304,7 +2304,7 @@ end;
 
 constructor THaval_5_224.Create;
 begin
-  inherited Create(THashSize.hsHashSize224);
+  inherited Create(THashSize.Size224);
 end;
 
 { THaval_3_256 }
@@ -2323,7 +2323,7 @@ end;
 
 constructor THaval_3_256.Create;
 begin
-  inherited Create(THashSize.hsHashSize256);
+  inherited Create(THashSize.Size256);
 end;
 
 { THaval_4_256 }
@@ -2342,7 +2342,7 @@ end;
 
 constructor THaval_4_256.Create;
 begin
-  inherited Create(THashSize.hsHashSize256);
+  inherited Create(THashSize.Size256);
 end;
 
 { THaval_5_256 }
@@ -2361,7 +2361,7 @@ end;
 
 constructor THaval_5_256.Create;
 begin
-  inherited Create(THashSize.hsHashSize256);
+  inherited Create(THashSize.Size256);
 end;
 
 end.

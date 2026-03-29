@@ -621,13 +621,13 @@ function TTiger.GetHashRound(AHashRound: Int32): THashRounds;
 begin
   case AHashRound of
     3:
-      Result := THashRounds.hrRounds3;
+      Result := THashRounds.Rounds3;
     4:
-      Result := THashRounds.hrRounds4;
+      Result := THashRounds.Rounds4;
     5:
-      Result := THashRounds.hrRounds5;
+      Result := THashRounds.Rounds5;
     8:
-      Result := THashRounds.hrRounds8
+      Result := THashRounds.Rounds8
   else
     begin
       raise EArgumentInvalidHashLibException.CreateResFmt(@SInvalidHashRound,
@@ -1014,17 +1014,17 @@ end;
 
 constructor TTiger_128.CreateRound3;
 begin
-  inherited Create(16, THashRounds.hrRounds3);
+  inherited Create(16, THashRounds.Rounds3);
 end;
 
 constructor TTiger_128.CreateRound4;
 begin
-  inherited Create(16, THashRounds.hrRounds4);
+  inherited Create(16, THashRounds.Rounds4);
 end;
 
 constructor TTiger_128.CreateRound5;
 begin
-  inherited Create(16, THashRounds.hrRounds5);
+  inherited Create(16, THashRounds.Rounds5);
 end;
 
 { TTiger_160 }
@@ -1043,17 +1043,17 @@ end;
 
 constructor TTiger_160.CreateRound3;
 begin
-  inherited Create(20, THashRounds.hrRounds3);
+  inherited Create(20, THashRounds.Rounds3);
 end;
 
 constructor TTiger_160.CreateRound4;
 begin
-  inherited Create(20, THashRounds.hrRounds4);
+  inherited Create(20, THashRounds.Rounds4);
 end;
 
 constructor TTiger_160.CreateRound5;
 begin
-  inherited Create(20, THashRounds.hrRounds5);
+  inherited Create(20, THashRounds.Rounds5);
 end;
 
 { TTiger_192 }
@@ -1072,17 +1072,17 @@ end;
 
 constructor TTiger_192.CreateRound3;
 begin
-  inherited Create(24, THashRounds.hrRounds3);
+  inherited Create(24, THashRounds.Rounds3);
 end;
 
 constructor TTiger_192.CreateRound4;
 begin
-  inherited Create(24, THashRounds.hrRounds4);
+  inherited Create(24, THashRounds.Rounds4);
 end;
 
 constructor TTiger_192.CreateRound5;
 begin
-  inherited Create(24, THashRounds.hrRounds5);
+  inherited Create(24, THashRounds.Rounds5);
 end;
 
 { TTiger_Base }

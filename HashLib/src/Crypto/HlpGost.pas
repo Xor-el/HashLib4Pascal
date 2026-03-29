@@ -15,12 +15,10 @@ uses
 
 type
 
-{$SCOPEDENUMS ON}
-  TGostSBox = (gsbTestParamSet, gsbCryptoProParamSet);
-{$SCOPEDENUMS OFF}
-
   TGost = class sealed(TBlockHash, ICryptoNotBuildIn, ITransformBlock)
 
+  type
+    TSBoxType = (TestParamSet, CryptoProParamSet);
   strict private
 
     class var
@@ -32,7 +30,7 @@ type
   var
     FState, FHash: THashLibUInt32Array;
     FSBox1, FSBox2, FSBox3, FSBox4: THashLibUInt32Array;
-    FSBoxType: TGostSBox;
+    FSBoxType: TSBoxType;
 
     procedure Compress(APtr: PCardinal);
     class procedure ComputeSBoxes(const ASBox: THashLibMatrixUInt32Array;
@@ -46,7 +44,7 @@ type
       AIndex: Int32); override;
 
   public
-    constructor Create(ASBoxType: TGostSBox = TGostSBox.gsbTestParamSet);
+    constructor Create(ASBoxType: TSBoxType = TSBoxType.TestParamSet);
     procedure Initialize(); override;
     function Clone(): IHash; override;
 
@@ -378,21 +376,21 @@ begin
   end;
 end;
 
-constructor TGost.Create(ASBoxType: TGostSBox);
+constructor TGost.Create(ASBoxType: TGost.TSBoxType);
 begin
   inherited Create(32, 32);
   System.SetLength(FState, 8);
   System.SetLength(FHash, 8);
   FSBoxType := ASBoxType;
   case ASBoxType of
-    TGostSBox.gsbTestParamSet:
+    TGost.TSBoxType.TestParamSet:
       begin
         FSBox1 := FSBox1_Test;
         FSBox2 := FSBox2_Test;
         FSBox3 := FSBox3_Test;
         FSBox4 := FSBox4_Test;
       end;
-    TGostSBox.gsbCryptoProParamSet:
+    TGost.TSBoxType.CryptoProParamSet:
       begin
         FSBox1 := FSBox1_CryptoPro;
         FSBox2 := FSBox2_CryptoPro;
