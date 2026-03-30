@@ -96,8 +96,18 @@ begin
 end;
 
 // =============================================================================
-// SSE2 and AVX2 implementations (x86-64 only)
+// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// IA-32: XMM8/XMM9 from the x64 asm are mapped to XMM0-7 plus stack.
 // =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure Blake2B_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
@@ -120,6 +130,14 @@ end;
 procedure InitDispatch();
 begin
   Blake2B_Compress := @Blake2B_Compress_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    begin
+      Blake2B_Compress := @Blake2B_Compress_Sse2;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:

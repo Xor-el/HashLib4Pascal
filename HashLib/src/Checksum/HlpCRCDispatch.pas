@@ -24,6 +24,10 @@ implementation
 uses
   HlpSimd;
 
+// =============================================================================
+// SIMD implementations: none (IA-32); PCLMULQDQ / VPCLMULQDQ (x86-64)
+// =============================================================================
+
 {$IFDEF HASHLIB_X86_64_ASM}
 
 function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;

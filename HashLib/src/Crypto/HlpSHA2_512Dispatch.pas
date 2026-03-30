@@ -121,8 +121,18 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations (x86-64 only)
+// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
 // =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\SHA512\SHA512CompressSse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
@@ -130,11 +140,6 @@ procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
   {$I ..\Include\Simd\SHA512\SHA512CompressSse2.inc}
-end;
-
-procedure SHA512_Compress_Sse2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
-begin
-  SHA512_Compress_Sse2(AState, AData, ANumBlocks, @K512);
 end;
 
 procedure SHA512_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
@@ -161,6 +166,15 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_X86_SIMD}
+
+procedure SHA512_Compress_Sse2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA512_Compress_Sse2(AState, AData, ANumBlocks, @K512);
+end;
+
+{$ENDIF HASHLIB_X86_SIMD}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -168,6 +182,14 @@ end;
 procedure InitDispatch();
 begin
   SHA512_Compress := @SHA512_Compress_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    begin
+      SHA512_Compress := @SHA512_Compress_Sse2_Wrap;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:

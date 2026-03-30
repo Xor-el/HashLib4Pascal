@@ -45,6 +45,13 @@
 
 {============================== CPU Architecture ==============================}
 
+{$IF DEFINED(CPU386)}
+  {$DEFINE HASHLIB_I386}
+  {$IFDEF MSWINDOWS}
+    {$DEFINE HASHLIB_I386_ASM}
+  {$ENDIF}
+{$IFEND}
+
 {$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
   {$IFDEF MSWINDOWS}
@@ -68,8 +75,12 @@
 // Uncomment to force scalar dispatch (available on all platforms):
 // {$DEFINE HASHLIB_FORCE_SCALAR}
 
-{$IFDEF HASHLIB_X86_64_ASM}
-// Uncomment ONE to force a specific x86-64 SIMD dispatch level:
+{$IF DEFINED(HASHLIB_I386_ASM) OR DEFINED(HASHLIB_X86_64_ASM)}
+  {$DEFINE HASHLIB_X86_SIMD}
+{$IFEND}
+
+{$IFDEF HASHLIB_X86_SIMD}
+// Uncomment ONE to force a specific x86/x86-64 SIMD dispatch level:
 // {$DEFINE HASHLIB_FORCE_SSE2}
 // {$DEFINE HASHLIB_FORCE_SSSE3}
 
@@ -78,6 +89,7 @@
   OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
   {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
+
 {$ENDIF}
 
 (* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& *)

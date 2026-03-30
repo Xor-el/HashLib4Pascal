@@ -102,8 +102,17 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations (x86-64 only)
+// SIMD implementations: SSE2 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
 // =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_i386.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressSse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
@@ -154,6 +163,14 @@ end;
 procedure InitDispatch();
 begin
   SHA1_Compress := @SHA1_Compress_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    begin
+      SHA1_Compress := @SHA1_Compress_Sse2;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   if TSimd.HasSHANI() then
   begin

@@ -103,8 +103,29 @@ begin
 end;
 
 // =============================================================================
-// SSE2 and AVX2 implementations (x86-64 only)
+// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
 // =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure XXH3_Accumulate512_Sse2(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_i386.inc}
+  {$I ..\Include\Simd\XXH3\XXH3Acc512Sse2_i386.inc}
+end;
+
+procedure XXH3_ScrambleAcc_Sse2(AAcc: Pointer; ASecret: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc2Begin_i386.inc}
+  {$I ..\Include\Simd\XXH3\XXH3ScrambleSse2_i386.inc}
+end;
+
+procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
+  ADefaultSecret: Pointer; ASeed: UInt64);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_i386.inc}
+  {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
@@ -127,16 +148,6 @@ procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2.inc}
 end;
 
-procedure XXH3_Accumulate_Sse2(AAcc: Pointer; AInput: Pointer;
-  ASecret: Pointer; ANbStripes: Int32);
-var
-  N: Int32;
-begin
-  for N := 0 to ANbStripes - 1 do
-    XXH3_Accumulate512_Sse2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
-      PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
-end;
-
 // ----- AVX2 -----
 
 procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
@@ -156,14 +167,37 @@ procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
   {$I ..\Include\Simd\XXH3\XXH3InitSecretAvx2.inc}
 end;
 
-procedure XXH3_Accumulate_Avx2(AAcc: Pointer; AInput: Pointer;
-  ASecret: Pointer; ANbStripes: Int32);
+{$ENDIF HASHLIB_X86_64_ASM}
+
+{$IFDEF HASHLIB_X86_SIMD}
+
+type
+  TXXH3_Accumulate512Proc = procedure(AAcc, AInput, ASecret: Pointer);
+
+procedure XXH3_Accumulate_Loop(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32; AAcc512: TXXH3_Accumulate512Proc);
 var
   N: Int32;
 begin
   for N := 0 to ANbStripes - 1 do
-    XXH3_Accumulate512_Avx2(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+    AAcc512(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
+end;
+
+procedure XXH3_Accumulate_Sse2(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32);
+begin
+  XXH3_Accumulate_Loop(AAcc, AInput, ASecret, ANbStripes, @XXH3_Accumulate512_Sse2);
+end;
+
+{$ENDIF HASHLIB_X86_SIMD}
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+procedure XXH3_Accumulate_Avx2(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32);
+begin
+  XXH3_Accumulate_Loop(AAcc, AInput, ASecret, ANbStripes, @XXH3_Accumulate512_Avx2);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
@@ -178,6 +212,17 @@ begin
   XXH3_Accumulate := @XXH3_Accumulate_Scalar;
   XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
   XXH3_InitSecret := @XXH3_InitSecret_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    begin
+      XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
+      XXH3_Accumulate := @XXH3_Accumulate_Sse2;
+      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Sse2;
+      XXH3_InitSecret := @XXH3_InitSecret_Sse2;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:
