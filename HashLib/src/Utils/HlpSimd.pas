@@ -36,18 +36,6 @@ type
     RegEAX, RegEBX, RegECX, RegEDX: UInt32;
   end;
 
-{$IFDEF HASHLIB_I386_ASM}
-
-procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; AResult: Pointer);
-  {$I ..\Include\Simd\CpuDetect\CpuIdQuery_i386.inc}
-end;
-
-procedure XGetBvQuery(AResult: Pointer);
-  {$I ..\Include\Simd\CpuDetect\XGetBvQuery_i386.inc}
-end;
-
-{$ELSE}
-
 procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; AResult: Pointer);
   {$I ..\Include\Simd\CpuDetect\CpuIdQuery.inc}
 end;
@@ -56,7 +44,6 @@ procedure XGetBvQuery(AResult: Pointer);
   {$I ..\Include\Simd\CpuDetect\XGetBvQuery.inc}
 end;
 
-{$ENDIF}
 {$ENDIF}
 
 { TSimd }

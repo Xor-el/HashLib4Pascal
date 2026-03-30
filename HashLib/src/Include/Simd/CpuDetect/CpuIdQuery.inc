@@ -1,11 +1,26 @@
 // CPUID query: executes CPUID with leaf=ALeaf, subleaf=ASubLeaf,
 // stores EAX/EBX/ECX/EDX into the TCpuIdResult record at AResult.
-// RBX must be preserved (CPUID clobbers it).
-// Expects MS x64 ABI: ecx = ALeaf, edx = ASubLeaf, r8 = AResult.
-// On FPC non-Windows (System V ABI), remaps edi,esi,rdx -> ecx,edx,r8.
+// IA-32 (HASHLIB_I386_ASM): preserves EBX; ESI = AResult, ECX = ASubLeaf, EAX = ALeaf.
+// x86-64: preserves RBX; MS ABI ecx=ALeaf, edx=ASubLeaf, r8=AResult;
+//   FPC non-Windows remaps edi, esi, rdx -> leaf, subleaf, result.
 {$IFDEF FPC}
   assembler; nostackframe;
+{$ENDIF}
 asm
+{$IFDEF HASHLIB_I386_ASM}
+  push ebx
+  push esi
+  mov esi, ecx
+  mov ecx, edx
+  cpuid
+  mov [esi], eax
+  mov [esi + 4], ebx
+  mov [esi + 8], ecx
+  mov [esi + 12], edx
+  pop esi
+  pop ebx
+{$ELSE}
+  {$IFDEF FPC}
   push rbx
   {$IFDEF MSWINDOWS}
   mov eax, ecx
@@ -26,8 +41,7 @@ asm
   mov dword ptr [r8 + 12], edx
   {$ENDIF}
   pop rbx
-{$ELSE}
-asm
+  {$ELSE}
   .PUSHNV RBX
   mov eax, ecx
   mov ecx, edx
@@ -36,4 +50,5 @@ asm
   mov dword ptr [r8 + 4], ebx
   mov dword ptr [r8 + 8], ecx
   mov dword ptr [r8 + 12], edx
+  {$ENDIF}
 {$ENDIF}
