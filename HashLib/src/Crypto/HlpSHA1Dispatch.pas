@@ -102,7 +102,7 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
+// SIMD implementations: SSE2 / SSSE3 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -110,6 +110,17 @@ end;
 procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32);
   {$I ..\Include\Simd\Common\SimdProc3Begin_i386.inc}
   {$I ..\Include\Simd\SHA1\SHA1CompressSse2_i386.inc}
+end;
+
+procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressSsse3_i386.inc}
+end;
+
+procedure SHA1_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA1_Compress_Ssse3(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -165,7 +176,11 @@ begin
   SHA1_Compress := @SHA1_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
   case TSimd.GetActiveLevel() of
-    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    TSimdLevel.SSSE3:
+    begin
+      SHA1_Compress := @SHA1_Compress_Ssse3_Wrap;
+    end;
+    TSimdLevel.SSE2:
     begin
       SHA1_Compress := @SHA1_Compress_Sse2;
     end;
