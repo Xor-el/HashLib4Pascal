@@ -125,8 +125,7 @@
 
 @L32Sse2_done:
   mov dword ptr [r8], ebx
-  mov rax, rbx
-  and rax, $FFFFFFFF
+  mov eax, ebx
 
   pop r15
   pop r14
