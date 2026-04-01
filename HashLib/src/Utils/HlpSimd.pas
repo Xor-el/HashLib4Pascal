@@ -198,6 +198,8 @@ begin
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSSE3)}
   if FDetectedLevel > TSimdLevel.SSSE3 then
     FDetectedLevel := TSimdLevel.SSSE3;
+  FHasSHANI := False;
+  FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 {$IFEND}
 end;
