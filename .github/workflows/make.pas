@@ -1,5 +1,6 @@
 program Make;
 {$mode objfpc}{$H+}
+{$SCOPEDENUMS ON}
 
 uses
   Classes,
@@ -14,7 +15,6 @@ uses
 
 const
   Target: string = '.';
-  Dependencies: array of string = ();
 
   // ANSI color codes
   CSI_Reset   = #27'[0m';
@@ -35,6 +35,45 @@ const
   ;
 
   OPMBaseUrl = 'https://packages.lazarus-ide.org/';
+  GitHubArchiveBaseUrl = 'https://github.com/';
+
+// ---------------------------------------------------------------------------
+// Dependency configuration
+// ---------------------------------------------------------------------------
+
+type
+  TDependencyKind = (OPM, GitHub);
+
+  TDependency = record
+    Kind: TDependencyKind;
+    Name: string;  // OPM: package name | GitHub: 'owner/repo'
+    Ref: string;   // GitHub: branch, tag or commit (ignored for OPM)
+  end;
+
+const
+  Dependencies: array of TDependency = (
+    // Examples:
+    // (Kind: TDependencyKind.OPM;    Name: 'HashLib';               Ref: ''),
+    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/SimpleBaseLib4Pascal';  Ref: 'master'),
+  );
+
+// ---------------------------------------------------------------------------
+// Helpers for building TDependency records (optional convenience)
+// ---------------------------------------------------------------------------
+
+function OPM(const AName: string): TDependency;
+begin
+  Result.Kind := TDependencyKind.OPM;
+  Result.Name := AName;
+  Result.Ref  := '';
+end;
+
+function GitHub(const AOwnerRepo, ARef: string): TDependency;
+begin
+  Result.Kind := TDependencyKind.GitHub;
+  Result.Name := AOwnerRepo;
+  Result.Ref  := ARef;
+end;
 
 var
   ErrorCount: Integer = 0;
@@ -266,19 +305,8 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
-// OPM dependency installation
+// Shared download + extract
 // ---------------------------------------------------------------------------
-
-function GetOPMPackagesDir: string;
-begin
-  Result :=
-    {$IFDEF MSWINDOWS}
-    GetEnvironmentVariable('APPDATA') + '\.lazarus\onlinepackagemanager\packages\'
-    {$ELSE}
-    GetEnvironmentVariable('HOME') + '/.lazarus/onlinepackagemanager/packages/'
-    {$ENDIF}
-    ;
-end;
 
 procedure DownloadAndExtract(const AUrl, ADestDir: string);
 var
@@ -317,12 +345,61 @@ begin
   end;
 end;
 
+// ---------------------------------------------------------------------------
+// Dependency providers
+// ---------------------------------------------------------------------------
+
+function GetDepsBaseDir(const ASubDir: string): string;
+var
+  BaseDir: string;
+begin
+  {$IFDEF MSWINDOWS}
+  BaseDir := GetEnvironmentVariable('APPDATA');
+  {$ELSE}
+  BaseDir := GetEnvironmentVariable('HOME');
+  {$ENDIF}
+  Result := IncludeTrailingPathDelimiter(
+    ConcatPaths([BaseDir, '.lazarus', ASubDir]));
+end;
+
 function InstallOPMPackage(const APackageName: string): string;
 begin
-  Result := GetOPMPackagesDir + APackageName;
+  Result := GetDepsBaseDir(ConcatPaths(['onlinepackagemanager', 'packages']))
+    + APackageName;
   if DirectoryExists(Result) then
     Exit;
   DownloadAndExtract(OPMBaseUrl + APackageName + '.zip', Result);
+end;
+
+function InstallGitHubPackage(const AOwnerRepo, ARef: string): string;
+var
+  SafeName, EffectiveRef: string;
+begin
+  // Flatten 'owner/repo' to 'owner--repo' for a safe directory name
+  SafeName := StringReplace(AOwnerRepo, '/', '--', [rfReplaceAll]);
+  EffectiveRef := ARef;
+  if EffectiveRef = '' then
+    EffectiveRef := 'main';
+
+  Result := GetDepsBaseDir('github-packages') + SafeName;
+  if DirectoryExists(Result) then
+    Exit;
+
+  // https://github.com/{owner}/{repo}/archive/refs/heads/{branch}.zip
+  // also works for tags: refs/tags/{tag}.zip  and commits: {sha}.zip
+  DownloadAndExtract(
+    GitHubArchiveBaseUrl + AOwnerRepo + '/archive/' + EffectiveRef + '.zip',
+    Result);
+end;
+
+function ResolveDependency(const ADep: TDependency): string;
+begin
+  case ADep.Kind of
+    TDependencyKind.OPM:    Result := InstallOPMPackage(ADep.Name);
+    TDependencyKind.GitHub: Result := InstallGitHubPackage(ADep.Name, ADep.Ref);
+  else
+    raise Exception.CreateFmt('Unknown dependency kind for "%s"', [ADep.Name]);
+  end;
 end;
 
 // ---------------------------------------------------------------------------
@@ -386,14 +463,17 @@ end;
 
 procedure Main;
 var
-  Each: string;
+  I: Integer;
 begin
   UpdateSubmodules;
-  InitSSLInterface;
 
-  // Install and register OPM dependencies
-  for Each in Dependencies do
-    RegisterAllPackages(InstallOPMPackage(Each));
+  // Install and register dependencies (safe when array is empty)
+  if Length(Dependencies) > 0 then
+  begin
+    InitSSLInterface;
+    for I := 0 to High(Dependencies) do
+      RegisterAllPackages(ResolveDependency(Dependencies[I]));
+  end;
 
   // Register all local packages
   RegisterAllPackages(GetCurrentDir);
