@@ -1,8 +1,7 @@
 // MSB-first 64-bit CRC: 16-byte slice (IA-32; SSE2 not required — same as x64 MSB path).
-// x64 counterpart: CRCFoldMsbSse2_x86_64.inc (Width/CrcMask at +224/+228).
+// x64 counterpart: CRCFoldMsbSse2_x86_64.inc.
 // After SimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
-// Offsets (packed TCRCFoldRuntimeCtx64, 32-bit ptrs): TableRow +96, Width +160,
-//   CrcMask +164 (x86-64 uses +224/+228 because TableRow entries are 8 bytes).
+// Ctx: FoldConstants.CrcBits at +80, TableRow at +96. CrcMask derived from width.
 // Result UInt64 in edx:eax.
 
   push ebp
@@ -23,19 +22,44 @@
 
   mov dword ptr [esp + 36], esi
 
-  mov eax, dword ptr [ebp + 160]
+  // Width from CrcBits [ebp+80]; build 64-bit mask into [esp+8],[esp+12]
+  mov eax, dword ptr [ebp + 80]
+  mov ecx, eax
+  dec ecx
+  xor eax, eax
+  xor edx, edx
+  cmp ecx, 32
+  jae @MsbSse2_mask_ge32
+  mov eax, 1
+  shl eax, cl
+  xor edx, edx
+  jmp @MsbSse2_mask_sub1
+@MsbSse2_mask_ge32:
+  mov esi, ecx
+  sub esi, 32
+  xor eax, eax
+  mov edx, 1
+  mov ecx, esi
+  shl edx, cl
+@MsbSse2_mask_sub1:
+  sub eax, 1
+  sbb edx, 0
+  shld edx, eax, 1
+  shl eax, 1
+  or eax, 1
+  mov dword ptr [esp + 8], eax
+  mov dword ptr [esp + 12], edx
+
+  mov esi, dword ptr [esp + 36]
+
+  mov eax, dword ptr [ebp + 80]
   add eax, 7
   shr eax, 3
   mov dword ptr [esp + 16], eax
 
-  mov eax, dword ptr [ebp + 160]
+  mov eax, dword ptr [ebp + 80]
   sub eax, 8
   mov dword ptr [esp + 20], eax
-
-  mov eax, dword ptr [ebp + 164]
-  mov dword ptr [esp + 8], eax
-  mov eax, dword ptr [ebp + 168]
-  mov dword ptr [esp + 12], eax
 
   mov eax, dword ptr [edi]
   mov edx, dword ptr [edi + 4]

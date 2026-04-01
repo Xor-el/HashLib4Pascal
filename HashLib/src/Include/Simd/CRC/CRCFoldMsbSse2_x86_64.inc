@@ -1,14 +1,17 @@
 // MSB-first 64-bit CRC: 16-byte slice (slicing-by-16) using SSE2 for load only.
-// IA-32 counterpart: CRCFoldMsbSse2_i386.inc (Width/CrcMask at +160/+164).
+// IA-32 counterpart: CRCFoldMsbSse2_i386.inc.
 // Signature (after SimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Msb_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 // MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx.
-// Offsets in PCRCFoldRuntimeCtx64 (packed): TableRow at +96, Width at +224,
-//   CrcMask at +228 (verify with SizeOf if compiler padding differs).
+// Callee-saved: rsi/rdi must be preserved (used as LTempCopy / LBIdx scratch).
+// Ctx = PCRCFoldRuntimeCtx64: FoldConstants.CrcBits at +80, TableRow at +96.
+// CrcMask = ((1 shl (W-1)) - 1) shl 1 or 1; W = dword [r9+80] (TCRC table path: W>=8).
 
   push rbx
   push rbp
+  push rsi
+  push rdi
   push r12
   push r13
   push r14
@@ -21,8 +24,17 @@
   cmp edx, 16
   jb @MsbSse2_done
 
-  mov r14d, dword ptr [r9 + 224]   // Width
-  mov r12, qword ptr [r9 + 228]    // CrcMask
+  mov r14d, dword ptr [r9 + 80]    // Width from FoldConstants.CrcBits
+
+  // r12 = CRCMaskFromWidth(r14d)
+  mov ecx, r14d
+  dec ecx
+  mov rax, 1
+  shl rax, cl
+  sub rax, 1
+  shl rax, 1
+  or rax, 1
+  mov r12, rax
 
   mov eax, r14d
   add eax, 7
@@ -84,5 +96,7 @@
   pop r14
   pop r13
   pop r12
+  pop rdi
+  pop rsi
   pop rbp
   pop rbx

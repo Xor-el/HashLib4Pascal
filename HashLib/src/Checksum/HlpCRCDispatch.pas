@@ -9,8 +9,9 @@ unit HlpCRCDispatch;
   CRC32Fast (HlpCRC32Fast.pas): PKZIP/Castagnoli only; FCurrentCRC with not/xor
   convention; uses CRCDispatch_UpdateReflectedCrc32 + TCRCFoldRuntimeCtx32.
 
-  Keep MSB SIMD kernels aligned: CRCFoldMsbSse2.inc (x64 offsets +224/+228) vs
-  CRCFoldMsbSse2_i386.inc (+160/+164 for 32-bit TableRow pointers).
+  TCRCFoldRuntimeCtx64 matches Ctx32 shape: FoldConstants + TableRow only.
+  MSB fold reads CRC width from FoldConstants.CrcBits (see TGF2.GenerateFoldConstants)
+  and derives the state mask the same way as TCRC.FCRCMask.
 }
 
 {$I ..\Include\HashLib.inc}
@@ -25,12 +26,11 @@ const
   MinSimdBytes = Int32(16);
 
 type
-  // Runtime context: PCLMUL reads first field only (offset 0).
+  // Runtime context: PCLMUL reads first field only (offset 0). Same layout as
+  // TCRCFoldRuntimeCtx32 apart from TableRow pointer size (PUInt64 vs PUInt32).
   TCRCFoldRuntimeCtx64 = packed record
     FoldConstants: TCRCFoldConstants;
     TableRow: array [0 .. 15] of PUInt64;
-    Width: Int32;
-    CrcMask: UInt64;
   end;
 
   PCRCFoldRuntimeCtx64 = ^TCRCFoldRuntimeCtx64;
@@ -94,6 +94,11 @@ begin
   Result := PUInt32(NativeUInt(Row) + UInt64(B) * SizeOf(UInt32))^;
 end;
 
+function CRCMaskFromWidth(AWidth: Int32): UInt64; inline;
+begin
+  Result := ((UInt64(1) shl (AWidth - 1)) - 1) shl 1 or 1;
+end;
+
 function CRC_Fold_Lsb_Scalar(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
 var
@@ -144,6 +149,8 @@ var
   LTemp, LNewTemp, LTempCopy: UInt64;
   LPtr: PByte;
   LLen: UInt32;
+  LWidth: Int32;
+  LCrcMask: UInt64;
   LCrcBytes, LBIdx: Int32;
   LByte: Byte;
 begin
@@ -151,7 +158,9 @@ begin
   LPtr := AData;
   LLen := ALength;
   LTemp := PUInt64(AState)^;
-  LCrcBytes := (Ctx.Width + 7) shr 3;
+  LWidth := Int32(Ctx.FoldConstants.CrcBits);
+  LCrcMask := CRCMaskFromWidth(LWidth);
+  LCrcBytes := (LWidth + 7) shr 3;
 
   while LLen >= 16 do
   begin
@@ -161,8 +170,8 @@ begin
     LBIdx := 0;
     while LBIdx < LCrcBytes do
     begin
-      LByte := LPtr[LBIdx] xor Byte(LTempCopy shr (Ctx.Width - 8));
-      LTempCopy := (LTempCopy shl 8) and Ctx.CrcMask;
+      LByte := LPtr[LBIdx] xor Byte(LTempCopy shr (LWidth - 8));
+      LTempCopy := (LTempCopy shl 8) and LCrcMask;
       LNewTemp := LNewTemp xor CrcTableU64(Ctx.TableRow[15 - LBIdx], LByte);
       System.Inc(LBIdx);
     end;
@@ -295,8 +304,6 @@ begin
   TGF2.GenerateFoldConstants(APoly, AWidth, AReflected, Ctx.FoldConstants);
   for I := 0 to 15 do
     Ctx.TableRow[I] := PUInt64(@Table[I][0]);
-  Ctx.Width := AWidth;
-  Ctx.CrcMask := ((UInt64(1) shl (AWidth - 1)) - 1) shl 1 or 1;
 end;
 
 procedure CRCDispatch_InitRuntimeCtx32(const Table: THashLibMatrixUInt32Array;
