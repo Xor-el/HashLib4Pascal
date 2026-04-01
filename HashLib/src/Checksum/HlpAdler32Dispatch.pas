@@ -64,32 +64,14 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations (x86-64 only)
+// SIMD implementations: SSE2 / SSSE3 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 
 type
   TProcessBlocksProc = procedure(AData: PByte; ANumBlocks: UInt32;
     ASums, AConstants: Pointer);
-
-procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksSse2.inc}
-end;
-
-procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3.inc}
-end;
-
-procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksAvx2.inc}
-end;
 
 procedure Adler32_Update_Simd(AData: PByte; ALength: UInt32; ASums: Pointer;
   AProcessBlocks: TProcessBlocksProc);
@@ -130,9 +112,42 @@ begin
   end;
 end;
 
-procedure Adler32_Update_Sse2(AData: PByte; ALength: UInt32; ASums: Pointer);
-begin
-  Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Sse2);
+{$ENDIF HASHLIB_X86_SIMD}
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSse2_i386.inc}
+end;
+
+procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSse2_x86_64.inc}
+end;
+
+procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3_x86_64.inc}
+end;
+
+procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksAvx2_x86_64.inc}
 end;
 
 procedure Adler32_Update_Ssse3(AData: PByte; ALength: UInt32; ASums: Pointer);
@@ -147,6 +162,24 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_X86_SIMD}
+
+procedure Adler32_Update_Sse2(AData: PByte; ALength: UInt32; ASums: Pointer);
+begin
+  Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Sse2);
+end;
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure Adler32_Update_Ssse3(AData: PByte; ALength: UInt32; ASums: Pointer);
+begin
+  Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Ssse3);
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$ENDIF HASHLIB_X86_SIMD}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -154,6 +187,18 @@ end;
 procedure InitDispatch();
 begin
   Adler32_Update := @Adler32_Update_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSSE3:
+    begin
+      Adler32_Update := @Adler32_Update_Ssse3;
+    end;
+    TSimdLevel.SSE2:
+    begin
+      Adler32_Update := @Adler32_Update_Sse2;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:

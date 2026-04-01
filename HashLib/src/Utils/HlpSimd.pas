@@ -29,7 +29,7 @@ type
 
 implementation
 
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 
 type
   TCpuIdResult = record
@@ -44,17 +44,17 @@ procedure XGetBvQuery(AResult: Pointer);
   {$I ..\Include\Simd\CpuDetect\XGetBvQuery.inc}
 end;
 
-{$ENDIF HASHLIB_X86_64_ASM}
+{$ENDIF}
 
 { TSimd }
 
 class function TSimd.CPUHasSSE2(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
   Result := (LCpuId.RegEDX and (1 shl 26)) <> 0;
 {$ELSE}
@@ -63,12 +63,12 @@ begin
 end;
 
 class function TSimd.CPUHasSSSE3(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
   // SSSE3: ECX bit 9
   Result := (LCpuId.RegECX and (1 shl 9)) <> 0;
@@ -78,13 +78,18 @@ begin
 end;
 
 class function TSimd.CPUHasAVX2(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
   LXcr0: UInt64;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFNDEF HASHLIB_X86_SIMD}
+  Result := False;
+{$ELSE}
+  {$IFDEF HASHLIB_I386_ASM}
+  Result := False;
+  {$ELSE}
   CpuIdQuery(1, 0, @LCpuId);
 
   // OSXSAVE: ECX bit 27 (required for OS AVX state saving)
@@ -101,33 +106,36 @@ begin
 
   // AVX2: EBX bit 5
   Result := (LCpuId.RegEBX and (1 shl 5)) <> 0;
-{$ELSE}
-  Result := False;
+  {$ENDIF}
 {$ENDIF}
 end;
 
 class function TSimd.CPUHasSHANI(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFNDEF HASHLIB_X86_SIMD}
+  Result := False;
+{$ELSE}
+  {$IFDEF HASHLIB_I386_ASM}
+  Result := False;
+  {$ELSE}
   CpuIdQuery(7, 0, @LCpuId);
   // SHA-NI: EBX bit 29
   Result := (LCpuId.RegEBX and (1 shl 29)) <> 0;
-{$ELSE}
-  Result := False;
+  {$ENDIF}
 {$ENDIF}
 end;
 
 class function TSimd.CPUHasPCLMULQDQ(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
   // PCLMULQDQ: ECX bit 1
   Result := (LCpuId.RegECX and (1 shl 1)) <> 0;
@@ -137,12 +145,12 @@ begin
 end;
 
 class function TSimd.CPUHasVPCLMULQDQ(): Boolean;
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(7, 0, @LCpuId);
   // VPCLMULQDQ: ECX bit 10
   Result := (LCpuId.RegECX and (1 shl 10)) <> 0;
@@ -190,6 +198,8 @@ begin
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSSE3)}
   if FDetectedLevel > TSimdLevel.SSSE3 then
     FDetectedLevel := TSimdLevel.SSSE3;
+  FHasSHANI := False;
+  FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 {$IFEND}
 end;

@@ -1,30 +1,21 @@
-// SHA-256 SSSE3 implementation with SIMD message schedule.
+// SHA-256 SSE2 implementation with SIMD message schedule.
+// Based on SSSE3 implementation (see SHA256CompressSsse3_x86_64.inc).
+// Same algorithm as SSSE3 version but replaces SSSE3-specific instructions:
+//   pshufb  -> SSE2 byte-swap (pshuflw/pshufhw + psrlw/psllw/por)
+//   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
 // K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
 // Uses xmm0-xmm7, all GPR.
 //
 // Two-phase per block:
-//   Phase 1 (SIMD): Compute W+K[0..63] using SSSE3 message schedule, store to stack
+//   Phase 1 (SIMD): Compute W+K[0..63] using SSE2 message schedule, store to stack
 //   Phase 2 (GPR): Run 64 compression rounds reading W+K from stack
 //
 // Non-volatile register saves:
 //   Windows: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15
-//   System V: rbx, rbp, r12-r15
+//   Unix: rbx, rbp, r12-r15
 //
-// Stack layout (sub rsp, 376):
-//   [rsp +   0.. 15]: xmm6 save (Windows only)
-//   [rsp +  16.. 31]: xmm7 save (Windows only)
-//   [rsp +  32.. 39]: rbx save
-//   [rsp +  40.. 47]: rbp save
-//   [rsp +  48.. 55]: rdi save (Windows only)
-//   [rsp +  56.. 63]: rsi save (Windows only)
-//   [rsp +  64.. 71]: r12 save
-//   [rsp +  72.. 79]: r13 save
-//   [rsp +  80.. 87]: r14 save
-//   [rsp +  88.. 95]: r15 save
-//   [rsp +  96..103]: K256 ptr save
-//   [rsp + 104..111]: padding
-//   [rsp + 112..367]: W+K buffer (256 bytes, 16-byte aligned)
+// Stack layout (sub rsp, 376): same as SSSE3 version
 
   sub rsp, 376
 
@@ -47,23 +38,46 @@
   mov [rsp + $60], r9
 
   test r14d, r14d
-  jz @ssse3_done
+  jz @sse2_256_done
 
-@ssse3_block_loop:
+@sse2_256_block_loop:
 
   // ========== Phase 1: Message Schedule ==========
 
   mov rax, [rsp + $60]
-  movdqu xmm7, oword [rax + $100]
 
+  // SSE2 32-bit byte-swap for W[0..15]
   movdqu xmm0, oword [r13]
-  pshufb xmm0, xmm7
+  pshuflw xmm0, xmm0, $B1
+  pshufhw xmm0, xmm0, $B1
+  movdqa xmm4, xmm0
+  psrlw  xmm0, 8
+  psllw  xmm4, 8
+  por    xmm0, xmm4
+
   movdqu xmm1, oword [r13 + $10]
-  pshufb xmm1, xmm7
+  pshuflw xmm1, xmm1, $B1
+  pshufhw xmm1, xmm1, $B1
+  movdqa xmm4, xmm1
+  psrlw  xmm1, 8
+  psllw  xmm4, 8
+  por    xmm1, xmm4
+
   movdqu xmm2, oword [r13 + $20]
-  pshufb xmm2, xmm7
+  pshuflw xmm2, xmm2, $B1
+  pshufhw xmm2, xmm2, $B1
+  movdqa xmm4, xmm2
+  psrlw  xmm2, 8
+  psllw  xmm4, 8
+  por    xmm2, xmm4
+
   movdqu xmm3, oword [r13 + $30]
-  pshufb xmm3, xmm7
+  pshuflw xmm3, xmm3, $B1
+  pshufhw xmm3, xmm3, $B1
+  movdqa xmm4, xmm3
+  psrlw  xmm3, 8
+  psllw  xmm4, 8
+  por    xmm3, xmm4
 
   lea rbp, [rsp + $70]
 
@@ -91,11 +105,15 @@
   add rbp, $40
   mov ecx, 12
 
-@ssse3_expand_loop:
+@sse2_256_expand_loop:
 
-  // sigma0(W[t-15..t-12])
-  movdqa xmm4, xmm1
-  palignr xmm4, xmm0, 4
+  // sigma0(W[t-15..t-12]) - replaces palignr xmm4, xmm0, 4
+  movdqa xmm4, xmm0
+  psrldq xmm4, 4
+  movdqa xmm7, xmm1
+  pslldq xmm7, 12
+  por    xmm4, xmm7
+
   movdqa xmm5, xmm4
   movdqa xmm6, xmm4
   psrld  xmm4, 3
@@ -110,9 +128,12 @@
 
   paddd  xmm0, xmm4
 
-  // W[t-7..t-4]
-  movdqa xmm4, xmm3
-  palignr xmm4, xmm2, 4
+  // W[t-7..t-4] - replaces palignr xmm4, xmm2, 4
+  movdqa xmm4, xmm2
+  psrldq xmm4, 4
+  movdqa xmm7, xmm3
+  pslldq xmm7, 12
+  por    xmm4, xmm7
   paddd  xmm0, xmm4
 
   // sigma1 phase 1: W[t-2..t-1]
@@ -151,7 +172,6 @@
   paddd  xmm4, xmm0
   movdqa oword [rbp], xmm4
 
-  // Rotate message window: old X0 replaced, shift X1->X0, X2->X1, X3->X2, new->X3
   movdqa xmm4, xmm0
   movdqa xmm0, xmm1
   movdqa xmm1, xmm2
@@ -161,7 +181,7 @@
   add rax, $10
   add rbp, $10
   dec ecx
-  jnz @ssse3_expand_loop
+  jnz @sse2_256_expand_loop
 
   // ========== Phase 2: 64 Compression Rounds ==========
 
@@ -177,7 +197,7 @@
   lea rbp, [rsp + $70]
   lea r15, [rsp + $70 + $100]
 
-@ssse3_round_loop:
+@sse2_256_round_loop:
 
   // Round 0: a=eax b=ebx c=ecx d=edx e=r8d f=r9d g=r10d h=r11d
   mov esi, r8d
@@ -435,11 +455,9 @@
   xor eax, edi
   add eax, esi
 
-  // After round 7: a=eax b=ebx c=ecx d=edx e=r8d f=r9d g=r10d h=r11d
-
   add rbp, $20
   cmp rbp, r15
-  jb @ssse3_round_loop
+  jb @sse2_256_round_loop
 
   // Add round results to state
   add [r12], eax
@@ -453,9 +471,9 @@
 
   add r13, $40
   dec r14d
-  jnz @ssse3_block_loop
+  jnz @sse2_256_block_loop
 
-@ssse3_done:
+@sse2_256_done:
 
   mov rbx, [rsp + $20]
   mov rbp, [rsp + $28]

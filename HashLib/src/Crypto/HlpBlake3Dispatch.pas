@@ -610,37 +610,53 @@ begin
 end;
 
 // =============================================================================
-// SSE2 and AVX2 implementations (x86-64 only)
+// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_I386_ASM}
 
 procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3CompressSse2.inc}
-end;
-
-procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3CompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressSse2_i386.inc}
 end;
 
 procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc6Begin_i386.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressSse2_x86_64.inc}
+end;
+
+procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressAvx2_x86_64.inc}
+end;
+
+procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc6Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2_x86_64.inc}
 end;
 
 procedure Blake3_Hash8_Avx2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3Hash8Avx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc6Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash8Avx2_x86_64.inc}
 end;
 
-// Cascade wrappers matching the official BLAKE3 dispatch pattern:
-// AVX2 hash_many: hash8 -> delegate remainder to SSE2 hash_many
-// SSE2 hash_many: hash4 -> delegate remainder to scalar hash_many
+{$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_X86_SIMD}
+
+// SSE2 hash_many: hash4 -> delegate remainder to scalar hash_many
 procedure Blake3_HashMany_Sse2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
 var
@@ -660,6 +676,11 @@ begin
     Blake3_HashMany_Scalar(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
 end;
 
+{$ENDIF HASHLIB_X86_SIMD}
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+// AVX2 hash_many: hash8 -> delegate remainder to SSE2 hash_many (x64 only; after shared Sse2)
 procedure Blake3_HashMany_Avx2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
 var
@@ -690,6 +711,16 @@ begin
   Blake3_Compress := @Blake3_Compress_Scalar;
   Blake3_HashMany := @Blake3_HashMany_Scalar;
   Blake3_ParallelDegree := 1;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    begin
+      Blake3_Compress := @Blake3_Compress_Sse2;
+      Blake3_HashMany := @Blake3_HashMany_Sse2;
+      Blake3_ParallelDegree := 4;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   case TSimd.GetActiveLevel() of
     TSimdLevel.AVX2:

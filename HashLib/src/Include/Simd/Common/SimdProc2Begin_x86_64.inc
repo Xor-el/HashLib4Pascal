@@ -1,9 +1,9 @@
 // Shared SIMD procedure prologue for 2-parameter assembly functions.
 // After inclusion: rcx = param1, rdx = param2 (MS x64 ABI).
-// On FPC non-Windows (System V ABI), remaps rdi,rsi -> rcx,rdx.
+// On FPC non-Windows (Unix ABI), remaps rdi,rsi -> rcx,rdx.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer);
-//     {$I SimdProc2Begin.inc}
+//     {$I SimdProc2Begin_x86_64.inc}
 //     // ... SIMD instructions using rcx, rdx ...
 //   end;
 {$IFDEF FPC}

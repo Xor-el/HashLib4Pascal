@@ -2,7 +2,7 @@
 // (MSB-first) CRCs with width 8..64.
 // PCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
-// Function signature (included after SimdProc4Begin.inc):
+// Function signature (included after SimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Pclmul_Msb(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //

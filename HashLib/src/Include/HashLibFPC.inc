@@ -38,6 +38,11 @@
 
 {============================== CPU Architecture ==============================}
 
+{$IF DEFINED(CPU386)}
+  {$DEFINE HASHLIB_I386}
+  {$DEFINE HASHLIB_I386_ASM}
+{$IFEND}
+
 {$IF DEFINED(CPUX64)}
   {$DEFINE HASHLIB_X86_64}
   {$DEFINE HASHLIB_X86_64_ASM}

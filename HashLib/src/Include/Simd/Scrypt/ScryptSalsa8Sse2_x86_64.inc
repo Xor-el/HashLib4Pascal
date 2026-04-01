@@ -12,7 +12,7 @@
 //   xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
 //   xmm2 = C = {w8,w13,w2,w7},  xmm3 = D = {w12,w1,w6,w11}.
 // Operation: State = Salsa20/8(State XOR Input)
-// Uses xmm0-xmm5 (all volatile on Windows and System V). No spills needed.
+// Uses xmm0-xmm5 (all volatile on Windows and Unix). No spills needed.
 // Stack: 72 bytes (64 for saved XOR'd state + 8 alignment padding).
 //
 // Column QR (lane-parallel):

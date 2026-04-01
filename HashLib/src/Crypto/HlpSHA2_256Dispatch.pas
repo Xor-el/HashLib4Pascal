@@ -97,15 +97,31 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations (x86-64 only)
+// SIMD implementations: SSE2 / SSSE3 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
 // =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressSse2_i386.inc}
+end;
+
+procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressSsse3_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA256_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA256\SHA256CompressShaNi.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressShaNi_x86_64.inc}
 end;
 
 procedure SHA256_Compress_ShaNi_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -115,19 +131,14 @@ end;
 
 procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA256\SHA256CompressSse2.inc}
-end;
-
-procedure SHA256_Compress_Sse2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
-begin
-  SHA256_Compress_Sse2(AState, AData, ANumBlocks, @K256);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressSse2_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA256\SHA256CompressSsse3.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressSsse3_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -137,8 +148,8 @@ end;
 
 procedure SHA256_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA256\SHA256CompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressAvx2_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -148,6 +159,24 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_X86_SIMD}
+
+procedure SHA256_Compress_Sse2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA256_Compress_Sse2(AState, AData, ANumBlocks, @K256);
+end;
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA256_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA256_Compress_Ssse3(AState, AData, ANumBlocks, @K256);
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$ENDIF HASHLIB_X86_SIMD}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -155,6 +184,18 @@ end;
 procedure InitDispatch();
 begin
   SHA256_Compress := @SHA256_Compress_Scalar;
+{$IFDEF HASHLIB_I386_ASM}
+  case TSimd.GetActiveLevel() of
+    TSimdLevel.SSSE3:
+    begin
+      SHA256_Compress := @SHA256_Compress_Ssse3_Wrap;
+    end;
+    TSimdLevel.SSE2:
+    begin
+      SHA256_Compress := @SHA256_Compress_Sse2_Wrap;
+    end;
+  end;
+{$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
   if TSimd.HasSHANI() then
   begin
