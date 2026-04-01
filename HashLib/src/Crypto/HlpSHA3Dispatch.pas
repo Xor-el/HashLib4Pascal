@@ -464,8 +464,8 @@ const
   );
 
 procedure KeccakF1600_Avx2(AState: Pointer; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
-  {$I ..\Include\Simd\SHA3\KeccakF1600Avx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA3\KeccakF1600Avx2_x86_64.inc}
 end;
 
 procedure KeccakF1600_Avx2_Wrap(AState: Pointer);
@@ -475,8 +475,8 @@ end;
 
 procedure KeccakF1600_Avx2_Absorb(AState: Pointer; AData: PByte;
   ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc5Begin.inc}
-  {$I ..\Include\Simd\SHA3\KeccakF1600Avx2Absorb.inc}
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA3\KeccakF1600Avx2Absorb_x86_64.inc}
 end;
 
 procedure KeccakF1600_Avx2_Absorb_Wrap(AState: Pointer; AData: PByte;

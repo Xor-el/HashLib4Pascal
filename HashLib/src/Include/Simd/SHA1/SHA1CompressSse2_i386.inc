@@ -1,5 +1,5 @@
 // SHA-1 SSE2 implementation with SIMD message schedule.
-// Based on SSSE3 implementation (see SHA1CompressSsse3.inc).
+// Based on SSSE3 implementation (see SHA1CompressSsse3_x86_64.inc).
 // Same algorithm as SSSE3 version but byte-swap uses SSE2 emulation
 //   (pshuflw/pshufhw + psrlw/psllw/por) instead of SSSE3 pshufb.
 // IA-32: after SimdProc3Begin_i386 — ebx = state, esi = data, edi = numblocks

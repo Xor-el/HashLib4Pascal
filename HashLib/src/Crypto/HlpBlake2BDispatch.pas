@@ -112,13 +112,13 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Blake2B_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2_x86_64.inc}
 end;
 
 procedure Blake2B_Compress_Avx2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake2B\Blake2BCompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake2B\Blake2BCompressAvx2_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

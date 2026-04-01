@@ -1,6 +1,6 @@
 // CRC32 reflected (PKZIP-style) 16-byte slice: SSE2 movdqu + dword table XOR.
 // Little-endian host only (matches TConverters.le2me_32 = identity on LE).
-// Signature (after SimdProc4Begin.inc):
+// Signature (after SimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Lsb32_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 // State: low UInt32 of qword at AState is the running CRC.

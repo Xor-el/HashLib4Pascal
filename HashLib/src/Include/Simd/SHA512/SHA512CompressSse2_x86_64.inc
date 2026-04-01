@@ -1,5 +1,5 @@
 // SHA-512 SSE2 implementation.
-// Based on SSSE3 implementation (see SHA512CompressSsse3.inc).
+// Based on SSSE3 implementation (see SHA512CompressSsse3_x86_64.inc).
 // Same as SSSE3 but byte-swap uses SSE2 emulation (pshuflw/pshufhw + psrlw/psllw/por)
 // instead of SSSE3 pshufb. Message schedule expansion and compression use GPR only.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K512 ptr.

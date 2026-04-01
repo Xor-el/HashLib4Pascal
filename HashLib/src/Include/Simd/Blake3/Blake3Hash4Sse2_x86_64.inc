@@ -3,7 +3,7 @@
 // Each XMM register holds the same 32-bit word from 4 different chunks (inter-chunk SIMD).
 // 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
 //
-// After SimdProc6Begin.inc:
+// After SimdProc6Begin_x86_64.inc:
 //   rcx = AInput, rdx = AKey, r8 = AOut,
 //   r9 = ANumChunks, r10 = ACounter, r11 = AFlags
 //

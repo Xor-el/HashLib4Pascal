@@ -149,14 +149,14 @@ end;
 
 procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA512\SHA512CompressSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA512\SHA512CompressSse2_x86_64.inc}
 end;
 
 procedure SHA512_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA512\SHA512CompressSsse3.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA512\SHA512CompressSsse3_x86_64.inc}
 end;
 
 procedure SHA512_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -166,8 +166,8 @@ end;
 
 procedure SHA512_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA512\SHA512CompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA512\SHA512CompressAvx2_x86_64.inc}
 end;
 
 procedure SHA512_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);

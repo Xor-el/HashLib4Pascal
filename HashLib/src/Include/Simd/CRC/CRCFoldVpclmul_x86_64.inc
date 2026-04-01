@@ -2,7 +2,7 @@
 // CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
 // AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
-// Function signature (included after SimdProc4Begin.inc):
+// Function signature (included after SimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //

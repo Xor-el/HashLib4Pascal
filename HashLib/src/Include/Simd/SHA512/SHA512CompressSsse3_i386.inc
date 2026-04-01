@@ -1,5 +1,5 @@
 // SHA-512 SSSE3 implementation (IA-32).
-// Based on SHA512CompressSsse3.inc (x86-64); same algorithm as SSE2 i386 but Phase 1 uses pshufb.
+// Based on SHA512CompressSsse3_x86_64.inc (x86-64); same algorithm as SSE2 i386 but Phase 1 uses pshufb.
 // IA-32: after SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K512 ptr
 //   (parallel to MS x64 ABI: rcx, rdx, r8d, r9).
 // K512: 80 UInt64 round constants (640 bytes), BSWAP64 mask at offset 640 ($280).

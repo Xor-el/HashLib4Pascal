@@ -8,7 +8,7 @@
 // Uses "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM registers.
 // All VEX instructions are db-encoded for broad assembler compatibility.
 //
-// After SimdProc5Begin.inc:
+// After SimdProc5Begin_x86_64.inc:
 //   rcx = state ptr (25 x UInt64, standard layout)
 //   rdx = data ptr (input bytes, little-endian UInt64 words)
 //   r8d = block count

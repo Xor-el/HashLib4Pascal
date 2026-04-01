@@ -6,7 +6,7 @@
 // x64 uses xmm6-xmm9 for widened weights; IA-32 only has xmm0-xmm7, so widened weights
 // live on stack (4 x 16 bytes). xmm6–xmm7 are non-volatile on Win32 and are saved there.
 //
-// Same SSE2 emulation as Adler32BlocksSse2.inc (punpcklbw/hbw + pmaddwd).
+// Same SSE2 emulation as Adler32BlocksSse2_x86_64.inc (punpcklbw/hbw + pmaddwd).
 
   // Preserve constants pointer (eax) before GPR reloads from ASums
   push eax

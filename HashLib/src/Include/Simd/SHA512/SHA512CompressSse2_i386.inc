@@ -1,5 +1,5 @@
 // SHA-512 SSE2 implementation (IA-32).
-// Based on SHA512CompressSse2.inc (x86-64); same algorithm.
+// Based on SHA512CompressSse2_x86_64.inc (x86-64); same algorithm.
 // IA-32: after SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K512 ptr
 //   (parallel to MS x64 ABI: rcx, rdx, r8d, r9).
 // K512: 80 UInt64 round constants (640 bytes).

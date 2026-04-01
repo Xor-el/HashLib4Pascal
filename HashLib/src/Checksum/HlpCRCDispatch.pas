@@ -371,27 +371,27 @@ end;
 // SIMD implementations: SSE2 (IA-32); SSE2, PCLMULQDQ / VPCLMULQDQ (x86-64)
 // =============================================================================
 // SSE2 = movdqu/movq/pxor/psrldq for wide loads; table XOR stays in GPRs.
-// x86-64: SimdProc4Begin.inc + CRCFold*Sse2.inc. IA-32: SimdProc4Begin_i386.inc
+// x86-64: SimdProc4Begin_x86_64.inc + CRCFold*Sse2_x86_64.inc. IA-32: SimdProc4Begin_i386.inc
 // + CRCFold*Sse2_i386.inc (MSB Width/CrcMask offsets differ from x64).
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
 function CRC_Fold_Lsb_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldLsbSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldLsbSse2_x86_64.inc}
 end;
 
 function CRC_Fold_Msb_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldMsbSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldMsbSse2_x86_64.inc}
 end;
 
 function CRC_Fold_Lsb32_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldLsb32Sse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldLsb32Sse2_x86_64.inc}
 end;
 
 {$ELSE}
@@ -443,26 +443,26 @@ end;
 
 function CRC_Fold_Pclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldPclmul.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldPclmul_x86_64.inc}
 end;
 
 function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldVpclmul.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldVpclmul_x86_64.inc}
 end;
 
 function CRC_Fold_Pclmul_Msb(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldPclmulMsb.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldPclmulMsb_x86_64.inc}
 end;
 
 function CRC_Fold_Vpclmul_Msb(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldVpclmulMsb.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldVpclmulMsb_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

@@ -117,13 +117,13 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Argon2\Argon2FillBlockSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Argon2\Argon2FillBlockSse2_x86_64.inc}
 end;
 
 procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Argon2\Argon2FillBlockAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Argon2\Argon2FillBlockAvx2_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

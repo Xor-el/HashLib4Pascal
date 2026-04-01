@@ -133,38 +133,38 @@ end;
 
 procedure XXH3_Accumulate512_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3Acc512Sse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3Acc512Sse2_x86_64.inc}
 end;
 
 procedure XXH3_ScrambleAcc_Sse2(AAcc: Pointer; ASecret: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3ScrambleSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3ScrambleSse2_x86_64.inc}
 end;
 
 procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
-  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2_x86_64.inc}
 end;
 
 // ----- AVX2 -----
 
 procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3Acc512Avx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3Acc512Avx2_x86_64.inc}
 end;
 
 procedure XXH3_ScrambleAcc_Avx2(AAcc: Pointer; ASecret: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3ScrambleAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3ScrambleAvx2_x86_64.inc}
 end;
 
 procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
-  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
-  {$I ..\Include\Simd\XXH3\XXH3InitSecretAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3InitSecretAvx2_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

@@ -1,5 +1,5 @@
 // MSB-first 64-bit CRC: 16-byte slice (IA-32; SSE2 not required — same as x64 MSB path).
-// x64 counterpart: CRCFoldMsbSse2.inc (Width/CrcMask at +224/+228).
+// x64 counterpart: CRCFoldMsbSse2_x86_64.inc (Width/CrcMask at +224/+228).
 // After SimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
 // Offsets (packed TCRCFoldRuntimeCtx64, 32-bit ptrs): TableRow +96, Width +160,
 //   CrcMask +164 (x86-64 uses +224/+228 because TableRow entries are 8 bytes).

@@ -129,8 +129,8 @@ end;
 
 procedure SHA1_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA1\SHA1CompressShaNi.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressShaNi_x86_64.inc}
 end;
 
 procedure SHA1_Compress_ShaNi_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -139,14 +139,14 @@ begin
 end;
 
 procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32);
-  {$I ..\Include\Simd\Common\SimdProc3Begin.inc}
-  {$I ..\Include\Simd\SHA1\SHA1CompressSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressSse2_x86_64.inc}
 end;
 
 procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA1\SHA1CompressSsse3.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressSsse3_x86_64.inc}
 end;
 
 procedure SHA1_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -156,8 +156,8 @@ end;
 
 procedure SHA1_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\SHA1\SHA1CompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressAvx2_x86_64.inc}
 end;
 
 procedure SHA1_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);

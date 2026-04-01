@@ -6,7 +6,7 @@
 // On MS x64, param5/6 are loaded from [rsp+40]/[rsp+48] (after shadow space).
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer; P4: Int32; P5: UInt64; P6: UInt32);
-//     {$I SimdProc6Begin.inc}
+//     {$I SimdProc6Begin_x86_64.inc}
 //     // ... SIMD instructions using rcx, rdx, r8, r9, r10, r11 ...
 //   end;
 {$IFDEF FPC}

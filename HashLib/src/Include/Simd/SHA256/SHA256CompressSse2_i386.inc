@@ -1,5 +1,5 @@
 // SHA-256 SSE2 implementation with SIMD message schedule.
-// Based on SSSE3 implementation (see SHA256CompressSsse3.inc).
+// Based on SSSE3 implementation (see SHA256CompressSsse3_x86_64.inc).
 // Same algorithm as SSSE3 version but replaces SSSE3-specific instructions:
 //   pshufb  -> SSE2 byte-swap (pshuflw/pshufhw + psrlw/psllw/por)
 //   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)

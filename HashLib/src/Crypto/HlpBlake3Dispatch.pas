@@ -631,25 +631,25 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3CompressSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressSse2_x86_64.inc}
 end;
 
 procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3CompressAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressAvx2_x86_64.inc}
 end;
 
 procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc6Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash4Sse2_x86_64.inc}
 end;
 
 procedure Blake3_Hash8_Avx2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\Include\Simd\Common\SimdProc6Begin.inc}
-  {$I ..\Include\Simd\Blake3\Blake3Hash8Avx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc6Begin_x86_64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash8Avx2_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

@@ -15,7 +15,7 @@
 // Operation: State = Salsa20/8(State XOR Input)
 // Uses xmm0–xmm5. Stack: sub esp, 72 (64 for saved XOR'd state + 8 alignment padding).
 //
-// Column QR / diagonal / row QR: same structure as ScryptSalsa8Sse2.inc header on x86-64.
+// Column QR / diagonal / row QR: same structure as ScryptSalsa8Sse2_x86_64.inc header on x86-64.
 
   sub esp, 72
 

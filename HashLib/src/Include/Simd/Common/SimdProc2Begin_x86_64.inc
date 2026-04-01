@@ -3,7 +3,7 @@
 // On FPC non-Windows (Unix ABI), remaps rdi,rsi -> rcx,rdx.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer);
-//     {$I SimdProc2Begin.inc}
+//     {$I SimdProc2Begin_x86_64.inc}
 //     // ... SIMD instructions using rcx, rdx ...
 //   end;
 {$IFDEF FPC}

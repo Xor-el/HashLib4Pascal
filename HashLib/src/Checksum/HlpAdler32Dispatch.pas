@@ -134,20 +134,20 @@ end;
 
 procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksSse2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSse2_x86_64.inc}
 end;
 
 procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3_x86_64.inc}
 end;
 
 procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin.inc}
-  {$I ..\Include\Simd\Adler32\Adler32BlocksAvx2.inc}
+  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksAvx2_x86_64.inc}
 end;
 
 procedure Adler32_Update_Ssse3(AData: PByte; ALength: UInt32; ASums: Pointer);

@@ -9,7 +9,7 @@
 //   R_buf at lea eax,[esp+32]; ECX = loop offset; EBX = Z_buf base after copy; EDI = Current.
 // r8/r9 analogues (Current, WithXor) are not clobbered across loops. ARight and ACurrent may alias.
 //
-// Diagonalize/Undiagonalize use shufpd (see x64 header in Argon2FillBlockSse2.inc).
+// Diagonalize/Undiagonalize use shufpd (see x64 header in Argon2FillBlockSse2_x86_64.inc).
 
   sub esp, 2132
 
