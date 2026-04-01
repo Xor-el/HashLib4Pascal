@@ -15,7 +15,7 @@
 //
 // Non-volatile register saves:
 //   Windows: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15
-//   System V: rbx, rbp, r12-r15
+//   Unix: rbx, rbp, r12-r15
 //
 // Stack layout (sub rsp, 440):
 //   [rsp +   0.. 15]: xmm6 save (Windows only)

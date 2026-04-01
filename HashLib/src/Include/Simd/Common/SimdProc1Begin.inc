@@ -1,6 +1,6 @@
 // Shared SIMD procedure prologue for 1-parameter assembly functions.
 // After inclusion: rcx = param1 (MS x64 ABI).
-// On FPC non-Windows (System V ABI), remaps rdi -> rcx.
+// On FPC non-Windows (Unix ABI), remaps rdi -> rcx.
 // Usage:
 //   procedure MyProc(P1: Pointer);
 //     {$I SimdProc1Begin.inc}
