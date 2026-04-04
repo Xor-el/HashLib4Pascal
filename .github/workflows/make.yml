@@ -20,6 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -33,22 +34,17 @@ jobs:
         with:
           submodules: true
 
-      - name: Build on Linux (x86_64)
-        if: runner.os == 'Linux' && runner.arch == 'X64'
+      # ─── Linux (unified for x86_64 and AArch64) ────────────────────────
+      - name: Build on Linux
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           set -xeuo pipefail
           sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
+          fpc -iV
           instantfpc .github/workflows/make.pas
 
-      - name: Build on Linux (AArch64)
-        if: runner.os == 'Linux' && runner.arch == 'ARM64'
-        shell: bash
-        run: |
-          set -xeuo pipefail
-          sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
-          instantfpc .github/workflows/make.pas
-
+      # ─── macOS ──────────────────────────────────────────────────────────
       - name: Install Lazarus on macOS
         if: runner.os == 'macOS'
         uses: gcarreno/setup-lazarus@v3
@@ -61,30 +57,37 @@ jobs:
         shell: bash
         run: |
           set -xeuo pipefail
+          fpc -iV
           instantfpc .github/workflows/make.pas
 
+      # ─── Windows ────────────────────────────────────────────────────────
       - name: Build on Windows
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          $ErrorActionPreference = 'stop'
+          $ErrorActionPreference = 'Stop'
           Set-PSDebug -Strict
 
           Write-Host "Installing Lazarus and OpenSSL 1.1 via Chocolatey..."
-          choco upgrade chocolatey -y
-          choco install lazarus -y
-          choco install openssl.light --version=1.1.1.20181020 -y
+          choco install lazarus -y --no-progress
+          choco install openssl.light --version=1.1.1.20181020 -y --no-progress
 
-          Write-Host "Verifying installed packages..."
-          choco list
+          # Discover FPC bin path dynamically
+          $fpcDir = Get-ChildItem 'C:\Lazarus\fpc' -Directory | Select-Object -First 1
+          $env:Path += ";C:\Lazarus;$($fpcDir.FullName)\bin\x86_64-win64"
 
-          # Lazarus installs to C:\Lazarus by default
-          # Add Lazarus and OpenSSL paths for instantfpc
-          $env:Path += ';C:\Lazarus;C:\Lazarus\fpc\3.2.2\bin\x86_64-win64;C:\ProgramData\chocolatey\lib\openssl.light\tools'
+          # Add OpenSSL to PATH (check known locations)
+          $opensslPaths = @(
+            'C:\ProgramData\chocolatey\lib\openssl.light\tools',
+            'C:\Program Files\OpenSSL\bin',
+            'C:\Program Files\OpenSSL-Win64\bin'
+          )
+          foreach ($p in $opensslPaths) {
+            if (Test-Path $p) { $env:Path += ";$p" }
+          }
 
-          Write-Host "Checking lazbuild and instantfpc availability..."
-          Get-Command lazbuild
-          Get-Command instantfpc
+          Write-Host "FPC version:"
+          fpc -iV
 
           Write-Host "Building make.pas..."
           instantfpc .github/workflows/make.pas
