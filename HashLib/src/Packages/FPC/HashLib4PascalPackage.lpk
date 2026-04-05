@@ -455,8 +455,8 @@
         <UnitName Value="HlpXXHash128"/>
       </Item106>
       <Item107>
-        <Filename Value="..\..\Utils\HlpSimd.pas"/>
-        <UnitName Value="HlpSimd"/>
+        <Filename Value="..\..\Utils\HlpCpuFeatures.pas"/>
+        <UnitName Value="HlpCpuFeatures"/>
       </Item107>
       <Item108>
         <Filename Value="..\..\Hash64\HlpXXHash3Dispatch.pas"/>

@@ -22,7 +22,7 @@ var
 implementation
 
 uses
-  HlpSimd;
+  HlpCpuFeatures;
 
 const
   XXH_STRIPE_LEN = 64;
@@ -213,8 +213,8 @@ begin
   XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
   XXH3_InitSecret := @XXH3_InitSecret_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
       XXH3_Accumulate := @XXH3_Accumulate_Sse2;
@@ -224,15 +224,15 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.AVX2:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.AVX2:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Avx2;
       XXH3_Accumulate := @XXH3_Accumulate_Avx2;
       XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Avx2;
       XXH3_InitSecret := @XXH3_InitSecret_Avx2;
     end;
-    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
       XXH3_Accumulate := @XXH3_Accumulate_Sse2;

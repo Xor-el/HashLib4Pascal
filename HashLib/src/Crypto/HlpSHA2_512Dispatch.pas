@@ -63,7 +63,7 @@ implementation
 uses
   HlpBits,
   HlpConverters,
-  HlpSimd;
+  HlpCpuFeatures;
 
 // =============================================================================
 // Scalar fallback implementation
@@ -194,28 +194,28 @@ procedure InitDispatch();
 begin
   SHA512_Compress := @SHA512_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.SSSE3:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.SSSE3:
     begin
       SHA512_Compress := @SHA512_Compress_Ssse3_Wrap;
     end;
-    TSimdLevel.SSE2:
+    TCpuSimdLevel.SSE2:
     begin
       SHA512_Compress := @SHA512_Compress_Sse2_Wrap;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.AVX2:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.AVX2:
     begin
       SHA512_Compress := @SHA512_Compress_Avx2_Wrap;
     end;
-    TSimdLevel.SSSE3:
+    TCpuSimdLevel.SSSE3:
     begin
       SHA512_Compress := @SHA512_Compress_Ssse3_Wrap;
     end;
-    TSimdLevel.SSE2:
+    TCpuSimdLevel.SSE2:
     begin
       SHA512_Compress := @SHA512_Compress_Sse2_Wrap;
     end;
