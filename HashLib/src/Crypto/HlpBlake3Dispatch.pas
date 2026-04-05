@@ -26,7 +26,7 @@ implementation
 
 uses
   HlpBits,
-  HlpSimd;
+  HlpCpuFeatures;
 
 const
   Blake3IV: array [0 .. 3] of UInt32 = (
@@ -712,8 +712,8 @@ begin
   Blake3_HashMany := @Blake3_HashMany_Scalar;
   Blake3_ParallelDegree := 1;
 {$IFDEF HASHLIB_I386_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
     begin
       Blake3_Compress := @Blake3_Compress_Sse2;
       Blake3_HashMany := @Blake3_HashMany_Sse2;
@@ -722,14 +722,14 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.AVX2:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.AVX2:
     begin
       Blake3_Compress := @Blake3_Compress_Avx2;
       Blake3_HashMany := @Blake3_HashMany_Avx2;
       Blake3_ParallelDegree := 8;
     end;
-    TSimdLevel.SSE2, TSimdLevel.SSSE3:
+    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
     begin
       Blake3_Compress := @Blake3_Compress_Sse2;
       Blake3_HashMany := @Blake3_HashMany_Sse2;

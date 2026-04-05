@@ -18,7 +18,7 @@ implementation
 uses
   HlpBits,
   HlpConverters,
-  HlpSimd;
+  HlpCpuFeatures;
 
 // =============================================================================
 // Round constants
@@ -496,8 +496,8 @@ begin
   KeccakF1600_Permute := @KeccakF1600_Scalar;
   KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TSimd.GetActiveLevel() of
-    TSimdLevel.AVX2:
+  case TCpuFeatures.GetActiveLevel() of
+    TCpuSimdLevel.AVX2:
     begin
       KeccakF1600_Permute := @KeccakF1600_Avx2_Wrap;
       KeccakF1600_Absorb := @KeccakF1600_Avx2_Absorb_Wrap;

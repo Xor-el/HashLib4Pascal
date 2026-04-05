@@ -123,7 +123,7 @@ uses
   HlpConverters in '..\..\HashLib\src\Utils\HlpConverters.pas',
   HlpBitConverter in '..\..\HashLib\src\Utils\HlpBitConverter.pas',
   HlpBits in '..\..\HashLib\src\Utils\HlpBits.pas',
-  HlpSimd in '..\..\HashLib\src\Utils\HlpSimd.pas',
+  HlpCpuFeatures in '..\..\HashLib\src\Utils\HlpCpuFeatures.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 

@@ -1,15 +1,15 @@
-unit HlpSimd;
+unit HlpCpuFeatures;
 
 {$I ..\Include\HashLib.inc}
 
 interface
 
 type
-  TSimdLevel = (Scalar, SSE2, SSSE3, AVX2);
+  TCpuSimdLevel = (Scalar, SSE2, SSSE3, AVX2);
 
-  TSimd = class sealed
+  TCpuFeatures = class sealed
   private
-    class var FDetectedLevel: TSimdLevel;
+    class var FDetectedLevel: TCpuSimdLevel;
     class var FHasSHANI: Boolean;
     class var FHasPCLMULQDQ: Boolean;
     class var FHasVPCLMULQDQ: Boolean;
@@ -21,7 +21,7 @@ type
     class function CPUHasVPCLMULQDQ(): Boolean; static;
     class procedure DetectFeatures(); static;
   public
-    class function GetActiveLevel(): TSimdLevel; static;
+    class function GetActiveLevel(): TCpuSimdLevel; static;
     class function HasSHANI(): Boolean; static;
     class function HasPCLMULQDQ(): Boolean; static;
     class function HasVPCLMULQDQ(): Boolean; static;
@@ -37,18 +37,18 @@ type
   end;
 
 procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; AResult: Pointer);
-  {$I ..\Include\Simd\CpuDetect\CpuIdQuery.inc}
+  {$I ..\Include\Simd\CpuFeatures\CpuIdQuery.inc}
 end;
 
 procedure XGetBvQuery(AResult: Pointer);
-  {$I ..\Include\Simd\CpuDetect\XGetBvQuery.inc}
+  {$I ..\Include\Simd\CpuFeatures\XGetBvQuery.inc}
 end;
 
 {$ENDIF}
 
-{ TSimd }
+{ TCpuFeatures }
 
-class function TSimd.CPUHasSSE2(): Boolean;
+class function TCpuFeatures.CPUHasSSE2(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -62,7 +62,7 @@ begin
 {$ENDIF}
 end;
 
-class function TSimd.CPUHasSSSE3(): Boolean;
+class function TCpuFeatures.CPUHasSSSE3(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -77,7 +77,7 @@ begin
 {$ENDIF}
 end;
 
-class function TSimd.CPUHasAVX2(): Boolean;
+class function TCpuFeatures.CPUHasAVX2(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -110,7 +110,7 @@ begin
 {$ENDIF}
 end;
 
-class function TSimd.CPUHasSHANI(): Boolean;
+class function TCpuFeatures.CPUHasSHANI(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -129,7 +129,7 @@ begin
 {$ENDIF}
 end;
 
-class function TSimd.CPUHasPCLMULQDQ(): Boolean;
+class function TCpuFeatures.CPUHasPCLMULQDQ(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -144,7 +144,7 @@ begin
 {$ENDIF}
 end;
 
-class function TSimd.CPUHasVPCLMULQDQ(): Boolean;
+class function TCpuFeatures.CPUHasVPCLMULQDQ(): Boolean;
 {$IFDEF HASHLIB_X86_SIMD}
 var
   LCpuId: TCpuIdResult;
@@ -159,23 +159,23 @@ begin
 {$ENDIF}
 end;
 
-class procedure TSimd.DetectFeatures();
+class procedure TCpuFeatures.DetectFeatures();
 begin
-  FDetectedLevel := TSimdLevel.Scalar;
+  FDetectedLevel := TCpuSimdLevel.Scalar;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 
   if CPUHasSSE2() then
   begin
-    FDetectedLevel := TSimdLevel.SSE2;
+    FDetectedLevel := TCpuSimdLevel.SSE2;
     FHasPCLMULQDQ := CPUHasPCLMULQDQ();
     if CPUHasSSSE3() then
     begin
-      FDetectedLevel := TSimdLevel.SSSE3;
+      FDetectedLevel := TCpuSimdLevel.SSSE3;
       if CPUHasAVX2() then
       begin
-        FDetectedLevel := TSimdLevel.AVX2;
+        FDetectedLevel := TCpuSimdLevel.AVX2;
         FHasVPCLMULQDQ := CPUHasVPCLMULQDQ();
       end;
     end;
@@ -185,46 +185,46 @@ begin
 
   // Cap based on user force defines
 {$IF DEFINED(HASHLIB_FORCE_SCALAR)}
-  FDetectedLevel := TSimdLevel.Scalar;
+  FDetectedLevel := TCpuSimdLevel.Scalar;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSE2)}
-  if FDetectedLevel > TSimdLevel.SSE2 then
-    FDetectedLevel := TSimdLevel.SSE2;
+  if FDetectedLevel > TCpuSimdLevel.SSE2 then
+    FDetectedLevel := TCpuSimdLevel.SSE2;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSSE3)}
-  if FDetectedLevel > TSimdLevel.SSSE3 then
-    FDetectedLevel := TSimdLevel.SSSE3;
+  if FDetectedLevel > TCpuSimdLevel.SSSE3 then
+    FDetectedLevel := TCpuSimdLevel.SSSE3;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
 {$IFEND}
 end;
 
-class function TSimd.GetActiveLevel(): TSimdLevel;
+class function TCpuFeatures.GetActiveLevel(): TCpuSimdLevel;
 begin
   Result := FDetectedLevel;
 end;
 
-class function TSimd.HasSHANI(): Boolean;
+class function TCpuFeatures.HasSHANI(): Boolean;
 begin
   Result := FHasSHANI;
 end;
 
-class function TSimd.HasPCLMULQDQ(): Boolean;
+class function TCpuFeatures.HasPCLMULQDQ(): Boolean;
 begin
   Result := FHasPCLMULQDQ;
 end;
 
-class function TSimd.HasVPCLMULQDQ(): Boolean;
+class function TCpuFeatures.HasVPCLMULQDQ(): Boolean;
 begin
   Result := FHasVPCLMULQDQ;
 end;
 
 initialization
-  TSimd.DetectFeatures();
+  TCpuFeatures.DetectFeatures();
 
 end.
