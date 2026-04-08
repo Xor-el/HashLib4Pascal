@@ -84,12 +84,7 @@ var
   LXcr0: UInt64;
 {$ENDIF}
 begin
-{$IFNDEF HASHLIB_X86_SIMD}
-  Result := False;
-{$ELSE}
-  {$IFDEF HASHLIB_I386_ASM}
-  Result := False;
-  {$ELSE}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
 
   // OSXSAVE: ECX bit 27 (required for OS AVX state saving)
@@ -106,7 +101,8 @@ begin
 
   // AVX2: EBX bit 5
   Result := (LCpuId.RegEBX and (1 shl 5)) <> 0;
-  {$ENDIF}
+{$ELSE}
+  Result := False;
 {$ENDIF}
 end;
 
@@ -116,16 +112,12 @@ var
   LCpuId: TCpuIdResult;
 {$ENDIF}
 begin
-{$IFNDEF HASHLIB_X86_SIMD}
-  Result := False;
-{$ELSE}
-  {$IFDEF HASHLIB_I386_ASM}
-  Result := False;
-  {$ELSE}
+{$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(7, 0, @LCpuId);
   // SHA-NI: EBX bit 29
   Result := (LCpuId.RegEBX and (1 shl 29)) <> 0;
-  {$ENDIF}
+{$ELSE}
+  Result := False;
 {$ENDIF}
 end;
 
