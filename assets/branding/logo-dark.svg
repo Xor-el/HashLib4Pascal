@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dark UI: brighter shards, arrow, and digest on near-black violet -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title2 desc2">
+  <title id="title2">HashLib4Pascal</title>
+  <desc id="desc2">Shred-to-block hash mark for dark backgrounds.</desc>
+  <defs>
+    <linearGradient id="hlbgd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1428"/>
+      <stop offset="100%" stop-color="#0a0810"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="26" fill="url(#hlbgd)"/>
+  <g fill="#a78bfa" opacity="0.7">
+    <rect x="22" y="38" width="12" height="8" rx="2" transform="rotate(-18 28 42)"/>
+    <rect x="30" y="52" width="10" height="10" rx="2" transform="rotate(12 35 57)"/>
+    <rect x="20" y="64" width="11" height="9" rx="2" transform="rotate(-25 26 68)"/>
+    <rect x="34" y="72" width="9" height="11" rx="2" transform="rotate(20 38 77)"/>
+  </g>
+  <path fill="none" stroke="#fde68a" stroke-width="3" stroke-linecap="round" d="M 48 64 L 58 64"/>
+  <rect x="62" y="44" width="44" height="40" rx="8" fill="#ffe082"/>
+  <rect x="70" y="56" width="28" height="6" rx="2" fill="#0a0810" opacity="0.45"/>
+  <rect x="70" y="66" width="20" height="6" rx="2" fill="#0a0810" opacity="0.45"/>
+</svg>

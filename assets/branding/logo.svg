@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  HashLib4Pascal project mark (not affiliated with Embarcadero).
+  Metaphor: input shards collapse into one digest block (any data to fixed fingerprint).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">HashLib4Pascal</title>
+  <desc id="desc">Badge showing scattered input fragments, arrow, and solid hash digest block.</desc>
+  <defs>
+    <linearGradient id="hlbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a3d66"/>
+      <stop offset="100%" stop-color="#261d38"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="26" fill="url(#hlbg)"/>
+  <g fill="#c4b5fd" opacity="0.55">
+    <rect x="22" y="38" width="12" height="8" rx="2" transform="rotate(-18 28 42)"/>
+    <rect x="30" y="52" width="10" height="10" rx="2" transform="rotate(12 35 57)"/>
+    <rect x="20" y="64" width="11" height="9" rx="2" transform="rotate(-25 26 68)"/>
+    <rect x="34" y="72" width="9" height="11" rx="2" transform="rotate(20 38 77)"/>
+  </g>
+  <path fill="none" stroke="#e8c547" stroke-width="3" stroke-linecap="round" d="M 48 64 L 58 64"/>
+  <rect x="62" y="44" width="44" height="40" rx="8" fill="#f7e08a"/>
+  <rect x="70" y="56" width="28" height="6" rx="2" fill="#261d38" opacity="0.35"/>
+  <rect x="70" y="66" width="20" height="6" rx="2" fill="#261d38" opacity="0.35"/>
+</svg>

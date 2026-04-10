@@ -1,9 +1,18 @@
-# HashLib4Pascal
+<p align="center">
+  <img src="assets/branding/logo.svg" width="160" alt="HashLib4Pascal logo" />
+  <h1 align="center">HashLib4Pascal</h1>
+  <p align="center">
+    <strong>Comprehensive hashing library for Object Pascal</strong>
+  </p>
+  <p align="center">
+    <a href="https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml"><img src="https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml/badge.svg" alt="Build Status"></a>
+    <a href="https://github.com/Xor-el/HashLib4Pascal/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+    <a href="https://www.embarcadero.com/products/delphi"><img src="https://img.shields.io/badge/Delphi-2010%2B-red.svg" alt="Delphi"></a>
+    <a href="https://www.freepascal.org/"><img src="https://img.shields.io/badge/FreePascal-3.2.2%2B-blue.svg" alt="FreePascal 3.2.2+"></a>
+  </p>
+</p>
 
-[![Build Status](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml/badge.svg)](https://github.com/Xor-el/HashLib4Pascal/actions/workflows/make.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Xor-el/HashLib4Pascal/blob/master/LICENSE)
-[![Delphi](https://img.shields.io/badge/Delphi-2010%2B-red.svg)](https://www.embarcadero.com/products/delphi)
-[![FreePascal](https://img.shields.io/badge/FreePascal-3.2.2%2B-blue.svg)](https://www.freepascal.org/)
+---
 
 HashLib4Pascal is a comprehensive hashing library for Object Pascal, providing an easy-to-use interface for computing hashes, checksums, MACs, KDFs, and XOFs with support for state-based (incremental) hashing, released under the permissive [MIT License](LICENSE).
 
@@ -18,6 +27,7 @@ HashLib4Pascal is a comprehensive hashing library for Object Pascal, providing a
 - [Other Implementations](#other-implementations)
 - [Tip Jar](#tip-jar)
 - [License](#license)
+- [Branding](assets/branding/README.md)
 
 ## Features
 
