@@ -17,7 +17,8 @@ implementation
 
 uses
   HlpBits,
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 // =============================================================================
 // Percival's (i*5 mod 16) permutation rearranges each 16-word Salsa20 state
@@ -201,20 +202,20 @@ procedure InitDispatch();
 begin
   Scrypt_SalsaXor := @Scrypt_SalsaXor_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.AVX2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.AVX2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Avx2;
     end;
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;

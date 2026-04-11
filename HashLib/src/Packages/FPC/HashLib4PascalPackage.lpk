@@ -29,7 +29,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="120">
+    <Files Count="123">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -510,6 +510,18 @@
         <Filename Value="..\..\Crypto\HlpSHA3Dispatch.pas"/>
         <UnitName Value="HlpSHA3Dispatch"/>
       </Item120>
+      <Item121>
+        <Filename Value="..\..\Utils\HlpArmSimdFeatures.pas"/>
+        <UnitName Value="HlpArmSimdFeatures"/>
+      </Item121>
+      <Item122>
+        <Filename Value="..\..\Utils\HlpSimdLevels.pas"/>
+        <UnitName Value="HlpSimdLevels"/>
+      </Item122>
+      <Item123>
+        <Filename Value="..\..\Utils\HlpX86SimdFeatures.pas"/>
+        <UnitName Value="HlpX86SimdFeatures"/>
+      </Item123>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

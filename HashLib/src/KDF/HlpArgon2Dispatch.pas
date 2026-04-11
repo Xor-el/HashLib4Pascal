@@ -14,7 +14,8 @@ implementation
 
 uses
   HlpBits,
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 // =============================================================================
 // Scalar fallback implementation
@@ -136,20 +137,20 @@ procedure InitDispatch();
 begin
   Argon2_FillBlock := @Argon2_FillBlock_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.AVX2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.AVX2:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Avx2;
     end;
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Sse2;
     end;

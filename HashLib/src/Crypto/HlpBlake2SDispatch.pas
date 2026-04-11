@@ -22,7 +22,8 @@ implementation
 
 uses
   HlpBits,
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 const
   Blake2SSigma: array [0 .. 9, 0 .. 15] of Int32 = (
@@ -129,20 +130,20 @@ procedure InitDispatch();
 begin
   Blake2S_Compress := @Blake2S_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Blake2S_Compress := @Blake2S_Compress_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.AVX2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.AVX2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Avx2;
     end;
-    TCpuSimdLevel.SSE2, TCpuSimdLevel.SSSE3:
+    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Blake2S_Compress := @Blake2S_Compress_Sse2;
     end;
