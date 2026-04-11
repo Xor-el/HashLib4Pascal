@@ -21,6 +21,7 @@ type
     FHasSHANI: Boolean;
     FHasPCLMULQDQ: Boolean;
     FHasVPCLMULQDQ: Boolean;
+    FHasAESNI: Boolean;
 
   strict private
     class function CPUHasSSE2(): Boolean; static;
@@ -29,6 +30,7 @@ type
     class function CPUHasSHANI(): Boolean; static;
     class function CPUHasPCLMULQDQ(): Boolean; static;
     class function CPUHasVPCLMULQDQ(): Boolean; static;
+    class function CPUHasAESNI(): Boolean; static;
 
   private
     class procedure ProbeHardwareAndCache(); static;
@@ -42,6 +44,7 @@ type
     class function HasSHANI(): Boolean; static;
     class function HasPCLMULQDQ(): Boolean; static;
     class function HasVPCLMULQDQ(): Boolean; static;
+    class function HasAESNI(): Boolean; static;
   end;
 
 implementation
@@ -82,6 +85,7 @@ var
 begin
 {$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
+  // SSSE3: ECX bit 9
   Result := (LCpuId.RegECX and (1 shl 9)) <> 0;
 {$ELSE}
   Result := False;
@@ -98,18 +102,18 @@ begin
 {$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
 
-  // Check OSXSAVE bit -- OS must support XSAVE/XRSTOR
+  // OSXSAVE: ECX bit 27 (required for OS AVX state saving)
   if (LCpuId.RegECX and (1 shl 27)) = 0 then
     Exit(False);
 
-  // Check XCR0 for SSE and AVX state saving
+  // XCR0 bits 1 and 2 must be set for AVX state support
   LXcr0 := 0;
   XGetBvQuery(@LXcr0);
   if (UInt32(LXcr0) and $06) <> $06 then
     Exit(False);
 
-  // Check AVX2 bit in structured extended feature flags
   CpuIdQuery(7, 0, @LCpuId);
+  // AVX2: EBX bit 5
   Result := (LCpuId.RegEBX and (1 shl 5)) <> 0;
 {$ELSE}
   Result := False;
@@ -124,6 +128,7 @@ var
 begin
 {$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(7, 0, @LCpuId);
+  // SHA-NI: EBX bit 29
   Result := (LCpuId.RegEBX and (1 shl 29)) <> 0;
 {$ELSE}
   Result := False;
@@ -138,6 +143,7 @@ var
 begin
 {$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(1, 0, @LCpuId);
+  // PCLMULQDQ: ECX bit 1
   Result := (LCpuId.RegECX and (1 shl 1)) <> 0;
 {$ELSE}
   Result := False;
@@ -152,7 +158,23 @@ var
 begin
 {$IFDEF HASHLIB_X86_SIMD}
   CpuIdQuery(7, 0, @LCpuId);
+  // VPCLMULQDQ: ECX bit 10
   Result := (LCpuId.RegECX and (1 shl 10)) <> 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
+end;
+
+class function TX86SimdFeatures.CPUHasAESNI(): Boolean;
+{$IFDEF HASHLIB_X86_SIMD}
+var
+  LCpuId: TCpuIdResult;
+{$ENDIF}
+begin
+{$IFDEF HASHLIB_X86_SIMD}
+  CpuIdQuery(1, 0, @LCpuId);
+  // AES-NI: ECX bit 25
+  Result := (LCpuId.RegECX and (1 shl 25)) <> 0;
 {$ELSE}
   Result := False;
 {$ENDIF}
@@ -164,6 +186,7 @@ begin
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
+  FHasAESNI := False;
 
   if CPUHasSSE2() then
   begin
@@ -181,6 +204,7 @@ begin
   end;
 
   FHasSHANI := CPUHasSHANI();
+  FHasAESNI := CPUHasAESNI();
 end;
 
 class procedure TX86SimdFeatures.ApplyBuildOverrides();
@@ -190,18 +214,21 @@ begin
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
+  FHasAESNI := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSE2)}
   if FSimdLevel > TX86SimdLevel.SSE2 then
     FSimdLevel := TX86SimdLevel.SSE2;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
+  FHasAESNI := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSSE3)}
   if FSimdLevel > TX86SimdLevel.SSSE3 then
     FSimdLevel := TX86SimdLevel.SSSE3;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
+  FHasAESNI := False;
 {$IFEND}
 end;
 
@@ -238,6 +265,11 @@ end;
 class function TX86SimdFeatures.HasVPCLMULQDQ(): Boolean;
 begin
   Result := FHasVPCLMULQDQ;
+end;
+
+class function TX86SimdFeatures.HasAESNI(): Boolean;
+begin
+  Result := FHasAESNI;
 end;
 
 initialization
