@@ -138,7 +138,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.AVX2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Avx2;

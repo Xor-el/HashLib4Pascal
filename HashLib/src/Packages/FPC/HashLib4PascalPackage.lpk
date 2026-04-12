@@ -29,7 +29,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="2"/>
-    <Files Count="123">
+    <Files Count="125">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -522,6 +522,14 @@
         <Filename Value="..\..\Utils\HlpX86SimdFeatures.pas"/>
         <UnitName Value="HlpX86SimdFeatures"/>
       </Item123>
+      <Item124>
+        <Filename Value="..\..\Utils\HlpArmHwCapProvider.pas"/>
+        <UnitName Value="HlpArmHwCapProvider"/>
+      </Item124>
+      <Item125>
+        <Filename Value="..\..\Utils\HlpDarwinSysCtl.pas"/>
+        <UnitName Value="HlpDarwinSysCtl"/>
+      </Item125>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

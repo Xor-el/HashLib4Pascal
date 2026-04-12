@@ -521,7 +521,7 @@ begin
   end;
   {$ENDIF HASHLIB_I386_ASM}
   {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2:
       BindSse2CrcFold;
   end;
