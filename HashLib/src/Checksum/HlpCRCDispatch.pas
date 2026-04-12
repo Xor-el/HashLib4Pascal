@@ -78,7 +78,8 @@ implementation
 
 uses
   HlpConverters,
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 // =============================================================================
 // Scalar fallback implementation
@@ -494,7 +495,7 @@ begin
   CRC_Fold_UsesPclmul := False;
 
 {$IFDEF HASHLIB_X86_64_ASM}
-  if TCpuFeatures.HasVPCLMULQDQ() then
+  if TCpuFeatures.X86.HasVPCLMULQDQ() then
   begin
     CRC_Fold_Lsb := @CRC_Fold_Vpclmul;
     CRC_Fold_Msb := @CRC_Fold_Vpclmul_Msb;
@@ -502,7 +503,7 @@ begin
     CRC_Fold_UsesPclmul := True;
     Exit;
   end;
-  if TCpuFeatures.HasPCLMULQDQ() then
+  if TCpuFeatures.X86.HasPCLMULQDQ() then
   begin
     CRC_Fold_Lsb := @CRC_Fold_Pclmul;
     CRC_Fold_Msb := @CRC_Fold_Pclmul_Msb;
@@ -514,14 +515,14 @@ begin
 
 {$IFDEF HASHLIB_X86_SIMD}
   {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.SSSE3, TCpuSimdLevel.SSE2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2:
       BindSse2CrcFold;
   end;
   {$ENDIF HASHLIB_I386_ASM}
   {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.AVX2, TCpuSimdLevel.SSSE3, TCpuSimdLevel.SSE2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2:
       BindSse2CrcFold;
   end;
   {$ENDIF HASHLIB_X86_64_ASM}

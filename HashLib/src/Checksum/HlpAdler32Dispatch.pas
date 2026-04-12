@@ -13,7 +13,8 @@ var
 implementation
 
 uses
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 const
   ModAdler = UInt32(65521);
@@ -188,28 +189,28 @@ procedure InitDispatch();
 begin
   Adler32_Update := @Adler32_Update_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.SSSE3:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.SSSE3:
     begin
       Adler32_Update := @Adler32_Update_Ssse3;
     end;
-    TCpuSimdLevel.SSE2:
+    TX86SimdLevel.SSE2:
     begin
       Adler32_Update := @Adler32_Update_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.GetActiveLevel() of
-    TCpuSimdLevel.AVX2:
+  case TCpuFeatures.X86.GetSimdLevel() of
+    TX86SimdLevel.AVX2:
     begin
       Adler32_Update := @Adler32_Update_Avx2;
     end;
-    TCpuSimdLevel.SSSE3:
+    TX86SimdLevel.SSSE3:
     begin
       Adler32_Update := @Adler32_Update_Ssse3;
     end;
-    TCpuSimdLevel.SSE2:
+    TX86SimdLevel.SSE2:
     begin
       Adler32_Update := @Adler32_Update_Sse2;
     end;
