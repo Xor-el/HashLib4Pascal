@@ -33,7 +33,8 @@ uses
   HlpArgon2Dispatch, HlpScryptDispatch, HlpBlake3Dispatch, 
   HlpSHA2_256Dispatch, HlpSHA2_512Dispatch, HlpSHA1Dispatch, 
   HlpAdler32Dispatch, HlpGF2, HlpCRCDispatch, HlpSHA3Dispatch, 
-  HlpArmSimdFeatures, HlpSimdLevels, HlpX86SimdFeatures;
+  HlpArmSimdFeatures, HlpSimdLevels, HlpX86SimdFeatures, HlpArmHwCapProvider, 
+  HlpDarwinSysCtl;
 
 implementation
 

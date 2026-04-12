@@ -154,6 +154,8 @@ contains
   HlpX86SimdFeatures in '..\..\Utils\HlpX86SimdFeatures.pas',
   HlpArmSimdFeatures in '..\..\Utils\HlpArmSimdFeatures.pas',
   HlpSimdLevels in '..\..\Utils\HlpSimdLevels.pas',
+  HlpArmHwCapProvider in '..\..\Utils\HlpArmHwCapProvider.pas',
+  HlpDarwinSysCtl in '..\..\Utils\HlpDarwinSysCtl.pas',
   HlpHashLibTypes in '..\..\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\Utils\HlpArrayUtils.pas';
 

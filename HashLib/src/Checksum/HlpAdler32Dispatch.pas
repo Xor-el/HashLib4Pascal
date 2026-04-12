@@ -201,7 +201,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.AVX2:
     begin
       Adler32_Update := @Adler32_Update_Avx2;

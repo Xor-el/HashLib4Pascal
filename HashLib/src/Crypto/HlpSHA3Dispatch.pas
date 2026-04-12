@@ -497,7 +497,7 @@ begin
   KeccakF1600_Permute := @KeccakF1600_Scalar;
   KeccakF1600_Absorb := @KeccakF1600_Absorb_Scalar;
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.AVX2:
     begin
       KeccakF1600_Permute := @KeccakF1600_Avx2_Wrap;

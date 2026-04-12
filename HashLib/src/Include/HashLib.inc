@@ -16,7 +16,7 @@
 {$IFDEF FPC}
   {$I HashLibFPC.inc}
 {$ELSE}
-   // Delphi 2010 and Above
+  // Delphi 2010 and Above
   {$IF CompilerVersion < 21.0}
     {$MESSAGE ERROR 'This Library requires Delphi 2010 or higher.'}
   {$IFEND}
@@ -43,54 +43,54 @@
     {$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
   {$IFEND}
 
-{============================== CPU Architecture ==============================}
+  {============================== CPU Architecture ==============================}
 
-{$IF DEFINED(CPU386)}
-  {$DEFINE HASHLIB_I386}
-  {$IFDEF MSWINDOWS}
-    {$DEFINE HASHLIB_I386_ASM}
+  {$IF DEFINED(CPU386)}
+    {$DEFINE HASHLIB_I386}
+    {$IFDEF MSWINDOWS}
+      {$DEFINE HASHLIB_I386_ASM}
+    {$ENDIF}
+  {$IFEND}
+
+  {$IF DEFINED(CPUX64)}
+    {$DEFINE HASHLIB_X86_64}
+    {$IFDEF MSWINDOWS}
+      {$DEFINE HASHLIB_X86_64_ASM}
+    {$ENDIF}
+  {$IFEND}
+
+  {$IFDEF CPUARM32}
+    {$DEFINE HASHLIB_ARM32}
   {$ENDIF}
-{$IFEND}
 
-{$IF DEFINED(CPUX64)}
-  {$DEFINE HASHLIB_X86_64}
-  {$IFDEF MSWINDOWS}
-    {$DEFINE HASHLIB_X86_64_ASM}
+  {$IFDEF CPUARM64}
+    {$DEFINE HASHLIB_AARCH64}
   {$ENDIF}
-{$IFEND}
 
-{$IFDEF CPUARM32}
-   {$DEFINE HASHLIB_ARM}
-{$ENDIF}
+  {================================= Target OS ==================================}
 
-{$IFDEF CPUARM64}
-   {$DEFINE HASHLIB_AARCH64}
-{$ENDIF}
+  {$IFDEF MSWINDOWS}
+    {$DEFINE HASHLIB_MSWINDOWS}
+  {$ENDIF}
 
-{$ENDIF}
+  {$IFDEF IOS}
+    {$DEFINE HASHLIB_IOS}
+  {$ENDIF}
 
-{================================= Target OS ==================================}
-
-{$IFDEF MSWINDOWS}
-   {$DEFINE HASHLIB_MSWINDOWS}
-{$ENDIF}
-
-{$IFDEF IOS}
-   {$DEFINE HASHLIB_IOS}
-{$ENDIF}
-
-{$IFDEF MACOS}
-   {$IFNDEF IOS}
+  {$IFDEF MACOS}
+    {$IFNDEF IOS}
       {$DEFINE HASHLIB_MACOS}
-   {$ENDIF}
-{$ENDIF}
+    {$ENDIF}
+  {$ENDIF}
 
-{$IFDEF ANDROID}
-   {$DEFINE HASHLIB_ANDROID}
-{$ENDIF}
+  {$IFDEF ANDROID}
+    {$DEFINE HASHLIB_ANDROID}
+  {$ENDIF}
 
-{$IFDEF LINUX}
-   {$DEFINE HASHLIB_LINUX}
+  {$IFDEF LINUX}
+    {$DEFINE HASHLIB_LINUX}
+  {$ENDIF}
+
 {$ENDIF}
 
 {========================== Common Compiler Settings ==========================}
@@ -102,7 +102,17 @@
 {$SCOPEDENUMS ON}
 {$POINTERMATH ON}
 
-{============================== SIMD Settings =================================}
+{========================== Common Defines Settings ===========================}
+
+{$IF DEFINED(HASHLIB_I386) OR DEFINED(HASHLIB_X86_64)}
+  {$DEFINE HASHLIB_X86}
+{$IFEND}
+
+{$IF DEFINED(HASHLIB_ARM32) OR DEFINED(HASHLIB_AARCH64)}
+  {$DEFINE HASHLIB_ARM}
+{$IFEND}
+
+{============================ Common SIMD Settings ============================}
 
 // Uncomment to force scalar dispatch (available on all platforms):
 // {$DEFINE HASHLIB_FORCE_SCALAR}
@@ -111,7 +121,7 @@
   {$DEFINE HASHLIB_X86_SIMD}
 {$IFEND}
 
-{$IF DEFINED(HASHLIB_ARM_ASM) OR DEFINED(HASHLIB_AARCH64_ASM)}
+{$IF DEFINED(HASHLIB_ARM32_ASM) OR DEFINED(HASHLIB_AARCH64_ASM)}
   {$DEFINE HASHLIB_ARM_SIMD}
 {$IFEND}
 

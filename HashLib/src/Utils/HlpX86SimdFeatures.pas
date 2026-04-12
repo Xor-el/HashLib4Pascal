@@ -17,7 +17,7 @@ type
 
   strict private
   class var
-    FSimdLevel: TX86SimdLevel;
+    FActiveSimdLevel: TX86SimdLevel;
     FHasSHANI: Boolean;
     FHasPCLMULQDQ: Boolean;
     FHasVPCLMULQDQ: Boolean;
@@ -37,7 +37,7 @@ type
     class procedure ApplyBuildOverrides(); static;
 
   public
-    class function GetSimdLevel(): TX86SimdLevel; static;
+    class function GetActiveSimdLevel(): TX86SimdLevel; static;
     class function HasSSE2(): Boolean; static;
     class function HasSSSE3(): Boolean; static;
     class function HasAVX2(): Boolean; static;
@@ -182,7 +182,7 @@ end;
 
 class procedure TX86SimdFeatures.ProbeHardwareAndCache();
 begin
-  FSimdLevel := TX86SimdLevel.Scalar;
+  FActiveSimdLevel := TX86SimdLevel.Scalar;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
@@ -190,14 +190,14 @@ begin
 
   if CPUHasSSE2() then
   begin
-    FSimdLevel := TX86SimdLevel.SSE2;
+    FActiveSimdLevel := TX86SimdLevel.SSE2;
     FHasPCLMULQDQ := CPUHasPCLMULQDQ();
     if CPUHasSSSE3() then
     begin
-      FSimdLevel := TX86SimdLevel.SSSE3;
+      FActiveSimdLevel := TX86SimdLevel.SSSE3;
       if CPUHasAVX2() then
       begin
-        FSimdLevel := TX86SimdLevel.AVX2;
+        FActiveSimdLevel := TX86SimdLevel.AVX2;
         FHasVPCLMULQDQ := CPUHasVPCLMULQDQ();
       end;
     end;
@@ -210,21 +210,21 @@ end;
 class procedure TX86SimdFeatures.ApplyBuildOverrides();
 begin
 {$IF DEFINED(HASHLIB_FORCE_SCALAR)}
-  FSimdLevel := TX86SimdLevel.Scalar;
+  FActiveSimdLevel := TX86SimdLevel.Scalar;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
   FHasAESNI := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSE2)}
-  if FSimdLevel > TX86SimdLevel.SSE2 then
-    FSimdLevel := TX86SimdLevel.SSE2;
+  if FActiveSimdLevel > TX86SimdLevel.SSE2 then
+    FActiveSimdLevel := TX86SimdLevel.SSE2;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
   FHasAESNI := False;
 {$ELSEIF DEFINED(HASHLIB_FORCE_SSSE3)}
-  if FSimdLevel > TX86SimdLevel.SSSE3 then
-    FSimdLevel := TX86SimdLevel.SSSE3;
+  if FActiveSimdLevel > TX86SimdLevel.SSSE3 then
+    FActiveSimdLevel := TX86SimdLevel.SSSE3;
   FHasSHANI := False;
   FHasPCLMULQDQ := False;
   FHasVPCLMULQDQ := False;
@@ -232,24 +232,24 @@ begin
 {$IFEND}
 end;
 
-class function TX86SimdFeatures.GetSimdLevel(): TX86SimdLevel;
+class function TX86SimdFeatures.GetActiveSimdLevel(): TX86SimdLevel;
 begin
-  Result := FSimdLevel;
+  Result := FActiveSimdLevel;
 end;
 
 class function TX86SimdFeatures.HasSSE2(): Boolean;
 begin
-  Result := FSimdLevel >= TX86SimdLevel.SSE2;
+  Result := FActiveSimdLevel >= TX86SimdLevel.SSE2;
 end;
 
 class function TX86SimdFeatures.HasSSSE3(): Boolean;
 begin
-  Result := FSimdLevel >= TX86SimdLevel.SSSE3;
+  Result := FActiveSimdLevel >= TX86SimdLevel.SSSE3;
 end;
 
 class function TX86SimdFeatures.HasAVX2(): Boolean;
 begin
-  Result := FSimdLevel >= TX86SimdLevel.AVX2;
+  Result := FActiveSimdLevel >= TX86SimdLevel.AVX2;
 end;
 
 class function TX86SimdFeatures.HasSHANI(): Boolean;

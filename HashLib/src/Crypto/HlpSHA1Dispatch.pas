@@ -193,7 +193,7 @@ begin
     SHA1_Compress := @SHA1_Compress_ShaNi_Wrap;
     Exit;
   end;
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.AVX2:
     begin
       SHA1_Compress := @SHA1_Compress_Avx2_Wrap;

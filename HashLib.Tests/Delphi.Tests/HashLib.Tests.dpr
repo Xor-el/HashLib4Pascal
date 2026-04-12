@@ -146,6 +146,8 @@ uses
   HlpX86SimdFeatures in '..\..\HashLib\src\Utils\HlpX86SimdFeatures.pas',
   HlpArmSimdFeatures in '..\..\HashLib\src\Utils\HlpArmSimdFeatures.pas',
   HlpSimdLevels in '..\..\HashLib\src\Utils\HlpSimdLevels.pas',
+  HlpArmHwCapProvider in '..\..\HashLib\src\Utils\HlpArmHwCapProvider.pas',
+  HlpDarwinSysCtl in '..\..\HashLib\src\Utils\HlpDarwinSysCtl.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas',
   HashLibTestBase in '..\src\HashLibTestBase.pas',
