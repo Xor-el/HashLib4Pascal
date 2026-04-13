@@ -31,10 +31,9 @@ type
   strict private
   class var
     FSysCtlByName: TSysCtlByNameFunc;
-    FResolved: Boolean;
 
-  strict private
-    class procedure ResolveOnce(); static;
+  private
+    class procedure ResolveDynamicImports(); static;
 
     /// <summary>
     /// Queries a single sysctl key. Returns True if the key exists and
@@ -63,15 +62,11 @@ implementation
 
 { TDarwinSysCtl }
 
-class procedure TDarwinSysCtl.ResolveOnce();
+class procedure TDarwinSysCtl.ResolveDynamicImports();
 var
   LHandle: Pointer;
 begin
-  if FResolved then
-    Exit;
-
   FSysCtlByName := nil;
-  FResolved := True;
 
   LHandle := dlopen(nil, RTLD_NOW);
   if LHandle = nil then
@@ -107,8 +102,6 @@ end;
 class function TDarwinSysCtl.HasFeature(const AModernName: PAnsiChar;
   const ALegacyName: PAnsiChar): Boolean;
 begin
-  ResolveOnce();
-
   if not System.Assigned(FSysCtlByName) then
   begin
     Result := False;
@@ -122,6 +115,9 @@ begin
   if (not Result) and (ALegacyName <> nil) then
     Result := QueryKey(ALegacyName);
 end;
+
+initialization
+  TDarwinSysCtl.ResolveDynamicImports;
 
 {$IFEND} // HASHLIB_MACOS OR HASHLIB_IOS
 {$IFEND} // HASHLIB_ARM

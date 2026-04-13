@@ -92,10 +92,9 @@ type
   strict private
   class var
     FGetAuxVal: TGetAuxValFunc;
-    FResolved: Boolean;
 
-  strict private
-    class procedure ResolveOnce(); static;
+  private
+    class procedure ResolveDynamicImports(); static;
 
   public
     class function GetHwCap(): UInt64; static;
@@ -110,10 +109,9 @@ type
   strict private
   class var
     FElfAuxInfo: TElfAuxInfoFunc;
-    FResolved: Boolean;
 
-  strict private
-    class procedure ResolveOnce(); static;
+  private
+    class procedure ResolveDynamicImports(); static;
 
   public
     class function GetHwCap(): UInt64; static;
@@ -139,15 +137,11 @@ implementation
 
 {$IF DEFINED(HASHLIB_LINUX) OR DEFINED(HASHLIB_ANDROID)}
 
-class procedure TArmHwCapProvider.ResolveOnce();
+class procedure TArmHwCapProvider.ResolveDynamicImports();
 var
   LHandle: Pointer;
 begin
-  if FResolved then
-    Exit;
-
   FGetAuxVal := nil;
-  FResolved := True;
 
   LHandle := dlopen(nil, RTLD_NOW);
   if LHandle = nil then
@@ -163,7 +157,6 @@ end;
 
 class function TArmHwCapProvider.GetHwCap(): UInt64;
 begin
-  ResolveOnce();
   if System.Assigned(FGetAuxVal) then
     Result := FGetAuxVal(AT_HWCAP)
   else
@@ -172,7 +165,6 @@ end;
 
 class function TArmHwCapProvider.GetHwCap2(): UInt64;
 begin
-  ResolveOnce();
   if System.Assigned(FGetAuxVal) then
     Result := FGetAuxVal(AT_HWCAP2)
   else
@@ -185,15 +177,11 @@ end;
 
 {$IF DEFINED(HASHLIB_BSD)}
 
-class procedure TArmHwCapProvider.ResolveOnce();
+class procedure TArmHwCapProvider.ResolveDynamicImports();
 var
   LHandle: Pointer;
 begin
-  if FResolved then
-    Exit;
-
   FElfAuxInfo := nil;
-  FResolved := True;
 
   LHandle := dlopen(nil, RTLD_NOW);
   if LHandle = nil then
@@ -216,7 +204,6 @@ class function TArmHwCapProvider.GetHwCap(): UInt64;
 var
   LValue: UInt64;
 begin
-  ResolveOnce();
   if System.Assigned(FElfAuxInfo) then
   begin
     LValue := 0;
@@ -233,7 +220,6 @@ class function TArmHwCapProvider.GetHwCap2(): UInt64;
 var
   LValue: UInt64;
 begin
-  ResolveOnce();
   if System.Assigned(FElfAuxInfo) then
   begin
     LValue := 0;
@@ -258,6 +244,11 @@ begin
 end;
 
 {$IFEND} // HASHLIB_MSWINDOWS
+
+{$IF DEFINED(HASHLIB_LINUX) OR DEFINED(HASHLIB_ANDROID) OR DEFINED(HASHLIB_BSD)}
+initialization
+  TArmHwCapProvider.ResolveDynamicImports;
+{$IFEND}
 
 {$IFEND} // HASHLIB_ARM
 
