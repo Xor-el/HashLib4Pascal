@@ -15,18 +15,42 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# ═══════════════════════════════════════════════════════════════════════
+#  Shared configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+env:
+  LAZARUS_BRANCH: lazarus_4_4
+  LAZARUS_REPO: https://github.com/fpc/Lazarus.git
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Jobs
+# ═══════════════════════════════════════════════════════════════════════
+
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Tier 1 — Native GitHub-hosted runners (Linux, macOS, Windows)
+  # ─────────────────────────────────────────────────────────────────────
+
+  native:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - ubuntu-24.04-arm
-          - windows-latest
-          - macos-latest
+        include:
+          - runner: ubuntu-latest
+            name: Linux x86_64
+          - runner: ubuntu-24.04-arm
+            name: Linux AArch64
+          - runner: windows-latest
+            name: Windows x86_64
+          - runner: macos-latest
+            name: macOS AArch64 (Apple Silicon)
+          - runner: macos-15-intel
+            name: macOS x86_64 (Intel)
 
     steps:
       - name: Checkout
@@ -34,60 +58,401 @@ jobs:
         with:
           submodules: true
 
-      # ─── Linux (unified for x86_64 and AArch64) ────────────────────────
-      - name: Build on Linux
+      # ── Linux ──────────────────────────────────────────────────────
+      - name: Build (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           set -xeuo pipefail
           sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
+          openssl version
           fpc -iV
           instantfpc .github/workflows/make.pas
 
-      # ─── macOS ──────────────────────────────────────────────────────────
-      - name: Install Lazarus on macOS
-        if: runner.os == 'macOS'
-        uses: gcarreno/setup-lazarus@v3
-        with:
-          lazarus-version: stable
-          with-cache: false
-
-      - name: Build on macOS
+      # ── macOS ──────────────────────────────────────────────────────
+      - name: Build (macOS)
         if: runner.os == 'macOS'
         shell: bash
         run: |
           set -xeuo pipefail
+
+          LAZARUS_DIR="/tmp/lazarus-src"
+
+          brew install fpc
+
+          # FPC 3.2.2 hardcodes libssl.1.1 but macOS runners ship
+          # OpenSSL 3 via Homebrew (keg-only). Symlink so FPC can find
+          # the libraries. This hack can be removed once we move to
+          # FPC 3.2.4+ which natively includes '.3' in DLLVersions.
+          OSSL_LIB="$(brew --prefix openssl@3)/lib"
+          sudo mkdir -p /usr/local/lib
+          sudo ln -sf "$OSSL_LIB/libssl.3.dylib"    /usr/local/lib/libssl.1.1.dylib
+          sudo ln -sf "$OSSL_LIB/libcrypto.3.dylib"  /usr/local/lib/libcrypto.1.1.dylib
+
+          git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+            "$LAZARUS_REPO" "$LAZARUS_DIR"
+          make -C "$LAZARUS_DIR" lazbuild
+
+          mkdir -p "$HOME/.lazarus"
+          cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <CONFIG>
+            <EnvironmentOptions>
+              <LazarusDirectory Value="$LAZARUS_DIR"/>
+              <CompilerFilename Value="$(which fpc)"/>
+            </EnvironmentOptions>
+          </CONFIG>
+          EOF
+
+          export PATH="$LAZARUS_DIR:$PATH"
+          "$(brew --prefix openssl@3)/bin/openssl" version
           fpc -iV
+          lazbuild --version
           instantfpc .github/workflows/make.pas
 
-      # ─── Windows ────────────────────────────────────────────────────────
-      - name: Build on Windows
+      # ── Windows ────────────────────────────────────────────────────
+      - name: Build (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           Set-PSDebug -Strict
 
-          Write-Host "Installing Lazarus and OpenSSL 1.1 via Chocolatey..."
+          Write-Host "Installing Lazarus via Chocolatey..."
           choco install lazarus -y --no-progress
-          choco install openssl.light --version=1.1.1.20181020 -y --no-progress
 
-          # Discover FPC bin path dynamically
           $fpcDir = Get-ChildItem 'C:\Lazarus\fpc' -Directory | Select-Object -First 1
           $env:Path += ";C:\Lazarus;$($fpcDir.FullName)\bin\x86_64-win64"
 
-          # Add OpenSSL to PATH (check known locations)
-          $opensslPaths = @(
-            'C:\ProgramData\chocolatey\lib\openssl.light\tools',
-            'C:\Program Files\OpenSSL\bin',
-            'C:\Program Files\OpenSSL-Win64\bin'
-          )
-          foreach ($p in $opensslPaths) {
-            if (Test-Path $p) { $env:Path += ";$p" }
-          }
+          Write-Host "OpenSSL version:"
+          openssl version
 
           Write-Host "FPC version:"
           fpc -iV
 
           Write-Host "Building make.pas..."
           instantfpc .github/workflows/make.pas
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Tier 2 — Linux ARM32 via QEMU user-mode emulation
+  # ─────────────────────────────────────────────────────────────────────
+
+  linux-arm32:
+    name: Linux ARMv7 (QEMU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build (ARMv7 via QEMU user-mode)
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: armv7
+          distro: ubuntu24.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update
+            apt-get install -y lazarus openssl wget ca-certificates
+
+            # FPC 3.2.2 hardcodes libssl.1.1 but Ubuntu 24.04 ships
+            # OpenSSL 3.x only. Symlink so FPC can find the libraries.
+            # This hack can be removed once we move to FPC 3.2.4+ which
+            # natively includes '.3' in DLLVersions.
+            ln -sf /usr/lib/arm-linux-gnueabihf/libssl.so.3 \
+                   /usr/lib/arm-linux-gnueabihf/libssl.so.1.1
+            ln -sf /usr/lib/arm-linux-gnueabihf/libcrypto.so.3 \
+                   /usr/lib/arm-linux-gnueabihf/libcrypto.so.1.1
+          run: |
+            set -xeuo pipefail
+            openssl version
+            fpc -iV
+            instantfpc .github/workflows/make.pas
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Tier 3 — BSD family via vmactions QEMU system VMs
+  #
+  #  All BSD jobs: build lazbuild from source (Lazarus packages are
+  #  unreliable across BSDs). GNU make (gmake) required on all BSDs.
+  #
+  #  Not supported (removed):
+  #    - FreeBSD aarch64: fpc-devel exists but is experimental.
+  #    - OpenBSD: pre-built FPC binary links against older libc;
+  #      incompatible with current OpenBSD. No usable package either.
+  #    - NetBSD aarch64: no FPC package available.
+  #
+  #  Disabled (commented out below):
+  #    - NetBSD x86_64: package server intermittently times out.
+  #    - DragonFlyBSD x86_64: FPC 3.2.x TLS broken (see comment below).
+  # ─────────────────────────────────────────────────────────────────────
+
+  freebsd:
+    name: FreeBSD x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build (FreeBSD x86_64)
+        uses: vmactions/freebsd-vm@v1
+        with:
+          envs: LAZARUS_BRANCH LAZARUS_REPO
+          release: "15.0"
+          usesh: true
+          prepare: |
+            pkg install -y fpc git wget gmake
+
+            LAZARUS_DIR="/tmp/lazarus-src"
+            git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+              "$LAZARUS_REPO" "$LAZARUS_DIR"
+            gmake -C "$LAZARUS_DIR" lazbuild
+
+            mkdir -p "$HOME/.lazarus"
+            cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+            <?xml version="1.0" encoding="UTF-8"?>
+            <CONFIG>
+              <EnvironmentOptions>
+                <LazarusDirectory Value="$LAZARUS_DIR"/>
+                <CompilerFilename Value="$(which fpc)"/>
+              </EnvironmentOptions>
+            </CONFIG>
+            EOF
+
+            export PATH="$LAZARUS_DIR:$PATH"
+            lazbuild --version
+          run: |
+            set -xeuo pipefail
+            export PATH="/tmp/lazarus-src:$PATH"
+            openssl version || true
+            fpc -iV
+            lazbuild --version
+            instantfpc .github/workflows/make.pas
+
+  # netbsd:
+  #   name: NetBSD x86_64
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 120
+  #   # Disabled: NetBSD package server (cdn.NetBSD.org) intermittently
+  #   # times out, causing CI failures. Re-enable when server is stable.
+  #   #
+  #   # pkgin is not pre-installed in the vmactions NetBSD image, so we
+  #   # use pkg_add directly. The VM ships with slightly older base
+  #   # packages (e.g. pcre2-10.46) that conflict with the latest repo
+  #   # (which has git requiring pcre2>=10.47). We force-replace pcre2
+  #   # first, then install everything else cleanly.
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v6
+  #       with:
+  #         submodules: true
+  #
+  #     - name: Build (NetBSD x86_64)
+  #       uses: vmactions/netbsd-vm@v1
+  #       with:
+  #         envs: LAZARUS_BRANCH LAZARUS_REPO
+  #         prepare: |
+  #           export PKG_PATH="https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r | cut -d_ -f1)/All"
+  #
+  #           # Force-update pcre2 to resolve version conflict with git
+  #           pkg_add -uu pcre2 || true
+  #           pkg_add fpc git wget gmake
+  #
+  #           # NetBSD's FPC package may not generate fpc.cfg properly.
+  #           # Ensure fpc.cfg exists and points to the correct unit paths.
+  #           FPC_VER=$(fpc -iV)
+  #           FPC_CFG="/usr/pkg/etc/fpc.cfg"
+  #           if [ ! -f "$FPC_CFG" ] || ! grep -q "units" "$FPC_CFG"; then
+  #             /usr/pkg/lib/fpc/${FPC_VER}/samplecfg \
+  #               /usr/pkg/lib/fpc/${FPC_VER} /usr/pkg/etc
+  #           fi
+  #
+  #           LAZARUS_DIR="/tmp/lazarus-src"
+  #           git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+  #             "$LAZARUS_REPO" "$LAZARUS_DIR"
+  #           gmake -C "$LAZARUS_DIR" lazbuild
+  #
+  #           mkdir -p "$HOME/.lazarus"
+  #           cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+  #           <?xml version="1.0" encoding="UTF-8"?>
+  #           <CONFIG>
+  #             <EnvironmentOptions>
+  #               <LazarusDirectory Value="$LAZARUS_DIR"/>
+  #               <CompilerFilename Value="$(which fpc)"/>
+  #             </EnvironmentOptions>
+  #           </CONFIG>
+  #           EOF
+  #
+  #           export PATH="$LAZARUS_DIR:/usr/pkg/bin:$PATH"
+  #           lazbuild --version
+  #         run: |
+  #           set -xeuo pipefail
+  #           export PATH="/tmp/lazarus-src:/usr/pkg/bin:$PATH"
+  #           openssl version || true
+  #           fpc -iV
+  #           lazbuild --version
+  #           instantfpc .github/workflows/make.pas
+
+  # dragonflybsd:
+  #   name: DragonFlyBSD x86_64
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 120
+  #   # Disabled: FPC 3.2.x cannot establish TLS connections on
+  #   # DragonFlyBSD — base LibreSSL is ABI-incompatible and DPorts
+  #   # OpenSSL is 3.x which FPC 3.2.x doesn't support. FPC's
+  #   # pure-Pascal DNS resolver is also broken (same as mono/mono#8168).
+  #   #
+  #   # FPC 3.2.4+ fixes OpenSSL 3.x loading (adds '.3' to DLLVersions)
+  #   # but will NOT fix the DNS resolver bug. The /etc/hosts workaround
+  #   # and LD_LIBRARY_PATH below will still be needed.
+  #   #
+  #   # Lazarus has no DragonFlyBSD lazconf.inc, but DragonFlyBSD is a
+  #   # FreeBSD derivative so the FreeBSD include works as-is. We patch
+  #   # it in after cloning the Lazarus source.
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v6
+  #       with:
+  #         submodules: true
+  #
+  #     - name: Build (DragonFlyBSD x86_64)
+  #       uses: vmactions/dragonflybsd-vm@v1
+  #       with:
+  #         envs: LAZARUS_BRANCH LAZARUS_REPO
+  #         usesh: true
+  #         prepare: |
+  #           pkg install -y fpc git wget gmake openssl
+  #
+  #           # FPC's pure-Pascal DNS resolver (netdb unit) is broken on
+  #           # DragonFlyBSD — it fails to resolve hostnames even though
+  #           # system tools (host, drill, wget, git) work fine. This is
+  #           # the same class of bug as mono/mono#8168.
+  #           #
+  #           # Workaround: resolve dependency hostnames via system DNS
+  #           # and add them to /etc/hosts. FPC's netdb checks /etc/hosts
+  #           # first (via gethostbyname), bypassing the broken resolver.
+  #           for h in github.com packages.lazarus-ide.org; do
+  #             ip=$(drill "$h" 2>/dev/null | awk '/^'"$h"'/{print $5; exit}')
+  #             if [ -n "$ip" ]; then
+  #               echo "$ip $h" >> /etc/hosts
+  #             fi
+  #           done
+  #
+  #           # DragonFlyBSD base ships LibreSSL in /usr/lib. Real OpenSSL
+  #           # 3.x from DPorts installs to /usr/local/lib. FPC 3.2.4+
+  #           # adds '.3' to DLLVersions — once upgraded, remove these
+  #           # symlinks but keep LD_LIBRARY_PATH in the run step.
+  #           ln -sf libssl.so.3 /usr/local/lib/libssl.so.1.1
+  #           ln -sf libcrypto.so.3 /usr/local/lib/libcrypto.so.1.1
+  #
+  #           LAZARUS_DIR="/tmp/lazarus-src"
+  #           git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+  #             "$LAZARUS_REPO" "$LAZARUS_DIR"
+  #
+  #           # Lazarus is missing include/dragonfly/lazconf.inc.
+  #           # DragonFlyBSD is a FreeBSD derivative, so the FreeBSD
+  #           # version works as-is.
+  #           mkdir -p "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly"
+  #           cp "$LAZARUS_DIR/ide/packages/ideconfig/include/freebsd/lazconf.inc" \
+  #              "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly/lazconf.inc"
+  #
+  #           gmake -C "$LAZARUS_DIR" lazbuild
+  #
+  #           mkdir -p "$HOME/.lazarus"
+  #           cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+  #           <?xml version="1.0" encoding="UTF-8"?>
+  #           <CONFIG>
+  #             <EnvironmentOptions>
+  #               <LazarusDirectory Value="$LAZARUS_DIR"/>
+  #               <CompilerFilename Value="$(which fpc)"/>
+  #             </EnvironmentOptions>
+  #           </CONFIG>
+  #           EOF
+  #
+  #           export PATH="$LAZARUS_DIR:$PATH"
+  #           lazbuild --version
+  #         run: |
+  #           set -xeuo pipefail
+  #           export PATH="/tmp/lazarus-src:$PATH"
+  #           export LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  #           /usr/local/bin/openssl version || true
+  #           fpc -iV
+  #           lazbuild --version
+  #           instantfpc .github/workflows/make.pas
+
+  # ─────────────────────────────────────────────────────────────────────
+  #  Tier 4 — Solaris via vmactions QEMU system VM
+  #
+  #  Solaris uses pkgutil (OpenCSW) for community packages which install
+  #  to /opt/csw/bin. FPC is installed from the official SourceForge
+  #  tarball. FPC's install.sh uses bash syntax so must be run with bash.
+  # ─────────────────────────────────────────────────────────────────────
+
+  solaris:
+    name: Solaris x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build (Solaris x86_64)
+        uses: vmactions/solaris-vm@v1
+        with:
+          envs: LAZARUS_BRANCH LAZARUS_REPO
+          release: "11.4-gcc"
+          usesh: true
+          prepare: |
+            # CSW packages install to /opt/csw — must be in PATH
+            # before any CSW-installed tool can be used.
+            export PATH="/opt/csw/bin:/usr/local/bin:$PATH"
+
+            pkgutil -y -i bash wget gmake git
+
+            # Install FPC from the official SourceForge tarball.
+            # FPC's install.sh uses bash syntax (subshell expressions)
+            # which is incompatible with Solaris /bin/sh.
+            FPC_VERSION="3.2.2"
+            FPC_TARBALL="fpc-${FPC_VERSION}.x86_64-solaris.tar"
+            wget -q "https://sourceforge.net/projects/freepascal/files/Solaris/${FPC_VERSION}/${FPC_TARBALL}/download" \
+              -O "/tmp/${FPC_TARBALL}"
+            cd /tmp && tar xf "${FPC_TARBALL}"
+            cd "fpc-${FPC_VERSION}.x86_64-solaris"
+            echo -e "/usr/local\nY\n\nY\n" | bash install.sh
+            export PATH="/usr/local/bin:$PATH"
+
+            # Build lazbuild from source
+            LAZARUS_DIR="/tmp/lazarus-src"
+            git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+              "$LAZARUS_REPO" "$LAZARUS_DIR"
+            gmake -C "$LAZARUS_DIR" lazbuild
+
+            mkdir -p "$HOME/.lazarus"
+            cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+            <?xml version="1.0" encoding="UTF-8"?>
+            <CONFIG>
+              <EnvironmentOptions>
+                <LazarusDirectory Value="$LAZARUS_DIR"/>
+                <CompilerFilename Value="$(which fpc)"/>
+              </EnvironmentOptions>
+            </CONFIG>
+            EOF
+
+            export PATH="$LAZARUS_DIR:$PATH"
+            fpc -iV
+            lazbuild --version
+          run: |
+            set -xeuo pipefail
+            export PATH="/tmp/lazarus-src:/usr/local/bin:/opt/csw/bin:$PATH"
+            openssl version || true
+            fpc -iV
+            lazbuild --version
+            instantfpc .github/workflows/make.pas
