@@ -186,7 +186,7 @@ procedure InitDispatch();
 begin
   SHA256_Compress := @SHA256_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSSE3:
     begin
       SHA256_Compress := @SHA256_Compress_Ssse3_Wrap;

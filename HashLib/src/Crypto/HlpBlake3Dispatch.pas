@@ -713,7 +713,7 @@ begin
   Blake3_HashMany := @Blake3_HashMany_Scalar;
   Blake3_ParallelDegree := 1;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Blake3_Compress := @Blake3_Compress_Sse2;
