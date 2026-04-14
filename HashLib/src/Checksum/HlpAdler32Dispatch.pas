@@ -189,7 +189,7 @@ procedure InitDispatch();
 begin
   Adler32_Update := @Adler32_Update_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSSE3:
     begin
       Adler32_Update := @Adler32_Update_Ssse3;

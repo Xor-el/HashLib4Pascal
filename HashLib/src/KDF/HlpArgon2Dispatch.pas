@@ -137,7 +137,7 @@ procedure InitDispatch();
 begin
   Argon2_FillBlock := @Argon2_FillBlock_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Sse2;

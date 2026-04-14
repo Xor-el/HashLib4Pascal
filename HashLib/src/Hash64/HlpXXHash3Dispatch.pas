@@ -214,7 +214,7 @@ begin
   XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
   XXH3_InitSecret := @XXH3_InitSecret_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;

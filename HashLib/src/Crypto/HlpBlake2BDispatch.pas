@@ -132,7 +132,7 @@ procedure InitDispatch();
 begin
   Blake2B_Compress := @Blake2B_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetSimdLevel() of
+  case TCpuFeatures.X86.GetActiveSimdLevel() of
     TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
     begin
       Blake2B_Compress := @Blake2B_Compress_Sse2;
