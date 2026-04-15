@@ -448,7 +448,7 @@ begin
   LResult.FLeafSize := FLeafSize;
   LResult.FNodeOffset := FNodeOffset;
   LResult.FIsLastNode := FIsLastNode;
-  Result := LResult as IBlake2STreeConfig;
+  Result := LResult;
 end;
 
 class function TBlake2STreeConfig.GetSequentialTreeConfig: IBlake2STreeConfig;
