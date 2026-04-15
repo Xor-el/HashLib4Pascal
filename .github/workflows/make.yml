@@ -154,7 +154,8 @@ jobs:
         with:
           arch: armv7
           distro: ubuntu24.04
-          githubToken: ${{ github.token }}
+          # Not required, but speeds up builds by storing container images in a GitHub package registry.
+          # githubToken: ${{ github.token }}
           install: |
             apt-get update
             apt-get install -y lazarus openssl wget ca-certificates
