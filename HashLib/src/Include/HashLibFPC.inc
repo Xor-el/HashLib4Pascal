@@ -20,15 +20,7 @@
   {$MESSAGE FATAL 'This Library does not support "Big Endian" processors yet.'}
 {$ENDIF}
 
-{$IFDEF FPC_LITTLE_ENDIAN}
-  {$DEFINE HASHLIB_LITTLE_ENDIAN}
-{$ENDIF}
-
-{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
-  {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-{$ENDIF}
-
-{========================= FPC Version Features ===============================}
+{============================ FPC Version Features ============================}
 
 {$IF FPC_FULLVERSION >= 30301}
   {.$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
@@ -38,15 +30,23 @@
 
 {============================== CPU Architecture ==============================}
 
-{$IF DEFINED(CPU386)}
+{$IFDEF FPC_LITTLE_ENDIAN}
+  {$DEFINE HASHLIB_LITTLE_ENDIAN}
+{$ENDIF}
+
+{$IFDEF FPC_REQUIRES_PROPER_ALIGNMENT}
+  {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+{$ENDIF}
+
+{$IFDEF CPU386}
   {$DEFINE HASHLIB_I386}
   {$DEFINE HASHLIB_I386_ASM}
-{$IFEND}
+{$ENDIF}
 
-{$IF DEFINED(CPUX64)}
+{$IFDEF CPUX64}
   {$DEFINE HASHLIB_X86_64}
   {$DEFINE HASHLIB_X86_64_ASM}
-{$IFEND}
+{$ENDIF}
 
 {$IFDEF CPUARM}
   {$DEFINE HASHLIB_ARM32}
@@ -88,7 +88,7 @@
   {$DEFINE HASHLIB_SOLARIS}
 {$ENDIF}
 
-{========================= Compiler Mode & Optimizations ======================}
+{======================= Compiler Mode & Optimizations ========================}
 
 {$MODE DELPHI}
 {$IF DEFINED(CPU386) OR DEFINED(CPUX64)}
@@ -102,7 +102,6 @@
 {$OPTIMIZATION NOUSELOADMODIFYSTORE}
 {$OPTIMIZATION ORDERFIELDS}
 {$OPTIMIZATION DEADVALUES}
-{$IFDEF CPUI386}  {$OPTIMIZATION USEEBP} {$ENDIF}
+{$IFDEF CPUI386} {$OPTIMIZATION USEEBP} {$ENDIF}
 {$IFDEF CPUX86_64} {$OPTIMIZATION USERBP} {$ENDIF}
 *)
-

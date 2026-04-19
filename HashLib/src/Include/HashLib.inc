@@ -20,18 +20,12 @@
   {$IF CompilerVersion < 21.0}
     {$MESSAGE ERROR 'This Library requires Delphi 2010 or higher.'}
   {$IFEND}
-  
+
   {$DEFINE DELPHI}
 
   {$DEFINITIONINFO ON} // Enable code browsing (Ctrl+Click)
   {$STRINGCHECKS OFF}
   {$WARN DUPLICATE_CTOR_DTOR OFF}
-
-  {$DEFINE HASHLIB_LITTLE_ENDIAN}
-
-  {$IFDEF CPUARM}
-    {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
-  {$ENDIF}
 
   {$DEFINE USE_UNROLLED_VARIANT}
 
@@ -43,21 +37,27 @@
     {$DEFINE HASHLIB_USE_PPL} // Use Parallel Programming Library
   {$IFEND}
 
-  {============================== CPU Architecture ==============================}
+  {============================= CPU Architecture =============================}
 
-  {$IF DEFINED(CPU386)}
+  {$DEFINE HASHLIB_LITTLE_ENDIAN}
+
+  {$IFDEF CPUARM}
+    {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
+  {$ENDIF}
+
+  {$IFDEF CPU386}
     {$DEFINE HASHLIB_I386}
     {$IFDEF MSWINDOWS}
       {$DEFINE HASHLIB_I386_ASM}
     {$ENDIF}
-  {$IFEND}
+  {$ENDIF}
 
-  {$IF DEFINED(CPUX64)}
+  {$IFDEF CPUX64}
     {$DEFINE HASHLIB_X86_64}
     {$IFDEF MSWINDOWS}
       {$DEFINE HASHLIB_X86_64_ASM}
     {$ENDIF}
-  {$IFEND}
+  {$ENDIF}
 
   {$IFDEF CPUARM32}
     {$DEFINE HASHLIB_ARM32}
@@ -67,7 +67,7 @@
     {$DEFINE HASHLIB_AARCH64}
   {$ENDIF}
 
-  {================================= Target OS ==================================}
+  {================================ Target OS =================================}
 
   {$IFDEF MSWINDOWS}
     {$DEFINE HASHLIB_MSWINDOWS}
@@ -92,6 +92,12 @@
   {$ENDIF}
 
 {$ENDIF}
+
+{========================== Common Feature Detection ==========================}
+
+{$IF DEFINED(HASHLIB_LITTLE_ENDIAN) AND NOT DEFINED(HASHLIB_REQUIRES_PROPER_ALIGNMENT)}
+  {$DEFINE HASHLIB_HAS_FAST_UNALIGNED_ACCESS_LE}
+{$IFEND}
 
 {========================== Common Compiler Settings ==========================}
 
@@ -131,8 +137,8 @@
 // {$DEFINE HASHLIB_FORCE_SSSE3}
 
 {$IF (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSE2))
-  OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSSE3))
-  OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
+   OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SSSE3))
+   OR (DEFINED(HASHLIB_FORCE_SSE2) AND DEFINED(HASHLIB_FORCE_SSSE3))}
   {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
 
@@ -144,8 +150,8 @@
 // {$DEFINE HASHLIB_FORCE_SVE}
 
 {$IF (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_NEON))
-  OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SVE))
-  OR (DEFINED(HASHLIB_FORCE_NEON) AND DEFINED(HASHLIB_FORCE_SVE))}
+   OR (DEFINED(HASHLIB_FORCE_SCALAR) AND DEFINED(HASHLIB_FORCE_SVE))
+   OR (DEFINED(HASHLIB_FORCE_NEON) AND DEFINED(HASHLIB_FORCE_SVE))}
   {$MESSAGE ERROR 'Only one HASHLIB_FORCE_* define may be enabled at a time.'}
 {$IFEND}
 
