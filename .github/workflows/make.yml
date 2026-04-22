@@ -10,6 +10,15 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
+    inputs:
+      enabled_targets:
+        description: >-
+          Comma-separated list of targets to run (leave empty for default).
+          Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
+          macos-x64, linux-arm32, freebsd, netbsd, dragonflybsd, solaris
+        default: ""
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,10 +39,62 @@ env:
 jobs:
 
   # ─────────────────────────────────────────────────────────────────────
+  #  Target gating — single source of truth for which jobs run.
+  #
+  #  This job resolves the effective target list exactly once and
+  #  exposes it as an output. Every other job gates on that output,
+  #  so the default list lives in exactly one place: the DEFAULT
+  #  variable below.
+  #
+  #  To disable a target permanently, remove its ID from DEFAULT.
+  #  Currently disabled (absent from DEFAULT):
+  #    - netbsd          : package server intermittently times out
+  #    - dragonflybsd    : FPC 3.2.x TLS broken (see job comments)
+  #
+  #  For ad-hoc runs with a different set, use the Run Workflow
+  #  button in the Actions tab — the workflow_dispatch input
+  #  overrides DEFAULT when non-empty.
+  #
+  #  Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
+  #             macos-x64, linux-arm32, freebsd, netbsd,
+  #             dragonflybsd, solaris
+  # ─────────────────────────────────────────────────────────────────────
+
+  setup:
+    name: Resolve target list
+    runs-on: ubuntu-latest
+    outputs:
+      enabled_targets: ${{ steps.resolve.outputs.enabled_targets }}
+    steps:
+      - name: Resolve enabled targets
+        id: resolve
+        shell: bash
+        env:
+          INPUT_TARGETS: ${{ github.event.inputs.enabled_targets }}
+        run: |
+          set -euo pipefail
+          DEFAULT="linux-x64,linux-arm64,windows-x64,macos-arm64,macos-x64,linux-arm32,freebsd,solaris"
+          # workflow_dispatch with an empty textbox still sends an empty
+          # string (the declared `default:` is suppressed in that case),
+          # and push/PR/schedule runs have no inputs context at all, so
+          # both paths land here as empty. Fall through to DEFAULT.
+          if [ -z "${INPUT_TARGETS// /}" ]; then
+            TARGETS="$DEFAULT"
+            SOURCE="default"
+          else
+            # Strip any whitespace the user may have pasted.
+            TARGETS="${INPUT_TARGETS// /}"
+            SOURCE="workflow_dispatch input"
+          fi
+          echo "enabled_targets=${TARGETS}" >> "$GITHUB_OUTPUT"
+          echo "::notice::Enabled targets (${SOURCE}): ${TARGETS}"
+
+  # ─────────────────────────────────────────────────────────────────────
   #  Tier 1 — Native GitHub-hosted runners (Linux, macOS, Windows)
   # ─────────────────────────────────────────────────────────────────────
 
   native:
+    needs: setup
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
@@ -41,26 +102,45 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-latest
+          - id: linux-x64
+            runner: ubuntu-latest
             name: Linux x86_64
-          - runner: ubuntu-24.04-arm
+          - id: linux-arm64
+            runner: ubuntu-24.04-arm
             name: Linux AArch64
-          - runner: windows-latest
+          - id: windows-x64
+            runner: windows-latest
             name: Windows x86_64
-          - runner: macos-latest
+          - id: macos-arm64
+            runner: macos-latest
             name: macOS AArch64 (Apple Silicon)
-          - runner: macos-15-intel
+          - id: macos-x64
+            runner: macos-15-intel
             name: macOS x86_64 (Intel)
 
     steps:
+      - name: Check if target is enabled
+        id: gate
+        shell: bash
+        env:
+          ENABLED_TARGETS: ${{ needs.setup.outputs.enabled_targets }}
+        run: |
+          if [[ ",${ENABLED_TARGETS}," == *",${{ matrix.id }},"* ]]; then
+            echo "enabled=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping ${{ matrix.id }} (not in enabled targets)"
+          fi
+
       - name: Checkout
+        if: steps.gate.outputs.enabled == 'true'
         uses: actions/checkout@v6
         with:
           submodules: true
 
       # ── Linux ──────────────────────────────────────────────────────
       - name: Build (Linux)
-        if: runner.os == 'Linux'
+        if: steps.gate.outputs.enabled == 'true' && runner.os == 'Linux'
         shell: bash
         run: |
           set -xeuo pipefail
@@ -71,7 +151,7 @@ jobs:
 
       # ── macOS ──────────────────────────────────────────────────────
       - name: Build (macOS)
-        if: runner.os == 'macOS'
+        if: steps.gate.outputs.enabled == 'true' && runner.os == 'macOS'
         shell: bash
         run: |
           set -xeuo pipefail
@@ -112,7 +192,7 @@ jobs:
 
       # ── Windows ────────────────────────────────────────────────────
       - name: Build (Windows)
-        if: runner.os == 'Windows'
+        if: steps.gate.outputs.enabled == 'true' && runner.os == 'Windows'
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
@@ -141,6 +221,8 @@ jobs:
     name: Linux ARMv7 (QEMU)
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-arm32,')
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -195,6 +277,8 @@ jobs:
     name: FreeBSD x86_64
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',freebsd,')
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -236,156 +320,160 @@ jobs:
             lazbuild --version
             instantfpc .github/workflows/make.pas
 
-  # netbsd:
-  #   name: NetBSD x86_64
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 120
-  #   # Disabled: NetBSD package server (cdn.NetBSD.org) intermittently
-  #   # times out, causing CI failures. Re-enable when server is stable.
-  #   #
-  #   # pkgin is not pre-installed in the vmactions NetBSD image, so we
-  #   # use pkg_add directly. The VM ships with slightly older base
-  #   # packages (e.g. pcre2-10.46) that conflict with the latest repo
-  #   # (which has git requiring pcre2>=10.47). We force-replace pcre2
-  #   # first, then install everything else cleanly.
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v6
-  #       with:
-  #         submodules: true
-  #
-  #     - name: Build (NetBSD x86_64)
-  #       uses: vmactions/netbsd-vm@v1
-  #       with:
-  #         envs: LAZARUS_BRANCH LAZARUS_REPO
-  #         prepare: |
-  #           export PKG_PATH="https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r | cut -d_ -f1)/All"
-  #
-  #           # Force-update pcre2 to resolve version conflict with git
-  #           pkg_add -uu pcre2 || true
-  #           pkg_add fpc git wget gmake
-  #
-  #           # NetBSD's FPC package may not generate fpc.cfg properly.
-  #           # Ensure fpc.cfg exists and points to the correct unit paths.
-  #           FPC_VER=$(fpc -iV)
-  #           FPC_CFG="/usr/pkg/etc/fpc.cfg"
-  #           if [ ! -f "$FPC_CFG" ] || ! grep -q "units" "$FPC_CFG"; then
-  #             /usr/pkg/lib/fpc/${FPC_VER}/samplecfg \
-  #               /usr/pkg/lib/fpc/${FPC_VER} /usr/pkg/etc
-  #           fi
-  #
-  #           LAZARUS_DIR="/tmp/lazarus-src"
-  #           git clone --depth 1 --branch "$LAZARUS_BRANCH" \
-  #             "$LAZARUS_REPO" "$LAZARUS_DIR"
-  #           gmake -C "$LAZARUS_DIR" lazbuild
-  #
-  #           mkdir -p "$HOME/.lazarus"
-  #           cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
-  #           <?xml version="1.0" encoding="UTF-8"?>
-  #           <CONFIG>
-  #             <EnvironmentOptions>
-  #               <LazarusDirectory Value="$LAZARUS_DIR"/>
-  #               <CompilerFilename Value="$(which fpc)"/>
-  #             </EnvironmentOptions>
-  #           </CONFIG>
-  #           EOF
-  #
-  #           export PATH="$LAZARUS_DIR:/usr/pkg/bin:$PATH"
-  #           lazbuild --version
-  #         run: |
-  #           set -xeuo pipefail
-  #           export PATH="/tmp/lazarus-src:/usr/pkg/bin:$PATH"
-  #           openssl version || true
-  #           fpc -iV
-  #           lazbuild --version
-  #           instantfpc .github/workflows/make.pas
+  netbsd:
+    name: NetBSD x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',netbsd,')
+    # Disabled: NetBSD package server (cdn.NetBSD.org) intermittently
+    # times out, causing CI failures. Re-enable when server is stable.
+    #
+    # pkgin is not pre-installed in the vmactions NetBSD image, so we
+    # use pkg_add directly. The VM ships with slightly older base
+    # packages (e.g. pcre2-10.46) that conflict with the latest repo
+    # (which has git requiring pcre2>=10.47). We force-replace pcre2
+    # first, then install everything else cleanly.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
 
-  # dragonflybsd:
-  #   name: DragonFlyBSD x86_64
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 120
-  #   # Disabled: FPC 3.2.x cannot establish TLS connections on
-  #   # DragonFlyBSD — base LibreSSL is ABI-incompatible and DPorts
-  #   # OpenSSL is 3.x which FPC 3.2.x doesn't support. FPC's
-  #   # pure-Pascal DNS resolver is also broken (same as mono/mono#8168).
-  #   #
-  #   # FPC 3.2.4+ fixes OpenSSL 3.x loading (adds '.3' to DLLVersions)
-  #   # but will NOT fix the DNS resolver bug. The /etc/hosts workaround
-  #   # and LD_LIBRARY_PATH below will still be needed.
-  #   #
-  #   # Lazarus has no DragonFlyBSD lazconf.inc, but DragonFlyBSD is a
-  #   # FreeBSD derivative so the FreeBSD include works as-is. We patch
-  #   # it in after cloning the Lazarus source.
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v6
-  #       with:
-  #         submodules: true
-  #
-  #     - name: Build (DragonFlyBSD x86_64)
-  #       uses: vmactions/dragonflybsd-vm@v1
-  #       with:
-  #         envs: LAZARUS_BRANCH LAZARUS_REPO
-  #         usesh: true
-  #         prepare: |
-  #           pkg install -y fpc git wget gmake openssl
-  #
-  #           # FPC's pure-Pascal DNS resolver (netdb unit) is broken on
-  #           # DragonFlyBSD — it fails to resolve hostnames even though
-  #           # system tools (host, drill, wget, git) work fine. This is
-  #           # the same class of bug as mono/mono#8168.
-  #           #
-  #           # Workaround: resolve dependency hostnames via system DNS
-  #           # and add them to /etc/hosts. FPC's netdb checks /etc/hosts
-  #           # first (via gethostbyname), bypassing the broken resolver.
-  #           for h in github.com packages.lazarus-ide.org; do
-  #             ip=$(drill "$h" 2>/dev/null | awk '/^'"$h"'/{print $5; exit}')
-  #             if [ -n "$ip" ]; then
-  #               echo "$ip $h" >> /etc/hosts
-  #             fi
-  #           done
-  #
-  #           # DragonFlyBSD base ships LibreSSL in /usr/lib. Real OpenSSL
-  #           # 3.x from DPorts installs to /usr/local/lib. FPC 3.2.4+
-  #           # adds '.3' to DLLVersions — once upgraded, remove these
-  #           # symlinks but keep LD_LIBRARY_PATH in the run step.
-  #           ln -sf libssl.so.3 /usr/local/lib/libssl.so.1.1
-  #           ln -sf libcrypto.so.3 /usr/local/lib/libcrypto.so.1.1
-  #
-  #           LAZARUS_DIR="/tmp/lazarus-src"
-  #           git clone --depth 1 --branch "$LAZARUS_BRANCH" \
-  #             "$LAZARUS_REPO" "$LAZARUS_DIR"
-  #
-  #           # Lazarus is missing include/dragonfly/lazconf.inc.
-  #           # DragonFlyBSD is a FreeBSD derivative, so the FreeBSD
-  #           # version works as-is.
-  #           mkdir -p "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly"
-  #           cp "$LAZARUS_DIR/ide/packages/ideconfig/include/freebsd/lazconf.inc" \
-  #              "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly/lazconf.inc"
-  #
-  #           gmake -C "$LAZARUS_DIR" lazbuild
-  #
-  #           mkdir -p "$HOME/.lazarus"
-  #           cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
-  #           <?xml version="1.0" encoding="UTF-8"?>
-  #           <CONFIG>
-  #             <EnvironmentOptions>
-  #               <LazarusDirectory Value="$LAZARUS_DIR"/>
-  #               <CompilerFilename Value="$(which fpc)"/>
-  #             </EnvironmentOptions>
-  #           </CONFIG>
-  #           EOF
-  #
-  #           export PATH="$LAZARUS_DIR:$PATH"
-  #           lazbuild --version
-  #         run: |
-  #           set -xeuo pipefail
-  #           export PATH="/tmp/lazarus-src:$PATH"
-  #           export LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-  #           /usr/local/bin/openssl version || true
-  #           fpc -iV
-  #           lazbuild --version
-  #           instantfpc .github/workflows/make.pas
+      - name: Build (NetBSD x86_64)
+        uses: vmactions/netbsd-vm@v1
+        with:
+          envs: LAZARUS_BRANCH LAZARUS_REPO
+          prepare: |
+            export PKG_PATH="https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r | cut -d_ -f1)/All"
+
+            # Force-update pcre2 to resolve version conflict with git
+            pkg_add -uu pcre2 || true
+            pkg_add fpc git wget gmake
+
+            # NetBSD's FPC package may not generate fpc.cfg properly.
+            # Ensure fpc.cfg exists and points to the correct unit paths.
+            FPC_VER=$(fpc -iV)
+            FPC_CFG="/usr/pkg/etc/fpc.cfg"
+            if [ ! -f "$FPC_CFG" ] || ! grep -q "units" "$FPC_CFG"; then
+              /usr/pkg/lib/fpc/${FPC_VER}/samplecfg \
+                /usr/pkg/lib/fpc/${FPC_VER} /usr/pkg/etc
+            fi
+
+            LAZARUS_DIR="/tmp/lazarus-src"
+            git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+              "$LAZARUS_REPO" "$LAZARUS_DIR"
+            gmake -C "$LAZARUS_DIR" lazbuild
+
+            mkdir -p "$HOME/.lazarus"
+            cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+            <?xml version="1.0" encoding="UTF-8"?>
+            <CONFIG>
+              <EnvironmentOptions>
+                <LazarusDirectory Value="$LAZARUS_DIR"/>
+                <CompilerFilename Value="$(which fpc)"/>
+              </EnvironmentOptions>
+            </CONFIG>
+            EOF
+
+            export PATH="$LAZARUS_DIR:/usr/pkg/bin:$PATH"
+            lazbuild --version
+          run: |
+            set -xeuo pipefail
+            export PATH="/tmp/lazarus-src:/usr/pkg/bin:$PATH"
+            openssl version || true
+            fpc -iV
+            lazbuild --version
+            instantfpc .github/workflows/make.pas
+
+  dragonflybsd:
+    name: DragonFlyBSD x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',dragonflybsd,')
+    # Disabled: FPC 3.2.x cannot establish TLS connections on
+    # DragonFlyBSD — base LibreSSL is ABI-incompatible and DPorts
+    # OpenSSL is 3.x which FPC 3.2.x doesn't support. FPC's
+    # pure-Pascal DNS resolver is also broken (same as mono/mono#8168).
+    #
+    # FPC 3.2.4+ fixes OpenSSL 3.x loading (adds '.3' to DLLVersions)
+    # but will NOT fix the DNS resolver bug. The /etc/hosts workaround
+    # and LD_LIBRARY_PATH below will still be needed.
+    #
+    # Lazarus has no DragonFlyBSD lazconf.inc, but DragonFlyBSD is a
+    # FreeBSD derivative so the FreeBSD include works as-is. We patch
+    # it in after cloning the Lazarus source.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build (DragonFlyBSD x86_64)
+        uses: vmactions/dragonflybsd-vm@v1
+        with:
+          envs: LAZARUS_BRANCH LAZARUS_REPO
+          usesh: true
+          prepare: |
+            pkg install -y fpc git wget gmake openssl
+
+            # FPC's pure-Pascal DNS resolver (netdb unit) is broken on
+            # DragonFlyBSD — it fails to resolve hostnames even though
+            # system tools (host, drill, wget, git) work fine. This is
+            # the same class of bug as mono/mono#8168.
+            #
+            # Workaround: resolve dependency hostnames via system DNS
+            # and add them to /etc/hosts. FPC's netdb checks /etc/hosts
+            # first (via gethostbyname), bypassing the broken resolver.
+            for h in github.com packages.lazarus-ide.org; do
+              ip=$(drill "$h" 2>/dev/null | awk '/^'"$h"'/{print $5; exit}')
+              if [ -n "$ip" ]; then
+                echo "$ip $h" >> /etc/hosts
+              fi
+            done
+
+            # DragonFlyBSD base ships LibreSSL in /usr/lib. Real OpenSSL
+            # 3.x from DPorts installs to /usr/local/lib. FPC 3.2.4+
+            # adds '.3' to DLLVersions — once upgraded, remove these
+            # symlinks but keep LD_LIBRARY_PATH in the run step.
+            ln -sf libssl.so.3 /usr/local/lib/libssl.so.1.1
+            ln -sf libcrypto.so.3 /usr/local/lib/libcrypto.so.1.1
+
+            LAZARUS_DIR="/tmp/lazarus-src"
+            git clone --depth 1 --branch "$LAZARUS_BRANCH" \
+              "$LAZARUS_REPO" "$LAZARUS_DIR"
+
+            # Lazarus is missing include/dragonfly/lazconf.inc.
+            # DragonFlyBSD is a FreeBSD derivative, so the FreeBSD
+            # version works as-is.
+            mkdir -p "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly"
+            cp "$LAZARUS_DIR/ide/packages/ideconfig/include/freebsd/lazconf.inc" \
+               "$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly/lazconf.inc"
+
+            gmake -C "$LAZARUS_DIR" lazbuild
+
+            mkdir -p "$HOME/.lazarus"
+            cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
+            <?xml version="1.0" encoding="UTF-8"?>
+            <CONFIG>
+              <EnvironmentOptions>
+                <LazarusDirectory Value="$LAZARUS_DIR"/>
+                <CompilerFilename Value="$(which fpc)"/>
+              </EnvironmentOptions>
+            </CONFIG>
+            EOF
+
+            export PATH="$LAZARUS_DIR:$PATH"
+            lazbuild --version
+          run: |
+            set -xeuo pipefail
+            export PATH="/tmp/lazarus-src:$PATH"
+            export LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            /usr/local/bin/openssl version || true
+            fpc -iV
+            lazbuild --version
+            instantfpc .github/workflows/make.pas
 
   # ─────────────────────────────────────────────────────────────────────
   #  Tier 4 — Solaris via vmactions QEMU system VM
@@ -399,6 +487,8 @@ jobs:
     name: Solaris x86_64
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',solaris,')
     steps:
       - name: Checkout
         uses: actions/checkout@v6
