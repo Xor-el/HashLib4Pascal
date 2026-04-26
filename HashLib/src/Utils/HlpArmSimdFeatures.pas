@@ -359,35 +359,44 @@ end;
 { ========================= Probe & Override ================================= }
 
 class procedure TArmSimdFeatures.ProbeHardwareAndCache();
+var
+  LHasNEON, LHasSVE, LHasSVE2, LHasAES: Boolean;
 begin
-  FActiveSimdLevel := TArmSimdLevel.Scalar;
-  FHasAES := False;
-  FHasSHA1 := False;
-  FHasSHA256 := False;
-  FHasSHA512 := False;
-  FHasSHA3 := False;
-  FHasCRC32 := False;
-  FHasPMULL := False;
+  // Probe once, reason later
+  LHasNEON := CPUHasNEON();
+  LHasSVE  := CPUHasSVE()  and LHasNEON;  // SVE operates alongside Advanced SIMD (NEON)
+  LHasSVE2 := CPUHasSVE2() and LHasSVE;   // SVE2 is a strict superset of SVE
 
-  if CPUHasNEON() then
-  begin
-    FActiveSimdLevel := TArmSimdLevel.NEON;
+  // Pick the highest tier the CPU can sustain
+  if LHasSVE2 then
+    FActiveSimdLevel := TArmSimdLevel.SVE2
+  else if LHasSVE then
+    FActiveSimdLevel := TArmSimdLevel.SVE
+  else if LHasNEON then
+    FActiveSimdLevel := TArmSimdLevel.NEON
+  else
+    FActiveSimdLevel := TArmSimdLevel.Scalar;
 
-    FHasAES := CPUHasAES();
-    FHasSHA1 := CPUHasSHA1();
-    FHasSHA256 := CPUHasSHA256();
-    FHasSHA512 := CPUHasSHA512();
-    FHasSHA3 := CPUHasSHA3();
-    FHasCRC32 := CPUHasCRC32();
-    FHasPMULL := CPUHasPMULL();
+  // ARMv8 crypto extensions - operate on NEON V registers, so gate on NEON.
+  // AES and PMULL/PMULL2 share the same FEAT_AES feature bit in the
+  // ARM Architecture Reference Manual:
+  // a CPU that reports AES also reports 64-bit polynomial multiply, and vice versa.
+  // We probe both and require agreement - if they ever disagree (buggy CPUID
+  // emulation, partial hypervisor masking), we conservatively disable both.
+  LHasAES := CPUHasAES() and CPUHasPMULL() and LHasNEON;
+  FHasAES   := LHasAES;
+  FHasPMULL := LHasAES;
 
-    if CPUHasSVE() then
-    begin
-      FActiveSimdLevel := TArmSimdLevel.SVE;
-      if CPUHasSVE2() then
-        FActiveSimdLevel := TArmSimdLevel.SVE2;
-    end;
-  end;
+  // SHA extensions - each is an independent FEAT_SHA* bit, but all require
+  // NEON register state. SHA2 (SHA256) is architecturally a prerequisite for
+  // SHA512 and SHA3 on ARMv8, so we chain them defensively.
+  FHasSHA1   := CPUHasSHA1()   and LHasNEON;
+  FHasSHA256 := CPUHasSHA256() and LHasNEON;
+  FHasSHA512 := CPUHasSHA512() and LHasNEON and FHasSHA256;
+  FHasSHA3   := CPUHasSHA3()   and LHasNEON and FHasSHA256;
+
+  // CRC32 uses general-purpose registers, not NEON - genuinely independent.
+  FHasCRC32 := CPUHasCRC32();
 end;
 
 class procedure TArmSimdFeatures.ApplyBuildOverrides();
