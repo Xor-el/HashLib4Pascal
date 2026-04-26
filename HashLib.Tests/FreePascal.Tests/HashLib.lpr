@@ -18,7 +18,8 @@ uses
   PBKDF2_HMACTests,
   PBKDF_Argon2Tests,
   PBKDF_ScryptTests,
-  CRCTests;
+  CRCTests,
+  SimdSelectSlotTests;
 
 {$R *.res}
 

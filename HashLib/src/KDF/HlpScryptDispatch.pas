@@ -202,20 +202,20 @@ procedure InitDispatch();
 begin
   Scrypt_SalsaXor := @Scrypt_SalsaXor_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Avx2;
     end;
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+    TX86SimdLevel.SSE2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;

@@ -214,8 +214,8 @@ begin
   XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Scalar;
   XXH3_InitSecret := @XXH3_InitSecret_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
       XXH3_Accumulate := @XXH3_Accumulate_Sse2;
@@ -225,7 +225,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Avx2;
@@ -233,7 +233,7 @@ begin
       XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Avx2;
       XXH3_InitSecret := @XXH3_InitSecret_Avx2;
     end;
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+    TX86SimdLevel.SSE2:
     begin
       XXH3_Accumulate512 := @XXH3_Accumulate512_Sse2;
       XXH3_Accumulate := @XXH3_Accumulate_Sse2;

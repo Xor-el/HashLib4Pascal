@@ -514,18 +514,10 @@ begin
 {$ENDIF HASHLIB_X86_64_ASM}
 
 {$IFDEF HASHLIB_X86_SIMD}
-  {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
-    TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2:
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
       BindSse2CrcFold;
   end;
-  {$ENDIF HASHLIB_I386_ASM}
-  {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
-    TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2:
-      BindSse2CrcFold;
-  end;
-  {$ENDIF HASHLIB_X86_64_ASM}
 {$ENDIF HASHLIB_X86_SIMD}
 end;
 
