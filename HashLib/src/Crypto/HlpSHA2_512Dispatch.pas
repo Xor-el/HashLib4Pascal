@@ -195,7 +195,7 @@ procedure InitDispatch();
 begin
   SHA512_Compress := @SHA512_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.SSSE3:
     begin
       SHA512_Compress := @SHA512_Compress_Ssse3_Wrap;
@@ -207,7 +207,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
     begin
       SHA512_Compress := @SHA512_Compress_Avx2_Wrap;

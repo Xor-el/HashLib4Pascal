@@ -130,20 +130,20 @@ procedure InitDispatch();
 begin
   Blake2S_Compress := @Blake2S_Compress_Scalar;
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Sse2;
     end;
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.GetActiveSimdLevel() of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Avx2;
     end;
-    TX86SimdLevel.SSE2, TX86SimdLevel.SSSE3:
+    TX86SimdLevel.SSE2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Sse2;
     end;

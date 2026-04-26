@@ -55,6 +55,18 @@ type
     class function HasSHA3(): Boolean; static;
     class function HasCRC32(): Boolean; static;
     class function HasPMULL(): Boolean; static;
+
+    // Picks the highest declared tier in ATiers that is <= the cached
+    // FActiveSimdLevel. Falls back to TArmSimdLevel.Scalar when no tier
+    // matches or ATiers is empty. Dispatch units use this overload.
+    class function SelectSlot(const ATiers: array of TArmSimdLevel)
+      : TArmSimdLevel; overload; static;
+
+    // Pure overload: reasons over any caller-supplied active level.
+    // Used by tests to deterministically exercise fallback semantics
+    // without depending on the host CPU.
+    class function SelectSlot(AActiveLevel: TArmSimdLevel;
+      const ATiers: array of TArmSimdLevel): TArmSimdLevel; overload; static;
   end;
 
 implementation
@@ -453,6 +465,39 @@ end;
 class function TArmSimdFeatures.HasPMULL(): Boolean;
 begin
   Result := FHasPMULL;
+end;
+
+class function TArmSimdFeatures.SelectSlot(const ATiers
+  : array of TArmSimdLevel): TArmSimdLevel;
+begin
+  Result := SelectSlot(FActiveSimdLevel, ATiers);
+end;
+
+class function TArmSimdFeatures.SelectSlot(AActiveLevel: TArmSimdLevel;
+  const ATiers: array of TArmSimdLevel): TArmSimdLevel;
+var
+  I: Integer;
+  LTier, LBest: TArmSimdLevel;
+  LFound: Boolean;
+begin
+  // Walk all declared tiers, keep the highest one that is <= AActiveLevel.
+  // Order of ATiers is irrelevant. Empty ATiers or no matching tier yields
+  // TArmSimdLevel.Scalar so dispatch units cleanly fall through to scalar.
+  LBest := TArmSimdLevel.Scalar;
+  LFound := False;
+  for I := 0 to System.Length(ATiers) - 1 do
+  begin
+    LTier := ATiers[I];
+    if (LTier <= AActiveLevel) and ((not LFound) or (LTier > LBest)) then
+    begin
+      LBest := LTier;
+      LFound := True;
+    end;
+  end;
+  if LFound then
+    Result := LBest
+  else
+    Result := TArmSimdLevel.Scalar;
 end;
 
 initialization
