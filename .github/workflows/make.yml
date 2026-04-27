@@ -212,8 +212,6 @@ jobs:
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-arm32,')
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6
