@@ -97,7 +97,7 @@ type
     procedure ValidateInnerHashSize(AInnerHashSize: Byte); inline;
     procedure ValidateMaxDepth(AMaxDepth: Byte); inline;
     procedure ValidateNodeDepth(ANodeDepth: Byte); inline;
-    procedure ValidateNodeOffset(ANodeOffset: UInt64); inline;
+    procedure ValidateNodeOffset(ANodeOffset: UInt64);
 
     function GetFanOut: Byte; inline;
     procedure SetFanOut(AValue: Byte); inline;
@@ -342,9 +342,10 @@ begin
 end;
 
 procedure TBlake2BTreeConfig.ValidateNodeOffset(ANodeOffset: UInt64);
+const
+  MaxNodeOffset: UInt64 = $FFFFFFFFFFFFFFFF; // (2^64) - 1
 begin
-  // ANodeOffset > ((2^64) - 1)
-  if ANodeOffset > System.High(UInt64) then
+  if ANodeOffset > MaxNodeOffset then
   begin
     raise EArgumentInvalidHashLibException.CreateRes
       (@SInvalidNodeOffsetParameter);
