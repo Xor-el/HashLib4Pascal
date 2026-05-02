@@ -139,12 +139,17 @@ implementation
 
 class procedure TArmHwCapProvider.ResolveDynamicImports();
 var
-  LHandle: Pointer;
+  LHandle: NativeUInt;
 begin
   FGetAuxVal := nil;
 
+{$IFDEF FPC}
+  LHandle := NativeUInt(dlopen(nil, RTLD_NOW));
+{$ELSE}
   LHandle := dlopen(nil, RTLD_NOW);
-  if LHandle = nil then
+{$ENDIF}
+
+  if LHandle = 0 then
     Exit;
 
   try
@@ -179,12 +184,17 @@ end;
 
 class procedure TArmHwCapProvider.ResolveDynamicImports();
 var
-  LHandle: Pointer;
+  LHandle: NativeUInt;
 begin
   FElfAuxInfo := nil;
 
+{$IFDEF FPC}
+  LHandle := NativeUInt(dlopen(nil, RTLD_NOW));
+{$ELSE}
   LHandle := dlopen(nil, RTLD_NOW);
-  if LHandle = nil then
+{$ENDIF}
+
+  if LHandle = 0 then
     Exit;
 
   try
