@@ -312,22 +312,25 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO
-          # Pinned to 14.3 to avoid the broken FreeBSD:15:amd64 pkg
-          # cluster (see https://github.com/freebsd/pkg/issues/2653).
-          # Revisit once 15.x package infrastructure stabilises.
-          release: "14.3"
+          release: "15.0"
           usesh: true
           prepare: |
             # ─── INTERIM: pkg install fpc ──────────────────────────
-            # Workaround for periodic FreeBSD pkg cluster breakage:
-            # bootstrap pkg fresh, force-refresh the catalog, and
-            # align pre-installed VM packages with the current repo
-            # before installing new ones — otherwise newly-installed
-            # packages may link against newer libs than the VM image
-            # ships.
+            # Workaround for periodic FreeBSD pkg cluster breakage
+            # (see https://github.com/freebsd/pkg/issues/2653):
+            # bootstrap pkg fresh, then prime the repo metadata with
+            # a fetch-only upgrade before the real catalog refresh —
+            # this sidesteps transient broken-cluster states on the
+            # FreeBSD:15:amd64/latest repo. After that, force-refresh
+            # the catalog and align pre-installed VM packages with
+            # the current repo before installing new ones — otherwise
+            # newly-installed packages may link against newer libs
+            # than the VM image ships.
             export ASSUME_ALWAYS_YES=yes
             export IGNORE_OSVERSION=yes
             pkg bootstrap -f
+            # Prime repo metadata (fetch-only) before the real update.
+            pkg upgrade -Fqy || true
             pkg update -f
             pkg upgrade -y
 
