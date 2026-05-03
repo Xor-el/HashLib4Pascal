@@ -21,6 +21,13 @@
     {$MESSAGE ERROR 'This Library requires Delphi 2010 or higher.'}
   {$IFEND}
 
+  // Silence H2586 (legacy $IFEND) on XE4+ where $ENDIF can also close $IF.
+  // The $LEGACYIFEND directive itself was introduced in XE4 (25.0), so the
+  // guard is necessary to keep Delphi 2010 / XE / XE2 / XE3 compiling.
+  {$IF CompilerVersion >= 25.0}
+    {$LEGACYIFEND ON}
+  {$IFEND}
+
   {$DEFINE DELPHI}
 
   {$DEFINITIONINFO ON} // Enable code browsing (Ctrl+Click)
