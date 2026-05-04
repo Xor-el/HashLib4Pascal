@@ -52,12 +52,19 @@
     {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
   {$ENDIF}
 
-  {$IFDEF CPUX86}
+  // CPUX86 was introduced in XE2; older Delphi versions (2010, XE) only
+  // have CPU386. On XE2+, CPUX86 alone is sufficient. The CPU386 fallback
+  // covers 2010/XE - those versions had no 64-bit compiler, so the
+  // CPU64BITS guard is harmless there (CPU64BITS itself was introduced
+  // in XE8). The guard's real purpose is DCCOSX64 (64-bit Intel macOS,
+  // available since 10.3 Rio Release 2), where Embarcadero's docs
+  // indicate CPU386 is defined alongside CPU64BITS on a 64-bit target.
+  {$IF DEFINED(CPUX86) OR (DEFINED(CPU386) AND NOT DEFINED(CPU64BITS))}
     {$DEFINE HASHLIB_I386}
     {$IFDEF MSWINDOWS}
       {$DEFINE HASHLIB_I386_ASM}
     {$ENDIF}
-  {$ENDIF}
+  {$IFEND}
 
   {$IFDEF CPUX64}
     {$DEFINE HASHLIB_X86_64}
