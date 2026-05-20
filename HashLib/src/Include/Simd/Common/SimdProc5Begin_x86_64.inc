@@ -1,7 +1,7 @@
 // Shared SIMD procedure prologue for 5-parameter assembly functions.
 // After inclusion: rcx = param1, rdx = param2, r8 = param3, r9 = param4, r10 = param5
 // (MS x64 ABI).
-// On FPC non-Windows (Unix ABI), remaps rdi,rsi,rdx,rcx,r8 -> rcx,rdx,r8,r9,r10.
+// When HASHLIB_SYSV_X64_ABI is defined, remaps rdi,rsi,rdx,rcx,r8 -> rcx,rdx,r8,r9,r10.
 // Move order avoids register clobbering.
 // On MS x64, param5 is loaded from [rsp+40] (after shadow space).
 // Usage:
@@ -12,7 +12,7 @@
 {$IFDEF FPC}
   assembler; nostackframe;
 asm
-  {$IFNDEF MSWINDOWS}
+  {$IFDEF HASHLIB_SYSV_X64_ABI}
   mov r10, r8
   mov r9, rcx
   mov r8, rdx

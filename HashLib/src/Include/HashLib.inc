@@ -134,6 +134,10 @@
 
 {============================ Common SIMD Settings ============================}
 
+{$IF DEFINED(HASHLIB_X86_64) AND NOT DEFINED(HASHLIB_MSWINDOWS)}
+  {$DEFINE HASHLIB_SYSV_X64_ABI}
+{$IFEND}
+
 // Uncomment to force scalar dispatch (available on all platforms):
 // {$DEFINE HASHLIB_FORCE_SCALAR}
 
