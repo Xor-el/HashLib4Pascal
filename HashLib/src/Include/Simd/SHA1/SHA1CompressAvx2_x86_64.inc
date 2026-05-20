@@ -16,12 +16,10 @@
 
   sub rsp, 440
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
   db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
-{$ENDIF}
   mov [rsp + $20], rbx
   mov [rsp + $28], rbp
   mov [rsp + $40], r12
@@ -439,12 +437,10 @@
   mov r13, [rsp + $48]
   mov r14, [rsp + $50]
   mov r15, [rsp + $58]
-{$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
   db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
   db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
-{$ENDIF}
   add rsp, 440
 
   db $C5, $F8, $77                              // vzeroupper

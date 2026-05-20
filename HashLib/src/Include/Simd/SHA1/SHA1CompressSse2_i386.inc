@@ -4,7 +4,7 @@
 //   (pshuflw/pshufhw + psrlw/psllw/por) instead of SSSE3 pshufb.
 // IA-32: after SimdProc3Begin_i386 — ebx = state, esi = data, edi = numblocks
 //   (parallel to MS x64 ABI: rcx, rdx, r8d; K constants are inlined here — x64 SSE2 passes K_SHA1 via r9).
-// Uses xmm0–xmm6. Non-volatile xmm6 saved/restored on Windows (MSWINDOWS).
+// Uses xmm0–xmm6; xmm6 saved/restored defensively (volatile on i386).
 //
 // Two phases per block:
 //   Phase 1 (SIMD): SSE2 byte-swap W[0..15], then expand W[16..79] (same as SSSE3 schedule).
@@ -16,9 +16,7 @@
 
   sub esp, 424
 
-{$IFDEF MSWINDOWS}
   movdqu oword ptr [esp], xmm6
-{$ENDIF}
   mov [esp + $10], ebx
   mov [esp + $14], esi
   mov [esp + $18], edi
@@ -460,9 +458,7 @@
 @sse2_sha1_done:
 
   mov ebp, [esp + $38]
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
-{$ENDIF}
   add esp, 424
   pop edi
   pop esi

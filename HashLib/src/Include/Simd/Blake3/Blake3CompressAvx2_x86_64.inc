@@ -8,8 +8,14 @@
 // 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
 // Blend emulations use vshufps+vpshufd (blend_0xCC) and vpunpckhdq+vshufps (blend_0xC0),
 // avoiding the need for mask constants.
+//
+// MS x64 non-volatile saves: xmm6, xmm7, xmm8, xmm9, xmm11, xmm14.
+//
+// Stack layout (sub rsp, 120):
+//   [rsp +  0.. 95]: xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 * 16)
+//   [rsp + 96..111]: IV staging area (loaded into xmm2)
+//   [rsp +112..119]: padding
 
-{$IFDEF MSWINDOWS}
   sub rsp, 120
   db $C5, $F9, $7F, $34, $24                    // vmovdqa oword [rsp], xmm6
   db $C5, $F9, $7F, $7C, $24, $10               // vmovdqa oword [rsp + $10], xmm7
@@ -27,19 +33,6 @@
   mov eax, $A54FF53A
   mov dword ptr [rsp + $6C], eax
   db $C5, $F9, $6F, $54, $24, $60               // vmovdqa xmm2, oword [rsp + $60]
-{$ELSE}
-  sub rsp, 24
-
-  mov eax, $6A09E667
-  mov dword ptr [rsp], eax
-  mov eax, $BB67AE85
-  mov dword ptr [rsp + $04], eax
-  mov eax, $3C6EF372
-  mov dword ptr [rsp + $08], eax
-  mov eax, $A54FF53A
-  mov dword ptr [rsp + $0C], eax
-  db $C5, $F9, $6F, $14, $24                    // vmovdqa xmm2, oword [rsp]
-{$ENDIF}
 
   // Initialize state
   db $C4, $C1, $7A, $6F, $00                    // vmovdqu xmm0, oword [r8]
@@ -593,7 +586,6 @@
   db $C5, $FA, $7F, $51, $20                    // vmovdqu oword [rcx + $20], xmm2
   db $C5, $FA, $7F, $59, $30                    // vmovdqu oword [rcx + $30], xmm3
 
-{$IFDEF MSWINDOWS}
   db $C5, $F9, $6F, $34, $24                    // vmovdqa xmm6, oword [rsp]
   db $C5, $F9, $6F, $7C, $24, $10               // vmovdqa xmm7, oword [rsp + $10]
   db $C5, $79, $6F, $44, $24, $20               // vmovdqa xmm8, oword [rsp + $20]
@@ -601,6 +593,3 @@
   db $C5, $79, $6F, $5C, $24, $40               // vmovdqa xmm11, oword [rsp + $40]
   db $C5, $79, $6F, $74, $24, $50               // vmovdqa xmm14, oword [rsp + $50]
   add rsp, 120
-{$ELSE}
-  add rsp, 24
-{$ENDIF}

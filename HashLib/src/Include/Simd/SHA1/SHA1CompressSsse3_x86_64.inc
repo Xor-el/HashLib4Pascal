@@ -13,17 +13,15 @@
 //     W[32..79]: ROL2 expanded recurrence W[t]=ROL2(W[t-6]^W[t-16]^W[t-28]^W[t-32]).
 //   Phase 2 (GPR): 80 compression rounds with 5-round unrolling
 //
-// Non-volatile register saves:
-//   Windows: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15
-//   Unix: rbx, rbp, r12-r15
+// MS x64 non-volatile saves: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15.
 //
 // Stack layout (sub rsp, 440):
-//   [rsp +   0.. 15]: xmm6 save (Windows only)
-//   [rsp +  16.. 31]: xmm7 save (Windows only)
+//   [rsp +   0.. 15]: xmm6 save
+//   [rsp +  16.. 31]: xmm7 save
 //   [rsp +  32.. 39]: rbx save
 //   [rsp +  40.. 47]: rbp save
-//   [rsp +  48.. 55]: rdi save (Windows only)
-//   [rsp +  56.. 63]: rsi save (Windows only)
+//   [rsp +  48.. 55]: rdi save
+//   [rsp +  56.. 63]: rsi save
 //   [rsp +  64.. 71]: r12 save
 //   [rsp +  72.. 79]: r13 save
 //   [rsp +  80.. 87]: r14 save
@@ -34,12 +32,10 @@
 
   sub rsp, 440
 
-{$IFDEF MSWINDOWS}
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
-{$ENDIF}
   mov [rsp + $20], rbx
   mov [rsp + $28], rbp
   mov [rsp + $40], r12
@@ -460,10 +456,8 @@
   mov r13, [rsp + $48]
   mov r14, [rsp + $50]
   mov r15, [rsp + $58]
-{$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
-{$ENDIF}
   add rsp, 440

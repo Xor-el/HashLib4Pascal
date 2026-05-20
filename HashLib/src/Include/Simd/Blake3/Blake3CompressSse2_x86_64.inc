@@ -8,8 +8,14 @@
 // Message scheduling: all 16 words kept in xmm4-7, permuted between rounds using
 //   shufps/pshufd (blend_0xCC emulated via shufps+pshufd, blend_0xC0 via punpckhdq+shufps).
 // Diagonalize/Undiagonalize via pshufd (row1 unrotated, per sneves optimization).
+//
+// MS x64 non-volatile saves: xmm6, xmm7, xmm8, xmm9, xmm11, xmm14.
+//
+// Stack layout (sub rsp, 120):
+//   [rsp +  0.. 95]: xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 * 16)
+//   [rsp + 96..111]: IV staging area (loaded into xmm2)
+//   [rsp +112..119]: padding
 
-{$IFDEF MSWINDOWS}
   sub rsp, 120
   movdqa oword [rsp], xmm6
   movdqa oword [rsp + $10], xmm7
@@ -27,19 +33,6 @@
   mov eax, $A54FF53A
   mov dword ptr [rsp + $6C], eax
   movdqa xmm2, oword [rsp + $60]
-{$ELSE}
-  sub rsp, 24
-
-  mov eax, $6A09E667
-  mov dword ptr [rsp], eax
-  mov eax, $BB67AE85
-  mov dword ptr [rsp + $04], eax
-  mov eax, $3C6EF372
-  mov dword ptr [rsp + $08], eax
-  mov eax, $A54FF53A
-  mov dword ptr [rsp + $0C], eax
-  movdqa xmm2, oword [rsp]
-{$ENDIF}
 
   // Initialize state: a=CV[0..3], b=CV[4..7], c=IV[0..3], d=CounterFlags
   movdqu xmm0, oword [r8]
@@ -646,7 +639,6 @@
   movdqu oword [rcx + $20], xmm2
   movdqu oword [rcx + $30], xmm3
 
-{$IFDEF MSWINDOWS}
   movdqa xmm6, oword [rsp]
   movdqa xmm7, oword [rsp + $10]
   movdqa xmm8, oword [rsp + $20]
@@ -654,6 +646,3 @@
   movdqa xmm11, oword [rsp + $40]
   movdqa xmm14, oword [rsp + $50]
   add rsp, 120
-{$ELSE}
-  add rsp, 24
-{$ENDIF}

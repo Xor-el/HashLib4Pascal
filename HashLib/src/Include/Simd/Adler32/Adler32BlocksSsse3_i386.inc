@@ -3,6 +3,8 @@
 // Constants: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B] (48 bytes; same as x64 SSSE3).
 // No xmm8 on IA-32: psadbw uses a copy in xmm5 (first half) or xmm4 (second half), then reload weights.
 // Caller applies mod 65521.
+//
+// xmm6–xmm7 saved/restored defensively (volatile on i386).
 
   push eax
 
@@ -17,14 +19,10 @@
   pxor xmm0, xmm0
   pxor xmm3, xmm3
 
-{$IFDEF MSWINDOWS}
   sub esp, 32
   movdqu oword ptr [esp], xmm6
   movdqu oword ptr [esp + $10], xmm7
   mov edx, dword ptr [esp + 32]
-{$ELSE}
-  mov edx, dword ptr [esp]
-{$ENDIF}
 
   movdqu xmm4, oword ptr [edx]
   movdqu xmm5, oword ptr [edx + 16]
@@ -76,11 +74,9 @@
   mov dword ptr [edi], eax
   mov dword ptr [edi + 4], esi
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
   movdqu xmm7, oword ptr [esp + $10]
   add esp, 32
-{$ENDIF}
   add esp, 4
   pop edi
   pop esi

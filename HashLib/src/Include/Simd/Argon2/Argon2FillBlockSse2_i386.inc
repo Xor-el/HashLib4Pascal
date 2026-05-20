@@ -2,7 +2,7 @@
 // IA-32: after SimdProc4Begin_i386 — ebx, esi, edi, eax = Left, Right, Current, WithXor
 //   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
 // Each pointer addresses 128 QWords (1024 bytes).
-// Uses xmm0–xmm7 only. Non-volatile xmm6–xmm7 saved/restored on Windows (MSWINDOWS).
+// Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
 // Register map during G rounds: xmm0-1 = A(0..3), xmm2-3 = B(4..7),
 //   xmm4-5 = C(8..11), xmm6-7 = D(12..15) / temps (same roles as x64, fewer XMM).
 // IA-32 stack (sub esp, 2132): WithXor at [esp+2128]; spill slots [esp+2080],[esp+2096],[esp+2112];
@@ -15,10 +15,8 @@
 
   mov dword ptr [esp + 2128], eax
 
-{$IFDEF MSWINDOWS}
   movdqu oword ptr [esp], xmm6
   movdqu oword ptr [esp + 16], xmm7
-{$ENDIF}
 
   // =========================================================================
   // Step 1: Compute R_buf = Left XOR Right, store at [esp+32]
@@ -729,10 +727,8 @@
   jb @final_xor_loop
 
 @epilogue:
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
   movdqu xmm7, oword ptr [esp + 16]
-{$ENDIF}
 
   add esp, 2132
   pop edi

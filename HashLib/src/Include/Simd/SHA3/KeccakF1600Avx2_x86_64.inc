@@ -17,14 +17,15 @@
 //   ymm5 = { state[21], state[17], state[13], state[9]  }
 //   ymm6 = { state[6],  state[12], state[18], state[24] }
 //
+// MS x64 non-volatile saves: xmm6-xmm15.
+//
 // Stack layout (sub rsp, 224):
-//   [rsp+0..31]   : 32-byte temp buffer for gather/scatter
-//   [rsp+32..191] : save xmm6-xmm15 (Windows only)
+//   [rsp+  0.. 31]: 32-byte temp buffer for gather/scatter
+//   [rsp+ 32..191]: xmm6-xmm15 save area
 //   [rsp+192..223]: padding
 
   sub rsp, 224
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $7F, $74, $24, $20  // vmovdqu [rsp+32], xmm6
   db $C5, $FA, $7F, $7C, $24, $30  // vmovdqu [rsp+48], xmm7
   db $C4, $61, $7A, $7F, $44, $24, $40  // vmovdqu [rsp+64], xmm8
@@ -35,7 +36,6 @@
   db $C4, $61, $7A, $7F, $AC, $24, $90, $00, $00, $00  // vmovdqu [rsp+144], xmm13
   db $C4, $61, $7A, $7F, $B4, $24, $A0, $00, $00, $00  // vmovdqu [rsp+160], xmm14
   db $C4, $61, $7A, $7F, $BC, $24, $B0, $00, $00, $00  // vmovdqu [rsp+176], xmm15
-{$ENDIF}
 
   // Set up table pointers (biased by +96 for compact displacements)
   lea r8, [rdx + 96]
@@ -281,7 +281,6 @@
 
   db $C5, $F8, $77  // vzeroupper
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $6F, $74, $24, $20  // vmovdqu xmm6, [rsp+32]
   db $C5, $FA, $6F, $7C, $24, $30  // vmovdqu xmm7, [rsp+48]
   db $C4, $61, $7A, $6F, $44, $24, $40  // vmovdqu xmm8, [rsp+64]
@@ -292,6 +291,5 @@
   db $C4, $61, $7A, $6F, $AC, $24, $90, $00, $00, $00  // vmovdqu xmm13, [rsp+144]
   db $C4, $61, $7A, $6F, $B4, $24, $A0, $00, $00, $00  // vmovdqu xmm14, [rsp+160]
   db $C4, $61, $7A, $6F, $BC, $24, $B0, $00, $00, $00  // vmovdqu xmm15, [rsp+176]
-{$ENDIF}
 
   add rsp, 224

@@ -11,10 +11,8 @@
 
   sub esp, 1016
 
-{$IFDEF MSWINDOWS}
   movdqu oword ptr [esp], xmm6
   movdqu oword ptr [esp + $10], xmm7
-{$ENDIF}
   mov dword ptr [esp + $20], ebx
   mov dword ptr [esp + $24], esi
   mov dword ptr [esp + $28], edi
@@ -1292,10 +1290,8 @@
   jnz @ssse3_512_block_loop
 
 @ssse3_512_done:
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
   movdqu xmm7, oword ptr [esp + $10]
-{$ENDIF}
   mov ebp, dword ptr [esp + $30]
   add esp, 1016
   pop edi

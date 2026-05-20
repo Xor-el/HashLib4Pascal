@@ -1,7 +1,7 @@
 // SHA-256 SHA-NI implementation.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
 // K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
-// Uses xmm0-xmm9. Non-volatile xmm6-xmm9 saved/restored on Windows.
+// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
 // Reference: Jeffrey Walton / Sean Gulley / Intel SHA Extensions whitepaper.
 //
 // SHA-NI instruction db encodings (for assembler compatibility):
@@ -21,13 +21,11 @@
 //   xmm8  = ABEF_SAVE
 //   xmm9  = CDGH_SAVE
 
-{$IFDEF MSWINDOWS}
   sub rsp, 72
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   movdqu oword [rsp + $20], xmm8
   movdqu oword [rsp + $30], xmm9
-{$ENDIF}
 
   test r8d, r8d
   jz @shani_done
@@ -252,10 +250,8 @@
 
 @shani_done:
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
   movdqu xmm8, oword [rsp + $20]
   movdqu xmm9, oword [rsp + $30]
   add rsp, 72
-{$ENDIF}

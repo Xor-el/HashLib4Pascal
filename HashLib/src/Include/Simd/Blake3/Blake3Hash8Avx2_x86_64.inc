@@ -15,6 +15,8 @@
 // Output transpose: full 8x8 via vperm2i128 + vpunpckl/hdq + vpunpcklq/hqdq.
 // 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
 // Stack 32-byte aligned via "and rsp, -32" for YMM movdqu stores.
+//
+// MS x64 non-volatile saves: xmm6-xmm13.
 
   push rbx
   push rbp
@@ -23,7 +25,6 @@
   mov r12, rsp
   and rsp, -32
 
-{$IFDEF MSWINDOWS}
   sub rsp, 1280
   db $C5, $FA, $7F, $B4, $24, $80, $04, $00, $00 // vmovdqu [rsp+1152], xmm6
   db $C5, $FA, $7F, $BC, $24, $90, $04, $00, $00 // vmovdqu [rsp+1168], xmm7
@@ -33,9 +34,6 @@
   db $C5, $7A, $7F, $9C, $24, $D0, $04, $00, $00 // vmovdqu [rsp+1232], xmm11
   db $C5, $7A, $7F, $A4, $24, $E0, $04, $00, $00 // vmovdqu [rsp+1248], xmm12
   db $C5, $7A, $7F, $AC, $24, $F0, $04, $00, $00 // vmovdqu [rsp+1264], xmm13
-{$ELSE}
-  sub rsp, 1152
-{$ENDIF}
 
   mov qword ptr [rsp + 1136], r12
   mov qword ptr [rsp + 1120], r8
@@ -1679,7 +1677,6 @@
   db $C5, $7E, $7F, $A0, $C0, $00, $00, $00  // vmovdqu [rax+192], ymm12
   db $C5, $7E, $7F, $A8, $E0, $00, $00, $00  // vmovdqu [rax+224], ymm13
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $6F, $B4, $24, $80, $04, $00, $00 // vmovdqu xmm6, [rsp+1152]
   db $C5, $FA, $6F, $BC, $24, $90, $04, $00, $00 // vmovdqu xmm7, [rsp+1168]
   db $C5, $7A, $6F, $84, $24, $A0, $04, $00, $00 // vmovdqu xmm8, [rsp+1184]
@@ -1688,7 +1685,6 @@
   db $C5, $7A, $6F, $9C, $24, $D0, $04, $00, $00 // vmovdqu xmm11, [rsp+1232]
   db $C5, $7A, $6F, $A4, $24, $E0, $04, $00, $00 // vmovdqu xmm12, [rsp+1248]
   db $C5, $7A, $6F, $AC, $24, $F0, $04, $00, $00 // vmovdqu xmm13, [rsp+1264]
-{$ENDIF}
 
   db $C5, $F8, $77                           // vzeroupper
 

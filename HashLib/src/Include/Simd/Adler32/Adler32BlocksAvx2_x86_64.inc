@@ -3,7 +3,7 @@
 // ASums layout: [SumA: UInt32, SumB: UInt32].
 // Constants layout: [weights: 32B, ones_16: 32B] at offsets 0 and 32.
 // Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
-// Uses ymm0-ymm5 only (all volatile on Windows x64, no saves needed).
+// Uses ymm0-ymm5 only (volatile under both ABIs; no saves needed).
 // Weights and ones are reloaded from memory each iteration to avoid
 // using non-volatile ymm registers.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.

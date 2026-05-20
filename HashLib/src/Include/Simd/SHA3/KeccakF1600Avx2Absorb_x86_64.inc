@@ -24,12 +24,15 @@
 //   ymm5 = { state[21], state[17], state[13], state[9]  }
 //   ymm6 = { state[6],  state[12], state[18], state[24] }
 //
-// Stack layout (sub rsp, 424):
-//   [rsp+0..223]   : jagged buffer (7 x 32 bytes)
-//   [rsp+224..255]  : scratch
-//   [rsp+256..415] : save xmm6-xmm15 (Windows only)
+// MS x64 non-volatile saves: xmm6-xmm15, rbx, rbp, r12-r15, rdi, rsi.
+// rdi/rsi are also pushed under non-MS ABIs because the absorb loop uses rsi
+// as the A_JAGGED base pointer for the duration of the routine.
 //
-// Callee-saved GPRs (pushed): rbx, rbp, r12-r15, rdi, rsi (Win) / rbx, rbp, r12-r15 (Linux)
+// Stack layout (sub rsp, 424):
+//   [rsp+  0..223]: jagged buffer (7 x 32 bytes)
+//   [rsp+224..255]: scratch
+//   [rsp+256..415]: xmm6-xmm15 save area
+//
 // Register allocation across absorb loop:
 //   r12  = state pointer (for final scatter)
 //   r13  = data pointer (advances per block)
@@ -37,7 +40,7 @@
 //   r15d = block size in bytes (constant)
 //   rbx  = constants pointer (constant)
 //   ebp  = block size in qwords (constant)
-//   rsi  = A_JAGGED base pointer (constant, Windows callee-saved)
+//   rsi  = A_JAGGED base pointer (constant)
 
   // ===== Prologue: save callee-saved GPRs =====
   push rbx
@@ -46,15 +49,12 @@
   push r13
   push r14
   push r15
-{$IFDEF MSWINDOWS}
   push rdi
   push rsi
-{$ENDIF}
 
   sub rsp, 424
 
-  // Save XMM6-XMM15 (Windows only)
-{$IFDEF MSWINDOWS}
+  // Save XMM6-XMM15
   db $C5, $FA, $7F, $B4, $24, $00, $01, $00, $00  // vmovdqu [rsp+256], xmm6
   db $C5, $FA, $7F, $BC, $24, $10, $01, $00, $00  // vmovdqu [rsp+272], xmm7
   db $C4, $61, $7A, $7F, $84, $24, $20, $01, $00, $00  // vmovdqu [rsp+288], xmm8
@@ -65,7 +65,6 @@
   db $C4, $61, $7A, $7F, $AC, $24, $70, $01, $00, $00  // vmovdqu [rsp+368], xmm13
   db $C4, $61, $7A, $7F, $B4, $24, $80, $01, $00, $00  // vmovdqu [rsp+384], xmm14
   db $C4, $61, $7A, $7F, $BC, $24, $90, $01, $00, $00  // vmovdqu [rsp+400], xmm15
-{$ENDIF}
 
   // Save parameters to callee-saved registers
   mov r12, rcx
@@ -402,8 +401,7 @@
   // ===== Epilogue =====
   db $C5, $F8, $77  // vzeroupper
 
-  // Restore XMM6-XMM15 (Windows only)
-{$IFDEF MSWINDOWS}
+  // Restore XMM6-XMM15
   db $C5, $FA, $6F, $B4, $24, $00, $01, $00, $00  // vmovdqu xmm6, [rsp+256]
   db $C5, $FA, $6F, $BC, $24, $10, $01, $00, $00  // vmovdqu xmm7, [rsp+272]
   db $C4, $61, $7A, $6F, $84, $24, $20, $01, $00, $00  // vmovdqu xmm8, [rsp+288]
@@ -414,14 +412,11 @@
   db $C4, $61, $7A, $6F, $AC, $24, $70, $01, $00, $00  // vmovdqu xmm13, [rsp+368]
   db $C4, $61, $7A, $6F, $B4, $24, $80, $01, $00, $00  // vmovdqu xmm14, [rsp+384]
   db $C4, $61, $7A, $6F, $BC, $24, $90, $01, $00, $00  // vmovdqu xmm15, [rsp+400]
-{$ENDIF}
 
   add rsp, 424
 
-{$IFDEF MSWINDOWS}
   pop rsi
   pop rdi
-{$ENDIF}
   pop r15
   pop r14
   pop r13

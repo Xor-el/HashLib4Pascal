@@ -1,17 +1,15 @@
 // SSE2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
 // Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses xmm0-xmm9. Non-volatile xmm6-xmm9 saved/restored on Windows.
+// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
 // Register map: xmm0-1 = row1 (v0-3), xmm2-3 = row2 (v4-7),
 //   xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15), xmm8-9 = temps.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-{$IFDEF MSWINDOWS}
   sub rsp, 64
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   movdqu oword [rsp + $20], xmm8
   movdqu oword [rsp + $30], xmm9
-{$ENDIF}
 
   // Initialize working vector
   movdqu xmm0, oword [rcx]
@@ -1995,10 +1993,8 @@
   movdqu oword [rcx + $20], xmm2
   movdqu oword [rcx + $30], xmm3
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
   movdqu xmm8, oword [rsp + $20]
   movdqu xmm9, oword [rsp + $30]
   add rsp, 64
-{$ENDIF}

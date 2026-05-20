@@ -12,16 +12,14 @@
 //     using vectorized message schedule (same as SSSE3).
 //   Phase 2 (GPR): 80 compression rounds with 5-round unrolling
 //
-// Non-volatile register saves:
-//   Windows: xmm6, rbx, rbp, rdi, rsi, r12-r15
-//   Unix: rbx, rbp, r12-r15
+// MS x64 non-volatile saves: xmm6, rbx, rbp, rdi, rsi, r12-r15.
 //
 // Stack layout (sub rsp, 424):
-//   [rsp +   0.. 15]: xmm6 save (Windows only)
+//   [rsp +   0.. 15]: xmm6 save
 //   [rsp +  16.. 23]: rbx save
 //   [rsp +  24.. 31]: rbp save
-//   [rsp +  32.. 39]: rdi save (Windows only)
-//   [rsp +  40.. 47]: rsi save (Windows only)
+//   [rsp +  32.. 39]: rdi save
+//   [rsp +  40.. 47]: rsi save
 //   [rsp +  48.. 55]: r12 save
 //   [rsp +  56.. 63]: r13 save
 //   [rsp +  64.. 71]: r14 save
@@ -32,11 +30,9 @@
 
   sub rsp, 424
 
-{$IFDEF MSWINDOWS}
   movdqu oword [rsp], xmm6
   mov [rsp + $20], rdi
   mov [rsp + $28], rsi
-{$ENDIF}
   mov [rsp + $10], rbx
   mov [rsp + $18], rbp
   mov [rsp + $30], r12
@@ -471,9 +467,7 @@
   mov r13, [rsp + $38]
   mov r14, [rsp + $40]
   mov r15, [rsp + $48]
-{$IFDEF MSWINDOWS}
   mov rdi, [rsp + $20]
   mov rsi, [rsp + $28]
   movdqu xmm6, oword [rsp]
-{$ENDIF}
   add rsp, 424

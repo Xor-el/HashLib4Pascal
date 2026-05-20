@@ -5,13 +5,15 @@
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K512 ptr.
 // K512 layout: 80 UInt64 round constants (640 bytes), then BSWAP64 mask (16 bytes) at offset 640.
 //
+// MS x64 non-volatile saves: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15.
+//
 // Stack layout (sub rsp, 1016): same as SSSE3 version
-//   [rsp +   0.. 15]: xmm6 save (Windows only)
-//   [rsp +  16.. 31]: xmm7 save (Windows only)
+//   [rsp +   0.. 15]: xmm6 save
+//   [rsp +  16.. 31]: xmm7 save
 //   [rsp +  32.. 39]: rbx save
 //   [rsp +  40.. 47]: rbp save
-//   [rsp +  48.. 55]: rdi save (Windows only)
-//   [rsp +  56.. 63]: rsi save (Windows only)
+//   [rsp +  48.. 55]: rdi save
+//   [rsp +  56.. 63]: rsi save
 //   [rsp +  64.. 71]: r12 save
 //   [rsp +  72.. 79]: r13 save
 //   [rsp +  80.. 87]: r14 save
@@ -23,12 +25,10 @@
 
   sub rsp, 1016
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
   db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
-{$ENDIF}
   mov [rsp + $20], rbx
   mov [rsp + $28], rbp
   mov [rsp + $40], r12
@@ -467,12 +467,10 @@
   mov r13, [rsp + $48]
   mov r14, [rsp + $50]
   mov r15, [rsp + $58]
-{$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
   db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
   db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
-{$ENDIF}
   add rsp, 1016
 
   db $C5, $F8, $77                              // vzeroupper
