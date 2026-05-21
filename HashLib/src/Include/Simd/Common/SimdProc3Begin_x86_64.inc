@@ -9,13 +9,13 @@
 //   end;
 {$IFDEF FPC}
   assembler; nostackframe;
+{$ENDIF}
 asm
-  {$IFDEF HASHLIB_SYSV_X64_ABI}
+{$IFNDEF FPC}
+  .noframe
+{$ENDIF}
+{$IFDEF HASHLIB_SYSV_X64_ABI}
   mov r8, rdx
   mov rdx, rsi
   mov rcx, rdi
-  {$ENDIF}
-{$ELSE}
-asm
-  .noframe
 {$ENDIF}
