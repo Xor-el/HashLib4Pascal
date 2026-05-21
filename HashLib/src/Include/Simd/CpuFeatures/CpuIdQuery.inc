@@ -23,14 +23,12 @@ asm
   pop ebx
 {$ELSE}
   // x86-64: normalize to EAX=ALeaf, ECX=ASubLeaf, R8=AResult, then cpuid.
-
   // Preserve RBX (CPUID clobbers it).
   {$IFDEF FPC}
   push rbx
   {$ELSE}
   .PUSHNV RBX
   {$ENDIF}
-
   {$IFDEF HASHLIB_SYSV_X64_ABI}
   // SysV ABI entry: RDI=ALeaf, RSI=ASubLeaf, RDX=AResult.
   mov eax, edi       // EAX := ALeaf
@@ -41,14 +39,11 @@ asm
   mov eax, ecx       // EAX := ALeaf
   mov ecx, edx       // ECX := ASubLeaf
   {$ENDIF}
-
   cpuid
-
   mov dword ptr [r8], eax
   mov dword ptr [r8 + 4], ebx
   mov dword ptr [r8 + 8], ecx
   mov dword ptr [r8 + 12], edx
-
   {$IFDEF FPC}
   pop rbx
   {$ENDIF}

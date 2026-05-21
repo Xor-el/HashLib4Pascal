@@ -19,11 +19,9 @@ asm
   pop ebx
 {$ELSE}
   // x86-64: normalize to R8=AResult, then xgetbv.
-
   {$IFNDEF FPC}
   .noframe
   {$ENDIF}
-
   {$IFDEF HASHLIB_SYSV_X64_ABI}
   // SysV ABI entry: RDI=AResult.
   mov r8, rdi        // R8 := AResult
@@ -31,7 +29,6 @@ asm
   // MS ABI entry: RCX=AResult.
   mov r8, rcx        // R8 := AResult
   {$ENDIF}
-
   xor ecx, ecx       // XCR index 0
   db $0F, $01, $D0   // xgetbv -> EDX:EAX
   mov dword ptr [r8], eax
