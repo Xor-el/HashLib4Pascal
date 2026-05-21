@@ -1,16 +1,14 @@
 // AVX2 implementation of BLAKE2s compress (VEX-encoded 128-bit, fully unrolled 10 rounds).
 // Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses xmm0-xmm6. Non-volatile xmm6 saved/restored on Windows.
+// Uses xmm0-xmm6; xmm6 is MS x64 non-volatile (saved/restored).
 // Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
 //   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load).
 // 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-{$IFDEF MSWINDOWS}
   sub rsp, 16
   db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
-{$ENDIF}
 
   // Initialize working vector
   db $C5, $FA, $6F, $01                         // vmovdqu xmm0, oword [rcx]
@@ -994,9 +992,7 @@
   db $C5, $FA, $7F, $01                         // vmovdqu oword [rcx], xmm0
   db $C5, $FA, $7F, $49, $10                    // vmovdqu oword [rcx + $10], xmm1
 
-{$IFDEF MSWINDOWS}
   db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
   add rsp, 16
-{$ENDIF}
 
   db $C5, $F8, $77                              // vzeroupper

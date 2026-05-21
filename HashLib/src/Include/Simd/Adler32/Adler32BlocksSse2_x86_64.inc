@@ -3,20 +3,18 @@
 // ASums layout: [SumA: UInt32, SumB: UInt32].
 // Constants layout: [weights_hi: 16B, weights_lo: 16B] (only first 32 bytes used).
 // Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
-// Uses xmm0-xmm9 (xmm6-xmm9 saved/restored on Windows).
+// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
 //
 // Emulates SSSE3 pmaddubsw via punpcklbw/punpckhbw + pmaddwd:
 //   data bytes are zero-extended to i16, then multiplied with pre-widened
 //   weight bytes via pmaddwd (SSE2), producing the same 4 x i32 weighted
 //   sums per 16-byte half that pmaddubsw + pmaddwd would yield.
 
-{$IFDEF MSWINDOWS}
   sub rsp, 64
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   movdqu oword [rsp + $20], xmm8
   movdqu oword [rsp + $30], xmm9
-{$ENDIF}
 
   // Zero constant
   pxor xmm3, xmm3
@@ -104,10 +102,8 @@
   mov dword [r8], eax
   mov dword [r8 + 4], r10d
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
   movdqu xmm8, oword [rsp + $20]
   movdqu xmm9, oword [rsp + $30]
   add rsp, 64
-{$ENDIF}

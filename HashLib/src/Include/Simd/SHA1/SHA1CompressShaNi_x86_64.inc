@@ -2,7 +2,7 @@
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
 // K_SHA1 layout: K_00_19 at 0, K_20_39 at 16, K_40_59 at 32,
 //   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
-// Uses xmm0-xmm8. Non-volatile xmm6-xmm8 saved/restored on Windows.
+// Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
 // Reference: Intel SHA Extensions whitepaper.
 //
 // SHA-NI instruction db encodings (for assembler compatibility):
@@ -22,12 +22,10 @@
 //   xmm7  = BSWAP mask, then E_SAVE
 //   xmm8  = ABCD_SAVE
 
-{$IFDEF MSWINDOWS}
   sub rsp, 56
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   movdqu oword [rsp + $20], xmm8
-{$ENDIF}
 
   test r8d, r8d
   jz @sha1ni_done
@@ -230,9 +228,7 @@
 
 @sha1ni_done:
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
   movdqu xmm8, oword [rsp + $20]
   add rsp, 56
-{$ENDIF}

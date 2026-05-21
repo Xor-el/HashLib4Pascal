@@ -2,22 +2,21 @@
 // After SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K_SHA1 ptr.
 // K_SHA1 layout matches x64: K_00_19..K_60_79 (64B), BSWAP32 mask at offset 64 ($40).
 // Phase 1 matches SHA1CompressSsse3_x86_64.inc (pshufb + same expand); Phase 2 matches SSE2 i386 GPR rounds.
-// Uses xmm0–xmm7 in Phase 1; xmm7 = BSWAP mask. Non-volatile xmm6–xmm7 saved on Windows.
+// Uses xmm0–xmm7 in Phase 1; xmm7 = BSWAP mask.
+// xmm6–xmm7 saved/restored defensively (volatile on i386).
 //
 // Two phases per block:
 //   Phase 1 (SIMD): pshufb W[0..15], then expand W[16..79] (same as x64 SSSE3 schedule).
 //   Phase 2 (GPR): 80 compression rounds with 5-round unrolling
 //
 // Saved GPR / stack (sub esp, 424): [esp+$10] state, +$14 data, +$18 numblocks, +$34 K_SHA1,
-//   +$1C E, +$20 loop ctr, +$38 saved ebp; W buffer at +$60. Win: xmm6 at [esp], xmm7 at [esp+$24].
+//   +$1C E, +$20 loop ctr, +$38 saved ebp; W buffer at +$60. xmm6 at [esp], xmm7 at [esp+$24].
 // W-buffer uses movdqu (not movdqa): this frame does not keep ESP 16-byte aligned.
 
   sub esp, 424
 
-{$IFDEF MSWINDOWS}
   movdqu oword ptr [esp], xmm6
   movdqu oword ptr [esp + $24], xmm7
-{$ENDIF}
   mov [esp + $10], ebx
   mov [esp + $14], esi
   mov [esp + $18], edi
@@ -441,10 +440,8 @@
 @ssse3_sha1_done:
 
   mov ebp, [esp + $38]
-{$IFDEF MSWINDOWS}
   movdqu xmm7, oword ptr [esp + $24]
   movdqu xmm6, oword ptr [esp]
-{$ENDIF}
   add esp, 424
   pop edi
   pop esi

@@ -2,7 +2,7 @@
 // After SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K256 ptr.
 // Phase 1 matches SHA256CompressSsse3_x86_64.inc (pshufb, palignr); Phase 2 same GPR rounds as SSE2 i386.
 // K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
-// Uses xmm0–xmm7. Non-volatile xmm6–xmm7 saved/restored on Windows (MSWINDOWS).
+// Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
 //
 // Two-phase per block:
 //   Phase 1 (SIMD): Compute W+K[0..63] using SSSE3 message schedule, store to stack
@@ -13,10 +13,8 @@
 
   sub esp, 376
 
-{$IFDEF MSWINDOWS}
   movdqu oword ptr [esp], xmm6
   movdqu oword ptr [esp + $10], xmm7
-{$ENDIF}
   mov [esp + $20], ebx
   mov [esp + $24], esi
   mov [esp + $28], edi
@@ -468,10 +466,8 @@
 @ssse3_256_done:
 
   mov ebp, [esp + $30]
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
   movdqu xmm7, oword ptr [esp + $10]
-{$ENDIF}
   add esp, 376
   pop edi
   pop esi

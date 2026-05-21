@@ -10,10 +10,8 @@
 
   sub rsp, 1016
 
-{$IFDEF MSWINDOWS}
   mov [rsp + $30], rdi
   mov [rsp + $38], rsi
-{$ENDIF}
   mov [rsp + $20], rbx
   mov [rsp + $28], rbp
   mov [rsp + $40], r12
@@ -486,8 +484,6 @@
   mov r13, [rsp + $48]
   mov r14, [rsp + $50]
   mov r15, [rsp + $58]
-{$IFDEF MSWINDOWS}
   mov rdi, [rsp + $30]
   mov rsi, [rsp + $38]
-{$ENDIF}
   add rsp, 1016

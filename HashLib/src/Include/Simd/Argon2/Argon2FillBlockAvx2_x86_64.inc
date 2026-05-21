@@ -2,11 +2,11 @@
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Expects MS x64 ABI: rcx = Left ptr, rdx = Right ptr, r8 = Current ptr, r9 = WithXor (0 or 1).
 // Each pointer addresses 128 QWords (1024 bytes).
-// Uses ymm0-ymm9. Non-volatile ymm6-ymm9 saved/restored on Windows.
+// Uses ymm0-ymm9; ymm6-ymm9 are MS x64 non-volatile (saved/restored).
 // Register map during G rounds: ymm0 = A(v0..v3), ymm1 = B(v4..v7),
 //   ymm2 = C(v8..v11), ymm3 = D(v12..v15), ymm4-ymm5 = temps.
 // Stack layout (sub rsp, 2184):
-//   [rsp+0..127]    ymm6-9 save area (Windows only, 4 * 32 = 128 bytes)
+//   [rsp+0..127]    ymm6-9 save area (4 * 32 = 128 bytes)
 //   [rsp+128..1151] R_buf (1024 bytes)
 //   [rsp+1152..2175] Z_buf (1024 bytes)
 //   [rsp+2176..2183] alignment padding
@@ -17,12 +17,10 @@
 
   sub rsp, 2184
 
-{$IFDEF MSWINDOWS}
   db $C5, $FE, $7F, $34, $24                    // vmovdqu yword [rsp], ymm6
   db $C5, $FE, $7F, $7C, $24, $20               // vmovdqu yword [rsp + $20], ymm7
   db $C5, $7E, $7F, $44, $24, $40               // vmovdqu yword [rsp + $40], ymm8
   db $C5, $7E, $7F, $4C, $24, $60               // vmovdqu yword [rsp + $60], ymm9
-{$ENDIF}
 
   // =========================================================================
   // Step 1: Compute R_buf = Left XOR Right, store at [rsp+128]
@@ -328,12 +326,10 @@
   jb @final_xor_loop
 
 @epilogue:
-{$IFDEF MSWINDOWS}
   db $C5, $FE, $6F, $34, $24                    // vmovdqu ymm6, yword [rsp]
   db $C5, $FE, $6F, $7C, $24, $20               // vmovdqu ymm7, yword [rsp + $20]
   db $C5, $7E, $6F, $44, $24, $40               // vmovdqu ymm8, yword [rsp + $40]
   db $C5, $7E, $6F, $4C, $24, $60               // vmovdqu ymm9, yword [rsp + $60]
-{$ENDIF}
 
   add rsp, 2184
   db $C5, $F8, $77                              // vzeroupper

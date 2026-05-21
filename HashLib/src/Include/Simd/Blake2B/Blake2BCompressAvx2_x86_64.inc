@@ -1,6 +1,6 @@
 // AVX2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
 // Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses ymm0-ymm5 only (all volatile on Windows x64).
+// Uses ymm0-ymm5 only (volatile under both ABIs; no saves needed).
 // Register map: ymm0 = a (v0-3), ymm1 = b (v4-7), ymm2 = c (v8-11), ymm3 = d (v12-15),
 //   ymm4 = message temp, ymm5 = computation temp.
 // Rotations: ROT32 via vpshufd, ROT16/24/63 via shift+or.

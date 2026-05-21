@@ -12,11 +12,12 @@
 // GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block byte offset.
 // Message transpose: 4x4 via punpckldq/punpckhdq + punpcklqdq/punpckhqdq (pure SSE2).
 // Rotations: rot16 via pshuflw+pshufhw; rot12/8/7 via pslld/psrld/por.
+//
+// MS x64 non-volatile saves: xmm6-xmm13.
 
   push rbx
   push rbp
 
-{$IFDEF MSWINDOWS}
   sub rsp, 712
   movdqa oword [rsp + 576], xmm6
   movdqa oword [rsp + 592], xmm7
@@ -26,9 +27,6 @@
   movdqa oword [rsp + 656], xmm11
   movdqa oword [rsp + 672], xmm12
   movdqa oword [rsp + 688], xmm13
-{$ELSE}
-  sub rsp, 584
-{$ENDIF}
 
   mov qword ptr [rsp + 560], r8
   mov dword ptr [rsp + 568], r11d
@@ -1834,7 +1832,6 @@
   movdqu oword [rax + 80], xmm4
   movdqu oword [rax + 112], xmm3
 
-{$IFDEF MSWINDOWS}
   movdqa xmm6, oword [rsp + 576]
   movdqa xmm7, oword [rsp + 592]
   movdqa xmm8, oword [rsp + 608]
@@ -1844,9 +1841,6 @@
   movdqa xmm12, oword [rsp + 672]
   movdqa xmm13, oword [rsp + 688]
   add rsp, 712
-{$ELSE}
-  add rsp, 584
-{$ENDIF}
 
   pop rbp
   pop rbx

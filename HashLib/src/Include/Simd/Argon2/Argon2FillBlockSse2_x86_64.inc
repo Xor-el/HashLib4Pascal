@@ -1,11 +1,11 @@
 // SSE2 implementation of Argon2 FillBlock.
 // Expects MS x64 ABI: rcx = Left ptr, rdx = Right ptr, r8 = Current ptr, r9 = WithXor (0 or 1).
 // Each pointer addresses 128 QWords (1024 bytes).
-// Uses xmm0-xmm9. Non-volatile xmm6-xmm9 saved/restored on Windows.
+// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
 // Register map during G rounds: xmm0-1 = A(0..3), xmm2-3 = B(4..7),
 //   xmm4-5 = C(8..11), xmm6-7 = D(12..15), xmm8-9 = temps.
 // Stack layout (sub rsp, 2120):
-//   [rsp+0..63]     xmm6-9 save area (Windows only)
+//   [rsp+0..63]     xmm6-9 save area
 //   [rsp+64..1087]  R_buf (1024 bytes)
 //   [rsp+1088..2111] Z_buf (1024 bytes)
 //   [rsp+2112..2119] alignment padding
@@ -18,12 +18,10 @@
 
   sub rsp, 2120
 
-{$IFDEF MSWINDOWS}
   movdqu oword [rsp], xmm6
   movdqu oword [rsp + $10], xmm7
   movdqu oword [rsp + $20], xmm8
   movdqu oword [rsp + $30], xmm9
-{$ENDIF}
 
   // =========================================================================
   // Step 1: Compute R_buf = Left XOR Right, store at [rsp+64]
@@ -558,11 +556,9 @@
   jb @final_xor_loop
 
 @epilogue:
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword [rsp]
   movdqu xmm7, oword [rsp + $10]
   movdqu xmm8, oword [rsp + $20]
   movdqu xmm9, oword [rsp + $30]
-{$ENDIF}
 
   add rsp, 2120

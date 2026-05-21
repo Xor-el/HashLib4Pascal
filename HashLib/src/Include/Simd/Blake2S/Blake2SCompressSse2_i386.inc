@@ -1,7 +1,7 @@
 // SSE2 implementation of BLAKE2s compress (fully unrolled 10 rounds).
 // IA-32: after SimdProc4Begin_i386 — ebx = state, esi = msg, edi = counter+flags, eax = IV
 //   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
-// Uses xmm0–xmm6. Non-volatile xmm6 saved/restored on Windows (MSWINDOWS).
+// Uses xmm0–xmm6; xmm6 saved/restored defensively (volatile on i386).
 // Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
 //   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load).
 // Rotations: ROT16/12/8/7 via psrld/pslld/por.
@@ -9,10 +9,8 @@
 // Message loads via movd + punpcklqdq + shufps.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-{$IFDEF MSWINDOWS}
   sub esp, 16
   movdqu oword ptr [esp], xmm6
-{$ENDIF}
 
   // Initialize working vector
   movdqu xmm0, oword ptr [ebx]
@@ -1076,10 +1074,8 @@
   movdqu oword ptr [ebx], xmm0
   movdqu oword ptr [ebx + $10], xmm1
 
-{$IFDEF MSWINDOWS}
   movdqu xmm6, oword ptr [esp]
   add esp, 16
-{$ENDIF}
   pop edi
   pop esi
   pop ebx
