@@ -579,7 +579,7 @@ begin
     // Process 16 blocks per chunk
     for LBlock := 0 to 15 do
     begin
-      // Convert block bytes to words (little-endian, which is native on x86)
+      // Convert block bytes to words (assume little-endian)
       System.Move(LPInput^, LBlockWords[0], 64);
 
       // Set flags for this block
