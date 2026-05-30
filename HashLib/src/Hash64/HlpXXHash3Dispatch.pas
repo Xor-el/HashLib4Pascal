@@ -22,6 +22,7 @@ var
 implementation
 
 uses
+  HlpConverters,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -48,8 +49,8 @@ begin
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
-    LDataVal := PUInt64(LPInput + I * 8)^;
-    LDataKey := LDataVal xor PUInt64(LPSecret + I * 8)^;
+    LDataVal := TConverters.ReadBytesAsUInt64LE(LPInput, I * 8);
+    LDataKey := LDataVal xor TConverters.ReadBytesAsUInt64LE(LPSecret, I * 8);
     PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ :=
       PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ + LDataVal;
     PUInt64(PByte(LPAcc) + I * 8)^ :=
@@ -69,7 +70,7 @@ begin
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
-    LKey64 := PUInt64(LPSecret + I * 8)^;
+    LKey64 := TConverters.ReadBytesAsUInt64LE(LPSecret, I * 8);
     LAcc64 := PUInt64(PByte(LPAcc) + I * 8)^;
     LAcc64 := LAcc64 xor (LAcc64 shr 47);
     LAcc64 := LAcc64 xor LKey64;
@@ -88,8 +89,10 @@ begin
   LPDst := PByte(ACustomSecret);
   for I := 0 to (192 div 16) - 1 do
   begin
-    PUInt64(LPDst + 16 * I)^ := PUInt64(LPSrc + 16 * I)^ + ASeed;
-    PUInt64(LPDst + 16 * I + 8)^ := PUInt64(LPSrc + 16 * I + 8)^ - ASeed;
+    PUInt64(LPDst + 16 * I)^ :=
+      TConverters.ReadBytesAsUInt64LE(LPSrc, 16 * I) + ASeed;
+    PUInt64(LPDst + 16 * I + 8)^ :=
+      TConverters.ReadBytesAsUInt64LE(LPSrc, 16 * I + 8) - ASeed;
   end;
 end;
 
