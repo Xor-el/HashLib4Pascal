@@ -104,7 +104,7 @@ function CRC_Fold_Lsb_Scalar(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
 var
   Ctx: PCRCFoldRuntimeCtx64;
-  LTemp, LQWord1, LQWord2: UInt64;
+  LTemp: UInt64;
   LPtr: PByte;
   LLen: UInt32;
 begin
@@ -115,25 +115,22 @@ begin
 
   while LLen >= 16 do
   begin
-    LQWord1 := PUInt64(LPtr)^ xor LTemp;
-    LQWord2 := PUInt64(LPtr + 8)^;
-
-    LTemp := CrcTableU64(Ctx.TableRow[15], Byte(LQWord1))
-      xor CrcTableU64(Ctx.TableRow[14], Byte(LQWord1 shr 8))
-      xor CrcTableU64(Ctx.TableRow[13], Byte(LQWord1 shr 16))
-      xor CrcTableU64(Ctx.TableRow[12], Byte(LQWord1 shr 24))
-      xor CrcTableU64(Ctx.TableRow[11], Byte(LQWord1 shr 32))
-      xor CrcTableU64(Ctx.TableRow[10], Byte(LQWord1 shr 40))
-      xor CrcTableU64(Ctx.TableRow[9], Byte(LQWord1 shr 48))
-      xor CrcTableU64(Ctx.TableRow[8], Byte(LQWord1 shr 56))
-      xor CrcTableU64(Ctx.TableRow[7], Byte(LQWord2))
-      xor CrcTableU64(Ctx.TableRow[6], Byte(LQWord2 shr 8))
-      xor CrcTableU64(Ctx.TableRow[5], Byte(LQWord2 shr 16))
-      xor CrcTableU64(Ctx.TableRow[4], Byte(LQWord2 shr 24))
-      xor CrcTableU64(Ctx.TableRow[3], Byte(LQWord2 shr 32))
-      xor CrcTableU64(Ctx.TableRow[2], Byte(LQWord2 shr 40))
-      xor CrcTableU64(Ctx.TableRow[1], Byte(LQWord2 shr 48))
-      xor CrcTableU64(Ctx.TableRow[0], Byte(LQWord2 shr 56));
+    LTemp := CrcTableU64(Ctx.TableRow[15], LPtr[0] xor Byte(LTemp))
+      xor CrcTableU64(Ctx.TableRow[14], LPtr[1] xor Byte(LTemp shr 8))
+      xor CrcTableU64(Ctx.TableRow[13], LPtr[2] xor Byte(LTemp shr 16))
+      xor CrcTableU64(Ctx.TableRow[12], LPtr[3] xor Byte(LTemp shr 24))
+      xor CrcTableU64(Ctx.TableRow[11], LPtr[4] xor Byte(LTemp shr 32))
+      xor CrcTableU64(Ctx.TableRow[10], LPtr[5] xor Byte(LTemp shr 40))
+      xor CrcTableU64(Ctx.TableRow[9], LPtr[6] xor Byte(LTemp shr 48))
+      xor CrcTableU64(Ctx.TableRow[8], LPtr[7] xor Byte(LTemp shr 56))
+      xor CrcTableU64(Ctx.TableRow[7], LPtr[8])
+      xor CrcTableU64(Ctx.TableRow[6], LPtr[9])
+      xor CrcTableU64(Ctx.TableRow[5], LPtr[10])
+      xor CrcTableU64(Ctx.TableRow[4], LPtr[11])
+      xor CrcTableU64(Ctx.TableRow[3], LPtr[12])
+      xor CrcTableU64(Ctx.TableRow[2], LPtr[13])
+      xor CrcTableU64(Ctx.TableRow[1], LPtr[14])
+      xor CrcTableU64(Ctx.TableRow[0], LPtr[15]);
 
     System.Inc(LPtr, 16);
     System.Dec(LLen, 16);
@@ -194,52 +191,25 @@ end;
 procedure CRC32_FoldLsb32_OneSlice(Ctx: PCRCFoldRuntimeCtx32;
   var LCRC: UInt32; LPtr: PByte);
 var
-  LOne, LTwo, LThree, LFour: UInt32;
+  LTempCrc: UInt32;
 begin
-  LOne := TConverters.ReadPCardinalAsUInt32(PCardinal(LPtr))
-    xor TConverters.le2me_32(LCRC);
-  System.Inc(LPtr, 4);
-  LTwo := TConverters.ReadPCardinalAsUInt32(PCardinal(LPtr));
-  System.Inc(LPtr, 4);
-  LThree := TConverters.ReadPCardinalAsUInt32(PCardinal(LPtr));
-  System.Inc(LPtr, 4);
-  LFour := TConverters.ReadPCardinalAsUInt32(PCardinal(LPtr));
-
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  LCRC := CrcTableU32(Ctx.TableRow[0], (LFour shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[1], (LFour shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[2], (LFour shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[3], LFour and $FF)
-    xor CrcTableU32(Ctx.TableRow[4], (LThree shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[5], (LThree shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[6], (LThree shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[7], LThree and $FF)
-    xor CrcTableU32(Ctx.TableRow[8], (LTwo shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[9], (LTwo shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[10], (LTwo shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[11], LTwo and $FF)
-    xor CrcTableU32(Ctx.TableRow[12], (LOne shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[13], (LOne shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[14], (LOne shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[15], LOne and $FF);
-{$ELSE}
-  LCRC := CrcTableU32(Ctx.TableRow[0], LFour and $FF)
-    xor CrcTableU32(Ctx.TableRow[1], (LFour shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[2], (LFour shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[3], (LFour shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[4], LThree and $FF)
-    xor CrcTableU32(Ctx.TableRow[5], (LThree shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[6], (LThree shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[7], (LThree shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[8], LTwo and $FF)
-    xor CrcTableU32(Ctx.TableRow[9], (LTwo shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[10], (LTwo shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[11], (LTwo shr 24) and $FF)
-    xor CrcTableU32(Ctx.TableRow[12], LOne and $FF)
-    xor CrcTableU32(Ctx.TableRow[13], (LOne shr 8) and $FF)
-    xor CrcTableU32(Ctx.TableRow[14], (LOne shr 16) and $FF)
-    xor CrcTableU32(Ctx.TableRow[15], (LOne shr 24) and $FF);
-{$ENDIF}
+  LTempCrc := TConverters.le2me_32(LCRC);
+  LCRC := CrcTableU32(Ctx.TableRow[0], LPtr[15])
+    xor CrcTableU32(Ctx.TableRow[1], LPtr[14])
+    xor CrcTableU32(Ctx.TableRow[2], LPtr[13])
+    xor CrcTableU32(Ctx.TableRow[3], LPtr[12])
+    xor CrcTableU32(Ctx.TableRow[4], LPtr[11])
+    xor CrcTableU32(Ctx.TableRow[5], LPtr[10])
+    xor CrcTableU32(Ctx.TableRow[6], LPtr[9])
+    xor CrcTableU32(Ctx.TableRow[7], LPtr[8])
+    xor CrcTableU32(Ctx.TableRow[8], LPtr[7])
+    xor CrcTableU32(Ctx.TableRow[9], LPtr[6])
+    xor CrcTableU32(Ctx.TableRow[10], LPtr[5])
+    xor CrcTableU32(Ctx.TableRow[11], LPtr[4])
+    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LTempCrc shr 24))
+    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LTempCrc shr 16))
+    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LTempCrc shr 8))
+    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LTempCrc));
 end;
 
 function CRC_Fold_Lsb32_Scalar(AData: PByte; ALength: UInt32;

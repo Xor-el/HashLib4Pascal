@@ -404,7 +404,8 @@ procedure TGost.Finish;
 var
   LBits: UInt64;
   LPad: THashLibByteArray;
-  LLength: THashLibUInt32Array;
+  LLengthBytes: THashLibByteArray;
+  LLengthWords: array [0 .. 7] of UInt32;
 begin
   LBits := FProcessedBytesCount * 8;
 
@@ -413,11 +414,14 @@ begin
     System.SetLength(LPad, 32 - FBuffer.Position);
     TransformBytes(LPad, 0, 32 - FBuffer.Position);
   end;
-  System.SetLength(LLength, 8);
-  LLength[0] := UInt32(LBits);
-  LLength[1] := UInt32(LBits shr 32);
 
-  Compress(PCardinal(LLength));
+  System.SetLength(LLengthBytes, 32);
+  TArrayUtils.ZeroFill(LLengthBytes);
+  LBits := TConverters.le2me_64(LBits);
+  TConverters.ReadUInt64AsBytesLE(LBits, LLengthBytes, 0);
+  TConverters.le32_copy(@LLengthBytes[0], 0, @LLengthWords[0], 0, 32);
+
+  Compress(PCardinal(@LLengthWords[0]));
 
   Compress(PCardinal(FState));
 end;
