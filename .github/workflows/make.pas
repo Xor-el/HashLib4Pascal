@@ -250,7 +250,7 @@ const
   Dependencies: array[0..0] of TDependency = (
     // Examples:
     // (Kind: TDependencyKind.OPM;    Name: 'HashLib';               Ref: ''),
-    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/HashLib4Pascal';  Ref: 'enhancement/big-endian-ci-flow'),
+     (Kind: TDependencyKind.GitHub; Name: 'Xor-el/HashLib4Pascal';  Ref: 'enhancement/big-endian-ci-flow')
   );
 
 // ---------------------------------------------------------------------------
