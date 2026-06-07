@@ -1605,13 +1605,13 @@ begin
     begin
       for I := 0 to DepDirs.Count - 1 do
         RegisterAllPackagesLazbuild(DepDirs[I]);
-      RegisterAllPackagesLazbuild(TargetDirectory);
+      RegisterAllPackagesLazbuild(RepoRoot);
     end
     else
     begin
       for I := 0 to DepDirs.Count - 1 do
         FGraph.DiscoverUnder(DepDirs[I]);
-      FGraph.DiscoverUnder(TargetDirectory);
+      FGraph.DiscoverUnder(RepoRoot);
       if FGraph.PackageCount > 0 then
         FGraph.BuildAll;
     end;
