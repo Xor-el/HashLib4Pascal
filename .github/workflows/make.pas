@@ -1,5 +1,5 @@
 program Make;
-{$MODE DELPHI}
+{$mode objfpc}{$H+}
 {$SCOPEDENUMS ON}
 
 uses
@@ -145,16 +145,16 @@ type
   TPackageGraph = class
   private
     FRunner: TMakeRunner;
-    FItems: TObjectList<TLpkPackage>;
+    FItems: specialize TObjectList<TLpkPackage>;
     FNameToIndex: TStringList;
     function GetPackage(Index: Integer): TLpkPackage;
     function FindIndexByName(const AName: string): Integer;
     function IsBuiltinPackage(const AName: string): Boolean;
     function ResolveDepIndex(const APackageName, AContext: string): Integer;
-    procedure VisitPackageDeps(const AIndex: Integer; AVisited: TList<Integer>;
-      AKind: TDepVisitKind; AOrder: TList<Integer>; APaths: TStrings);
-    procedure CollectBuildOrder(const AIndex: Integer; AOrder: TList<Integer>);
-    procedure CollectUnitPaths(const AIndex: Integer; AVisited: TList<Integer>;
+    procedure VisitPackageDeps(const AIndex: Integer; AVisited: specialize TList<Integer>;
+      AKind: TDepVisitKind; AOrder: specialize TList<Integer>; APaths: TStrings);
+    procedure CollectBuildOrder(const AIndex: Integer; AOrder: specialize TList<Integer>);
+    procedure CollectUnitPaths(const AIndex: Integer; AVisited: specialize TList<Integer>;
       APaths: TStrings);
   public
     constructor Create(ARunner: TMakeRunner);
@@ -247,10 +247,10 @@ const
   OPMBaseUrl = 'https://packages.lazarus-ide.org/';
   GitHubArchiveBaseUrl = 'https://github.com/';
 
-  Dependencies: array[0..0] of TDependency = (
+  Dependencies: array of TDependency = (
     // Examples:
-    // (Kind: TDependencyKind.OPM;    Name: 'HashLib';               Ref: ''),
-     (Kind: TDependencyKind.GitHub; Name: 'Xor-el/HashLib4Pascal';  Ref: 'enhancement/big-endian-ci-flow')
+    // (Kind: TDependencyKind.OPM;    Name: 'HashLib';                     Ref: ''),
+    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/SimpleBaseLib4Pascal'; Ref: 'master'),
   );
 
 // ---------------------------------------------------------------------------
@@ -914,7 +914,7 @@ constructor TPackageGraph.Create(ARunner: TMakeRunner);
 begin
   inherited Create;
   FRunner := ARunner;
-  FItems := TObjectList<TLpkPackage>.Create(True);
+  FItems := specialize TObjectList<TLpkPackage>.Create(True);
   FNameToIndex := TStringList.Create;
   FNameToIndex.Sorted := True;
   FNameToIndex.Duplicates := dupError;
@@ -1012,7 +1012,7 @@ begin
 end;
 
 procedure TPackageGraph.VisitPackageDeps(const AIndex: Integer;
-  AVisited: TList<Integer>; AKind: TDepVisitKind; AOrder: TList<Integer>;
+  AVisited: specialize TList<Integer>; AKind: TDepVisitKind; AOrder: specialize TList<Integer>;
   APaths: TStrings);
 var
   Pkg: TLpkPackage;
@@ -1060,20 +1060,20 @@ begin
 end;
 
 procedure TPackageGraph.CollectBuildOrder(const AIndex: Integer;
-  AOrder: TList<Integer>);
+  AOrder: specialize TList<Integer>);
 begin
   VisitPackageDeps(AIndex, nil, TDepVisitKind.BuildOrder, AOrder, nil);
 end;
 
 procedure TPackageGraph.CollectUnitPaths(const AIndex: Integer;
-  AVisited: TList<Integer>; APaths: TStrings);
+  AVisited: specialize TList<Integer>; APaths: TStrings);
 begin
   VisitPackageDeps(AIndex, AVisited, TDepVisitKind.UnitPaths, nil, APaths);
 end;
 
 function TPackageGraph.BuildAll: Boolean;
 var
-  Order: TList<Integer>;
+  Order: specialize TList<Integer>;
   I, Idx, J: Integer;
   Pkg: TLpkPackage;
   Args: TStringList;
@@ -1085,7 +1085,7 @@ begin
   if FItems.Count = 0 then
     Exit;
 
-  Order := TList<Integer>.Create;
+  Order := specialize TList<Integer>.Create;
   try
     for I := 0 to FItems.Count - 1 do
       CollectBuildOrder(I, Order);
@@ -1148,13 +1148,13 @@ end;
 function TPackageGraph.UnitPathsForRequired(const ANames: TStrings): TStringList;
 var
   I, Idx: Integer;
-  Visited: TList<Integer>;
+  Visited: specialize TList<Integer>;
 begin
   Result := TStringList.Create;
   if not Assigned(ANames) then
     Exit;
 
-  Visited := TList<Integer>.Create;
+  Visited := specialize TList<Integer>.Create;
   try
     for I := 0 to ANames.Count - 1 do
     begin
@@ -1584,7 +1584,7 @@ end;
 
 procedure TMakeRunner.RegisterAllPackagesLazbuild(const ASearchDir: string);
 begin
-  ForEachLpkInDir(ASearchDir, RegisterPackageLazbuild);
+  ForEachLpkInDir(ASearchDir, @RegisterPackageLazbuild);
 end;
 
 procedure TMakeRunner.InstallDependencies;
