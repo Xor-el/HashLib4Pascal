@@ -43,8 +43,7 @@ type
   PCRCFoldRuntimeCtx32 = ^TCRCFoldRuntimeCtx32;
 
   // AData: data pointer, ALength: byte count (>= MinSimdBytes, multiple of 16).
-  // AState: pointer to 2 x UInt64; QWORD[0] low 32 bits are LE wire bytes, QWORD[1]=0.
-  // Callers must use the function return value after fold (VPCLMUL may not write AState).
+  // AState: pointer to 2 x UInt64 ([0]=CRC / state, [1]=0 for PCLMUL).
   // AConstants: pointer to TCRCFoldRuntimeCtx64 or 32 (FoldConstants at offset 0).
   TCRCFoldFunc = function(AData: PByte; ALength: UInt32;
     AState: Pointer; AConstants: Pointer): UInt64;
@@ -78,7 +77,6 @@ var
 implementation
 
 uses
-  HlpConverters,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -99,29 +97,6 @@ end;
 function CRCMaskFromWidth(AWidth: Int32): UInt64; inline;
 begin
   Result := ((UInt64(1) shl (AWidth - 1)) - 1) shl 1 or 1;
-end;
-
-// Fold state QWORD[0] carries the running CRC as LE wire bytes in [0..3]
-// (high [4..7] zero). Matches SIMD dword/qword loads at AState on x86 LE and
-// keeps scalar paths correct on big-endian hosts.
-function CRCFold_LoadUInt32LE(AState: Pointer): UInt32; inline;
-begin
-  Result := TConverters.ReadBytesAsUInt32LE(PByte(AState), 0);
-end;
-
-procedure CRCFold_StoreUInt32LE(AState: Pointer; AValue: UInt32); inline;
-var
-  P: PByte;
-begin
-  P := PByte(AState);
-  P[0] := Byte(AValue);
-  P[1] := Byte(AValue shr 8);
-  P[2] := Byte(AValue shr 16);
-  P[3] := Byte(AValue shr 24);
-  P[4] := 0;
-  P[5] := 0;
-  P[6] := 0;
-  P[7] := 0;
 end;
 
 function CRC_Fold_Lsb_Scalar(AData: PByte; ALength: UInt32;
@@ -214,7 +189,10 @@ end;
 
 procedure CRC32_FoldLsb32_OneSlice(Ctx: PCRCFoldRuntimeCtx32;
   var LCRC: UInt32; LPtr: PByte);
+var
+  LTempCrc: UInt32;
 begin
+  LTempCrc := LCRC;
   LCRC := CrcTableU32(Ctx.TableRow[0], LPtr[15])
     xor CrcTableU32(Ctx.TableRow[1], LPtr[14])
     xor CrcTableU32(Ctx.TableRow[2], LPtr[13])
@@ -227,10 +205,10 @@ begin
     xor CrcTableU32(Ctx.TableRow[9], LPtr[6])
     xor CrcTableU32(Ctx.TableRow[10], LPtr[5])
     xor CrcTableU32(Ctx.TableRow[11], LPtr[4])
-    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LCRC shr 24))
-    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LCRC shr 16))
-    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LCRC shr 8))
-    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LCRC));
+    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LTempCrc shr 24))
+    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LTempCrc shr 16))
+    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LTempCrc shr 8))
+    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LTempCrc));
 end;
 
 function CRC_Fold_Lsb32_Scalar(AData: PByte; ALength: UInt32;
@@ -244,7 +222,7 @@ begin
   Ctx := PCRCFoldRuntimeCtx32(AConstants);
   LPtr := AData;
   LLen := ALength;
-  LCRC := CRCFold_LoadUInt32LE(AState);
+  LCRC := UInt32(PUInt64(AState)^);
 
   while LLen >= 16 do
   begin
@@ -253,7 +231,7 @@ begin
     System.Dec(LLen, 16);
   end;
 
-  CRCFold_StoreUInt32LE(AState, LCRC);
+  PUInt64(AState)^ := LCRC;
   Result := LCRC;
 end;
 
@@ -271,7 +249,7 @@ begin
   if LLen >= UInt32(MinSimdBytes) then
   begin
     LProcessed := LLen and (not UInt32(15));
-    CRCFold_StoreUInt32LE(@LState[0], LInternal);
+    LState[0] := UInt64(LInternal);
     LState[1] := 0;
     LInternal := UInt32(CRC_Fold_Lsb32(LPtr, LProcessed, @LState[0], ACtx));
     System.Inc(LPtr, LProcessed);

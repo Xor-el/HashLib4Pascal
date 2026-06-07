@@ -678,7 +678,7 @@ end;
 function TTiger2.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, HashSize);
-  TConverters.le64_copy(PUInt64(FHash), 0, PByte(Result), 0,
+  TConverters.le64_copy_partial(PUInt64(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 

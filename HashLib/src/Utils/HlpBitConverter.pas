@@ -31,7 +31,7 @@ type
     class function GetBytes(AValue: Boolean): THashLibByteArray; overload;
       static; inline;
     class function GetBytes(AValue: Char): THashLibByteArray; overload;
-      static; inline;
+      static;
     class function GetBytes(AValue: Double): THashLibByteArray; overload;
       static; inline;
     class function GetBytes(AValue: Int16): THashLibByteArray; overload;
@@ -56,7 +56,7 @@ type
     class function ToBoolean(const AValue: THashLibByteArray;
       AStartIndex: Int32): Boolean; static; inline;
     class function ToChar(const AValue: THashLibByteArray; AStartIndex: Int32)
-      : Char; static; inline;
+      : Char; static;
     class function ToDouble(const AValue: THashLibByteArray; AStartIndex: Int32)
       : Double; static; inline;
     class function ToInt16(const AValue: THashLibByteArray; AStartIndex: Int32)
@@ -132,12 +132,22 @@ end;
 
 class function TBitConverter.GetBytes(AValue: Char): THashLibByteArray;
 var
-  LCode: UInt16;
+  LValue: UInt32;
+  LIdx, LSize: Int32;
 begin
-  System.SetLength(Result, 2);
-  LCode := UInt16(Ord(AValue));
-  Result[0] := Byte(LCode);
-  Result[1] := Byte(LCode shr 8);
+  LSize := System.SizeOf(AValue);
+  System.SetLength(Result, LSize);
+  LValue := UInt32(System.Ord(AValue));
+  if (IsLittleEndian) then
+  begin
+    for LIdx := 0 to LSize - 1 do
+      Result[LIdx] := Byte(LValue shr (LIdx * 8));
+  end
+  else
+  begin
+    for LIdx := 0 to LSize - 1 do
+      Result[LSize - 1 - LIdx] := Byte(LValue shr (LIdx * 8));
+  end;
 end;
 
 class function TBitConverter.GetBytes(AValue: UInt8): THashLibByteArray;
@@ -218,8 +228,24 @@ end;
 
 class function TBitConverter.ToChar(const AValue: THashLibByteArray;
   AStartIndex: Int32): Char;
+var
+  LValue: UInt32;
+  LIdx, LSize: Int32;
 begin
-  Result := Char(Ord(AValue[AStartIndex]) or (Ord(AValue[AStartIndex + 1]) shl 8));
+  LSize := System.SizeOf(Result);
+  LValue := 0;
+  if (IsLittleEndian) then
+  begin
+    for LIdx := 0 to LSize - 1 do
+      LValue := LValue or (UInt32(AValue[AStartIndex + LIdx]) shl (LIdx * 8));
+  end
+  else
+  begin
+    for LIdx := 0 to LSize - 1 do
+      LValue := LValue or
+        (UInt32(AValue[AStartIndex + (LSize - 1 - LIdx)]) shl (LIdx * 8));
+  end;
+  Result := Char(LValue);
 end;
 
 class function TBitConverter.ToDouble(const AValue: THashLibByteArray;

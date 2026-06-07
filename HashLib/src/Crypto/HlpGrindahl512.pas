@@ -229,9 +229,7 @@ begin
 
   TransformBytes(LPad, 0, LPaddingSize - 8);
 
-  FState[0] := TConverters.ReadBytesAsUInt64LE(PByte(LPad), LPaddingSize - 8);
-
-  FState[0] := TConverters.be2me_64(FState[0]);
+  FState[0] := TConverters.ReadBytesAsUInt64BE(PByte(LPad), LPaddingSize - 8);
 
   InjectMsg(True);
 
@@ -374,8 +372,7 @@ end;
 procedure TGrindahl512.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 begin
-  FState[0] := TConverters.ReadBytesAsUInt64LE(AData, AIndex);
-  FState[0] := TConverters.be2me_64(FState[0]);
+  FState[0] := TConverters.ReadBytesAsUInt64BE(AData, AIndex);
   InjectMsg(False);
 end;
 
