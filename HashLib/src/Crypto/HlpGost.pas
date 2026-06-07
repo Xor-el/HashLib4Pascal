@@ -417,7 +417,6 @@ begin
 
   System.SetLength(LLengthBytes, 32);
   TArrayUtils.ZeroFill(LLengthBytes);
-  LBits := TConverters.le2me_64(LBits);
   TConverters.ReadUInt64AsBytesLE(LBits, LLengthBytes, 0);
   TConverters.le32_copy(@LLengthBytes[0], 0, @LLengthWords[0], 0, 32);
 

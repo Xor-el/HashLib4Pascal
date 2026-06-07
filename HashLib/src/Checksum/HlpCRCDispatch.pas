@@ -190,10 +190,7 @@ end;
 
 procedure CRC32_FoldLsb32_OneSlice(Ctx: PCRCFoldRuntimeCtx32;
   var LCRC: UInt32; LPtr: PByte);
-var
-  LTempCrc: UInt32;
 begin
-  LTempCrc := TConverters.le2me_32(LCRC);
   LCRC := CrcTableU32(Ctx.TableRow[0], LPtr[15])
     xor CrcTableU32(Ctx.TableRow[1], LPtr[14])
     xor CrcTableU32(Ctx.TableRow[2], LPtr[13])
@@ -206,10 +203,10 @@ begin
     xor CrcTableU32(Ctx.TableRow[9], LPtr[6])
     xor CrcTableU32(Ctx.TableRow[10], LPtr[5])
     xor CrcTableU32(Ctx.TableRow[11], LPtr[4])
-    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LTempCrc shr 24))
-    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LTempCrc shr 16))
-    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LTempCrc shr 8))
-    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LTempCrc));
+    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LCRC shr 24))
+    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LCRC shr 16))
+    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LCRC shr 8))
+    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LCRC));
 end;
 
 function CRC_Fold_Lsb32_Scalar(AData: PByte; ALength: UInt32;
@@ -223,7 +220,7 @@ begin
   Ctx := PCRCFoldRuntimeCtx32(AConstants);
   LPtr := AData;
   LLen := ALength;
-  LCRC := UInt32(PUInt64(AState)^);
+  LCRC := TConverters.ReadBytesAsUInt32LE(PByte(AState), 0);
 
   while LLen >= 16 do
   begin
@@ -232,7 +229,10 @@ begin
     System.Dec(LLen, 16);
   end;
 
-  PUInt64(AState)^ := LCRC;
+  PByte(AState)[0] := Byte(LCRC);
+  PByte(AState)[1] := Byte(LCRC shr 8);
+  PByte(AState)[2] := Byte(LCRC shr 16);
+  PByte(AState)[3] := Byte(LCRC shr 24);
   Result := LCRC;
 end;
 
@@ -250,9 +250,13 @@ begin
   if LLen >= UInt32(MinSimdBytes) then
   begin
     LProcessed := LLen and (not UInt32(15));
-    LState[0] := UInt64(LInternal);
+    PByte(@LState[0])[0] := Byte(LInternal);
+    PByte(@LState[0])[1] := Byte(LInternal shr 8);
+    PByte(@LState[0])[2] := Byte(LInternal shr 16);
+    PByte(@LState[0])[3] := Byte(LInternal shr 24);
     LState[1] := 0;
-    LInternal := UInt32(CRC_Fold_Lsb32(LPtr, LProcessed, @LState[0], ACtx));
+    CRC_Fold_Lsb32(LPtr, LProcessed, @LState[0], ACtx);
+    LInternal := TConverters.ReadBytesAsUInt32LE(PByte(@LState[0]), 0);
     System.Inc(LPtr, LProcessed);
     System.Dec(LLen, LProcessed);
   end;

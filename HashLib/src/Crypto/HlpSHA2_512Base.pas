@@ -61,15 +61,11 @@ begin
   System.SetLength(LPad, LPadIndex + 16);
   LPad[0] := $80;
 
-  LHiBits := TConverters.be2me_64(LHiBits);
-
-  TConverters.ReadUInt64AsBytesLE(LHiBits, LPad, LPadIndex);
+  TConverters.ReadUInt64AsBytesBE(LHiBits, LPad, LPadIndex);
 
   LPadIndex := LPadIndex + 8;
 
-  LLoBits := TConverters.be2me_64(LLoBits);
-
-  TConverters.ReadUInt64AsBytesLE(LLoBits, LPad, LPadIndex);
+  TConverters.ReadUInt64AsBytesBE(LLoBits, LPad, LPadIndex);
 
   LPadIndex := LPadIndex + 8;
 

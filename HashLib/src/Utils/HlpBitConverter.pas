@@ -131,11 +131,13 @@ begin
 end;
 
 class function TBitConverter.GetBytes(AValue: Char): THashLibByteArray;
+var
+  LCode: UInt16;
 begin
-  // System.SetLength(Result, System.SizeOf(AValue));
-  // PChar(@Result[0])^ := AValue;
-  System.SetLength(Result, System.SizeOf(AValue));
-  System.Move(AValue, Result[0], System.SizeOf(AValue));
+  System.SetLength(Result, 2);
+  LCode := UInt16(Ord(AValue));
+  Result[0] := Byte(LCode);
+  Result[1] := Byte(LCode shr 8);
 end;
 
 class function TBitConverter.GetBytes(AValue: UInt8): THashLibByteArray;
@@ -217,15 +219,7 @@ end;
 class function TBitConverter.ToChar(const AValue: THashLibByteArray;
   AStartIndex: Int32): Char;
 begin
-  // System.Move(AValue[AStartIndex], Result, System.SizeOf(Result));
-  if (IsLittleEndian) then
-  begin
-    Result := Char(AValue[AStartIndex] or (AValue[AStartIndex + 1] shl 8));
-  end
-  else
-  begin
-    Result := Char((AValue[AStartIndex] shl 8) or AValue[AStartIndex + 1]);
-  end;
+  Result := Char(Ord(AValue[AStartIndex]) or (Ord(AValue[AStartIndex + 1]) shl 8));
 end;
 
 class function TBitConverter.ToDouble(const AValue: THashLibByteArray;
