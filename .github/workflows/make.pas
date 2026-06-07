@@ -247,10 +247,10 @@ const
   OPMBaseUrl = 'https://packages.lazarus-ide.org/';
   GitHubArchiveBaseUrl = 'https://github.com/';
 
-  Dependencies: array[0..-1] of TDependency = (
+  Dependencies: array[0..0] of TDependency = (
     // Examples:
     // (Kind: TDependencyKind.OPM;    Name: 'HashLib';               Ref: ''),
-    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/SimpleBaseLib4Pascal';  Ref: 'master'),
+    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/HashLib4Pascal';  Ref: 'enhancement/big-endian-ci-flow'),
   );
 
 // ---------------------------------------------------------------------------
