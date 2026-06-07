@@ -53,18 +53,6 @@ type
       ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32);
       static; inline;
 
-    // Serialize 32-bit words to little-endian bytes for an arbitrary byte
-    // count (including a partial trailing word). Host-independent, unlike
-    // le32_copy whose big-endian path only handles whole words.
-    class procedure le32_copy_partial(ASource: Pointer; ASourceIndex: Int32;
-      ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32); static;
-
-    // Serialize 64-bit words to little-endian bytes for an arbitrary byte
-    // count (including a partial trailing word). Host-independent, unlike
-    // le64_copy whose big-endian path only handles whole words.
-    class procedure le64_copy_partial(ASource: Pointer; ASourceIndex: Int32;
-      ADestination: Pointer; ADestinationIndex: Int32; ASize: Int32); static;
-
     class procedure ReadUInt32AsBytesLE(AInput: UInt32;
       const AOutput: THashLibByteArray; AIndex: Int32); overload;
       static; inline;
@@ -139,8 +127,8 @@ class procedure TConverters.swap_copy_str_to_u32(ASource: Pointer;
   ASize: Int32);
 var
   LPtrSourceStart, LPtrDestinationStart, LPtrSourceEnd: PCardinal;
-  LPtrByteSourceStart: PByte;
-  LLength: Int32;
+  LPtrByteSourceStart, LPtrByteDestStart: PByte;
+  LIdx: Int32;
 begin
   // if all pointers and length are 32-bits aligned
   if ((Int32(PByte(ADestination) - PByte(0)) or (PByte(ASource) - PByte(0)) or
@@ -159,13 +147,15 @@ begin
   end
   else
   begin
+    // Reverse bytes within each 32-bit lane. Walk the destination so a partial
+    // trailing word stays in bounds and receives the low (little-end) bytes.
     LPtrByteSourceStart := (PByte(ASource) + ASourceIndex);
-    LLength := ASize + ADestinationIndex;
-    while ADestinationIndex < LLength do
+    LPtrByteDestStart := (PByte(ADestination) + ADestinationIndex);
+    LIdx := 0;
+    while LIdx < ASize do
     begin
-      PByte(ADestination)[ADestinationIndex xor 3] := LPtrByteSourceStart^;
-      System.Inc(LPtrByteSourceStart);
-      System.Inc(ADestinationIndex);
+      LPtrByteDestStart[LIdx] := LPtrByteSourceStart[LIdx xor 3];
+      System.Inc(LIdx);
     end;
   end;
 end;
@@ -175,8 +165,8 @@ class procedure TConverters.swap_copy_str_to_u64(ASource: Pointer;
   ASize: Int32);
 var
   LPtrSourceStart, LPtrDestinationStart, LPtrSourceEnd: PUInt64;
-  LPtrByteSourceStart: PByte;
-  LLength: Int32;
+  LPtrByteSourceStart, LPtrByteDestStart: PByte;
+  LIdx: Int32;
 begin
   // if all pointers and length are 64-bits aligned
   if ((Int32(PByte(ADestination) - PByte(0)) or (PByte(ASource) - PByte(0)) or
@@ -195,13 +185,15 @@ begin
   end
   else
   begin
+    // Reverse bytes within each 64-bit lane. Walk the destination so a partial
+    // trailing word stays in bounds and receives the low (little-end) bytes.
     LPtrByteSourceStart := (PByte(ASource) + ASourceIndex);
-    LLength := ASize + ADestinationIndex;
-    while ADestinationIndex < LLength do
+    LPtrByteDestStart := (PByte(ADestination) + ADestinationIndex);
+    LIdx := 0;
+    while LIdx < ASize do
     begin
-      PByte(ADestination)[ADestinationIndex xor 7] := LPtrByteSourceStart^;
-      System.Inc(LPtrByteSourceStart);
-      System.Inc(ADestinationIndex);
+      LPtrByteDestStart[LIdx] := LPtrByteSourceStart[LIdx xor 7];
+      System.Inc(LIdx);
     end;
   end;
 end;
@@ -288,44 +280,6 @@ begin
   swap_copy_str_to_u64(ASource, ASourceIndex, ADestination,
     ADestinationIndex, ASize);
 {$ENDIF HASHLIB_LITTLE_ENDIAN}
-end;
-
-class procedure TConverters.le32_copy_partial(ASource: Pointer;
-  ASourceIndex: Int32; ADestination: Pointer; ADestinationIndex: Int32;
-  ASize: Int32);
-var
-  LIdx: Int32;
-  LSrc, LDst: PByte;
-  LWord: UInt32;
-begin
-  LSrc := PByte(ASource) + ASourceIndex;
-  LDst := PByte(ADestination) + ADestinationIndex;
-  LIdx := 0;
-  while LIdx < ASize do
-  begin
-    LWord := PCardinal(LSrc + (LIdx and (not 3)))^;
-    LDst[LIdx] := Byte(LWord shr ((LIdx and 3) shl 3));
-    System.Inc(LIdx);
-  end;
-end;
-
-class procedure TConverters.le64_copy_partial(ASource: Pointer;
-  ASourceIndex: Int32; ADestination: Pointer; ADestinationIndex: Int32;
-  ASize: Int32);
-var
-  LIdx: Int32;
-  LSrc, LDst: PByte;
-  LWord: UInt64;
-begin
-  LSrc := PByte(ASource) + ASourceIndex;
-  LDst := PByte(ADestination) + ADestinationIndex;
-  LIdx := 0;
-  while LIdx < ASize do
-  begin
-    LWord := PUInt64(LSrc + (LIdx and (not 7)))^;
-    LDst[LIdx] := Byte(LWord shr ((LIdx and 7) shl 3));
-    System.Inc(LIdx);
-  end;
 end;
 
 class procedure TConverters.ReadUInt32AsBytesLE(AInput: UInt32;

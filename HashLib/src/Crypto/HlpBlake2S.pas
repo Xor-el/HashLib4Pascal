@@ -300,7 +300,7 @@ end;
 function TBlake2S.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, HashSize);
-  TConverters.le32_copy_partial(PCardinal(FState), 0, PByte(Result), 0,
+  TConverters.le32_copy(PCardinal(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -679,7 +679,7 @@ begin
   begin
     // Get root digest
     System.SetLength(FRootHashDigest, Blake2SHashSize);
-    TConverters.le32_copy_partial(PCardinal(FState), 0, PByte(FRootHashDigest), 0,
+    TConverters.le32_copy(PCardinal(FState), 0, PByte(FRootHashDigest), 0,
       System.Length(FRootHashDigest));
   end;
 
