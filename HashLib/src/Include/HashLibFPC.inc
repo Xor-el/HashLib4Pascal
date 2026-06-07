@@ -17,7 +17,7 @@
 {$IFEND}
 
 {$IFDEF ENDIAN_BIG}
-  {$MESSAGE FATAL 'This Library does not support "Big Endian" processors yet.'}
+  {.$MESSAGE FATAL 'This Library does not support "Big Endian" processors yet.'}
 {$ENDIF}
 
 {============================ FPC Version Features ============================}

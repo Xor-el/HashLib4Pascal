@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Clone Lazarus, build lazbuild, write environmentoptions.xml, update PATH.
+# Requires ci_init_paths and ci_write_lazarus_environmentoptions from common.sh.
+
+set -euo pipefail
+
+: "${LAZARUS_BRANCH:?LAZARUS_BRANCH is required}"
+: "${LAZARUS_REPO:?LAZARUS_REPO is required}"
+: "${FPC_EXE:?FPC_EXE is required (path to fpc binary for environmentoptions.xml)}"
+
+: "${LAZARUS_DIR:=$HOME/lazarus-src}"
+
+if [ -z "${MAKE_CMD:-}" ]; then
+  case "$(uname -s)" in
+    *BSD|DragonFly|SunOS) MAKE_CMD="gmake" ;;
+    MINGW*|MSYS*|CYGWIN*) MAKE_CMD="gmake" ;;
+    *)                    MAKE_CMD="make"  ;;
+  esac
+fi
+
+git clone --depth 1 --branch "$LAZARUS_BRANCH" "$LAZARUS_REPO" "$LAZARUS_DIR"
+
+if [ "$(uname -s)" = "DragonFly" ]; then
+  df_inc="$LAZARUS_DIR/ide/packages/ideconfig/include/dragonfly"
+  if [ ! -f "$df_inc/lazconf.inc" ]; then
+    mkdir -p "$df_inc"
+    cp "$LAZARUS_DIR/ide/packages/ideconfig/include/freebsd/lazconf.inc" \
+       "$df_inc/lazconf.inc"
+  fi
+fi
+
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    "$MAKE_CMD" -C "$(cygpath -w "$LAZARUS_DIR")" lazbuild
+    ;;
+  *)
+    "$MAKE_CMD" -C "$LAZARUS_DIR" lazbuild
+    ;;
+esac
+
+ci_write_lazarus_environmentoptions "$LAZARUS_DIR" "$FPC_EXE"
+
+export PATH="$LAZARUS_DIR:$PATH"
+ci_github_path_append "$LAZARUS_DIR"
+
+lazbuild --version
+
+if [ "${MAKE_BUILD_BACKEND:-}" = "fpc" ]; then
+  echo "::notice::MAKE_BUILD_BACKEND=fpc — lazbuild was built but make.pas will use the fpc backend"
+fi
