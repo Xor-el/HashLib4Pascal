@@ -34,4 +34,4 @@ for _id in "${_selected[@]}"; do
 done
 
 echo "enabled_targets=${TARGETS}" >> "${GITHUB_OUTPUT:?GITHUB_OUTPUT is required}"
-echo "::notice::Enabled targets (${SOURCE}): ${TARGETS}"
+echo "Enabled targets (${SOURCE}): ${TARGETS}"

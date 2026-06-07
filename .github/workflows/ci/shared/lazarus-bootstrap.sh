@@ -46,5 +46,5 @@ ci_github_path_append "$LAZARUS_DIR"
 lazbuild --version
 
 if [ "${MAKE_BUILD_BACKEND:-}" = "fpc" ]; then
-  echo "::notice::MAKE_BUILD_BACKEND=fpc — lazbuild was built but make.pas will use the fpc backend"
+  echo "MAKE_BUILD_BACKEND=fpc — lazbuild was built but make.pas will use the fpc backend"
 fi

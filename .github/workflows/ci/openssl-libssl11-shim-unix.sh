@@ -3,14 +3,22 @@
 set -euo pipefail
 
 ARCH_DIR="${1:-}"
-if [ -z "$ARCH_DIR" ]; then
-  if command -v gcc >/dev/null 2>&1; then
-    ARCH_DIR="/usr/lib/$(gcc -print-multiarch 2>/dev/null || true)"
+if [ -z "$ARCH_DIR" ] && command -v gcc >/dev/null 2>&1; then
+  multiarch="$(gcc -print-multiarch 2>/dev/null || true)"
+  if [ -n "$multiarch" ] && [ -f "/usr/lib/$multiarch/libssl.so.3" ]; then
+    ARCH_DIR="/usr/lib/$multiarch"
   fi
 fi
-if [ -z "$ARCH_DIR" ] || [ ! -d "$ARCH_DIR" ]; then
-  for ARCH_DIR in /usr/lib/powerpc64-linux-gnu /usr/lib/arm-linux-gnueabihf /usr/lib; do
-    if [ -f "$ARCH_DIR/libssl.so.3" ]; then
+if [ -z "$ARCH_DIR" ] || [ ! -f "$ARCH_DIR/libssl.so.3" ]; then
+  for candidate in \
+    /usr/lib/powerpc64-linux-gnu \
+    /usr/lib/ppc64-linux-gnu \
+    /usr/lib/arm-linux-gnueabihf \
+    /usr/lib/aarch64-linux-gnu \
+    /usr/lib/x86_64-linux-gnu \
+    /usr/lib; do
+    if [ -f "$candidate/libssl.so.3" ]; then
+      ARCH_DIR="$candidate"
       break
     fi
   done

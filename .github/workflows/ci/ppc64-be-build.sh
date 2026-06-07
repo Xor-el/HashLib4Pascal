@@ -8,6 +8,8 @@ set -euo pipefail
 
 CI_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CI_SHARED="$CI_ROOT/shared"
+# shellcheck source=ppc64-be-images.env
+source "$CI_ROOT/ppc64-be-images.env"
 
 # Cross-compile glibc csu stubs on the x86 host. gcc inside QEMU ppc64
 # user-mode often SIGSEGVs; install-fpc-lazarus.sh expects CSU_STUBS_PREBUILT.
@@ -37,5 +39,5 @@ docker run --rm --platform linux/ppc64 \
   -e DEBIAN_FRONTEND=noninteractive \
   -e QEMU_CPU=power8 \
   -e CSU_STUBS_PREBUILT="${CSU_STUBS_IN_CONTAINER}" \
-  urbanogilson/debian-debootstrap-ports:ppc64-forky-sid \
+  "$PPC64_RUNTIME_IMAGE" \
   bash .github/workflows/ci/ppc64-be-inner.sh

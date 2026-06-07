@@ -11,7 +11,6 @@ if [ "$FREEBSD_INSTALL_MODE" = "preferred" ]; then
   ci_build_standard
 else
   export PATH="$HOME/lazarus-src:$PATH"
-  fpc -iV
-  lazbuild --version
+  ci_preflight
   ci_run_make
 fi

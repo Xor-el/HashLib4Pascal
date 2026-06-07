@@ -217,6 +217,8 @@ type
     procedure RunBuiltBinary(const ABinaryPath: string;
       const AArgs: array of string; const AFailMessage: string);
     procedure NormalizeFpcTarget(var AValue: string);
+    function RunFpcInfoProbeWithRetry(const AInfoFlag: string;
+      out AValue: string): Boolean;
     procedure PrepareProjectBuild(Proj: TLpiProject);
   public
     constructor Create;
@@ -1343,6 +1345,46 @@ begin
   AValue := Trim(AValue);
 end;
 
+function TMakeRunner.RunFpcInfoProbeWithRetry(const AInfoFlag: string;
+  out AValue: string): Boolean;
+var
+  Attempt, MaxAttempts, DelayMs: Integer;
+  Env, Output: string;
+begin
+  MaxAttempts := 3;
+  DelayMs := 2000;
+  Env := Trim(GetEnvironmentVariable('CI_FPC_PROBE_ATTEMPTS'));
+  if Env <> '' then
+    MaxAttempts := StrToIntDef(Env, MaxAttempts);
+  Env := Trim(GetEnvironmentVariable('CI_FPC_PROBE_DELAY_MS'));
+  if Env <> '' then
+    DelayMs := StrToIntDef(Env, DelayMs);
+
+  AValue := '';
+  for Attempt := 1 to MaxAttempts do
+  begin
+    if RunCommandEx('fpc', [AInfoFlag], '', False, Output) then
+    begin
+      NormalizeFpcTarget(Output);
+      if Output <> '' then
+      begin
+        AValue := Output;
+        if Attempt > 1 then
+          Log(CSI_Yellow, Format('fpc %s succeeded on attempt %d/%d',
+            [AInfoFlag, Attempt, MaxAttempts]));
+        Exit(True);
+      end;
+    end;
+    if Attempt < MaxAttempts then
+    begin
+      Log(CSI_Yellow, Format('fpc %s empty or failed (attempt %d/%d), retrying...',
+        [AInfoFlag, Attempt, MaxAttempts]));
+      Sleep(DelayMs);
+    end;
+  end;
+  Result := False;
+end;
+
 function TMakeRunner.RepoRoot: string;
 var
   Seeds: array[0..1] of string;
@@ -1414,15 +1456,9 @@ begin
   if FBackendResolved then
     Exit;
 
-  if RunCommandEx('fpc', ['-iTP'], '', False, Output) then
-    FTargetCpu := Output;
-  if RunCommandEx('fpc', ['-iTO'], '', False, Output) then
-    FTargetOs := Output;
-  NormalizeFpcTarget(FTargetCpu);
-  NormalizeFpcTarget(FTargetOs);
-  if FTargetCpu = '' then
+  if not RunFpcInfoProbeWithRetry('-iTP', FTargetCpu) then
     raise Exception.Create('fpc -iTP returned empty TargetCPU');
-  if FTargetOs = '' then
+  if not RunFpcInfoProbeWithRetry('-iTO', FTargetOs) then
     raise Exception.Create('fpc -iTO returned empty TargetOS');
 
   Requested := ParseBackendEnv;
