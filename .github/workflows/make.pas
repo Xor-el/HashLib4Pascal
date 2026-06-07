@@ -950,7 +950,7 @@ begin
   Result := -1;
   Idx := FNameToIndex.IndexOf(AName);
   if Idx >= 0 then
-    Result := Integer(FNameToIndex.Objects[Idx]);
+    Result := Integer(PtrInt(FNameToIndex.Objects[Idx]));
 end;
 
 procedure TPackageGraph.RegisterLpk(const ALpkPath: string);
@@ -979,7 +979,7 @@ begin
     Exit;
   end;
 
-  FNameToIndex.AddObject(Pkg.PackageName, TObject(FItems.Count));
+  FNameToIndex.AddObject(Pkg.PackageName, TObject(PtrInt(FItems.Count)));
   FItems.Add(Pkg);
 end;
 
