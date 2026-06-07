@@ -13,6 +13,11 @@
         <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams"/>
         <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="4"/>
+        </Optimizations>
+      </CodeGeneration>
       <Other>
         <ConfigFile>
           <CustomConfigFile Value="True"/>
