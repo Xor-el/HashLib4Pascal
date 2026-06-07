@@ -43,7 +43,8 @@ type
   PCRCFoldRuntimeCtx32 = ^TCRCFoldRuntimeCtx32;
 
   // AData: data pointer, ALength: byte count (>= MinSimdBytes, multiple of 16).
-  // AState: pointer to 2 x UInt64 ([0]=CRC / state, [1]=0 for PCLMUL).
+  // AState: pointer to 2 x UInt64; QWORD[0] low 32 bits are LE wire bytes, QWORD[1]=0.
+  // Callers must use the function return value after fold (VPCLMUL may not write AState).
   // AConstants: pointer to TCRCFoldRuntimeCtx64 or 32 (FoldConstants at offset 0).
   TCRCFoldFunc = function(AData: PByte; ALength: UInt32;
     AState: Pointer; AConstants: Pointer): UInt64;
@@ -98,6 +99,29 @@ end;
 function CRCMaskFromWidth(AWidth: Int32): UInt64; inline;
 begin
   Result := ((UInt64(1) shl (AWidth - 1)) - 1) shl 1 or 1;
+end;
+
+// Fold state QWORD[0] carries the running CRC as LE wire bytes in [0..3]
+// (high [4..7] zero). Matches SIMD dword/qword loads at AState on x86 LE and
+// keeps scalar paths correct on big-endian hosts.
+function CRCFold_LoadUInt32LE(AState: Pointer): UInt32; inline;
+begin
+  Result := TConverters.ReadBytesAsUInt32LE(PByte(AState), 0);
+end;
+
+procedure CRCFold_StoreUInt32LE(AState: Pointer; AValue: UInt32); inline;
+var
+  P: PByte;
+begin
+  P := PByte(AState);
+  P[0] := Byte(AValue);
+  P[1] := Byte(AValue shr 8);
+  P[2] := Byte(AValue shr 16);
+  P[3] := Byte(AValue shr 24);
+  P[4] := 0;
+  P[5] := 0;
+  P[6] := 0;
+  P[7] := 0;
 end;
 
 function CRC_Fold_Lsb_Scalar(AData: PByte; ALength: UInt32;
@@ -220,7 +244,7 @@ begin
   Ctx := PCRCFoldRuntimeCtx32(AConstants);
   LPtr := AData;
   LLen := ALength;
-  LCRC := TConverters.ReadBytesAsUInt32LE(PByte(AState), 0);
+  LCRC := CRCFold_LoadUInt32LE(AState);
 
   while LLen >= 16 do
   begin
@@ -229,10 +253,7 @@ begin
     System.Dec(LLen, 16);
   end;
 
-  PByte(AState)[0] := Byte(LCRC);
-  PByte(AState)[1] := Byte(LCRC shr 8);
-  PByte(AState)[2] := Byte(LCRC shr 16);
-  PByte(AState)[3] := Byte(LCRC shr 24);
+  CRCFold_StoreUInt32LE(AState, LCRC);
   Result := LCRC;
 end;
 
@@ -250,13 +271,9 @@ begin
   if LLen >= UInt32(MinSimdBytes) then
   begin
     LProcessed := LLen and (not UInt32(15));
-    PByte(@LState[0])[0] := Byte(LInternal);
-    PByte(@LState[0])[1] := Byte(LInternal shr 8);
-    PByte(@LState[0])[2] := Byte(LInternal shr 16);
-    PByte(@LState[0])[3] := Byte(LInternal shr 24);
+    CRCFold_StoreUInt32LE(@LState[0], LInternal);
     LState[1] := 0;
-    CRC_Fold_Lsb32(LPtr, LProcessed, @LState[0], ACtx);
-    LInternal := TConverters.ReadBytesAsUInt32LE(PByte(@LState[0]), 0);
+    LInternal := UInt32(CRC_Fold_Lsb32(LPtr, LProcessed, @LState[0], ACtx));
     System.Inc(LPtr, LProcessed);
     System.Dec(LLen, LProcessed);
   end;
