@@ -20,11 +20,9 @@
 #    LAZARUS_REPO   git URL
 #    MAKE_CMD            'make' on Linux/Windows/macOS, 'gmake' on BSD/Solaris
 #                        (auto-detected if unset)
-#    MAKE_BUILD_BACKEND  auto | lazbuild | fpc
-#                        fpc    — install FPC only; skip Lazarus/lazbuild
-#                        lazbuild | auto — also clone Lazarus and build lazbuild
-#                        (auto here always installs Lazarus; make.pas auto probes
-#                        lazbuild on PATH at runtime and may still choose fpc)
+#    MAKE_BUILD_BACKEND  lazbuild | fpc (default: fpc)
+#                        fpc      — install FPC only; skip Lazarus/lazbuild
+#                        lazbuild — also clone Lazarus and build lazbuild
 #
 #  Outputs (appended to $GITHUB_PATH if set):
 #    $INSTALL_PREFIX/bin and $LAZARUS_DIR are added to PATH
@@ -41,12 +39,11 @@ source "$INSTALL_SCRIPT_DIR/ci/shared/common.sh"
 
 : "${FPC_VERSION:?FPC_VERSION is required (e.g. 3.2.2)}"
 : "${FPC_TARGET:?FPC_TARGET is required (e.g. x86_64-linux)}"
-: "${MAKE_BUILD_BACKEND:?MAKE_BUILD_BACKEND is required (lazbuild|fpc|auto)}"
-case "$MAKE_BUILD_BACKEND" in
-  fpc)    INSTALL_LAZARUS=0 ;;
-  auto|lazbuild) INSTALL_LAZARUS=1 ;;
+case "${MAKE_BUILD_BACKEND:-fpc}" in
+  fpc)      INSTALL_LAZARUS=0 ;;
+  lazbuild) INSTALL_LAZARUS=1 ;;
   *)
-    echo "unknown MAKE_BUILD_BACKEND: $MAKE_BUILD_BACKEND" >&2
+    echo "unknown MAKE_BUILD_BACKEND: $MAKE_BUILD_BACKEND (expected lazbuild|fpc)" >&2
     exit 1
     ;;
 esac
@@ -263,7 +260,7 @@ fi
 # ci_fpc_info_probe instead of letting one emulation hiccup fail the install.
 ci_fpc_info_probe -iV
 
-# ── Build Lazarus from source (lazbuild | auto only) ─────────────────
+# ── Build Lazarus from source (lazbuild backend only) ────────────────
 #
 # When INSTALL_LAZARUS=1, clone Lazarus and build lazbuild (~1–2 min).
 # Packaged Lazarus on Linux/Windows pulls in the full IDE; we only need

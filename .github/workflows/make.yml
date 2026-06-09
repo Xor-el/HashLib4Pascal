@@ -35,6 +35,10 @@ env:
   LAZARUS_BRANCH: lazarus_4_4
   LAZARUS_REPO: https://github.com/fpc/Lazarus.git
   MAKE_BUILD_BACKEND: fpc
+  # make.pas package build scope: 'all' compiles every discovered package (catches
+  # a package that fails on the target even if unused); 'required' only compiles
+  # the projects' dependency closure. Override per job below, like MAKE_BUILD_BACKEND.
+  MAKE_PACKAGE_SCOPE: required
   # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
   # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
   CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
@@ -104,6 +108,7 @@ jobs:
             LAZARUS_BRANCH: ${{ env.LAZARUS_BRANCH }}
             LAZARUS_REPO: ${{ env.LAZARUS_REPO }}
             MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
+            MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
             CI_DEBUG: ${{ env.CI_DEBUG }}
           run: bash .github/workflows/ci/arm32-run.sh
 
@@ -126,7 +131,8 @@ jobs:
         env:
           FPC_VERSION: ${{ env.FPC_VERSION }}
           FPC_TARGET: powerpc64-linux
-          MAKE_BUILD_BACKEND: fpc
+          MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
+          MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
         run: bash .github/workflows/ci/ppc64-be-build.sh
 
   freebsd:
@@ -147,7 +153,7 @@ jobs:
           FPC_TARGET: x86_64-freebsd
           FREEBSD_INSTALL_MODE: interim
         with:
-          envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FREEBSD_INSTALL_MODE CI_DEBUG
+          envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FREEBSD_INSTALL_MODE CI_DEBUG
           release: "15.0"
           usesh: true
           prepare: sh .github/workflows/ci/vm-freebsd-prepare.sh
@@ -170,7 +176,7 @@ jobs:
         env:
           FPC_TARGET: x86_64-netbsd
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
           prepare: sh .github/workflows/ci/vm-netbsd-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
 
@@ -192,7 +198,7 @@ jobs:
           FPC_TARGET: x86_64-dragonfly
           LD_LIBRARY_PATH_EXTRA: /usr/local/lib
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
           usesh: true
           prepare: sh .github/workflows/ci/vm-dragonfly-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
@@ -214,7 +220,7 @@ jobs:
         env:
           FPC_TARGET: x86_64-solaris
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
           release: "11.4-gcc"
           usesh: true
           prepare: sh .github/workflows/ci/vm-solaris-prepare.sh
