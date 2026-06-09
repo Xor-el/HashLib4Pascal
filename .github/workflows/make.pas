@@ -364,7 +364,7 @@ begin
   CloseTag := '</' + AOpenTag + '>';
   Q := PosEx(CloseTag, AContent, P);
   if Q = 0 then
-    Result := Copy(AContent, P, MaxInt)
+    Result := Copy(AContent, P, Length(AContent) - P + 1)
   else
     Result := Copy(AContent, P, Q - P + Length(CloseTag));
 end;
@@ -440,7 +440,7 @@ begin
   begin
     if not StartsText('-Fu', AArgs[I]) then
       Continue;
-    ArgPath := Copy(AArgs[I], 4, MaxInt);
+    ArgPath := Copy(AArgs[I], 4, Length(AArgs[I]) - 3);
     if SameText(Norm, LowerCase(ExpandFileName(ExcludeTrailingPathDelimiter(ArgPath)))) then
       Exit(True);
   end;
