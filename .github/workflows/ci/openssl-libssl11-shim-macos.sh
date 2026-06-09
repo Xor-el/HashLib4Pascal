@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# FPC 3.2.2 hardcodes libssl.1.1.dylib; symlink Homebrew OpenSSL 3 on macOS.
+# TODO(FPC 3.2.4): remove this shim. FPC 3.2.2 hardcodes libssl.1.1.dylib, so
+# symlink Homebrew's OpenSSL 3 dylibs to the 1.1 names on macOS.
 set -euo pipefail
 
 OSSL_LIB="$(brew --prefix openssl@3)/lib"

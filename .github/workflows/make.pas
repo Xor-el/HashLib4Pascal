@@ -14,6 +14,9 @@ type
   // Build backend
   // ---------------------------------------------------------------------------
 
+  // Selected via MAKE_BUILD_BACKEND. Auto probes for lazbuild on PATH and
+  // falls back to Fpc. Lazbuild drives builds through the IDE tool; Fpc builds
+  // packages/projects by invoking the compiler directly (see TPackageGraph).
   TBuildBackend = (
     Auto,
     Lazbuild,
@@ -46,6 +49,9 @@ type
     UnitOutputDirTemplate: string;
   end;
 
+  // Lightweight extractor for the subset of Lazarus .lpi/.lpk XML we need
+  // (block ranges, Value="" attributes, search paths). Not a general XML
+  // parser; it relies on the well-formed, tool-generated Lazarus schema.
   TLazXml = class
   public
     class function ReadFile(const AFileName: string): string;
@@ -142,6 +148,10 @@ type
 
   TDepVisitKind = (BuildOrder, UnitPaths);
 
+  // Dependency graph of discovered .lpk packages. Used by the fpc backend to
+  // compute a topological build order and to collect each package's unit
+  // output directory (-Fu paths) for dependents. The lazbuild backend does
+  // not need this; it registers package links and lets the IDE resolve deps.
   TPackageGraph = class
   private
     FRunner: TMakeRunner;
@@ -168,6 +178,10 @@ type
     class function ExcludePattern: string;
     class function ShouldExcludeLpkPath(const ALpkPath: string): Boolean;
     class function ShouldSkipLpk(const ALpkPath: string): Boolean;
+    // Returns True if the .lpk should be skipped, logging the reason via
+    // ARunner when it is skipped solely for an LCL (GUI) dependency.
+    class function ShouldSkipLpkLogged(ARunner: TMakeRunner;
+      const ALpkPath: string): Boolean;
   end;
 
   // ---------------------------------------------------------------------------
@@ -181,6 +195,7 @@ type
     FTargetCpu: string;
     FTargetOs: string;
     FErrorCount: Integer;
+    FUseColor: Boolean;
     FGraph: TPackageGraph;
     function ParseBackendEnv: TBuildBackend;
     function ResolveAutoBackend: TBuildBackend;
@@ -251,8 +266,8 @@ const
 
   Dependencies: array of TDependency = (
     // Examples:
-    // (Kind: TDependencyKind.OPM;    Name: 'HashLib';                     Ref: ''),
-    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/SimpleBaseLib4Pascal'; Ref: 'master'),
+    // (Kind: TDependencyKind.OPM;    Name: 'SimpleBaseLib';                     Ref: ''),
+    // (Kind: TDependencyKind.GitHub; Name: 'Xor-el/HashLib4Pascal'; Ref: 'master'),
   );
 
 // ---------------------------------------------------------------------------
@@ -809,6 +824,9 @@ begin
     PkgNames.Free;
   end;
 
+  // fpc compiles a unit, not an .lpk. When the package has no real unit named
+  // after it, synthesize a stub unit that `uses` every listed unit so a single
+  // `fpc <stub>` builds the whole package. (lazbuild reads the .lpk directly.)
   FStubPas := IncludeTrailingPathDelimiter(FPkgDir) + FPackageName + '.pas';
   if not FileExists(FStubPas) then
   begin
@@ -912,6 +930,16 @@ begin
     TLpkPackage.HasLclDependencyInFile(ALpkPath);
 end;
 
+class function TPackageGraph.ShouldSkipLpkLogged(ARunner: TMakeRunner;
+  const ALpkPath: string): Boolean;
+begin
+  Result := ShouldSkipLpk(ALpkPath);
+  // Platform/template packages are excluded silently; only the LCL skip is
+  // worth a note since it is the reason a console-only CI drops a package.
+  if Result and not ShouldExcludeLpkPath(ALpkPath) then
+    ARunner.Log(CSI_Yellow, 'skip LCL-dependent package ' + ALpkPath);
+end;
+
 constructor TPackageGraph.Create(ARunner: TMakeRunner);
 begin
   inherited Create;
@@ -959,12 +987,8 @@ procedure TPackageGraph.RegisterLpk(const ALpkPath: string);
 var
   Pkg: TLpkPackage;
 begin
-  if ShouldSkipLpk(ALpkPath) then
-  begin
-    if not ShouldExcludeLpkPath(ALpkPath) then
-      FRunner.Log(CSI_Yellow, 'skip LCL-dependent package ' + ALpkPath);
+  if ShouldSkipLpkLogged(FRunner, ALpkPath) then
     Exit;
-  end;
 
   Pkg := TLpkPackage.CreateFromFile(ALpkPath, FRunner.TargetCpu, FRunner.TargetOs);
   if not Pkg.IsValid then
@@ -1189,6 +1213,9 @@ begin
   FBackend := TBuildBackend.Auto;
   FBackendResolved := False;
   FErrorCount := 0;
+  // Honor the NO_COLOR convention (https://no-color.org): any value disables
+  // ANSI colors. GitHub Actions renders ANSI in its log viewer, so default on.
+  FUseColor := GetEnvironmentVariable('NO_COLOR') = '';
   FGraph := TPackageGraph.Create(Self);
 end;
 
@@ -1200,12 +1227,18 @@ end;
 
 procedure TMakeRunner.Log(const AColor, AMessage: string);
 begin
-  WriteLn(stderr, AColor, AMessage, CSI_Reset);
+  if FUseColor then
+    WriteLn(stderr, AColor, AMessage, CSI_Reset)
+  else
+    WriteLn(stderr, AMessage);
 end;
 
 procedure TMakeRunner.LogInline(const AColor, AMessage: string);
 begin
-  Write(stderr, AColor, AMessage, CSI_Reset);
+  if FUseColor then
+    Write(stderr, AColor, AMessage, CSI_Reset)
+  else
+    Write(stderr, AMessage);
 end;
 
 procedure TMakeRunner.IncError;
@@ -1497,10 +1530,11 @@ begin
     Log(CSI_Yellow, Trim(CommandOutput));
 end;
 
-// FPC 3.2.2 hardcodes OpenSSL 1.1 DLL names on Windows, but
-// modern CI runners ship OpenSSL 3.x. Override so FPC can find
-// the libraries. This hack can be removed once we move to
-// FPC 3.2.4+ which natively includes OpenSSL 3.x DLL names.
+// TODO(FPC 3.2.4): drop this Windows override. FPC 3.2.2's openssl unit
+// hardcodes the OpenSSL 1.1 DLL names (libssl-1_1*.dll / libeay32.dll), but
+// modern Windows CI runners ship only OpenSSL 3.x. Point FPC at the 3.x DLLs
+// so HTTPS downloads work. FPC 3.2.4+ already knows the OpenSSL 3 names, so
+// this whole procedure can become a plain InitSSLInterface call then.
 procedure TMakeRunner.InitSslForDownloads;
 begin
   {$IFDEF MSWINDOWS}
@@ -1607,12 +1641,8 @@ procedure TMakeRunner.RegisterPackageLazbuild(const APath: string);
 var
   CommandOutput: string;
 begin
-  if TPackageGraph.ShouldSkipLpk(APath) then
-  begin
-    if not TPackageGraph.ShouldExcludeLpkPath(APath) then
-      Log(CSI_Yellow, 'skip LCL-dependent package ' + APath);
+  if TPackageGraph.ShouldSkipLpkLogged(Self, APath) then
     Exit;
-  end;
   if RunCommandEx('lazbuild', ['--add-package-link', APath], '', False,
     CommandOutput) then
     Log(CSI_Yellow, 'added ' + APath);

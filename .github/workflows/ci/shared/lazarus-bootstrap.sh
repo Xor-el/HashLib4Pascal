@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Clone Lazarus, build lazbuild, write environmentoptions.xml, update PATH.
-# Requires ci_init_paths and ci_write_lazarus_environmentoptions from common.sh.
+# Source common.sh first: uses ci_default_make_cmd, ci_is_windows,
+# ci_write_lazarus_environmentoptions, ci_github_path_append.
 
 set -euo pipefail
 
@@ -10,13 +11,7 @@ set -euo pipefail
 
 : "${LAZARUS_DIR:=$HOME/lazarus-src}"
 
-if [ -z "${MAKE_CMD:-}" ]; then
-  case "$(uname -s)" in
-    *BSD|DragonFly|SunOS) MAKE_CMD="gmake" ;;
-    MINGW*|MSYS*|CYGWIN*) MAKE_CMD="gmake" ;;
-    *)                    MAKE_CMD="make"  ;;
-  esac
-fi
+: "${MAKE_CMD:=$(ci_default_make_cmd)}"
 
 git clone --depth 1 --branch "$LAZARUS_BRANCH" "$LAZARUS_REPO" "$LAZARUS_DIR"
 
@@ -29,14 +24,11 @@ if [ "$(uname -s)" = "DragonFly" ]; then
   fi
 fi
 
-case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*)
-    "$MAKE_CMD" -C "$(cygpath -w "$LAZARUS_DIR")" lazbuild
-    ;;
-  *)
-    "$MAKE_CMD" -C "$LAZARUS_DIR" lazbuild
-    ;;
-esac
+if ci_is_windows; then
+  "$MAKE_CMD" -C "$(cygpath -w "$LAZARUS_DIR")" lazbuild
+else
+  "$MAKE_CMD" -C "$LAZARUS_DIR" lazbuild
+fi
 
 ci_write_lazarus_environmentoptions "$LAZARUS_DIR" "$FPC_EXE"
 

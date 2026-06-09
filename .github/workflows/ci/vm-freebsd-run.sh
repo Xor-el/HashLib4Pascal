@@ -10,7 +10,9 @@ ci_init_paths
 if [ "$FREEBSD_INSTALL_MODE" = "preferred" ]; then
   ci_build_standard
 else
+  # TODO(FPC 3.2.4): remove the interim path once the FreeBSD 15+ dist tarball
+  # installs cleanly. Until then the toolchain is pkg-installed in prepare, so
+  # build against it directly without re-running the installer.
   export PATH="$HOME/lazarus-src:$PATH"
-  ci_preflight
-  ci_run_make
+  ci_build_prebuilt
 fi

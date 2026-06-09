@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# FPC 3.2.2 hardcodes libssl.so.1.1; symlink OpenSSL 3.x ELF libraries on Linux/BSD.
+# TODO(FPC 3.2.4): remove this shim. FPC 3.2.2 hardcodes libssl.so.1.1, so
+# symlink the OpenSSL 3.x ELF libraries to the 1.1 sonames on Linux/BSD.
 set -euo pipefail
 
 ARCH_DIR="${1:-}"

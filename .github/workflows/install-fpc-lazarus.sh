@@ -30,7 +30,10 @@
 #    $INSTALL_PREFIX/bin and $LAZARUS_DIR are added to PATH
 # ─────────────────────────────────────────────────────────────────────
 
-set -xeuo pipefail
+set -euo pipefail
+# Opt-in command tracing (this installer is verbose); set CI_DEBUG=1 to enable.
+# Match only truthy values so a flat CI_DEBUG=0 (the CI default) stays quiet.
+case "${CI_DEBUG:-}" in 1|true|yes|on) set -x ;; esac
 
 INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ci/shared/common.sh
@@ -52,26 +55,12 @@ if [ "$INSTALL_LAZARUS" = "1" ]; then
   : "${LAZARUS_REPO:?LAZARUS_REPO is required}"
 fi
 
-case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*)   IS_WINDOWS=1 ;;
-  *)                      IS_WINDOWS=0 ;;
-esac
+if ci_is_windows; then IS_WINDOWS=1; else IS_WINDOWS=0; fi
 
 : "${INSTALL_PREFIX:=$HOME/fpc-install}"
 : "${LAZARUS_DIR:=$HOME/lazarus-src}"
-
-# Pick GNU make. On most platforms 'make' is GNU make. On BSDs and
-# Solaris, 'make' is BSD make and we need 'gmake'. On Windows
-# (windows-latest runner) the only GNU make pre-installed is
-# Strawberry Perl's 'gmake.exe' — there is no 'make' on PATH.
-# Caller can override MAKE_CMD if they have a different setup.
-if [ -z "${MAKE_CMD:-}" ]; then
-  case "$(uname -s)" in
-    *BSD|DragonFly|SunOS)        MAKE_CMD="gmake" ;;
-    MINGW*|MSYS*|CYGWIN*)        MAKE_CMD="gmake" ;;
-    *)                           MAKE_CMD="make"  ;;
-  esac
-fi
+# MAKE_CMD (gmake on BSD/Solaris/Windows) is defaulted by lazarus-bootstrap.sh,
+# which is the only consumer; a caller-provided value propagates via sourcing.
 
 # ── Fetch + extract ──────────────────────────────────────────────────
 
@@ -165,6 +154,8 @@ fi
 
 # ── Linux glibc 2.34+ workaround ─────────────────────────────────────
 #
+# TODO(FPC 3.2.4): remove this whole glibc stub block (see end of comment).
+#
 # FPC 3.2.2 was built against glibc < 2.34 and its RTL references
 # __libc_csu_init / __libc_csu_fini, which glibc 2.34 (Aug 2021) made
 # private. Linking anything FPC produces against current glibc fails:
@@ -185,7 +176,7 @@ fi
 #     is cross-compiled on the x86 host (CSU_STUBS_PREBUILT); running cc
 #     inside QEMU user-mode for ppc64 is unreliable.
 #
-# This hack can be removed once we move to FPC 3.2.4+.
+# Removable once we move to FPC 3.2.4+ (see TODO above).
 #
 # See https://gitlab.com/freepascal.org/fpc/source/-/issues/39295
 if [ "$(uname -s)" = "Linux" ]; then
@@ -267,7 +258,10 @@ if [ -n "$FPC_UTIL_DIR" ]; then
   ci_github_path_append "$FPC_UTIL_DIR"
 fi
 
-fpc -iV
+# Probe the freshly installed compiler. Under QEMU user-mode (notably ppc64
+# big-endian) the compiler binary can SIGSEGV intermittently, so retry via
+# ci_fpc_info_probe instead of letting one emulation hiccup fail the install.
+ci_fpc_info_probe -iV
 
 # ── Build Lazarus from source (lazbuild | auto only) ─────────────────
 #

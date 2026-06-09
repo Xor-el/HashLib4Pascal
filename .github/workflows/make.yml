@@ -14,13 +14,17 @@ on:
     inputs:
       enabled_targets:
         description: >-
-          Comma-separated list of targets to run (leave empty for default stable
+          Comma-separated list of targets to run (leave empty for the default
           set). Opt-in only: netbsd, dragonflybsd — pass explicitly here.
           Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
           macos-x64, linux-arm32, linux-powerpc64-be, freebsd, solaris,
           netbsd, dragonflybsd
         default: ""
         type: string
+      debug:
+        description: Verbose install tracing (CI_DEBUG=1 in install-fpc-lazarus.sh)
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,6 +35,9 @@ env:
   LAZARUS_BRANCH: lazarus_4_4
   LAZARUS_REPO: https://github.com/fpc/Lazarus.git
   MAKE_BUILD_BACKEND: fpc
+  # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
+  # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
+  CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
 
 jobs:
 
@@ -39,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       enabled_targets: ${{ steps.resolve.outputs.enabled_targets }}
+      native_matrix: ${{ steps.resolve.outputs.native_matrix }}
     steps:
       - uses: actions/checkout@v6
 
@@ -51,56 +59,23 @@ jobs:
 
   native:
     needs: setup
+    # native_matrix is built from targets.json filtered to enabled native ids.
+    # An empty array would be an invalid matrix, so skip the job in that case.
+    if: needs.setup.outputs.native_matrix != '[]'
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - id: linux-x64
-            runner: ubuntu-latest
-            name: Linux x86_64
-            fpc_target: x86_64-linux
-          - id: linux-arm64
-            runner: ubuntu-24.04-arm
-            name: Linux AArch64
-            fpc_target: aarch64-linux
-          - id: windows-x64
-            runner: windows-latest
-            name: Windows x86_64
-            fpc_target: x86_64-win64
-          - id: macos-arm64
-            runner: macos-latest
-            name: macOS AArch64 (Apple Silicon)
-            fpc_target: aarch64-darwin
-          - id: macos-x64
-            runner: macos-15-intel
-            name: macOS x86_64 (Intel)
-            fpc_target: x86_64-darwin
+        include: ${{ fromJSON(needs.setup.outputs.native_matrix) }}
     steps:
-      - name: Check if target is enabled
-        id: gate
-        shell: bash
-        env:
-          ENABLED_TARGETS: ${{ needs.setup.outputs.enabled_targets }}
-          TARGET_ID: ${{ matrix.id }}
-        run: |
-          if [[ ",${ENABLED_TARGETS}," == *",${TARGET_ID},"* ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping ${TARGET_ID} (not in enabled targets)"
-          fi
-
       - name: Checkout
-        if: steps.gate.outputs.enabled == 'true'
         uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Build
-        if: steps.gate.outputs.enabled == 'true'
         shell: bash
         env:
           FPC_TARGET: ${{ matrix.fpc_target }}
@@ -129,6 +104,7 @@ jobs:
             LAZARUS_BRANCH: ${{ env.LAZARUS_BRANCH }}
             LAZARUS_REPO: ${{ env.LAZARUS_REPO }}
             MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
+            CI_DEBUG: ${{ env.CI_DEBUG }}
           run: bash .github/workflows/ci/arm32-run.sh
 
   linux-powerpc64-be:
@@ -143,7 +119,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Set up QEMU (ppc64 BE, pinned)
+      - name: Set up QEMU (ppc64 big-endian)
         run: bash .github/workflows/ci/ppc64-qemu-setup.sh
 
       - name: Build (PowerPC64 BE via QEMU)
@@ -171,7 +147,7 @@ jobs:
           FPC_TARGET: x86_64-freebsd
           FREEBSD_INSTALL_MODE: interim
         with:
-          envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FREEBSD_INSTALL_MODE
+          envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FREEBSD_INSTALL_MODE CI_DEBUG
           release: "15.0"
           usesh: true
           prepare: sh .github/workflows/ci/vm-freebsd-prepare.sh
@@ -194,7 +170,7 @@ jobs:
         env:
           FPC_TARGET: x86_64-netbsd
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET CI_DEBUG
           prepare: sh .github/workflows/ci/vm-netbsd-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
 
@@ -216,7 +192,7 @@ jobs:
           FPC_TARGET: x86_64-dragonfly
           LD_LIBRARY_PATH_EXTRA: /usr/local/lib
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET LD_LIBRARY_PATH_EXTRA
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
           usesh: true
           prepare: sh .github/workflows/ci/vm-dragonfly-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
@@ -238,7 +214,7 @@ jobs:
         env:
           FPC_TARGET: x86_64-solaris
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND FPC_TARGET CI_DEBUG
           release: "11.4-gcc"
           usesh: true
           prepare: sh .github/workflows/ci/vm-solaris-prepare.sh

@@ -10,6 +10,25 @@ ci_init_paths() {
   REPO_ROOT="$(cd "$WORKFLOWS_DIR/../.." && pwd)"
 }
 
+# True when running under a Windows POSIX layer (Git Bash / MSYS / Cygwin).
+ci_is_windows() {
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) return 0 ;;
+    *)                    return 1 ;;
+  esac
+}
+
+# Prints the GNU make command name for this OS. 'make' is GNU make on Linux,
+# but BSD make on the *BSDs/Solaris and absent on Windows runners (only
+# Strawberry Perl's gmake), so those need 'gmake'.
+ci_default_make_cmd() {
+  case "$(uname -s)" in
+    *BSD|DragonFly|SunOS)  echo "gmake" ;;
+    MINGW*|MSYS*|CYGWIN*)  echo "gmake" ;;
+    *)                     echo "make"  ;;
+  esac
+}
+
 ci_install_toolchain() {
   : "${FPC_TARGET:?FPC_TARGET is required}"
   bash "$WORKFLOWS_DIR/install-fpc-lazarus.sh"
@@ -126,6 +145,13 @@ ci_build_standard() {
   ci_run_make
 }
 
+# Build when the toolchain is already installed (e.g. a distro/pkg FPC).
+# Skips ci_install_toolchain; the caller is responsible for PATH.
+ci_build_prebuilt() {
+  ci_preflight
+  ci_run_make
+}
+
 ci_openssl_hack() {
   case "$(uname -s)" in
     Linux)     bash "$CI_ROOT/openssl-libssl11-shim-unix.sh" ;;
@@ -144,14 +170,12 @@ ci_debian_container_bootstrap() {
 ci_github_path_append() {
   local dir="$1"
   [ -n "${GITHUB_PATH:-}" ] || return 0
-  case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*)
-      cygpath -w "$dir" >> "$GITHUB_PATH"
-      ;;
-    *)
-      echo "$dir" >> "$GITHUB_PATH"
-      ;;
-  esac
+  # GITHUB_PATH expects native Windows paths (C:\foo), not MSYS (/c/foo).
+  if ci_is_windows; then
+    cygpath -w "$dir" >> "$GITHUB_PATH"
+  else
+    echo "$dir" >> "$GITHUB_PATH"
+  fi
 }
 
 ci_write_lazarus_environmentoptions() {
@@ -159,19 +183,16 @@ ci_write_lazarus_environmentoptions() {
   local fpc_exe="$2"
   local laz_cfg_dir laz_dir_native fpc_exe_native
 
-  case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*)
-      local win_local="${LOCALAPPDATA:-$USERPROFILE/AppData/Local}"
-      laz_cfg_dir="$(cygpath -u "$win_local")/lazarus"
-      laz_dir_native="$(cygpath -w "$laz_dir")"
-      fpc_exe_native="$(cygpath -w "$fpc_exe")"
-      ;;
-    *)
-      laz_cfg_dir="${HOME}/.lazarus"
-      laz_dir_native="$laz_dir"
-      fpc_exe_native="$fpc_exe"
-      ;;
-  esac
+  if ci_is_windows; then
+    local win_local="${LOCALAPPDATA:-$USERPROFILE/AppData/Local}"
+    laz_cfg_dir="$(cygpath -u "$win_local")/lazarus"
+    laz_dir_native="$(cygpath -w "$laz_dir")"
+    fpc_exe_native="$(cygpath -w "$fpc_exe")"
+  else
+    laz_cfg_dir="${HOME}/.lazarus"
+    laz_dir_native="$laz_dir"
+    fpc_exe_native="$fpc_exe"
+  fi
 
   mkdir -p "$laz_cfg_dir"
   cat > "$laz_cfg_dir/environmentoptions.xml" <<EOF

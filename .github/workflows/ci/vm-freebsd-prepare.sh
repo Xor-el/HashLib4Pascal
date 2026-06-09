@@ -15,7 +15,8 @@ if [ "$FREEBSD_INSTALL_MODE" = "preferred" ]; then
   exit 0
 fi
 
-# INTERIM: pkg-installed FPC until FPC 3.2.4 dist tarball works on FreeBSD 15+.
+# TODO(FPC 3.2.4): remove the interim path; use pkg-installed FPC until the
+# FPC 3.2.4 dist tarball works on FreeBSD 15+ (see vm-freebsd-run.sh).
 freebsd_pkg_bootstrap
 pkg install -y bash fpc git wget gmake
 
