@@ -14,197 +14,76 @@ on:
     inputs:
       enabled_targets:
         description: >-
-          Comma-separated list of targets to run (leave empty for default).
+          Comma-separated list of targets to run (leave empty for the default
+          set). Opt-in only: netbsd, dragonflybsd — pass explicitly here.
           Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
-          macos-x64, linux-arm32, freebsd, netbsd, dragonflybsd, solaris
+          macos-x64, linux-arm32, linux-powerpc64-be, freebsd, solaris,
+          netbsd, dragonflybsd
         default: ""
         type: string
+      debug:
+        description: Verbose install tracing (CI_DEBUG=1 in install-fpc-lazarus.sh)
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# ═══════════════════════════════════════════════════════════════════════
-#  Shared configuration
-#
-#  FPC and Lazarus are installed identically on every target by
-#  .github/workflows/install-fpc-lazarus.sh, which fetches FPC from the
-#  official freepascal.org dist mirror and builds lazbuild from source.
-#  No native package manager dependency, no SourceForge dependency.
-# ═══════════════════════════════════════════════════════════════════════
-
 env:
   FPC_VERSION: 3.2.2
   LAZARUS_BRANCH: lazarus_4_4
   LAZARUS_REPO: https://github.com/fpc/Lazarus.git
-
-# ═══════════════════════════════════════════════════════════════════════
-#  Jobs
-# ═══════════════════════════════════════════════════════════════════════
+  MAKE_BUILD_BACKEND: fpc
+  # make.pas package build scope: 'all' compiles every discovered package (catches
+  # a package that fails on the target even if unused); 'required' only compiles
+  # the projects' dependency closure. Override per job below, like MAKE_BUILD_BACKEND.
+  MAKE_PACKAGE_SCOPE: required
+  # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
+  # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
+  CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
 
 jobs:
-
-  # ─────────────────────────────────────────────────────────────────────
-  #  Target gating — single source of truth for which jobs run.
-  #
-  #  This job resolves the effective target list exactly once and
-  #  exposes it as an output. Every other job gates on that output,
-  #  so the default list lives in exactly one place: the DEFAULT
-  #  variable below.
-  #
-  #  To disable a target permanently, remove its ID from DEFAULT.
-  #  Currently disabled (absent from DEFAULT):
-  #    - netbsd          : package server intermittently times out
-  #    - dragonflybsd    : FPC 3.2.x TLS broken (see job comments)
-  #
-  #  For ad-hoc runs with a different set, use the Run Workflow
-  #  button in the Actions tab — the workflow_dispatch input
-  #  overrides DEFAULT when non-empty.
-  #
-  #  Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
-  #             macos-x64, linux-arm32, freebsd, netbsd,
-  #             dragonflybsd, solaris
-  # ─────────────────────────────────────────────────────────────────────
 
   setup:
     name: Resolve target list
     runs-on: ubuntu-latest
     outputs:
       enabled_targets: ${{ steps.resolve.outputs.enabled_targets }}
+      native_matrix: ${{ steps.resolve.outputs.native_matrix }}
     steps:
+      - uses: actions/checkout@v6
+
       - name: Resolve enabled targets
         id: resolve
         shell: bash
         env:
           INPUT_TARGETS: ${{ github.event.inputs.enabled_targets }}
-        run: |
-          set -euo pipefail
-          DEFAULT="linux-arm32,linux-x64,linux-arm64,windows-x64,macos-arm64,macos-x64,freebsd,solaris"
-          # workflow_dispatch with an empty textbox still sends an empty
-          # string (the declared `default:` is suppressed in that case),
-          # and push/PR/schedule runs have no inputs context at all, so
-          # both paths land here as empty. Fall through to DEFAULT.
-          if [ -z "${INPUT_TARGETS// /}" ]; then
-            TARGETS="$DEFAULT"
-            SOURCE="default"
-          else
-            # Strip any whitespace the user may have pasted.
-            TARGETS="${INPUT_TARGETS// /}"
-            SOURCE="workflow_dispatch input"
-          fi
-          echo "enabled_targets=${TARGETS}" >> "$GITHUB_OUTPUT"
-          echo "::notice::Enabled targets (${SOURCE}): ${TARGETS}"
-
-  # ─────────────────────────────────────────────────────────────────────
-  #  Tier 1 — Native GitHub-hosted runners (Linux, macOS, Windows)
-  #
-  #  Each entry sets only the bits that vary: runner image, FPC
-  #  target triple, and a per-OS dependency-install command. The
-  #  shared installer script handles everything else identically
-  #  across these five targets.
-  # ─────────────────────────────────────────────────────────────────────
+        run: bash .github/workflows/ci/resolve-targets.sh
 
   native:
     needs: setup
+    # native_matrix is built from targets.json filtered to enabled native ids.
+    # An empty array would be an invalid matrix, so skip the job in that case.
+    if: needs.setup.outputs.native_matrix != '[]'
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - id: linux-x64
-            runner: ubuntu-latest
-            name: Linux x86_64
-            fpc_target: x86_64-linux
-          - id: linux-arm64
-            runner: ubuntu-24.04-arm
-            name: Linux AArch64
-            fpc_target: aarch64-linux
-          - id: windows-x64
-            runner: windows-latest
-            name: Windows x86_64
-            fpc_target: x86_64-win64
-          - id: macos-arm64
-            runner: macos-latest
-            name: macOS AArch64 (Apple Silicon)
-            fpc_target: aarch64-darwin
-          - id: macos-x64
-            runner: macos-15-intel
-            name: macOS x86_64 (Intel)
-            fpc_target: x86_64-darwin
-
+        include: ${{ fromJSON(needs.setup.outputs.native_matrix) }}
     steps:
-      - name: Check if target is enabled
-        id: gate
-        shell: bash
-        env:
-          ENABLED_TARGETS: ${{ needs.setup.outputs.enabled_targets }}
-        run: |
-          if [[ ",${ENABLED_TARGETS}," == *",${{ matrix.id }},"* ]]; then
-            echo "enabled=true"  >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping ${{ matrix.id }} (not in enabled targets)"
-          fi
-
       - name: Checkout
-        if: steps.gate.outputs.enabled == 'true'
         uses: actions/checkout@v6
         with:
           submodules: true
 
-      # ── OpenSSL libssl.1.1 symlink hack (Linux + macOS) ──────────────
-      #
-      # FPC 3.2.2 hardcodes libssl.1.1 in its DLLVersions array, but
-      # current Linux distros and Homebrew ship OpenSSL 3.x only.
-      # Symlink so FPC's openssl unit can find the libraries.
-      # Removable once we move to FPC 3.2.4+ which includes '.3' in
-      # DLLVersions natively.
-      - name: OpenSSL symlink hack (Linux)
-        if: steps.gate.outputs.enabled == 'true' && runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -xeuo pipefail
-          ARCH_DIR="/usr/lib/$(gcc -print-multiarch)"
-          sudo ln -sf "$ARCH_DIR/libssl.so.3"    "$ARCH_DIR/libssl.so.1.1"
-          sudo ln -sf "$ARCH_DIR/libcrypto.so.3" "$ARCH_DIR/libcrypto.so.1.1"
-
-      - name: OpenSSL symlink hack (macOS)
-        if: steps.gate.outputs.enabled == 'true' && runner.os == 'macOS'
-        shell: bash
-        run: |
-          set -xeuo pipefail
-          OSSL_LIB="$(brew --prefix openssl@3)/lib"
-          sudo mkdir -p /usr/local/lib
-          sudo ln -sf "$OSSL_LIB/libssl.3.dylib"    /usr/local/lib/libssl.1.1.dylib
-          sudo ln -sf "$OSSL_LIB/libcrypto.3.dylib" /usr/local/lib/libcrypto.1.1.dylib
-
-      # ── Install FPC + Lazarus from upstream tarball ──────────────────
-      #
-      # Single shared script across all native targets. On Windows it
-      # runs under Git Bash (pre-installed on windows-latest), which
-      # provides bash + GNU coreutils + tar — everything install.sh
-      # needs.
-      - name: Install FPC + Lazarus
-        if: steps.gate.outputs.enabled == 'true'
+      - name: Build
         shell: bash
         env:
           FPC_TARGET: ${{ matrix.fpc_target }}
-        run: bash .github/workflows/install-fpc-lazarus.sh
-
-      - name: Build
-        if: steps.gate.outputs.enabled == 'true'
-        shell: bash
-        run: |
-          set -xeuo pipefail
-          fpc -iV
-          lazbuild --version
-          instantfpc .github/workflows/make.pas
-
-  # ─────────────────────────────────────────────────────────────────────
-  #  Tier 2 — Linux ARM32 via QEMU user-mode emulation
-  # ─────────────────────────────────────────────────────────────────────
+        run: bash .github/workflows/ci/native-build.sh
 
   linux-arm32:
     name: Linux ARMv7 (QEMU)
@@ -223,48 +102,38 @@ jobs:
         with:
           arch: armv7
           distro: ubuntu24.04
-          # Pass through the env vars our shared script expects.
-          # YAML map format with literal '|' is what this action expects.
           env: |
             FPC_VERSION: ${{ env.FPC_VERSION }}
+            FPC_TARGET: arm-linux
             LAZARUS_BRANCH: ${{ env.LAZARUS_BRANCH }}
             LAZARUS_REPO: ${{ env.LAZARUS_REPO }}
-          install: |
-            apt-get update
-            apt-get install -y curl ca-certificates git build-essential \
-                               openssl
+            MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
+            MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
+            CI_DEBUG: ${{ env.CI_DEBUG }}
+          run: bash .github/workflows/ci/arm32-run.sh
 
-            # FPC 3.2.2 hardcodes libssl.1.1; symlink to the OpenSSL 3.x
-            # libraries Ubuntu 24.04 ships. Removable once on FPC 3.2.4+.
-            ARCH_DIR="/usr/lib/arm-linux-gnueabihf"
-            ln -sf "$ARCH_DIR/libssl.so.3"    "$ARCH_DIR/libssl.so.1.1"
-            ln -sf "$ARCH_DIR/libcrypto.so.3" "$ARCH_DIR/libcrypto.so.1.1"
-          run: |
-            set -xeuo pipefail
-            export FPC_TARGET=arm-linux
-            bash .github/workflows/install-fpc-lazarus.sh
-            export PATH="$HOME/lazarus-src:$HOME/fpc-install/bin:$PATH"
-            fpc -iV
-            instantfpc .github/workflows/make.pas
+  linux-powerpc64-be:
+    name: Linux PowerPC64 BE (QEMU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-powerpc64-be,')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
 
-  # ─────────────────────────────────────────────────────────────────────
-  #  Tier 3 — BSD family via vmactions QEMU system VMs
-  #
-  #  All BSD jobs reuse the shared installer script. The VM image's
-  #  package manager only needs to provide the script's prerequisites
-  #  (curl, git, tar, gmake, bash). FPC itself comes from the
-  #  freepascal.org mirror, identically to native runners.
-  #
-  #  Not supported (removed):
-  #    - FreeBSD aarch64: fpc-devel exists but is experimental.
-  #    - OpenBSD: pre-built FPC binary links against older libc;
-  #      incompatible with current OpenBSD. No usable package either.
-  #    - NetBSD aarch64: no FPC package available.
-  #
-  #  Disabled (commented out below):
-  #    - NetBSD x86_64: package server intermittently times out.
-  #    - DragonFlyBSD x86_64: FPC 3.2.x TLS broken (see comment below).
-  # ─────────────────────────────────────────────────────────────────────
+      - name: Set up QEMU (ppc64 big-endian)
+        run: bash .github/workflows/ci/ppc64-qemu-setup.sh
+
+      - name: Build (PowerPC64 BE via QEMU)
+        env:
+          FPC_VERSION: ${{ env.FPC_VERSION }}
+          FPC_TARGET: powerpc64-linux
+          MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
+          MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
+        run: bash .github/workflows/ci/ppc64-be-build.sh
 
   freebsd:
     name: FreeBSD x86_64
@@ -272,36 +141,6 @@ jobs:
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',freebsd,')
-    # ─────────────────────────────────────────────────────────────────
-    # INTERIM: install FPC from FreeBSD's pkg system instead of using
-    # the shared install-fpc-lazarus.sh script.
-    #
-    # Why: FPC 3.2.2's official tarball at downloads.freepascal.org is
-    # built on FreeBSD 11 (filename: fpc-3.2.2.x86_64-freebsd11.tar).
-    # FreeBSD's ABI is not stable across major versions, and binaries
-    # linked against FPC 3.2.2's freebsd11 RTL units segfault on any
-    # FreeBSD ≥12. The compat11x/12x/13x ports that historically
-    # smoothed this over are no longer available on FreeBSD 14+.
-    #
-    # Bootstrapping FPC from source (which is what every FreeBSD pkg
-    # maintainer does internally to ship `fpc`) gets close — the
-    # build completes — but FPC 3.2.2's source itself contains
-    # FreeBSD ≥12 incompatibilities (struct stat layout, etc., see
-    # FPC issue #37784). fixes_3_2 was tried; build still produced
-    # binaries that couldn't exec ppcx64 due to fpc.cfg path / version
-    # detection issues.
-    #
-    # Rather than chase those, we use FreeBSD's pkg-built fpc, which
-    # is freshly compiled against the running FreeBSD's libc and just
-    # works. This re-introduces a FreeBSD-specific code path; that's
-    # the deliberate tradeoff.
-    #
-    # Plan to remove this branch: when FPC 3.2.4 is released, the
-    # dist-mirror tarball will be FreeBSD ≥13-built and/or the source
-    # tarball will have all the FreeBSD compat backports. At that
-    # point, comment the INTERIM block below and uncomment the
-    # PREFERRED block — no other changes needed.
-    # ─────────────────────────────────────────────────────────────────
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -310,85 +149,15 @@ jobs:
 
       - name: Build (FreeBSD x86_64)
         uses: vmactions/freebsd-vm@v1
+        env:
+          FPC_TARGET: x86_64-freebsd
+          FREEBSD_INSTALL_MODE: interim
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO
+          envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FREEBSD_INSTALL_MODE CI_DEBUG
           release: "15.0"
           usesh: true
-          prepare: |
-            # ─── INTERIM: pkg install fpc ──────────────────────────
-            # Workaround for periodic FreeBSD pkg cluster breakage
-            # (see https://github.com/freebsd/pkg/issues/2653):
-            # bootstrap pkg fresh, then prime the repo metadata with
-            # a fetch-only upgrade before the real catalog refresh —
-            # this sidesteps transient broken-cluster states on the
-            # FreeBSD:15:amd64/latest repo. After that, force-refresh
-            # the catalog and align pre-installed VM packages with
-            # the current repo before installing new ones — otherwise
-            # newly-installed packages may link against newer libs
-            # than the VM image ships.
-            export ASSUME_ALWAYS_YES=yes
-            export IGNORE_OSVERSION=yes
-            pkg bootstrap -f
-            # Prime repo metadata (fetch-only) before the real update.
-            pkg upgrade -Fqy || true
-            pkg update -f
-            pkg upgrade -y
-
-            pkg install -y fpc git wget gmake
-
-            LAZARUS_DIR="$HOME/lazarus-src"
-            git clone --depth 1 --branch "$LAZARUS_BRANCH" \
-              "$LAZARUS_REPO" "$LAZARUS_DIR"
-            gmake -C "$LAZARUS_DIR" lazbuild
-
-            mkdir -p "$HOME/.lazarus"
-            cat > "$HOME/.lazarus/environmentoptions.xml" <<EOF
-            <?xml version="1.0" encoding="UTF-8"?>
-            <CONFIG>
-              <EnvironmentOptions>
-                <LazarusDirectory Value="$LAZARUS_DIR"/>
-                <CompilerFilename Value="$(which fpc)"/>
-              </EnvironmentOptions>
-            </CONFIG>
-            EOF
-
-            export PATH="$LAZARUS_DIR:$PATH"
-            lazbuild --version
-
-            # ─── PREFERRED: shared installer (currently disabled) ──
-            # When FPC 3.2.4 ships, comment out the INTERIM block
-            # above and uncomment this. The shared script handles
-            # FreeBSD identically to the other 9 platforms.
-            #
-            # Add binutils to the pkg install line above (FPC source
-            # build needs GNU as / ld.bfd from /usr/local/bin/) and
-            # also add: bash curl
-            #
-            # export ASSUME_ALWAYS_YES=yes
-            # export IGNORE_OSVERSION=yes
-            # pkg bootstrap -f
-            # pkg update -f
-            # pkg upgrade -y
-            # pkg install -y bash curl git gmake binutils
-          run: |
-            set -xeuo pipefail
-            export PATH="$HOME/lazarus-src:$PATH"
-            fpc -iV
-            lazbuild --version
-            instantfpc .github/workflows/make.pas
-
-            # ─── PREFERRED: shared installer (currently disabled) ──
-            # When the INTERIM block in `prepare:` is removed,
-            # uncomment this. It runs the same shared script the
-            # other 9 platforms use — FPC_TARGET selects the dist-
-            # mirror tarball; INSTALL_PREFIX/LAZARUS_DIR default to
-            # $HOME/fpc-install and $HOME/lazarus-src.
-            #
-            # export FPC_TARGET=x86_64-freebsd
-            # bash .github/workflows/install-fpc-lazarus.sh
-            # export PATH="$HOME/lazarus-src:$HOME/fpc-install/bin:$PATH"
-            # fpc -iV
-            # instantfpc .github/workflows/make.pas
+          prepare: sh .github/workflows/ci/vm-freebsd-prepare.sh
+          run: bash .github/workflows/ci/vm-freebsd-run.sh
 
   netbsd:
     name: NetBSD x86_64
@@ -396,8 +165,6 @@ jobs:
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',netbsd,')
-    # Disabled: NetBSD package server (cdn.NetBSD.org) intermittently
-    # times out, causing CI failures. Re-enable when server is stable.
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -406,22 +173,12 @@ jobs:
 
       - name: Build (NetBSD x86_64)
         uses: vmactions/netbsd-vm@v1
+        env:
+          FPC_TARGET: x86_64-netbsd
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO
-          prepare: |
-            export PKG_PATH="https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r | cut -d_ -f1)/All"
-
-            # Force-update pcre2 to resolve version conflict with git
-            pkg_add -uu pcre2 || true
-            pkg_add bash curl git gmake mozilla-rootcerts-openssl
-          run: |
-            set -xeuo pipefail
-            export PATH="/usr/pkg/bin:/usr/pkg/sbin:$PATH"
-            export FPC_TARGET=x86_64-netbsd
-            bash .github/workflows/install-fpc-lazarus.sh
-            export PATH="$HOME/lazarus-src:$HOME/fpc-install/bin:$PATH"
-            fpc -iV
-            instantfpc .github/workflows/make.pas
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
+          prepare: sh .github/workflows/ci/vm-netbsd-prepare.sh
+          run: bash .github/workflows/ci/vm-run-shared.sh
 
   dragonflybsd:
     name: DragonFlyBSD x86_64
@@ -429,18 +186,6 @@ jobs:
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',dragonflybsd,')
-    # Disabled: FPC 3.2.x cannot establish TLS connections on
-    # DragonFlyBSD — base LibreSSL is ABI-incompatible and DPorts
-    # OpenSSL is 3.x which FPC 3.2.x doesn't support. FPC's
-    # pure-Pascal DNS resolver is also broken (same as mono/mono#8168).
-    #
-    # FPC 3.2.4+ fixes OpenSSL 3.x loading (adds '.3' to DLLVersions)
-    # but will NOT fix the DNS resolver bug. The /etc/hosts workaround
-    # and LD_LIBRARY_PATH below will still be needed.
-    #
-    # Lazarus has no DragonFlyBSD lazconf.inc, but DragonFlyBSD is a
-    # FreeBSD derivative so the FreeBSD include works as-is. The
-    # shared installer script patches it in after cloning Lazarus.
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -449,49 +194,14 @@ jobs:
 
       - name: Build (DragonFlyBSD x86_64)
         uses: vmactions/dragonflybsd-vm@v1
+        env:
+          FPC_TARGET: x86_64-dragonfly
+          LD_LIBRARY_PATH_EXTRA: /usr/local/lib
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
           usesh: true
-          prepare: |
-            pkg install -y bash curl git gmake openssl
-
-            # FPC's pure-Pascal DNS resolver (netdb unit) is broken on
-            # DragonFlyBSD — it fails to resolve hostnames even though
-            # system tools (host, drill, wget, git) work fine. This is
-            # the same class of bug as mono/mono#8168.
-            #
-            # Workaround: resolve dependency hostnames via system DNS
-            # and add them to /etc/hosts. FPC's netdb checks /etc/hosts
-            # first (via gethostbyname), bypassing the broken resolver.
-            for h in github.com packages.lazarus-ide.org downloads.freepascal.org; do
-              ip=$(drill "$h" 2>/dev/null | awk '/^'"$h"'/{print $5; exit}')
-              if [ -n "$ip" ]; then
-                echo "$ip $h" >> /etc/hosts
-              fi
-            done
-
-            # DragonFlyBSD base ships LibreSSL in /usr/lib. Real OpenSSL
-            # 3.x from DPorts installs to /usr/local/lib. FPC 3.2.4+
-            # adds '.3' to DLLVersions — once upgraded, remove these
-            # symlinks but keep LD_LIBRARY_PATH in the run step.
-            ln -sf libssl.so.3 /usr/local/lib/libssl.so.1.1
-            ln -sf libcrypto.so.3 /usr/local/lib/libcrypto.so.1.1
-          run: |
-            set -xeuo pipefail
-            export LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-            export FPC_TARGET=x86_64-dragonfly
-            bash .github/workflows/install-fpc-lazarus.sh
-            export PATH="$HOME/lazarus-src:$HOME/fpc-install/bin:$PATH"
-            fpc -iV
-            instantfpc .github/workflows/make.pas
-
-  # ─────────────────────────────────────────────────────────────────────
-  #  Tier 4 — Solaris via vmactions QEMU system VM
-  #
-  #  Solaris uses pkgutil (OpenCSW) for community packages which install
-  #  to /opt/csw/bin. FPC comes from the official freepascal.org mirror
-  #  via the shared installer script.
-  # ─────────────────────────────────────────────────────────────────────
+          prepare: sh .github/workflows/ci/vm-dragonfly-prepare.sh
+          run: bash .github/workflows/ci/vm-run-shared.sh
 
   solaris:
     name: Solaris x86_64
@@ -507,21 +217,11 @@ jobs:
 
       - name: Build (Solaris x86_64)
         uses: vmactions/solaris-vm@v1
+        env:
+          FPC_TARGET: x86_64-solaris
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
           release: "11.4-gcc"
           usesh: true
-          prepare: |
-            # CSW packages install to /opt/csw — must be in PATH
-            # before any CSW-installed tool can be used.
-            export PATH="/opt/csw/bin:/usr/local/bin:$PATH"
-
-            pkgutil -y -i bash curl git gmake
-          run: |
-            set -xeuo pipefail
-            export PATH="/opt/csw/bin:/usr/local/bin:$PATH"
-            export FPC_TARGET=x86_64-solaris
-            bash .github/workflows/install-fpc-lazarus.sh
-            export PATH="$HOME/lazarus-src:$HOME/fpc-install/bin:$PATH"
-            fpc -iV
-            instantfpc .github/workflows/make.pas
+          prepare: sh .github/workflows/ci/vm-solaris-prepare.sh
+          run: bash .github/workflows/ci/vm-run-shared.sh

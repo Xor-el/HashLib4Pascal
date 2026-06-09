@@ -139,15 +139,11 @@ begin
 
   LPad[0] := $80;
 
-  LMessageLength := TConverters.be2me_64(LMessageLength);
-
-  TConverters.ReadUInt64AsBytesLE(LMessageLength, LPad, LPaddingSize - 8);
+  TConverters.ReadUInt64AsBytesBE(LMessageLength, LPad, LPaddingSize - 8);
 
   TransformBytes(LPad, 0, LPaddingSize - 4);
 
-  FState[0] := TConverters.ReadBytesAsUInt32LE(PByte(LPad), LPaddingSize - 4);
-
-  FState[0] := TConverters.be2me_32(FState[0]);
+  FState[0] := TConverters.ReadBytesAsUInt32BE(PByte(LPad), LPaddingSize - 4);
 
   InjectMsg(True);
 
@@ -260,8 +256,7 @@ end;
 procedure TGrindahl256.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 begin
-  FState[0] := TConverters.ReadBytesAsUInt32LE(AData, AIndex);
-  FState[0] := TConverters.be2me_32(FState[0]);
+  FState[0] := TConverters.ReadBytesAsUInt32BE(AData, AIndex);
   InjectMsg(False);
 end;
 

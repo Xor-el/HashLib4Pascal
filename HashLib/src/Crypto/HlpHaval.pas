@@ -268,8 +268,6 @@ begin
   LPad[LPadIndex] := Byte(HashSize shl 1);
   System.Inc(LPadIndex);
 
-  LBits := TConverters.le2me_64(LBits);
-
   TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
 
   LPadIndex := LPadIndex + 8;

@@ -77,7 +77,6 @@ var
 implementation
 
 uses
-  HlpConverters,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -193,7 +192,7 @@ procedure CRC32_FoldLsb32_OneSlice(Ctx: PCRCFoldRuntimeCtx32;
 var
   LTempCrc: UInt32;
 begin
-  LTempCrc := TConverters.le2me_32(LCRC);
+  LTempCrc := LCRC;
   LCRC := CrcTableU32(Ctx.TableRow[0], LPtr[15])
     xor CrcTableU32(Ctx.TableRow[1], LPtr[14])
     xor CrcTableU32(Ctx.TableRow[2], LPtr[13])

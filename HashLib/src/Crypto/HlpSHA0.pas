@@ -226,9 +226,7 @@ begin
 
   LPad[0] := $80;
 
-  LBits := TConverters.be2me_64(LBits);
-
-  TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
+  TConverters.ReadUInt64AsBytesBE(LBits, LPad, LPadIndex);
 
   LPadIndex := LPadIndex + 8;
 

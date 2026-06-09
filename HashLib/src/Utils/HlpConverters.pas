@@ -127,8 +127,8 @@ class procedure TConverters.swap_copy_str_to_u32(ASource: Pointer;
   ASize: Int32);
 var
   LPtrSourceStart, LPtrDestinationStart, LPtrSourceEnd: PCardinal;
-  LPtrByteSourceStart: PByte;
-  LLength: Int32;
+  LPtrByteSourceStart, LPtrByteDestStart: PByte;
+  LIdx: Int32;
 begin
   // if all pointers and length are 32-bits aligned
   if ((Int32(PByte(ADestination) - PByte(0)) or (PByte(ASource) - PByte(0)) or
@@ -147,13 +147,15 @@ begin
   end
   else
   begin
+    // Reverse bytes within each 32-bit lane. Walk the destination so a partial
+    // trailing word stays in bounds and receives the low (little-end) bytes.
     LPtrByteSourceStart := (PByte(ASource) + ASourceIndex);
-    LLength := ASize + ADestinationIndex;
-    while ADestinationIndex < LLength do
+    LPtrByteDestStart := (PByte(ADestination) + ADestinationIndex);
+    LIdx := 0;
+    while LIdx < ASize do
     begin
-      PByte(ADestination)[ADestinationIndex xor 3] := LPtrByteSourceStart^;
-      System.Inc(LPtrByteSourceStart);
-      System.Inc(ADestinationIndex);
+      LPtrByteDestStart[LIdx] := LPtrByteSourceStart[LIdx xor 3];
+      System.Inc(LIdx);
     end;
   end;
 end;
@@ -163,8 +165,8 @@ class procedure TConverters.swap_copy_str_to_u64(ASource: Pointer;
   ASize: Int32);
 var
   LPtrSourceStart, LPtrDestinationStart, LPtrSourceEnd: PUInt64;
-  LPtrByteSourceStart: PByte;
-  LLength: Int32;
+  LPtrByteSourceStart, LPtrByteDestStart: PByte;
+  LIdx: Int32;
 begin
   // if all pointers and length are 64-bits aligned
   if ((Int32(PByte(ADestination) - PByte(0)) or (PByte(ASource) - PByte(0)) or
@@ -183,13 +185,15 @@ begin
   end
   else
   begin
+    // Reverse bytes within each 64-bit lane. Walk the destination so a partial
+    // trailing word stays in bounds and receives the low (little-end) bytes.
     LPtrByteSourceStart := (PByte(ASource) + ASourceIndex);
-    LLength := ASize + ADestinationIndex;
-    while ADestinationIndex < LLength do
+    LPtrByteDestStart := (PByte(ADestination) + ADestinationIndex);
+    LIdx := 0;
+    while LIdx < ASize do
     begin
-      PByte(ADestination)[ADestinationIndex xor 7] := LPtrByteSourceStart^;
-      System.Inc(LPtrByteSourceStart);
-      System.Inc(ADestinationIndex);
+      LPtrByteDestStart[LIdx] := LPtrByteSourceStart[LIdx xor 7];
+      System.Inc(LIdx);
     end;
   end;
 end;
