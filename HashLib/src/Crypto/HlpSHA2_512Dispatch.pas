@@ -61,8 +61,8 @@ const
 implementation
 
 uses
-  HlpBits,
-  HlpConverters,
+  HlpBinaryPrimitives,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -83,15 +83,15 @@ begin
 
   while ANumBlocks > 0 do
   begin
-    TConverters.be64_copy(LPData, 0, @LW[0], 0, 128);
+    TBinaryPrimitives.CopyUInt64BigEndian(LPData, 0, @LW[0], 0, 128);
 
     for LRound := 16 to 79 do
     begin
       LT1 := LW[LRound - 2];
       LT2 := LW[LRound - 15];
-      LW[LRound] := (TBits.RotateRight64(LT1, 19) xor TBits.RotateRight64(LT1, 61)
+      LW[LRound] := (TBitOperations.RotateRight64(LT1, 19) xor TBitOperations.RotateRight64(LT1, 61)
         xor (LT1 shr 6)) + LW[LRound - 7] +
-        (TBits.RotateRight64(LT2, 1) xor TBits.RotateRight64(LT2, 8)
+        (TBitOperations.RotateRight64(LT2, 1) xor TBitOperations.RotateRight64(LT2, 8)
         xor (LT2 shr 7)) + LW[LRound - 16];
     end;
 
@@ -100,11 +100,11 @@ begin
 
     for LRound := 0 to 79 do
     begin
-      LT1 := LH + (TBits.RotateRight64(LE, 14) xor TBits.RotateRight64(LE, 18)
-        xor TBits.RotateRight64(LE, 41)) + ((LE and LF) xor (not LE and LG))
+      LT1 := LH + (TBitOperations.RotateRight64(LE, 14) xor TBitOperations.RotateRight64(LE, 18)
+        xor TBitOperations.RotateRight64(LE, 41)) + ((LE and LF) xor (not LE and LG))
         + K512[LRound] + LW[LRound];
-      LT2 := (TBits.RotateRight64(LA, 28) xor TBits.RotateRight64(LA, 34)
-        xor TBits.RotateRight64(LA, 39)) +
+      LT2 := (TBitOperations.RotateRight64(LA, 28) xor TBitOperations.RotateRight64(LA, 34)
+        xor TBitOperations.RotateRight64(LA, 39)) +
         ((LA and LB) xor (LA and LC) xor (LB and LC));
       LH := LG; LG := LF; LF := LE; LE := LD + LT1;
       LD := LC; LC := LB; LB := LA; LA := LT1 + LT2;

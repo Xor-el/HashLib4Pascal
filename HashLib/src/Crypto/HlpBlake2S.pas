@@ -5,6 +5,7 @@ unit HlpBlake2S;
 interface
 
 uses
+  HlpBinaryPrimitives,
   SysUtils,
   HlpHash,
   HlpHashCryptoNotBuildIn,
@@ -14,7 +15,6 @@ uses
   HlpBlake2SParams,
   HlpIHash,
   HlpIHashInfo,
-  HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -252,7 +252,7 @@ procedure TBlake2S.Compress(ABlock: PByte; AStart: Int32);
 var
   LCounterFlags: array [0 .. 3] of UInt32;
 begin
-  TConverters.le32_copy(ABlock, AStart, @(FM[0]), 0, BlockSize);
+  TBinaryPrimitives.CopyUInt32LittleEndian(ABlock, AStart, @(FM[0]), 0, BlockSize);
   LCounterFlags[0] := FCounter0;
   LCounterFlags[1] := FCounter1;
   LCounterFlags[2] := FFinalizationFlag0;
@@ -300,7 +300,7 @@ end;
 function TBlake2S.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, HashSize);
-  TConverters.le32_copy(PCardinal(FState), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -679,7 +679,7 @@ begin
   begin
     // Get root digest
     System.SetLength(FRootHashDigest, Blake2SHashSize);
-    TConverters.le32_copy(PCardinal(FState), 0, PByte(FRootHashDigest), 0,
+    TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FState), 0, PByte(FRootHashDigest), 0,
       System.Length(FRootHashDigest));
   end;
 

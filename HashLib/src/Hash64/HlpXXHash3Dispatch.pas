@@ -22,7 +22,7 @@ var
 implementation
 
 uses
-  HlpConverters,
+  HlpBinaryPrimitives,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -49,8 +49,8 @@ begin
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
-    LDataVal := TConverters.ReadBytesAsUInt64LE(LPInput, I * 8);
-    LDataKey := LDataVal xor TConverters.ReadBytesAsUInt64LE(LPSecret, I * 8);
+    LDataVal := TBinaryPrimitives.ReadUInt64LittleEndian(LPInput, I * 8);
+    LDataKey := LDataVal xor TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
     PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ :=
       PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ + LDataVal;
     PUInt64(PByte(LPAcc) + I * 8)^ :=
@@ -70,7 +70,7 @@ begin
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
-    LKey64 := TConverters.ReadBytesAsUInt64LE(LPSecret, I * 8);
+    LKey64 := TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
     LAcc64 := PUInt64(PByte(LPAcc) + I * 8)^;
     LAcc64 := LAcc64 xor (LAcc64 shr 47);
     LAcc64 := LAcc64 xor LKey64;
@@ -90,9 +90,9 @@ begin
   for I := 0 to (192 div 16) - 1 do
   begin
     PUInt64(LPDst + 16 * I)^ :=
-      TConverters.ReadBytesAsUInt64LE(LPSrc, 16 * I) + ASeed;
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I) + ASeed;
     PUInt64(LPDst + 16 * I + 8)^ :=
-      TConverters.ReadBytesAsUInt64LE(LPSrc, 16 * I + 8) - ASeed;
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I + 8) - ASeed;
   end;
 end;
 

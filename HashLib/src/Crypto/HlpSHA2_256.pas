@@ -5,10 +5,10 @@ unit HlpSHA2_256;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpIHash,
-  HlpSHA2_256Base,
-  HlpConverters;
+  HlpSHA2_256Base;
 
 type
   TSHA2_256 = class sealed(TSHA2_256Base)
@@ -47,7 +47,7 @@ end;
 function TSHA2_256.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 8 * System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(FState), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32BigEndian(PCardinal(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 

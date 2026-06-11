@@ -13,7 +13,7 @@ var
 implementation
 
 uses
-  HlpBits,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -33,19 +33,19 @@ var
   begin
     LProd := UInt64(UInt32(LZ[AA])) * UInt64(UInt32(LZ[AB]));
     LZ[AA] := LZ[AA] + LZ[AB] + (2 * LProd);
-    LZ[AD] := TBits.RotateRight64(LZ[AD] xor LZ[AA], 32);
+    LZ[AD] := TBitOperations.RotateRight64(LZ[AD] xor LZ[AA], 32);
 
     LProd := UInt64(UInt32(LZ[AC])) * UInt64(UInt32(LZ[AD]));
     LZ[AC] := LZ[AC] + LZ[AD] + (2 * LProd);
-    LZ[AB] := TBits.RotateRight64(LZ[AB] xor LZ[AC], 24);
+    LZ[AB] := TBitOperations.RotateRight64(LZ[AB] xor LZ[AC], 24);
 
     LProd := UInt64(UInt32(LZ[AA])) * UInt64(UInt32(LZ[AB]));
     LZ[AA] := LZ[AA] + LZ[AB] + (2 * LProd);
-    LZ[AD] := TBits.RotateRight64(LZ[AD] xor LZ[AA], 16);
+    LZ[AD] := TBitOperations.RotateRight64(LZ[AD] xor LZ[AA], 16);
 
     LProd := UInt64(UInt32(LZ[AC])) * UInt64(UInt32(LZ[AD]));
     LZ[AC] := LZ[AC] + LZ[AD] + (2 * LProd);
-    LZ[AB] := TBits.RotateRight64(LZ[AB] xor LZ[AC], 63);
+    LZ[AB] := TBitOperations.RotateRight64(LZ[AB] xor LZ[AC], 63);
   end;
 
   procedure RoundFunction(AV0, AV1, AV2, AV3, AV4, AV5, AV6, AV7,

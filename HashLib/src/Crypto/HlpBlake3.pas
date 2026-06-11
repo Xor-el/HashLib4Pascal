@@ -5,6 +5,7 @@ unit HlpBlake3;
 interface
 
 uses
+  HlpBinaryPrimitives,
   Math,
   SysUtils,
   HlpHash,
@@ -13,7 +14,6 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpHashSize,
-  HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -342,7 +342,7 @@ begin
   Result := N.Clone();
   // pad the remaining space in the block with zeros
   TArrayUtils.FillMemory(@(Block[BlockLen]), (Int64(System.Length(Block)) - BlockLen) * System.SizeOf(Byte), 0);
-  TConverters.le32_copy(@(Block[0]), 0, @(Result.Block[0]), 0, BlockSizeInBytes);
+  TBinaryPrimitives.CopyUInt32LittleEndian(@(Block[0]), 0, @(Result.Block[0]), 0, BlockSizeInBytes);
   Result.BlockLen := UInt32(BlockLen);
   Result.Flags := Result.Flags or FlagChunkEnd;
 end;
@@ -365,7 +365,7 @@ begin
     if BlockLen = BlockSizeInBytes then
     begin
       // copy the chunk block (bytes) into the node block and chain it.
-      TConverters.le32_copy(LBytePtr, 0, LCardinalPtr, 0, BlockSizeInBytes);
+      TBinaryPrimitives.CopyUInt32LittleEndian(LBytePtr, 0, LCardinalPtr, 0, BlockSizeInBytes);
       N.ChainingValue(LCVPtr);
       // clear the start flag for all but the first block
       N.Flags := N.Flags and (N.Flags xor FlagChunkStart);
@@ -434,7 +434,7 @@ begin
     begin
       N.Counter := Offset div UInt64(BlockSizeInBytes);
       N.Compress(LPtrCardinal);
-      TConverters.le32_copy(LPtrCardinal, 0, LPtrByte, 0, BlockSizeInBytes);
+      TBinaryPrimitives.CopyUInt32LittleEndian(LPtrCardinal, 0, LPtrByte, 0, BlockSizeInBytes);
     end;
 
     LBlockOffset := Offset and (BlockSizeInBytes - 1);
@@ -539,7 +539,7 @@ begin
       raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLengthInBytes, LKeyLength]);
     end;
-    TConverters.le32_copy(PByte(AKey), 0, @LKeyWords[0], 0, LKeyLength);
+    TBinaryPrimitives.CopyUInt32LittleEndian(PByte(AKey), 0, @LKeyWords[0], 0, LKeyLength);
     CreateInternal(AHashSize, @LKeyWords[0], FlagKeyedHash);
   end;
 end;
@@ -723,7 +723,7 @@ begin
   // construct the derivation Hasher and get the DerivationIV
   LDerivationIV := (TBlake3.CreateInternal(derivationIVLen, @LIVWords[0],
     FlagDeriveKeyContext) as IHash).ComputeBytes(ACtx).GetBytes();
-  TConverters.le32_copy(PByte(LDerivationIV), 0, @LIVWords[0], 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PByte(LDerivationIV), 0, @LIVWords[0], 0,
     KeyLengthInBytes);
 
   // derive the SubKey

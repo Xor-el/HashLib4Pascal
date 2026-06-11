@@ -5,11 +5,11 @@ unit HlpBlake2SParams;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpIBlake2SParams,
   HlpHashSize,
   HlpArrayUtils,
-  HlpHashLibTypes,
-  HlpConverters;
+  HlpHashLibTypes;
 
 resourcestring
   SInvalidHashSize =
@@ -549,7 +549,7 @@ begin
   begin
     LBuffer[2] := ATreeConfig.FanOut;
     LBuffer[3] := ATreeConfig.MaxDepth;
-    TConverters.ReadUInt32AsBytesLE(ATreeConfig.LeafSize, LBuffer, 4);
+    TBinaryPrimitives.WriteUInt32LittleEndian(LBuffer, 4, ATreeConfig.LeafSize);
     LBuffer[8] := Byte(ATreeConfig.NodeOffset);
     LBuffer[9] := Byte(ATreeConfig.NodeOffset shr 8);
     LBuffer[10] := Byte(ATreeConfig.NodeOffset shr 16);
@@ -572,7 +572,7 @@ begin
   end;
 
   System.SetLength(Result, 8);
-  TConverters.le32_copy(PByte(LBuffer), 0, PCardinal(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PByte(LBuffer), 0, PCardinal(Result), 0,
     System.Length(LBuffer) * System.SizeOf(Byte));
 end;
 

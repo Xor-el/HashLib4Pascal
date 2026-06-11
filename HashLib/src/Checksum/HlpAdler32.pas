@@ -5,13 +5,13 @@ unit HlpAdler32;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpIHashInfo,
   HlpHash,
   HlpIHash,
   HlpHashResult,
-  HlpIHashResult,
-  HlpConverters;
+  HlpIHashResult;
 
 type
   TAdler32 = class sealed(THash, IChecksum, IHash32, ITransformBlock)
@@ -81,7 +81,7 @@ var
   LBufferBytes: THashLibByteArray;
 begin
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt32AsBytesBE(UInt32((FSumB shl 16) or FSumA), LBufferBytes, 0);
+  TBinaryPrimitives.WriteUInt32BigEndian(LBufferBytes, 0, UInt32((FSumB shl 16) or FSumA));
 
   Result := THashResult.Create(LBufferBytes);
   Initialize();

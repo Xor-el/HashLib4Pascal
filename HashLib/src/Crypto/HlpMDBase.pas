@@ -5,10 +5,10 @@ unit HlpMDBase;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpIHashInfo,
-  HlpHashCryptoNotBuildIn,
-  HlpConverters;
+  HlpHashCryptoNotBuildIn;
 
 type
   TMDBase = class abstract(TBlockHash, ICryptoNotBuildIn)
@@ -67,7 +67,7 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -77,7 +77,7 @@ end;
 function TMDBase.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, System.Length(FState) * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FState), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 

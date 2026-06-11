@@ -5,14 +5,14 @@ unit HlpXXHash128;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,
-  HlpConverters,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits,
+  HlpBitOperations,
   HlpXXHash3;
 
 resourcestring
@@ -134,7 +134,8 @@ end;
 
 function TXXHash128.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt64AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt64));
+  TBinaryPrimitives.WriteUInt64LittleEndian(Result, 0, FKey);
 end;
 
 function TXXHash128.GetKeyLength: Int32;
@@ -155,7 +156,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -181,11 +182,11 @@ class procedure TXXHash128.XXH128_mix32B(var ALow, AHigh: UInt64;
   AInput1, AInput2, ASecret: PByte; ASeed: UInt64);
 begin
   ALow := ALow + TXXH3Core.XXH3_mix16B(AInput1, ASecret, ASeed);
-  ALow := ALow xor (TConverters.ReadBytesAsUInt64LE(AInput2, 0) +
-    TConverters.ReadBytesAsUInt64LE(AInput2, 8));
+  ALow := ALow xor (TBinaryPrimitives.ReadUInt64LittleEndian(AInput2, 0) +
+    TBinaryPrimitives.ReadUInt64LittleEndian(AInput2, 8));
   AHigh := AHigh + TXXH3Core.XXH3_mix16B(AInput2, ASecret + 16, ASeed);
-  AHigh := AHigh xor (TConverters.ReadBytesAsUInt64LE(AInput1, 0) +
-    TConverters.ReadBytesAsUInt64LE(AInput1, 8));
+  AHigh := AHigh xor (TBinaryPrimitives.ReadUInt64LittleEndian(AInput1, 0) +
+    TBinaryPrimitives.ReadUInt64LittleEndian(AInput1, 8));
 end;
 
 class procedure TXXHash128.XXH3_len_1to3_128b(AInput, ASecret: PByte;
@@ -196,17 +197,17 @@ var
   LBitflipL, LBitflipH: UInt64;
 begin
   LC1 := AInput[0];
-  LC2 := AInput[TBits.Asr32(ALen, 1)];
+  LC2 := AInput[TBitOperations.Asr32(ALen, 1)];
   LC3 := AInput[ALen - 1];
 
   LCombinedL := (UInt32(LC1) shl 16) or (UInt32(LC2) shl 24) or
     (UInt32(LC3) shl 0) or (UInt32(ALen) shl 8);
-  LCombinedH := TBits.RotateLeft32(TBits.ReverseBytesUInt32(LCombinedL), 13);
+  LCombinedH := TBitOperations.RotateLeft32(TBitOperations.ReverseBytesUInt32(LCombinedL), 13);
 
-  LBitflipL := UInt64(TConverters.ReadBytesAsUInt32LE(ASecret, 0) xor
-    TConverters.ReadBytesAsUInt32LE(ASecret, 4)) + ASeed;
-  LBitflipH := UInt64(TConverters.ReadBytesAsUInt32LE(ASecret, 8) xor
-    TConverters.ReadBytesAsUInt32LE(ASecret, 12)) - ASeed;
+  LBitflipL := UInt64(TBinaryPrimitives.ReadUInt32LittleEndian(ASecret, 0) xor
+    TBinaryPrimitives.ReadUInt32LittleEndian(ASecret, 4)) + ASeed;
+  LBitflipH := UInt64(TBinaryPrimitives.ReadUInt32LittleEndian(ASecret, 8) xor
+    TBinaryPrimitives.ReadUInt32LittleEndian(ASecret, 12)) - ASeed;
 
   ALow := TXXH3Core.XXH64_avalanche(UInt64(LCombinedL) xor LBitflipL);
   AHigh := TXXH3Core.XXH64_avalanche(UInt64(LCombinedH) xor LBitflipH);
@@ -219,13 +220,13 @@ var
   LInput64, LBitflip, LKeyed: UInt64;
   LMLow, LMHigh: UInt64;
 begin
-  ASeed := ASeed xor (UInt64(TBits.ReverseBytesUInt32(UInt32(ASeed))) shl 32);
+  ASeed := ASeed xor (UInt64(TBitOperations.ReverseBytesUInt32(UInt32(ASeed))) shl 32);
 
-  LInputLo := TConverters.ReadBytesAsUInt32LE(AInput, 0);
-  LInputHi := TConverters.ReadBytesAsUInt32LE(AInput, ALen - 4);
+  LInputLo := TBinaryPrimitives.ReadUInt32LittleEndian(AInput, 0);
+  LInputHi := TBinaryPrimitives.ReadUInt32LittleEndian(AInput, ALen - 4);
   LInput64 := UInt64(LInputLo) + (UInt64(LInputHi) shl 32);
-  LBitflip := (TConverters.ReadBytesAsUInt64LE(ASecret, 16) xor
-    TConverters.ReadBytesAsUInt64LE(ASecret, 24)) + ASeed;
+  LBitflip := (TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 16) xor
+    TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 24)) + ASeed;
   LKeyed := LInput64 xor LBitflip;
 
   TXXH3Core.XXH_mult64to128(LKeyed, TXXH3Core.XXH_PRIME64_1 +
@@ -249,12 +250,12 @@ var
   LBitflipL, LBitflipH, LInputLo, LInputHi: UInt64;
   LMLow, LMHigh, LHLow, LHHigh: UInt64;
 begin
-  LBitflipL := (TConverters.ReadBytesAsUInt64LE(ASecret, 32) xor
-    TConverters.ReadBytesAsUInt64LE(ASecret, 40)) - ASeed;
-  LBitflipH := (TConverters.ReadBytesAsUInt64LE(ASecret, 48) xor
-    TConverters.ReadBytesAsUInt64LE(ASecret, 56)) + ASeed;
-  LInputLo := TConverters.ReadBytesAsUInt64LE(AInput, 0);
-  LInputHi := TConverters.ReadBytesAsUInt64LE(AInput, ALen - 8);
+  LBitflipL := (TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 32) xor
+    TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 40)) - ASeed;
+  LBitflipH := (TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 48) xor
+    TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 56)) + ASeed;
+  LInputLo := TBinaryPrimitives.ReadUInt64LittleEndian(AInput, 0);
+  LInputHi := TBinaryPrimitives.ReadUInt64LittleEndian(AInput, ALen - 8);
 
   TXXH3Core.XXH_mult64to128(LInputLo xor LInputHi xor LBitflipL,
     TXXH3Core.XXH_PRIME64_1, LMLow, LMHigh);
@@ -265,7 +266,7 @@ begin
   LMHigh := LMHigh + LInputHi +
     TXXH3Core.XXH_mult32to64(UInt32(LInputHi),
     TXXH3Core.XXH_PRIME32_2 - 1);
-  LMLow := LMLow xor TBits.ReverseBytesUInt64(LMHigh);
+  LMLow := LMLow xor TBitOperations.ReverseBytesUInt64(LMHigh);
 
   TXXH3Core.XXH_mult64to128(LMLow, TXXH3Core.XXH_PRIME64_2, LHLow, LHHigh);
   LHHigh := LHHigh + LMHigh * TXXH3Core.XXH_PRIME64_2;
@@ -287,10 +288,10 @@ begin
     XXH3_len_1to3_128b(AInput, ASecret, ALen, ASeed, ALow, AHigh)
   else
   begin
-    LBitflipL := TConverters.ReadBytesAsUInt64LE(ASecret, 64) xor
-      TConverters.ReadBytesAsUInt64LE(ASecret, 72);
-    LBitflipH := TConverters.ReadBytesAsUInt64LE(ASecret, 80) xor
-      TConverters.ReadBytesAsUInt64LE(ASecret, 88);
+    LBitflipL := TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 64) xor
+      TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 72);
+    LBitflipH := TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 80) xor
+      TBinaryPrimitives.ReadUInt64LittleEndian(ASecret, 88);
     ALow := TXXH3Core.XXH64_avalanche(ASeed xor LBitflipL);
     AHigh := TXXH3Core.XXH64_avalanche(ASeed xor LBitflipH);
   end;
@@ -533,8 +534,8 @@ begin
   end;
 
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt64AsBytesBE(FHashHigh, LBufferBytes, 0);
-  TConverters.ReadUInt64AsBytesBE(FHashLow, LBufferBytes, 8);
+  TBinaryPrimitives.WriteUInt64BigEndian(LBufferBytes, 0, FHashHigh);
+  TBinaryPrimitives.WriteUInt64BigEndian(LBufferBytes, 8, FHashLow);
 
   Result := THashResult.Create(LBufferBytes);
   Initialize();

@@ -351,12 +351,12 @@
         <UnitName Value="HlpConverters"/>
       </Item80>
       <Item81>
-        <Filename Value="..\..\Utils\HlpBitConverter.pas"/>
-        <UnitName Value="HlpBitConverter"/>
+        <Filename Value="..\..\Utils\HlpBitOperations.pas"/>
+        <UnitName Value="HlpBitOperations"/>
       </Item81>
       <Item82>
-        <Filename Value="..\..\Utils\HlpBits.pas"/>
-        <UnitName Value="HlpBits"/>
+        <Filename Value="..\..\Utils\HlpBinaryPrimitives.pas"/>
+        <UnitName Value="HlpBinaryPrimitives"/>
       </Item82>
       <Item83>
         <Filename Value="..\..\Utils\HlpHashLibTypes.pas"/>

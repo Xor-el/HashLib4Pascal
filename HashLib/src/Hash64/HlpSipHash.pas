@@ -5,14 +5,14 @@ unit HlpSipHash;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHashInfo,
   HlpHash,
   HlpIHash,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits;
+  HlpBitOperations;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -124,18 +124,18 @@ begin
 
   LV0 := LV0 + LV1;
   LV2 := LV2 + LV3;
-  LV1 := TBits.RotateLeft64(LV1, 13);
-  LV3 := TBits.RotateLeft64(LV3, 16);
+  LV1 := TBitOperations.RotateLeft64(LV1, 13);
+  LV3 := TBitOperations.RotateLeft64(LV3, 16);
   LV1 := LV1 xor LV0;
   LV3 := LV3 xor LV2;
-  LV0 := TBits.RotateLeft64(LV0, 32);
+  LV0 := TBitOperations.RotateLeft64(LV0, 32);
   LV2 := LV2 + LV1;
   LV0 := LV0 + LV3;
-  LV1 := TBits.RotateLeft64(LV1, 17);
-  LV3 := TBits.RotateLeft64(LV3, 21);
+  LV1 := TBitOperations.RotateLeft64(LV1, 17);
+  LV3 := TBitOperations.RotateLeft64(LV3, 21);
   LV1 := LV1 xor LV2;
   LV3 := LV3 xor LV0;
-  LV2 := TBits.RotateLeft64(LV2, 32);
+  LV2 := TBitOperations.RotateLeft64(LV2, 32);
 
   FV0 := LV0;
   FV1 := LV1;
@@ -237,7 +237,7 @@ begin
   if FIdx >= 8 then
   begin
     LPtrBuffer := PByte(FBuffer);
-    LBlock := TConverters.ReadBytesAsUInt64LE(LPtrBuffer, 0);
+    LBlock := TBinaryPrimitives.ReadUInt64LittleEndian(LPtrBuffer, 0);
     ProcessBlock(LBlock);
     FIdx := 0;
   end;
@@ -257,8 +257,8 @@ var
 begin
   System.SetLength(LKey, KeyLength);
 
-  TConverters.ReadUInt64AsBytesLE(FKey0, LKey, 0);
-  TConverters.ReadUInt64AsBytesLE(FKey1, LKey, 8);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LKey, 0, FKey0);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LKey, 8, FKey1);
 
   Result := LKey;
 end;
@@ -308,8 +308,8 @@ begin
         [KeyLength]);
     end;
 
-    FKey0 := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
-    FKey1 := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 8);
+    FKey0 := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(AValue), 0);
+    FKey1 := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(AValue), 8);
   end;
 end;
 
@@ -349,7 +349,7 @@ begin
     if (FIdx = 8) then
     begin
       LPtrBuffer := PByte(FBuffer);
-      LBlock := TConverters.ReadBytesAsUInt64LE(LPtrBuffer, 0);
+      LBlock := TBinaryPrimitives.ReadUInt64LittleEndian(LPtrBuffer, 0);
       ProcessBlock(LBlock);
       FIdx := 0;
     end;
@@ -365,7 +365,7 @@ begin
   LPtrDataUInt64 := PUInt64(LPtrData + AIndex);
   while LIdx < LBlockCount do
   begin
-    LBlock := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    LBlock := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(LPtrDataUInt64 + LIdx), 0);
     ProcessBlock(LBlock);
     System.Inc(LIdx);
   end;
@@ -411,12 +411,12 @@ begin
   Finish();
 
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt64AsBytesLE(FPartA, LBufferBytes, 0);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LBufferBytes, 0, FPartA);
 
   case HashSize of
     16:
       begin
-        TConverters.ReadUInt64AsBytesLE(FPartB, LBufferBytes, 8);
+        TBinaryPrimitives.WriteUInt64LittleEndian(LBufferBytes, 8, FPartB);
       end;
   end;
 

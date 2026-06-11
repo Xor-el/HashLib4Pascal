@@ -5,9 +5,9 @@ unit HlpGrindahl512;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
-  HlpConverters,
+  HlpBitOperations,
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
@@ -187,7 +187,7 @@ begin
   LJdx := 0;
   while LJdx < 256 do
   begin
-    Result[LJdx] := TBits.RotateRight64(MasterTable[LJdx], AI * 8);
+    Result[LJdx] := TBitOperations.RotateRight64(MasterTable[LJdx], AI * 8);
     System.Inc(LJdx);
   end;
 end;
@@ -225,11 +225,11 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesBE(LMessageLength, LPad, LPaddingSize - 8);
+  TBinaryPrimitives.WriteUInt64BigEndian(LPad, LPaddingSize - 8, LMessageLength);
 
   TransformBytes(LPad, 0, LPaddingSize - 8);
 
-  FState[0] := TConverters.ReadBytesAsUInt64BE(PByte(LPad), LPaddingSize - 8);
+  FState[0] := TBinaryPrimitives.ReadUInt64BigEndian(PByte(LPad), LPaddingSize - 8);
 
   InjectMsg(True);
 
@@ -245,7 +245,7 @@ end;
 function TGrindahl512.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 8 * System.SizeOf(UInt64));
-  TConverters.be64_copy(PUInt64(FState), 5 * System.SizeOf(UInt64),
+  TBinaryPrimitives.CopyUInt64BigEndian(PUInt64(FState), 5 * System.SizeOf(UInt64),
     PByte(Result), 0, System.Length(Result));
 end;
 
@@ -372,7 +372,7 @@ end;
 procedure TGrindahl512.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 begin
-  FState[0] := TConverters.ReadBytesAsUInt64BE(AData, AIndex);
+  FState[0] := TBinaryPrimitives.ReadUInt64BigEndian(AData, AIndex);
   InjectMsg(False);
 end;
 

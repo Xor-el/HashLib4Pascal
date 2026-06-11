@@ -5,8 +5,8 @@ unit HlpHAS160;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -85,7 +85,7 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -95,7 +95,7 @@ end;
 function THAS160.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 5 * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FHash), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -122,7 +122,7 @@ begin
   LRegD := FHash[3];
   LRegE := FHash[4];
 
-  TConverters.le32_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LData[0]), 0, ADataLength);
 
   LData[16] := LData[0] xor LData[1] xor LData[2] xor LData[3];
   LData[17] := LData[4] xor LData[5] xor LData[6] xor LData[7];

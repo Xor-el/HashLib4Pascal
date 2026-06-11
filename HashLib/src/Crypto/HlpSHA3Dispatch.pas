@@ -16,8 +16,8 @@ var
 implementation
 
 uses
-  HlpBits,
-  HlpConverters,
+  HlpBinaryPrimitives,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -98,22 +98,22 @@ begin
     BCo := Abo xor Ago xor Ako xor Amo xor Aso;
     BCu := Abu xor Agu xor Aku xor Amu xor Asu;
 
-    LDa := BCu xor TBits.RotateLeft64(BCe, 1);
-    LDe := BCa xor TBits.RotateLeft64(BCi, 1);
-    LDi := BCe xor TBits.RotateLeft64(BCo, 1);
-    LDo := BCi xor TBits.RotateLeft64(BCu, 1);
-    LDu := BCo xor TBits.RotateLeft64(BCa, 1);
+    LDa := BCu xor TBitOperations.RotateLeft64(BCe, 1);
+    LDe := BCa xor TBitOperations.RotateLeft64(BCi, 1);
+    LDi := BCe xor TBitOperations.RotateLeft64(BCo, 1);
+    LDo := BCi xor TBitOperations.RotateLeft64(BCu, 1);
+    LDu := BCo xor TBitOperations.RotateLeft64(BCa, 1);
 
     Aba := Aba xor LDa;
     BCa := Aba;
     Age := Age xor LDe;
-    BCe := TBits.RotateLeft64(Age, 44);
+    BCe := TBitOperations.RotateLeft64(Age, 44);
     Aki := Aki xor LDi;
-    BCi := TBits.RotateLeft64(Aki, 43);
+    BCi := TBitOperations.RotateLeft64(Aki, 43);
     Amo := Amo xor LDo;
-    BCo := TBits.RotateLeft64(Amo, 21);
+    BCo := TBitOperations.RotateLeft64(Amo, 21);
     Asu := Asu xor LDu;
-    BCu := TBits.RotateLeft64(Asu, 14);
+    BCu := TBitOperations.RotateLeft64(Asu, 14);
     Eba := BCa xor ((not BCe) and BCi);
     Eba := Eba xor UInt64(RC[LRound]);
     Ebe := BCe xor ((not BCi) and BCo);
@@ -122,15 +122,15 @@ begin
     Ebu := BCu xor ((not BCa) and BCe);
 
     Abo := Abo xor LDo;
-    BCa := TBits.RotateLeft64(Abo, 28);
+    BCa := TBitOperations.RotateLeft64(Abo, 28);
     Agu := Agu xor LDu;
-    BCe := TBits.RotateLeft64(Agu, 20);
+    BCe := TBitOperations.RotateLeft64(Agu, 20);
     Aka := Aka xor LDa;
-    BCi := TBits.RotateLeft64(Aka, 3);
+    BCi := TBitOperations.RotateLeft64(Aka, 3);
     Ame := Ame xor LDe;
-    BCo := TBits.RotateLeft64(Ame, 45);
+    BCo := TBitOperations.RotateLeft64(Ame, 45);
     Asi := Asi xor LDi;
-    BCu := TBits.RotateLeft64(Asi, 61);
+    BCu := TBitOperations.RotateLeft64(Asi, 61);
     Ega := BCa xor ((not BCe) and BCi);
     Ege := BCe xor ((not BCi) and BCo);
     Egi := BCi xor ((not BCo) and BCu);
@@ -138,15 +138,15 @@ begin
     Egu := BCu xor ((not BCa) and BCe);
 
     Abe := Abe xor LDe;
-    BCa := TBits.RotateLeft64(Abe, 1);
+    BCa := TBitOperations.RotateLeft64(Abe, 1);
     Agi := Agi xor LDi;
-    BCe := TBits.RotateLeft64(Agi, 6);
+    BCe := TBitOperations.RotateLeft64(Agi, 6);
     Ako := Ako xor LDo;
-    BCi := TBits.RotateLeft64(Ako, 25);
+    BCi := TBitOperations.RotateLeft64(Ako, 25);
     Amu := Amu xor LDu;
-    BCo := TBits.RotateLeft64(Amu, 8);
+    BCo := TBitOperations.RotateLeft64(Amu, 8);
     Asa := Asa xor LDa;
-    BCu := TBits.RotateLeft64(Asa, 18);
+    BCu := TBitOperations.RotateLeft64(Asa, 18);
     Eka := BCa xor ((not BCe) and BCi);
     Eke := BCe xor ((not BCi) and BCo);
     Eki := BCi xor ((not BCo) and BCu);
@@ -154,15 +154,15 @@ begin
     Eku := BCu xor ((not BCa) and BCe);
 
     Abu := Abu xor LDu;
-    BCa := TBits.RotateLeft64(Abu, 27);
+    BCa := TBitOperations.RotateLeft64(Abu, 27);
     Aga := Aga xor LDa;
-    BCe := TBits.RotateLeft64(Aga, 36);
+    BCe := TBitOperations.RotateLeft64(Aga, 36);
     Ake := Ake xor LDe;
-    BCi := TBits.RotateLeft64(Ake, 10);
+    BCi := TBitOperations.RotateLeft64(Ake, 10);
     Ami := Ami xor LDi;
-    BCo := TBits.RotateLeft64(Ami, 15);
+    BCo := TBitOperations.RotateLeft64(Ami, 15);
     Aso := Aso xor LDo;
-    BCu := TBits.RotateLeft64(Aso, 56);
+    BCu := TBitOperations.RotateLeft64(Aso, 56);
     Ema := BCa xor ((not BCe) and BCi);
     Eme := BCe xor ((not BCi) and BCo);
     Emi := BCi xor ((not BCo) and BCu);
@@ -170,15 +170,15 @@ begin
     Emu := BCu xor ((not BCa) and BCe);
 
     Abi := Abi xor LDi;
-    BCa := TBits.RotateLeft64(Abi, 62);
+    BCa := TBitOperations.RotateLeft64(Abi, 62);
     Ago := Ago xor LDo;
-    BCe := TBits.RotateLeft64(Ago, 55);
+    BCe := TBitOperations.RotateLeft64(Ago, 55);
     Aku := Aku xor LDu;
-    BCi := TBits.RotateLeft64(Aku, 39);
+    BCi := TBitOperations.RotateLeft64(Aku, 39);
     Ama := Ama xor LDa;
-    BCo := TBits.RotateLeft64(Ama, 41);
+    BCo := TBitOperations.RotateLeft64(Ama, 41);
     Ase := Ase xor LDe;
-    BCu := TBits.RotateLeft64(Ase, 2);
+    BCu := TBitOperations.RotateLeft64(Ase, 2);
     Esa := BCa xor ((not BCe) and BCi);
     Ese := BCe xor ((not BCi) and BCo);
     Esi := BCi xor ((not BCo) and BCu);
@@ -191,22 +191,22 @@ begin
     BCo := Ebo xor Ego xor Eko xor Emo xor Eso;
     BCu := Ebu xor Egu xor Eku xor Emu xor Esu;
 
-    LDa := BCu xor TBits.RotateLeft64(BCe, 1);
-    LDe := BCa xor TBits.RotateLeft64(BCi, 1);
-    LDi := BCe xor TBits.RotateLeft64(BCo, 1);
-    LDo := BCi xor TBits.RotateLeft64(BCu, 1);
-    LDu := BCo xor TBits.RotateLeft64(BCa, 1);
+    LDa := BCu xor TBitOperations.RotateLeft64(BCe, 1);
+    LDe := BCa xor TBitOperations.RotateLeft64(BCi, 1);
+    LDi := BCe xor TBitOperations.RotateLeft64(BCo, 1);
+    LDo := BCi xor TBitOperations.RotateLeft64(BCu, 1);
+    LDu := BCo xor TBitOperations.RotateLeft64(BCa, 1);
 
     Eba := Eba xor LDa;
     BCa := Eba;
     Ege := Ege xor LDe;
-    BCe := TBits.RotateLeft64(Ege, 44);
+    BCe := TBitOperations.RotateLeft64(Ege, 44);
     Eki := Eki xor LDi;
-    BCi := TBits.RotateLeft64(Eki, 43);
+    BCi := TBitOperations.RotateLeft64(Eki, 43);
     Emo := Emo xor LDo;
-    BCo := TBits.RotateLeft64(Emo, 21);
+    BCo := TBitOperations.RotateLeft64(Emo, 21);
     Esu := Esu xor LDu;
-    BCu := TBits.RotateLeft64(Esu, 14);
+    BCu := TBitOperations.RotateLeft64(Esu, 14);
     Aba := BCa xor ((not BCe) and BCi);
     Aba := Aba xor UInt64(RC[LRound + 1]);
     Abe := BCe xor ((not BCi) and BCo);
@@ -215,15 +215,15 @@ begin
     Abu := BCu xor ((not BCa) and BCe);
 
     Ebo := Ebo xor LDo;
-    BCa := TBits.RotateLeft64(Ebo, 28);
+    BCa := TBitOperations.RotateLeft64(Ebo, 28);
     Egu := Egu xor LDu;
-    BCe := TBits.RotateLeft64(Egu, 20);
+    BCe := TBitOperations.RotateLeft64(Egu, 20);
     Eka := Eka xor LDa;
-    BCi := TBits.RotateLeft64(Eka, 3);
+    BCi := TBitOperations.RotateLeft64(Eka, 3);
     Eme := Eme xor LDe;
-    BCo := TBits.RotateLeft64(Eme, 45);
+    BCo := TBitOperations.RotateLeft64(Eme, 45);
     Esi := Esi xor LDi;
-    BCu := TBits.RotateLeft64(Esi, 61);
+    BCu := TBitOperations.RotateLeft64(Esi, 61);
     Aga := BCa xor ((not BCe) and BCi);
     Age := BCe xor ((not BCi) and BCo);
     Agi := BCi xor ((not BCo) and BCu);
@@ -231,15 +231,15 @@ begin
     Agu := BCu xor ((not BCa) and BCe);
 
     Ebe := Ebe xor LDe;
-    BCa := TBits.RotateLeft64(Ebe, 1);
+    BCa := TBitOperations.RotateLeft64(Ebe, 1);
     Egi := Egi xor LDi;
-    BCe := TBits.RotateLeft64(Egi, 6);
+    BCe := TBitOperations.RotateLeft64(Egi, 6);
     Eko := Eko xor LDo;
-    BCi := TBits.RotateLeft64(Eko, 25);
+    BCi := TBitOperations.RotateLeft64(Eko, 25);
     Emu := Emu xor LDu;
-    BCo := TBits.RotateLeft64(Emu, 8);
+    BCo := TBitOperations.RotateLeft64(Emu, 8);
     Esa := Esa xor LDa;
-    BCu := TBits.RotateLeft64(Esa, 18);
+    BCu := TBitOperations.RotateLeft64(Esa, 18);
     Aka := BCa xor ((not BCe) and BCi);
     Ake := BCe xor ((not BCi) and BCo);
     Aki := BCi xor ((not BCo) and BCu);
@@ -247,15 +247,15 @@ begin
     Aku := BCu xor ((not BCa) and BCe);
 
     Ebu := Ebu xor LDu;
-    BCa := TBits.RotateLeft64(Ebu, 27);
+    BCa := TBitOperations.RotateLeft64(Ebu, 27);
     Ega := Ega xor LDa;
-    BCe := TBits.RotateLeft64(Ega, 36);
+    BCe := TBitOperations.RotateLeft64(Ega, 36);
     Eke := Eke xor LDe;
-    BCi := TBits.RotateLeft64(Eke, 10);
+    BCi := TBitOperations.RotateLeft64(Eke, 10);
     Emi := Emi xor LDi;
-    BCo := TBits.RotateLeft64(Emi, 15);
+    BCo := TBitOperations.RotateLeft64(Emi, 15);
     Eso := Eso xor LDo;
-    BCu := TBits.RotateLeft64(Eso, 56);
+    BCu := TBitOperations.RotateLeft64(Eso, 56);
     Ama := BCa xor ((not BCe) and BCi);
     Ame := BCe xor ((not BCi) and BCo);
     Ami := BCi xor ((not BCo) and BCu);
@@ -263,15 +263,15 @@ begin
     Amu := BCu xor ((not BCa) and BCe);
 
     Ebi := Ebi xor LDi;
-    BCa := TBits.RotateLeft64(Ebi, 62);
+    BCa := TBitOperations.RotateLeft64(Ebi, 62);
     Ego := Ego xor LDo;
-    BCe := TBits.RotateLeft64(Ego, 55);
+    BCe := TBitOperations.RotateLeft64(Ego, 55);
     Eku := Eku xor LDu;
-    BCi := TBits.RotateLeft64(Eku, 39);
+    BCi := TBitOperations.RotateLeft64(Eku, 39);
     Ema := Ema xor LDa;
-    BCo := TBits.RotateLeft64(Ema, 41);
+    BCo := TBitOperations.RotateLeft64(Ema, 41);
     Ese := Ese xor LDe;
-    BCu := TBits.RotateLeft64(Ese, 2);
+    BCu := TBitOperations.RotateLeft64(Ese, 2);
     Asa := BCa xor ((not BCe) and BCi);
     Ase := BCe xor ((not BCi) and BCo);
     Asi := BCi xor ((not BCo) and BCu);
@@ -320,36 +320,36 @@ begin
       xor LPState[23];
     LColU := LPState[04] xor LPState[09] xor LPState[14] xor LPState[19]
       xor LPState[24];
-    LDa := TBits.RotateLeft64(LColA, 1) xor LColO;
-    LDe := TBits.RotateLeft64(LColE, 1) xor LColU;
-    LDi := TBits.RotateLeft64(LColI, 1) xor LColA;
-    LDo := TBits.RotateLeft64(LColO, 1) xor LColE;
-    LDu := TBits.RotateLeft64(LColU, 1) xor LColI;
+    LDa := TBitOperations.RotateLeft64(LColA, 1) xor LColO;
+    LDe := TBitOperations.RotateLeft64(LColE, 1) xor LColU;
+    LDi := TBitOperations.RotateLeft64(LColI, 1) xor LColA;
+    LDo := TBitOperations.RotateLeft64(LColO, 1) xor LColE;
+    LDu := TBitOperations.RotateLeft64(LColU, 1) xor LColI;
     LTemp[00] := LPState[00] xor LDe;
-    LTemp[01] := TBits.RotateLeft64(LPState[06] xor LDi, 44);
-    LTemp[02] := TBits.RotateLeft64(LPState[12] xor LDo, 43);
-    LTemp[03] := TBits.RotateLeft64(LPState[18] xor LDu, 21);
-    LTemp[04] := TBits.RotateLeft64(LPState[24] xor LDa, 14);
-    LTemp[05] := TBits.RotateLeft64(LPState[03] xor LDu, 28);
-    LTemp[06] := TBits.RotateLeft64(LPState[09] xor LDa, 20);
-    LTemp[07] := TBits.RotateLeft64(LPState[10] xor LDe, 3);
-    LTemp[08] := TBits.RotateLeft64(LPState[16] xor LDi, 45);
-    LTemp[09] := TBits.RotateLeft64(LPState[22] xor LDo, 61);
-    LTemp[10] := TBits.RotateLeft64(LPState[01] xor LDi, 1);
-    LTemp[11] := TBits.RotateLeft64(LPState[07] xor LDo, 6);
-    LTemp[12] := TBits.RotateLeft64(LPState[13] xor LDu, 25);
-    LTemp[13] := TBits.RotateLeft64(LPState[19] xor LDa, 8);
-    LTemp[14] := TBits.RotateLeft64(LPState[20] xor LDe, 18);
-    LTemp[15] := TBits.RotateLeft64(LPState[04] xor LDa, 27);
-    LTemp[16] := TBits.RotateLeft64(LPState[05] xor LDe, 36);
-    LTemp[17] := TBits.RotateLeft64(LPState[11] xor LDi, 10);
-    LTemp[18] := TBits.RotateLeft64(LPState[17] xor LDo, 15);
-    LTemp[19] := TBits.RotateLeft64(LPState[23] xor LDu, 56);
-    LTemp[20] := TBits.RotateLeft64(LPState[02] xor LDo, 62);
-    LTemp[21] := TBits.RotateLeft64(LPState[08] xor LDu, 55);
-    LTemp[22] := TBits.RotateLeft64(LPState[14] xor LDa, 39);
-    LTemp[23] := TBits.RotateLeft64(LPState[15] xor LDe, 41);
-    LTemp[24] := TBits.RotateLeft64(LPState[21] xor LDi, 2);
+    LTemp[01] := TBitOperations.RotateLeft64(LPState[06] xor LDi, 44);
+    LTemp[02] := TBitOperations.RotateLeft64(LPState[12] xor LDo, 43);
+    LTemp[03] := TBitOperations.RotateLeft64(LPState[18] xor LDu, 21);
+    LTemp[04] := TBitOperations.RotateLeft64(LPState[24] xor LDa, 14);
+    LTemp[05] := TBitOperations.RotateLeft64(LPState[03] xor LDu, 28);
+    LTemp[06] := TBitOperations.RotateLeft64(LPState[09] xor LDa, 20);
+    LTemp[07] := TBitOperations.RotateLeft64(LPState[10] xor LDe, 3);
+    LTemp[08] := TBitOperations.RotateLeft64(LPState[16] xor LDi, 45);
+    LTemp[09] := TBitOperations.RotateLeft64(LPState[22] xor LDo, 61);
+    LTemp[10] := TBitOperations.RotateLeft64(LPState[01] xor LDi, 1);
+    LTemp[11] := TBitOperations.RotateLeft64(LPState[07] xor LDo, 6);
+    LTemp[12] := TBitOperations.RotateLeft64(LPState[13] xor LDu, 25);
+    LTemp[13] := TBitOperations.RotateLeft64(LPState[19] xor LDa, 8);
+    LTemp[14] := TBitOperations.RotateLeft64(LPState[20] xor LDe, 18);
+    LTemp[15] := TBitOperations.RotateLeft64(LPState[04] xor LDa, 27);
+    LTemp[16] := TBitOperations.RotateLeft64(LPState[05] xor LDe, 36);
+    LTemp[17] := TBitOperations.RotateLeft64(LPState[11] xor LDi, 10);
+    LTemp[18] := TBitOperations.RotateLeft64(LPState[17] xor LDo, 15);
+    LTemp[19] := TBitOperations.RotateLeft64(LPState[23] xor LDu, 56);
+    LTemp[20] := TBitOperations.RotateLeft64(LPState[02] xor LDo, 62);
+    LTemp[21] := TBitOperations.RotateLeft64(LPState[08] xor LDu, 55);
+    LTemp[22] := TBitOperations.RotateLeft64(LPState[14] xor LDa, 39);
+    LTemp[23] := TBitOperations.RotateLeft64(LPState[15] xor LDe, 41);
+    LTemp[24] := TBitOperations.RotateLeft64(LPState[21] xor LDi, 2);
     LPState[00] := LTemp[00] xor ((not LTemp[01]) and LTemp[02]);
     LPState[01] := LTemp[01] xor ((not LTemp[02]) and LTemp[03]);
     LPState[02] := LTemp[02] xor ((not LTemp[03]) and LTemp[04]);
@@ -397,7 +397,7 @@ begin
   LBlockSizeWords := ABlockSize shr 3;
   for I := 0 to ABlockCount - 1 do
   begin
-    TConverters.le64_copy(AData, 0, @LData[0], 0, ABlockSize);
+    TBinaryPrimitives.CopyUInt64LittleEndian(AData, 0, @LData[0], 0, ABlockSize);
     for J := 0 to LBlockSizeWords - 1 do
       LPState[J] := LPState[J] xor LData[J];
     KeccakF1600_Scalar(AState);

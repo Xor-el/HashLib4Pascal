@@ -5,14 +5,14 @@ unit HlpMurmurHash3_x64_128;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHashInfo,
   HlpHash,
   HlpIHash,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits;
+  HlpBitOperations;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -68,24 +68,24 @@ begin
   if FIdx >= 16 then
   begin
     LPtrBuffer := PByte(FBuffer);
-    LK1 := TConverters.ReadBytesAsUInt64LE(LPtrBuffer, 0);
-    LK2 := TConverters.ReadBytesAsUInt64LE(LPtrBuffer, 8);
+    LK1 := TBinaryPrimitives.ReadUInt64LittleEndian(LPtrBuffer, 0);
+    LK2 := TBinaryPrimitives.ReadUInt64LittleEndian(LPtrBuffer, 8);
 
     LK1 := LK1 * C1;
-    LK1 := TBits.RotateLeft64(LK1, 31);
+    LK1 := TBitOperations.RotateLeft64(LK1, 31);
     LK1 := LK1 * C2;
     FH1 := FH1 xor LK1;
 
-    FH1 := TBits.RotateLeft64(FH1, 27);
+    FH1 := TBitOperations.RotateLeft64(FH1, 27);
     FH1 := FH1 + FH2;
     FH1 := FH1 * 5 + C3;
 
     LK2 := LK2 * C2;
-    LK2 := TBits.RotateLeft64(LK2, 33);
+    LK2 := TBitOperations.RotateLeft64(LK2, 33);
     LK2 := LK2 * C1;
     FH2 := FH2 xor LK2;
 
-    FH2 := TBits.RotateLeft64(FH2, 31);
+    FH2 := TBitOperations.RotateLeft64(FH2, 31);
     FH2 := FH2 + FH1;
     FH2 := FH2 * 5 + C4;
 
@@ -149,7 +149,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -163,7 +163,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -176,7 +176,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -188,7 +188,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -199,7 +199,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -209,7 +209,7 @@ begin
           LK2 := LK2 xor (UInt64(FBuffer[9]) shl 8);
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -218,7 +218,7 @@ begin
         begin
           LK2 := LK2 xor (UInt64(FBuffer[8]) shl 0);
           LK2 := LK2 * C2;
-          LK2 := TBits.RotateLeft64(LK2, 33);
+          LK2 := TBitOperations.RotateLeft64(LK2, 33);
           LK2 := LK2 * C1;
           FH2 := FH2 xor LK2;
         end;
@@ -242,7 +242,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -257,7 +257,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -271,7 +271,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -284,7 +284,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -296,7 +296,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -307,7 +307,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -317,7 +317,7 @@ begin
           LK1 := LK1 xor (UInt64(FBuffer[1]) shl 8);
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -326,7 +326,7 @@ begin
         begin
           LK1 := LK1 xor (UInt64(FBuffer[0]) shl 0);
           LK1 := LK1 * C1;
-          LK1 := TBits.RotateLeft64(LK1, 31);
+          LK1 := TBitOperations.RotateLeft64(LK1, 31);
           LK1 := LK1 * C2;
           FH1 := FH1 xor LK1;
         end;
@@ -359,7 +359,8 @@ end;
 
 function TMurmurHash3_x64_128.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt32AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(Result, 0, FKey);
 end;
 
 function TMurmurHash3_x64_128.GetKeyLength: Int32;
@@ -389,7 +390,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -446,26 +447,26 @@ begin
   while LIndex < LNBlocks do
   begin
 
-    LK1 := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    LK1 := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(LPtrDataUInt64 + LIdx), 0);
     System.Inc(LIdx);
-    LK2 := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    LK2 := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(LPtrDataUInt64 + LIdx), 0);
     System.Inc(LIdx);
 
     LK1 := LK1 * C1;
-    LK1 := TBits.RotateLeft64(LK1, 31);
+    LK1 := TBitOperations.RotateLeft64(LK1, 31);
     LK1 := LK1 * C2;
     LH1 := LH1 xor LK1;
 
-    LH1 := TBits.RotateLeft64(LH1, 27);
+    LH1 := TBitOperations.RotateLeft64(LH1, 27);
     LH1 := LH1 + LH2;
     LH1 := LH1 * 5 + C3;
 
     LK2 := LK2 * C2;
-    LK2 := TBits.RotateLeft64(LK2, 33);
+    LK2 := TBitOperations.RotateLeft64(LK2, 33);
     LK2 := LK2 * C1;
     LH2 := LH2 xor LK2;
 
-    LH2 := TBits.RotateLeft64(LH2, 31);
+    LH2 := TBitOperations.RotateLeft64(LH2, 31);
     LH2 := LH2 + LH1;
     LH2 := LH2 * 5 + C4;
 
@@ -491,8 +492,8 @@ begin
   Finish();
 
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt64AsBytesBE(FH1, LBufferBytes, 0);
-  TConverters.ReadUInt64AsBytesBE(FH2, LBufferBytes, 8);
+  TBinaryPrimitives.WriteUInt64BigEndian(LBufferBytes, 0, FH1);
+  TBinaryPrimitives.WriteUInt64BigEndian(LBufferBytes, 8, FH2);
 
   Result := THashResult.Create(LBufferBytes);
   Initialize();

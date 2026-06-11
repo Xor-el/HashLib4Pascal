@@ -6,10 +6,10 @@ interface
 
 uses
   SysUtils,
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
+  HlpBitOperations,
   HlpHashSize,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -118,7 +118,7 @@ begin
 
   System.SetLength(LPad, LPadIndex + 8);
 
-  TConverters.ReadUInt64AsBytesBE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64BigEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -134,7 +134,7 @@ end;
 function TSnefru.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, System.Length(FState) * System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(FState), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32BigEndian(PCardinal(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -156,7 +156,7 @@ begin
   System.Move(FState[0], LWork[0], System.Length(FState) *
     System.SizeOf(UInt32));
 
-  TConverters.be32_copy(AData, AIndex, LPtrWork + System.Length(FState), 0,
+  TBinaryPrimitives.CopyUInt32BigEndian(AData, AIndex, LPtrWork + System.Length(FState), 0,
     ADataLength);
 
   LIdx := 0;
@@ -208,7 +208,7 @@ begin
 
       while LWordIdx < 16 do
       begin
-        LWork[LWordIdx] := TBits.RotateRight32(LWork[LWordIdx], LShift);
+        LWork[LWordIdx] := TBitOperations.RotateRight32(LWork[LWordIdx], LShift);
         System.Inc(LWordIdx);
       end;
 

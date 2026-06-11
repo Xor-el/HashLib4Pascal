@@ -5,8 +5,8 @@ unit HlpMurmur2_64;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
@@ -90,7 +90,7 @@ begin
 
   while LIdx < LNBlocks do
   begin
-    LReadChunk := TConverters.ReadPUInt64AsUInt64LE(LPtrDataUInt64 + LIdx);
+    LReadChunk := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(LPtrDataUInt64 + LIdx), 0);
 
     LReadChunk := LReadChunk * CMul;
     LReadChunk := LReadChunk xor (LReadChunk shr CShift);
@@ -210,7 +210,8 @@ end;
 
 function TMurmur2_64.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt64AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt64));
+  TBinaryPrimitives.WriteUInt64LittleEndian(Result, 0, FKey);
 end;
 
 function TMurmur2_64.GetKeyLength: Int32;
@@ -237,7 +238,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(AValue), 0);
   end;
 end;
 

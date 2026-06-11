@@ -5,9 +5,9 @@ unit HlpGost;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
-  HlpConverters,
+  HlpBitOperations,
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
@@ -362,7 +362,7 @@ begin
     LWordA := ASBox[1, LRowIdx] shl 15;
     LWordB := ASBox[3, LRowIdx] shl 23;
     LWordC := ASBox[5, LRowIdx];
-    LWordC := TBits.RotateRight32(LWordC, 1);
+    LWordC := TBitOperations.RotateRight32(LWordC, 1);
     LWordD := ASBox[7, LRowIdx] shl 7;
 
     for LColIdx := 0 to 15 do
@@ -417,8 +417,8 @@ begin
 
   System.SetLength(LLengthBytes, 32);
   TArrayUtils.ZeroFill(LLengthBytes);
-  TConverters.ReadUInt64AsBytesLE(LBits, LLengthBytes, 0);
-  TConverters.le32_copy(@LLengthBytes[0], 0, @LLengthWords[0], 0, 32);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LLengthBytes, 0, LBits);
+  TBinaryPrimitives.CopyUInt32LittleEndian(@LLengthBytes[0], 0, @LLengthWords[0], 0, 32);
 
   Compress(PCardinal(@LLengthWords[0]));
 
@@ -428,7 +428,7 @@ end;
 function TGost.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 8 * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FHash), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -481,7 +481,7 @@ var
 begin
   LCarry := 0;
 
-  TConverters.le32_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LData[0]), 0, ADataLength);
 
   for LIdx := 0 to 7 do
   begin

@@ -6,7 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
-  HlpBits,
+  HlpBitOperations,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
@@ -104,22 +104,22 @@ begin
     LRegC := LRegC + UInt32(LI1 or LI2 or LI3 or LI4);
 
     LRegA := LRegA - LRegC;
-    LRegA := LRegA xor TBits.RotateLeft32(LRegC, 4);
+    LRegA := LRegA xor TBitOperations.RotateLeft32(LRegC, 4);
     LRegC := LRegC + LRegB;
     LRegB := LRegB - LRegA;
-    LRegB := LRegB xor TBits.RotateLeft32(LRegA, 6);
+    LRegB := LRegB xor TBitOperations.RotateLeft32(LRegA, 6);
     LRegA := LRegA + LRegC;
     LRegC := LRegC - LRegB;
-    LRegC := LRegC xor TBits.RotateLeft32(LRegB, 8);
+    LRegC := LRegC xor TBitOperations.RotateLeft32(LRegB, 8);
     LRegB := LRegB + LRegA;
     LRegA := LRegA - LRegC;
-    LRegA := LRegA xor TBits.RotateLeft32(LRegC, 16);
+    LRegA := LRegA xor TBitOperations.RotateLeft32(LRegC, 16);
     LRegC := LRegC + LRegB;
     LRegB := LRegB - LRegA;
-    LRegB := LRegB xor TBits.RotateLeft32(LRegA, 19);
+    LRegB := LRegB xor TBitOperations.RotateLeft32(LRegA, 19);
     LRegA := LRegA + LRegC;
     LRegC := LRegC - LRegB;
-    LRegC := LRegC xor TBits.RotateLeft32(LRegB, 4);
+    LRegC := LRegC xor TBitOperations.RotateLeft32(LRegB, 4);
     LRegB := LRegB + LRegA;
 
     System.Dec(LLength, 12);
@@ -380,19 +380,19 @@ begin
   end;
 
   LRegC := LRegC xor LRegB;
-  LRegC := LRegC - TBits.RotateLeft32(LRegB, 14);
+  LRegC := LRegC - TBitOperations.RotateLeft32(LRegB, 14);
   LRegA := LRegA xor LRegC;
-  LRegA := LRegA - TBits.RotateLeft32(LRegC, 11);
+  LRegA := LRegA - TBitOperations.RotateLeft32(LRegC, 11);
   LRegB := LRegB xor LRegA;
-  LRegB := LRegB - TBits.RotateLeft32(LRegA, 25);
+  LRegB := LRegB - TBitOperations.RotateLeft32(LRegA, 25);
   LRegC := LRegC xor LRegB;
-  LRegC := LRegC - TBits.RotateLeft32(LRegB, 16);
+  LRegC := LRegC - TBitOperations.RotateLeft32(LRegB, 16);
   LRegA := LRegA xor LRegC;
-  LRegA := LRegA - TBits.RotateLeft32(LRegC, 4);
+  LRegA := LRegA - TBitOperations.RotateLeft32(LRegC, 4);
   LRegB := LRegB xor LRegA;
-  LRegB := LRegB - TBits.RotateLeft32(LRegA, 14);
+  LRegB := LRegB - TBitOperations.RotateLeft32(LRegA, 14);
   LRegC := LRegC xor LRegB;
-  LRegC := LRegC - TBits.RotateLeft32(LRegB, 24);
+  LRegC := LRegC - TBitOperations.RotateLeft32(LRegB, 24);
 
   Result := THashResult.Create(LRegC);
 end;

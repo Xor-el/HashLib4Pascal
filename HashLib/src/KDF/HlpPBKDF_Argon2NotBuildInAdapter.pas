@@ -16,6 +16,7 @@ uses
   HlpIBlake2BParams,
   HlpBlake2BParams,
   HlpConverters,
+  HlpBinaryPrimitives,
   HlpArgon2TypeAndVersion,
   HlpArgon2Dispatch,
   HlpArrayUtils,
@@ -439,7 +440,7 @@ begin
   LPtrInput := PByte(AInput);
   for LIdx := 0 to System.Pred(Size) do
   begin
-    V[LIdx] := TConverters.ReadBytesAsUInt64LE(LPtrInput, LIdx * 8);
+    V[LIdx] := TBinaryPrimitives.ReadUInt64LittleEndian(LPtrInput, LIdx * 8);
   end;
 end;
 
@@ -453,13 +454,14 @@ begin
   System.SetLength(Result, Argon2BlockSize);
   for LIdx := 0 to System.Pred(Size) do
   begin
-    TConverters.ReadUInt64AsBytesLE(V[LIdx], Result, LIdx * 8);
+    TBinaryPrimitives.WriteUInt64LittleEndian(Result, LIdx * 8, V[LIdx]);
   end;
 end;
 
 function TPBKDF_Argon2NotBuildInAdapter.TBlock.ToString: String;
 var
   LIdx: Int32;
+  LBytes: THashLibByteArray;
 begin
 {$IFDEF DEBUG}
   System.Assert(Initialized, SBlockInstanceNotInitialized);
@@ -467,8 +469,9 @@ begin
   Result := '';
   for LIdx := 0 to System.Pred(Size) do
   begin
-    Result := Result + TConverters.ConvertBytesToHexString
-      (TConverters.ReadUInt64AsBytesLE(V[LIdx]), False);
+    System.SetLength(LBytes, System.SizeOf(UInt64));
+    TBinaryPrimitives.WriteUInt64LittleEndian(LBytes, 0, V[LIdx]);
+    Result := Result + TConverters.ConvertBytesToHexString(LBytes, False);
   end;
 end;
 
@@ -710,8 +713,12 @@ end;
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.AddIntToLittleEndian
   (const AHash: IHash; AInt32Value: Int32);
+var
+  LBytes: THashLibByteArray;
 begin
-  AHash.TransformBytes(TConverters.ReadUInt32AsBytesLE(UInt32(AInt32Value)));
+  System.SetLength(LBytes, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(LBytes, 0, UInt32(AInt32Value));
+  AHash.TransformBytes(LBytes);
 end;
 
 class procedure TPBKDF_Argon2NotBuildInAdapter.AddByteString(const AHash: IHash;
@@ -853,7 +860,8 @@ var
   LBlake2B: IHash;
 begin
   System.SetLength(Result, AOutputLength);
-  LOutlenBytes := TConverters.ReadUInt32AsBytesLE(UInt32(AOutputLength));
+  System.SetLength(LOutlenBytes, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(LOutlenBytes, 0, UInt32(AOutputLength));
 
   LBlake2BLength := 64;
 
@@ -952,10 +960,10 @@ begin
 
   for LIdx := 0 to System.Pred(FParameters.Lanes) do
   begin
-    TConverters.ReadUInt32AsBytesLE(UInt32(LIdx), LInitialHashWithZeros,
-      Argon2PrehashDigestLength + 4);
-    TConverters.ReadUInt32AsBytesLE(UInt32(LIdx), LInitialHashWithOnes,
-      Argon2PrehashDigestLength + 4);
+    TBinaryPrimitives.WriteUInt32LittleEndian(LInitialHashWithZeros,
+      Argon2PrehashDigestLength + 4, UInt32(LIdx));
+    TBinaryPrimitives.WriteUInt32LittleEndian(LInitialHashWithOnes,
+      Argon2PrehashDigestLength + 4, UInt32(LIdx));
 
     LBlockHashBytes := Hash(LInitialHashWithZeros, Argon2BlockSize);
     FMemory[LIdx * FLaneLength].FromBytes(LBlockHashBytes);

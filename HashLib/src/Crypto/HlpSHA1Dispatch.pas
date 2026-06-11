@@ -25,8 +25,8 @@ const
 implementation
 
 uses
-  HlpBits,
-  HlpConverters,
+  HlpBinaryPrimitives,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -47,13 +47,13 @@ begin
 
   while ANumBlocks > 0 do
   begin
-    TConverters.be32_copy(LPData, 0, @LW[0], 0, 64);
+    TBinaryPrimitives.CopyUInt32BigEndian(LPData, 0, @LW[0], 0, 64);
 
     for LRound := 16 to 79 do
     begin
       LT := LW[LRound - 3] xor LW[LRound - 8] xor LW[LRound - 14]
         xor LW[LRound - 16];
-      LW[LRound] := TBits.RotateLeft32(LT, 1);
+      LW[LRound] := TBitOperations.RotateLeft32(LT, 1);
     end;
 
     LA := LPState[0]; LB := LPState[1]; LC := LPState[2];
@@ -61,34 +61,34 @@ begin
 
     for LRound := 0 to 19 do
     begin
-      LT := TBits.RotateLeft32(LA, 5) + (LD xor (LB and (LC xor LD)))
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LD xor (LB and (LC xor LD)))
         + LE + $5A827999 + LW[LRound];
-      LE := LD; LD := LC; LC := TBits.RotateLeft32(LB, 30);
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
       LB := LA; LA := LT;
     end;
 
     for LRound := 20 to 39 do
     begin
-      LT := TBits.RotateLeft32(LA, 5) + (LB xor LC xor LD)
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LB xor LC xor LD)
         + LE + $6ED9EBA1 + LW[LRound];
-      LE := LD; LD := LC; LC := TBits.RotateLeft32(LB, 30);
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
       LB := LA; LA := LT;
     end;
 
     for LRound := 40 to 59 do
     begin
-      LT := TBits.RotateLeft32(LA, 5) +
+      LT := TBitOperations.RotateLeft32(LA, 5) +
         ((LB and LC) or (LD and (LB or LC)))
         + LE + $8F1BBCDC + LW[LRound];
-      LE := LD; LD := LC; LC := TBits.RotateLeft32(LB, 30);
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
       LB := LA; LA := LT;
     end;
 
     for LRound := 60 to 79 do
     begin
-      LT := TBits.RotateLeft32(LA, 5) + (LB xor LC xor LD)
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LB xor LC xor LD)
         + LE + $CA62C1D6 + LW[LRound];
-      LE := LD; LD := LC; LC := TBits.RotateLeft32(LB, 30);
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
       LB := LA; LA := LT;
     end;
 

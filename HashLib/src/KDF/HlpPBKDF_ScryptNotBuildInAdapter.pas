@@ -13,9 +13,9 @@ uses
   HlpKDF,
   HlpSHA2_256,
   HlpIHashInfo,
+  HlpBinaryPrimitives,
   HlpPBKDF2_HMACNotBuildInAdapter,
   HlpScryptDispatch,
-  HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -260,12 +260,12 @@ begin
     LBLen := System.Length(LBytes) div 4;
     System.SetLength(LBlockWords, LBLen);
 
-    TConverters.le32_copy(PByte(LBytes), 0, PCardinal(LBlockWords), 0,
+    TBinaryPrimitives.CopyUInt32LittleEndian(PByte(LBytes), 0, PCardinal(LBlockWords), 0,
       System.Length(LBytes) * System.SizeOf(Byte));
 
     DoParallelSMix(PCardinal(LBlockWords), AParallelism, ACost, ABlockSize);
 
-    TConverters.le32_copy(PCardinal(LBlockWords), 0, PByte(LBytes), 0,
+    TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(LBlockWords), 0, PByte(LBytes), 0,
       System.Length(LBlockWords) * System.SizeOf(UInt32));
 
     Result := SingleIterationPBKDF2(APasswordBytes, LBytes, AOutputLength);

@@ -19,6 +19,7 @@ uses
   HlpIHashInfo,
   HlpIHashResult,
   HlpConverters,
+  HlpBinaryPrimitives,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -861,11 +862,14 @@ end;
 procedure THashWithUInt32AsKeyAlgorithmTestCase.TestWithMaxUInt32AsKey;
 var
   LIHashWithKey: IHashWithKey;
+  LKey: THashLibByteArray;
 begin
   ExpectedString := HashOfDefaultDataWithMaxUInt32AsKey;
   CheckTrue(Supports(HashInstance, IHashWithKey, LIHashWithKey),
     'HashInstance must support IHashWithKey');
-  LIHashWithKey.Key := TConverters.ReadUInt32AsBytesLE(System.High(UInt32));
+  System.SetLength(LKey, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(LKey, 0, System.High(UInt32));
+  LIHashWithKey.Key := LKey;
   ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
@@ -889,10 +893,13 @@ end;
 procedure THashWithUInt64AsKeyAlgorithmTestCase.TestWithMaxUInt64AsKey;
 var
   LIHashWithKey: IHashWithKey;
+  LKey: THashLibByteArray;
 begin
   ExpectedString := HashOfDefaultDataWithMaxUInt64AsKey;
   LIHashWithKey := HashInstance as IHashWithKey;
-  LIHashWithKey.Key := TConverters.ReadUInt64AsBytesLE(System.High(UInt64));
+  System.SetLength(LKey, System.SizeOf(UInt64));
+  TBinaryPrimitives.WriteUInt64LittleEndian(LKey, 0, System.High(UInt64));
+  LIHashWithKey.Key := LKey;
   ActualString := LIHashWithKey.ComputeString(DefaultData, TEncoding.UTF8)
     .ToString();
   CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',

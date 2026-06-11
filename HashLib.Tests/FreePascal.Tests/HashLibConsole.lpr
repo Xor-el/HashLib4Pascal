@@ -13,7 +13,6 @@ uses
   Hash64Tests,
   Hash128Tests,
   CryptoTests,
-  BitConverterTests,
   PBKDF2_HMACTests,
   PBKDF_Argon2Tests,
   PBKDF_ScryptTests,

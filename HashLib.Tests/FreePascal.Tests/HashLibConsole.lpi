@@ -69,7 +69,6 @@
         <UnitName Value="HashLib.Tests"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\src\BitConverterTests.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>

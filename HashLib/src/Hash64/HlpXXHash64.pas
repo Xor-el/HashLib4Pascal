@@ -5,14 +5,14 @@ unit HlpXXHash64;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpHash,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits;
+  HlpBitOperations;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -107,7 +107,8 @@ end;
 
 function TXXHash64.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt64AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt64));
+  TBinaryPrimitives.WriteUInt64LittleEndian(Result, 0, FKey);
 end;
 
 function TXXHash64.GetKeyLength: Int32;
@@ -139,7 +140,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt64LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt64LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -177,14 +178,14 @@ begin
     LPtrMemoryStart := PByte(FState.FMemory) + FState.FMemorySize;
     System.Move(LPtrADataStart^, LPtrMemoryStart^, 32 - FState.FMemorySize);
 
-    FState.FV1 := Prime64_1 * TBits.RotateLeft64(FState.FV1 + Prime64_2 *
-      TConverters.ReadBytesAsUInt64LE(LPtrMemory, 0), 31);
-    FState.FV2 := Prime64_1 * TBits.RotateLeft64(FState.FV2 + Prime64_2 *
-      TConverters.ReadBytesAsUInt64LE(LPtrMemory, 8), 31);
-    FState.FV3 := Prime64_1 * TBits.RotateLeft64(FState.FV3 + Prime64_2 *
-      TConverters.ReadBytesAsUInt64LE(LPtrMemory, 16), 31);
-    FState.FV4 := Prime64_1 * TBits.RotateLeft64(FState.FV4 + Prime64_2 *
-      TConverters.ReadBytesAsUInt64LE(LPtrMemory, 24), 31);
+    FState.FV1 := Prime64_1 * TBitOperations.RotateLeft64(FState.FV1 + Prime64_2 *
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPtrMemory, 0), 31);
+    FState.FV2 := Prime64_1 * TBitOperations.RotateLeft64(FState.FV2 + Prime64_2 *
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPtrMemory, 8), 31);
+    FState.FV3 := Prime64_1 * TBitOperations.RotateLeft64(FState.FV3 + Prime64_2 *
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPtrMemory, 16), 31);
+    FState.FV4 := Prime64_1 * TBitOperations.RotateLeft64(FState.FV4 + Prime64_2 *
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPtrMemory, 24), 31);
 
     LPtrADataStart := LPtrADataStart + (32 - FState.FMemorySize);
     FState.FMemorySize := 0;
@@ -202,18 +203,18 @@ begin
 
       LPtrADataStartUInt64 := PUInt64(LPtrADataStart);
 
-      LV1 := Prime64_1 * TBits.RotateLeft64
-        (LV1 + Prime64_2 * TConverters.ReadPUInt64AsUInt64LE
-        (LPtrADataStartUInt64), 31);
-      LV2 := Prime64_1 * TBits.RotateLeft64
-        (LV2 + Prime64_2 * TConverters.ReadPUInt64AsUInt64LE
-        (LPtrADataStartUInt64 + 1), 31);
-      LV3 := Prime64_1 * TBits.RotateLeft64
-        (LV3 + Prime64_2 * TConverters.ReadPUInt64AsUInt64LE
-        (LPtrADataStartUInt64 + 2), 31);
-      LV4 := Prime64_1 * TBits.RotateLeft64
-        (LV4 + Prime64_2 * TConverters.ReadPUInt64AsUInt64LE
-        (LPtrADataStartUInt64 + 3), 31);
+      LV1 := Prime64_1 * TBitOperations.RotateLeft64
+        (LV1 + Prime64_2 * TBinaryPrimitives.ReadUInt64LittleEndian
+        (PByte(LPtrADataStartUInt64), 0), 31);
+      LV2 := Prime64_1 * TBitOperations.RotateLeft64
+        (LV2 + Prime64_2 * TBinaryPrimitives.ReadUInt64LittleEndian
+        (PByte(LPtrADataStartUInt64 + 1), 0), 31);
+      LV3 := Prime64_1 * TBitOperations.RotateLeft64
+        (LV3 + Prime64_2 * TBinaryPrimitives.ReadUInt64LittleEndian
+        (PByte(LPtrADataStartUInt64 + 2), 0), 31);
+      LV4 := Prime64_1 * TBitOperations.RotateLeft64
+        (LV4 + Prime64_2 * TBinaryPrimitives.ReadUInt64LittleEndian
+        (PByte(LPtrADataStartUInt64 + 3), 0), 31);
 
       System.Inc(LPtrADataStart, 32);
 
@@ -246,19 +247,19 @@ begin
     LV3 := FState.FV3;
     LV4 := FState.FV4;
 
-    FHash := TBits.RotateLeft64(LV1, 1) + TBits.RotateLeft64(LV2, 7) +
-      TBits.RotateLeft64(LV3, 12) + TBits.RotateLeft64(LV4, 18);
+    FHash := TBitOperations.RotateLeft64(LV1, 1) + TBitOperations.RotateLeft64(LV2, 7) +
+      TBitOperations.RotateLeft64(LV3, 12) + TBitOperations.RotateLeft64(LV4, 18);
 
-    LV1 := TBits.RotateLeft64(LV1 * Prime64_2, 31) * Prime64_1;
+    LV1 := TBitOperations.RotateLeft64(LV1 * Prime64_2, 31) * Prime64_1;
     FHash := (FHash xor LV1) * Prime64_1 + Prime64_4;
 
-    LV2 := TBits.RotateLeft64(LV2 * Prime64_2, 31) * Prime64_1;
+    LV2 := TBitOperations.RotateLeft64(LV2 * Prime64_2, 31) * Prime64_1;
     FHash := (FHash xor LV2) * Prime64_1 + Prime64_4;
 
-    LV3 := TBits.RotateLeft64(LV3 * Prime64_2, 31) * Prime64_1;
+    LV3 := TBitOperations.RotateLeft64(LV3 * Prime64_2, 31) * Prime64_1;
     FHash := (FHash xor LV3) * Prime64_1 + Prime64_4;
 
-    LV4 := TBits.RotateLeft64(LV4 * Prime64_2, 31) * Prime64_1;
+    LV4 := TBitOperations.RotateLeft64(LV4 * Prime64_2, 31) * Prime64_1;
     FHash := (FHash xor LV4) * Prime64_1 + Prime64_4;
   end
   else
@@ -273,24 +274,24 @@ begin
 
   while (LPtrBuffer + 8) <= LPtrEnd do
   begin
-    FHash := FHash xor (Prime64_1 * TBits.RotateLeft64(Prime64_2 *
-      TConverters.ReadBytesAsUInt64LE(LPtrBuffer, 0), 31));
-    FHash := TBits.RotateLeft64(FHash, 27) * Prime64_1 + Prime64_4;
+    FHash := FHash xor (Prime64_1 * TBitOperations.RotateLeft64(Prime64_2 *
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPtrBuffer, 0), 31));
+    FHash := TBitOperations.RotateLeft64(FHash, 27) * Prime64_1 + Prime64_4;
     System.Inc(LPtrBuffer, 8);
   end;
 
   if (LPtrBuffer + 4) <= LPtrEnd then
   begin
-    FHash := FHash xor TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0) *
+    FHash := FHash xor TBinaryPrimitives.ReadUInt32LittleEndian(LPtrBuffer, 0) *
       Prime64_1;
-    FHash := TBits.RotateLeft64(FHash, 23) * Prime64_2 + Prime64_3;
+    FHash := TBitOperations.RotateLeft64(FHash, 23) * Prime64_2 + Prime64_3;
     System.Inc(LPtrBuffer, 4);
   end;
 
   while LPtrBuffer < LPtrEnd do
   begin
     FHash := FHash xor LPtrBuffer^ * Prime64_5;
-    FHash := TBits.RotateLeft64(FHash, 11) * Prime64_1;
+    FHash := TBitOperations.RotateLeft64(FHash, 11) * Prime64_1;
     System.Inc(LPtrBuffer);
   end;
 

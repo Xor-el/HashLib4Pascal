@@ -6,7 +6,7 @@ interface
 
 uses
   HlpHashLibTypes,
-  HlpBits,
+  HlpBitOperations,
   HlpHash,
   HlpIHash,
   HlpIHashInfo,
@@ -65,7 +65,7 @@ begin
   LIdx := AIndex;
   while ALength > 0 do
   begin
-    FHash := TBits.RotateLeft32(FHash, 4) xor AData[LIdx];
+    FHash := TBitOperations.RotateLeft32(FHash, 4) xor AData[LIdx];
     System.Inc(LIdx);
     System.Dec(ALength);
   end;
