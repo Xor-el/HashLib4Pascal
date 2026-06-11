@@ -10,7 +10,7 @@ uses
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits,
+  HlpBitOperations,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -104,14 +104,14 @@ begin
   ADest[63] := Byte(LCarry);
 
   LCarry := (ADest[62] and $FF) +
-    ((TBits.Asr32(AIncrement, 8)) and $FF) + (TBits.Asr32(LCarry, 8));
+    ((TBitOperations.Asr32(AIncrement, 8)) and $FF) + (TBitOperations.Asr32(LCarry, 8));
   ADest[62] := Byte(LCarry);
 
   LIdx := 61;
 
   while ((LIdx >= 0) and (LCarry > 0)) do
   begin
-    LCarry := (ADest[LIdx] and $FF) + (TBits.Asr32(LCarry, 8));
+    LCarry := (ADest[LIdx] and $FF) + (TBitOperations.Asr32(LCarry, 8));
     ADest[LIdx] := Byte(LCarry);
     System.Dec(LIdx);
   end;
@@ -128,7 +128,7 @@ begin
   while LIdx >= 0 do
   begin
     LCarry := Int32(ADest[LIdx] and $FF) + Int32(AAddend[LIdx] and $FF) +
-      (TBits.Asr32(LCarry, 8));
+      (TBitOperations.Asr32(LCarry, 8));
     ADest[LIdx] := Byte(LCarry);
     System.Dec(LIdx);
   end;

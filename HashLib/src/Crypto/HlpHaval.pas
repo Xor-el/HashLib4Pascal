@@ -5,11 +5,11 @@ unit HlpHaval;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
+  HlpBitOperations,
   HlpHashSize,
   HlpHashRounds,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn;
@@ -268,7 +268,7 @@ begin
   LPad[LPadIndex] := Byte(HashSize shl 1);
   System.Inc(LPadIndex);
 
-  TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -279,7 +279,7 @@ function THaval.GetResult: THashLibByteArray;
 begin
   TailorDigestBits();
   System.SetLength(Result, (HashSize shr 2) * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FHash), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -307,13 +307,13 @@ begin
       begin
         LTailorWord := (FHash[7] and $000000FF) or (FHash[6] and $FF000000) or
           (FHash[5] and $00FF0000) or (FHash[4] and $0000FF00);
-        FHash[0] := FHash[0] + TBits.RotateRight32(LTailorWord, 8);
+        FHash[0] := FHash[0] + TBitOperations.RotateRight32(LTailorWord, 8);
         LTailorWord := (FHash[7] and $0000FF00) or (FHash[6] and $000000FF) or
           (FHash[5] and $FF000000) or (FHash[4] and $00FF0000);
-        FHash[1] := FHash[1] + TBits.RotateRight32(LTailorWord, 16);
+        FHash[1] := FHash[1] + TBitOperations.RotateRight32(LTailorWord, 16);
         LTailorWord := (FHash[7] and $00FF0000) or (FHash[6] and $0000FF00) or
           (FHash[5] and $000000FF) or (FHash[4] and $FF000000);
-        FHash[2] := FHash[2] + TBits.RotateRight32(LTailorWord, 24);
+        FHash[2] := FHash[2] + TBitOperations.RotateRight32(LTailorWord, 24);
         LTailorWord := (FHash[7] and $FF000000) or (FHash[6] and $00FF0000) or
           (FHash[5] and $0000FF00) or (FHash[4] and $000000FF);
         FHash[3] := FHash[3] + LTailorWord;
@@ -323,10 +323,10 @@ begin
       begin
         LTailorWord := UInt32(FHash[7] and $3F) or UInt32(FHash[6] and ($7F shl 25)) or
           UInt32(FHash[5] and ($3F shl 19));
-        FHash[0] := FHash[0] + TBits.RotateRight32(LTailorWord, 19);
+        FHash[0] := FHash[0] + TBitOperations.RotateRight32(LTailorWord, 19);
         LTailorWord := UInt32(FHash[7] and ($3F shl 6)) or UInt32(FHash[6] and $3F) or
           UInt32(FHash[5] and ($7F shl 25));
-        FHash[1] := FHash[1] + TBits.RotateRight32(LTailorWord, 25);
+        FHash[1] := FHash[1] + TBitOperations.RotateRight32(LTailorWord, 25);
         LTailorWord := (FHash[7] and ($7F shl 12)) or (FHash[6] and ($3F shl 6)) or
           (FHash[5] and $3F);
         FHash[2] := FHash[2] + LTailorWord;
@@ -342,7 +342,7 @@ begin
     24:
       begin
         LTailorWord := UInt32(FHash[7] and $1F) or UInt32(FHash[6] and ($3F shl 26));
-        FHash[0] := FHash[0] + TBits.RotateRight32(LTailorWord, 26);
+        FHash[0] := FHash[0] + TBitOperations.RotateRight32(LTailorWord, 26);
         LTailorWord := (FHash[7] and ($1F shl 5)) or (FHash[6] and $1F);
         FHash[1] := FHash[1] + LTailorWord;
         LTailorWord := (FHash[7] and ($3F shl 10)) or (FHash[6] and ($1F shl 5));
@@ -383,7 +383,7 @@ var
   LRegA, LRegB, LRegC, LRegD, LRegE, LRegF, LRegG, LRegH, LNfOut: UInt32;
   LTemp: array [0 .. 31] of UInt32;
 begin
-  TConverters.le32_copy(AData, AIndex, @(LTemp[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LTemp[0]), 0, ADataLength);
 
   LRegA := FHash[0];
   LRegB := FHash[1];
@@ -395,388 +395,388 @@ begin
   LRegH := FHash[7];
 
   LNfOut := LRegC and (LRegE xor LRegD) xor LRegG and LRegA xor LRegF and LRegB xor LRegE;
-  LRegH := LTemp[0] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegD xor LRegC) xor LRegF and LRegH xor LRegE and LRegA xor LRegD;
-  LRegG := LTemp[1] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[1] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegC xor LRegB) xor LRegE and LRegG xor LRegD and LRegH xor LRegC;
-  LRegF := LTemp[2] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[2] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegB xor LRegA) xor LRegD and LRegF xor LRegC and LRegG xor LRegB;
-  LRegE := LTemp[3] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegA xor LRegH) xor LRegC and LRegE xor LRegB and LRegF xor LRegA;
-  LRegD := LTemp[4] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[4] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegH xor LRegG) xor LRegB and LRegD xor LRegA and LRegE xor LRegH;
-  LRegC := LTemp[5] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[5] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegG xor LRegF) xor LRegA and LRegC xor LRegH and LRegD xor LRegG;
-  LRegB := LTemp[6] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[6] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegF xor LRegE) xor LRegH and LRegB xor LRegG and LRegC xor LRegF;
-  LRegA := LTemp[7] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[7] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegE xor LRegD) xor LRegG and LRegA xor LRegF and LRegB xor LRegE;
-  LRegH := LTemp[8] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[8] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegD xor LRegC) xor LRegF and LRegH xor LRegE and LRegA xor LRegD;
-  LRegG := LTemp[9] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegC xor LRegB) xor LRegE and LRegG xor LRegD and LRegH xor LRegC;
-  LRegF := LTemp[10] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[10] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegB xor LRegA) xor LRegD and LRegF xor LRegC and LRegG xor LRegB;
-  LRegE := LTemp[11] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[11] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegA xor LRegH) xor LRegC and LRegE xor LRegB and LRegF xor LRegA;
-  LRegD := LTemp[12] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[12] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegH xor LRegG) xor LRegB and LRegD xor LRegA and LRegE xor LRegH;
-  LRegC := LTemp[13] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[13] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegG xor LRegF) xor LRegA and LRegC xor LRegH and LRegD xor LRegG;
-  LRegB := LTemp[14] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[14] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegF xor LRegE) xor LRegH and LRegB xor LRegG and LRegC xor LRegF;
-  LRegA := LTemp[15] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[15] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegE xor LRegD) xor LRegG and LRegA xor LRegF and LRegB xor LRegE;
-  LRegH := LTemp[16] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[16] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegD xor LRegC) xor LRegF and LRegH xor LRegE and LRegA xor LRegD;
-  LRegG := LTemp[17] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[17] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegC xor LRegB) xor LRegE and LRegG xor LRegD and LRegH xor LRegC;
-  LRegF := LTemp[18] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[18] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegB xor LRegA) xor LRegD and LRegF xor LRegC and LRegG xor LRegB;
-  LRegE := LTemp[19] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[19] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegA xor LRegH) xor LRegC and LRegE xor LRegB and LRegF xor LRegA;
-  LRegD := LTemp[20] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[20] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegH xor LRegG) xor LRegB and LRegD xor LRegA and LRegE xor LRegH;
-  LRegC := LTemp[21] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[21] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegG xor LRegF) xor LRegA and LRegC xor LRegH and LRegD xor LRegG;
-  LRegB := LTemp[22] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[22] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegF xor LRegE) xor LRegH and LRegB xor LRegG and LRegC xor LRegF;
-  LRegA := LTemp[23] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[23] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegE xor LRegD) xor LRegG and LRegA xor LRegF and LRegB xor LRegE;
-  LRegH := LTemp[24] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[24] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegD xor LRegC) xor LRegF and LRegH xor LRegE and LRegA xor LRegD;
-  LRegG := LTemp[25] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[25] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegC xor LRegB) xor LRegE and LRegG xor LRegD and LRegH xor LRegC;
-  LRegF := LTemp[26] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegB xor LRegA) xor LRegD and LRegF xor LRegC and LRegG xor LRegB;
-  LRegE := LTemp[27] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[27] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegA xor LRegH) xor LRegC and LRegE xor LRegB and LRegF xor LRegA;
-  LRegD := LTemp[28] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegH xor LRegG) xor LRegB and LRegD xor LRegA and LRegE xor LRegH;
-  LRegC := LTemp[29] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[29] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegG xor LRegF) xor LRegA and LRegC xor LRegH and LRegD xor LRegG;
-  LRegB := LTemp[30] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[30] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegF xor LRegE) xor LRegH and LRegB xor LRegG and LRegC xor LRegF;
-  LRegA := LTemp[31] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[31] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegF and (LRegD and not LRegA xor LRegB and LRegC xor LRegE xor LRegG) xor LRegB and (LRegD xor LRegC)
     xor LRegA and LRegC xor LRegG;
-  LRegH := LTemp[5] + $452821E6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[5] + $452821E6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegE and (LRegC and not LRegH xor LRegA and LRegB xor LRegD xor LRegF) xor LRegA and (LRegC xor LRegB)
     xor LRegH and LRegB xor LRegF;
-  LRegG := LTemp[14] + $38D01377 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $38D01377 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegD and (LRegB and not LRegG xor LRegH and LRegA xor LRegC xor LRegE) xor LRegH and (LRegB xor LRegA)
     xor LRegG and LRegA xor LRegE;
-  LRegF := LTemp[26] + $BE5466CF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + $BE5466CF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegC and (LRegA and not LRegF xor LRegG and LRegH xor LRegB xor LRegD) xor LRegG and (LRegA xor LRegH)
     xor LRegF and LRegH xor LRegD;
-  LRegE := LTemp[18] + $34E90C6C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[18] + $34E90C6C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegB and (LRegH and not LRegE xor LRegF and LRegG xor LRegA xor LRegC) xor LRegF and (LRegH xor LRegG)
     xor LRegE and LRegG xor LRegC;
-  LRegD := LTemp[11] + $C0AC29B7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[11] + $C0AC29B7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegA and (LRegG and not LRegD xor LRegE and LRegF xor LRegH xor LRegB) xor LRegE and (LRegG xor LRegF)
     xor LRegD and LRegF xor LRegB;
-  LRegC := LTemp[28] + $C97C50DD + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[28] + $C97C50DD + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegH and (LRegF and not LRegC xor LRegD and LRegE xor LRegG xor LRegA) xor LRegD and (LRegF xor LRegE)
     xor LRegC and LRegE xor LRegA;
-  LRegB := LTemp[7] + $3F84D5B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[7] + $3F84D5B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegG and (LRegE and not LRegB xor LRegC and LRegD xor LRegF xor LRegH) xor LRegC and (LRegE xor LRegD)
     xor LRegB and LRegD xor LRegH;
-  LRegA := LTemp[16] + $B5470917 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[16] + $B5470917 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegF and (LRegD and not LRegA xor LRegB and LRegC xor LRegE xor LRegG) xor LRegB and (LRegD xor LRegC)
     xor LRegA and LRegC xor LRegG;
-  LRegH := LTemp[0] + $9216D5D9 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + $9216D5D9 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegE and (LRegC and not LRegH xor LRegA and LRegB xor LRegD xor LRegF) xor LRegA and (LRegC xor LRegB)
     xor LRegH and LRegB xor LRegF;
-  LRegG := LTemp[23] + $8979FB1B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[23] + $8979FB1B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegD and (LRegB and not LRegG xor LRegH and LRegA xor LRegC xor LRegE) xor LRegH and (LRegB xor LRegA)
     xor LRegG and LRegA xor LRegE;
-  LRegF := LTemp[20] + $D1310BA6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[20] + $D1310BA6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegC and (LRegA and not LRegF xor LRegG and LRegH xor LRegB xor LRegD) xor LRegG and (LRegA xor LRegH)
     xor LRegF and LRegH xor LRegD;
-  LRegE := LTemp[22] + $98DFB5AC + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[22] + $98DFB5AC + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegB and (LRegH and not LRegE xor LRegF and LRegG xor LRegA xor LRegC) xor LRegF and (LRegH xor LRegG)
     xor LRegE and LRegG xor LRegC;
-  LRegD := LTemp[1] + $2FFD72DB + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $2FFD72DB + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegA and (LRegG and not LRegD xor LRegE and LRegF xor LRegH xor LRegB) xor LRegE and (LRegG xor LRegF)
     xor LRegD and LRegF xor LRegB;
-  LRegC := LTemp[10] + $D01ADFB7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[10] + $D01ADFB7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegH and (LRegF and not LRegC xor LRegD and LRegE xor LRegG xor LRegA) xor LRegD and (LRegF xor LRegE)
     xor LRegC and LRegE xor LRegA;
-  LRegB := LTemp[4] + $B8E1AFED + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[4] + $B8E1AFED + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegG and (LRegE and not LRegB xor LRegC and LRegD xor LRegF xor LRegH) xor LRegC and (LRegE xor LRegD)
     xor LRegB and LRegD xor LRegH;
-  LRegA := LTemp[8] + $6A267E96 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[8] + $6A267E96 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegF and (LRegD and not LRegA xor LRegB and LRegC xor LRegE xor LRegG) xor LRegB and (LRegD xor LRegC)
     xor LRegA and LRegC xor LRegG;
-  LRegH := LTemp[30] + $BA7C9045 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[30] + $BA7C9045 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegE and (LRegC and not LRegH xor LRegA and LRegB xor LRegD xor LRegF) xor LRegA and (LRegC xor LRegB)
     xor LRegH and LRegB xor LRegF;
-  LRegG := LTemp[3] + $F12C7F99 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[3] + $F12C7F99 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegD and (LRegB and not LRegG xor LRegH and LRegA xor LRegC xor LRegE) xor LRegH and (LRegB xor LRegA)
     xor LRegG and LRegA xor LRegE;
-  LRegF := LTemp[21] + $24A19947 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $24A19947 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegC and (LRegA and not LRegF xor LRegG and LRegH xor LRegB xor LRegD) xor LRegG and (LRegA xor LRegH)
     xor LRegF and LRegH xor LRegD;
-  LRegE := LTemp[9] + $B3916CF7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[9] + $B3916CF7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegB and (LRegH and not LRegE xor LRegF and LRegG xor LRegA xor LRegC) xor LRegF and (LRegH xor LRegG)
     xor LRegE and LRegG xor LRegC;
-  LRegD := LTemp[17] + $0801F2E2 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $0801F2E2 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegA and (LRegG and not LRegD xor LRegE and LRegF xor LRegH xor LRegB) xor LRegE and (LRegG xor LRegF)
     xor LRegD and LRegF xor LRegB;
-  LRegC := LTemp[24] + $858EFC16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[24] + $858EFC16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegH and (LRegF and not LRegC xor LRegD and LRegE xor LRegG xor LRegA) xor LRegD and (LRegF xor LRegE)
     xor LRegC and LRegE xor LRegA;
-  LRegB := LTemp[29] + $636920D8 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[29] + $636920D8 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegG and (LRegE and not LRegB xor LRegC and LRegD xor LRegF xor LRegH) xor LRegC and (LRegE xor LRegD)
     xor LRegB and LRegD xor LRegH;
-  LRegA := LTemp[6] + $71574E69 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[6] + $71574E69 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegF and (LRegD and not LRegA xor LRegB and LRegC xor LRegE xor LRegG) xor LRegB and (LRegD xor LRegC)
     xor LRegA and LRegC xor LRegG;
-  LRegH := LTemp[19] + $A458FEA3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $A458FEA3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegE and (LRegC and not LRegH xor LRegA and LRegB xor LRegD xor LRegF) xor LRegA and (LRegC xor LRegB)
     xor LRegH and LRegB xor LRegF;
-  LRegG := LTemp[12] + $F4933D7E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[12] + $F4933D7E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegD and (LRegB and not LRegG xor LRegH and LRegA xor LRegC xor LRegE) xor LRegH and (LRegB xor LRegA)
     xor LRegG and LRegA xor LRegE;
-  LRegF := LTemp[15] + $0D95748F + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[15] + $0D95748F + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegC and (LRegA and not LRegF xor LRegG and LRegH xor LRegB xor LRegD) xor LRegG and (LRegA xor LRegH)
     xor LRegF and LRegH xor LRegD;
-  LRegE := LTemp[13] + $728EB658 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[13] + $728EB658 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegB and (LRegH and not LRegE xor LRegF and LRegG xor LRegA xor LRegC) xor LRegF and (LRegH xor LRegG)
     xor LRegE and LRegG xor LRegC;
-  LRegD := LTemp[2] + $718BCD58 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[2] + $718BCD58 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegA and (LRegG and not LRegD xor LRegE and LRegF xor LRegH xor LRegB) xor LRegE and (LRegG xor LRegF)
     xor LRegD and LRegF xor LRegB;
-  LRegC := LTemp[25] + $82154AEE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[25] + $82154AEE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegH and (LRegF and not LRegC xor LRegD and LRegE xor LRegG xor LRegA) xor LRegD and (LRegF xor LRegE)
     xor LRegC and LRegE xor LRegA;
-  LRegB := LTemp[31] + $7B54A41D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[31] + $7B54A41D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegG and (LRegE and not LRegB xor LRegC and LRegD xor LRegF xor LRegH) xor LRegC and (LRegE xor LRegD)
     xor LRegB and LRegD xor LRegH;
-  LRegA := LTemp[27] + $C25A59B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $C25A59B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and LRegE xor LRegG xor LRegA) xor LRegF and LRegC xor LRegE and LRegB xor LRegA;
-  LRegH := LTemp[19] + $9C30D539 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $9C30D539 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and LRegD xor LRegF xor LRegH) xor LRegE and LRegB xor LRegD and LRegA xor LRegH;
-  LRegG := LTemp[9] + $2AF26013 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + $2AF26013 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and LRegC xor LRegE xor LRegG) xor LRegD and LRegA xor LRegC and LRegH xor LRegG;
-  LRegF := LTemp[4] + $C5D1B023 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[4] + $C5D1B023 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and LRegB xor LRegD xor LRegF) xor LRegC and LRegH xor LRegB and LRegG xor LRegF;
-  LRegE := LTemp[20] + $286085F0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[20] + $286085F0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and LRegA xor LRegC xor LRegE) xor LRegB and LRegG xor LRegA and LRegF xor LRegE;
-  LRegD := LTemp[28] + $CA417918 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + $CA417918 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and LRegH xor LRegB xor LRegD) xor LRegA and LRegF xor LRegH and LRegE xor LRegD;
-  LRegC := LTemp[17] + $B8DB38EF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[17] + $B8DB38EF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and LRegG xor LRegA xor LRegC) xor LRegH and LRegE xor LRegG and LRegD xor LRegC;
-  LRegB := LTemp[8] + $8E79DCB0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[8] + $8E79DCB0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and LRegF xor LRegH xor LRegB) xor LRegG and LRegD xor LRegF and LRegC xor LRegB;
-  LRegA := LTemp[22] + $603A180E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[22] + $603A180E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and LRegE xor LRegG xor LRegA) xor LRegF and LRegC xor LRegE and LRegB xor LRegA;
-  LRegH := LTemp[29] + $6C9E0E8B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[29] + $6C9E0E8B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and LRegD xor LRegF xor LRegH) xor LRegE and LRegB xor LRegD and LRegA xor LRegH;
-  LRegG := LTemp[14] + $B01E8A3E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $B01E8A3E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and LRegC xor LRegE xor LRegG) xor LRegD and LRegA xor LRegC and LRegH xor LRegG;
-  LRegF := LTemp[25] + $D71577C1 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[25] + $D71577C1 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and LRegB xor LRegD xor LRegF) xor LRegC and LRegH xor LRegB and LRegG xor LRegF;
-  LRegE := LTemp[12] + $BD314B27 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[12] + $BD314B27 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and LRegA xor LRegC xor LRegE) xor LRegB and LRegG xor LRegA and LRegF xor LRegE;
-  LRegD := LTemp[24] + $78AF2FDA + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[24] + $78AF2FDA + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and LRegH xor LRegB xor LRegD) xor LRegA and LRegF xor LRegH and LRegE xor LRegD;
-  LRegC := LTemp[30] + $55605C60 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[30] + $55605C60 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and LRegG xor LRegA xor LRegC) xor LRegH and LRegE xor LRegG and LRegD xor LRegC;
-  LRegB := LTemp[16] + $E65525F3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[16] + $E65525F3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and LRegF xor LRegH xor LRegB) xor LRegG and LRegD xor LRegF and LRegC xor LRegB;
-  LRegA := LTemp[26] + $AA55AB94 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[26] + $AA55AB94 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and LRegE xor LRegG xor LRegA) xor LRegF and LRegC xor LRegE and LRegB xor LRegA;
-  LRegH := LTemp[31] + $57489862 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[31] + $57489862 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and LRegD xor LRegF xor LRegH) xor LRegE and LRegB xor LRegD and LRegA xor LRegH;
-  LRegG := LTemp[15] + $63E81440 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[15] + $63E81440 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and LRegC xor LRegE xor LRegG) xor LRegD and LRegA xor LRegC and LRegH xor LRegG;
-  LRegF := LTemp[7] + $55CA396A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[7] + $55CA396A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and LRegB xor LRegD xor LRegF) xor LRegC and LRegH xor LRegB and LRegG xor LRegF;
-  LRegE := LTemp[3] + $2AAB10B6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + $2AAB10B6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and LRegA xor LRegC xor LRegE) xor LRegB and LRegG xor LRegA and LRegF xor LRegE;
-  LRegD := LTemp[1] + $B4CC5C34 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $B4CC5C34 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and LRegH xor LRegB xor LRegD) xor LRegA and LRegF xor LRegH and LRegE xor LRegD;
-  LRegC := LTemp[0] + $1141E8CE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[0] + $1141E8CE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and LRegG xor LRegA xor LRegC) xor LRegH and LRegE xor LRegG and LRegD xor LRegC;
-  LRegB := LTemp[18] + $A15486AF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[18] + $A15486AF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and LRegF xor LRegH xor LRegB) xor LRegG and LRegD xor LRegF and LRegC xor LRegB;
-  LRegA := LTemp[27] + $7C72E993 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $7C72E993 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and LRegE xor LRegG xor LRegA) xor LRegF and LRegC xor LRegE and LRegB xor LRegA;
-  LRegH := LTemp[13] + $B3EE1411 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[13] + $B3EE1411 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and LRegD xor LRegF xor LRegH) xor LRegE and LRegB xor LRegD and LRegA xor LRegH;
-  LRegG := LTemp[6] + $636FBC2A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[6] + $636FBC2A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and LRegC xor LRegE xor LRegG) xor LRegD and LRegA xor LRegC and LRegH xor LRegG;
-  LRegF := LTemp[21] + $2BA9C55D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $2BA9C55D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and LRegB xor LRegD xor LRegF) xor LRegC and LRegH xor LRegB and LRegG xor LRegF;
-  LRegE := LTemp[10] + $741831F6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[10] + $741831F6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and LRegA xor LRegC xor LRegE) xor LRegB and LRegG xor LRegA and LRegF xor LRegE;
-  LRegD := LTemp[23] + $CE5C3E16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[23] + $CE5C3E16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and LRegH xor LRegB xor LRegD) xor LRegA and LRegF xor LRegH and LRegE xor LRegD;
-  LRegC := LTemp[11] + $9B87931E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[11] + $9B87931E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and LRegG xor LRegA xor LRegC) xor LRegH and LRegE xor LRegG and LRegD xor LRegC;
-  LRegB := LTemp[5] + $AFD6BA33 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[5] + $AFD6BA33 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and LRegF xor LRegH xor LRegB) xor LRegG and LRegD xor LRegF and LRegC xor LRegB;
-  LRegA := LTemp[2] + $6C24CF5C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[2] + $6C24CF5C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   FHash[0] := FHash[0] + LRegA;
   FHash[1] := FHash[1] + LRegB;
@@ -803,7 +803,7 @@ var
   LRegA, LRegB, LRegC, LRegD, LRegE, LRegF, LRegG, LRegH, LNfOut: UInt32;
   LTemp: array [0 .. 31] of UInt32;
 begin
-  TConverters.le32_copy(AData, AIndex, @(LTemp[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LTemp[0]), 0, ADataLength);
 
   LRegA := FHash[0];
   LRegB := FHash[1];
@@ -815,548 +815,548 @@ begin
   LRegH := FHash[7];
 
   LNfOut := LRegD and (LRegA xor LRegB) xor LRegF and LRegG xor LRegE and LRegC xor LRegA;
-  LRegH := LTemp[0] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegH xor LRegA) xor LRegE and LRegF xor LRegD and LRegB xor LRegH;
-  LRegG := LTemp[1] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[1] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegG xor LRegH) xor LRegD and LRegE xor LRegC and LRegA xor LRegG;
-  LRegF := LTemp[2] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[2] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegF xor LRegG) xor LRegC and LRegD xor LRegB and LRegH xor LRegF;
-  LRegE := LTemp[3] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegE xor LRegF) xor LRegB and LRegC xor LRegA and LRegG xor LRegE;
-  LRegD := LTemp[4] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[4] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegD xor LRegE) xor LRegA and LRegB xor LRegH and LRegF xor LRegD;
-  LRegC := LTemp[5] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[5] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegC xor LRegD) xor LRegH and LRegA xor LRegG and LRegE xor LRegC;
-  LRegB := LTemp[6] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[6] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegB xor LRegC) xor LRegG and LRegH xor LRegF and LRegD xor LRegB;
-  LRegA := LTemp[7] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[7] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegA xor LRegB) xor LRegF and LRegG xor LRegE and LRegC xor LRegA;
-  LRegH := LTemp[8] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[8] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegH xor LRegA) xor LRegE and LRegF xor LRegD and LRegB xor LRegH;
-  LRegG := LTemp[9] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegG xor LRegH) xor LRegD and LRegE xor LRegC and LRegA xor LRegG;
-  LRegF := LTemp[10] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[10] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegF xor LRegG) xor LRegC and LRegD xor LRegB and LRegH xor LRegF;
-  LRegE := LTemp[11] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[11] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegE xor LRegF) xor LRegB and LRegC xor LRegA and LRegG xor LRegE;
-  LRegD := LTemp[12] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[12] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegD xor LRegE) xor LRegA and LRegB xor LRegH and LRegF xor LRegD;
-  LRegC := LTemp[13] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[13] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegC xor LRegD) xor LRegH and LRegA xor LRegG and LRegE xor LRegC;
-  LRegB := LTemp[14] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[14] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegB xor LRegC) xor LRegG and LRegH xor LRegF and LRegD xor LRegB;
-  LRegA := LTemp[15] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[15] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegA xor LRegB) xor LRegF and LRegG xor LRegE and LRegC xor LRegA;
-  LRegH := LTemp[16] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[16] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegH xor LRegA) xor LRegE and LRegF xor LRegD and LRegB xor LRegH;
-  LRegG := LTemp[17] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[17] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegG xor LRegH) xor LRegD and LRegE xor LRegC and LRegA xor LRegG;
-  LRegF := LTemp[18] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[18] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegF xor LRegG) xor LRegC and LRegD xor LRegB and LRegH xor LRegF;
-  LRegE := LTemp[19] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[19] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegE xor LRegF) xor LRegB and LRegC xor LRegA and LRegG xor LRegE;
-  LRegD := LTemp[20] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[20] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegD xor LRegE) xor LRegA and LRegB xor LRegH and LRegF xor LRegD;
-  LRegC := LTemp[21] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[21] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegC xor LRegD) xor LRegH and LRegA xor LRegG and LRegE xor LRegC;
-  LRegB := LTemp[22] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[22] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegB xor LRegC) xor LRegG and LRegH xor LRegF and LRegD xor LRegB;
-  LRegA := LTemp[23] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[23] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegA xor LRegB) xor LRegF and LRegG xor LRegE and LRegC xor LRegA;
-  LRegH := LTemp[24] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[24] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegH xor LRegA) xor LRegE and LRegF xor LRegD and LRegB xor LRegH;
-  LRegG := LTemp[25] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[25] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegG xor LRegH) xor LRegD and LRegE xor LRegC and LRegA xor LRegG;
-  LRegF := LTemp[26] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegF xor LRegG) xor LRegC and LRegD xor LRegB and LRegH xor LRegF;
-  LRegE := LTemp[27] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[27] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegE xor LRegF) xor LRegB and LRegC xor LRegA and LRegG xor LRegE;
-  LRegD := LTemp[28] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegD xor LRegE) xor LRegA and LRegB xor LRegH and LRegF xor LRegD;
-  LRegC := LTemp[29] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[29] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegC xor LRegD) xor LRegH and LRegA xor LRegG and LRegE xor LRegC;
-  LRegB := LTemp[30] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[30] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegB xor LRegC) xor LRegG and LRegH xor LRegF and LRegD xor LRegB;
-  LRegA := LTemp[31] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[31] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegG and not LRegA xor LRegC and LRegF xor LRegD xor LRegE) xor LRegC and (LRegG xor LRegF)
     xor LRegA and LRegF xor LRegE;
-  LRegH := LTemp[5] + $452821E6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[5] + $452821E6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegF and not LRegH xor LRegB and LRegE xor LRegC xor LRegD) xor LRegB and (LRegF xor LRegE)
     xor LRegH and LRegE xor LRegD;
-  LRegG := LTemp[14] + $38D01377 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $38D01377 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegE and not LRegG xor LRegA and LRegD xor LRegB xor LRegC) xor LRegA and (LRegE xor LRegD)
     xor LRegG and LRegD xor LRegC;
-  LRegF := LTemp[26] + $BE5466CF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + $BE5466CF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegD and not LRegF xor LRegH and LRegC xor LRegA xor LRegB) xor LRegH and (LRegD xor LRegC)
     xor LRegF and LRegC xor LRegB;
-  LRegE := LTemp[18] + $34E90C6C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[18] + $34E90C6C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegC and not LRegE xor LRegG and LRegB xor LRegH xor LRegA) xor LRegG and (LRegC xor LRegB)
     xor LRegE and LRegB xor LRegA;
-  LRegD := LTemp[11] + $C0AC29B7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[11] + $C0AC29B7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegB and not LRegD xor LRegF and LRegA xor LRegG xor LRegH) xor LRegF and (LRegB xor LRegA)
     xor LRegD and LRegA xor LRegH;
-  LRegC := LTemp[28] + $C97C50DD + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[28] + $C97C50DD + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegA and not LRegC xor LRegE and LRegH xor LRegF xor LRegG) xor LRegE and (LRegA xor LRegH)
     xor LRegC and LRegH xor LRegG;
-  LRegB := LTemp[7] + $3F84D5B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[7] + $3F84D5B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegH and not LRegB xor LRegD and LRegG xor LRegE xor LRegF) xor LRegD and (LRegH xor LRegG)
     xor LRegB and LRegG xor LRegF;
-  LRegA := LTemp[16] + $B5470917 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[16] + $B5470917 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegG and not LRegA xor LRegC and LRegF xor LRegD xor LRegE) xor LRegC and (LRegG xor LRegF)
     xor LRegA and LRegF xor LRegE;
-  LRegH := LTemp[0] + $9216D5D9 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + $9216D5D9 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegF and not LRegH xor LRegB and LRegE xor LRegC xor LRegD) xor LRegB and (LRegF xor LRegE)
     xor LRegH and LRegE xor LRegD;
-  LRegG := LTemp[23] + $8979FB1B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[23] + $8979FB1B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegE and not LRegG xor LRegA and LRegD xor LRegB xor LRegC) xor LRegA and (LRegE xor LRegD)
     xor LRegG and LRegD xor LRegC;
-  LRegF := LTemp[20] + $D1310BA6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[20] + $D1310BA6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegD and not LRegF xor LRegH and LRegC xor LRegA xor LRegB) xor LRegH and (LRegD xor LRegC)
     xor LRegF and LRegC xor LRegB;
-  LRegE := LTemp[22] + $98DFB5AC + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[22] + $98DFB5AC + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegC and not LRegE xor LRegG and LRegB xor LRegH xor LRegA) xor LRegG and (LRegC xor LRegB)
     xor LRegE and LRegB xor LRegA;
-  LRegD := LTemp[1] + $2FFD72DB + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $2FFD72DB + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegB and not LRegD xor LRegF and LRegA xor LRegG xor LRegH) xor LRegF and (LRegB xor LRegA)
     xor LRegD and LRegA xor LRegH;
-  LRegC := LTemp[10] + $D01ADFB7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[10] + $D01ADFB7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegA and not LRegC xor LRegE and LRegH xor LRegF xor LRegG) xor LRegE and (LRegA xor LRegH)
     xor LRegC and LRegH xor LRegG;
-  LRegB := LTemp[4] + $B8E1AFED + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[4] + $B8E1AFED + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegH and not LRegB xor LRegD and LRegG xor LRegE xor LRegF) xor LRegD and (LRegH xor LRegG)
     xor LRegB and LRegG xor LRegF;
-  LRegA := LTemp[8] + $6A267E96 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[8] + $6A267E96 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegG and not LRegA xor LRegC and LRegF xor LRegD xor LRegE) xor LRegC and (LRegG xor LRegF)
     xor LRegA and LRegF xor LRegE;
-  LRegH := LTemp[30] + $BA7C9045 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[30] + $BA7C9045 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegF and not LRegH xor LRegB and LRegE xor LRegC xor LRegD) xor LRegB and (LRegF xor LRegE)
     xor LRegH and LRegE xor LRegD;
-  LRegG := LTemp[3] + $F12C7F99 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[3] + $F12C7F99 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegE and not LRegG xor LRegA and LRegD xor LRegB xor LRegC) xor LRegA and (LRegE xor LRegD)
     xor LRegG and LRegD xor LRegC;
-  LRegF := LTemp[21] + $24A19947 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $24A19947 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegD and not LRegF xor LRegH and LRegC xor LRegA xor LRegB) xor LRegH and (LRegD xor LRegC)
     xor LRegF and LRegC xor LRegB;
-  LRegE := LTemp[9] + $B3916CF7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[9] + $B3916CF7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegC and not LRegE xor LRegG and LRegB xor LRegH xor LRegA) xor LRegG and (LRegC xor LRegB)
     xor LRegE and LRegB xor LRegA;
-  LRegD := LTemp[17] + $0801F2E2 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $0801F2E2 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegB and not LRegD xor LRegF and LRegA xor LRegG xor LRegH) xor LRegF and (LRegB xor LRegA)
     xor LRegD and LRegA xor LRegH;
-  LRegC := LTemp[24] + $858EFC16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[24] + $858EFC16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegA and not LRegC xor LRegE and LRegH xor LRegF xor LRegG) xor LRegE and (LRegA xor LRegH)
     xor LRegC and LRegH xor LRegG;
-  LRegB := LTemp[29] + $636920D8 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[29] + $636920D8 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegH and not LRegB xor LRegD and LRegG xor LRegE xor LRegF) xor LRegD and (LRegH xor LRegG)
     xor LRegB and LRegG xor LRegF;
-  LRegA := LTemp[6] + $71574E69 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[6] + $71574E69 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegG and not LRegA xor LRegC and LRegF xor LRegD xor LRegE) xor LRegC and (LRegG xor LRegF)
     xor LRegA and LRegF xor LRegE;
-  LRegH := LTemp[19] + $A458FEA3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $A458FEA3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegF and not LRegH xor LRegB and LRegE xor LRegC xor LRegD) xor LRegB and (LRegF xor LRegE)
     xor LRegH and LRegE xor LRegD;
-  LRegG := LTemp[12] + $F4933D7E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[12] + $F4933D7E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegE and not LRegG xor LRegA and LRegD xor LRegB xor LRegC) xor LRegA and (LRegE xor LRegD)
     xor LRegG and LRegD xor LRegC;
-  LRegF := LTemp[15] + $0D95748F + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[15] + $0D95748F + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegD and not LRegF xor LRegH and LRegC xor LRegA xor LRegB) xor LRegH and (LRegD xor LRegC)
     xor LRegF and LRegC xor LRegB;
-  LRegE := LTemp[13] + $728EB658 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[13] + $728EB658 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegC and not LRegE xor LRegG and LRegB xor LRegH xor LRegA) xor LRegG and (LRegC xor LRegB)
     xor LRegE and LRegB xor LRegA;
-  LRegD := LTemp[2] + $718BCD58 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[2] + $718BCD58 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegB and not LRegD xor LRegF and LRegA xor LRegG xor LRegH) xor LRegF and (LRegB xor LRegA)
     xor LRegD and LRegA xor LRegH;
-  LRegC := LTemp[25] + $82154AEE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[25] + $82154AEE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegA and not LRegC xor LRegE and LRegH xor LRegF xor LRegG) xor LRegE and (LRegA xor LRegH)
     xor LRegC and LRegH xor LRegG;
-  LRegB := LTemp[31] + $7B54A41D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[31] + $7B54A41D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegH and not LRegB xor LRegD and LRegG xor LRegE xor LRegF) xor LRegD and (LRegH xor LRegG)
     xor LRegB and LRegG xor LRegF;
-  LRegA := LTemp[27] + $C25A59B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $C25A59B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegG and (LRegC and LRegA xor LRegB xor LRegF) xor LRegC and LRegD xor LRegA and LRegE xor LRegF;
-  LRegH := LTemp[19] + $9C30D539 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $9C30D539 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegF and (LRegB and LRegH xor LRegA xor LRegE) xor LRegB and LRegC xor LRegH and LRegD xor LRegE;
-  LRegG := LTemp[9] + $2AF26013 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + $2AF26013 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegE and (LRegA and LRegG xor LRegH xor LRegD) xor LRegA and LRegB xor LRegG and LRegC xor LRegD;
-  LRegF := LTemp[4] + $C5D1B023 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[4] + $C5D1B023 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegD and (LRegH and LRegF xor LRegG xor LRegC) xor LRegH and LRegA xor LRegF and LRegB xor LRegC;
-  LRegE := LTemp[20] + $286085F0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[20] + $286085F0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegC and (LRegG and LRegE xor LRegF xor LRegB) xor LRegG and LRegH xor LRegE and LRegA xor LRegB;
-  LRegD := LTemp[28] + $CA417918 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + $CA417918 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegB and (LRegF and LRegD xor LRegE xor LRegA) xor LRegF and LRegG xor LRegD and LRegH xor LRegA;
-  LRegC := LTemp[17] + $B8DB38EF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[17] + $B8DB38EF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegA and (LRegE and LRegC xor LRegD xor LRegH) xor LRegE and LRegF xor LRegC and LRegG xor LRegH;
-  LRegB := LTemp[8] + $8E79DCB0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[8] + $8E79DCB0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegH and (LRegD and LRegB xor LRegC xor LRegG) xor LRegD and LRegE xor LRegB and LRegF xor LRegG;
-  LRegA := LTemp[22] + $603A180E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[22] + $603A180E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegG and (LRegC and LRegA xor LRegB xor LRegF) xor LRegC and LRegD xor LRegA and LRegE xor LRegF;
-  LRegH := LTemp[29] + $6C9E0E8B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[29] + $6C9E0E8B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegF and (LRegB and LRegH xor LRegA xor LRegE) xor LRegB and LRegC xor LRegH and LRegD xor LRegE;
-  LRegG := LTemp[14] + $B01E8A3E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $B01E8A3E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegE and (LRegA and LRegG xor LRegH xor LRegD) xor LRegA and LRegB xor LRegG and LRegC xor LRegD;
-  LRegF := LTemp[25] + $D71577C1 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[25] + $D71577C1 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegD and (LRegH and LRegF xor LRegG xor LRegC) xor LRegH and LRegA xor LRegF and LRegB xor LRegC;
-  LRegE := LTemp[12] + $BD314B27 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[12] + $BD314B27 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegC and (LRegG and LRegE xor LRegF xor LRegB) xor LRegG and LRegH xor LRegE and LRegA xor LRegB;
-  LRegD := LTemp[24] + $78AF2FDA + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[24] + $78AF2FDA + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegB and (LRegF and LRegD xor LRegE xor LRegA) xor LRegF and LRegG xor LRegD and LRegH xor LRegA;
-  LRegC := LTemp[30] + $55605C60 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[30] + $55605C60 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegA and (LRegE and LRegC xor LRegD xor LRegH) xor LRegE and LRegF xor LRegC and LRegG xor LRegH;
-  LRegB := LTemp[16] + $E65525F3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[16] + $E65525F3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegH and (LRegD and LRegB xor LRegC xor LRegG) xor LRegD and LRegE xor LRegB and LRegF xor LRegG;
-  LRegA := LTemp[26] + $AA55AB94 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[26] + $AA55AB94 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegG and (LRegC and LRegA xor LRegB xor LRegF) xor LRegC and LRegD xor LRegA and LRegE xor LRegF;
-  LRegH := LTemp[31] + $57489862 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[31] + $57489862 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegF and (LRegB and LRegH xor LRegA xor LRegE) xor LRegB and LRegC xor LRegH and LRegD xor LRegE;
-  LRegG := LTemp[15] + $63E81440 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[15] + $63E81440 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegE and (LRegA and LRegG xor LRegH xor LRegD) xor LRegA and LRegB xor LRegG and LRegC xor LRegD;
-  LRegF := LTemp[7] + $55CA396A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[7] + $55CA396A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegD and (LRegH and LRegF xor LRegG xor LRegC) xor LRegH and LRegA xor LRegF and LRegB xor LRegC;
-  LRegE := LTemp[3] + $2AAB10B6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + $2AAB10B6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegC and (LRegG and LRegE xor LRegF xor LRegB) xor LRegG and LRegH xor LRegE and LRegA xor LRegB;
-  LRegD := LTemp[1] + $B4CC5C34 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $B4CC5C34 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegB and (LRegF and LRegD xor LRegE xor LRegA) xor LRegF and LRegG xor LRegD and LRegH xor LRegA;
-  LRegC := LTemp[0] + $1141E8CE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[0] + $1141E8CE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegA and (LRegE and LRegC xor LRegD xor LRegH) xor LRegE and LRegF xor LRegC and LRegG xor LRegH;
-  LRegB := LTemp[18] + $A15486AF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[18] + $A15486AF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegH and (LRegD and LRegB xor LRegC xor LRegG) xor LRegD and LRegE xor LRegB and LRegF xor LRegG;
-  LRegA := LTemp[27] + $7C72E993 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $7C72E993 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegG and (LRegC and LRegA xor LRegB xor LRegF) xor LRegC and LRegD xor LRegA and LRegE xor LRegF;
-  LRegH := LTemp[13] + $B3EE1411 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[13] + $B3EE1411 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegF and (LRegB and LRegH xor LRegA xor LRegE) xor LRegB and LRegC xor LRegH and LRegD xor LRegE;
-  LRegG := LTemp[6] + $636FBC2A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[6] + $636FBC2A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegE and (LRegA and LRegG xor LRegH xor LRegD) xor LRegA and LRegB xor LRegG and LRegC xor LRegD;
-  LRegF := LTemp[21] + $2BA9C55D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $2BA9C55D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegD and (LRegH and LRegF xor LRegG xor LRegC) xor LRegH and LRegA xor LRegF and LRegB xor LRegC;
-  LRegE := LTemp[10] + $741831F6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[10] + $741831F6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegC and (LRegG and LRegE xor LRegF xor LRegB) xor LRegG and LRegH xor LRegE and LRegA xor LRegB;
-  LRegD := LTemp[23] + $CE5C3E16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[23] + $CE5C3E16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegB and (LRegF and LRegD xor LRegE xor LRegA) xor LRegF and LRegG xor LRegD and LRegH xor LRegA;
-  LRegC := LTemp[11] + $9B87931E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[11] + $9B87931E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegA and (LRegE and LRegC xor LRegD xor LRegH) xor LRegE and LRegF xor LRegC and LRegG xor LRegH;
-  LRegB := LTemp[5] + $AFD6BA33 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[5] + $AFD6BA33 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegH and (LRegD and LRegB xor LRegC xor LRegG) xor LRegD and LRegE xor LRegB and LRegF xor LRegG;
-  LRegA := LTemp[2] + $6C24CF5C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[2] + $6C24CF5C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegA and (LRegE and not LRegC xor LRegF and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegF and
     (LRegB and LRegC xor LRegE xor LRegG) xor LRegC and LRegG xor LRegD;
-  LRegH := LTemp[24] + $7A325381 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[24] + $7A325381 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegH and (LRegD and not LRegB xor LRegE and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegE and
     (LRegA and LRegB xor LRegD xor LRegF) xor LRegB and LRegF xor LRegC;
-  LRegG := LTemp[4] + $28958677 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[4] + $28958677 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegG and (LRegC and not LRegA xor LRegD and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegD and
     (LRegH and LRegA xor LRegC xor LRegE) xor LRegA and LRegE xor LRegB;
-  LRegF := LTemp[0] + $3B8F4898 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[0] + $3B8F4898 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegF and (LRegB and not LRegH xor LRegC and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegC and
     (LRegG and LRegH xor LRegB xor LRegD) xor LRegH and LRegD xor LRegA;
-  LRegE := LTemp[14] + $6B4BB9AF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[14] + $6B4BB9AF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegE and (LRegA and not LRegG xor LRegB and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegB and
     (LRegF and LRegG xor LRegA xor LRegC) xor LRegG and LRegC xor LRegH;
-  LRegD := LTemp[2] + $C4BFE81B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[2] + $C4BFE81B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegD and (LRegH and not LRegF xor LRegA and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegA and
     (LRegE and LRegF xor LRegH xor LRegB) xor LRegF and LRegB xor LRegG;
-  LRegC := LTemp[7] + $66282193 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[7] + $66282193 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegC and (LRegG and not LRegE xor LRegH and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegH and
     (LRegD and LRegE xor LRegG xor LRegA) xor LRegE and LRegA xor LRegF;
-  LRegB := LTemp[28] + $61D809CC + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[28] + $61D809CC + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegB and (LRegF and not LRegD xor LRegG and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegG and
     (LRegC and LRegD xor LRegF xor LRegH) xor LRegD and LRegH xor LRegE;
-  LRegA := LTemp[23] + $FB21A991 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[23] + $FB21A991 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegA and (LRegE and not LRegC xor LRegF and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegF and
     (LRegB and LRegC xor LRegE xor LRegG) xor LRegC and LRegG xor LRegD;
-  LRegH := LTemp[26] + $487CAC60 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[26] + $487CAC60 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegH and (LRegD and not LRegB xor LRegE and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegE and
     (LRegA and LRegB xor LRegD xor LRegF) xor LRegB and LRegF xor LRegC;
-  LRegG := LTemp[6] + $5DEC8032 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[6] + $5DEC8032 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegG and (LRegC and not LRegA xor LRegD and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegD and
     (LRegH and LRegA xor LRegC xor LRegE) xor LRegA and LRegE xor LRegB;
-  LRegF := LTemp[30] + $EF845D5D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[30] + $EF845D5D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegF and (LRegB and not LRegH xor LRegC and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegC and
     (LRegG and LRegH xor LRegB xor LRegD) xor LRegH and LRegD xor LRegA;
-  LRegE := LTemp[20] + $E98575B1 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[20] + $E98575B1 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegE and (LRegA and not LRegG xor LRegB and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegB and
     (LRegF and LRegG xor LRegA xor LRegC) xor LRegG and LRegC xor LRegH;
-  LRegD := LTemp[18] + $DC262302 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[18] + $DC262302 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegD and (LRegH and not LRegF xor LRegA and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegA and
     (LRegE and LRegF xor LRegH xor LRegB) xor LRegF and LRegB xor LRegG;
-  LRegC := LTemp[25] + $EB651B88 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[25] + $EB651B88 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegC and (LRegG and not LRegE xor LRegH and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegH and
     (LRegD and LRegE xor LRegG xor LRegA) xor LRegE and LRegA xor LRegF;
-  LRegB := LTemp[19] + $23893E81 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[19] + $23893E81 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegB and (LRegF and not LRegD xor LRegG and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegG and
     (LRegC and LRegD xor LRegF xor LRegH) xor LRegD and LRegH xor LRegE;
-  LRegA := LTemp[3] + $D396ACC5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[3] + $D396ACC5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegA and (LRegE and not LRegC xor LRegF and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegF and
     (LRegB and LRegC xor LRegE xor LRegG) xor LRegC and LRegG xor LRegD;
-  LRegH := LTemp[22] + $0F6D6FF3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[22] + $0F6D6FF3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegH and (LRegD and not LRegB xor LRegE and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegE and
     (LRegA and LRegB xor LRegD xor LRegF) xor LRegB and LRegF xor LRegC;
-  LRegG := LTemp[11] + $83F44239 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[11] + $83F44239 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegG and (LRegC and not LRegA xor LRegD and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegD and
     (LRegH and LRegA xor LRegC xor LRegE) xor LRegA and LRegE xor LRegB;
-  LRegF := LTemp[31] + $2E0B4482 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[31] + $2E0B4482 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegF and (LRegB and not LRegH xor LRegC and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegC and
     (LRegG and LRegH xor LRegB xor LRegD) xor LRegH and LRegD xor LRegA;
-  LRegE := LTemp[21] + $A4842004 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[21] + $A4842004 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegE and (LRegA and not LRegG xor LRegB and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegB and
     (LRegF and LRegG xor LRegA xor LRegC) xor LRegG and LRegC xor LRegH;
-  LRegD := LTemp[8] + $69C8F04A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[8] + $69C8F04A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegD and (LRegH and not LRegF xor LRegA and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegA and
     (LRegE and LRegF xor LRegH xor LRegB) xor LRegF and LRegB xor LRegG;
-  LRegC := LTemp[27] + $9E1F9B5E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[27] + $9E1F9B5E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegC and (LRegG and not LRegE xor LRegH and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegH and
     (LRegD and LRegE xor LRegG xor LRegA) xor LRegE and LRegA xor LRegF;
-  LRegB := LTemp[12] + $21C66842 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[12] + $21C66842 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegB and (LRegF and not LRegD xor LRegG and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegG and
     (LRegC and LRegD xor LRegF xor LRegH) xor LRegD and LRegH xor LRegE;
-  LRegA := LTemp[9] + $F6E96C9A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[9] + $F6E96C9A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegA and (LRegE and not LRegC xor LRegF and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegF and
     (LRegB and LRegC xor LRegE xor LRegG) xor LRegC and LRegG xor LRegD;
-  LRegH := LTemp[1] + $670C9C61 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[1] + $670C9C61 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegH and (LRegD and not LRegB xor LRegE and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegE and
     (LRegA and LRegB xor LRegD xor LRegF) xor LRegB and LRegF xor LRegC;
-  LRegG := LTemp[29] + $ABD388F0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[29] + $ABD388F0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegG and (LRegC and not LRegA xor LRegD and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegD and
     (LRegH and LRegA xor LRegC xor LRegE) xor LRegA and LRegE xor LRegB;
-  LRegF := LTemp[5] + $6A51A0D2 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[5] + $6A51A0D2 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegF and (LRegB and not LRegH xor LRegC and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegC and
     (LRegG and LRegH xor LRegB xor LRegD) xor LRegH and LRegD xor LRegA;
-  LRegE := LTemp[15] + $D8542F68 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[15] + $D8542F68 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegE and (LRegA and not LRegG xor LRegB and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegB and
     (LRegF and LRegG xor LRegA xor LRegC) xor LRegG and LRegC xor LRegH;
-  LRegD := LTemp[17] + $960FA728 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $960FA728 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegD and (LRegH and not LRegF xor LRegA and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegA and
     (LRegE and LRegF xor LRegH xor LRegB) xor LRegF and LRegB xor LRegG;
-  LRegC := LTemp[10] + $AB5133A3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[10] + $AB5133A3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegC and (LRegG and not LRegE xor LRegH and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegH and
     (LRegD and LRegE xor LRegG xor LRegA) xor LRegE and LRegA xor LRegF;
-  LRegB := LTemp[16] + $6EEF0B6C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[16] + $6EEF0B6C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegB and (LRegF and not LRegD xor LRegG and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegG and
     (LRegC and LRegD xor LRegF xor LRegH) xor LRegD and LRegH xor LRegE;
-  LRegA := LTemp[13] + $137A3BE4 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[13] + $137A3BE4 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   FHash[0] := FHash[0] + LRegA;
   FHash[1] := FHash[1] + LRegB;
@@ -1383,7 +1383,7 @@ var
   LRegA, LRegB, LRegC, LRegD, LRegE, LRegF, LRegG, LRegH, LNfOut: UInt32;
   LTemp: array [0 .. 31] of UInt32;
 begin
-  TConverters.le32_copy(AData, AIndex, @(LTemp[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LTemp[0]), 0, ADataLength);
 
   LRegA := FHash[0];
   LRegB := FHash[1];
@@ -1395,675 +1395,675 @@ begin
   LRegH := FHash[7];
 
   LNfOut := LRegC and (LRegG xor LRegB) xor LRegF and LRegE xor LRegA and LRegD xor LRegG;
-  LRegH := LTemp[0] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
   LNfOut := LRegB and (LRegF xor LRegA) xor LRegE and LRegD xor LRegH and LRegC xor LRegF;
-  LRegG := LTemp[1] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[1] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegE xor LRegH) xor LRegD and LRegC xor LRegG and LRegB xor LRegE;
-  LRegF := LTemp[2] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[2] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegD xor LRegG) xor LRegC and LRegB xor LRegF and LRegA xor LRegD;
-  LRegE := LTemp[3] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegC xor LRegF) xor LRegB and LRegA xor LRegE and LRegH xor LRegC;
-  LRegD := LTemp[4] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[4] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegB xor LRegE) xor LRegA and LRegH xor LRegD and LRegG xor LRegB;
-  LRegC := LTemp[5] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[5] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegA xor LRegD) xor LRegH and LRegG xor LRegC and LRegF xor LRegA;
-  LRegB := LTemp[6] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[6] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegH xor LRegC) xor LRegG and LRegF xor LRegB and LRegE xor LRegH;
-  LRegA := LTemp[7] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[7] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegG xor LRegB) xor LRegF and LRegE xor LRegA and LRegD xor LRegG;
-  LRegH := LTemp[8] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[8] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegF xor LRegA) xor LRegE and LRegD xor LRegH and LRegC xor LRegF;
-  LRegG := LTemp[9] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegE xor LRegH) xor LRegD and LRegC xor LRegG and LRegB xor LRegE;
-  LRegF := LTemp[10] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[10] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegD xor LRegG) xor LRegC and LRegB xor LRegF and LRegA xor LRegD;
-  LRegE := LTemp[11] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[11] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegC xor LRegF) xor LRegB and LRegA xor LRegE and LRegH xor LRegC;
-  LRegD := LTemp[12] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[12] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegB xor LRegE) xor LRegA and LRegH xor LRegD and LRegG xor LRegB;
-  LRegC := LTemp[13] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[13] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegA xor LRegD) xor LRegH and LRegG xor LRegC and LRegF xor LRegA;
-  LRegB := LTemp[14] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[14] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegH xor LRegC) xor LRegG and LRegF xor LRegB and LRegE xor LRegH;
-  LRegA := LTemp[15] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[15] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegG xor LRegB) xor LRegF and LRegE xor LRegA and LRegD xor LRegG;
-  LRegH := LTemp[16] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[16] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegF xor LRegA) xor LRegE and LRegD xor LRegH and LRegC xor LRegF;
-  LRegG := LTemp[17] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[17] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegE xor LRegH) xor LRegD and LRegC xor LRegG and LRegB xor LRegE;
-  LRegF := LTemp[18] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[18] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegD xor LRegG) xor LRegC and LRegB xor LRegF and LRegA xor LRegD;
-  LRegE := LTemp[19] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[19] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegC xor LRegF) xor LRegB and LRegA xor LRegE and LRegH xor LRegC;
-  LRegD := LTemp[20] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[20] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegB xor LRegE) xor LRegA and LRegH xor LRegD and LRegG xor LRegB;
-  LRegC := LTemp[21] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[21] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegA xor LRegD) xor LRegH and LRegG xor LRegC and LRegF xor LRegA;
-  LRegB := LTemp[22] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[22] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegH xor LRegC) xor LRegG and LRegF xor LRegB and LRegE xor LRegH;
-  LRegA := LTemp[23] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[23] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegC and (LRegG xor LRegB) xor LRegF and LRegE xor LRegA and LRegD xor LRegG;
-  LRegH := LTemp[24] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[24] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegB and (LRegF xor LRegA) xor LRegE and LRegD xor LRegH and LRegC xor LRegF;
-  LRegG := LTemp[25] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[25] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegA and (LRegE xor LRegH) xor LRegD and LRegC xor LRegG and LRegB xor LRegE;
-  LRegF := LTemp[26] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegH and (LRegD xor LRegG) xor LRegC and LRegB xor LRegF and LRegA xor LRegD;
-  LRegE := LTemp[27] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[27] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegG and (LRegC xor LRegF) xor LRegB and LRegA xor LRegE and LRegH xor LRegC;
-  LRegD := LTemp[28] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegF and (LRegB xor LRegE) xor LRegA and LRegH xor LRegD and LRegG xor LRegB;
-  LRegC := LTemp[29] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[29] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegE and (LRegA xor LRegD) xor LRegH and LRegG xor LRegC and LRegF xor LRegA;
-  LRegB := LTemp[30] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[30] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegD and (LRegH xor LRegC) xor LRegG and LRegF xor LRegB and LRegE xor LRegH;
-  LRegA := LTemp[31] + TBits.RotateRight32(LNfOut, 7) + TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[31] + TBitOperations.RotateRight32(LNfOut, 7) + TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegE and not LRegA xor LRegB and LRegC xor LRegG xor LRegF) xor LRegB and (LRegE xor LRegC)
     xor LRegA and LRegC xor LRegF;
-  LRegH := LTemp[5] + $452821E6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[5] + $452821E6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegD and not LRegH xor LRegA and LRegB xor LRegF xor LRegE) xor LRegA and (LRegD xor LRegB)
     xor LRegH and LRegB xor LRegE;
-  LRegG := LTemp[14] + $38D01377 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $38D01377 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegC and not LRegG xor LRegH and LRegA xor LRegE xor LRegD) xor LRegH and (LRegC xor LRegA)
     xor LRegG and LRegA xor LRegD;
-  LRegF := LTemp[26] + $BE5466CF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[26] + $BE5466CF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegB and not LRegF xor LRegG and LRegH xor LRegD xor LRegC) xor LRegG and (LRegB xor LRegH)
     xor LRegF and LRegH xor LRegC;
-  LRegE := LTemp[18] + $34E90C6C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[18] + $34E90C6C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegA and not LRegE xor LRegF and LRegG xor LRegC xor LRegB) xor LRegF and (LRegA xor LRegG)
     xor LRegE and LRegG xor LRegB;
-  LRegD := LTemp[11] + $C0AC29B7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[11] + $C0AC29B7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegH and not LRegD xor LRegE and LRegF xor LRegB xor LRegA) xor LRegE and (LRegH xor LRegF)
     xor LRegD and LRegF xor LRegA;
-  LRegC := LTemp[28] + $C97C50DD + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[28] + $C97C50DD + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegG and not LRegC xor LRegD and LRegE xor LRegA xor LRegH) xor LRegD and (LRegG xor LRegE)
     xor LRegC and LRegE xor LRegH;
-  LRegB := LTemp[7] + $3F84D5B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[7] + $3F84D5B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegF and not LRegB xor LRegC and LRegD xor LRegH xor LRegG) xor LRegC and (LRegF xor LRegD)
     xor LRegB and LRegD xor LRegG;
-  LRegA := LTemp[16] + $B5470917 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[16] + $B5470917 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegE and not LRegA xor LRegB and LRegC xor LRegG xor LRegF) xor LRegB and (LRegE xor LRegC)
     xor LRegA and LRegC xor LRegF;
-  LRegH := LTemp[0] + $9216D5D9 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[0] + $9216D5D9 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegD and not LRegH xor LRegA and LRegB xor LRegF xor LRegE) xor LRegA and (LRegD xor LRegB)
     xor LRegH and LRegB xor LRegE;
-  LRegG := LTemp[23] + $8979FB1B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[23] + $8979FB1B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegC and not LRegG xor LRegH and LRegA xor LRegE xor LRegD) xor LRegH and (LRegC xor LRegA)
     xor LRegG and LRegA xor LRegD;
-  LRegF := LTemp[20] + $D1310BA6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[20] + $D1310BA6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegB and not LRegF xor LRegG and LRegH xor LRegD xor LRegC) xor LRegG and (LRegB xor LRegH)
     xor LRegF and LRegH xor LRegC;
-  LRegE := LTemp[22] + $98DFB5AC + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[22] + $98DFB5AC + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegA and not LRegE xor LRegF and LRegG xor LRegC xor LRegB) xor LRegF and (LRegA xor LRegG)
     xor LRegE and LRegG xor LRegB;
-  LRegD := LTemp[1] + $2FFD72DB + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $2FFD72DB + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegH and not LRegD xor LRegE and LRegF xor LRegB xor LRegA) xor LRegE and (LRegH xor LRegF)
     xor LRegD and LRegF xor LRegA;
-  LRegC := LTemp[10] + $D01ADFB7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[10] + $D01ADFB7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegG and not LRegC xor LRegD and LRegE xor LRegA xor LRegH) xor LRegD and (LRegG xor LRegE)
     xor LRegC and LRegE xor LRegH;
-  LRegB := LTemp[4] + $B8E1AFED + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[4] + $B8E1AFED + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegF and not LRegB xor LRegC and LRegD xor LRegH xor LRegG) xor LRegC and (LRegF xor LRegD)
     xor LRegB and LRegD xor LRegG;
-  LRegA := LTemp[8] + $6A267E96 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[8] + $6A267E96 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegE and not LRegA xor LRegB and LRegC xor LRegG xor LRegF) xor LRegB and (LRegE xor LRegC)
     xor LRegA and LRegC xor LRegF;
-  LRegH := LTemp[30] + $BA7C9045 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[30] + $BA7C9045 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegD and not LRegH xor LRegA and LRegB xor LRegF xor LRegE) xor LRegA and (LRegD xor LRegB)
     xor LRegH and LRegB xor LRegE;
-  LRegG := LTemp[3] + $F12C7F99 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[3] + $F12C7F99 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegC and not LRegG xor LRegH and LRegA xor LRegE xor LRegD) xor LRegH and (LRegC xor LRegA)
     xor LRegG and LRegA xor LRegD;
-  LRegF := LTemp[21] + $24A19947 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $24A19947 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegB and not LRegF xor LRegG and LRegH xor LRegD xor LRegC) xor LRegG and (LRegB xor LRegH)
     xor LRegF and LRegH xor LRegC;
-  LRegE := LTemp[9] + $B3916CF7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[9] + $B3916CF7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegA and not LRegE xor LRegF and LRegG xor LRegC xor LRegB) xor LRegF and (LRegA xor LRegG)
     xor LRegE and LRegG xor LRegB;
-  LRegD := LTemp[17] + $0801F2E2 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $0801F2E2 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegH and not LRegD xor LRegE and LRegF xor LRegB xor LRegA) xor LRegE and (LRegH xor LRegF)
     xor LRegD and LRegF xor LRegA;
-  LRegC := LTemp[24] + $858EFC16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[24] + $858EFC16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegG and not LRegC xor LRegD and LRegE xor LRegA xor LRegH) xor LRegD and (LRegG xor LRegE)
     xor LRegC and LRegE xor LRegH;
-  LRegB := LTemp[29] + $636920D8 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[29] + $636920D8 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegF and not LRegB xor LRegC and LRegD xor LRegH xor LRegG) xor LRegC and (LRegF xor LRegD)
     xor LRegB and LRegD xor LRegG;
-  LRegA := LTemp[6] + $71574E69 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[6] + $71574E69 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegE and not LRegA xor LRegB and LRegC xor LRegG xor LRegF) xor LRegB and (LRegE xor LRegC)
     xor LRegA and LRegC xor LRegF;
-  LRegH := LTemp[19] + $A458FEA3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $A458FEA3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegD and not LRegH xor LRegA and LRegB xor LRegF xor LRegE) xor LRegA and (LRegD xor LRegB)
     xor LRegH and LRegB xor LRegE;
-  LRegG := LTemp[12] + $F4933D7E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[12] + $F4933D7E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegC and not LRegG xor LRegH and LRegA xor LRegE xor LRegD) xor LRegH and (LRegC xor LRegA)
     xor LRegG and LRegA xor LRegD;
-  LRegF := LTemp[15] + $0D95748F + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[15] + $0D95748F + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegB and not LRegF xor LRegG and LRegH xor LRegD xor LRegC) xor LRegG and (LRegB xor LRegH)
     xor LRegF and LRegH xor LRegC;
-  LRegE := LTemp[13] + $728EB658 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[13] + $728EB658 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegA and not LRegE xor LRegF and LRegG xor LRegC xor LRegB) xor LRegF and (LRegA xor LRegG)
     xor LRegE and LRegG xor LRegB;
-  LRegD := LTemp[2] + $718BCD58 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[2] + $718BCD58 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegH and not LRegD xor LRegE and LRegF xor LRegB xor LRegA) xor LRegE and (LRegH xor LRegF)
     xor LRegD and LRegF xor LRegA;
-  LRegC := LTemp[25] + $82154AEE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[25] + $82154AEE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegG and not LRegC xor LRegD and LRegE xor LRegA xor LRegH) xor LRegD and (LRegG xor LRegE)
     xor LRegC and LRegE xor LRegH;
-  LRegB := LTemp[31] + $7B54A41D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[31] + $7B54A41D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegF and not LRegB xor LRegC and LRegD xor LRegH xor LRegG) xor LRegC and (LRegF xor LRegD)
     xor LRegB and LRegD xor LRegG;
-  LRegA := LTemp[27] + $C25A59B5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $C25A59B5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegE and (LRegB and LRegD xor LRegC xor LRegF) xor LRegB and LRegA xor LRegD and LRegG xor LRegF;
-  LRegH := LTemp[19] + $9C30D539 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $9C30D539 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegD and (LRegA and LRegC xor LRegB xor LRegE) xor LRegA and LRegH xor LRegC and LRegF xor LRegE;
-  LRegG := LTemp[9] + $2AF26013 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + $2AF26013 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegC and (LRegH and LRegB xor LRegA xor LRegD) xor LRegH and LRegG xor LRegB and LRegE xor LRegD;
-  LRegF := LTemp[4] + $C5D1B023 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[4] + $C5D1B023 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegB and (LRegG and LRegA xor LRegH xor LRegC) xor LRegG and LRegF xor LRegA and LRegD xor LRegC;
-  LRegE := LTemp[20] + $286085F0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[20] + $286085F0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegA and (LRegF and LRegH xor LRegG xor LRegB) xor LRegF and LRegE xor LRegH and LRegC xor LRegB;
-  LRegD := LTemp[28] + $CA417918 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[28] + $CA417918 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegH and (LRegE and LRegG xor LRegF xor LRegA) xor LRegE and LRegD xor LRegG and LRegB xor LRegA;
-  LRegC := LTemp[17] + $B8DB38EF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[17] + $B8DB38EF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegG and (LRegD and LRegF xor LRegE xor LRegH) xor LRegD and LRegC xor LRegF and LRegA xor LRegH;
-  LRegB := LTemp[8] + $8E79DCB0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[8] + $8E79DCB0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegF and (LRegC and LRegE xor LRegD xor LRegG) xor LRegC and LRegB xor LRegE and LRegH xor LRegG;
-  LRegA := LTemp[22] + $603A180E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[22] + $603A180E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegE and (LRegB and LRegD xor LRegC xor LRegF) xor LRegB and LRegA xor LRegD and LRegG xor LRegF;
-  LRegH := LTemp[29] + $6C9E0E8B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[29] + $6C9E0E8B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegD and (LRegA and LRegC xor LRegB xor LRegE) xor LRegA and LRegH xor LRegC and LRegF xor LRegE;
-  LRegG := LTemp[14] + $B01E8A3E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[14] + $B01E8A3E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegC and (LRegH and LRegB xor LRegA xor LRegD) xor LRegH and LRegG xor LRegB and LRegE xor LRegD;
-  LRegF := LTemp[25] + $D71577C1 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[25] + $D71577C1 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegB and (LRegG and LRegA xor LRegH xor LRegC) xor LRegG and LRegF xor LRegA and LRegD xor LRegC;
-  LRegE := LTemp[12] + $BD314B27 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[12] + $BD314B27 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegA and (LRegF and LRegH xor LRegG xor LRegB) xor LRegF and LRegE xor LRegH and LRegC xor LRegB;
-  LRegD := LTemp[24] + $78AF2FDA + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[24] + $78AF2FDA + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegH and (LRegE and LRegG xor LRegF xor LRegA) xor LRegE and LRegD xor LRegG and LRegB xor LRegA;
-  LRegC := LTemp[30] + $55605C60 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[30] + $55605C60 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegG and (LRegD and LRegF xor LRegE xor LRegH) xor LRegD and LRegC xor LRegF and LRegA xor LRegH;
-  LRegB := LTemp[16] + $E65525F3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[16] + $E65525F3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegF and (LRegC and LRegE xor LRegD xor LRegG) xor LRegC and LRegB xor LRegE and LRegH xor LRegG;
-  LRegA := LTemp[26] + $AA55AB94 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[26] + $AA55AB94 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegE and (LRegB and LRegD xor LRegC xor LRegF) xor LRegB and LRegA xor LRegD and LRegG xor LRegF;
-  LRegH := LTemp[31] + $57489862 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[31] + $57489862 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegD and (LRegA and LRegC xor LRegB xor LRegE) xor LRegA and LRegH xor LRegC and LRegF xor LRegE;
-  LRegG := LTemp[15] + $63E81440 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[15] + $63E81440 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegC and (LRegH and LRegB xor LRegA xor LRegD) xor LRegH and LRegG xor LRegB and LRegE xor LRegD;
-  LRegF := LTemp[7] + $55CA396A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[7] + $55CA396A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegB and (LRegG and LRegA xor LRegH xor LRegC) xor LRegG and LRegF xor LRegA and LRegD xor LRegC;
-  LRegE := LTemp[3] + $2AAB10B6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[3] + $2AAB10B6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegA and (LRegF and LRegH xor LRegG xor LRegB) xor LRegF and LRegE xor LRegH and LRegC xor LRegB;
-  LRegD := LTemp[1] + $B4CC5C34 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[1] + $B4CC5C34 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegH and (LRegE and LRegG xor LRegF xor LRegA) xor LRegE and LRegD xor LRegG and LRegB xor LRegA;
-  LRegC := LTemp[0] + $1141E8CE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[0] + $1141E8CE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegG and (LRegD and LRegF xor LRegE xor LRegH) xor LRegD and LRegC xor LRegF and LRegA xor LRegH;
-  LRegB := LTemp[18] + $A15486AF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[18] + $A15486AF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegF and (LRegC and LRegE xor LRegD xor LRegG) xor LRegC and LRegB xor LRegE and LRegH xor LRegG;
-  LRegA := LTemp[27] + $7C72E993 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[27] + $7C72E993 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegE and (LRegB and LRegD xor LRegC xor LRegF) xor LRegB and LRegA xor LRegD and LRegG xor LRegF;
-  LRegH := LTemp[13] + $B3EE1411 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[13] + $B3EE1411 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegD and (LRegA and LRegC xor LRegB xor LRegE) xor LRegA and LRegH xor LRegC and LRegF xor LRegE;
-  LRegG := LTemp[6] + $636FBC2A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[6] + $636FBC2A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegC and (LRegH and LRegB xor LRegA xor LRegD) xor LRegH and LRegG xor LRegB and LRegE xor LRegD;
-  LRegF := LTemp[21] + $2BA9C55D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $2BA9C55D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegB and (LRegG and LRegA xor LRegH xor LRegC) xor LRegG and LRegF xor LRegA and LRegD xor LRegC;
-  LRegE := LTemp[10] + $741831F6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[10] + $741831F6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegA and (LRegF and LRegH xor LRegG xor LRegB) xor LRegF and LRegE xor LRegH and LRegC xor LRegB;
-  LRegD := LTemp[23] + $CE5C3E16 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[23] + $CE5C3E16 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegH and (LRegE and LRegG xor LRegF xor LRegA) xor LRegE and LRegD xor LRegG and LRegB xor LRegA;
-  LRegC := LTemp[11] + $9B87931E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[11] + $9B87931E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegG and (LRegD and LRegF xor LRegE xor LRegH) xor LRegD and LRegC xor LRegF and LRegA xor LRegH;
-  LRegB := LTemp[5] + $AFD6BA33 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[5] + $AFD6BA33 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegF and (LRegC and LRegE xor LRegD xor LRegG) xor LRegC and LRegB xor LRegE and LRegH xor LRegG;
-  LRegA := LTemp[2] + $6C24CF5C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[2] + $6C24CF5C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and not LRegA xor LRegC and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegC and
     (LRegE and LRegA xor LRegF xor LRegB) xor LRegA and LRegB xor LRegG;
-  LRegH := LTemp[24] + $7A325381 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[24] + $7A325381 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and not LRegH xor LRegB and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegB and
     (LRegD and LRegH xor LRegE xor LRegA) xor LRegH and LRegA xor LRegF;
-  LRegG := LTemp[4] + $28958677 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[4] + $28958677 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and not LRegG xor LRegA and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegA and
     (LRegC and LRegG xor LRegD xor LRegH) xor LRegG and LRegH xor LRegE;
-  LRegF := LTemp[0] + $3B8F4898 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[0] + $3B8F4898 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and not LRegF xor LRegH and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegH and
     (LRegB and LRegF xor LRegC xor LRegG) xor LRegF and LRegG xor LRegD;
-  LRegE := LTemp[14] + $6B4BB9AF + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[14] + $6B4BB9AF + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and not LRegE xor LRegG and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegG and
     (LRegA and LRegE xor LRegB xor LRegF) xor LRegE and LRegF xor LRegC;
-  LRegD := LTemp[2] + $C4BFE81B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[2] + $C4BFE81B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and not LRegD xor LRegF and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegF and
     (LRegH and LRegD xor LRegA xor LRegE) xor LRegD and LRegE xor LRegB;
-  LRegC := LTemp[7] + $66282193 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[7] + $66282193 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and not LRegC xor LRegE and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegE and
     (LRegG and LRegC xor LRegH xor LRegD) xor LRegC and LRegD xor LRegA;
-  LRegB := LTemp[28] + $61D809CC + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[28] + $61D809CC + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and not LRegB xor LRegD and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegD and
     (LRegF and LRegB xor LRegG xor LRegC) xor LRegB and LRegC xor LRegH;
-  LRegA := LTemp[23] + $FB21A991 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[23] + $FB21A991 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and not LRegA xor LRegC and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegC and
     (LRegE and LRegA xor LRegF xor LRegB) xor LRegA and LRegB xor LRegG;
-  LRegH := LTemp[26] + $487CAC60 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[26] + $487CAC60 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and not LRegH xor LRegB and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegB and
     (LRegD and LRegH xor LRegE xor LRegA) xor LRegH and LRegA xor LRegF;
-  LRegG := LTemp[6] + $5DEC8032 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[6] + $5DEC8032 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and not LRegG xor LRegA and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegA and
     (LRegC and LRegG xor LRegD xor LRegH) xor LRegG and LRegH xor LRegE;
-  LRegF := LTemp[30] + $EF845D5D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[30] + $EF845D5D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and not LRegF xor LRegH and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegH and
     (LRegB and LRegF xor LRegC xor LRegG) xor LRegF and LRegG xor LRegD;
-  LRegE := LTemp[20] + $E98575B1 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[20] + $E98575B1 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and not LRegE xor LRegG and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegG and
     (LRegA and LRegE xor LRegB xor LRegF) xor LRegE and LRegF xor LRegC;
-  LRegD := LTemp[18] + $DC262302 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[18] + $DC262302 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and not LRegD xor LRegF and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegF and
     (LRegH and LRegD xor LRegA xor LRegE) xor LRegD and LRegE xor LRegB;
-  LRegC := LTemp[25] + $EB651B88 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[25] + $EB651B88 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and not LRegC xor LRegE and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegE and
     (LRegG and LRegC xor LRegH xor LRegD) xor LRegC and LRegD xor LRegA;
-  LRegB := LTemp[19] + $23893E81 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[19] + $23893E81 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and not LRegB xor LRegD and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegD and
     (LRegF and LRegB xor LRegG xor LRegC) xor LRegB and LRegC xor LRegH;
-  LRegA := LTemp[3] + $D396ACC5 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[3] + $D396ACC5 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and not LRegA xor LRegC and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegC and
     (LRegE and LRegA xor LRegF xor LRegB) xor LRegA and LRegB xor LRegG;
-  LRegH := LTemp[22] + $0F6D6FF3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[22] + $0F6D6FF3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and not LRegH xor LRegB and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegB and
     (LRegD and LRegH xor LRegE xor LRegA) xor LRegH and LRegA xor LRegF;
-  LRegG := LTemp[11] + $83F44239 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[11] + $83F44239 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and not LRegG xor LRegA and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegA and
     (LRegC and LRegG xor LRegD xor LRegH) xor LRegG and LRegH xor LRegE;
-  LRegF := LTemp[31] + $2E0B4482 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[31] + $2E0B4482 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and not LRegF xor LRegH and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegH and
     (LRegB and LRegF xor LRegC xor LRegG) xor LRegF and LRegG xor LRegD;
-  LRegE := LTemp[21] + $A4842004 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[21] + $A4842004 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and not LRegE xor LRegG and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegG and
     (LRegA and LRegE xor LRegB xor LRegF) xor LRegE and LRegF xor LRegC;
-  LRegD := LTemp[8] + $69C8F04A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[8] + $69C8F04A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and not LRegD xor LRegF and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegF and
     (LRegH and LRegD xor LRegA xor LRegE) xor LRegD and LRegE xor LRegB;
-  LRegC := LTemp[27] + $9E1F9B5E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[27] + $9E1F9B5E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and not LRegC xor LRegE and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegE and
     (LRegG and LRegC xor LRegH xor LRegD) xor LRegC and LRegD xor LRegA;
-  LRegB := LTemp[12] + $21C66842 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[12] + $21C66842 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and not LRegB xor LRegD and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegD and
     (LRegF and LRegB xor LRegG xor LRegC) xor LRegB and LRegC xor LRegH;
-  LRegA := LTemp[9] + $F6E96C9A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[9] + $F6E96C9A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegD and (LRegF and not LRegA xor LRegC and not LRegB xor LRegE xor LRegB xor LRegG) xor LRegC and
     (LRegE and LRegA xor LRegF xor LRegB) xor LRegA and LRegB xor LRegG;
-  LRegH := LTemp[1] + $670C9C61 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[1] + $670C9C61 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegC and (LRegE and not LRegH xor LRegB and not LRegA xor LRegD xor LRegA xor LRegF) xor LRegB and
     (LRegD and LRegH xor LRegE xor LRegA) xor LRegH and LRegA xor LRegF;
-  LRegG := LTemp[29] + $ABD388F0 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[29] + $ABD388F0 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegB and (LRegD and not LRegG xor LRegA and not LRegH xor LRegC xor LRegH xor LRegE) xor LRegA and
     (LRegC and LRegG xor LRegD xor LRegH) xor LRegG and LRegH xor LRegE;
-  LRegF := LTemp[5] + $6A51A0D2 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[5] + $6A51A0D2 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegA and (LRegC and not LRegF xor LRegH and not LRegG xor LRegB xor LRegG xor LRegD) xor LRegH and
     (LRegB and LRegF xor LRegC xor LRegG) xor LRegF and LRegG xor LRegD;
-  LRegE := LTemp[15] + $D8542F68 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[15] + $D8542F68 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegH and (LRegB and not LRegE xor LRegG and not LRegF xor LRegA xor LRegF xor LRegC) xor LRegG and
     (LRegA and LRegE xor LRegB xor LRegF) xor LRegE and LRegF xor LRegC;
-  LRegD := LTemp[17] + $960FA728 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $960FA728 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegG and (LRegA and not LRegD xor LRegF and not LRegE xor LRegH xor LRegE xor LRegB) xor LRegF and
     (LRegH and LRegD xor LRegA xor LRegE) xor LRegD and LRegE xor LRegB;
-  LRegC := LTemp[10] + $AB5133A3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[10] + $AB5133A3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegF and (LRegH and not LRegC xor LRegE and not LRegD xor LRegG xor LRegD xor LRegA) xor LRegE and
     (LRegG and LRegC xor LRegH xor LRegD) xor LRegC and LRegD xor LRegA;
-  LRegB := LTemp[16] + $6EEF0B6C + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[16] + $6EEF0B6C + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegE and (LRegG and not LRegB xor LRegD and not LRegC xor LRegF xor LRegC xor LRegH) xor LRegD and
     (LRegF and LRegB xor LRegG xor LRegC) xor LRegB and LRegC xor LRegH;
-  LRegA := LTemp[13] + $137A3BE4 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[13] + $137A3BE4 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegD and LRegE and LRegG xor not LRegF) xor LRegD and LRegA xor LRegE and LRegF xor LRegG and LRegC;
-  LRegH := LTemp[27] + $BA3BF050 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[27] + $BA3BF050 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegC and LRegD and LRegF xor not LRegE) xor LRegC and LRegH xor LRegD and LRegE xor LRegF and LRegB;
-  LRegG := LTemp[3] + $7EFB2A98 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[3] + $7EFB2A98 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegB and LRegC and LRegE xor not LRegD) xor LRegB and LRegG xor LRegC and LRegD xor LRegE and LRegA;
-  LRegF := LTemp[21] + $A1F1651D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[21] + $A1F1651D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegA and LRegB and LRegD xor not LRegC) xor LRegA and LRegF xor LRegB and LRegC xor LRegD and LRegH;
-  LRegE := LTemp[26] + $39AF0176 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[26] + $39AF0176 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegH and LRegA and LRegC xor not LRegB) xor LRegH and LRegE xor LRegA and LRegB xor LRegC and LRegG;
-  LRegD := LTemp[17] + $66CA593E + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[17] + $66CA593E + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegG and LRegH and LRegB xor not LRegA) xor LRegG and LRegD xor LRegH and LRegA xor LRegB and LRegF;
-  LRegC := LTemp[11] + $82430E88 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[11] + $82430E88 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegF and LRegG and LRegA xor not LRegH) xor LRegF and LRegC xor LRegG and LRegH xor LRegA and LRegE;
-  LRegB := LTemp[20] + $8CEE8619 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[20] + $8CEE8619 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegE and LRegF and LRegH xor not LRegG) xor LRegE and LRegB xor LRegF and LRegG xor LRegH and LRegD;
-  LRegA := LTemp[29] + $456F9FB4 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[29] + $456F9FB4 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegD and LRegE and LRegG xor not LRegF) xor LRegD and LRegA xor LRegE and LRegF xor LRegG and LRegC;
-  LRegH := LTemp[19] + $7D84A5C3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[19] + $7D84A5C3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegC and LRegD and LRegF xor not LRegE) xor LRegC and LRegH xor LRegD and LRegE xor LRegF and LRegB;
-  LRegG := LTemp[0] + $3B8B5EBE + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[0] + $3B8B5EBE + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegB and LRegC and LRegE xor not LRegD) xor LRegB and LRegG xor LRegC and LRegD xor LRegE and LRegA;
-  LRegF := LTemp[12] + $E06F75D8 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[12] + $E06F75D8 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegA and LRegB and LRegD xor not LRegC) xor LRegA and LRegF xor LRegB and LRegC xor LRegD and LRegH;
-  LRegE := LTemp[7] + $85C12073 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[7] + $85C12073 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegH and LRegA and LRegC xor not LRegB) xor LRegH and LRegE xor LRegA and LRegB xor LRegC and LRegG;
-  LRegD := LTemp[13] + $401A449F + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[13] + $401A449F + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegG and LRegH and LRegB xor not LRegA) xor LRegG and LRegD xor LRegH and LRegA xor LRegB and LRegF;
-  LRegC := LTemp[8] + $56C16AA6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[8] + $56C16AA6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegF and LRegG and LRegA xor not LRegH) xor LRegF and LRegC xor LRegG and LRegH xor LRegA and LRegE;
-  LRegB := LTemp[31] + $4ED3AA62 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[31] + $4ED3AA62 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegE and LRegF and LRegH xor not LRegG) xor LRegE and LRegB xor LRegF and LRegG xor LRegH and LRegD;
-  LRegA := LTemp[10] + $363F7706 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[10] + $363F7706 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegD and LRegE and LRegG xor not LRegF) xor LRegD and LRegA xor LRegE and LRegF xor LRegG and LRegC;
-  LRegH := LTemp[5] + $1BFEDF72 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[5] + $1BFEDF72 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegC and LRegD and LRegF xor not LRegE) xor LRegC and LRegH xor LRegD and LRegE xor LRegF and LRegB;
-  LRegG := LTemp[9] + $429B023D + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[9] + $429B023D + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegB and LRegC and LRegE xor not LRegD) xor LRegB and LRegG xor LRegC and LRegD xor LRegE and LRegA;
-  LRegF := LTemp[14] + $37D0D724 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[14] + $37D0D724 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegA and LRegB and LRegD xor not LRegC) xor LRegA and LRegF xor LRegB and LRegC xor LRegD and LRegH;
-  LRegE := LTemp[30] + $D00A1248 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[30] + $D00A1248 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegH and LRegA and LRegC xor not LRegB) xor LRegH and LRegE xor LRegA and LRegB xor LRegC and LRegG;
-  LRegD := LTemp[18] + $DB0FEAD3 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[18] + $DB0FEAD3 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegG and LRegH and LRegB xor not LRegA) xor LRegG and LRegD xor LRegH and LRegA xor LRegB and LRegF;
-  LRegC := LTemp[6] + $49F1C09B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[6] + $49F1C09B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegF and LRegG and LRegA xor not LRegH) xor LRegF and LRegC xor LRegG and LRegH xor LRegA and LRegE;
-  LRegB := LTemp[28] + $075372C9 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[28] + $075372C9 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegE and LRegF and LRegH xor not LRegG) xor LRegE and LRegB xor LRegF and LRegG xor LRegH and LRegD;
-  LRegA := LTemp[24] + $80991B7B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[24] + $80991B7B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   LNfOut := LRegB and (LRegD and LRegE and LRegG xor not LRegF) xor LRegD and LRegA xor LRegE and LRegF xor LRegG and LRegC;
-  LRegH := LTemp[2] + $25D479D8 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegH, 11);
+  LRegH := LTemp[2] + $25D479D8 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegH, 11);
 
   LNfOut := LRegA and (LRegC and LRegD and LRegF xor not LRegE) xor LRegC and LRegH xor LRegD and LRegE xor LRegF and LRegB;
-  LRegG := LTemp[23] + $F6E8DEF7 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegG, 11);
+  LRegG := LTemp[23] + $F6E8DEF7 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegG, 11);
 
   LNfOut := LRegH and (LRegB and LRegC and LRegE xor not LRegD) xor LRegB and LRegG xor LRegC and LRegD xor LRegE and LRegA;
-  LRegF := LTemp[16] + $E3FE501A + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegF, 11);
+  LRegF := LTemp[16] + $E3FE501A + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegF, 11);
 
   LNfOut := LRegG and (LRegA and LRegB and LRegD xor not LRegC) xor LRegA and LRegF xor LRegB and LRegC xor LRegD and LRegH;
-  LRegE := LTemp[22] + $B6794C3B + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegE, 11);
+  LRegE := LTemp[22] + $B6794C3B + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegE, 11);
 
   LNfOut := LRegF and (LRegH and LRegA and LRegC xor not LRegB) xor LRegH and LRegE xor LRegA and LRegB xor LRegC and LRegG;
-  LRegD := LTemp[4] + $976CE0BD + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegD, 11);
+  LRegD := LTemp[4] + $976CE0BD + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegD, 11);
 
   LNfOut := LRegE and (LRegG and LRegH and LRegB xor not LRegA) xor LRegG and LRegD xor LRegH and LRegA xor LRegB and LRegF;
-  LRegC := LTemp[1] + $04C006BA + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegC, 11);
+  LRegC := LTemp[1] + $04C006BA + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegC, 11);
 
   LNfOut := LRegD and (LRegF and LRegG and LRegA xor not LRegH) xor LRegF and LRegC xor LRegG and LRegH xor LRegA and LRegE;
-  LRegB := LTemp[25] + $C1A94FB6 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegB, 11);
+  LRegB := LTemp[25] + $C1A94FB6 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegB, 11);
 
   LNfOut := LRegC and (LRegE and LRegF and LRegH xor not LRegG) xor LRegE and LRegB xor LRegF and LRegG xor LRegH and LRegD;
-  LRegA := LTemp[15] + $409F60C4 + TBits.RotateRight32(LNfOut, 7) +
-    TBits.RotateRight32(LRegA, 11);
+  LRegA := LTemp[15] + $409F60C4 + TBitOperations.RotateRight32(LNfOut, 7) +
+    TBitOperations.RotateRight32(LRegA, 11);
 
   FHash[0] := FHash[0] + LRegA;
   FHash[1] := FHash[1] + LRegB;

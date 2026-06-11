@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils,
-  HlpBits,
+  HlpBinaryPrimitives,
+  HlpBitOperations,
   HlpHashLibTypes,
   HlpIHashResult,
   HlpConverters,
@@ -50,7 +51,7 @@ constructor THashResult.Create(AHash: UInt64);
 begin
   inherited Create();
   System.SetLength(FHash, System.SizeOf(UInt64));
-  TConverters.ReadUInt64AsBytesBE(AHash, FHash, 0);
+  TBinaryPrimitives.WriteUInt64BigEndian(FHash, 0, AHash);
 end;
 
 constructor THashResult.Create(const AHash: THashLibByteArray);
@@ -63,7 +64,7 @@ constructor THashResult.Create(AHash: UInt32);
 begin
   inherited Create();
   System.SetLength(FHash, System.SizeOf(UInt32));
-  TConverters.ReadUInt32AsBytesBE(AHash, FHash, 0);
+  TBinaryPrimitives.WriteUInt32BigEndian(FHash, 0, AHash);
 end;
 
 constructor THashResult.Create(AHash: UInt8);
@@ -81,8 +82,8 @@ end;
 constructor THashResult.Create(AHash: Int32);
 begin
   inherited Create();
-  FHash := THashLibByteArray.Create(Byte(TBits.Asr32(AHash, 24)),
-    Byte(TBits.Asr32(AHash, 16)), Byte(TBits.Asr32(AHash, 8)), Byte(AHash));
+  FHash := THashLibByteArray.Create(Byte(TBitOperations.Asr32(AHash, 24)),
+    Byte(TBitOperations.Asr32(AHash, 16)), Byte(TBitOperations.Asr32(AHash, 8)), Byte(AHash));
 end;
 
 function THashResult.Equals(const AHashResult: IHashResult): Boolean;
@@ -137,7 +138,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt32)]);
   end;
-  Result := TConverters.ReadBytesAsUInt32BE(PByte(FHash), 0);
+  Result := TBinaryPrimitives.ReadUInt32BigEndian(PByte(FHash), 0);
 end;
 
 function THashResult.GetUInt64: UInt64;
@@ -148,7 +149,7 @@ begin
       @SDifferingSizeOfByteArrayAndIntType,
       [System.Length(FHash), sizeof(UInt64)]);
   end;
-  Result := TConverters.ReadBytesAsUInt64BE(PByte(FHash), 0);
+  Result := TBinaryPrimitives.ReadUInt64BigEndian(PByte(FHash), 0);
 end;
 
 function THashResult.ToString(AGroup: Boolean): String;

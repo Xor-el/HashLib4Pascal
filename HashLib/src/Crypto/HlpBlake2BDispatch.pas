@@ -21,7 +21,7 @@ var
 implementation
 
 uses
-  HlpBits,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -54,13 +54,13 @@ var
   procedure G(AA, AB, AC, AD, AMsgIdx0, AMsgIdx1: Int32);
   begin
     LV[AA] := LV[AA] + LV[AB] + PUInt64(LPMsg + AMsgIdx0 * SizeOf(UInt64))^;
-    LV[AD] := TBits.RotateRight64(LV[AD] xor LV[AA], 32);
+    LV[AD] := TBitOperations.RotateRight64(LV[AD] xor LV[AA], 32);
     LV[AC] := LV[AC] + LV[AD];
-    LV[AB] := TBits.RotateRight64(LV[AB] xor LV[AC], 24);
+    LV[AB] := TBitOperations.RotateRight64(LV[AB] xor LV[AC], 24);
     LV[AA] := LV[AA] + LV[AB] + PUInt64(LPMsg + AMsgIdx1 * SizeOf(UInt64))^;
-    LV[AD] := TBits.RotateRight64(LV[AD] xor LV[AA], 16);
+    LV[AD] := TBitOperations.RotateRight64(LV[AD] xor LV[AA], 16);
     LV[AC] := LV[AC] + LV[AD];
-    LV[AB] := TBits.RotateRight64(LV[AB] xor LV[AC], 63);
+    LV[AB] := TBitOperations.RotateRight64(LV[AB] xor LV[AC], 63);
   end;
 
 begin

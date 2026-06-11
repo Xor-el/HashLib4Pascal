@@ -5,9 +5,9 @@ unit HlpMurmur2;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpIHash,
-  HlpConverters,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
@@ -59,7 +59,8 @@ end;
 
 function TMurmur2.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt32AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(Result, 0, FKey);
 end;
 
 procedure TMurmur2.SetKey(const AValue: THashLibByteArray);
@@ -75,7 +76,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -129,7 +130,7 @@ begin
 
   while LIdx < LNBlocks do
   begin
-    LBlock := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    LBlock := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(LPtrDataCardinal + LIdx), 0);
 
     LBlock := LBlock * CMul;
     LBlock := LBlock xor (LBlock shr CShift);

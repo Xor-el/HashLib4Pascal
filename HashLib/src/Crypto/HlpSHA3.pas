@@ -5,6 +5,7 @@ unit HlpSHA3;
 interface
 
 uses
+  HlpBinaryPrimitives,
   SysUtils,
   HlpHash,
   HlpIHashInfo,
@@ -393,7 +394,7 @@ function TSHA3.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, HashSize);
 
-  TConverters.le64_copy(PUInt64(FState), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt64LittleEndian(PUInt64(FState), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -689,7 +690,7 @@ begin
         FBufferPosition := 0;
       end;
 
-      TConverters.ReadUInt64AsBytesLE(FState[FBufferPosition], FShakeBuffer, 0);
+      TBinaryPrimitives.WriteUInt64LittleEndian(FShakeBuffer, 0, FState[FBufferPosition]);
       System.Inc(FBufferPosition);
     end;
 

@@ -5,8 +5,8 @@ unit HlpWhirlPool;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
@@ -108,7 +108,7 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesBE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64BigEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -118,7 +118,7 @@ end;
 function TWhirlPool.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, System.Length(FHash) * System.SizeOf(UInt64));
-  TConverters.be64_copy(PUInt64(FHash), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt64BigEndian(PUInt64(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -152,7 +152,7 @@ var
   LData, LKeyState, LMixState, LTemp: array [0 .. 7] of UInt64;
   LIdx, LRound: Int32;
 begin
-  TConverters.be64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt64BigEndian(AData, AIndex, @(LData[0]), 0, ADataLength);
 
   LIdx := 0;
   while LIdx < 8 do

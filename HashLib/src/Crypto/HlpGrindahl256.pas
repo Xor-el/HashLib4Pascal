@@ -5,8 +5,8 @@ unit HlpGrindahl256;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
@@ -139,11 +139,11 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesBE(LMessageLength, LPad, LPaddingSize - 8);
+  TBinaryPrimitives.WriteUInt64BigEndian(LPad, LPaddingSize - 8, LMessageLength);
 
   TransformBytes(LPad, 0, LPaddingSize - 4);
 
-  FState[0] := TConverters.ReadBytesAsUInt32BE(PByte(LPad), LPaddingSize - 4);
+  FState[0] := TBinaryPrimitives.ReadUInt32BigEndian(PByte(LPad), LPaddingSize - 4);
 
   InjectMsg(True);
 
@@ -159,7 +159,7 @@ end;
 function TGrindahl256.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 8 * System.SizeOf(UInt32));
-  TConverters.be32_copy(PCardinal(FState), 5 * System.SizeOf(UInt32),
+  TBinaryPrimitives.CopyUInt32BigEndian(PCardinal(FState), 5 * System.SizeOf(UInt32),
     PByte(Result), 0, System.Length(Result));
 end;
 
@@ -256,7 +256,7 @@ end;
 procedure TGrindahl256.TransformBlock(AData: PByte; ADataLength: Int32;
   AIndex: Int32);
 begin
-  FState[0] := TConverters.ReadBytesAsUInt32BE(AData, AIndex);
+  FState[0] := TBinaryPrimitives.ReadUInt32BigEndian(AData, AIndex);
   InjectMsg(False);
 end;
 

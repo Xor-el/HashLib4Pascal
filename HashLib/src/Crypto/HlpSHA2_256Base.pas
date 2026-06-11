@@ -5,8 +5,8 @@ unit HlpSHA2_256Base;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHashInfo,
   HlpHashCryptoNotBuildIn,
   HlpSHA2_256Dispatch;
@@ -57,7 +57,7 @@ begin
   System.SetLength(LPad, LPadIndex + 8);
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesBE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64BigEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 

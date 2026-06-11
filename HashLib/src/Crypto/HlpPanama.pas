@@ -5,9 +5,9 @@ unit HlpPanama;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
-  HlpConverters,
+  HlpBitOperations,
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
@@ -153,7 +153,7 @@ end;
 function TPanama.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, 8 * System.SizeOf(UInt32));
-  TConverters.le32_copy(PCardinal(FState), 9 * System.SizeOf(UInt32),
+  TBinaryPrimitives.CopyUInt32LittleEndian(PCardinal(FState), 9 * System.SizeOf(UInt32),
     PByte(Result), 0, System.Length(Result));
 end;
 
@@ -178,22 +178,22 @@ begin
   FGamma[16] := FState[16] xor (FState[0] or not FState[1]);
 
   FPi[0] := FGamma[0];
-  FPi[1] := TBits.RotateLeft32(FGamma[7], 1);
-  FPi[2] := TBits.RotateLeft32(FGamma[14], 3);
-  FPi[3] := TBits.RotateLeft32(FGamma[4], 6);
-  FPi[4] := TBits.RotateLeft32(FGamma[11], 10);
-  FPi[5] := TBits.RotateLeft32(FGamma[1], 15);
-  FPi[6] := TBits.RotateLeft32(FGamma[8], 21);
-  FPi[7] := TBits.RotateLeft32(FGamma[15], 28);
-  FPi[8] := TBits.RotateLeft32(FGamma[5], 4);
-  FPi[9] := TBits.RotateLeft32(FGamma[12], 13);
-  FPi[10] := TBits.RotateLeft32(FGamma[2], 23);
-  FPi[11] := TBits.RotateLeft32(FGamma[9], 2);
-  FPi[12] := TBits.RotateLeft32(FGamma[16], 14);
-  FPi[13] := TBits.RotateLeft32(FGamma[6], 27);
-  FPi[14] := TBits.RotateLeft32(FGamma[13], 9);
-  FPi[15] := TBits.RotateLeft32(FGamma[3], 24);
-  FPi[16] := TBits.RotateLeft32(FGamma[10], 8);
+  FPi[1] := TBitOperations.RotateLeft32(FGamma[7], 1);
+  FPi[2] := TBitOperations.RotateLeft32(FGamma[14], 3);
+  FPi[3] := TBitOperations.RotateLeft32(FGamma[4], 6);
+  FPi[4] := TBitOperations.RotateLeft32(FGamma[11], 10);
+  FPi[5] := TBitOperations.RotateLeft32(FGamma[1], 15);
+  FPi[6] := TBitOperations.RotateLeft32(FGamma[8], 21);
+  FPi[7] := TBitOperations.RotateLeft32(FGamma[15], 28);
+  FPi[8] := TBitOperations.RotateLeft32(FGamma[5], 4);
+  FPi[9] := TBitOperations.RotateLeft32(FGamma[12], 13);
+  FPi[10] := TBitOperations.RotateLeft32(FGamma[2], 23);
+  FPi[11] := TBitOperations.RotateLeft32(FGamma[9], 2);
+  FPi[12] := TBitOperations.RotateLeft32(FGamma[16], 14);
+  FPi[13] := TBitOperations.RotateLeft32(FGamma[6], 27);
+  FPi[14] := TBitOperations.RotateLeft32(FGamma[13], 9);
+  FPi[15] := TBitOperations.RotateLeft32(FGamma[3], 24);
+  FPi[16] := TBitOperations.RotateLeft32(FGamma[10], 8);
 
   APtrTheta[0] := FPi[0] xor FPi[1] xor FPi[4];
   APtrTheta[1] := FPi[1] xor FPi[2] xor FPi[5];
@@ -234,7 +234,7 @@ var
   LWorkBuffer: array [0 .. 7] of UInt32;
   LTap16, LTap25: Int32;
 begin
-  TConverters.le32_copy(AData, AIndex, @(LWorkBuffer[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt32LittleEndian(AData, AIndex, @(LWorkBuffer[0]), 0, ADataLength);
 
   LTap16 := (FTap + 16) and $1F;
 

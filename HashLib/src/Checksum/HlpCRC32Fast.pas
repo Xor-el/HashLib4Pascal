@@ -5,13 +5,13 @@ unit HlpCRC32Fast;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpConverters,
   HlpCRCDispatch;
 
 type
@@ -101,7 +101,7 @@ var
   LBufferBytes: THashLibByteArray;
 begin
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt32AsBytesBE(FCurrentCRC, LBufferBytes, 0);
+  TBinaryPrimitives.WriteUInt32BigEndian(LBufferBytes, 0, FCurrentCRC);
 
   Result := THashResult.Create(LBufferBytes);
   Initialize();

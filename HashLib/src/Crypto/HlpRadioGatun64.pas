@@ -5,9 +5,9 @@ unit HlpRadioGatun64;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpBits,
-  HlpConverters,
+  HlpBitOperations,
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
@@ -105,7 +105,7 @@ begin
     System.Inc(LIdx);
   end;
 
-  TConverters.le64_copy(PCardinal(LBuffer), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt64LittleEndian(PCardinal(LBuffer), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -151,7 +151,7 @@ begin
   LIdx := 0;
   while LIdx < 19 do
   begin
-    FMill[LIdx] := TBits.RotateRight64(LMillScratch[(7 * LIdx) mod 19],
+    FMill[LIdx] := TBitOperations.RotateRight64(LMillScratch[(7 * LIdx) mod 19],
       (LIdx * (LIdx + 1)) shr 1);
     System.Inc(LIdx);
   end;
@@ -187,7 +187,7 @@ var
   LData: array [0 .. 2] of UInt64;
   LIdx: Int32;
 begin
-  TConverters.le64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt64LittleEndian(AData, AIndex, @(LData[0]), 0, ADataLength);
   LIdx := 0;
   while LIdx < 3 do
   begin

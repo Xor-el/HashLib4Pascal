@@ -16,7 +16,7 @@ procedure Scrypt_Unpermute(ABlock: PCardinal; AChunkCount: Int32);
 implementation
 
 uses
-  HlpBits,
+  HlpBitOperations,
   HlpCpuFeatures,
   HlpSimdLevels;
 
@@ -112,39 +112,39 @@ begin
   LIdx := 4;
   while LIdx > 0 do
   begin
-    LW4  := LW4  xor TBits.RotateLeft32(LW0  + LW12, 7);
-    LW8  := LW8  xor TBits.RotateLeft32(LW4  + LW0,  9);
-    LW12 := LW12 xor TBits.RotateLeft32(LW8  + LW4,  13);
-    LW0  := LW0  xor TBits.RotateLeft32(LW12 + LW8,  18);
-    LW9  := LW9  xor TBits.RotateLeft32(LW5  + LW1,  7);
-    LW13 := LW13 xor TBits.RotateLeft32(LW9  + LW5,  9);
-    LW1  := LW1  xor TBits.RotateLeft32(LW13 + LW9,  13);
-    LW5  := LW5  xor TBits.RotateLeft32(LW1  + LW13, 18);
-    LW14 := LW14 xor TBits.RotateLeft32(LW10 + LW6,  7);
-    LW2  := LW2  xor TBits.RotateLeft32(LW14 + LW10, 9);
-    LW6  := LW6  xor TBits.RotateLeft32(LW2  + LW14, 13);
-    LW10 := LW10 xor TBits.RotateLeft32(LW6  + LW2,  18);
-    LW3  := LW3  xor TBits.RotateLeft32(LW15 + LW11, 7);
-    LW7  := LW7  xor TBits.RotateLeft32(LW3  + LW15, 9);
-    LW11 := LW11 xor TBits.RotateLeft32(LW7  + LW3,  13);
-    LW15 := LW15 xor TBits.RotateLeft32(LW11 + LW7,  18);
+    LW4  := LW4  xor TBitOperations.RotateLeft32(LW0  + LW12, 7);
+    LW8  := LW8  xor TBitOperations.RotateLeft32(LW4  + LW0,  9);
+    LW12 := LW12 xor TBitOperations.RotateLeft32(LW8  + LW4,  13);
+    LW0  := LW0  xor TBitOperations.RotateLeft32(LW12 + LW8,  18);
+    LW9  := LW9  xor TBitOperations.RotateLeft32(LW5  + LW1,  7);
+    LW13 := LW13 xor TBitOperations.RotateLeft32(LW9  + LW5,  9);
+    LW1  := LW1  xor TBitOperations.RotateLeft32(LW13 + LW9,  13);
+    LW5  := LW5  xor TBitOperations.RotateLeft32(LW1  + LW13, 18);
+    LW14 := LW14 xor TBitOperations.RotateLeft32(LW10 + LW6,  7);
+    LW2  := LW2  xor TBitOperations.RotateLeft32(LW14 + LW10, 9);
+    LW6  := LW6  xor TBitOperations.RotateLeft32(LW2  + LW14, 13);
+    LW10 := LW10 xor TBitOperations.RotateLeft32(LW6  + LW2,  18);
+    LW3  := LW3  xor TBitOperations.RotateLeft32(LW15 + LW11, 7);
+    LW7  := LW7  xor TBitOperations.RotateLeft32(LW3  + LW15, 9);
+    LW11 := LW11 xor TBitOperations.RotateLeft32(LW7  + LW3,  13);
+    LW15 := LW15 xor TBitOperations.RotateLeft32(LW11 + LW7,  18);
 
-    LW1  := LW1  xor TBits.RotateLeft32(LW0  + LW3,  7);
-    LW2  := LW2  xor TBits.RotateLeft32(LW1  + LW0,  9);
-    LW3  := LW3  xor TBits.RotateLeft32(LW2  + LW1,  13);
-    LW0  := LW0  xor TBits.RotateLeft32(LW3  + LW2,  18);
-    LW6  := LW6  xor TBits.RotateLeft32(LW5  + LW4,  7);
-    LW7  := LW7  xor TBits.RotateLeft32(LW6  + LW5,  9);
-    LW4  := LW4  xor TBits.RotateLeft32(LW7  + LW6,  13);
-    LW5  := LW5  xor TBits.RotateLeft32(LW4  + LW7,  18);
-    LW11 := LW11 xor TBits.RotateLeft32(LW10 + LW9,  7);
-    LW8  := LW8  xor TBits.RotateLeft32(LW11 + LW10, 9);
-    LW9  := LW9  xor TBits.RotateLeft32(LW8  + LW11, 13);
-    LW10 := LW10 xor TBits.RotateLeft32(LW9  + LW8,  18);
-    LW12 := LW12 xor TBits.RotateLeft32(LW15 + LW14, 7);
-    LW13 := LW13 xor TBits.RotateLeft32(LW12 + LW15, 9);
-    LW14 := LW14 xor TBits.RotateLeft32(LW13 + LW12, 13);
-    LW15 := LW15 xor TBits.RotateLeft32(LW14 + LW13, 18);
+    LW1  := LW1  xor TBitOperations.RotateLeft32(LW0  + LW3,  7);
+    LW2  := LW2  xor TBitOperations.RotateLeft32(LW1  + LW0,  9);
+    LW3  := LW3  xor TBitOperations.RotateLeft32(LW2  + LW1,  13);
+    LW0  := LW0  xor TBitOperations.RotateLeft32(LW3  + LW2,  18);
+    LW6  := LW6  xor TBitOperations.RotateLeft32(LW5  + LW4,  7);
+    LW7  := LW7  xor TBitOperations.RotateLeft32(LW6  + LW5,  9);
+    LW4  := LW4  xor TBitOperations.RotateLeft32(LW7  + LW6,  13);
+    LW5  := LW5  xor TBitOperations.RotateLeft32(LW4  + LW7,  18);
+    LW11 := LW11 xor TBitOperations.RotateLeft32(LW10 + LW9,  7);
+    LW8  := LW8  xor TBitOperations.RotateLeft32(LW11 + LW10, 9);
+    LW9  := LW9  xor TBitOperations.RotateLeft32(LW8  + LW11, 13);
+    LW10 := LW10 xor TBitOperations.RotateLeft32(LW9  + LW8,  18);
+    LW12 := LW12 xor TBitOperations.RotateLeft32(LW15 + LW14, 7);
+    LW13 := LW13 xor TBitOperations.RotateLeft32(LW12 + LW15, 9);
+    LW14 := LW14 xor TBitOperations.RotateLeft32(LW13 + LW12, 13);
+    LW15 := LW15 xor TBitOperations.RotateLeft32(LW14 + LW13, 18);
 
     System.Dec(LIdx);
   end;

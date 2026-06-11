@@ -5,11 +5,11 @@ unit HlpPBKDF2_HMACNotBuildInAdapter;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpIHash,
   HlpKDF,
   HlpIHashInfo,
   HlpHMACNotBuildInAdapter,
-  HlpConverters,
   HlpArrayUtils,
   HlpHashLibTypes;
 
@@ -111,7 +111,7 @@ class function TPBKDF2_HMACNotBuildInAdapter.GetBigEndianBytes(AInput: UInt32)
   : THashLibByteArray;
 begin
   System.SetLength(Result, System.SizeOf(UInt32));
-  TConverters.ReadUInt32AsBytesBE(AInput, Result, 0);
+  TBinaryPrimitives.WriteUInt32BigEndian(Result, 0, AInput);
 end;
 
 function TPBKDF2_HMACNotBuildInAdapter.Func: THashLibByteArray;

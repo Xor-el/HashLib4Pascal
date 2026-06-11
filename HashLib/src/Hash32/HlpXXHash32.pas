@@ -5,14 +5,14 @@ unit HlpXXHash32;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
   HlpHash,
   HlpIHash,
-  HlpConverters,
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits;
+  HlpBitOperations;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -107,7 +107,8 @@ end;
 
 function TXXHash32.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt32AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(Result, 0, FKey);
 end;
 
 function TXXHash32.GetKeyLength: Int32;
@@ -139,7 +140,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -178,14 +179,14 @@ begin
     LPtrMemoryStart := PByte(FState.FMemory) + FState.FMemorySize;
     System.Move(LPtrADataStart^, LPtrMemoryStart^, 16 - FState.FMemorySize);
 
-    FState.FV1 := Prime32_1 * TBits.RotateLeft32(FState.FV1 + Prime32_2 *
-      TConverters.ReadBytesAsUInt32LE(LPtrMemory, 0), 13);
-    FState.FV2 := Prime32_1 * TBits.RotateLeft32(FState.FV2 + Prime32_2 *
-      TConverters.ReadBytesAsUInt32LE(LPtrMemory, 4), 13);
-    FState.FV3 := Prime32_1 * TBits.RotateLeft32(FState.FV3 + Prime32_2 *
-      TConverters.ReadBytesAsUInt32LE(LPtrMemory, 8), 13);
-    FState.FV4 := Prime32_1 * TBits.RotateLeft32(FState.FV4 + Prime32_2 *
-      TConverters.ReadBytesAsUInt32LE(LPtrMemory, 12), 13);
+    FState.FV1 := Prime32_1 * TBitOperations.RotateLeft32(FState.FV1 + Prime32_2 *
+      TBinaryPrimitives.ReadUInt32LittleEndian(LPtrMemory, 0), 13);
+    FState.FV2 := Prime32_1 * TBitOperations.RotateLeft32(FState.FV2 + Prime32_2 *
+      TBinaryPrimitives.ReadUInt32LittleEndian(LPtrMemory, 4), 13);
+    FState.FV3 := Prime32_1 * TBitOperations.RotateLeft32(FState.FV3 + Prime32_2 *
+      TBinaryPrimitives.ReadUInt32LittleEndian(LPtrMemory, 8), 13);
+    FState.FV4 := Prime32_1 * TBitOperations.RotateLeft32(FState.FV4 + Prime32_2 *
+      TBinaryPrimitives.ReadUInt32LittleEndian(LPtrMemory, 12), 13);
 
     LPtrADataStart := LPtrADataStart + (16 - FState.FMemorySize);
     FState.FMemorySize := 0;
@@ -203,18 +204,18 @@ begin
 
       LPtrADataStartCardinal := PCardinal(LPtrADataStart);
 
-      LV1 := Prime32_1 * TBits.RotateLeft32
-        (LV1 + Prime32_2 * TConverters.ReadPCardinalAsUInt32LE
-        (LPtrADataStartCardinal), 13);
-      LV2 := Prime32_1 * TBits.RotateLeft32
-        (LV2 + Prime32_2 * TConverters.ReadPCardinalAsUInt32LE
-        (LPtrADataStartCardinal + 1), 13);
-      LV3 := Prime32_1 * TBits.RotateLeft32
-        (LV3 + Prime32_2 * TConverters.ReadPCardinalAsUInt32LE
-        (LPtrADataStartCardinal + 2), 13);
-      LV4 := Prime32_1 * TBits.RotateLeft32
-        (LV4 + Prime32_2 * TConverters.ReadPCardinalAsUInt32LE
-        (LPtrADataStartCardinal + 3), 13);
+      LV1 := Prime32_1 * TBitOperations.RotateLeft32
+        (LV1 + Prime32_2 * TBinaryPrimitives.ReadUInt32LittleEndian
+        (PByte(LPtrADataStartCardinal), 0), 13);
+      LV2 := Prime32_1 * TBitOperations.RotateLeft32
+        (LV2 + Prime32_2 * TBinaryPrimitives.ReadUInt32LittleEndian
+        (PByte(LPtrADataStartCardinal + 1), 0), 13);
+      LV3 := Prime32_1 * TBitOperations.RotateLeft32
+        (LV3 + Prime32_2 * TBinaryPrimitives.ReadUInt32LittleEndian
+        (PByte(LPtrADataStartCardinal + 2), 0), 13);
+      LV4 := Prime32_1 * TBitOperations.RotateLeft32
+        (LV4 + Prime32_2 * TBinaryPrimitives.ReadUInt32LittleEndian
+        (PByte(LPtrADataStartCardinal + 3), 0), 13);
 
       System.Inc(LPtrADataStart, 16);
 
@@ -242,8 +243,8 @@ begin
 
   if FState.FTotalLength >= UInt64(16) then
   begin
-    FHash := TBits.RotateLeft32(FState.FV1, 1) + TBits.RotateLeft32(FState.FV2,
-      7) + TBits.RotateLeft32(FState.FV3, 12) + TBits.RotateLeft32
+    FHash := TBitOperations.RotateLeft32(FState.FV1, 1) + TBitOperations.RotateLeft32(FState.FV2,
+      7) + TBitOperations.RotateLeft32(FState.FV3, 12) + TBitOperations.RotateLeft32
       (FState.FV4, 18)
   end
   else
@@ -257,15 +258,15 @@ begin
   LPtrEnd := LPtrBuffer + FState.FMemorySize;
   while ((LPtrBuffer + 4) <= LPtrEnd) do
   begin
-    FHash := FHash + TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0) * PRIME32_3;
-    FHash := TBits.RotateLeft32(FHash, 17) * Prime32_4;
+    FHash := FHash + TBinaryPrimitives.ReadUInt32LittleEndian(LPtrBuffer, 0) * PRIME32_3;
+    FHash := TBitOperations.RotateLeft32(FHash, 17) * Prime32_4;
     System.Inc(LPtrBuffer, 4);
   end;
 
   while LPtrBuffer < LPtrEnd do
   begin
     FHash := FHash + LPtrBuffer^ * Prime32_5;
-    FHash := TBits.RotateLeft32(FHash, 11) * Prime32_1;
+    FHash := TBitOperations.RotateLeft32(FHash, 11) * Prime32_1;
     System.Inc(LPtrBuffer);
   end;
 

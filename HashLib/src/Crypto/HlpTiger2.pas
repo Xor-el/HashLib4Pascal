@@ -5,9 +5,9 @@ unit HlpTiger2;
 interface
 
 uses
+  HlpBinaryPrimitives,
   SysUtils,
   HlpHashLibTypes,
-  HlpConverters,
   HlpHashRounds,
   HlpIHash,
   HlpIHashInfo,
@@ -662,7 +662,7 @@ begin
 
   LPad[0] := $80;
 
-  TConverters.ReadUInt64AsBytesLE(LBits, LPad, LPadIndex);
+  TBinaryPrimitives.WriteUInt64LittleEndian(LPad, LPadIndex, LBits);
 
   LPadIndex := LPadIndex + 8;
 
@@ -678,7 +678,7 @@ end;
 function TTiger2.GetResult: THashLibByteArray;
 begin
   System.SetLength(Result, HashSize);
-  TConverters.le64_copy(PUInt64(FHash), 0, PByte(Result), 0,
+  TBinaryPrimitives.CopyUInt64LittleEndian(PUInt64(FHash), 0, PByte(Result), 0,
     System.Length(Result));
 end;
 
@@ -697,7 +697,7 @@ var
   LRounds: Int32;
   LData: array [0 .. 7] of UInt64;
 begin
-  TConverters.le64_copy(AData, AIndex, @(LData[0]), 0, ADataLength);
+  TBinaryPrimitives.CopyUInt64LittleEndian(AData, AIndex, @(LData[0]), 0, ADataLength);
 
   LRegA := FHash[0];
   LRegB := FHash[1];

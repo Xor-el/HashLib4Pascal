@@ -5,14 +5,14 @@ unit HlpMurmurHash3_x86_32;
 interface
 
 uses
+  HlpBinaryPrimitives,
   HlpHashLibTypes,
-  HlpConverters,
   HlpIHashInfo,
   HlpHash,
   HlpIHash,
   HlpHashResult,
   HlpIHashResult,
-  HlpBits;
+  HlpBitOperations;
 
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
@@ -100,7 +100,7 @@ begin
           LFinalBlock := LFinalBlock xor (FBuffer[1] shl 8);
           LFinalBlock := LFinalBlock xor FBuffer[0];
           LFinalBlock := LFinalBlock * C1;
-          LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
+          LFinalBlock := TBitOperations.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
           FHashValue := FHashValue xor LFinalBlock;
 
@@ -111,7 +111,7 @@ begin
           LFinalBlock := LFinalBlock xor (FBuffer[1] shl 8);
           LFinalBlock := LFinalBlock xor FBuffer[0];
           LFinalBlock := LFinalBlock * C1;
-          LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
+          LFinalBlock := TBitOperations.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
           FHashValue := FHashValue xor LFinalBlock;
 
@@ -121,7 +121,7 @@ begin
 
           LFinalBlock := LFinalBlock xor FBuffer[0];
           LFinalBlock := LFinalBlock * C1;
-          LFinalBlock := TBits.RotateLeft32(LFinalBlock, 15);
+          LFinalBlock := TBitOperations.RotateLeft32(LFinalBlock, 15);
           LFinalBlock := LFinalBlock * C2;
           FHashValue := FHashValue xor LFinalBlock;
 
@@ -150,14 +150,14 @@ begin
   if FIdx >= 4 then
   begin
     LPtrBuffer := PByte(FBuffer);
-    LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
+    LBlock := TBinaryPrimitives.ReadUInt32LittleEndian(LPtrBuffer, 0);
 
     LBlock := LBlock * C1;
-    LBlock := TBits.RotateLeft32(LBlock, 15);
+    LBlock := TBitOperations.RotateLeft32(LBlock, 15);
     LBlock := LBlock * C2;
 
     FHashValue := FHashValue xor LBlock;
-    FHashValue := TBits.RotateLeft32(FHashValue, 13);
+    FHashValue := TBitOperations.RotateLeft32(FHashValue, 13);
     FHashValue := (FHashValue * 5) + C3;
 
     FIdx := 0;
@@ -166,7 +166,8 @@ end;
 
 function TMurmurHash3_x86_32.GetKey: THashLibByteArray;
 begin
-  Result := TConverters.ReadUInt32AsBytesLE(FKey);
+  System.SetLength(Result, System.SizeOf(UInt32));
+  TBinaryPrimitives.WriteUInt32LittleEndian(Result, 0, FKey);
 end;
 
 procedure TMurmurHash3_x86_32.SetKey(const AValue: THashLibByteArray);
@@ -182,7 +183,7 @@ begin
       raise EArgumentHashLibException.CreateResFmt(@SInvalidKeyLength,
         [KeyLength]);
     end;
-    FKey := TConverters.ReadBytesAsUInt32LE(PByte(AValue), 0);
+    FKey := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(AValue), 0);
   end;
 end;
 
@@ -244,14 +245,14 @@ begin
     if (FIdx = 4) then
     begin
       LPtrBuffer := PByte(FBuffer);
-      LBlock := TConverters.ReadBytesAsUInt32LE(LPtrBuffer, 0);
+      LBlock := TBinaryPrimitives.ReadUInt32LittleEndian(LPtrBuffer, 0);
 
       LBlock := LBlock * C1;
-      LBlock := TBits.RotateLeft32(LBlock, 15);
+      LBlock := TBitOperations.RotateLeft32(LBlock, 15);
       LBlock := LBlock * C2;
 
       FHashValue := FHashValue xor LBlock;
-      FHashValue := TBits.RotateLeft32(FHashValue, 13);
+      FHashValue := TBitOperations.RotateLeft32(FHashValue, 13);
       FHashValue := (FHashValue * 5) + C3;
 
       FIdx := 0;
@@ -270,14 +271,14 @@ begin
   LPtrDataCardinal := PCardinal(LPtrData + AIndex);
   while LIdx < LNBlocks do
   begin
-    LBlock := TConverters.ReadPCardinalAsUInt32LE(LPtrDataCardinal + LIdx);
+    LBlock := TBinaryPrimitives.ReadUInt32LittleEndian(PByte(LPtrDataCardinal + LIdx), 0);
 
     LBlock := LBlock * C1;
-    LBlock := TBits.RotateLeft32(LBlock, 15);
+    LBlock := TBitOperations.RotateLeft32(LBlock, 15);
     LBlock := LBlock * C2;
 
     LHashAcc := LHashAcc xor LBlock;
-    LHashAcc := TBits.RotateLeft32(LHashAcc, 13);
+    LHashAcc := TBitOperations.RotateLeft32(LHashAcc, 13);
     LHashAcc := (LHashAcc * 5) + C3;
 
     System.Inc(LIdx);
@@ -301,7 +302,7 @@ begin
   Finish();
 
   System.SetLength(LBufferBytes, HashSize);
-  TConverters.ReadUInt32AsBytesBE(FHashValue, LBufferBytes, 0);
+  TBinaryPrimitives.WriteUInt32BigEndian(LBufferBytes, 0, FHashValue);
 
   Result := THashResult.Create(LBufferBytes);
   Initialize();
