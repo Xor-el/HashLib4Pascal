@@ -14,8 +14,7 @@ on:
     inputs:
       enabled_targets:
         description: >-
-          Comma-separated list of targets to run (leave empty for the default
-          set). Opt-in only: netbsd, dragonflybsd — pass explicitly here.
+          Comma-separated list of targets to run (leave empty for the default set).
           Valid IDs: linux-x64, linux-arm64, windows-x64, macos-arm64,
           macos-x64, linux-arm32, linux-powerpc64-be, freebsd, solaris,
           netbsd, dragonflybsd
@@ -64,8 +63,10 @@ jobs:
   native:
     needs: setup
     # native_matrix is built from targets.json filtered to enabled native ids.
-    # An empty array would be an invalid matrix, so skip the job in that case.
-    if: needs.setup.outputs.native_matrix != '[]'
+    # When no native target is enabled, resolve-targets.sh emits a single
+    # placeholder entry (fpc_target=none) so the matrix is never empty: a job
+    # skipped via an empty matrix renders the literal `${{ matrix.name }}` in
+    # the UI. The placeholder's steps no-op via `matrix.fpc_target != 'none'`.
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
@@ -75,18 +76,20 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.native_matrix) }}
     steps:
       - name: Checkout
+        if: matrix.fpc_target != 'none'
         uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Build
+        if: matrix.fpc_target != 'none'
         shell: bash
         env:
           FPC_TARGET: ${{ matrix.fpc_target }}
         run: bash .github/workflows/ci/native-build.sh
 
   linux-arm32:
-    name: Linux ARMv7 (QEMU)
+    name: "QEMU: Linux ARMv7"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: setup
@@ -113,7 +116,7 @@ jobs:
           run: bash .github/workflows/ci/arm32-run.sh
 
   linux-powerpc64-be:
-    name: Linux PowerPC64 BE (QEMU)
+    name: "QEMU: Linux PowerPC64 BE"
     runs-on: ubuntu-latest
     timeout-minutes: 180
     needs: setup
@@ -136,7 +139,7 @@ jobs:
         run: bash .github/workflows/ci/ppc64-be-build.sh
 
   freebsd:
-    name: FreeBSD x86_64
+    name: "VM: FreeBSD x86_64"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: setup
@@ -160,7 +163,7 @@ jobs:
           run: bash .github/workflows/ci/vm-freebsd-run.sh
 
   netbsd:
-    name: NetBSD x86_64
+    name: "VM: NetBSD x86_64"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: setup
@@ -181,7 +184,7 @@ jobs:
           run: bash .github/workflows/ci/vm-run-shared.sh
 
   dragonflybsd:
-    name: DragonFlyBSD x86_64
+    name: "VM: DragonFlyBSD x86_64"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: setup
@@ -204,7 +207,7 @@ jobs:
           run: bash .github/workflows/ci/vm-run-shared.sh
 
   solaris:
-    name: Solaris x86_64
+    name: "VM: Solaris x86_64"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: setup

@@ -53,6 +53,13 @@ NATIVE_MATRIX="$(jq -c --arg ids "$TARGETS" \
   '[.targets[] | select(.kind == "native") | select(.id as $i | ($ids | split(",") | index($i)))]' \
   "$REGISTRY")"
 
+# Never emit an empty matrix: GitHub renders the literal `${{ matrix.name }}`
+# for a job skipped via an empty matrix. A single placeholder keeps the matrix
+# valid; the native job no-ops it via `matrix.fpc_target != 'none'`.
+if [ "$NATIVE_MATRIX" = "[]" ]; then
+  NATIVE_MATRIX='[{"name":"Native: (no targets selected)","runner":"ubuntu-latest","fpc_target":"none"}]'
+fi
+
 {
   echo "enabled_targets=${TARGETS}"
   echo "native_matrix=${NATIVE_MATRIX}"

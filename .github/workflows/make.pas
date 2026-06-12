@@ -228,6 +228,8 @@ type
     procedure RunSampleProject(const APath: string);
     procedure InitSslForDownloads;
     procedure DownloadAndExtract(const AUrl, ADestDir: string);
+    procedure DownloadToFile(const AUrl, ADestFile: string);
+    function TryExternalDownload(const AUrl, ADestFile: string): Boolean;
     function GetDepsBaseDir(const ASubDir: string): string;
     function InstallOPMPackage(const APackageName: string): string;
     function InstallGitHubPackage(const AOwnerRepo, ARef: string): string;
@@ -1592,60 +1594,119 @@ begin
     Log(CSI_Yellow, Trim(CommandOutput));
 end;
 
-// TODO(FPC 3.2.4): drop this Windows override. FPC 3.2.2's openssl unit
-// hardcodes the OpenSSL 1.1 DLL names (libssl-1_1*.dll / libeay32.dll), but
-// modern Windows CI runners ship only OpenSSL 3.x. Point FPC at the 3.x DLLs
-// so HTTPS downloads work. FPC 3.2.4+ already knows the OpenSSL 3 names, so
-// this whole procedure can become a plain InitSSLInterface call then.
 procedure TMakeRunner.InitSslForDownloads;
 begin
-  {$IFDEF MSWINDOWS}
-    {$IFDEF WIN64}
-  DLLSSLName := 'libssl-3-x64.dll';
-  DLLUtilName := 'libcrypto-3-x64.dll';
-    {$ELSE}
-  DLLSSLName := 'libssl-3.dll';
-  DLLUtilName := 'libcrypto-3.dll';
-    {$ENDIF}
-  {$ENDIF}
   InitSSLInterface;
 end;
 
 procedure TMakeRunner.DownloadAndExtract(const AUrl, ADestDir: string);
 var
   TempFile: string;
-  Stream: TFileStream;
-  Client: TFPHttpClient;
   Unzipper: TUnZipper;
 begin
   TempFile := GetTempFileName;
-  Stream := TFileStream.Create(TempFile, fmCreate or fmOpenWrite);
   try
-    Client := TFPHttpClient.Create(nil);
+    DownloadToFile(AUrl, TempFile);
+
+    CreateDir(ADestDir);
+    Unzipper := TUnZipper.Create;
     try
-      Client.AddHeader('User-Agent', 'Mozilla/5.0 (compatible; fpweb)');
-      Client.AllowRedirect := True;
-      Client.Get(AUrl, Stream);
-      Log(CSI_Cyan, 'downloaded ' + AUrl);
+      Unzipper.FileName := TempFile;
+      Unzipper.OutputPath := ADestDir;
+      Unzipper.Examine;
+      Unzipper.UnZipAllFiles;
+      Log(CSI_Cyan, 'extracted to ' + ADestDir);
     finally
-      Client.Free;
+      Unzipper.Free;
     end;
   finally
-    Stream.Free;
-  end;
-
-  CreateDir(ADestDir);
-  Unzipper := TUnZipper.Create;
-  try
-    Unzipper.FileName := TempFile;
-    Unzipper.OutputPath := ADestDir;
-    Unzipper.Examine;
-    Unzipper.UnZipAllFiles;
-    Log(CSI_Cyan, 'extracted to ' + ADestDir);
-  finally
-    Unzipper.Free;
     DeleteFile(TempFile);
   end;
+end;
+
+procedure TMakeRunner.DownloadToFile(const AUrl, ADestFile: string);
+var
+  Stream: TFileStream;
+  Client: TFPHttpClient;
+begin
+  // Prefer FPC's own HTTP client; it works on every platform we target except
+  // DragonFlyBSD, where FPC 3.2.2's TInetSocket.Connect deterministically fails
+  // even though the host resolves and the system TLS stack is healthy (verified
+  // in CI: `fetch` downloads the very same URL/IP that TFPHttpClient cannot
+  // connect to). Treat any client failure as a cue to fall back to an external
+  // downloader rather than special-casing one OS.
+  try
+    Stream := TFileStream.Create(ADestFile, fmCreate or fmOpenWrite);
+    try
+      Client := TFPHttpClient.Create(nil);
+      try
+        Client.AddHeader('User-Agent', 'Mozilla/5.0 (compatible; fpweb)');
+        Client.AllowRedirect := True;
+        Client.Get(AUrl, Stream);
+        Log(CSI_Cyan, 'downloaded ' + AUrl);
+        Exit;
+      finally
+        Client.Free;
+      end;
+    finally
+      Stream.Free;
+    end;
+  except
+    on E: Exception do
+      Log(CSI_Yellow, Format(
+        'TFPHttpClient could not download %s (%s: %s); trying external downloader',
+        [AUrl, E.ClassName, E.Message]));
+  end;
+
+  if not TryExternalDownload(AUrl, ADestFile) then
+    raise Exception.CreateFmt(
+      'Failed to download %s via TFPHttpClient and external downloaders ' +
+      '(curl/wget/fetch)', [AUrl]);
+end;
+
+function TMakeRunner.TryExternalDownload(const AUrl, ADestFile: string): Boolean;
+const
+  UserAgent = 'Mozilla/5.0 (compatible; fpweb)';
+var
+  Output: string;
+begin
+  // Tried in preference order; the first tool present on PATH that succeeds
+  // wins. RunCommandEx raises if the executable is absent, so each attempt is
+  // guarded and a missing tool simply falls through to the next.
+  try
+    if RunCommandEx('curl',
+      ['-fsSL', '-A', UserAgent, '-o', ADestFile, AUrl], '', False, Output) then
+    begin
+      Log(CSI_Cyan, 'downloaded ' + AUrl + ' via curl');
+      Exit(True);
+    end;
+  except
+    on E: Exception do ;
+  end;
+
+  try
+    if RunCommandEx('wget',
+      ['-q', '-U', UserAgent, '-O', ADestFile, AUrl], '', False, Output) then
+    begin
+      Log(CSI_Cyan, 'downloaded ' + AUrl + ' via wget');
+      Exit(True);
+    end;
+  except
+    on E: Exception do ;
+  end;
+
+  try
+    if RunCommandEx('fetch',
+      ['-q', '-o', ADestFile, AUrl], '', False, Output) then
+    begin
+      Log(CSI_Cyan, 'downloaded ' + AUrl + ' via fetch');
+      Exit(True);
+    end;
+  except
+    on E: Exception do ;
+  end;
+
+  Result := False;
 end;
 
 function TMakeRunner.GetDepsBaseDir(const ASubDir: string): string;
