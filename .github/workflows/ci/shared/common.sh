@@ -29,6 +29,23 @@ ci_default_make_cmd() {
   esac
 }
 
+# Download $1 (URL) to $2 (output path) with whatever fetcher exists.
+# curl covers Linux/macOS/Windows; fetch is the FreeBSD/DragonFly base tool
+# (survives pkg upgrades that drop the curl package); wget is the middle option.
+ci_download() {
+  local url="$1" out="$2"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fL --retry 5 --retry-delay 5 --retry-all-errors -o "$out" "$url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget --tries=5 --retry-connrefused -O "$out" "$url"
+  elif command -v fetch >/dev/null 2>&1; then
+    fetch -a -o "$out" "$url"
+  else
+    echo "ci_download: no curl/wget/fetch available" >&2
+    return 1
+  fi
+}
+
 ci_install_toolchain() {
   : "${FPC_TARGET:?FPC_TARGET is required}"
   bash "$WORKFLOWS_DIR/install-fpc-lazarus.sh"
@@ -135,7 +152,18 @@ ci_preflight() {
 }
 
 ci_run_make() {
-  instantfpc "$WORKFLOWS_DIR/make.pas"
+  if command -v instantfpc >/dev/null 2>&1; then
+    instantfpc "$WORKFLOWS_DIR/make.pas"
+    return
+  fi
+  # Some FPC tarballs (notably the reduced x86_64-dragonfly cross build) ship
+  # fpc but omit the instantfpc helper. instantfpc just compiles+runs a .pas
+  # program, so do that directly with fpc instead. -FE/-FU keep build artifacts
+  # in a temp dir; fpc reads the same fpc.cfg, so units resolve identically.
+  local build_dir
+  build_dir="$(mktemp -d 2>/dev/null || mktemp -d -t ci-make)"
+  fpc -FE"$build_dir" -FU"$build_dir" -omake "$WORKFLOWS_DIR/make.pas"
+  "$build_dir/make"
 }
 
 ci_build_standard() {
@@ -153,6 +181,10 @@ ci_build_prebuilt() {
 }
 
 ci_openssl_hack() {
+  if ci_is_windows; then
+    bash "$CI_ROOT/openssl-libssl11-shim-windows.sh"
+    return
+  fi
   case "$(uname -s)" in
     Linux)     bash "$CI_ROOT/openssl-libssl11-shim-unix.sh" ;;
     Darwin)    bash "$CI_ROOT/openssl-libssl11-shim-macos.sh" ;;

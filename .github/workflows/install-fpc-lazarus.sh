@@ -33,6 +33,12 @@ set -euo pipefail
 # Match only truthy values so a flat CI_DEBUG=0 (the CI default) stays quiet.
 case "${CI_DEBUG:-}" in 1|true|yes|on) set -x ;; esac
 
+# tar (the FPC tarball extraction and install.sh's internal tars) inherits
+# LANG/LC_* that some minimal VMs (notably DragonFly) point at a locale that
+# isn't installed, which prints "tar: Failed to set default locale". Force the
+# always-present C locale; harmless on every platform.
+export LC_ALL=C LANG=C
+
 INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ci/shared/common.sh
 source "$INSTALL_SCRIPT_DIR/ci/shared/common.sh"
@@ -78,10 +84,9 @@ WORK_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t fpc-install)"
 cd "$WORK_DIR"
 
 echo "Downloading $URL"
-# curl is on every platform we target; wget isn't (macOS notably).
-# Retry to ride out transient mirror hiccups.
-curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
-  -o "$TARBALL" "$URL"
+# Prefer curl (Linux/macOS/Windows); fall back to wget, then the BSD base
+# `fetch`. Retries ride out transient mirror hiccups.
+ci_download "$URL" "$TARBALL"
 
 tar xf "$TARBALL"
 
