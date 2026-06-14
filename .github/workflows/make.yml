@@ -50,6 +50,7 @@ jobs:
     outputs:
       enabled_targets: ${{ steps.resolve.outputs.enabled_targets }}
       native_matrix: ${{ steps.resolve.outputs.native_matrix }}
+      target_map: ${{ steps.resolve.outputs.target_map }}
     steps:
       - uses: actions/checkout@v6
 
@@ -90,7 +91,7 @@ jobs:
 
   linux-arm32:
     name: "QEMU: Linux ARMv7"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['linux-arm32'].runner }}
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-arm32,')
@@ -107,7 +108,7 @@ jobs:
           distro: ubuntu24.04
           env: |
             FPC_VERSION: ${{ env.FPC_VERSION }}
-            FPC_TARGET: arm-linux
+            FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['linux-arm32'].fpc_target }}
             LAZARUS_BRANCH: ${{ env.LAZARUS_BRANCH }}
             LAZARUS_REPO: ${{ env.LAZARUS_REPO }}
             MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
@@ -117,7 +118,7 @@ jobs:
 
   linux-powerpc64-be:
     name: "QEMU: Linux PowerPC64 BE"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['linux-powerpc64-be'].runner }}
     timeout-minutes: 180
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-powerpc64-be,')
@@ -133,14 +134,14 @@ jobs:
       - name: Build (PowerPC64 BE via QEMU)
         env:
           FPC_VERSION: ${{ env.FPC_VERSION }}
-          FPC_TARGET: powerpc64-linux
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['linux-powerpc64-be'].fpc_target }}
           MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
           MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
         run: bash .github/workflows/ci/ppc64-be-build.sh
 
   freebsd:
     name: "VM: FreeBSD x86_64"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['freebsd'].runner }}
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',freebsd,')
@@ -153,7 +154,7 @@ jobs:
       - name: Build (FreeBSD x86_64)
         uses: vmactions/freebsd-vm@v1
         env:
-          FPC_TARGET: x86_64-freebsd
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['freebsd'].fpc_target }}
           FREEBSD_INSTALL_MODE: interim
         with:
           envs: FPC_VERSION FPC_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FREEBSD_INSTALL_MODE CI_DEBUG
@@ -164,7 +165,7 @@ jobs:
 
   netbsd:
     name: "VM: NetBSD x86_64"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['netbsd'].runner }}
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',netbsd,')
@@ -177,7 +178,7 @@ jobs:
       - name: Build (NetBSD x86_64)
         uses: vmactions/netbsd-vm@v1
         env:
-          FPC_TARGET: x86_64-netbsd
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['netbsd'].fpc_target }}
         with:
           envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
           prepare: sh .github/workflows/ci/vm-netbsd-prepare.sh
@@ -185,7 +186,7 @@ jobs:
 
   dragonflybsd:
     name: "VM: DragonFlyBSD x86_64"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['dragonflybsd'].runner }}
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',dragonflybsd,')
@@ -198,7 +199,7 @@ jobs:
       - name: Build (DragonFlyBSD x86_64)
         uses: vmactions/dragonflybsd-vm@v1
         env:
-          FPC_TARGET: x86_64-dragonfly
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['dragonflybsd'].fpc_target }}
           LD_LIBRARY_PATH_EXTRA: /usr/local/lib
         with:
           envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
@@ -208,7 +209,7 @@ jobs:
 
   solaris:
     name: "VM: Solaris x86_64"
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['solaris'].runner }}
     timeout-minutes: 120
     needs: setup
     if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',solaris,')
@@ -221,7 +222,7 @@ jobs:
       - name: Build (Solaris x86_64)
         uses: vmactions/solaris-vm@v1
         env:
-          FPC_TARGET: x86_64-solaris
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['solaris'].fpc_target }}
         with:
           envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET CI_DEBUG
           release: "11.4-gcc"

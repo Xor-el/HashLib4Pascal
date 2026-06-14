@@ -9,6 +9,9 @@ set -euo pipefail
 #   enabled_targets  CSV of selected ids; gates the qemu/vm jobs in make.yml.
 #   native_matrix    JSON array of enabled kind=native entries; consumed as the
 #                    native job's strategy.matrix.include (empty => job skipped).
+#   target_map       JSON object (id -> full target entry) over the WHOLE
+#                    registry; the static qemu/vm jobs in make.yml look up their
+#                    runner/fpc_target by id (independent of which are enabled).
 #
 # targets.json is the single source of truth. Opt-in targets (default=false,
 # e.g. netbsd, dragonflybsd) are excluded from the default and must be named
@@ -60,10 +63,19 @@ if [ "$NATIVE_MATRIX" = "[]" ]; then
   NATIVE_MATRIX='[{"name":"Native: (no targets selected)","runner":"ubuntu-latest","fpc_target":"none"}]'
 fi
 
+# id -> full target entry, over the entire registry (not just enabled ids). The
+# static qemu/vm jobs look up their runner/fpc_target by id, so the map must
+# resolve even for a target gated off by its `if:` (avoids a null runs-on). Job
+# names stay literal in make.yml: an if-skipped job renders an unevaluated name
+# expression in the UI, so it cannot be sourced from here.
+TARGET_MAP="$(jq -c '.targets | map({(.id): .}) | add' "$REGISTRY")"
+
 {
   echo "enabled_targets=${TARGETS}"
   echo "native_matrix=${NATIVE_MATRIX}"
+  echo "target_map=${TARGET_MAP}"
 } >> "${GITHUB_OUTPUT:?GITHUB_OUTPUT is required}"
 
 echo "Enabled targets (${SOURCE}): ${TARGETS}"
 echo "Native matrix: ${NATIVE_MATRIX}"
+echo "Target map: ${TARGET_MAP}"

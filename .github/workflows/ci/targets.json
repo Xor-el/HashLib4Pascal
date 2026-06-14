@@ -1,16 +1,16 @@
 {
-  "comment": "Single source of truth for CI targets. resolve-targets.sh reads this to compute the default set and the native job's dynamic matrix. kind: native (matrixed runner), qemu (QEMU job), vm (vmactions job). default=true targets run automatically on push/PR; default=false targets are opt-in and must be named explicitly via workflow_dispatch enabled_targets (set default=false to stop a slow target from running automatically).",
+  "comment": "Single source of truth for CI targets. resolve-targets.sh reads this to compute the default set, the native job's dynamic matrix, and target_map (id -> entry) consumed by the static QEMU/VM jobs in make.yml. kind: native (matrixed runner), qemu (QEMU job), vm (vmactions job). runner is the GitHub-hosted runner; for qemu/vm it is the host that runs the emulator/VM. fpc_target is the FPC platform triple. name, runner, and fpc_target apply to every kind: the native job reads them via its matrix, the static qemu/vm jobs via target_map. default=true targets run automatically on push/PR; default=false targets are opt-in and must be named explicitly via workflow_dispatch enabled_targets (set default=false to stop a slow target from running automatically).",
   "targets": [
     { "id": "linux-x64",          "name": "Native: Linux x86_64",                  "kind": "native", "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-linux" },
     { "id": "linux-arm64",        "name": "Native: Linux AArch64",                 "kind": "native", "default": true,  "runner": "ubuntu-24.04-arm", "fpc_target": "aarch64-linux" },
     { "id": "windows-x64",        "name": "Native: Windows x86_64",                "kind": "native", "default": true,  "runner": "windows-latest",   "fpc_target": "x86_64-win64" },
     { "id": "macos-arm64",        "name": "Native: macOS AArch64 (Apple Silicon)", "kind": "native", "default": true,  "runner": "macos-latest",     "fpc_target": "aarch64-darwin" },
     { "id": "macos-x64",          "name": "Native: macOS x86_64 (Intel)",          "kind": "native", "default": true,  "runner": "macos-15-intel",   "fpc_target": "x86_64-darwin" },
-    { "id": "linux-arm32",        "name": "QEMU: Linux ARMv7",                     "kind": "qemu",   "default": true },
-    { "id": "linux-powerpc64-be", "name": "QEMU: Linux PowerPC64 BE",              "kind": "qemu",   "default": true },
-    { "id": "freebsd",            "name": "VM: FreeBSD x86_64",                    "kind": "vm",     "default": true },
-    { "id": "solaris",            "name": "VM: Solaris x86_64",                    "kind": "vm",     "default": true },
-    { "id": "netbsd",             "name": "VM: NetBSD x86_64",                     "kind": "vm",     "default": true },
-    { "id": "dragonflybsd",       "name": "VM: DragonFlyBSD x86_64",               "kind": "vm",     "default": true }
+    { "id": "linux-arm32",        "name": "QEMU: Linux ARMv7",                     "kind": "qemu",   "default": true, "runner": "ubuntu-latest",    "fpc_target": "arm-linux" },
+    { "id": "linux-powerpc64-be", "name": "QEMU: Linux PowerPC64 BE",              "kind": "qemu",   "default": true, "runner": "ubuntu-latest",    "fpc_target": "powerpc64-linux" },
+    { "id": "freebsd",            "name": "VM: FreeBSD x86_64",                    "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-freebsd" },
+    { "id": "solaris",            "name": "VM: Solaris x86_64",                    "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-solaris" },
+    { "id": "netbsd",             "name": "VM: NetBSD x86_64",                     "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-netbsd" },
+    { "id": "dragonflybsd",       "name": "VM: DragonFlyBSD x86_64",               "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-dragonfly" }
   ]
 }
