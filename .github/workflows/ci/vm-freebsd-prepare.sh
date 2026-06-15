@@ -20,7 +20,14 @@ fi
 freebsd_pkg_bootstrap
 pkg install -y bash fpc git wget gmake
 
-export FPC_EXE="$(which fpc)"
-export LAZARUS_DIR="$HOME/lazarus-src"
-# shellcheck source=shared/lazarus-bootstrap.sh
-. "$CI_ROOT/shared/lazarus-bootstrap.sh"
+# Only build Lazarus/lazbuild when the lazbuild backend needs it. With the fpc
+# backend make.pas never invokes lazbuild, so skip the ~1-2 min clone+build
+# (mirrors install-fpc-lazarus.sh, which gates Lazarus on the same var).
+if [ "${MAKE_BUILD_BACKEND:-fpc}" = "lazbuild" ]; then
+  export FPC_EXE="$(which fpc)"
+  export LAZARUS_DIR="$HOME/lazarus-src"
+  # shellcheck source=shared/lazarus-bootstrap.sh
+  . "$CI_ROOT/shared/lazarus-bootstrap.sh"
+else
+  echo "MAKE_BUILD_BACKEND=fpc - interim mode: pkg fpc only, skipping Lazarus/lazbuild build"
+fi

@@ -38,6 +38,12 @@ env:
   # a package that fails on the target even if unused); 'required' only compiles
   # the projects' dependency closure. Override per job below, like MAKE_BUILD_BACKEND.
   MAKE_PACKAGE_SCOPE: required
+  # Space/comma/semicolon-separated conditional defines passed to every compile in
+  # both backends (fpc: -dNAME, lazbuild: --opt=-dNAME). Override per job as needed.
+  # Examples:
+  #   single:   MAKE_DEFINES: WITH_GTK2_IM
+  #   multiple: MAKE_DEFINES: 'WITH_GTK2_IM DEBUG_LOG USE_CTHREADS'
+  MAKE_DEFINES: ''
   # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
   # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
   CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
@@ -49,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       enabled_targets: ${{ steps.resolve.outputs.enabled_targets }}
-      native_matrix: ${{ steps.resolve.outputs.native_matrix }}
       target_map: ${{ steps.resolve.outputs.target_map }}
     steps:
       - uses: actions/checkout@v6
@@ -61,32 +66,100 @@ jobs:
           INPUT_TARGETS: ${{ github.event.inputs.enabled_targets }}
         run: bash .github/workflows/ci/resolve-targets.sh
 
-  native:
-    needs: setup
-    # native_matrix is built from targets.json filtered to enabled native ids.
-    # When no native target is enabled, resolve-targets.sh emits a single
-    # placeholder entry (fpc_target=none) so the matrix is never empty: a job
-    # skipped via an empty matrix renders the literal `${{ matrix.name }}` in
-    # the UI. The placeholder's steps no-op via `matrix.fpc_target != 'none'`.
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.runner }}
+  # Native targets are standalone jobs (one per target) rather than a single
+  # matrix job, so each can carry its own env overrides and so a single-target
+  # workflow_dispatch cleanly skips the rest. Like the QEMU/VM jobs below, they
+  # gate via `if: contains(... enabled_targets ...)` and resolve runner/fpc_target
+  # from target_map. Keep `name:` literal: an if-skipped job renders an
+  # unevaluated name expression in the UI, so it cannot be sourced from JSON.
+  linux-x64:
+    name: "Native: Linux x86_64"
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['linux-x64'].runner }}
     timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.setup.outputs.native_matrix) }}
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-x64,')
     steps:
       - name: Checkout
-        if: matrix.fpc_target != 'none'
         uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Build
-        if: matrix.fpc_target != 'none'
         shell: bash
         env:
-          FPC_TARGET: ${{ matrix.fpc_target }}
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['linux-x64'].fpc_target }}
+        run: bash .github/workflows/ci/native-build.sh
+
+  linux-arm64:
+    name: "Native: Linux AArch64"
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['linux-arm64'].runner }}
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',linux-arm64,')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build
+        shell: bash
+        env:
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['linux-arm64'].fpc_target }}
+        run: bash .github/workflows/ci/native-build.sh
+
+  windows-x64:
+    name: "Native: Windows x86_64"
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['windows-x64'].runner }}
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',windows-x64,')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build
+        shell: bash
+        env:
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['windows-x64'].fpc_target }}
+        run: bash .github/workflows/ci/native-build.sh
+
+  macos-arm64:
+    name: "Native: macOS AArch64 (Apple Silicon)"
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['macos-arm64'].runner }}
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',macos-arm64,')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build
+        shell: bash
+        env:
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['macos-arm64'].fpc_target }}
+        run: bash .github/workflows/ci/native-build.sh
+
+  macos-x64:
+    name: "Native: macOS x86_64 (Intel)"
+    runs-on: ${{ fromJSON(needs.setup.outputs.target_map)['macos-x64'].runner }}
+    timeout-minutes: 120
+    needs: setup
+    if: contains(format(',{0},', needs.setup.outputs.enabled_targets), ',macos-x64,')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Build
+        shell: bash
+        env:
+          FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['macos-x64'].fpc_target }}
         run: bash .github/workflows/ci/native-build.sh
 
   linux-arm32:

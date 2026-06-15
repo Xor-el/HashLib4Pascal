@@ -6,11 +6,10 @@ set -euo pipefail
 # Inputs:
 #   INPUT_TARGETS  workflow_dispatch CSV. Empty => default set (default=true).
 # Outputs (GITHUB_OUTPUT):
-#   enabled_targets  CSV of selected ids; gates the qemu/vm jobs in make.yml.
-#   native_matrix    JSON array of enabled kind=native entries; consumed as the
-#                    native job's strategy.matrix.include (empty => job skipped).
+#   enabled_targets  CSV of selected ids; gates every job in make.yml via their
+#                    job-level `if: contains(...)`.
 #   target_map       JSON object (id -> full target entry) over the WHOLE
-#                    registry; the static qemu/vm jobs in make.yml look up their
+#                    registry; the standalone jobs in make.yml look up their
 #                    runner/fpc_target by id (independent of which are enabled).
 #
 # targets.json is the single source of truth. Opt-in targets (default=false,
@@ -49,33 +48,17 @@ for _id in "${_selected[@]}"; do
   fi
 done
 
-# Filter the registry to enabled native entries. Bind .id before switching the
-# pipe context to the split list; index() returns null when absent (falsy) and
-# an integer otherwise (0 is truthy in jq).
-NATIVE_MATRIX="$(jq -c --arg ids "$TARGETS" \
-  '[.targets[] | select(.kind == "native") | select(.id as $i | ($ids | split(",") | index($i)))]' \
-  "$REGISTRY")"
-
-# Never emit an empty matrix: GitHub renders the literal `${{ matrix.name }}`
-# for a job skipped via an empty matrix. A single placeholder keeps the matrix
-# valid; the native job no-ops it via `matrix.fpc_target != 'none'`.
-if [ "$NATIVE_MATRIX" = "[]" ]; then
-  NATIVE_MATRIX='[{"name":"Native: (no targets selected)","runner":"ubuntu-latest","fpc_target":"none"}]'
-fi
-
 # id -> full target entry, over the entire registry (not just enabled ids). The
-# static qemu/vm jobs look up their runner/fpc_target by id, so the map must
-# resolve even for a target gated off by its `if:` (avoids a null runs-on). Job
-# names stay literal in make.yml: an if-skipped job renders an unevaluated name
+# standalone jobs look up their runner/fpc_target by id, so the map must resolve
+# even for a target gated off by its `if:` (avoids a null runs-on). Job names
+# stay literal in make.yml: an if-skipped job renders an unevaluated name
 # expression in the UI, so it cannot be sourced from here.
 TARGET_MAP="$(jq -c '.targets | map({(.id): .}) | add' "$REGISTRY")"
 
 {
   echo "enabled_targets=${TARGETS}"
-  echo "native_matrix=${NATIVE_MATRIX}"
   echo "target_map=${TARGET_MAP}"
 } >> "${GITHUB_OUTPUT:?GITHUB_OUTPUT is required}"
 
 echo "Enabled targets (${SOURCE}): ${TARGETS}"
-echo "Native matrix: ${NATIVE_MATRIX}"
 echo "Target map: ${TARGET_MAP}"
