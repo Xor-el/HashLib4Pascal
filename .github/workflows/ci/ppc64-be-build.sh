@@ -35,6 +35,7 @@ docker run --rm --platform linux/ppc64 \
   -v "${STUB_OBJ}:${CSU_STUBS_IN_CONTAINER}:ro" \
   -e FPC_VERSION \
   -e FPC_TARGET \
+  -e FPC_TARBALL_TARGET \
   -e MAKE_BUILD_BACKEND \
   -e MAKE_PACKAGE_SCOPE \
   -e LAZARUS_BRANCH \

@@ -53,7 +53,13 @@ done
 # even for a target gated off by its `if:` (avoids a null runs-on). Job names
 # stay literal in make.yml: an if-skipped job renders an unevaluated name
 # expression in the UI, so it cannot be sourced from here.
-TARGET_MAP="$(jq -c '.targets | map({(.id): .}) | add' "$REGISTRY")"
+#
+# fpc_tarball_target is optional in targets.json (only set when a platform's
+# tarball filename deviates from the canonical target, e.g. x86_64-freebsd11).
+# Default it to fpc_target here so every entry in the map carries a concrete,
+# non-empty value: jobs can then read it directly (no per-job fallback), which
+# also satisfies run-on-arch-action's requirement that env values be non-empty.
+TARGET_MAP="$(jq -c '.targets | map({(.id): (. + {fpc_tarball_target: (.fpc_tarball_target // .fpc_target)})}) | add' "$REGISTRY")"
 
 {
   echo "enabled_targets=${TARGETS}"

@@ -12,6 +12,10 @@
 #
 #  Inputs (env vars):
 #    FPC_TARGET     e.g. x86_64-linux, aarch64-darwin, x86_64-win64
+#    FPC_TARBALL_TARGET  optional override for the tarball filename token only
+#                   (e.g. x86_64-freebsd11 for fpc-3.2.2.x86_64-freebsd11.tar).
+#                   The URL directory and extracted dir stay canonical
+#                   (FPC_TARGET). Defaults to FPC_TARGET when empty/unset.
 #    FPC_VERSION    FPC release version, e.g. 3.2.2
 #    INSTALL_PREFIX where FPC is installed (default: $HOME/fpc-install)
 #    LAZARUS_DIR    where Lazarus source is cloned and built
@@ -67,15 +71,13 @@ if ci_is_windows; then IS_WINDOWS=1; else IS_WINDOWS=0; fi
 
 # ── Fetch + extract ──────────────────────────────────────────────────
 
-# Some BSD tarballs have an OS-version suffix in the filename, e.g.
-# fpc-3.2.2.x86_64-freebsd11.tar. The tarball extracts to a directory
-# WITHOUT the version suffix. Map our canonical FPC_TARGET to the
-# actual filename here; let the post-extract glob handle the directory
-# name.
-case "$FPC_TARGET" in
-  x86_64-freebsd)   TAR_TARGET="x86_64-freebsd11" ;;
-  *)                TAR_TARGET="$FPC_TARGET"      ;;
-esac
+# Tarball filename token. Some platforms ship an OS-version suffix in the
+# filename, e.g. fpc-3.2.2.x86_64-freebsd11.tar, while the URL directory and the
+# extracted directory use the canonical target (no suffix). Targets that need
+# this set FPC_TARBALL_TARGET (sourced from targets.json's fpc_tarball_target);
+# everyone else falls back to FPC_TARGET. The post-extract glob handles the
+# extracted directory name.
+TAR_TARGET="${FPC_TARBALL_TARGET:-$FPC_TARGET}"
 
 TARBALL="fpc-${FPC_VERSION}.${TAR_TARGET}.tar"
 URL="http://downloads.freepascal.org/fpc/dist/${FPC_VERSION}/${FPC_TARGET}/${TARBALL}"
