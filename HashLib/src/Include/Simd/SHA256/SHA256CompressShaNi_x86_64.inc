@@ -57,31 +57,31 @@
   pshufb xmm6, xmm7
 
   // ===== Rounds 0-3 (MSG0, no msg schedule) =====
-  movdqa xmm0, xmm3
-  paddd xmm0, oword [r9]
+  movdqu xmm0, oword [r9]
+  paddd xmm0, xmm3
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   pshufd xmm0, xmm0, $0E
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
 
   // ===== Rounds 4-7 (MSG1 + sha256msg1 MSG0,MSG1) =====
-  movdqa xmm0, xmm4
-  paddd xmm0, oword [r9 + $10]
+  movdqu xmm0, oword [r9 + $10]
+  paddd xmm0, xmm4
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   pshufd xmm0, xmm0, $0E
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
   db $0F, $38, $CC, $DC              // sha256msg1 xmm3, xmm4
 
   // ===== Rounds 8-11 (MSG2 + sha256msg1 MSG1,MSG2) =====
-  movdqa xmm0, xmm5
-  paddd xmm0, oword [r9 + $20]
+  movdqu xmm0, oword [r9 + $20]
+  paddd xmm0, xmm5
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   pshufd xmm0, xmm0, $0E
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
   db $0F, $38, $CC, $E5              // sha256msg1 xmm4, xmm5
 
   // ===== Rounds 12-15 (MSG3 + complete MSG0 + sha256msg1 MSG2,MSG3) =====
-  movdqa xmm0, xmm6
-  paddd xmm0, oword [r9 + $30]
+  movdqu xmm0, oword [r9 + $30]
+  paddd xmm0, xmm6
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm6
   palignr xmm7, xmm5, 4
@@ -92,8 +92,8 @@
   db $0F, $38, $CC, $EE              // sha256msg1 xmm5, xmm6
 
   // ===== Rounds 16-19 (MSG0 + complete MSG1 + sha256msg1 MSG3,MSG0) =====
-  movdqa xmm0, xmm3
-  paddd xmm0, oword [r9 + $40]
+  movdqu xmm0, oword [r9 + $40]
+  paddd xmm0, xmm3
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm3
   palignr xmm7, xmm6, 4
@@ -104,8 +104,8 @@
   db $0F, $38, $CC, $F3              // sha256msg1 xmm6, xmm3
 
   // ===== Rounds 20-23 (MSG1 + complete MSG2 + sha256msg1 MSG0,MSG1) =====
-  movdqa xmm0, xmm4
-  paddd xmm0, oword [r9 + $50]
+  movdqu xmm0, oword [r9 + $50]
+  paddd xmm0, xmm4
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm4
   palignr xmm7, xmm3, 4
@@ -116,8 +116,8 @@
   db $0F, $38, $CC, $DC              // sha256msg1 xmm3, xmm4
 
   // ===== Rounds 24-27 (MSG2 + complete MSG3 + sha256msg1 MSG1,MSG2) =====
-  movdqa xmm0, xmm5
-  paddd xmm0, oword [r9 + $60]
+  movdqu xmm0, oword [r9 + $60]
+  paddd xmm0, xmm5
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm5
   palignr xmm7, xmm4, 4
@@ -128,8 +128,8 @@
   db $0F, $38, $CC, $E5              // sha256msg1 xmm4, xmm5
 
   // ===== Rounds 28-31 (MSG3 + complete MSG0 + sha256msg1 MSG2,MSG3) =====
-  movdqa xmm0, xmm6
-  paddd xmm0, oword [r9 + $70]
+  movdqu xmm0, oword [r9 + $70]
+  paddd xmm0, xmm6
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm6
   palignr xmm7, xmm5, 4
@@ -140,8 +140,8 @@
   db $0F, $38, $CC, $EE              // sha256msg1 xmm5, xmm6
 
   // ===== Rounds 32-35 (MSG0 + complete MSG1 + sha256msg1 MSG3,MSG0) =====
-  movdqa xmm0, xmm3
-  paddd xmm0, oword [r9 + $80]
+  movdqu xmm0, oword [r9 + $80]
+  paddd xmm0, xmm3
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm3
   palignr xmm7, xmm6, 4
@@ -152,8 +152,8 @@
   db $0F, $38, $CC, $F3              // sha256msg1 xmm6, xmm3
 
   // ===== Rounds 36-39 (MSG1 + complete MSG2 + sha256msg1 MSG0,MSG1) =====
-  movdqa xmm0, xmm4
-  paddd xmm0, oword [r9 + $90]
+  movdqu xmm0, oword [r9 + $90]
+  paddd xmm0, xmm4
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm4
   palignr xmm7, xmm3, 4
@@ -164,8 +164,8 @@
   db $0F, $38, $CC, $DC              // sha256msg1 xmm3, xmm4
 
   // ===== Rounds 40-43 (MSG2 + complete MSG3 + sha256msg1 MSG1,MSG2) =====
-  movdqa xmm0, xmm5
-  paddd xmm0, oword [r9 + $A0]
+  movdqu xmm0, oword [r9 + $A0]
+  paddd xmm0, xmm5
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm5
   palignr xmm7, xmm4, 4
@@ -176,8 +176,8 @@
   db $0F, $38, $CC, $E5              // sha256msg1 xmm4, xmm5
 
   // ===== Rounds 44-47 (MSG3 + complete MSG0 + sha256msg1 MSG2,MSG3) =====
-  movdqa xmm0, xmm6
-  paddd xmm0, oword [r9 + $B0]
+  movdqu xmm0, oword [r9 + $B0]
+  paddd xmm0, xmm6
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm6
   palignr xmm7, xmm5, 4
@@ -188,8 +188,8 @@
   db $0F, $38, $CC, $EE              // sha256msg1 xmm5, xmm6
 
   // ===== Rounds 48-51 (MSG0 + complete MSG1 + sha256msg1 MSG3,MSG0) =====
-  movdqa xmm0, xmm3
-  paddd xmm0, oword [r9 + $C0]
+  movdqu xmm0, oword [r9 + $C0]
+  paddd xmm0, xmm3
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm3
   palignr xmm7, xmm6, 4
@@ -200,8 +200,8 @@
   db $0F, $38, $CC, $F3              // sha256msg1 xmm6, xmm3
 
   // ===== Rounds 52-55 (MSG1 + complete MSG2, no msg1) =====
-  movdqa xmm0, xmm4
-  paddd xmm0, oword [r9 + $D0]
+  movdqu xmm0, oword [r9 + $D0]
+  paddd xmm0, xmm4
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm4
   palignr xmm7, xmm3, 4
@@ -211,8 +211,8 @@
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
 
   // ===== Rounds 56-59 (MSG2 + complete MSG3, no msg1) =====
-  movdqa xmm0, xmm5
-  paddd xmm0, oword [r9 + $E0]
+  movdqu xmm0, oword [r9 + $E0]
+  paddd xmm0, xmm5
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   movdqa xmm7, xmm5
   palignr xmm7, xmm4, 4
@@ -222,8 +222,8 @@
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
 
   // ===== Rounds 60-63 (MSG3, no msg schedule) =====
-  movdqa xmm0, xmm6
-  paddd xmm0, oword [r9 + $F0]
+  movdqu xmm0, oword [r9 + $F0]
+  paddd xmm0, xmm6
   db $0F, $38, $CB, $D1              // sha256rnds2 xmm2, xmm1
   pshufd xmm0, xmm0, $0E
   db $0F, $38, $CB, $CA              // sha256rnds2 xmm1, xmm2
