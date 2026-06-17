@@ -1,0 +1,80 @@
+object MobileTestHostForm: TMobileTestHostForm
+  Left = 0
+  Top = 0
+  Caption = 'HashLib Tests (Mobile)'
+  ClientHeight = 606
+  ClientWidth = 360
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnShow = FormShow
+  DesignerMasterStyle = 3
+  object lblBaseUrl: TLabel
+    AutoSize = True
+    Position.X = 8.000000000000000000
+    Position.Y = 26.000000000000000000
+    Size.Width = 177.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'TestInsight URL'
+    TabOrder = 4
+  end
+  object edtBaseUrl: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 0
+    Position.X = 8.000000000000000000
+    Position.Y = 56.000000000000000000
+    Size.Width = 344.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    TextPrompt = 'http://IP:PORT'
+    OnChange = edtBaseUrlChange
+    OnChangeTracking = edtBaseUrlChange
+  end
+  object btnSaveUrl: TButton
+    Enabled = False
+    Position.X = 8.000000000000000000
+    Position.Y = 114.000000000000000000
+    Size.Width = 89.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Save URL'
+    OnClick = btnSaveUrlClick
+  end
+  object lblConnection: TLabel
+    AutoSize = True
+    Position.X = 8.000000000000000000
+    Position.Y = 222.000000000000000000
+    Size.Width = 344.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'IDE: (status)'
+    TabOrder = 5
+  end
+  object btnRunTests: TButton
+    Enabled = False
+    Position.X = 8.000000000000000000
+    Position.Y = 166.000000000000000000
+    Size.Width = 89.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    Text = 'Run Tests'
+    OnClick = btnRunTestsClick
+  end
+  object memLog: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Position.X = 8.000000000000000000
+    Position.Y = 264.000000000000000000
+    Size.Width = 344.000000000000000000
+    Size.Height = 334.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    Viewport.Width = 336.000000000000000000
+    Viewport.Height = 326.000000000000000000
+  end
+end
