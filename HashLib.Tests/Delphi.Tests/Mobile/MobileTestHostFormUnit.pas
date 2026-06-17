@@ -4,9 +4,10 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  System.IOUtils,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
   FMX.Controls.Presentation, FMX.Edit, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
-  MobileTestRunner;
+  HashLibTestResourceLoader, MobileTestRunner;
 
 type
   TMobileTestHostForm = class(TForm)
@@ -17,11 +18,12 @@ type
     btnRunTests: TButton;
     memLog: TMemo;
     procedure FormShow(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     procedure edtBaseUrlChange(Sender: TObject);
     procedure btnSaveUrlClick(Sender: TObject);
     procedure btnRunTestsClick(Sender: TObject);
   private
-    procedure InitializeLogSection;
+    procedure RefreshDataRootSection;
     procedure AppendLog(const ALine: string);
     procedure UpdateConnectionLabel;
     procedure UpdateActionButtons;
@@ -67,13 +69,35 @@ begin
   UpdateActionButtons;
 end;
 
-procedure TMobileTestHostForm.InitializeLogSection;
+procedure TMobileTestHostForm.RefreshDataRootSection;
+var
+  LDataRoot, LSentinelPath: string;
+  LFiles: TArray<string>;
 begin
+  LDataRoot := THashLibTestResourceLoader.DataRoot;
   memLog.Lines.BeginUpdate;
   try
     memLog.Lines.Clear;
-    memLog.Lines.Add('=== HashLib mobile tests ===');
-    memLog.Lines.Add('Vectors: embedded (TestVectors.pas)');
+    memLog.Lines.Add('=== Test data ===');
+    memLog.Lines.Add('Data root: ' + LDataRoot);
+    if LDataRoot = '' then
+    begin
+      memLog.Lines.Add('(path provider did not resolve a data root)');
+      Exit;
+    end;
+    LSentinelPath := THashLibTestResourceLoader.ResolveRelativePath(LDataRoot,
+      THashLibTestResourceLoader.HashLibTestDataSentinel);
+    if FileExists(LSentinelPath) then
+      memLog.Lines.Add('Sentinel ' + THashLibTestResourceLoader.HashLibTestDataSentinel + ': yes')
+    else
+      memLog.Lines.Add('Sentinel ' + THashLibTestResourceLoader.HashLibTestDataSentinel + ': no');
+    if TDirectory.Exists(LDataRoot) then
+    begin
+      LFiles := TDirectory.GetFiles(LDataRoot, '*', TSearchOption.soAllDirectories);
+      memLog.Lines.Add('file count: ' + IntToStr(Length(LFiles)));
+    end
+    else
+      memLog.Lines.Add('(directory does not exist)');
     memLog.Lines.Add('');
     memLog.Lines.Add('=== Test log ===');
   finally
@@ -86,7 +110,12 @@ begin
   edtBaseUrl.Text := LoadTestInsightBaseUrl;
   UpdateConnectionLabel;
   UpdateActionButtons;
-  InitializeLogSection;
+  RefreshDataRootSection;
+end;
+
+procedure TMobileTestHostForm.FormActivate(Sender: TObject);
+begin
+  RefreshDataRootSection;
 end;
 
 procedure TMobileTestHostForm.btnSaveUrlClick(Sender: TObject);

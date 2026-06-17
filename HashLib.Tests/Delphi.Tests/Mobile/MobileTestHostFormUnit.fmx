@@ -8,6 +8,7 @@ object MobileTestHostForm: TMobileTestHostForm
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnShow = FormShow
+  OnActivate = FormActivate
   DesignerMasterStyle = 3
   object lblBaseUrl: TLabel
     AutoSize = True

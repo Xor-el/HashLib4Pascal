@@ -474,7 +474,15 @@
         <DCCReference Include="..\..\HashLib\src\Utils\HlpHashLibTypes.pas"/>
         <DCCReference Include="..\..\HashLib\src\Utils\HlpArrayUtils.pas"/>
         <DCCReference Include="..\src\HashLibTestBase.pas"/>
-        <DCCReference Include="..\src\TestVectors.pas"/>
+        <DCCReference Include="..\src\Utils\HashLibTestResourceLoader.pas"/>
+        <DCCReference Include="..\src\Utils\Parsers\CsvVectorParser.pas"/>
+        <DCCReference Include="..\src\Utils\Parsers\JsonVectorParser.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\CsvVectorLoaderBase.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\Blake2KatVectors.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\Blake3Vectors.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\Argon2Vectors.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\ScryptVectors.pas"/>
+        <DCCReference Include="..\src\Utils\Vectors\Pbkdf2Vectors.pas"/>
         <DCCReference Include="..\src\ChecksumTests.pas"/>
         <DCCReference Include="..\src\NullDigestTests.pas"/>
         <DCCReference Include="..\src\Hash32Tests.pas"/>
@@ -1741,4 +1749,5 @@
     <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
     <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
+    <Import Project="$(MSBuildProjectName).TestData.deployproj" Condition="Exists('$(MSBuildProjectName).TestData.deployproj')"/>
 </Project>
