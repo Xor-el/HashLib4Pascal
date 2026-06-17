@@ -22,7 +22,8 @@ uses
   HlpBlake3,
   HlpHashLibTypes,
   HlpGost,
-  TestVectors;
+  Blake2KatVectors,
+  Blake3Vectors;
 
 // Crypto
 type
@@ -2786,8 +2787,8 @@ begin
   HashOfDefaultDataHMACWithLongKey :=
     '8E6F664622E2637AE477C00F314087FF8F6A8142D8CCF8946A451982AB750566DFD9BF97A50D705389FBF450525098797924DC443EFFDB1A1C945ECEA5DE9553';
 
-  UnkeyedTestVectors := TBlake2BTestVectors.FUnkeyedBlake2B;
-  KeyedTestVectors := TBlake2BTestVectors.FKeyedBlake2B;
+  UnkeyedTestVectors := TBlake2KatVectors.GetUnkeyedDigests(TBlake2KatAlgorithm.Blake2B);
+  KeyedTestVectors := TBlake2KatVectors.GetKeyedDigests(TBlake2KatAlgorithm.Blake2B);
 end;
 
 procedure TTestBlake2B.TearDown;
@@ -2925,8 +2926,8 @@ begin
   HashOfDefaultDataHMACWithLongKey :=
     '1CB9502C2FE830B46849F2C178BE527BF4B1B80B0B002F6FAC18C0A7ABD3B636';
 
-  UnkeyedTestVectors := TBlake2STestVectors.FUnkeyedBlake2S;
-  KeyedTestVectors := TBlake2STestVectors.FKeyedBlake2S;
+  UnkeyedTestVectors := TBlake2KatVectors.GetUnkeyedDigests(TBlake2KatAlgorithm.Blake2S);
+  KeyedTestVectors := TBlake2KatVectors.GetKeyedDigests(TBlake2KatAlgorithm.Blake2S);
 end;
 
 procedure TTestBlake2S.TearDown;
@@ -3178,11 +3179,11 @@ var
 begin
 
   for LIdx := 0 to System.Pred
-    (System.Length(TBlake2STestVectors.FBlake2XS_XofTestVectors)) do
+    (System.Length(TBlake2KatVectors.GetBlake2XsXofCases)) do
   begin
-    LVector := TBlake2STestVectors.FBlake2XS_XofTestVectors[LIdx];
+    LVector := TBlake2KatVectors.GetBlake2XsXofCases[LIdx];
     LInput := TConverters.ConvertHexStringToBytes
-      (TBlake2STestVectors.FBlake2XS_XofTestInput);
+      (TBlake2KatVectors.GetBlake2XsXofInputHex);
     LKey := TConverters.ConvertHexStringToBytes(LVector[0]);
 
     LHash := THashFactory.TXOF.CreateBlake2XS(LKey,
@@ -3273,11 +3274,11 @@ var
 begin
 
   for LIdx := 0 to System.Pred
-    (System.Length(TBlake2BTestVectors.FBlake2XB_XofTestVectors)) do
+    (System.Length(TBlake2KatVectors.GetBlake2XbXofCases)) do
   begin
-    LVector := TBlake2BTestVectors.FBlake2XB_XofTestVectors[LIdx];
+    LVector := TBlake2KatVectors.GetBlake2XbXofCases[LIdx];
     LInput := TConverters.ConvertHexStringToBytes
-      (TBlake2BTestVectors.FBlake2XB_XofTestInput);
+      (TBlake2KatVectors.GetBlake2XbXofInputHex);
     LKey := TConverters.ConvertHexStringToBytes(LVector[0]);
 
     LHash := THashFactory.TXOF.CreateBlake2XB(LKey,
@@ -3412,9 +3413,9 @@ begin
   LCtx := TConverters.ConvertStringToBytes(LCtxAsString, TEncoding.UTF8);
 
   for LIdx := 0 to System.Pred
-    (System.Length(TBlake3TestVectors.FBlake3_XofTestVectors)) do
+    (System.Length(TBlake3Vectors.GetXofCases)) do
   begin
-    LVector := TBlake3TestVectors.FBlake3_XofTestVectors[LIdx];
+    LVector := TBlake3Vectors.GetXofCases[LIdx];
     LChunkedInput := System.Copy(LFullInput, 0, StrToInt(LVector[0]));
 
     LHash := THashFactory.TXOF.CreateBlake3XOF(LNilKey,
@@ -3998,8 +3999,8 @@ begin
   HashOfDefaultDataHMACWithLongKey :=
     '62B264D5D5DFC01350B69C083B239426EC8A8F971FAC8DCB0B6A4825DD664CB992413AA1F7E5D2950BFFB9C207A9B084591633A96F3F590A861B27C3B827D3BC';
 
-  UnkeyedTestVectors := TBlake2BPTestVectors.FUnkeyedBlake2BP;
-  KeyedTestVectors := TBlake2BPTestVectors.FKeyedBlake2BP;
+  UnkeyedTestVectors := TBlake2KatVectors.GetUnkeyedDigests(TBlake2KatAlgorithm.Blake2BP);
+  KeyedTestVectors := TBlake2KatVectors.GetKeyedDigests(TBlake2KatAlgorithm.Blake2BP);
 end;
 
 procedure TTestBlake2BP.TearDown;
@@ -4042,8 +4043,8 @@ begin
   HashOfDefaultDataHMACWithLongKey :=
     '7E061EC8E97D200F21BD7DB59FF4ED7BB1F7327D9E75EB3D922B926A76FEFE3F';
 
-  UnkeyedTestVectors := TBlake2SPTestVectors.FUnkeyedBlake2SP;
-  KeyedTestVectors := TBlake2SPTestVectors.FKeyedBlake2SP;
+  UnkeyedTestVectors := TBlake2KatVectors.GetUnkeyedDigests(TBlake2KatAlgorithm.Blake2SP);
+  KeyedTestVectors := TBlake2KatVectors.GetKeyedDigests(TBlake2KatAlgorithm.Blake2SP);
 end;
 
 procedure TTestBlake2SP.TearDown;
