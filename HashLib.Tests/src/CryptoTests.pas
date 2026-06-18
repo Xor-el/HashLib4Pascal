@@ -739,6 +739,57 @@ type
 
   end;
 
+  // ----- Streaming XOF (IXOFStream / continuous squeeze) test cases ----- //
+
+type
+  TTestShake_128Stream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestShake_256Stream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestCShake_128Stream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestCShake_256Stream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestBlake2XSStream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestBlake2XBStream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+type
+  TTestBlake3XOFStream = class(TXofStreamAlgorithmTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
 type
   TTestKeccak_224 = class(TCryptoAlgorithmTestCase)
 
@@ -820,6 +871,8 @@ type
     procedure TestKMAC128XOFNISTSample1;
     procedure TestKMAC128XOFNISTSample2;
     procedure TestKMAC128XOFNISTSample3;
+    procedure TestKMAC128XOFMultiChunkConsistency;
+    procedure TestKMAC128XOFStreamMatchesSized;
 
   end;
 
@@ -844,6 +897,8 @@ type
     procedure TestKMAC256XOFNISTSample1;
     procedure TestKMAC256XOFNISTSample2;
     procedure TestKMAC256XOFNISTSample3;
+    procedure TestKMAC256XOFMultiChunkConsistency;
+    procedure TestKMAC256XOFStreamMatchesSized;
 
   end;
 
@@ -3390,6 +3445,124 @@ begin
   inherited;
 end;
 
+{ TTestShake_128Stream }
+
+procedure TTestShake_128Stream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateShake_128Stream();
+  // SHAKE output is length-independent, so a sized reference matches the stream
+  ReferenceXof := THashFactory.TXOF.CreateShake_128(512 * 8) as IXOF;
+end;
+
+procedure TTestShake_128Stream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestShake_256Stream }
+
+procedure TTestShake_256Stream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateShake_256Stream();
+  ReferenceXof := THashFactory.TXOF.CreateShake_256(512 * 8) as IXOF;
+end;
+
+procedure TTestShake_256Stream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestCShake_128Stream }
+
+procedure TTestCShake_128Stream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateCShake_128Stream(nil, nil);
+  ReferenceXof := THashFactory.TXOF.CreateCShake_128(nil, nil, 512 * 8) as IXOF;
+end;
+
+procedure TTestCShake_128Stream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestCShake_256Stream }
+
+procedure TTestCShake_256Stream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateCShake_256Stream(nil, nil);
+  ReferenceXof := THashFactory.TXOF.CreateCShake_256(nil, nil, 512 * 8) as IXOF;
+end;
+
+procedure TTestCShake_256Stream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestBlake2XSStream }
+
+procedure TTestBlake2XSStream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateBlake2XSStream(nil);
+  // Blake2X output depends on the declared length, so the reference must also
+  // be in unknown-length (streaming) mode. The streaming instance already
+  // owns that mode, so view a fresh one through IXOF rather than re-deriving
+  // the magic sentinel here.
+  ReferenceXof := THashFactory.TXOF.CreateBlake2XSStream(nil) as IXOF;
+end;
+
+procedure TTestBlake2XSStream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestBlake2XBStream }
+
+procedure TTestBlake2XBStream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateBlake2XBStream(nil);
+  // unknown-length (streaming) mode reference, viewed through IXOF
+  ReferenceXof := THashFactory.TXOF.CreateBlake2XBStream(nil) as IXOF;
+end;
+
+procedure TTestBlake2XBStream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
+{ TTestBlake3XOFStream }
+
+procedure TTestBlake3XOFStream.SetUp;
+begin
+  inherited;
+  StreamInstance := THashFactory.TXOF.CreateBlake3XOFStream(nil);
+  ReferenceXof := THashFactory.TXOF.CreateBlake3XOF(nil, 512 * 8) as IXOF;
+end;
+
+procedure TTestBlake3XOFStream.TearDown;
+begin
+  StreamInstance := nil;
+  ReferenceXof := nil;
+  inherited;
+end;
+
 procedure TTestBlake3XOF.TestCheckTestVectors;
 var
   LIdx: Int32;
@@ -3648,6 +3821,104 @@ begin
     OutputSizeInBits, True);
 end;
 
+procedure TTestKMAC128.TestKMAC128XOFMultiChunkConsistency;
+const
+  CTotal = Int32(512);
+  CChunks: array [0 .. 4] of Int32 = (1, 7, 13, 64, 100);
+var
+  LKey, LCustomization, LData, LSingle, LChunked: TBytes;
+  LXof1, LXof2: IXOF;
+  LOffset, LChunkSize, LIdx: Int32;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(RawKeyInHex);
+  LCustomization := TConverters.ConvertStringToBytes(CustomizationMessage,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(FData);
+
+  // single-call DoOutput reference
+  LXof1 := THashFactory.TXOF.CreateKMAC128XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LXof1.Initialize;
+  LXof1.TransformBytes(LData);
+  LSingle := nil;
+  System.SetLength(LSingle, CTotal);
+  LXof1.DoOutput(LSingle, 0, CTotal);
+
+  // multi-chunk (3+ uneven) DoOutput: regression gate ensuring RightEncode is
+  // appended exactly once across successive output calls
+  LXof2 := THashFactory.TXOF.CreateKMAC128XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LXof2.Initialize;
+  LXof2.TransformBytes(LData);
+  LChunked := nil;
+  System.SetLength(LChunked, CTotal);
+  LOffset := 0;
+  LIdx := 0;
+  while LOffset < CTotal do
+  begin
+    LChunkSize := CChunks[LIdx mod System.Length(CChunks)];
+    if LChunkSize > (CTotal - LOffset) then
+    begin
+      LChunkSize := CTotal - LOffset;
+    end;
+    LXof2.DoOutput(LChunked, LOffset, LChunkSize);
+    System.Inc(LOffset, LChunkSize);
+    System.Inc(LIdx);
+  end;
+
+  CheckTrue(AreEqual(LSingle, LChunked),
+    'KMAC128XOF multi-chunk DoOutput does not match single DoOutput ' +
+    '(RightEncode-once regression)');
+end;
+
+procedure TTestKMAC128.TestKMAC128XOFStreamMatchesSized;
+const
+  CTotal = Int32(512);
+  CChunks: array [0 .. 4] of Int32 = (1, 7, 13, 64, 100);
+var
+  LKey, LCustomization, LData, LSized, LStreamed: TBytes;
+  LSizedXof: IXOF;
+  LStream: IXOFStream;
+  LOffset, LChunkSize, LIdx: Int32;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(RawKeyInHex);
+  LCustomization := TConverters.ConvertStringToBytes(CustomizationMessage,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(FData);
+
+  // sized KMAC-XOF reference (already NIST-verified via the samples above)
+  LSizedXof := THashFactory.TXOF.CreateKMAC128XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LSizedXof.Initialize;
+  LSizedXof.TransformBytes(LData);
+  LSized := nil;
+  System.SetLength(LSized, CTotal);
+  LSizedXof.DoOutput(LSized, 0, CTotal);
+
+  // streaming KMAC-XOF squeezed in uneven chunks
+  LStream := THashFactory.TXOF.CreateKMAC128XOFStream(LKey, LCustomization);
+  LStream.Initialize;
+  LStream.TransformBytes(LData);
+  LStreamed := nil;
+  System.SetLength(LStreamed, CTotal);
+  LOffset := 0;
+  LIdx := 0;
+  while LOffset < CTotal do
+  begin
+    LChunkSize := CChunks[LIdx mod System.Length(CChunks)];
+    if LChunkSize > (CTotal - LOffset) then
+    begin
+      LChunkSize := CTotal - LOffset;
+    end;
+    LStream.Squeeze(LStreamed, LOffset, LChunkSize);
+    System.Inc(LOffset, LChunkSize);
+    System.Inc(LIdx);
+  end;
+
+  CheckTrue(AreEqual(LSized, LStreamed),
+    'KMAC128XOF stream Squeeze does not match sized DoOutput');
+end;
+
 { TTestKMAC256 }
 
 procedure TTestKMAC256.DoComputeKMAC256(const AKey, ACustomization, AData,
@@ -3786,6 +4057,104 @@ begin
   DoComputeKMAC256(RawKeyInHex, CustomizationMessage, FData,
     'D5BE731C954ED7732846BB59DBE3A8E30F83E77A4BFF4459F2F1C2B4ECEBB8CE67BA01C62E8AB8578D2D499BD1BB276768781190020A306A97DE281DCC30305D',
     OutputSizeInBits, True);
+end;
+
+procedure TTestKMAC256.TestKMAC256XOFMultiChunkConsistency;
+const
+  CTotal = Int32(512);
+  CChunks: array [0 .. 4] of Int32 = (1, 7, 13, 64, 100);
+var
+  LKey, LCustomization, LData, LSingle, LChunked: TBytes;
+  LXof1, LXof2: IXOF;
+  LOffset, LChunkSize, LIdx: Int32;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(RawKeyInHex);
+  LCustomization := TConverters.ConvertStringToBytes(CustomizationMessage,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(FData);
+
+  // single-call DoOutput reference
+  LXof1 := THashFactory.TXOF.CreateKMAC256XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LXof1.Initialize;
+  LXof1.TransformBytes(LData);
+  LSingle := nil;
+  System.SetLength(LSingle, CTotal);
+  LXof1.DoOutput(LSingle, 0, CTotal);
+
+  // multi-chunk (3+ uneven) DoOutput: regression gate ensuring RightEncode is
+  // appended exactly once across successive output calls
+  LXof2 := THashFactory.TXOF.CreateKMAC256XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LXof2.Initialize;
+  LXof2.TransformBytes(LData);
+  LChunked := nil;
+  System.SetLength(LChunked, CTotal);
+  LOffset := 0;
+  LIdx := 0;
+  while LOffset < CTotal do
+  begin
+    LChunkSize := CChunks[LIdx mod System.Length(CChunks)];
+    if LChunkSize > (CTotal - LOffset) then
+    begin
+      LChunkSize := CTotal - LOffset;
+    end;
+    LXof2.DoOutput(LChunked, LOffset, LChunkSize);
+    System.Inc(LOffset, LChunkSize);
+    System.Inc(LIdx);
+  end;
+
+  CheckTrue(AreEqual(LSingle, LChunked),
+    'KMAC256XOF multi-chunk DoOutput does not match single DoOutput ' +
+    '(RightEncode-once regression)');
+end;
+
+procedure TTestKMAC256.TestKMAC256XOFStreamMatchesSized;
+const
+  CTotal = Int32(512);
+  CChunks: array [0 .. 4] of Int32 = (1, 7, 13, 64, 100);
+var
+  LKey, LCustomization, LData, LSized, LStreamed: TBytes;
+  LSizedXof: IXOF;
+  LStream: IXOFStream;
+  LOffset, LChunkSize, LIdx: Int32;
+begin
+  LKey := TConverters.ConvertHexStringToBytes(RawKeyInHex);
+  LCustomization := TConverters.ConvertStringToBytes(CustomizationMessage,
+    TEncoding.UTF8);
+  LData := TConverters.ConvertHexStringToBytes(FData);
+
+  // sized KMAC-XOF reference (already NIST-verified via the samples above)
+  LSizedXof := THashFactory.TXOF.CreateKMAC256XOF(LKey, LCustomization,
+    UInt64(CTotal) * 8) as IXOF;
+  LSizedXof.Initialize;
+  LSizedXof.TransformBytes(LData);
+  LSized := nil;
+  System.SetLength(LSized, CTotal);
+  LSizedXof.DoOutput(LSized, 0, CTotal);
+
+  // streaming KMAC-XOF squeezed in uneven chunks
+  LStream := THashFactory.TXOF.CreateKMAC256XOFStream(LKey, LCustomization);
+  LStream.Initialize;
+  LStream.TransformBytes(LData);
+  LStreamed := nil;
+  System.SetLength(LStreamed, CTotal);
+  LOffset := 0;
+  LIdx := 0;
+  while LOffset < CTotal do
+  begin
+    LChunkSize := CChunks[LIdx mod System.Length(CChunks)];
+    if LChunkSize > (CTotal - LOffset) then
+    begin
+      LChunkSize := CTotal - LOffset;
+    end;
+    LStream.Squeeze(LStreamed, LOffset, LChunkSize);
+    System.Inc(LOffset, LChunkSize);
+    System.Inc(LIdx);
+  end;
+
+  CheckTrue(AreEqual(LSized, LStreamed),
+    'KMAC256XOF stream Squeeze does not match sized DoOutput');
 end;
 
 { TTestBlake2BMAC }
@@ -4148,6 +4517,13 @@ RegisterTest(TTestBlake2BP);
 RegisterTest(TTestBlake2SP);
 RegisterTest(TTestBlake3);
 RegisterTest(TTestBlake3XOF);
+RegisterTest(TTestShake_128Stream);
+RegisterTest(TTestShake_256Stream);
+RegisterTest(TTestCShake_128Stream);
+RegisterTest(TTestCShake_256Stream);
+RegisterTest(TTestBlake2XSStream);
+RegisterTest(TTestBlake2XBStream);
+RegisterTest(TTestBlake3XOFStream);
 {$ELSE}
 // Crypto
 RegisterTest(TTestGost.Suite);
@@ -4237,6 +4613,13 @@ RegisterTest(TTestBlake2BP.Suite);
 RegisterTest(TTestBlake2SP.Suite);
 RegisterTest(TTestBlake3.Suite);
 RegisterTest(TTestBlake3XOF.Suite);
+RegisterTest(TTestShake_128Stream.Suite);
+RegisterTest(TTestShake_256Stream.Suite);
+RegisterTest(TTestCShake_128Stream.Suite);
+RegisterTest(TTestCShake_256Stream.Suite);
+RegisterTest(TTestBlake2XSStream.Suite);
+RegisterTest(TTestBlake2XBStream.Suite);
+RegisterTest(TTestBlake3XOFStream.Suite);
 {$ENDIF FPC}
 
 end.

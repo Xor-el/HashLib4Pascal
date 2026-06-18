@@ -469,6 +469,36 @@ type
       class function CreateBlake3XOF(const AKey: THashLibByteArray;
         AXofSizeInBits: UInt64): IHash; overload; static;
 
+      // ----- Streaming XOF constructors (continuous squeeze) ----- //
+      // These return IXOFStream instances whose output length need not be
+      // declared upfront; use Squeeze to pull bytes on demand.
+
+      class function CreateShake_128Stream(): IXOFStream; static;
+      class function CreateShake_256Stream(): IXOFStream; static;
+
+      class function CreateCShake_128Stream(const AN, &AS: THashLibByteArray)
+        : IXOFStream; static;
+      class function CreateCShake_256Stream(const AN, &AS: THashLibByteArray)
+        : IXOFStream; static;
+
+      class function CreateBlake2XSStream(const ABlake2XSConfig
+        : TBlake2XSConfig): IXOFStream; overload; static;
+      class function CreateBlake2XSStream(const AKey: THashLibByteArray)
+        : IXOFStream; overload; static;
+
+      class function CreateBlake2XBStream(const ABlake2XBConfig
+        : TBlake2XBConfig): IXOFStream; overload; static;
+      class function CreateBlake2XBStream(const AKey: THashLibByteArray)
+        : IXOFStream; overload; static;
+
+      class function CreateKMAC128XOFStream(const AKMACKey, ACustomization
+        : THashLibByteArray): IXOFStream; static;
+      class function CreateKMAC256XOFStream(const AKMACKey, ACustomization
+        : THashLibByteArray): IXOFStream; static;
+
+      class function CreateBlake3XOFStream(const AKey: THashLibByteArray)
+        : IXOFStream; static;
+
     end;
 
     // ====================== THMAC ====================== //
@@ -1523,6 +1553,93 @@ class function THashFactory.TXOF.CreateKMAC256XOF(const AKMACKey,
 begin
   Result := TKMAC256XOF.CreateKMAC256XOF(AKMACKey, ACustomization,
     AXofSizeInBits);
+end;
+
+class function THashFactory.TXOF.CreateShake_128Stream(): IXOFStream;
+var
+  LStream: IXOFStream;
+begin
+  LStream := TShake_128.Create();
+  Result := LStream;
+end;
+
+class function THashFactory.TXOF.CreateShake_256Stream(): IXOFStream;
+var
+  LStream: IXOFStream;
+begin
+  LStream := TShake_256.Create();
+  Result := LStream;
+end;
+
+class function THashFactory.TXOF.CreateCShake_128Stream(const AN,
+  &AS: THashLibByteArray): IXOFStream;
+var
+  LStream: IXOFStream;
+begin
+  LStream := TCShake_128.Create(AN, &AS);
+  Result := LStream;
+end;
+
+class function THashFactory.TXOF.CreateCShake_256Stream(const AN,
+  &AS: THashLibByteArray): IXOFStream;
+var
+  LStream: IXOFStream;
+begin
+  LStream := TCShake_256.Create(AN, &AS);
+  Result := LStream;
+end;
+
+class function THashFactory.TXOF.CreateBlake2XSStream(const ABlake2XSConfig
+  : TBlake2XSConfig): IXOFStream;
+begin
+  Result := TBlake2XS.CreateBlake2XSXofStream(ABlake2XSConfig);
+end;
+
+class function THashFactory.TXOF.CreateBlake2XSStream(const AKey
+  : THashLibByteArray): IXOFStream;
+var
+  LConfig: IBlake2SConfig;
+begin
+  LConfig := TBlake2SConfig.Create(32);
+  LConfig.Key := AKey;
+  Result := CreateBlake2XSStream(TBlake2XSConfig.Create(LConfig, nil));
+end;
+
+class function THashFactory.TXOF.CreateBlake2XBStream(const ABlake2XBConfig
+  : TBlake2XBConfig): IXOFStream;
+begin
+  Result := TBlake2XB.CreateBlake2XBXofStream(ABlake2XBConfig);
+end;
+
+class function THashFactory.TXOF.CreateBlake2XBStream(const AKey
+  : THashLibByteArray): IXOFStream;
+var
+  LConfig: IBlake2BConfig;
+begin
+  LConfig := TBlake2BConfig.Create(64);
+  LConfig.Key := AKey;
+  Result := CreateBlake2XBStream(TBlake2XBConfig.Create(LConfig, nil));
+end;
+
+class function THashFactory.TXOF.CreateKMAC128XOFStream(const AKMACKey,
+  ACustomization: THashLibByteArray): IXOFStream;
+begin
+  Result := TKMAC128XOF.CreateKMAC128XOFStream(AKMACKey, ACustomization);
+end;
+
+class function THashFactory.TXOF.CreateKMAC256XOFStream(const AKMACKey,
+  ACustomization: THashLibByteArray): IXOFStream;
+begin
+  Result := TKMAC256XOF.CreateKMAC256XOFStream(AKMACKey, ACustomization);
+end;
+
+class function THashFactory.TXOF.CreateBlake3XOFStream(const AKey
+  : THashLibByteArray): IXOFStream;
+var
+  LStream: IXOFStream;
+begin
+  LStream := TBlake3XOF.Create(32, AKey);
+  Result := LStream;
 end;
 
 { THashFactory.THMAC }

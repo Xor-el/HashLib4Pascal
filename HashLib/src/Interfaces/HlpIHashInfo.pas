@@ -140,6 +140,49 @@ type
       ADestinationOffset, AOutputLength: UInt64);
   end;
 
+  /// <summary>
+  /// Streaming XOF interface. Unlike <see cref="IXOF" />, the total output
+  /// length need not be declared upfront: <c>Squeeze</c> emits an arbitrary
+  /// number of bytes per call, continuing from where the previous call left
+  /// off. Implemented by the same classes that implement <see cref="IXOF" />.
+  /// </summary>
+  IXOFStream = Interface(IHash)
+    ['{8F2A6C41-3B9E-4D17-A5C8-1E704293B6D0}']
+    /// <summary>
+    /// Squeeze <paramref name="AOutputLength" /> bytes into
+    /// <paramref name="ADestination" /> starting at
+    /// <paramref name="ADestinationOffset" />. No upfront size cap.
+    /// </summary>
+    procedure Squeeze(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); overload;
+    /// <summary>
+    /// Squeeze and return <paramref name="AOutputLength" /> freshly allocated
+    /// bytes.
+    /// </summary>
+    function Squeeze(AOutputLength: UInt64): THashLibByteArray; overload;
+    function GetBytesSqueezed: UInt64;
+    /// <summary>
+    /// Cumulative number of bytes squeezed since the last
+    /// <c>Initialize</c>.
+    /// </summary>
+    property BytesSqueezed: UInt64 read GetBytesSqueezed;
+  end;
+
+  /// <summary>
+  /// Internal "engine" contract for an XOF squeeze. Owns a self-contained
+  /// copy of the finalized state and produces an unbounded pseudo-random
+  /// byte stream. The size cap (if any) is policy enforced by the owner, not
+  /// by the reader.
+  /// </summary>
+  IXofReader = Interface(IInterface)
+    ['{3D5B9E22-7C14-4A8F-9E6B-2F8A1C0D4E77}']
+    procedure Read(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64);
+    function GetPosition: UInt64;
+    property Position: UInt64 read GetPosition;
+    function Clone(): IXofReader;
+  end;
+
 type
   IArgon2Parameters = interface(IInterface)
     ['{566D3381-57F1-4EE0-81EC-3DB21FF49FBC}']

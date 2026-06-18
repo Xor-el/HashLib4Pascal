@@ -109,7 +109,7 @@ type
   end;
 
 type
-  TBlake2XB = class sealed(TBlake2B, IXOF)
+  TBlake2XB = class sealed(TBlake2B, IXOF, IXOFStream)
   strict private
   const
     Blake2BHashSize = Int32(64);
@@ -134,8 +134,6 @@ type
     function NodeOffsetWithXOFDigestLength(AXOFSizeInBytes: UInt64)
       : UInt64; inline;
 
-    function ComputeStepLength(): Int32; inline;
-
     function GetResult(): THashLibByteArray; reintroduce;
 
     constructor CreateInternal(const AConfig: IBlake2BConfig;
@@ -144,12 +142,12 @@ type
   strict protected
   var
     FBlake2XBConfig: TBlake2XBConfig;
-    FDigestPosition: UInt64;
     FRootConfig, FOutputConfig: TBlake2XBConfig;
-    FRootHashDigest, FBlake2XBBuffer: THashLibByteArray;
-    FFinalized: Boolean;
+    // squeeze engine; nil until the first output (lazily finalized)
+    FReader: IXofReader;
 
     function GetName: String; override;
+    procedure EnsureReader();
     property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
@@ -163,6 +161,21 @@ type
 
     procedure DoOutput(const ADestination: THashLibByteArray;
       ADestinationOffset, AOutputLength: UInt64);
+
+    procedure Squeeze(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); overload;
+    function Squeeze(AOutputLength: UInt64): THashLibByteArray; overload;
+    function GetBytesSqueezed: UInt64;
+
+    /// <summary>
+    /// Creates a Blake2XB instance in unknown-length (streaming) mode. Unlike
+    /// SHAKE/Blake3, Blake2X bakes the final digest length into every output
+    /// block, so unbounded output must be selected at construction by encoding
+    /// the spec's reserved "unknown length" marker. This factory hides that
+    /// marker so callers never deal with the magic value directly.
+    /// </summary>
+    class function CreateBlake2XBXofStream(const ABlake2XBConfig
+      : TBlake2XBConfig): IXOFStream; static;
 
   end;
 
@@ -210,6 +223,128 @@ implementation
 
 uses
   HlpBlake2BDispatch;
+
+type
+  // Self-contained Blake2XB squeeze engine. Owns the finalized root digest and
+  // its own copy of the output config; generates output blocks on demand. The
+  // size cap is enforced by the owning TBlake2XB, not here.
+  TBlake2XBXofReader = class sealed(TInterfacedObject, IXofReader)
+  strict private
+  const
+    Blake2BHashSize = Int32(64);
+  var
+    FRootHashDigest, FBlake2XBBuffer: THashLibByteArray;
+    FOutputConfig: TBlake2XBConfig;
+    FXofSizeInBytes: UInt64;
+    FUnknownLength: Boolean;
+    FDigestPosition: UInt64;
+    function ComputeStepLength(): Int32; inline;
+  public
+    constructor Create(const ARootHashDigest: THashLibByteArray;
+      const AOutputConfig: TBlake2XBConfig; AXofSizeInBytes: UInt64;
+      AUnknownLength: Boolean);
+    procedure Read(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64);
+    function GetPosition: UInt64;
+    function Clone(): IXofReader;
+  end;
+
+{ TBlake2XBXofReader }
+
+constructor TBlake2XBXofReader.Create(const ARootHashDigest: THashLibByteArray;
+  const AOutputConfig: TBlake2XBConfig; AXofSizeInBytes: UInt64;
+  AUnknownLength: Boolean);
+begin
+  inherited Create();
+  FRootHashDigest := System.Copy(ARootHashDigest);
+  FOutputConfig := AOutputConfig.Clone();
+  FXofSizeInBytes := AXofSizeInBytes;
+  FUnknownLength := AUnknownLength;
+  FDigestPosition := 0;
+  System.SetLength(FBlake2XBBuffer, Blake2BHashSize);
+end;
+
+function TBlake2XBXofReader.ComputeStepLength: Int32;
+var
+  LDiff: UInt64;
+begin
+  if FUnknownLength then
+  begin
+    Result := Blake2BHashSize;
+    Exit;
+  end;
+
+  LDiff := FXofSizeInBytes - FDigestPosition;
+
+  // Math.Min
+  if UInt64(Blake2BHashSize) < LDiff then
+  begin
+    Result := UInt64(Blake2BHashSize)
+  end
+  else
+  begin
+    Result := LDiff;
+  end;
+end;
+
+function TBlake2XBXofReader.GetPosition: UInt64;
+begin
+  Result := FDigestPosition;
+end;
+
+procedure TBlake2XBXofReader.Read(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+var
+  LDiff, LCount, LBlockOffset: UInt64;
+  LHash: IHash;
+begin
+  while AOutputLength > 0 do
+  begin
+    if (FDigestPosition and (Blake2BHashSize - 1)) = 0 then
+    begin
+      FOutputConfig.Blake2BConfig.HashSize := ComputeStepLength();
+      FOutputConfig.Blake2BTreeConfig.InnerHashSize := Blake2BHashSize;
+
+      LHash := TBlake2B.Create(FOutputConfig.Blake2BConfig,
+        FOutputConfig.Blake2BTreeConfig);
+      FBlake2XBBuffer := LHash.ComputeBytes(FRootHashDigest).GetBytes();
+      FOutputConfig.Blake2BTreeConfig.NodeOffset :=
+        FOutputConfig.Blake2BTreeConfig.NodeOffset + 1;
+    end;
+
+    LBlockOffset := FDigestPosition and (Blake2BHashSize - 1);
+
+    LDiff := UInt64(System.Length(FBlake2XBBuffer)) - LBlockOffset;
+
+    // Math.Min
+    if AOutputLength < LDiff then
+    begin
+      LCount := AOutputLength
+    end
+    else
+    begin
+      LCount := LDiff;
+    end;
+
+    System.Move(FBlake2XBBuffer[LBlockOffset], ADestination[ADestinationOffset],
+      LCount);
+
+    System.Dec(AOutputLength, LCount);
+    System.Inc(ADestinationOffset, LCount);
+    System.Inc(FDigestPosition, LCount);
+  end;
+end;
+
+function TBlake2XBXofReader.Clone(): IXofReader;
+var
+  LReader: TBlake2XBXofReader;
+begin
+  LReader := TBlake2XBXofReader.Create(FRootHashDigest, FOutputConfig,
+    FXofSizeInBytes, FUnknownLength);
+  LReader.FBlake2XBBuffer := System.Copy(FBlake2XBBuffer);
+  LReader.FDigestPosition := FDigestPosition;
+  Result := LReader;
+end;
 
 { TBlake2B }
 
@@ -510,29 +645,6 @@ begin
   Result := (UInt64(AXOFSizeInBytes) shl 32);
 end;
 
-function TBlake2XB.ComputeStepLength: Int32;
-var
-  LXofSizeInBytes, LDiff: UInt64;
-begin
-  LXofSizeInBytes := XOFSizeInBits shr 3;
-  LDiff := LXofSizeInBytes - FDigestPosition;
-  if (LXofSizeInBytes = UInt64(UnknownDigestLengthInBytes)) then
-  begin
-    Result := Blake2BHashSize;
-    Exit;
-  end;
-
-  // Math.Min
-  if UInt64(Blake2BHashSize) < LDiff then
-  begin
-    Result := UInt64(Blake2BHashSize)
-  end
-  else
-  begin
-    Result := LDiff;
-  end;
-end;
-
 function TBlake2XB.GetName: String;
 begin
   Result := Self.ClassName;
@@ -551,12 +663,12 @@ begin
   // Blake2XB Cloning
   LHashInstance := LXof as TBlake2XB;
   LHashInstance.FBlake2XBConfig := FBlake2XBConfig.Clone();
-  LHashInstance.FDigestPosition := FDigestPosition;
   LHashInstance.FRootConfig := FRootConfig.Clone();
   LHashInstance.FOutputConfig := FOutputConfig.Clone();
-  LHashInstance.FRootHashDigest := System.Copy(FRootHashDigest);
-  LHashInstance.FBlake2XBBuffer := System.Copy(FBlake2XBBuffer);
-  LHashInstance.FFinalized := FFinalized;
+  if FReader <> nil then
+  begin
+    LHashInstance.FReader := FReader.Clone();
+  end;
 
   // Internal Blake2B Cloning
   System.Move(FM, LHashInstance.FM, System.SizeOf(FM));
@@ -624,8 +736,18 @@ begin
   FOutputConfig.Blake2BTreeConfig := TBlake2BTreeConfig.Create();
 
   CreateInternal(FRootConfig.Blake2BConfig, FRootConfig.Blake2BTreeConfig);
+end;
 
-  System.SetLength(FBlake2XBBuffer, Blake2BHashSize);
+class function TBlake2XB.CreateBlake2XBXofStream(const ABlake2XBConfig
+  : TBlake2XBConfig): IXOFStream;
+var
+  LXof: TBlake2XB;
+begin
+  LXof := TBlake2XB.Create(ABlake2XBConfig);
+  // Select unbounded output by encoding the spec's "unknown length" marker
+  // into the XOF digest-length field; this is the streaming mode for Blake2X.
+  LXof.FXOFSizeInBits := UInt64(UnknownDigestLengthInBytes) shl 3;
+  Result := LXof;
 end;
 
 procedure TBlake2XB.Initialize;
@@ -640,18 +762,36 @@ begin
   FOutputConfig.Blake2BTreeConfig.NodeOffset := NodeOffsetWithXOFDigestLength
     (LXofSizeInBytes);
 
-  FRootHashDigest := nil;
-  FDigestPosition := 0;
-  FFinalized := False;
-  TArrayUtils.ZeroFill(FBlake2XBBuffer);
+  FReader := nil;
   inherited Initialize();
+end;
+
+procedure TBlake2XB.EnsureReader();
+var
+  LRootHashDigest: THashLibByteArray;
+  LXofSizeInBytes: UInt64;
+begin
+  if FReader <> nil then
+  begin
+    Exit;
+  end;
+
+  Finish();
+
+  // Get root digest from the finalized state
+  System.SetLength(LRootHashDigest, Blake2BHashSize);
+  TBinaryPrimitives.CopyUInt64LittleEndian(PUInt64(FState), 0,
+    PByte(LRootHashDigest), 0, System.Length(LRootHashDigest));
+
+  LXofSizeInBytes := XOFSizeInBits shr 3;
+  FReader := TBlake2XBXofReader.Create(LRootHashDigest, FOutputConfig,
+    LXofSizeInBytes, LXofSizeInBytes = UInt64(UnknownDigestLengthInBytes));
 end;
 
 procedure TBlake2XB.DoOutput(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 var
-  LDiff, LCount, LBlockOffset: UInt64;
-  LHash: IHash;
+  LPosition: UInt64;
 begin
 
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -660,67 +800,62 @@ begin
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputBufferTooShort);
   end;
 
+  if FReader = nil then
+  begin
+    LPosition := 0;
+  end
+  else
+  begin
+    LPosition := FReader.Position;
+  end;
+
   if ((XOFSizeInBits shr 3) <> UnknownDigestLengthInBytes) then
   begin
-    if ((FDigestPosition + AOutputLength) > (XOFSizeInBits shr 3)) then
+    if ((LPosition + AOutputLength) > (XOFSizeInBits shr 3)) then
     begin
       raise EArgumentOutOfRangeHashLibException.CreateRes
         (@SOutputLengthInvalid);
     end;
   end
-  else if (FDigestPosition = UnknownMaxDigestLengthInBytes) then
+  else if (LPosition = UnknownMaxDigestLengthInBytes) then
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes
       (@SMaximumOutputLengthExceeded);
   end;
 
-  if not FFinalized then
+  EnsureReader();
+  FReader.Read(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+procedure TBlake2XB.Squeeze(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
+  // For Blake2X the output is always bounded by the mode's maximum (the
+  // declared size when known, or UnknownMaxDigestLengthInBytes when the
+  // instance was created for streaming). The cap logic is therefore the
+  // same as DoOutput; unbounded streaming comes from unknown-length
+  // construction, not from bypassing the cap.
+  DoOutput(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+function TBlake2XB.Squeeze(AOutputLength: UInt64): THashLibByteArray;
+begin
+  System.SetLength(Result, AOutputLength);
+  if AOutputLength > 0 then
   begin
-    Finish();
-    FFinalized := True;
+    Squeeze(Result, 0, AOutputLength);
   end;
+end;
 
-  if (FRootHashDigest = nil) then
+function TBlake2XB.GetBytesSqueezed: UInt64;
+begin
+  if FReader = nil then
   begin
-    // Get root digest
-    System.SetLength(FRootHashDigest, Blake2BHashSize);
-    TBinaryPrimitives.CopyUInt64LittleEndian(PUInt64(FState), 0, PByte(FRootHashDigest), 0,
-      System.Length(FRootHashDigest));
-  end;
-
-  while AOutputLength > 0 do
+    Result := 0;
+  end
+  else
   begin
-    if (FDigestPosition and (Blake2BHashSize - 1)) = 0 then
-    begin
-      FOutputConfig.Blake2BConfig.HashSize := ComputeStepLength();
-      FOutputConfig.Blake2BTreeConfig.InnerHashSize := Blake2BHashSize;
-
-      LHash := TBlake2B.Create(FOutputConfig.Blake2BConfig, FOutputConfig.Blake2BTreeConfig);
-      FBlake2XBBuffer := LHash.ComputeBytes(FRootHashDigest).GetBytes();
-      FOutputConfig.Blake2BTreeConfig.NodeOffset :=
-        FOutputConfig.Blake2BTreeConfig.NodeOffset + 1;
-    end;
-
-    LBlockOffset := FDigestPosition and (Blake2BHashSize - 1);
-
-    LDiff := UInt64(System.Length(FBlake2XBBuffer)) - LBlockOffset;
-
-    // Math.Min
-    if AOutputLength < LDiff then
-    begin
-      LCount := AOutputLength
-    end
-    else
-    begin
-      LCount := LDiff;
-    end;
-
-    System.Move(FBlake2XBBuffer[LBlockOffset],
-      ADestination[ADestinationOffset], LCount);
-
-    System.Dec(AOutputLength, LCount);
-    System.Inc(ADestinationOffset, LCount);
-    System.Inc(FDigestPosition, LCount);
+    Result := FReader.Position;
   end;
 end;
 
@@ -740,7 +875,7 @@ end;
 procedure TBlake2XB.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 begin
-  if FFinalized then
+  if FReader <> nil then
   begin
     raise EInvalidOperationHashLibException.CreateResFmt
       (@SWritetoXofAfterReadError, [Name]);
