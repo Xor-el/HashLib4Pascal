@@ -142,20 +142,20 @@ type
   end;
 
 type
-  TShake = class abstract(TSHA3, IXOF)
+  TShake = class abstract(TSHA3, IXOF, IXOFStream)
   strict private
-  var
-    FXOFSizeInBits: UInt64;
     function GetXOFSizeInBits: UInt64; inline;
     procedure SetXOFSizeInBits(AXofSizeInBits: UInt64); inline;
     function SetXOFSizeInBitsInternal(AXofSizeInBits: UInt64): IXOF;
   strict protected
   var
-    FBufferPosition, FDigestPosition: UInt64;
-    FShakeBuffer: THashLibByteArray;
-    FFinalized: Boolean;
+    FXOFSizeInBits: UInt64;
+    FReader: IXofReader;
     constructor Create(AHashSize: THashSize);
     function GetHashMode(): TSHA3.THashMode; override;
+    procedure EnsureReader();
+    procedure CheckOutputBuffer(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); inline;
     property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
@@ -166,6 +166,10 @@ type
     function TransformFinal(): IHashResult; override;
     procedure DoOutput(const ADestination: THashLibByteArray;
       ADestinationOffset, AOutputLength: UInt64);
+    procedure Squeeze(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); overload;
+    function Squeeze(AOutputLength: UInt64): THashLibByteArray; overload;
+    function GetBytesSqueezed: UInt64;
   end;
 
 type
@@ -250,12 +254,18 @@ type
   var
     FHash: IHash;
     FKey: THashLibByteArray;
+    // KMAC appends RightEncode(L) exactly once, immediately before the first
+    // output byte is produced; this guards against re-appending on subsequent
+    // (multi-chunk) DoOutput / Squeeze calls.
+    FRightEncodeAppended: Boolean;
 
     function HashInstanceAsXof: IXOF;
     function GetName: String; override;
 
     function GetKey(): THashLibByteArray;
     procedure SetKey(const AValue: THashLibByteArray);
+
+    procedure EnsureRightEncodeAppended();
 
     procedure DoOutput(const ADestination: THashLibByteArray;
       ADestinationOffset, AOutputLength: UInt64);
@@ -274,6 +284,13 @@ type
     function TransformFinal(): IHashResult; override;
     procedure TransformBytes(const AData: THashLibByteArray;
       AIndex, ALength: Int32); override;
+
+    // IXOFStream (exposed by the KMAC-XOF subclasses): produce an unbounded
+    // stream of output, delegating to the inner cSHAKE stream engine.
+    procedure Squeeze(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); overload;
+    function Squeeze(AOutputLength: UInt64): THashLibByteArray; overload;
+    function GetBytesSqueezed: UInt64;
 
     property Key: THashLibByteArray read GetKey write SetKey;
     property Name: String read GetName;
@@ -296,7 +313,7 @@ type
   end;
 
 type
-  TKMAC128XOF = class sealed(TKMAC128, IKMAC, IXOF)
+  TKMAC128XOF = class sealed(TKMAC128, IKMAC, IXOF, IXOFStream)
   strict private
 
     function GetXOFSizeInBits: UInt64; inline;
@@ -315,6 +332,8 @@ type
     function Clone(): IHash; override;
     class function CreateKMAC128XOF(const AKMACKey, ACustomization
       : THashLibByteArray; AXofSizeInBits: UInt64): IKMAC; static;
+    class function CreateKMAC128XOFStream(const AKMACKey, ACustomization
+      : THashLibByteArray): IXOFStream; static;
 
   end;
 
@@ -334,7 +353,7 @@ type
   end;
 
 type
-  TKMAC256XOF = class sealed(TKMAC256, IKMAC, IXOF)
+  TKMAC256XOF = class sealed(TKMAC256, IKMAC, IXOF, IXOFStream)
   strict private
 
     function GetXOFSizeInBits: UInt64; inline;
@@ -353,10 +372,105 @@ type
     function Clone(): IHash; override;
     class function CreateKMAC256XOF(const AKMACKey, ACustomization
       : THashLibByteArray; AXofSizeInBits: UInt64): IKMAC; static;
+    class function CreateKMAC256XOFStream(const AKMACKey, ACustomization
+      : THashLibByteArray): IXOFStream; static;
 
   end;
 
 implementation
+
+type
+  // Self-contained SHAKE/Keccak squeeze engine. Owns a copy of the finalized
+  // Keccak state and produces an unbounded byte stream; the size cap (if any)
+  // is enforced by the owning XOF, not here. Shared by SHAKE, CShake and
+  // (via the inner cSHAKE) KMAC-XOF.
+  TKeccakXofReader = class sealed(TInterfacedObject, IXofReader)
+  strict private
+  var
+    FState: THashLibUInt64Array;
+    FShakeBuffer: THashLibByteArray;
+    FBlockSize: Int32;
+    FBufferPosition, FDigestPosition: UInt64;
+  public
+    constructor Create(const AState: THashLibUInt64Array; ABlockSize: Int32);
+    procedure Read(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64);
+    function GetPosition: UInt64;
+    function Clone(): IXofReader;
+  end;
+
+{ TKeccakXofReader }
+
+constructor TKeccakXofReader.Create(const AState: THashLibUInt64Array;
+  ABlockSize: Int32);
+begin
+  inherited Create();
+  FState := System.Copy(AState);
+  System.SetLength(FShakeBuffer, 8);
+  FBlockSize := ABlockSize;
+  FBufferPosition := 0;
+  FDigestPosition := 0;
+end;
+
+function TKeccakXofReader.GetPosition: UInt64;
+begin
+  Result := FDigestPosition;
+end;
+
+procedure TKeccakXofReader.Read(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+var
+  LDiff, LCount, LBlockOffset: UInt64;
+begin
+  while AOutputLength > 0 do
+  begin
+    if (FDigestPosition and 7) = 0 then
+    begin
+
+      if (FBufferPosition * 8) >= UInt64(FBlockSize) then
+      begin
+        KeccakF1600_Permute(@FState[0]);
+        FBufferPosition := 0;
+      end;
+
+      TBinaryPrimitives.WriteUInt64LittleEndian(FShakeBuffer, 0,
+        FState[FBufferPosition]);
+      System.Inc(FBufferPosition);
+    end;
+
+    LBlockOffset := FDigestPosition and 7;
+
+    LDiff := UInt64(System.Length(FShakeBuffer)) - LBlockOffset;
+
+    // Math.Min
+    if AOutputLength < LDiff then
+    begin
+      LCount := AOutputLength
+    end
+    else
+    begin
+      LCount := LDiff;
+    end;
+
+    System.Move(FShakeBuffer[LBlockOffset], ADestination[ADestinationOffset],
+      LCount);
+
+    System.Dec(AOutputLength, LCount);
+    System.Inc(ADestinationOffset, LCount);
+    System.Inc(FDigestPosition, LCount);
+  end;
+end;
+
+function TKeccakXofReader.Clone(): IXofReader;
+var
+  LReader: TKeccakXofReader;
+begin
+  LReader := TKeccakXofReader.Create(FState, FBlockSize);
+  LReader.FShakeBuffer := System.Copy(FShakeBuffer);
+  LReader.FBufferPosition := FBufferPosition;
+  LReader.FDigestPosition := FDigestPosition;
+  Result := LReader;
+end;
 
 { TSHA3 }
 
@@ -652,68 +766,81 @@ end;
 constructor TShake.Create(AHashSize: THashSize);
 begin
   inherited Create(AHashSize);
-  FFinalized := False;
-  System.SetLength(FShakeBuffer, 8);
+  FReader := nil;
 end;
 
-procedure TShake.DoOutput(const ADestination: THashLibByteArray;
-  ADestinationOffset, AOutputLength: UInt64);
-var
-  LDiff, LCount, LBlockOffset: UInt64;
+procedure TShake.EnsureReader();
 begin
+  if FReader = nil then
+  begin
+    Finish();
+    FReader := TKeccakXofReader.Create(FState, BlockSize);
+  end;
+end;
 
+procedure TShake.CheckOutputBuffer(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
   then
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputBufferTooShort);
   end;
+end;
 
-  if ((FDigestPosition + AOutputLength) > (XOFSizeInBits shr 3)) then
+procedure TShake.DoOutput(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+var
+  LPosition: UInt64;
+begin
+
+  CheckOutputBuffer(ADestination, ADestinationOffset, AOutputLength);
+
+  if FReader = nil then
+  begin
+    LPosition := 0;
+  end
+  else
+  begin
+    LPosition := FReader.Position;
+  end;
+
+  if ((LPosition + AOutputLength) > (XOFSizeInBits shr 3)) then
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputLengthInvalid);
   end;
 
-  if not FFinalized then
+  EnsureReader();
+  FReader.Read(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+procedure TShake.Squeeze(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
+  CheckOutputBuffer(ADestination, ADestinationOffset, AOutputLength);
+
+  EnsureReader();
+  FReader.Read(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+function TShake.Squeeze(AOutputLength: UInt64): THashLibByteArray;
+begin
+  System.SetLength(Result, AOutputLength);
+  if AOutputLength > 0 then
   begin
-    Finish();
-    FFinalized := True;
+    Squeeze(Result, 0, AOutputLength);
   end;
+end;
 
-  while AOutputLength > 0 do
+function TShake.GetBytesSqueezed: UInt64;
+begin
+  if FReader = nil then
   begin
-    if (FDigestPosition and 7) = 0 then
-    begin
-
-      if (FBufferPosition * 8) >= UInt64(BlockSize) then
-      begin
-        KeccakF1600_Permute(@FState[0]);
-        FBufferPosition := 0;
-      end;
-
-      TBinaryPrimitives.WriteUInt64LittleEndian(FShakeBuffer, 0, FState[FBufferPosition]);
-      System.Inc(FBufferPosition);
-    end;
-
-    LBlockOffset := FDigestPosition and 7;
-
-    LDiff := UInt64(System.Length(FShakeBuffer)) - LBlockOffset;
-
-    // Math.Min
-    if AOutputLength < LDiff then
-    begin
-      LCount := AOutputLength
-    end
-    else
-    begin
-      LCount := LDiff;
-    end;
-
-    System.Move(FShakeBuffer[LBlockOffset],
-      ADestination[ADestinationOffset], LCount);
-
-    System.Dec(AOutputLength, LCount);
-    System.Inc(ADestinationOffset, LCount);
-    System.Inc(FDigestPosition, LCount);
+    Result := 0;
+  end
+  else
+  begin
+    Result := FReader.Position;
   end;
 end;
 
@@ -731,16 +858,13 @@ end;
 procedure TShake.Initialize;
 begin
   inherited Initialize();
-  FBufferPosition := 0;
-  FDigestPosition := 0;
-  FFinalized := False;
-  TArrayUtils.ZeroFill(FShakeBuffer);
+  FReader := nil;
 end;
 
 procedure TShake.TransformBytes(const AData: THashLibByteArray;
   AIndex, ADataLength: Int32);
 begin
-  if FFinalized then
+  if FReader <> nil then
   begin
     raise EInvalidOperationHashLibException.CreateResFmt
       (@SWritetoXofAfterReadError, [Name]);
@@ -769,14 +893,14 @@ var
 begin
   // Xof Cloning
   LXof := TShake_128.Create();
-  LXof.XOFSizeInBits := Self.XOFSizeInBits;
 
   // Shake_128 Cloning
   LHashInstance := LXof as TShake_128;
-  LHashInstance.FBufferPosition := FBufferPosition;
-  LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FFinalized := FFinalized;
-  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+  LHashInstance.FXOFSizeInBits := FXOFSizeInBits;
+  if FReader <> nil then
+  begin
+    LHashInstance.FReader := FReader.Clone();
+  end;
 
   // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
@@ -801,14 +925,14 @@ var
 begin
   // Xof Cloning
   LXof := TShake_256.Create();
-  LXof.XOFSizeInBits := Self.XOFSizeInBits;
 
   // Shake_256 Cloning
   LHashInstance := LXof as TShake_256;
-  LHashInstance.FBufferPosition := FBufferPosition;
-  LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FFinalized := FFinalized;
-  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+  LHashInstance.FXOFSizeInBits := FXOFSizeInBits;
+  if FReader <> nil then
+  begin
+    LHashInstance.FReader := FReader.Clone();
+  end;
 
   // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
@@ -947,16 +1071,16 @@ var
 begin
   // Xof Cloning
   LXof := TCShake_128.Create(System.Copy(FN), System.Copy(FS));
-  LXof.XOFSizeInBits := Self.XOFSizeInBits;
 
   // CShake_128 Cloning
   LHashInstance := LXof as TCShake_128;
+  LHashInstance.FXOFSizeInBits := FXOFSizeInBits;
   LHashInstance.FInitBlock := System.Copy(FInitBlock);
 
-  LHashInstance.FBufferPosition := FBufferPosition;
-  LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FFinalized := FFinalized;
-  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+  if FReader <> nil then
+  begin
+    LHashInstance.FReader := FReader.Clone();
+  end;
 
   // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
@@ -981,16 +1105,16 @@ var
 begin
   // Xof Cloning
   LXof := TCShake_256.Create(System.Copy(FN), System.Copy(FS));
-  LXof.XOFSizeInBits := Self.XOFSizeInBits;
 
   // CShake_256 Cloning
   LHashInstance := LXof as TCShake_256;
+  LHashInstance.FXOFSizeInBits := FXOFSizeInBits;
   LHashInstance.FInitBlock := System.Copy(FInitBlock);
 
-  LHashInstance.FBufferPosition := FBufferPosition;
-  LHashInstance.FDigestPosition := FDigestPosition;
-  LHashInstance.FFinalized := FFinalized;
-  LHashInstance.FShakeBuffer := System.Copy(FShakeBuffer);
+  if FReader <> nil then
+  begin
+    LHashInstance.FReader := FReader.Clone();
+  end;
 
   // Internal Sha3 Cloning
   LHashInstance.FBuffer := FBuffer.Clone();
@@ -1034,22 +1158,73 @@ begin
   inherited Destroy;
 end;
 
-procedure TKMACNotBuildInAdapter.DoOutput(const ADestination: THashLibByteArray;
-  ADestinationOffset, AOutputLength: UInt64);
+procedure TKMACNotBuildInAdapter.EnsureRightEncodeAppended();
 var
   LXof: IXOF;
 begin
+  if FRightEncodeAppended then
+  begin
+    Exit;
+  end;
+
   LXof := HashInstanceAsXof;
   if Supports(Self, IXOF) then
   begin
+    // KMAC-XOF: arbitrary output length is encoded as RightEncode(0)
     TransformBytes(TCShake.RightEncode(0));
   end
   else
   begin
+    // fixed-length KMAC: the declared output length L (in bits) is encoded
     TransformBytes(TCShake.RightEncode(LXof.XOFSizeInBits));
   end;
 
-  LXof.DoOutput(ADestination, ADestinationOffset, AOutputLength);
+  FRightEncodeAppended := True;
+end;
+
+procedure TKMACNotBuildInAdapter.DoOutput(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
+  EnsureRightEncodeAppended();
+  HashInstanceAsXof.DoOutput(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+procedure TKMACNotBuildInAdapter.Squeeze(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+var
+  LStream: IXOFStream;
+begin
+  EnsureRightEncodeAppended();
+  if not Supports(FHash, IXOFStream, LStream) then
+  begin
+    raise EInvalidOperationHashLibException.Create
+      ('Internal error: KMAC hash must implement IXOFStream');
+  end;
+  LStream.Squeeze(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+function TKMACNotBuildInAdapter.Squeeze(AOutputLength: UInt64)
+  : THashLibByteArray;
+begin
+  System.SetLength(Result, AOutputLength);
+  if AOutputLength > 0 then
+  begin
+    Squeeze(Result, 0, AOutputLength);
+  end;
+end;
+
+function TKMACNotBuildInAdapter.GetBytesSqueezed: UInt64;
+var
+  LStream: IXOFStream;
+begin
+  if Supports(FHash, IXOFStream, LStream) then
+  begin
+    Result := LStream.BytesSqueezed;
+  end
+  else
+  begin
+    Result := 0;
+  end;
 end;
 
 function TKMACNotBuildInAdapter.GetKey: THashLibByteArray;
@@ -1064,6 +1239,7 @@ end;
 
 procedure TKMACNotBuildInAdapter.Initialize;
 begin
+  FRightEncodeAppended := False;
   FHash.Initialize;
   TransformBytes(TCShake.BytePad(TCShake.EncodeString(FKey), BlockSize));
 end;
@@ -1115,6 +1291,7 @@ var
 begin
   LHashInstance := TKMAC128.Create(FHash.Clone(), FKey,
     HashInstanceAsXof.XOFSizeInBits);
+  LHashInstance.FRightEncodeAppended := FRightEncodeAppended;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -1148,7 +1325,7 @@ var
   LXofSizeInBytes: UInt64;
 begin
   LXofSizeInBytes := AXofSizeInBits shr 3;
-  if (((LXofSizeInBytes and $7) <> 0) or (LXofSizeInBytes < 1)) then
+  if (((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1)) then
   begin
     raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
   end;
@@ -1170,11 +1347,9 @@ end;
 function TKMAC128XOF.Clone(): IHash;
 var
   LHashInstance: TKMAC128XOF;
-  LXof: IXOF;
 begin
   LHashInstance := TKMAC128XOF.Create(FHash.Clone(), FKey);
-  LXof := LHashInstance;
-  LXof.XOFSizeInBits := XOFSizeInBits;
+  LHashInstance.FRightEncodeAppended := FRightEncodeAppended;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -1204,6 +1379,13 @@ begin
   Result := LXof as IKMAC;
 end;
 
+class function TKMAC128XOF.CreateKMAC128XOFStream(const AKMACKey, ACustomization
+  : THashLibByteArray): IXOFStream;
+begin
+  // streaming KMAC-XOF: no output size is declared; Squeeze pulls on demand
+  Result := TKMAC128XOF.Create(AKMACKey, ACustomization) as IXOFStream;
+end;
+
 { TKMAC256 }
 
 function TKMAC256.Clone(): IHash;
@@ -1212,6 +1394,7 @@ var
 begin
   LHashInstance := TKMAC256.Create(FHash.Clone(), FKey,
     HashInstanceAsXof.XOFSizeInBits);
+  LHashInstance.FRightEncodeAppended := FRightEncodeAppended;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -1245,7 +1428,7 @@ var
   LXofSizeInBytes: UInt64;
 begin
   LXofSizeInBytes := AXofSizeInBits shr 3;
-  if (((LXofSizeInBytes and $7) <> 0) or (LXofSizeInBytes < 1)) then
+  if (((AXofSizeInBits and $7) <> 0) or (LXofSizeInBytes < 1)) then
   begin
     raise EArgumentInvalidHashLibException.CreateRes(@SInvalidXOFSize);
   end;
@@ -1267,11 +1450,9 @@ end;
 function TKMAC256XOF.Clone(): IHash;
 var
   LHashInstance: TKMAC256XOF;
-  LXof: IXOF;
 begin
   LHashInstance := TKMAC256XOF.Create(FHash.Clone(), FKey);
-  LXof := LHashInstance;
-  LXof.XOFSizeInBits := XOFSizeInBits;
+  LHashInstance.FRightEncodeAppended := FRightEncodeAppended;
   Result := LHashInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -1299,6 +1480,13 @@ begin
   LXof := TKMAC256XOF.Create(AKMACKey, ACustomization);
   LXof.XOFSizeInBits := AXofSizeInBits;
   Result := LXof as IKMAC;
+end;
+
+class function TKMAC256XOF.CreateKMAC256XOFStream(const AKMACKey, ACustomization
+  : THashLibByteArray): IXOFStream;
+begin
+  // streaming KMAC-XOF: no output size is declared; Squeeze pulls on demand
+  Result := TKMAC256XOF.Create(AKMACKey, ACustomization) as IXOFStream;
 end;
 
 { TKeccak }

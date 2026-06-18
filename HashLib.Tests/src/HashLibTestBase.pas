@@ -451,6 +451,44 @@ type
 
   end;
 
+type
+  // Base class for streaming-XOF (IXOFStream) tests. Each concrete test pairs a
+  // streaming instance with a reference IXOF configured for the *same* mode, so
+  // that Squeeze output can be cross-checked against the already NIST-verified
+  // DoOutput path. This validates the new streaming API, uneven-chunk
+  // continuity, the squeezed-byte counter, buffer guards and re-initialization,
+  // without requiring new hard-coded vectors.
+  TXofStreamAlgorithmTestCase = class abstract(THashLibAlgorithmTestCase)
+
+  strict private
+  const
+    CComparisonLength = Int32(512);
+  var
+    FStreamInstance: IXOFStream;
+    FReferenceXof: IXOF;
+
+    function GetStreamInstance: IXOFStream; inline;
+    procedure SetStreamInstance(const AValue: IXOFStream); inline;
+    function GetReferenceXof: IXOF; inline;
+    procedure SetReferenceXof(const AValue: IXOF); inline;
+
+    procedure FeedEmptyData();
+    procedure CallShouldRaiseException();
+
+  strict protected
+    property StreamInstance: IXOFStream read GetStreamInstance
+      write SetStreamInstance;
+    property ReferenceXof: IXOF read GetReferenceXof write SetReferenceXof;
+  published
+    procedure TestSqueezeMatchesReference;
+    procedure TestUnevenChunkedSqueezeMatchesReference;
+    procedure TestBytesSqueezedTracksOutput;
+    procedure TestSqueezeBufferTooShort;
+    procedure TestReInitializeResetsStream;
+    procedure TestStreamShouldRaiseExceptionOnWriteAfterRead;
+
+  end;
+
 implementation
 
 { THashLibTestCase }
@@ -1304,6 +1342,162 @@ begin
 end;
 
 procedure TXofAlgorithmTestCase.TestXofShouldRaiseExceptionOnWriteAfterRead;
+var
+  LTestMethod: TTestMethod;
+begin
+  LTestMethod := CallShouldRaiseException;
+  CheckException(LTestMethod, EInvalidOperationHashLibException);
+end;
+
+{ TXofStreamAlgorithmTestCase }
+
+function TXofStreamAlgorithmTestCase.GetStreamInstance: IXOFStream;
+begin
+  Result := FStreamInstance;
+end;
+
+procedure TXofStreamAlgorithmTestCase.SetStreamInstance(const AValue
+  : IXOFStream);
+begin
+  FStreamInstance := AValue;
+end;
+
+function TXofStreamAlgorithmTestCase.GetReferenceXof: IXOF;
+begin
+  Result := FReferenceXof;
+end;
+
+procedure TXofStreamAlgorithmTestCase.SetReferenceXof(const AValue: IXOF);
+begin
+  FReferenceXof := AValue;
+end;
+
+procedure TXofStreamAlgorithmTestCase.FeedEmptyData();
+begin
+  StreamInstance.Initialize;
+  StreamInstance.TransformString(EmptyData, TEncoding.UTF8);
+  ReferenceXof.Initialize;
+  ReferenceXof.TransformString(EmptyData, TEncoding.UTF8);
+end;
+
+procedure TXofStreamAlgorithmTestCase.CallShouldRaiseException();
+begin
+  StreamInstance.Initialize;
+  StreamInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+  StreamInstance.Squeeze(32);
+  // this call below should raise since output has already been read from the Xof
+  StreamInstance.TransformUntyped(BytesABCDE, System.SizeOf(BytesABCDE));
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestSqueezeMatchesReference;
+var
+  LStreamOut, LReferenceOut: TBytes;
+begin
+  FeedEmptyData();
+
+  LStreamOut := StreamInstance.Squeeze(CComparisonLength);
+
+  LReferenceOut := nil;
+  System.SetLength(LReferenceOut, CComparisonLength);
+  ReferenceXof.DoOutput(LReferenceOut, 0, CComparisonLength);
+
+  CheckTrue(AreEqual(LStreamOut, LReferenceOut),
+    Format('%s Stream Squeeze does not match reference DoOutput',
+    [StreamInstance.Name]));
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestUnevenChunkedSqueezeMatchesReference;
+const
+  CChunkSizes: array [0 .. 4] of Int32 = (1, 7, 13, 64, 100);
+var
+  LStreamOut, LReferenceOut: TBytes;
+  LOffset, LChunkSize, LIdx: Int32;
+begin
+  FeedEmptyData();
+
+  LStreamOut := nil;
+  System.SetLength(LStreamOut, CComparisonLength);
+  LOffset := 0;
+  LIdx := 0;
+  // squeeze the same output in many uneven chunks; this is the key regression
+  // gate for block-boundary handling inside the squeeze engine
+  while LOffset < CComparisonLength do
+  begin
+    LChunkSize := CChunkSizes[LIdx mod System.Length(CChunkSizes)];
+    if LChunkSize > (CComparisonLength - LOffset) then
+    begin
+      LChunkSize := CComparisonLength - LOffset;
+    end;
+    StreamInstance.Squeeze(LStreamOut, LOffset, LChunkSize);
+    System.Inc(LOffset, LChunkSize);
+    System.Inc(LIdx);
+  end;
+
+  LReferenceOut := nil;
+  System.SetLength(LReferenceOut, CComparisonLength);
+  ReferenceXof.DoOutput(LReferenceOut, 0, CComparisonLength);
+
+  CheckTrue(AreEqual(LStreamOut, LReferenceOut),
+    Format('%s Uneven chunked Squeeze does not match reference DoOutput',
+    [StreamInstance.Name]));
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestBytesSqueezedTracksOutput;
+begin
+  FeedEmptyData();
+
+  CheckEquals(Int64(0), Int64(StreamInstance.BytesSqueezed),
+    'BytesSqueezed should be 0 before any output');
+
+  StreamInstance.Squeeze(100);
+  CheckEquals(Int64(100), Int64(StreamInstance.BytesSqueezed),
+    'BytesSqueezed should be 100 after squeezing 100 bytes');
+
+  StreamInstance.Squeeze(50);
+  CheckEquals(Int64(150), Int64(StreamInstance.BytesSqueezed),
+    'BytesSqueezed should be 150 after squeezing 50 more bytes');
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestSqueezeBufferTooShort;
+var
+  LOutput: TBytes;
+begin
+  StreamInstance.Initialize;
+  StreamInstance.TransformString(EmptyData, TEncoding.UTF8);
+
+  LOutput := nil;
+  System.SetLength(LOutput, 10);
+
+  try
+    StreamInstance.Squeeze(LOutput, 1, 10);
+    Fail('no exception');
+  except
+    on e: EArgumentOutOfRangeHashLibException do
+    begin
+      CheckEquals('Output Buffer Too Short', e.Message);
+    end;
+  end;
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestReInitializeResetsStream;
+var
+  LFirst, LSecond: TBytes;
+begin
+  StreamInstance.Initialize;
+  StreamInstance.TransformString(EmptyData, TEncoding.UTF8);
+  LFirst := StreamInstance.Squeeze(CComparisonLength);
+
+  // re-initialize and squeeze again; output must be identical
+  StreamInstance.Initialize;
+  StreamInstance.TransformString(EmptyData, TEncoding.UTF8);
+  LSecond := StreamInstance.Squeeze(CComparisonLength);
+
+  CheckTrue(AreEqual(LFirst, LSecond),
+    Format('%s re-initialization did not reset the stream',
+    [StreamInstance.Name]));
+end;
+
+procedure TXofStreamAlgorithmTestCase.TestStreamShouldRaiseExceptionOnWriteAfterRead;
 var
   LTestMethod: TTestMethod;
 begin

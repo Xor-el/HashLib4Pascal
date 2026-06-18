@@ -202,7 +202,7 @@ type
   end;
 
 type
-  TBlake3XOF = class sealed(TBlake3, IXOF)
+  TBlake3XOF = class sealed(TBlake3, IXOF, IXOFStream)
   strict private
   var
     FXOFSizeInBits: UInt64;
@@ -218,6 +218,9 @@ type
     FFinalized: Boolean;
 
     function GetName: String; override;
+    procedure CheckOutputBuffer(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); inline;
+    procedure EnsureFinalized(); inline;
     property XOFSizeInBits: UInt64 read GetXOFSizeInBits write SetXOFSizeInBits;
 
   public
@@ -236,6 +239,11 @@ type
 
     procedure DoOutput(const ADestination: THashLibByteArray;
       ADestinationOffset, AOutputLength: UInt64);
+
+    procedure Squeeze(const ADestination: THashLibByteArray;
+      ADestinationOffset, AOutputLength: UInt64); overload;
+    function Squeeze(AOutputLength: UInt64): THashLibByteArray; overload;
+    function GetBytesSqueezed: UInt64;
 
   end;
 
@@ -754,10 +762,10 @@ var
 begin
   // Xof Cloning
   LXof := TBlake3XOF.Create(HashSize, nil);
-  LXof.XOFSizeInBits := XOFSizeInBits;
 
   // Blake3XOF Cloning
   LHashInstance := LXof as TBlake3XOF;
+  LHashInstance.FXOFSizeInBits := FXOFSizeInBits;
   LHashInstance.FFinalized := FFinalized;
 
   // Internal Blake3 Cloning
@@ -785,7 +793,7 @@ begin
   FFinalized := False;
 end;
 
-procedure TBlake3XOF.DoOutput(const ADestination: THashLibByteArray;
+procedure TBlake3XOF.CheckOutputBuffer(const ADestination: THashLibByteArray;
   ADestinationOffset, AOutputLength: UInt64);
 begin
   if (UInt64(System.Length(ADestination)) - ADestinationOffset) < AOutputLength
@@ -793,18 +801,53 @@ begin
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputBufferTooShort);
   end;
+end;
+
+procedure TBlake3XOF.EnsureFinalized();
+begin
+  if not FFinalized then
+  begin
+    Finish();
+    FFinalized := True;
+  end;
+end;
+
+procedure TBlake3XOF.DoOutput(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
+  CheckOutputBuffer(ADestination, ADestinationOffset, AOutputLength);
 
   if ((FOutputReader.Offset + AOutputLength) > (XOFSizeInBits shr 3)) then
   begin
     raise EArgumentOutOfRangeHashLibException.CreateRes(@SOutputLengthInvalid);
   end;
 
-  if not FFinalized then
-  begin
-    Finish();
-    FFinalized := True;
-  end;
+  EnsureFinalized();
   InternalDoOutput(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+procedure TBlake3XOF.Squeeze(const ADestination: THashLibByteArray;
+  ADestinationOffset, AOutputLength: UInt64);
+begin
+  CheckOutputBuffer(ADestination, ADestinationOffset, AOutputLength);
+
+  EnsureFinalized();
+  // no XOFSizeInBits cap; the output reader caps at 2^64-1 bytes
+  InternalDoOutput(ADestination, ADestinationOffset, AOutputLength);
+end;
+
+function TBlake3XOF.Squeeze(AOutputLength: UInt64): THashLibByteArray;
+begin
+  System.SetLength(Result, AOutputLength);
+  if AOutputLength > 0 then
+  begin
+    Squeeze(Result, 0, AOutputLength);
+  end;
+end;
+
+function TBlake3XOF.GetBytesSqueezed: UInt64;
+begin
+  Result := FOutputReader.Offset;
 end;
 
 function TBlake3XOF.GetName: String;
