@@ -3,9 +3,9 @@
 // Same algorithm as SSSE3 but using VEX-encoded instructions for the byte-swap phase,
 // avoiding SSE/AVX transition penalties on Sandy Bridge/Ivy Bridge.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
-// K_SHA1 layout: K_00_19 (16 bytes) at offset 0, K_20_39 at 16, K_40_59 at 32,
-//   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K_SHA1 ptr (K_00_19 at 0, K_20_39 at 16, K_40_59 at 32, K_60_79 at 48),
+//   r10 = BSWAP32 mask ptr (16 bytes).
 //
 // Two phases per block:
 //   Phase 1 (SIMD): VEX byte-swap W[0..15] via vpshufb, then expand W[16..79]
@@ -31,6 +31,7 @@
   mov r13, rdx
   mov r14d, r8d
   mov [rsp + $60], r9
+  mov [rsp + $68], r10
 
   test r14d, r14d
   jz @avx2_sha1_done
@@ -39,8 +40,9 @@
 
   // ========== Phase 1: SIMD message schedule ==========
 
+  mov rax, [rsp + $68]
+  db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
   mov rax, [rsp + $60]
-  db $C5, $FA, $6F, $78, $40                    // vmovdqu xmm7, oword [rax + $40]
 
   lea r15, [rsp + $70]
 

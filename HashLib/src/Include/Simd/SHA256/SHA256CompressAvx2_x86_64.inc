@@ -2,8 +2,8 @@
 // Same algorithm as SSSE3 but using VEX-encoded instructions for 3-operand
 // non-destructive forms, shorter encoding, and no SSE/AVX transition penalties.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K256 ptr (64 UInt32 round constants), r10 = BSWAP32 mask ptr (16 bytes).
 //
 // Two-phase per block:
 //   Phase 1 (VEX-128 SIMD): Compute W+K[0..63] using message schedule, store to stack
@@ -23,7 +23,7 @@
 //   [rsp +  80.. 87]: r14 save
 //   [rsp +  88.. 95]: r15 save
 //   [rsp +  96..103]: K256 ptr save
-//   [rsp + 104..111]: padding
+//   [rsp + 104..111]: BSWAP mask ptr save
 //   [rsp + 112..367]: W+K buffer (256 bytes, 16-byte aligned)
 
   sub rsp, 376
@@ -43,6 +43,7 @@
   mov r13, rdx
   mov r14d, r8d
   mov [rsp + $60], r9
+  mov [rsp + $68], r10
 
   test r14d, r14d
   jz @avx2_done
@@ -51,8 +52,9 @@
 
   // ========== Phase 1: Message Schedule (VEX-128) ==========
 
+  mov rax, [rsp + $68]
+  db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
   mov rax, [rsp + $60]
-  db $C5, $FA, $6F, $B8, $00, $01, $00, $00     // vmovdqu xmm7, oword [rax + $100]
 
   db $C4, $C1, $7A, $6F, $45, $00               // vmovdqu xmm0, oword [r13]
   db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7

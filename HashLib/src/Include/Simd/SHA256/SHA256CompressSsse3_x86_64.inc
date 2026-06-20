@@ -1,6 +1,6 @@
 // SHA-256 SSSE3 implementation with SIMD message schedule.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K256 ptr (64 UInt32 round constants), r10 = BSWAP32 mask ptr (16 bytes).
 // Uses xmm0-xmm7, all GPR.
 //
 // Two-phase per block:
@@ -21,7 +21,7 @@
 //   [rsp +  80.. 87]: r14 save
 //   [rsp +  88.. 95]: r15 save
 //   [rsp +  96..103]: K256 ptr save
-//   [rsp + 104..111]: padding
+//   [rsp + 104..111]: BSWAP mask ptr save
 //   [rsp + 112..367]: W+K buffer (256 bytes, 16-byte aligned)
 
   sub rsp, 376
@@ -41,6 +41,7 @@
   mov r13, rdx
   mov r14d, r8d
   mov [rsp + $60], r9
+  mov [rsp + $68], r10
 
   test r14d, r14d
   jz @ssse3_done
@@ -49,8 +50,9 @@
 
   // ========== Phase 1: Message Schedule ==========
 
+  mov rax, [rsp + $68]
+  movdqu xmm7, oword [rax]
   mov rax, [rsp + $60]
-  movdqu xmm7, oword [rax + $100]
 
   movdqu xmm0, oword [r13]
   pshufb xmm0, xmm7

@@ -5,7 +5,8 @@
 //   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)
 // IA-32: after SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K256 ptr
 //   (parallel to MS x64 ABI: rcx, rdx, r8d, r9).
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// K256: 64 UInt32 round constants (256 bytes). SSE2 byte-swaps without a mask, so
+// no BSWAP mask ptr is needed (4-param path).
 // Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
 //
 // Two-phase per block:

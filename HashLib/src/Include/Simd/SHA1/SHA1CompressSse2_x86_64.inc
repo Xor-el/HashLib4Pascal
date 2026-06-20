@@ -2,9 +2,9 @@
 // Based on SSSE3 implementation (see SHA1CompressSsse3_x86_64.inc).
 // Same algorithm as SSSE3 version but byte-swap uses SSE2 emulation
 // (pshuflw/pshufhw + psrlw/psllw/por) instead of SSSE3 pshufb.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
-// K_SHA1 layout: K_00_19 (16 bytes) at offset 0, K_20_39 at 16, K_40_59 at 32,
-//   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks (3-param path).
+// Round constants are inlined as immediates and SSE2 byte-swaps without a mask, so
+// neither a K_SHA1 ptr nor a BSWAP mask ptr is passed.
 // Uses xmm0-xmm6, all GPR.
 //
 // Two phases per block:

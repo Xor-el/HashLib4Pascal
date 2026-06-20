@@ -12,8 +12,7 @@ var
 
 const
   // K256 round constants (64 UInt32 = 256 bytes)
-  // followed by BSWAP32 mask for pshufb (4 UInt32 = 16 bytes) at offset 256
-  K256: array [0 .. 67] of UInt32 = (
+  K256: array [0 .. 63] of UInt32 = (
     $428A2F98, $71374491, $B5C0FBCF, $E9B5DBA5,
     $3956C25B, $59F111F1, $923F82A4, $AB1C5ED5,
     $D807AA98, $12835B01, $243185BE, $550C7DC3,
@@ -29,10 +28,17 @@ const
     $19A4C116, $1E376C08, $2748774C, $34B0BCB5,
     $391C0CB3, $4ED8AA4A, $5B9CCA4F, $682E6FF3,
     $748F82EE, $78A5636F, $84C87814, $8CC70208,
-    $90BEFFFA, $A4506CEB, $BEF9A3F7, $C67178F2,
-    // BSWAP32 mask at offset 256: reverses bytes within each dword
+    $90BEFFFA, $A4506CEB, $BEF9A3F7, $C67178F2
+  );
+
+{$IFDEF HASHLIB_X86_SIMD}
+  // BSWAP32 shuffle mask for pshufb (x86 SIMD only): reverses bytes within each
+  // dword. Not a SHA-256 constant; passed separately to the SIMD kernels. ARM
+  // byte-swaps with REV32 and needs no mask table.
+  BSWAP32_MASK: array [0 .. 3] of UInt32 = (
     $00010203, $04050607, $08090A0B, $0C0D0E0F
   );
+{$ENDIF HASHLIB_X86_SIMD}
 
 implementation
 
@@ -110,8 +116,8 @@ procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
 end;
 
 procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_i386.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressSsse3_i386.inc}
 end;
 
@@ -120,14 +126,14 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA256_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressShaNi_x86_64.inc}
 end;
 
 procedure SHA256_Compress_ShaNi_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA256_Compress_ShaNi(AState, AData, ANumBlocks, @K256);
+  SHA256_Compress_ShaNi(AState, AData, ANumBlocks, @K256, @BSWAP32_MASK);
 end;
 
 procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
@@ -137,25 +143,25 @@ procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
 end;
 
 procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressSsse3_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA256_Compress_Ssse3(AState, AData, ANumBlocks, @K256);
+  SHA256_Compress_Ssse3(AState, AData, ANumBlocks, @K256, @BSWAP32_MASK);
 end;
 
 procedure SHA256_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressAvx2_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA256_Compress_Avx2(AState, AData, ANumBlocks, @K256);
+  SHA256_Compress_Avx2(AState, AData, ANumBlocks, @K256, @BSWAP32_MASK);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
@@ -171,7 +177,7 @@ end;
 
 procedure SHA256_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA256_Compress_Ssse3(AState, AData, ANumBlocks, @K256);
+  SHA256_Compress_Ssse3(AState, AData, ANumBlocks, @K256, @BSWAP32_MASK);
 end;
 
 {$ENDIF HASHLIB_I386_ASM}

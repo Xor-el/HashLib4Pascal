@@ -4,7 +4,8 @@
 //   pshufb  -> SSE2 byte-swap (pshuflw/pshufhw + psrlw/psllw/por)
 //   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// K256: 64 UInt32 round constants (256 bytes). SSE2 byte-swaps without a mask, so
+// no BSWAP mask ptr is needed (4-param path).
 // Uses xmm0-xmm7, all GPR.
 //
 // Two-phase per block:

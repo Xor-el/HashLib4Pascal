@@ -3,7 +3,8 @@
 // Same algorithm as SSSE3 version but byte-swap uses SSE2 emulation
 //   (pshuflw/pshufhw + psrlw/psllw/por) instead of SSSE3 pshufb.
 // IA-32: after SimdProc3Begin_i386 — ebx = state, esi = data, edi = numblocks
-//   (parallel to MS x64 ABI: rcx, rdx, r8d; K constants are inlined here — x64 SSE2 passes K_SHA1 via r9).
+//   (parallel to MS x64 ABI: rcx, rdx, r8d). Round constants are inlined as
+//   immediates and SSE2 byte-swaps without a mask (both x64 and i386 use 3 params).
 // Uses xmm0–xmm6; xmm6 saved/restored defensively (volatile on i386).
 //
 // Two phases per block:

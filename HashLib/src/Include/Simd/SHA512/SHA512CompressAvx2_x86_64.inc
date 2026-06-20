@@ -2,8 +2,8 @@
 // Same algorithm as SSSE3 but using VEX-encoded instructions for the initial
 // byte-swap and K addition. Eliminates SSE/AVX transition penalties.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K512 ptr.
-// K512 layout: 80 UInt64 round constants (640 bytes), then BSWAP64 mask (16 bytes) at offset 640.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K512 ptr (80 UInt64 round constants), r10 = BSWAP64 mask ptr (16 bytes).
 //
 // MS x64 non-volatile saves: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15.
 //
@@ -19,7 +19,7 @@
 //   [rsp +  80.. 87]: r14 save
 //   [rsp +  88.. 95]: r15 save
 //   [rsp +  96..103]: K512 ptr save
-//   [rsp + 104..111]: padding
+//   [rsp + 104..111]: BSWAP mask ptr save
 //   [rsp + 112..751]: W+K buffer (640 bytes = 80 * 8, 16-byte aligned)
 //   [rsp + 752..879]: W circular buffer (128 bytes = 16 * 8)
 
@@ -40,6 +40,7 @@
   mov r13, rdx
   mov r14d, r8d
   mov [rsp + $60], r9
+  mov [rsp + $68], r10
 
   test r14d, r14d
   jz @avx2_512_done
@@ -48,8 +49,9 @@
 
   // ========== Phase 1: Load, byte-swap (VEX), expand ==========
 
+  mov rax, [rsp + $68]
+  db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
   mov rax, [rsp + $60]
-  db $C5, $FA, $6F, $B8, $80, $02, $00, $00     // vmovdqu xmm7, oword [rax + $280]
 
   lea rbp, [rsp + $70]
   lea r15, [rsp + $2F0]
