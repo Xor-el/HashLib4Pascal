@@ -12,8 +12,7 @@ var
 
 const
   // K512 round constants (80 UInt64 = 640 bytes)
-  // followed by BSWAP64 mask (2 UInt64 = 16 bytes) at offset 640
-  K512: array [0 .. 81] of UInt64 = (
+  K512: array [0 .. 79] of UInt64 = (
     UInt64($428A2F98D728AE22), UInt64($7137449123EF65CD),
     UInt64($B5C0FBCFEC4D3B2F), UInt64($E9B5DBA58189DBBC),
     UInt64($3956C25BF348B538), UInt64($59F111F1B605D019),
@@ -53,10 +52,17 @@ const
     UInt64($28DB77F523047D84), UInt64($32CAAB7B40C72493),
     UInt64($3C9EBE0A15C9BEBC), UInt64($431D67C49C100D4C),
     UInt64($4CC5D4BECB3E42B6), UInt64($597F299CFC657E2A),
-    UInt64($5FCB6FAB3AD6FAEC), UInt64($6C44198C4A475817),
-    // BSWAP64 mask at offset 640: reverses bytes within each qword
+    UInt64($5FCB6FAB3AD6FAEC), UInt64($6C44198C4A475817)
+  );
+
+{$IFDEF HASHLIB_X86_SIMD}
+  // BSWAP64 shuffle mask for pshufb (x86 SIMD only): reverses bytes within each
+  // qword. Not a SHA-512 constant; passed separately to the SIMD kernels. ARM
+  // byte-swaps with REV64 and needs no mask table.
+  BSWAP64_MASK: array [0 .. 1] of UInt64 = (
     UInt64($0001020304050607), UInt64($08090A0B0C0D0E0F)
   );
+{$ENDIF HASHLIB_X86_SIMD}
 
 implementation
 
@@ -134,14 +140,14 @@ procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
 end;
 
 procedure SHA512_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_i386.inc}
   {$I ..\Include\Simd\SHA512\SHA512CompressSsse3_i386.inc}
 end;
 
 procedure SHA512_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA512_Compress_Ssse3(AState, AData, ANumBlocks, @K512);
+  SHA512_Compress_Ssse3(AState, AData, ANumBlocks, @K512, @BSWAP64_MASK);
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -155,25 +161,25 @@ procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
 end;
 
 procedure SHA512_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA512\SHA512CompressSsse3_x86_64.inc}
 end;
 
 procedure SHA512_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA512_Compress_Ssse3(AState, AData, ANumBlocks, @K512);
+  SHA512_Compress_Ssse3(AState, AData, ANumBlocks, @K512, @BSWAP64_MASK);
 end;
 
 procedure SHA512_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  AConstants, AMask: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA512\SHA512CompressAvx2_x86_64.inc}
 end;
 
 procedure SHA512_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA512_Compress_Avx2(AState, AData, ANumBlocks, @K512);
+  SHA512_Compress_Avx2(AState, AData, ANumBlocks, @K512, @BSWAP64_MASK);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}

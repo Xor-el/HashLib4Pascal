@@ -1,9 +1,9 @@
 // SHA-1 SSSE3 implementation with SIMD message schedule.
 // Inspired by OpenSSL sha1-x86_64.pl by Andy Polyakov (CRYPTOGAMS),
 // Linux kernel sha1_ssse3_asm.S by Maxim Locktyukhin / Ronen Zohar / Mathias Krause.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
-// K_SHA1 layout: K_00_19 (16 bytes) at offset 0, K_20_39 at 16, K_40_59 at 32,
-//   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K_SHA1 ptr (K_00_19 at 0, K_20_39 at 16, K_40_59 at 32, K_60_79 at 48),
+//   r10 = BSWAP32 mask ptr (16 bytes).
 // Uses xmm0-xmm7 (SIMD message schedule + byte-swap), all GPR.
 //
 // Two phases per block:
@@ -27,7 +27,7 @@
 //   [rsp +  80.. 87]: r14 save
 //   [rsp +  88.. 95]: r15 save
 //   [rsp +  96..103]: K_SHA1 ptr save
-//   [rsp + 104..111]: padding
+//   [rsp + 104..111]: BSWAP mask ptr save
 //   [rsp + 112..431]: W buffer (320 bytes = 80 x 4, 16-byte aligned)
 
   sub rsp, 440
@@ -47,6 +47,7 @@
   mov r13, rdx
   mov r14d, r8d
   mov [rsp + $60], r9
+  mov [rsp + $68], r10
 
   test r14d, r14d
   jz @ssse3_sha1_done
@@ -55,8 +56,9 @@
 
   // ========== Phase 1: SIMD message schedule ==========
 
+  mov rax, [rsp + $68]
+  movdqu xmm7, oword [rax]
   mov rax, [rsp + $60]
-  movdqu xmm7, oword [rax + $40]
 
   lea r15, [rsp + $70]
 

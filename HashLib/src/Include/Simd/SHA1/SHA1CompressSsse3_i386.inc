@@ -1,6 +1,7 @@
 // SHA-1 SSSE3 implementation with SIMD message schedule (IA-32).
-// After SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K_SHA1 ptr.
-// K_SHA1 layout matches x64: K_00_19..K_60_79 (64B), BSWAP32 mask at offset 64 ($40).
+// After SimdProc5Begin_i386 — ebx = state, esi = data, edi = numblocks,
+//   eax = K_SHA1 ptr (unused: Phase 2 uses immediate round constants),
+//   ecx = BSWAP32 mask ptr (16 bytes). maskptr saved to [esp+$3C], reloaded each block.
 // Phase 1 matches SHA1CompressSsse3_x86_64.inc (pshufb + same expand); Phase 2 matches SSE2 i386 GPR rounds.
 // Uses xmm0–xmm7 in Phase 1; xmm7 = BSWAP mask.
 // xmm6–xmm7 saved/restored defensively (volatile on i386).
@@ -22,6 +23,7 @@
   mov [esp + $18], edi
   mov [esp + $34], eax
   mov [esp + $38], ebp
+  mov [esp + $3C], ecx
 
   test edi, edi
   jz @ssse3_sha1_done
@@ -30,8 +32,8 @@
 
   // ========== Phase 1: SIMD message schedule ==========
 
-  mov eax, [esp + $34]
-  movdqu xmm7, oword ptr [eax + $40]
+  mov eax, [esp + $3C]
+  movdqu xmm7, oword ptr [eax]
   mov esi, [esp + $14]
   lea ebx, [esp + $60]
 

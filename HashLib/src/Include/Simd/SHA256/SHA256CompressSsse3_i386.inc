@@ -1,7 +1,8 @@
 // SHA-256 SSSE3 implementation with SIMD message schedule (IA-32).
-// After SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K256 ptr.
+// After SimdProc5Begin_i386 — ebx = state, esi = data, edi = numblocks,
+//   eax = K256 ptr (64 UInt32 round constants), ecx = BSWAP32 mask ptr (16 bytes).
 // Phase 1 matches SHA256CompressSsse3_x86_64.inc (pshufb, palignr); Phase 2 same GPR rounds as SSE2 i386.
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// maskptr is saved to [esp+$48] in the prologue and reloaded (into eax) each block.
 // Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
 //
 // Two-phase per block:
@@ -20,6 +21,7 @@
   mov [esp + $28], edi
   mov [esp + $2C], eax
   mov [esp + $30], ebp
+  mov [esp + $48], ecx
 
   test edi, edi
   jz @ssse3_256_done
@@ -32,7 +34,8 @@
   mov esi, [esp + $24]
   lea ebp, [esp + $70]
 
-  movdqu xmm7, oword ptr [ebx + $100]
+  mov eax, [esp + $48]
+  movdqu xmm7, oword ptr [eax]
   movdqu xmm0, oword ptr [esi]
   pshufb xmm0, xmm7
   movdqu xmm1, oword ptr [esi + $10]

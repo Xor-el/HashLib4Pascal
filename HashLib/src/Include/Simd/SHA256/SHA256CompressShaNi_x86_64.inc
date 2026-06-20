@@ -1,6 +1,6 @@
 // SHA-256 SHA-NI implementation.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
-// K256 layout: 64 UInt32 round constants (256 bytes), then BSWAP mask (16 bytes) at offset 256.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K256 ptr (64 UInt32 round constants), r10 = BSWAP32 mask ptr (16 bytes).
 // Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
 // Reference: Jeffrey Walton / Sean Gulley / Intel SHA Extensions whitepaper.
 //
@@ -46,7 +46,7 @@
   movdqa xmm9, xmm2
 
   // Load and byte-swap all 4 message blocks
-  movdqu xmm7, oword [r9 + $100]        // BSWAP mask at offset 256
+  movdqu xmm7, oword [r10]              // BSWAP32 mask (separate ptr)
   movdqu xmm3, oword [rdx]
   pshufb xmm3, xmm7
   movdqu xmm4, oword [rdx + $10]

@@ -1,7 +1,7 @@
 // SHA-1 SHA-NI implementation.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K_SHA1 ptr.
-// K_SHA1 layout: K_00_19 at 0, K_20_39 at 16, K_40_59 at 32,
-//   K_60_79 at 48, BSWAP32 mask (16 bytes) at offset 64.
+// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
+//   r9 = K_SHA1 ptr (unused here: sha1rnds4 has the round constants built in),
+//   r10 = BSWAP32 mask ptr (16 bytes).
 // Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
 // Reference: Intel SHA Extensions whitepaper.
 //
@@ -44,7 +44,7 @@
   // Load, byte-swap, and reverse dword order for all 4 message blocks.
   // The per-dword BSWAP mask puts W[0] at [31:0], but sha1rnds4 reads
   // W[0] from [127:96]. The pshufd $1B reverses the dword order.
-  movdqu xmm7, oword [r9 + $40]    // BSWAP mask at offset 64
+  movdqu xmm7, oword [r10]         // BSWAP32 mask (separate ptr)
   movdqu xmm3, oword [rdx]
   pshufb xmm3, xmm7
   pshufd xmm3, xmm3, $1B

@@ -3,7 +3,7 @@
 // Same as SSSE3 but byte-swap uses SSE2 emulation (pshuflw/pshufhw + psrlw/psllw/por)
 // instead of SSSE3 pshufb. Message schedule expansion and compression use GPR only.
 // Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K512 ptr.
-// K512 layout: 80 UInt64 round constants (640 bytes), BSWAP64 mask unused.
+// K512: 80 UInt64 round constants (640 bytes). SSE2 byte-swaps without a mask (4-param path).
 // Uses xmm0, xmm4, all GPR.
 //
 // Stack layout (sub rsp, 1016): same as SSSE3 version (xmm6-xmm7 save slots unused)

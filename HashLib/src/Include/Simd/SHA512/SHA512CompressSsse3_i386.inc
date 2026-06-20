@@ -1,8 +1,9 @@
 // SHA-512 SSSE3 implementation (IA-32).
 // Based on SHA512CompressSsse3_x86_64.inc (x86-64); same algorithm as SSE2 i386 but Phase 1 uses pshufb.
-// IA-32: after SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K512 ptr
-//   (parallel to MS x64 ABI: rcx, rdx, r8d, r9).
-// K512: 80 UInt64 round constants (640 bytes), BSWAP64 mask at offset 640 ($280).
+// IA-32: after SimdProc5Begin_i386 — ebx = state, esi = data, edi = numblocks,
+//   eax = K512 ptr (80 UInt64 round constants), ecx = BSWAP64 mask ptr (16 bytes)
+//   (parallel to MS x64 ABI: rcx, rdx, r8d, r9, r10).
+// maskptr saved to [esp+$34] in the prologue; reloaded (into eax) each block.
 // Phase 1: SSSE3 xmm0/xmm4/xmm7 (mask); ebx = W ring @ [esp+$2F0], ebp = W+K @ [esp+$70].
 // Phase 2: rax..r11 in [esp+880]..[esp+936] (8 qwords).
 // Scratch: expand [esp+$3B8]..$3E0; shrd [esp+1000]/[esp+1004]; and M,M [esp+1008]..1015.
@@ -18,16 +19,18 @@
   mov dword ptr [esp + $28], edi
   mov dword ptr [esp + $2C], eax
   mov dword ptr [esp + $30], ebp
+  mov dword ptr [esp + $34], ecx
 
   cmp dword ptr [esp + $28], 0
   jz @ssse3_512_done
 
 @ssse3_512_block_loop:
+  mov eax, dword ptr [esp + $34]
+  movdqu xmm7, oword ptr [eax]
   mov eax, dword ptr [esp + $2C]
   lea ebp, [esp + $70]
   lea ebx, [esp + $2F0]
   mov esi, dword ptr [esp + $24]
-  movdqu xmm7, oword ptr [eax + $280]
 
   movdqu xmm0, oword ptr [esi+$0]
   pshufb xmm0, xmm7
