@@ -1,5 +1,6 @@
 // SHA-1 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K_SHA1.
+// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks.
+// K round constants: adr x3, .Lcryptoext_k_sha1 (local pool — FPC rejects adr on Pascal globals).
 // Reference: OpenSSL CRYPTOGAMS sha1-armv8.S (sha1_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -18,6 +19,7 @@
 //   q16-q19 = K constants; q20-q21 = W+K; q22 = saved ABCD
 
   cbz w2, .Lcryptoext_sha1_done
+  adr x3, .Lcryptoext_k_sha1
   .long 0x4e611c21                    // eor q1, q1, q1
   .long 0x3dc00000                    // ldr q0, [x0]
   .long 0xbd401004                    // ldr s4, [x0, #16]
@@ -130,4 +132,10 @@
   cbnz w2, .Lcryptoext_sha1_block_loop
   .long 0x3d800000                    // str q0, [x0]
   .long 0xbd001004                    // str s4, [x0, #16]
+  b .Lcryptoext_sha1_done
+.Lcryptoext_k_sha1:
+  .long 0x5a827999, 0x5a827999, 0x5a827999, 0x5a827999
+  .long 0x6ed9eba1, 0x6ed9eba1, 0x6ed9eba1, 0x6ed9eba1
+  .long 0x8f1bbcdc, 0x8f1bbcdc, 0x8f1bbcdc, 0x8f1bbcdc
+  .long 0xca62c1d6, 0xca62c1d6, 0xca62c1d6, 0xca62c1d6
   .Lcryptoext_sha1_done:

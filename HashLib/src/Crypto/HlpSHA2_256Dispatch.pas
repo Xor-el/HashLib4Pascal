@@ -186,15 +186,9 @@ end;
 
 {$IFDEF HASHLIB_AARCH64_ASM}
 
-procedure SHA256_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+procedure SHA256_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_aarch64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressCryptoExt_aarch64.inc}
-end;
-
-procedure SHA256_Compress_CryptoExt_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
-begin
-  SHA256_Compress_CryptoExt(AState, AData, ANumBlocks, @K256);
 end;
 
 {$ENDIF HASHLIB_AARCH64_ASM}
@@ -242,7 +236,7 @@ begin
 {$IFDEF HASHLIB_AARCH64_ASM}
   if TCpuFeatures.Arm.HasSHA256() then
   begin
-    SHA256_Compress := @SHA256_Compress_CryptoExt_Wrap;
+    SHA256_Compress := @SHA256_Compress_CryptoExt;
   end;
 {$ENDIF}
 end;
