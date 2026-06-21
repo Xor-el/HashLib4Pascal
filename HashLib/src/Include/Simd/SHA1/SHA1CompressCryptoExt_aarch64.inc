@@ -1,8 +1,6 @@
 // SHA-1 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks.
-// K round constants live in .Lcryptoext_k_sha1_data below (OpenSSL .Lconst pattern).
-// FPC 3.2.2: adr/adrp fail in inline asm; .quad on Pascal globals (K_SHA1) breaks at
-// runtime — use .quad .Llocal + inline .long pool in the same text section instead.
+// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K table (@K_SHA1).
+// K is passed from Pascal via *_Wrap; do not load x3 from an inline literal pool.
 // Reference: OpenSSL CRYPTOGAMS sha1-armv8.S (sha1_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -15,17 +13,15 @@
 //
 // Register map:
 //   q0 = ABCD; s4 = E (q1 lane 0)
-//   x4 = K table pointer (OpenSSL sha1_block_armv8)
+//   x3 = K table pointer from Pascal wrapper (@K_SHA1)
 //   q2, q3 = sha1h ping-pong; q4-q7 = message schedule
 //   q16-q19 = K constants; q20-q21 = W+K; q22 = saved ABCD
 
   cbz w2, .Lcryptoext_sha1_done
-  ldr x4, .Lcryptoext_k_sha1_ptr
-.Lcryptoext_k_sha1_loaded:
   .long 0x4e611c21                    // eor q1, q1, q1
   .long 0x3dc00000                    // ldr q0, [x0]
   .long 0xbd401004                    // ldr s4, [x0, #16]
-  .long 0x4c402890                    // ld1 {v16.4s-v19.4s}, [x4]
+  .long 0x4c402870                    // ld1 {v16.4s-v19.4s}, [x3]
 
 .Lcryptoext_sha1_block_loop:
   .long 0xacc11424                    // ldp q4, q5, [x1], #32
@@ -136,12 +132,3 @@
   b .Lcryptoext_sha1_done
 .Lcryptoext_sha1_done:
   ret
-  .balign 8
-.Lcryptoext_k_sha1_ptr:
-  .quad .Lcryptoext_k_sha1_data
-  .balign 4
-.Lcryptoext_k_sha1_data:
-  .long 0x5a827999, 0x5a827999, 0x5a827999, 0x5a827999
-  .long 0x6ed9eba1, 0x6ed9eba1, 0x6ed9eba1, 0x6ed9eba1
-  .long 0x8f1bbcdc, 0x8f1bbcdc, 0x8f1bbcdc, 0x8f1bbcdc
-  .long 0xca62c1d6, 0xca62c1d6, 0xca62c1d6, 0xca62c1d6
