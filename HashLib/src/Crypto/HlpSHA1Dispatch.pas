@@ -175,6 +175,15 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure SHA1_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_aarch64.inc}
+  {$I ..\Include\Simd\SHA1\SHA1CompressCryptoExt_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -213,6 +222,12 @@ begin
     begin
       SHA1_Compress := @SHA1_Compress_Sse2;
     end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  if TCpuFeatures.Arm.HasSHA1() then
+  begin
+    SHA1_Compress := @SHA1_Compress_CryptoExt;
   end;
 {$ENDIF}
 end;
