@@ -127,10 +127,10 @@
   .long 0x4ed73aa1                    // zip1 v1.2d, v21.2d, v23.2d
   .long 0x4ed67a82                    // zip2 v2.2d, v20.2d, v22.2d
   .long 0x4ed77aa3                    // zip2 v3.2d, v21.2d, v23.2d
-  .long 0x3d8007e0                    // str q0, [sp, #16]
-  .long 0x3d800be1                    // str q1, [sp, #32]
-  .long 0x3d800fe2                    // str q2, [sp, #48]
-  .long 0x3d8013e3                    // str q3, [sp, #64]
+  .long 0x3d8013e0                    // str q0, [sp, #64]
+  .long 0x3d8017e1                    // str q1, [sp, #80]
+  .long 0x3d801be2                    // str q2, [sp, #96]
+  .long 0x3d801fe3                    // str q3, [sp, #112]
   add x9, x0, x20
   .long 0x3dc00920                    // ldr q0, [x9, #32]
   .long 0x3dc10921                    // ldr q1, [x9, #1056]
@@ -144,10 +144,10 @@
   .long 0x4ed73aa1                    // zip1 v1.2d, v21.2d, v23.2d
   .long 0x4ed67a82                    // zip2 v2.2d, v20.2d, v22.2d
   .long 0x4ed77aa3                    // zip2 v3.2d, v21.2d, v23.2d
-  .long 0x3d800be0                    // str q0, [sp, #32]
-  .long 0x3d800fe1                    // str q1, [sp, #48]
-  .long 0x3d8013e2                    // str q2, [sp, #64]
-  .long 0x3d8017e3                    // str q3, [sp, #80]
+  .long 0x3d8023e0                    // str q0, [sp, #128]
+  .long 0x3d8027e1                    // str q1, [sp, #144]
+  .long 0x3d802be2                    // str q2, [sp, #160]
+  .long 0x3d802fe3                    // str q3, [sp, #176]
   add x9, x0, x20
   .long 0x3dc00d20                    // ldr q0, [x9, #48]
   .long 0x3dc10d21                    // ldr q1, [x9, #1072]
@@ -161,10 +161,10 @@
   .long 0x4ed73aa1                    // zip1 v1.2d, v21.2d, v23.2d
   .long 0x4ed67a82                    // zip2 v2.2d, v20.2d, v22.2d
   .long 0x4ed77aa3                    // zip2 v3.2d, v21.2d, v23.2d
-  .long 0x3d800fe0                    // str q0, [sp, #48]
-  .long 0x3d8013e1                    // str q1, [sp, #64]
-  .long 0x3d8017e2                    // str q2, [sp, #80]
-  .long 0x3d801be3                    // str q3, [sp, #96]
+  .long 0x3d8033e0                    // str q0, [sp, #192]
+  .long 0x3d8037e1                    // str q1, [sp, #208]
+  .long 0x3d803be2                    // str q2, [sp, #224]
+  .long 0x3d803fe3                    // str q3, [sp, #240]
   .long 0x3dc053e0                    // ldr q0, [sp, #320]
   .long 0x3dc057e1                    // ldr q1, [sp, #336]
   .long 0x3dc05be2                    // ldr q2, [sp, #352]
