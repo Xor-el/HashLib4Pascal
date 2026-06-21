@@ -8,7 +8,8 @@
 //
 // Encoding strategy for FPC 3.2.2 compatibility (forum topics 52909, 70561; FPC #41196):
 //   FPC 3.2.2 crashes on ldr/ldp/str/stp with qN/sN mnemonics — encode as .long.
-//   K table passed in x3 from Pascal wrapper (@K_SHA1).
+//   .long encodings: Rn nibble in each word must match the GPR in the comment
+//   (e.g. ldp q16, q17, [x3] = 0xad404470, not 0xad404490 which is [x4]).
 //   .long for REV32, vector add/orr/eor, memory traffic, and FEAT_SHA1 crypto ops
 //
 // Register map:
@@ -20,8 +21,8 @@
   .long 0x4e611c21                    // eor q1, q1, q1
   .long 0x3dc00000                    // ldr q0, [x0]
   .long 0xbd401004                    // ldr s4, [x0, #16]
-  .long 0xad404490                    // ldp q16, q17, [x3]
-  .long 0xad414c92                    // ldp q18, q19, [x3, #32]
+  .long 0xad404470                    // ldp q16, q17, [x3]
+  .long 0xad414c72                    // ldp q18, q19, [x3, #32]
 
 .Lcryptoext_sha1_block_loop:
   .long 0xacc11424                    // ldp q4, q5, [x1], #32
