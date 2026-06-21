@@ -1,6 +1,6 @@
 // SHA-256 ARMv8 Crypto Extensions.
 // Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks.
-// K256: adr x3, .Lcryptoext_k256 (local pool — FPC rejects adr on Pascal globals).
+// K256: ldr x3, .Lcryptoext_k_ptr → .quad .Lcryptoext_k256 (FPC 3.2.2 rejects adr).
 // Reference: OpenSSL CRYPTOGAMS sha256-armv8.S (sha256_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -9,7 +9,7 @@
 //
 // Encoding strategy for FPC 3.2.2 compatibility (forum topics 52909, 70561; FPC #41196):
 //   FPC 3.2.2 crashes on ldr/ldp/str/stp with qN/sN mnemonics — encode as .long.
-//   K table via adr x3, .Lcryptoext_k256 + inline .long pool (OpenSSL K256 pattern).
+//   K table: ldr x3, .Lcryptoext_k_ptr + .quad .Lcryptoext_k256 + inline .long pool.
 //   .long for REV32, vector add/orr, memory traffic, and FEAT_SHA256 crypto ops
 //
 // Register map (per block):
@@ -21,7 +21,7 @@
 
   cbz w2, .Lcryptoext_sha256_done
 
-  adr x3, .Lcryptoext_k256
+  ldr x3, .Lcryptoext_k_ptr
   .long 0xad400400                    // ldp q0, q1, [x0]
 
 .Lcryptoext_sha256_block_loop:
@@ -144,6 +144,8 @@
   cbnz w2, .Lcryptoext_sha256_block_loop
   .long 0xad000400                    // stp q0, q1, [x0]
   b .Lcryptoext_sha256_done
+.Lcryptoext_k_ptr:
+  .quad .Lcryptoext_k256
 .Lcryptoext_k256:
   .long 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5
   .long 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5
