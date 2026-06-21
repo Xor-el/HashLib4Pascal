@@ -1,7 +1,7 @@
 // SHA-1 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K table (4th param from *_Wrap).
-// x4 = K pointer (copied from x3 below). Do not use param names here — FPC 3.2.2 may mis-resolve
-// AConstants in included asm; use explicit GPR names per SimdProc4Begin_aarch64.inc.
+// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks.
+// K_SHA1 must be in scope in the including unit (HlpSHA1Dispatch.pas).
+// FPC 3.2.2 cannot use adr/adrp on rodata in included asm — load K via PC-relative pool.
 // Reference: OpenSSL CRYPTOGAMS sha1-armv8.S (sha1_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -19,7 +19,12 @@
 //   q16-q19 = K constants; q20-q21 = W+K; q22 = saved ABCD
 
   cbz w2, .Lcryptoext_sha1_done
-  mov x4, x3
+  ldr x4, .Lcryptoext_k_sha1
+  b .Lcryptoext_k_sha1_loaded
+  .balign 8
+.Lcryptoext_k_sha1:
+  .quad K_SHA1
+.Lcryptoext_k_sha1_loaded:
   .long 0x4e611c21                    // eor q1, q1, q1
   .long 0x3dc00000                    // ldr q0, [x0]
   .long 0xbd401004                    // ldr s4, [x0, #16]
@@ -133,4 +138,5 @@
   .long 0x3d800000                    // str q0, [x0]
   .long 0xbd001004                    // str s4, [x0, #16]
   b .Lcryptoext_sha1_done
-  .Lcryptoext_sha1_done:
+.Lcryptoext_sha1_done:
+  ret
