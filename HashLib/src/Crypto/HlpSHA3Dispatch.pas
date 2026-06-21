@@ -488,6 +488,36 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+// FEAT_SHA3 (ARMv8.2 crypto extension) kernels. Unlike the AVX2 path these
+// reuse the plain RC round-constant table directly (the asm broadcasts each
+// 64-bit iota with ld1r), so no separate packed constant block is needed.
+
+procedure KeccakF1600_CryptoExt(AState: Pointer; AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\SHA3\KeccakF1600CryptoExt_aarch64.inc}
+end;
+
+procedure KeccakF1600_CryptoExt_Wrap(AState: Pointer);
+begin
+  KeccakF1600_CryptoExt(AState, @RC);
+end;
+
+procedure KeccakF1600_CryptoExt_Absorb(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc5Begin_aarch64.inc}
+  {$I ..\Include\Simd\SHA3\KeccakF1600CryptoExtAbsorb_aarch64.inc}
+end;
+
+procedure KeccakF1600_CryptoExt_Absorb_Wrap(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32);
+begin
+  KeccakF1600_CryptoExt_Absorb(AState, AData, ABlockCount, ABlockSize, @RC);
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -503,6 +533,13 @@ begin
       KeccakF1600_Permute := @KeccakF1600_Avx2_Wrap;
       KeccakF1600_Absorb := @KeccakF1600_Avx2_Absorb_Wrap;
     end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  if TCpuFeatures.Arm.HasSHA3() then
+  begin
+    KeccakF1600_Permute := @KeccakF1600_CryptoExt_Wrap;
+    KeccakF1600_Absorb := @KeccakF1600_CryptoExt_Absorb_Wrap;
   end;
 {$ENDIF}
 end;
