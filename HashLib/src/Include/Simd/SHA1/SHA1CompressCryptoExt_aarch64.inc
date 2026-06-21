@@ -6,9 +6,10 @@
 //   Subscripted vector regs (v0.4s, v1.s[0], ld1 {v0.4s}, …) require FPC 3.3+.
 //   FPC 3.2.2 a64reg.dat exposes q0-q31 / s0-s31 for loads/stores only.
 //
-// Encoding strategy for FPC 3.2.2 compatibility (forum topic 52909 pattern):
-//   ldp/ldr/str with qN; ldr/str s4 for E (v1 lane 0 = s4)
-//   .long 0x........ for REV32, vector add/orr/eor, and FEAT_SHA1 crypto ops
+// Encoding strategy for FPC 3.2.2 compatibility (forum topics 52909, 70561; FPC #41196):
+//   FPC 3.2.2 crashes on ldr/ldp/str/stp with qN/sN mnemonics — encode as .long.
+//   (Intel db is for {$ASMMODE INTEL}; AArch64 GAS uses .long / .byte, not db.)
+//   .long for REV32, vector add/orr/eor, memory traffic, and FEAT_SHA1 crypto ops
 //
 // Register map:
 //   q0 = ABCD; s4 = E (q1 lane 0)
@@ -17,15 +18,15 @@
 
   cbz w2, .Lcryptoext_sha1_done
   .long 0x4e611c21                    // eor q1, q1, q1
-  ldr q0, [x0]
-  ldr s4, [x0, #16]
+  .long 0x3dc00000                    // ldr q0, [x0]
+  .long 0xbd401004                    // ldr s4, [x0, #16]
   adr x4, K_SHA1
-  ldp q16, q17, [x4]
-  ldp q18, q19, [x4, #32]
+  .long 0xad404490                    // ldp q16, q17, [x4]
+  .long 0xad414c92                    // ldp q18, q19, [x4, #32]
 
 .Lcryptoext_sha1_block_loop:
-  ldp q4, q5, [x1], #32
-  ldp q6, q7, [x1], #32
+  .long 0xacc11424                    // ldp q4, q5, [x1], #32
+  .long 0xacc11c26                    // ldp q6, q7, [x1], #32
   sub w2, w2, #1
   .long 0x05c80284                    // rev32 q4, q4
   .long 0x05c802a5                    // rev32 q5, q5
@@ -127,6 +128,6 @@
   .long 0x4e22d421                    // add q1, q1, q2
   .long 0x4e36d400                    // add q0, q0, q22
   cbnz w2, .Lcryptoext_sha1_block_loop
-  str q0, [x0]
-  str s4, [x0, #16]
+  .long 0x3d800000                    // str q0, [x0]
+  .long 0xbd001004                    // str s4, [x0, #16]
   .Lcryptoext_sha1_done:
