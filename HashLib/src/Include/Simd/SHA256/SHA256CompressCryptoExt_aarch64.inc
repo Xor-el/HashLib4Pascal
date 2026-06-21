@@ -1,146 +1,147 @@
-// SHA-256 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K table (@K256).
-// K is passed from Pascal via *_Wrap; x19 holds K base across each block loop.
+// SHA-256 ARMv8 Crypto Extension (FEAT_SHA256) implementation.
+// Expects AAPCS64: x0 = state ptr (8 x UInt32), x1 = data ptr,
+//   w2 = numblocks, x3 = K256 ptr (64 UInt32 round constants).
+// Touches only caller-saved registers (x0-x4, w2, v0-v7, v16-v19); no AAPCS64
+//   callee-saved register (x19-x28, or the low 64 bits of v8-v15) is used, so
+//   the 'nostackframe' leaf needs neither prologue nor epilogue. The K pointer
+//   is advanced with post-index loads and rewound once per block with
+//   'sub x3,x3,#240' (= 64*4 - 16), avoiding the need for a saved base register.
 // Reference: OpenSSL CRYPTOGAMS sha256-armv8.S (sha256_block_armv8).
 //
-// FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
-//   Subscripted vector regs (v0.4s, v1.16b, ld1 {v0.4s}, …) require FPC 3.3+.
-//   FPC 3.2.2 a64reg.dat exposes q0-q31 / s0-s31 for loads/stores only.
+// Instruction encodings (for assembler compatibility):
+//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
+//   (subscripted vector regs and the FEAT_SHA256 ops require FPC 3.3+, and
+//   ldr/str/ldp with qN crash the 3.2.2 assembler). Each such instruction is
+//   therefore emitted as its raw 32-bit '.long' opcode, with the equivalent
+//   mnemonic in the trailing comment; only cbz/cbnz/sub/ret stay as text.
 //
-// Encoding strategy for FPC 3.2.2 compatibility (forum topics 52909, 70561; FPC #41196):
-//   FPC 3.2.2 crashes on ldr/ldp/str/stp with qN/sN mnemonics — encode as .long.
-//   .long for REV32, vector add/orr, memory traffic, and FEAT_SHA256 crypto ops
-//
-// Register map (per block):
-//   q0, q1  = working state (ABCD, EFGH)
-//   q4-q7   = message schedule (W)
-//   q16-q17 = W+K for sha256h/sha256h2
-//   q18-q19 = saved state at block start
-//   q2      = sha256h2 temp (copy of q0)
+// Register map:
+//   v0, v1   = working state (ABCD, EFGH)
+//   v2       = sha256h2 temp (copy of v0 before each h/h2 pair)
+//   v4-v7    = message schedule (W)
+//   v16, v17 = W+K for sha256h / sha256h2 (ping-pong)
+//   v18, v19 = saved state (ABCD, EFGH) for the final add
 
   cbz w2, .Lcryptoext_sha256_done
-  mov x19, x3
   .long 0xad400400                    // ldp q0, q1, [x0]
-
 .Lcryptoext_sha256_block_loop:
-  mov x3, x19
   .long 0xacc11424                    // ldp q4, q5, [x1], #32
   .long 0xacc11c26                    // ldp q6, q7, [x1], #32
   sub w2, w2, #1
+  .long 0x6e200884                    // rev32 v4.16b, v4.16b
+  .long 0x6e2008a5                    // rev32 v5.16b, v5.16b
+  .long 0x6e2008c6                    // rev32 v6.16b, v6.16b
+  .long 0x6e2008e7                    // rev32 v7.16b, v7.16b
+  .long 0x4ea01c12                    // orr v18.16b, v0.16b, v0.16b
+  .long 0x4ea11c33                    // orr v19.16b, v1.16b, v1.16b
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x05c80284                    // rev32 q4, q4
-  .long 0x05c802a5                    // rev32 q5, q5
-  .long 0x05c802c6                    // rev32 q6, q6
-  .long 0x05c802e7                    // rev32 q7, q7
-  .long 0x4e201c12                    // orr q18, q0, q0
-  .long 0x4e211c33                    // orr q19, q1, q1
+  .long 0x4ea48610                    // add v16.4s, v16.4s, v4.4s
+  .long 0x5e2828a4                    // sha256su0 v4.4s, v5.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e0760c4                    // sha256su1 v4.4s, v6.4s, v7.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e24d610                    // add q16, q16, q4
-  .long 0x5e2828a4                    // sha256su0 v4.16b, v5.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e0760c4                    // sha256su1 v4.16b, v6.16b, v7.16b
+  .long 0x4ea58631                    // add v17.4s, v17.4s, v5.4s
+  .long 0x5e2828c5                    // sha256su0 v5.4s, v6.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0460e5                    // sha256su1 v5.4s, v7.4s, v4.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e25d631                    // add q17, q17, q5
-  .long 0x5e2828c5                    // sha256su0 v5.16b, v6.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0460e5                    // sha256su1 v5.16b, v7.16b, v4.16b
+  .long 0x4ea68610                    // add v16.4s, v16.4s, v6.4s
+  .long 0x5e2828e6                    // sha256su0 v6.4s, v7.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e056086                    // sha256su1 v6.4s, v4.4s, v5.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e26d610                    // add q16, q16, q6
-  .long 0x5e2828e6                    // sha256su0 v6.16b, v7.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e056086                    // sha256su1 v6.16b, v4.16b, v5.16b
+  .long 0x4ea78631                    // add v17.4s, v17.4s, v7.4s
+  .long 0x5e282887                    // sha256su0 v7.4s, v4.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0660a7                    // sha256su1 v7.4s, v5.4s, v6.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e27d631                    // add q17, q17, q7
-  .long 0x5e282887                    // sha256su0 v7.16b, v4.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0660a7                    // sha256su1 v7.16b, v5.16b, v6.16b
+  .long 0x4ea48610                    // add v16.4s, v16.4s, v4.4s
+  .long 0x5e2828a4                    // sha256su0 v4.4s, v5.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e0760c4                    // sha256su1 v4.4s, v6.4s, v7.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e24d610                    // add q16, q16, q4
-  .long 0x5e2828a4                    // sha256su0 v4.16b, v5.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e0760c4                    // sha256su1 v4.16b, v6.16b, v7.16b
+  .long 0x4ea58631                    // add v17.4s, v17.4s, v5.4s
+  .long 0x5e2828c5                    // sha256su0 v5.4s, v6.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0460e5                    // sha256su1 v5.4s, v7.4s, v4.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e25d631                    // add q17, q17, q5
-  .long 0x5e2828c5                    // sha256su0 v5.16b, v6.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0460e5                    // sha256su1 v5.16b, v7.16b, v4.16b
+  .long 0x4ea68610                    // add v16.4s, v16.4s, v6.4s
+  .long 0x5e2828e6                    // sha256su0 v6.4s, v7.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e056086                    // sha256su1 v6.4s, v4.4s, v5.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e26d610                    // add q16, q16, q6
-  .long 0x5e2828e6                    // sha256su0 v6.16b, v7.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e056086                    // sha256su1 v6.16b, v4.16b, v5.16b
+  .long 0x4ea78631                    // add v17.4s, v17.4s, v7.4s
+  .long 0x5e282887                    // sha256su0 v7.4s, v4.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0660a7                    // sha256su1 v7.4s, v5.4s, v6.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e27d631                    // add q17, q17, q7
-  .long 0x5e282887                    // sha256su0 v7.16b, v4.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0660a7                    // sha256su1 v7.16b, v5.16b, v6.16b
+  .long 0x4ea48610                    // add v16.4s, v16.4s, v4.4s
+  .long 0x5e2828a4                    // sha256su0 v4.4s, v5.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e0760c4                    // sha256su1 v4.4s, v6.4s, v7.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e24d610                    // add q16, q16, q4
-  .long 0x5e2828a4                    // sha256su0 v4.16b, v5.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e0760c4                    // sha256su1 v4.16b, v6.16b, v7.16b
+  .long 0x4ea58631                    // add v17.4s, v17.4s, v5.4s
+  .long 0x5e2828c5                    // sha256su0 v5.4s, v6.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0460e5                    // sha256su1 v5.4s, v7.4s, v4.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e25d631                    // add q17, q17, q5
-  .long 0x5e2828c5                    // sha256su0 v5.16b, v6.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0460e5                    // sha256su1 v5.16b, v7.16b, v4.16b
+  .long 0x4ea68610                    // add v16.4s, v16.4s, v6.4s
+  .long 0x5e2828e6                    // sha256su0 v6.4s, v7.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
+  .long 0x5e056086                    // sha256su1 v6.4s, v4.4s, v5.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e26d610                    // add q16, q16, q6
-  .long 0x5e2828e6                    // sha256su0 v6.16b, v7.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x5e056086                    // sha256su1 v6.16b, v4.16b, v5.16b
+  .long 0x4ea78631                    // add v17.4s, v17.4s, v7.4s
+  .long 0x5e282887                    // sha256su0 v7.4s, v4.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  .long 0x5e0660a7                    // sha256su1 v7.4s, v5.4s, v6.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e27d631                    // add q17, q17, q7
-  .long 0x5e282887                    // sha256su0 v7.16b, v4.16b
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x5e0660a7                    // sha256su1 v7.16b, v5.16b, v6.16b
+  .long 0x4ea48610                    // add v16.4s, v16.4s, v4.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
   .long 0x3cc10471                    // ldr q17, [x3], #16
-  .long 0x4e24d610                    // add q16, q16, q4
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
+  .long 0x4ea58631                    // add v17.4s, v17.4s, v5.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
   .long 0x3cc10470                    // ldr q16, [x3], #16
-  .long 0x4e25d631                    // add q17, q17, q5
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
+  .long 0x4ea68610                    // add v16.4s, v16.4s, v6.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e104020                    // sha256h q0, q1, v16.4s
+  .long 0x5e105041                    // sha256h2 q1, q2, v16.4s
   .long 0x3dc00071                    // ldr q17, [x3]
-  .long 0x4e26d610                    // add q16, q16, q6
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e104020                    // sha256h v0.16b, v1.16b, v16.4s
-  .long 0x5e105041                    // sha256h2 v1.16b, v2.16b, v16.4s
-  .long 0x4e27d631                    // add q17, q17, q7
-  .long 0x4e201c02                    // orr q2, q0, q0
-  .long 0x5e114020                    // sha256h v0.16b, v1.16b, v17.4s
-  .long 0x5e115041                    // sha256h2 v1.16b, v2.16b, v17.4s
-  .long 0x4e32d400                    // add q0, q0, q18
-  .long 0x4e33d421                    // add q1, q1, q19
+  .long 0x4ea78631                    // add v17.4s, v17.4s, v7.4s
+  .long 0x4ea01c02                    // orr v2.16b, v0.16b, v0.16b
+  .long 0x5e114020                    // sha256h q0, q1, v17.4s
+  .long 0x5e115041                    // sha256h2 q1, q2, v17.4s
+  sub x3, x3, #240
+  .long 0x4eb28400                    // add v0.4s, v0.4s, v18.4s
+  .long 0x4eb38421                    // add v1.4s, v1.4s, v19.4s
   cbnz w2, .Lcryptoext_sha256_block_loop
   .long 0xad000400                    // stp q0, q1, [x0]
-  b .Lcryptoext_sha256_done
 .Lcryptoext_sha256_done:
   ret
