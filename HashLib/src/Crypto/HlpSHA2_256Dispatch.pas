@@ -186,24 +186,6 @@ end;
 
 {$IFDEF HASHLIB_AARCH64_ASM}
 
-var
-  _K256_CryptoExt: PUInt32;
-
-procedure _EnsureK256_CryptoExt();
-var
-  LP: PUInt32;
-  LI: Integer;
-  LRaw: Pointer;
-begin
-  if _K256_CryptoExt <> nil then
-    Exit;
-  LRaw := GetMemory(256 + 16);
-  LP := PUInt32((PtrUInt(LRaw) + 15) and (not PtrUInt(15)));
-  for LI := 0 to 63 do
-    LP[LI] := K256[LI];
-  _K256_CryptoExt := LP;
-end;
-
 procedure SHA256_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
@@ -212,7 +194,7 @@ end;
 
 procedure SHA256_Compress_CryptoExt_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
 begin
-  SHA256_Compress_CryptoExt(AState, AData, ANumBlocks, _K256_CryptoExt);
+  SHA256_Compress_CryptoExt(AState, AData, ANumBlocks, @K256[0]);
 end;
 
 {$ENDIF HASHLIB_AARCH64_ASM}
@@ -224,9 +206,6 @@ end;
 procedure InitDispatch();
 begin
   SHA256_Compress := @SHA256_Compress_Scalar;
-{$IFDEF HASHLIB_AARCH64_ASM}
-  _EnsureK256_CryptoExt();
-{$ENDIF}
 {$IFDEF HASHLIB_I386_ASM}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.SSSE3:
