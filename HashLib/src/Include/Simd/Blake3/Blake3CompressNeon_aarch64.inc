@@ -1,7 +1,9 @@
 // BLAKE3 compress AArch64 NEON implementation.
 // Expects AAPCS64: x0 = state ptr (16 x UInt32), x1 = message ptr (64 bytes),
 //   x2 = CV ptr (8 x UInt32), x3 = counter+flags ptr (16 bytes: t[0..1], len, flags).
-// Reference: BLAKE3-team/BLAKE3 SSE2 compress; HashLib Blake3CompressSse2_x86_64.inc.
+// Reference (golden): HashLib Blake3CompressSse2_x86_64.inc (inter-round permute via
+//   SSE shufps/pshufd semantics); BLAKE3-team/BLAKE3 c/blake3_impl.h (round G / IV).
+//   Upstream blake3_neon.c has no NEON compress — uses portable C instead.
 //
 // Instruction encodings (for assembler compatibility):
 //   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
@@ -16,10 +18,12 @@
 //   v2       = c (v[8..11], IV constants staged on stack)
 //   v3       = d (v[12..15], counter+flags)
 //   v4-v7    = message schedule registers m0..m3
-//   v16-v17  = message permute temps
+//   v16-v17  = permute temps t8/t9; v17 saved to stack mid-permute when shufps
+//              needs v17 as scratch (see [sp, #0] spill below)
 //   v18-v19  = rotate temps (vsri path)
-//   v20      = permute temp (t14)
-//   Stack: 16 bytes IV staging at [sp, #96] during prologue.
+//   v20      = shufps/pshufd scratch (t14)
+//   Stack (128 bytes): [sp, #0] transient t9 (v17) spill during inter-round permute;
+//     [sp, #96..111] IV constant staging in prologue.
 
   sub sp, sp, #128
   .long 0x529ccceb                    // movz w11, #0xe667, lsl #0

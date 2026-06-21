@@ -22,6 +22,7 @@
 //   v16-v19  = saved initial row1l/h, row2l/h for the final feed-forward XOR
 //   v20      = message gather temp b0 (G function)
 //   v21-v23  = rotate / diagonalize temps (b1 gather uses v23)
+// u64 ror-by-32 uses rev64.4s (vrev64q_u32), matching blake2b-neon.c — not rev64.16b.
 
   .long 0xad400400                    // ldp q0, q1, [x0]
   .long 0xad410c02                    // ldp q2, q3, [x0, #32]

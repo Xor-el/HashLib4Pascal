@@ -1,8 +1,10 @@
 // BLAKE3 hash4 AArch64 NEON implementation (4 parallel 1 KiB chunks).
 // Expects AAPCS64: x0 = AInput, x1 = AKey, x2 = AOut,
 //   w3 = ANumChunks (unused; always 16 blocks like SSE2), x4 = ACounter, w5 = AFlags.
-// Reference: BLAKE3-team/BLAKE3 neon/blake3_neon.c hash4_neon;
-//   HashLib Blake3Hash4Sse2_x86_64.inc.
+// Reference (golden): HashLib Blake3Hash4Sse2_x86_64.inc (stack layout, msg indexing,
+//   output transpose / store offsets); BLAKE3-team/BLAKE3 c/blake3_impl.h (round_fn4,
+//   MSG_SCHEDULE); scripts/ref/blake3_neon.c (transpose_vecs_128 / round_fn4 structure).
+//   Output chunk order matches HashLib SSE2, not upstream blake3_neon.c store layout.
 //
 // Instruction encodings (for assembler compatibility):
 //   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
@@ -13,13 +15,16 @@
 //
 // Register map:
 //   v0-v7    = state v0..v7 (CV rows, 4-wide)
-//   v8-v11   = state v8..v11 (IV rows)
-//   v16-v17  = G temps (v12/v13 analog)
+//   v8-v11   = state v8..v11 (IV rows, updated each round)
+//   v16-v17  = G temps (v12/v13 analog; d lane spilled via stack v12-v15 slots)
+//   v18-v19  = rotate temps (vsri path inside G)
 //   v20-v23  = transpose / block temps
-//   x19      = block index (0..15), x20 = block byte offset
-//   Stack frame 720 bytes (712B SSE2 layout + 8B align): transposed msgs,
-//   v12-v15 spills, saved CV/counters/IV, AOut ptr, flags.
-//   Message transpose uses zip/uzp/trn (not x86 punpck).
+//   x19      = block index (0..15), x20 = block byte offset within chunk
+//   Stack frame 720 bytes (712B SSE2 layout + 8B align):
+//     [sp, #0..255]   transposed message m[0..15] (four 64-byte groups at +0,+64,+128,+192)
+//     [sp, #256..304] v12-v15 spills (counter lo/hi, block len, flags)
+//     [sp, #320..568] saved CV, counter vectors, IV, block len, AOut ptr, flags
+//   Message transpose uses trn1/trn2 + zip1/zip2 (equivalent to SSE punpck / neon transpose_vecs_128).
 
   stp x19, x20, [sp, #-16]!
   sub sp, sp, #720
