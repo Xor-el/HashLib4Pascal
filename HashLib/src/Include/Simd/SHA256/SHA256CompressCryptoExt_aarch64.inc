@@ -1,6 +1,5 @@
 // SHA-256 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K256 table.
-// K256 is passed from Pascal via *_Wrap; do not load x3 here (FPC 3.2.2 literal pools break).
+// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K256 (16-byte aligned heap copy).
 // Reference: OpenSSL CRYPTOGAMS sha256-armv8.S (sha256_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -19,6 +18,7 @@
 //   q2      = sha256h2 temp (copy of q0)
 
   cbz w2, .Lcryptoext_sha256_done
+  mov x3, AConstants
   .long 0xad400400                    // ldp q0, q1, [x0]
 
 .Lcryptoext_sha256_block_loop:

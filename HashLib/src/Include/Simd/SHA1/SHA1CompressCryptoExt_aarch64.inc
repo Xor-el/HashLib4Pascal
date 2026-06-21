@@ -1,6 +1,6 @@
 // SHA-1 ARMv8 Crypto Extensions.
-// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x3 = K table (@K_SHA1).
-// K is passed from Pascal via *_Wrap; do not load x3 here (FPC 3.2.2 literal pools break).
+// Expects AAPCS64: x0 = state, x1 = data, w2 = numblocks, x4 = K table (via AConstants).
+// K pointer comes from *_Wrap (16-byte aligned heap copy of K_SHA1 in this unit).
 // Reference: OpenSSL CRYPTOGAMS sha1-armv8.S (sha1_block_armv8).
 //
 // FPC 3.2.2 inline asm limitation (see Lazarus forum topic 55289, svn rev 47116):
@@ -9,21 +9,20 @@
 //
 // Encoding strategy for FPC 3.2.2 compatibility (forum topics 52909, 70561; FPC #41196):
 //   FPC 3.2.2 crashes on ldr/ldp/str/stp with qN/sN mnemonics — encode as .long.
-//   .long encodings: Rn nibble in each word must match the GPR in the comment
-//   (e.g. ldp q16, q17, [x3] = 0xad404470, not 0xad404490 which is [x4]).
 //   .long for REV32, vector add/orr/eor, memory traffic, and FEAT_SHA1 crypto ops
 //
 // Register map:
 //   q0 = ABCD; s4 = E (q1 lane 0)
+//   x4 = K table pointer (OpenSSL sha1_block_armv8)
 //   q2, q3 = sha1h ping-pong; q4-q7 = message schedule
 //   q16-q19 = K constants; q20-q21 = W+K; q22 = saved ABCD
 
   cbz w2, .Lcryptoext_sha1_done
+  mov x4, AConstants
   .long 0x4e611c21                    // eor q1, q1, q1
   .long 0x3dc00000                    // ldr q0, [x0]
   .long 0xbd401004                    // ldr s4, [x0, #16]
-  .long 0xad404470                    // ldp q16, q17, [x3]
-  .long 0xad414c72                    // ldp q18, q19, [x3, #32]
+  .long 0x4c402890                    // ld1 {q16, q17, q18, q19}, [x4]
 
 .Lcryptoext_sha1_block_loop:
   .long 0xacc11424                    // ldp q4, q5, [x1], #32
