@@ -1,8 +1,8 @@
 // AArch64 NEON implementation of fused XOR + Salsa20/8 on Percival-permuted data.
 //
 // Reference: Colin Percival, "Stronger Key Derivation via Sequential
-// Memory-Hard Functions" (2009), and the Tarsnap scrypt reference
-// implementation (crypto_scrypt_smix_sse2.c). The (i*5 mod 16) data permutation
+// Memory-Hard Functions" (2009); Tarsnap scrypt crypto_scrypt_smix_sse2.c;
+// HashLib ScryptSalsa8Sse2_x86_64.inc. The (i*5 mod 16) data permutation
 // arranges each 16-word Salsa20 state into role-based diagonal order,
 // enabling lane-parallel SIMD processing of column and row quarter-rounds
 // with pshufd-based diagonalize/undiagonalize between them.
@@ -21,9 +21,6 @@
 // Row QR (lane-parallel, swapped B/D roles):
 //   D ^= rotl(A+B,7); C ^= rotl(D+A,9); B ^= rotl(C+D,13); A ^= rotl(B+C,18)
 // Undiag: ins/pshufd B,$39; C,$4E; D,$93
-//
-// Reference (golden): HashLib ScryptSalsa8Sse2_x86_64.inc;
-//   scripts/ref/scrypt-sse.c (Tarsnap excerpt).
 //
 // Instruction encodings (for assembler compatibility):
 //   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
