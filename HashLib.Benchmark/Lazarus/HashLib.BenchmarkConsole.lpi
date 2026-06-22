@@ -11,7 +11,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="PerformanceBenchmarkConsole"/>
+      <Title Value="HashLib.BenchmarkConsole"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -22,7 +22,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="PerformanceBenchmarkConsole"/>
+            <Filename Value="HashLib.BenchmarkConsole"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -70,23 +70,23 @@
     </RequiredPackages>
     <Units Count="5">
       <Unit0>
-        <Filename Value="PerformanceBenchmarkConsole.lpr"/>
+        <Filename Value="HashLib.BenchmarkConsole.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\src\Core\uPerformanceBenchmark.pas"/>
+        <Filename Value="..\src\Core\PerformanceBenchmark.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\src\Core\uBenchmarkCommon.pas"/>
+        <Filename Value="..\src\Core\BenchmarkCommon.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\src\Core\uHashPerformanceBenchmark.pas"/>
+        <Filename Value="..\src\Core\HashPerformanceBenchmark.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\src\Core\uKdfPerformanceBenchmark.pas"/>
+        <Filename Value="..\src\Core\KdfPerformanceBenchmark.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
     </Units>
@@ -95,7 +95,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="PerformanceBenchmarkConsole"/>
+      <Filename Value="HashLib.BenchmarkConsole"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

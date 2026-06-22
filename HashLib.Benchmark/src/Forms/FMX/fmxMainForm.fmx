@@ -2,7 +2,7 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
-  Caption = 'PerformanceBenchmarkFMX'
+  Caption = 'HashLib.BenchmarkFMX'
   ClientHeight = 480
   ClientWidth = 636
   Position = MainFormCenter

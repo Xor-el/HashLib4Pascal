@@ -1,10 +1,10 @@
-program PerformanceBenchmarkConsole;
+program HashLib.BenchmarkConsole;
 
 {$MODE DELPHI}
 
 uses
   SysUtils,
-  uPerformanceBenchmark;
+  PerformanceBenchmark;
 
 procedure ConsoleLog(const AMessage: String);
 begin

@@ -2251,16 +2251,22 @@ end;
 
 function TMakeRunner.IsBenchmarkProject(const ALpiPath: string): Boolean;
 var
-  LprPath, Content: string;
+  LprPath, Content, ProjectBaseName: string;
 begin
   Result := False;
-  if Pos('PerformanceBenchmark', ALpiPath) > 0 then
+  if not SameText(ExtractFileExt(ALpiPath), '.lpi') then
+    Exit;
+
+  ProjectBaseName := ChangeFileExt(ExtractFileName(ALpiPath), '');
+  if Pos('BenchmarkConsole', ProjectBaseName) > 0 then
     Exit(True);
+
   LprPath := ChangeFileExt(ALpiPath, '.lpr');
   if not FileExists(LprPath) then
     Exit;
+
   Content := TLazXml.ReadFile(LprPath);
-  Result := Pos('uPerformanceBenchmark', Content) > 0;
+  Result := Pos('TPerformanceBenchmark.Run', Content) > 0;
 end;
 
 procedure TMakeRunner.RunTestProject(const APath: string);
