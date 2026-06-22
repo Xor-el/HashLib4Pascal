@@ -37,10 +37,6 @@ type
     Required
   );
 
-  // Selected via MAKE_RUN_BENCHMARK (defaults to False when unset). When true,
-  // make.pas builds and runs console benchmark projects under BenchmarkTargetFolder
-  // after the test suite completes.
-
   // ---------------------------------------------------------------------------
   // Dependency configuration
   // ---------------------------------------------------------------------------
@@ -228,6 +224,9 @@ type
     FTargetOs: string;
     FErrorCount: Integer;
     FUseColor: Boolean;
+    // Selected via MAKE_RUN_BENCHMARK (defaults to False when unset). When true,
+    // builds and runs console benchmark projects under BenchmarkTargetFolder
+    // after the test suite completes.
     FRunBenchmark: Boolean;
     FGraph: TPackageGraph;
     function ParseBackendEnv: TBuildBackend;
