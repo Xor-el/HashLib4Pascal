@@ -143,7 +143,7 @@
 {$IFEND}
 
 // Uncomment to force scalar dispatch (available on all platforms):
-// {$DEFINE HASHLIB_FORCE_SCALAR}
+ {$DEFINE HASHLIB_FORCE_SCALAR}
 
 {$IF DEFINED(HASHLIB_I386_ASM) OR DEFINED(HASHLIB_X86_64_ASM)}
   {$DEFINE HASHLIB_X86_SIMD}
