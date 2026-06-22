@@ -107,7 +107,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -133,8 +137,6 @@ end;
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
-// ----- SSE2 -----
-
 procedure XXH3_Accumulate512_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
@@ -151,8 +153,6 @@ procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
   {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2_x86_64.inc}
 end;
-
-// ----- AVX2 -----
 
 procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
@@ -209,10 +209,6 @@ begin
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
-
-// =============================================================================
-// SIMD implementations: AArch64 NEON
-// =============================================================================
 
 {$IFDEF HASHLIB_AARCH64_ASM}
 

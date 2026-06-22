@@ -407,7 +407,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: scalar only (IA-32); AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    —
+//   x86_64:  AVX2
+//   aarch64: SHA3 Crypto Extensions
 // =============================================================================
 
 {$IFDEF HASHLIB_X86_64_ASM}

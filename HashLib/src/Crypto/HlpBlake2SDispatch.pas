@@ -95,8 +95,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
-// IA-32: uses XMM0-XMM6 only.
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}

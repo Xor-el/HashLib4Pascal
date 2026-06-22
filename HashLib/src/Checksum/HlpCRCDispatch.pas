@@ -345,11 +345,12 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2, PCLMULQDQ / VPCLMULQDQ (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  VPCLMULQDQ, PCLMULQDQ, SSE2
+//   aarch64: —
 // =============================================================================
-// SSE2 = movdqu/movq/pxor/psrldq for wide loads; table XOR stays in GPRs.
-// x86-64: SimdProc4Begin_x86_64.inc + CRCFold*Sse2_x86_64.inc. IA-32: SimdProc4Begin_i386.inc
-// + CRCFold*Sse2_i386.inc (MSB Width/CrcMask offsets differ from x64).
 
 {$IFDEF HASHLIB_X86_64_ASM}
 

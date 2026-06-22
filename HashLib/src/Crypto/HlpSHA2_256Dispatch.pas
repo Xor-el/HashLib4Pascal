@@ -104,7 +104,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 / SSSE3 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2, SSSE3
+//   x86_64:  ShaNi, AVX2, SSSE3, SSE2
+//   aarch64: SHA256 Crypto Extensions
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}

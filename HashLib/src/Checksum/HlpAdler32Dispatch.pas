@@ -65,7 +65,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 / SSSE3 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2, SSSE3
+//   x86_64:  AVX2, SSSE3, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IF DEFINED(HASHLIB_X86_SIMD) OR DEFINED(HASHLIB_ARM_SIMD)}
