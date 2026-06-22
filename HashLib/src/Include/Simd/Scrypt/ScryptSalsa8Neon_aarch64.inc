@@ -13,8 +13,9 @@
 //   v0 = A = {w0,w5,w10,w15}, v1 = B = {w4,w9,w14,w3},
 //   v2 = C = {w8,w13,w2,w7},  v3 = D = {w12,w1,w6,w11}.
 // Operation: State = Salsa20/8(State XOR Input)
-// Uses v0-v5; caller-saved only, leaf nostackframe.
-// Stack: 80 bytes (64 for saved XOR'd state + 16 for AAPCS64 alignment).
+// Uses v0-v5 + v16-v19; caller-saved only, leaf nostackframe, no stack frame.
+// The XOR'd state is copied into v16-v19 and added back at the end, kept in
+// registers rather than spilled to the stack.
 //
 // Column QR (lane-parallel):
 //   B ^= rotl(A+D,7); C ^= rotl(B+A,9); D ^= rotl(C+B,13); A ^= rotl(D+C,18)
@@ -38,23 +39,23 @@
 //   v2       = C
 //   v3       = D
 //   v4-v5    = quarter-round temps (add + shl + sri)
-  sub sp, sp, #80
+//   v16-v19  = saved XOR'd state (A,B,C,D) for the final addition
   .long 0x3dc00000                    // ldr q0, [x0, #0x0]
   .long 0x3dc00024                    // ldr q4, [x1, #0x0]
   .long 0x6e241c00                    // eor v0.16b, v0.16b, v4.16b
-  .long 0x3d8003e0                    // str q0, [sp, #0x0]
+  .long 0x4ea01c10                    // mov v16.16b, v0.16b
   .long 0x3dc00401                    // ldr q1, [x0, #0x10]
   .long 0x3dc00424                    // ldr q4, [x1, #0x10]
   .long 0x6e241c21                    // eor v1.16b, v1.16b, v4.16b
-  .long 0x3d8007e1                    // str q1, [sp, #0x10]
+  .long 0x4ea11c31                    // mov v17.16b, v1.16b
   .long 0x3dc00802                    // ldr q2, [x0, #0x20]
   .long 0x3dc00824                    // ldr q4, [x1, #0x20]
   .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x3d800be2                    // str q2, [sp, #0x20]
+  .long 0x4ea21c52                    // mov v18.16b, v2.16b
   .long 0x3dc00c03                    // ldr q3, [x0, #0x30]
   .long 0x3dc00c24                    // ldr q4, [x1, #0x30]
   .long 0x6e241c63                    // eor v3.16b, v3.16b, v4.16b
-  .long 0x3d800fe3                    // str q3, [sp, #0x30]
+  .long 0x4ea31c73                    // mov v19.16b, v3.16b
   mov w9, #4
 .Lscrypt_double_round:
   .long 0x4ea38404                    // add v4.4s, v0.4s, v3.4s
@@ -97,17 +98,12 @@
   .long 0x6e036063                    // ext v3.16b, v3.16b, v3.16b, #12
   subs w9, w9, #1
   b.ne .Lscrypt_double_round
-  .long 0x3dc003e4                    // ldr q4, [sp, #0x0]
-  .long 0x4ea48400                    // add v0.4s, v0.4s, v4.4s
+  .long 0x4eb08400                    // add v0.4s, v0.4s, v16.4s
   .long 0x3d800000                    // str q0, [x0, #0x0]
-  .long 0x3dc007e4                    // ldr q4, [sp, #0x10]
-  .long 0x4ea48421                    // add v1.4s, v1.4s, v4.4s
+  .long 0x4eb18421                    // add v1.4s, v1.4s, v17.4s
   .long 0x3d800401                    // str q1, [x0, #0x10]
-  .long 0x3dc00be4                    // ldr q4, [sp, #0x20]
-  .long 0x4ea48442                    // add v2.4s, v2.4s, v4.4s
+  .long 0x4eb28442                    // add v2.4s, v2.4s, v18.4s
   .long 0x3d800802                    // str q2, [x0, #0x20]
-  .long 0x3dc00fe4                    // ldr q4, [sp, #0x30]
-  .long 0x4ea48463                    // add v3.4s, v3.4s, v4.4s
+  .long 0x4eb38463                    // add v3.4s, v3.4s, v19.4s
   .long 0x3d800c03                    // str q3, [x0, #0x30]
-  add sp, sp, #80
   ret
