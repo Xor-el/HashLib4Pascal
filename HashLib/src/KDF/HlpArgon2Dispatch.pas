@@ -129,6 +129,15 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Argon2_FillBlock_Neon(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Argon2\Argon2FillBlockNeon_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -153,6 +162,14 @@ begin
     TX86SimdLevel.SSE2:
     begin
       Argon2_FillBlock := @Argon2_FillBlock_Sse2;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      Argon2_FillBlock := @Argon2_FillBlock_Neon;
     end;
   end;
 {$ENDIF}
