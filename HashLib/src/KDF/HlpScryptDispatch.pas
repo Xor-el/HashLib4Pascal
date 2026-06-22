@@ -194,6 +194,15 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Scrypt_SalsaXor_Neon(AState, AInput: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\Scrypt\ScryptSalsa8Neon_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -218,6 +227,14 @@ begin
     TX86SimdLevel.SSE2:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      Scrypt_SalsaXor := @Scrypt_SalsaXor_Neon;
     end;
   end;
 {$ENDIF}
