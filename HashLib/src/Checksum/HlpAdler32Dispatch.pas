@@ -68,7 +68,7 @@ end;
 // SIMD implementations: SSE2 / SSSE3 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_SIMD}
+{$IF DEFINED(HASHLIB_X86_SIMD) OR DEFINED(HASHLIB_ARM_SIMD)}
 
 type
   TProcessBlocksProc = procedure(AData: PByte; ANumBlocks: UInt32;
@@ -113,7 +113,9 @@ begin
   end;
 end;
 
-{$ENDIF HASHLIB_X86_SIMD}
+{$ENDIF}
+
+{$IFDEF HASHLIB_X86_SIMD}
 
 {$IFDEF HASHLIB_I386_ASM}
 
@@ -163,8 +165,6 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
-{$IFDEF HASHLIB_X86_SIMD}
-
 procedure Adler32_Update_Sse2(AData: PByte; ALength: UInt32; ASums: Pointer);
 begin
   Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Sse2);
@@ -180,6 +180,25 @@ end;
 {$ENDIF HASHLIB_I386_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
+
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Adler32_ProcessBlocks_Neon(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Adler32\Adler32BlocksNeon_aarch64.inc}
+end;
+
+{$IFDEF HASHLIB_ARM_SIMD}
+
+procedure Adler32_Update_Neon(AData: PByte; ALength: UInt32; ASums: Pointer);
+begin
+  Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Neon);
+end;
+
+{$ENDIF HASHLIB_ARM_SIMD}
+
+{$ENDIF HASHLIB_AARCH64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -213,6 +232,14 @@ begin
     TX86SimdLevel.SSE2:
     begin
       Adler32_Update := @Adler32_Update_Sse2;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      Adler32_Update := @Adler32_Update_Neon;
     end;
   end;
 {$ENDIF}
