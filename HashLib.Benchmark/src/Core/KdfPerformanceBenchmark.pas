@@ -1,4 +1,4 @@
-unit uKdfPerformanceBenchmark;
+unit KdfPerformanceBenchmark;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -8,7 +8,7 @@ unit uKdfPerformanceBenchmark;
 interface
 
 uses
-  uBenchmarkCommon,
+  BenchmarkCommon,
   HlpIKDF;
 
 type

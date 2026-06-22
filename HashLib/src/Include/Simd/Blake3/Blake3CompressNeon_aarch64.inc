@@ -21,7 +21,8 @@
 //   v16-v17  = permute temps t8/t9; v17 saved to stack mid-permute when shufps
 //              needs v17 as scratch (see [sp, #0] spill below)
 //   v18-v19  = rotate temps (vsri path)
-//   v20      = shufps/pshufd scratch (t14)
+//   v20      = shufps / non-cyclic pshufd scratch (t14); cyclic diagonalize
+//              shuffles use in-place 'ext' instead
 //   Stack (128 bytes): [sp, #0] transient t9 (v17) spill during inter-round permute;
 //     [sp, #96..111] IV constant staging in prologue.
 
@@ -59,19 +60,12 @@
   .long 0x6e1404f4                    // ins v20.s[2], v7.s[0]
   .long 0x6e1c44f4                    // ins v20.s[3], v7.s[2]
   .long 0x4eb41e86                    // orr v6.16b, v20.16b, v20.16b
-  .long 0x6e0464d4                    // ins v20.s[0], v6.s[3]
-  .long 0x6e0c04d4                    // ins v20.s[1], v6.s[0]
-  .long 0x6e1424d4                    // ins v20.s[2], v6.s[1]
-  .long 0x6e1c44d4                    // ins v20.s[3], v6.s[2]
-  .long 0x4eb41e86                    // orr v6.16b, v20.16b, v20.16b
+  .long 0x6e0660c6                    // ext v6.16b, v6.16b, v6.16b, #12
   .long 0x6e042611                    // ins v17.s[0], v16.s[1]
   .long 0x6e0c6611                    // ins v17.s[1], v16.s[3]
   .long 0x6e1424f1                    // ins v17.s[2], v7.s[1]
   .long 0x6e1c64f1                    // ins v17.s[3], v7.s[3]
-  .long 0x6e046627                    // ins v7.s[0], v17.s[3]
-  .long 0x6e0c0627                    // ins v7.s[1], v17.s[0]
-  .long 0x6e142627                    // ins v7.s[2], v17.s[1]
-  .long 0x6e1c4627                    // ins v7.s[3], v17.s[2]
+  .long 0x6e116227                    // ext v7.16b, v17.16b, v17.16b, #12
   .long 0x4ea48400                    // add v0.4s, v0.4s, v4.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -94,21 +88,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -131,21 +113,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -158,10 +128,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -224,21 +191,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -261,21 +216,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -288,10 +231,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -354,21 +294,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -391,21 +319,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -418,10 +334,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -484,21 +397,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -521,21 +422,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -548,10 +437,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -614,21 +500,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -651,21 +525,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -678,10 +540,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -744,21 +603,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -781,21 +628,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c2614                    // ins v20.s[1], v16.s[1]
@@ -808,10 +643,7 @@
   .long 0x6e140634                    // ins v20.s[2], v17.s[0]
   .long 0x6e1c0634                    // ins v20.s[3], v17.s[0]
   .long 0x4eb41e91                    // orr v17.16b, v20.16b, v20.16b
-  .long 0x6e042604                    // ins v4.s[0], v16.s[1]
-  .long 0x6e0c4604                    // ins v4.s[1], v16.s[2]
-  .long 0x6e146604                    // ins v4.s[2], v16.s[3]
-  .long 0x6e1c0604                    // ins v4.s[3], v16.s[0]
+  .long 0x6e102204                    // ext v4.16b, v16.16b, v16.16b, #4
   .long 0x4ea61cd0                    // orr v16.16b, v6.16b, v6.16b
   .long 0x6e044614                    // ins v20.s[0], v16.s[2]
   .long 0x6e0c4614                    // ins v20.s[1], v16.s[2]
@@ -874,21 +706,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e046414                    // ins v20.s[0], v0.s[3]
-  .long 0x6e0c0414                    // ins v20.s[1], v0.s[0]
-  .long 0x6e142414                    // ins v20.s[2], v0.s[1]
-  .long 0x6e1c4414                    // ins v20.s[3], v0.s[2]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e042454                    // ins v20.s[0], v2.s[1]
-  .long 0x6e0c4454                    // ins v20.s[1], v2.s[2]
-  .long 0x6e146454                    // ins v20.s[2], v2.s[3]
-  .long 0x6e1c0454                    // ins v20.s[3], v2.s[0]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e006000                    // ext v0.16b, v0.16b, v0.16b, #12
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e022042                    // ext v2.16b, v2.16b, v2.16b, #4
   .long 0x4ea68400                    // add v0.4s, v0.4s, v6.4s
   .long 0x4ea18400                    // add v0.4s, v0.4s, v1.4s
   .long 0x6e201c63                    // eor v3.16b, v3.16b, v0.16b
@@ -911,21 +731,9 @@
   .long 0x4f395652                    // shl v18.4s, v18.4s, #25
   .long 0x6f394432                    // sri v18.4s, v1.4s, #7
   .long 0x4eb21e41                    // orr v1.16b, v18.16b, v18.16b
-  .long 0x6e042414                    // ins v20.s[0], v0.s[1]
-  .long 0x6e0c4414                    // ins v20.s[1], v0.s[2]
-  .long 0x6e146414                    // ins v20.s[2], v0.s[3]
-  .long 0x6e1c0414                    // ins v20.s[3], v0.s[0]
-  .long 0x4eb41e80                    // orr v0.16b, v20.16b, v20.16b
-  .long 0x6e044474                    // ins v20.s[0], v3.s[2]
-  .long 0x6e0c6474                    // ins v20.s[1], v3.s[3]
-  .long 0x6e140474                    // ins v20.s[2], v3.s[0]
-  .long 0x6e1c2474                    // ins v20.s[3], v3.s[1]
-  .long 0x4eb41e83                    // orr v3.16b, v20.16b, v20.16b
-  .long 0x6e046454                    // ins v20.s[0], v2.s[3]
-  .long 0x6e0c0454                    // ins v20.s[1], v2.s[0]
-  .long 0x6e142454                    // ins v20.s[2], v2.s[1]
-  .long 0x6e1c4454                    // ins v20.s[3], v2.s[2]
-  .long 0x4eb41e82                    // orr v2.16b, v20.16b, v20.16b
+  .long 0x6e002000                    // ext v0.16b, v0.16b, v0.16b, #4
+  .long 0x6e034063                    // ext v3.16b, v3.16b, v3.16b, #8
+  .long 0x6e026042                    // ext v2.16b, v2.16b, v2.16b, #12
   .long 0x6e221c00                    // eor v0.16b, v0.16b, v2.16b
   .long 0x6e231c21                    // eor v1.16b, v1.16b, v3.16b
   .long 0xad404450                    // ldp q16, q17, [x2]

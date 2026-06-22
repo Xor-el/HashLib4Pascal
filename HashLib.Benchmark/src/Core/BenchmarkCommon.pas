@@ -1,4 +1,4 @@
-unit uBenchmarkCommon;
+unit BenchmarkCommon;
 
 {$IFDEF FPC}
 {$MODE DELPHI}

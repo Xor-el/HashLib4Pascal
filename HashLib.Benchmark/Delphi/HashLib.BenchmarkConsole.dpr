@@ -1,13 +1,14 @@
-program PerformanceBenchmarkFMX;
+program HashLib.BenchmarkConsole;
+
+{$APPTYPE CONSOLE}
 
 uses
-  System.StartUpCopy,
-  FMX.Forms,
-  fmxMainForm in '..\src\Forms\FMX\fmxMainForm.pas' {MainForm},
-  uBenchmarkCommon in '..\src\Core\uBenchmarkCommon.pas',
-  uHashPerformanceBenchmark in '..\src\Core\uHashPerformanceBenchmark.pas',
-  uKdfPerformanceBenchmark in '..\src\Core\uKdfPerformanceBenchmark.pas',
-  uPerformanceBenchmark in '..\src\Core\uPerformanceBenchmark.pas',
+  Classes,
+  SysUtils,
+  BenchmarkCommon in '..\src\Core\BenchmarkCommon.pas',
+  HashPerformanceBenchmark in '..\src\Core\HashPerformanceBenchmark.pas',
+  KdfPerformanceBenchmark in '..\src\Core\KdfPerformanceBenchmark.pas',
+  PerformanceBenchmark in '..\src\Core\PerformanceBenchmark.pas',
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
@@ -127,13 +128,22 @@ uses
   HlpX86SimdFeatures in '..\..\HashLib\src\Utils\HlpX86SimdFeatures.pas',
   HlpArmSimdFeatures in '..\..\HashLib\src\Utils\HlpArmSimdFeatures.pas',
   HlpSimdLevels in '..\..\HashLib\src\Utils\HlpSimdLevels.pas',
+  HlpArmHwCapProvider in '..\..\HashLib\src\Utils\HlpArmHwCapProvider.pas',
+  HlpDarwinSysCtl in '..\..\HashLib\src\Utils\HlpDarwinSysCtl.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 
-{$R *.res}
+procedure ConsoleLog(const AMessage: String);
+begin
+  Writeln(AMessage);
+end;
 
 begin
-  Application.Initialize;
-  Application.CreateForm(TMainForm, MainForm);
-  Application.Run;
+  try
+    TPerformanceBenchmark.Run(ConsoleLog);
+    // ReadLn; // TODO: restore for interactive IDE runs; disabled for CI 
+  except
+    on E: Exception do
+      Writeln(E.ClassName, ': ', E.Message);
+  end;
 end.

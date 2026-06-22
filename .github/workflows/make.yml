@@ -44,6 +44,9 @@ env:
   #   single:   MAKE_DEFINES: WITH_GTK2_IM
   #   multiple: MAKE_DEFINES: 'WITH_GTK2_IM DEBUG_LOG USE_CTHREADS'
   MAKE_DEFINES: ''
+  # When true, make.pas builds and runs console benchmarks after the test suite.
+  # Override per job below, like MAKE_BUILD_BACKEND.
+  MAKE_RUN_BENCHMARK: false
   # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
   # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
   CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
@@ -192,6 +195,7 @@ jobs:
             LAZARUS_REPO: ${{ env.LAZARUS_REPO }}
             MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
             MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
+            MAKE_RUN_BENCHMARK: ${{ env.MAKE_RUN_BENCHMARK }}
             CI_DEBUG: ${{ env.CI_DEBUG }}
           run: bash .github/workflows/ci/arm32-run.sh
 
@@ -217,6 +221,7 @@ jobs:
           FPC_TARBALL_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['linux-powerpc64-be'].fpc_tarball_target }}
           MAKE_BUILD_BACKEND: ${{ env.MAKE_BUILD_BACKEND }}
           MAKE_PACKAGE_SCOPE: ${{ env.MAKE_PACKAGE_SCOPE }}
+          MAKE_RUN_BENCHMARK: ${{ env.MAKE_RUN_BENCHMARK }}
         run: bash .github/workflows/ci/ppc64-be-build.sh
 
   freebsd:
@@ -238,7 +243,7 @@ jobs:
           FPC_TARBALL_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['freebsd'].fpc_tarball_target }}
           FREEBSD_INSTALL_MODE: interim
         with:
-          envs: FPC_VERSION FPC_TARGET FPC_TARBALL_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FREEBSD_INSTALL_MODE CI_DEBUG
+          envs: FPC_VERSION FPC_TARGET FPC_TARBALL_TARGET LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE MAKE_RUN_BENCHMARK FREEBSD_INSTALL_MODE CI_DEBUG
           release: "15.0"
           usesh: true
           prepare: sh .github/workflows/ci/vm-freebsd-prepare.sh
@@ -262,7 +267,7 @@ jobs:
           FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['netbsd'].fpc_target }}
           FPC_TARBALL_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['netbsd'].fpc_tarball_target }}
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET FPC_TARBALL_TARGET CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE MAKE_RUN_BENCHMARK FPC_TARGET FPC_TARBALL_TARGET CI_DEBUG
           prepare: sh .github/workflows/ci/vm-netbsd-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
 
@@ -285,7 +290,7 @@ jobs:
           FPC_TARBALL_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['dragonflybsd'].fpc_tarball_target }}
           LD_LIBRARY_PATH_EXTRA: /usr/local/lib
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET FPC_TARBALL_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE MAKE_RUN_BENCHMARK FPC_TARGET FPC_TARBALL_TARGET LD_LIBRARY_PATH_EXTRA CI_DEBUG
           usesh: true
           prepare: sh .github/workflows/ci/vm-dragonfly-prepare.sh
           run: bash .github/workflows/ci/vm-run-shared.sh
@@ -308,7 +313,7 @@ jobs:
           FPC_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['solaris'].fpc_target }}
           FPC_TARBALL_TARGET: ${{ fromJSON(needs.setup.outputs.target_map)['solaris'].fpc_tarball_target }}
         with:
-          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE FPC_TARGET FPC_TARBALL_TARGET CI_DEBUG
+          envs: FPC_VERSION LAZARUS_BRANCH LAZARUS_REPO MAKE_BUILD_BACKEND MAKE_PACKAGE_SCOPE MAKE_RUN_BENCHMARK FPC_TARGET FPC_TARBALL_TARGET CI_DEBUG
           release: "11.4-gcc"
           usesh: true
           prepare: sh .github/workflows/ci/vm-solaris-prepare.sh

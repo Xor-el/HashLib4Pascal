@@ -224,16 +224,24 @@ type
     FTargetOs: string;
     FErrorCount: Integer;
     FUseColor: Boolean;
+    // Selected via MAKE_RUN_BENCHMARK (defaults to False when unset). When true,
+    // builds and runs console benchmark projects under BenchmarkTargetFolder
+    // after the test suite completes.
+    FRunBenchmark: Boolean;
     FGraph: TPackageGraph;
     function ParseBackendEnv: TBuildBackend;
     function ParsePackageScopeEnv: TPackageScope;
+    function ParseBoolEnv(const AName: string; ADefault: Boolean): Boolean;
     function ParseDefinesEnv: TStringList;
     procedure InitEnvironment;
     procedure UpdateSubmodules;
     procedure InstallDependencies;
     procedure BuildDiscoveredPackagesFpc;
     function CollectProjectRequiredNames: TStringList;
+    procedure CollectRequiredNamesFromDirectory(const ADirectory: string;
+      AResult: TStringList);
     procedure BuildAllProjects;
+    procedure RunBenchmarkProjects;
     procedure BuildGuiProject(const ALpiPath: string);
     function BuildProject(const ALpiPath: string): string;
     function BuildProjectWithLazbuild(const APath: string): string;
@@ -241,6 +249,7 @@ type
     function ExtractBinaryFromBuildLog(const AOutput, AFallback: string): string;
     function IsGUIProject(const ALpiPath: string): Boolean;
     function IsTestProject(const ALpiPath: string): Boolean;
+    function IsBenchmarkProject(const ALpiPath: string): Boolean;
     procedure RunTestProject(const APath: string);
     procedure RunSampleProject(const APath: string);
     procedure InitSslForDownloads;
@@ -267,6 +276,7 @@ type
       AStreamToStderr: Boolean; out AOutput: string): Boolean; overload;
     function RepoRoot: string;
     function TargetDirectory: string;
+    function BenchmarkDirectory: string;
     procedure ForEachLpkInDir(const ARoot: string; ACallback: TLpkPathProc);
     procedure RunBuiltBinary(const ABinaryPath: string;
       const AArgs: array of string; const AFailMessage: string);
@@ -295,7 +305,8 @@ type
 // ---------------------------------------------------------------------------
 
 const
-  Target: string = 'HashLib.Tests';
+  TestTargetFolder: string = 'HashLib.Tests';
+  BenchmarkTargetFolder: string = 'HashLib.Benchmark';
 
   CSI_Reset  = #27'[0m';
   CSI_Red    = #27'[31m';
@@ -510,7 +521,8 @@ end;
 
 class function TLazXml.ParseCompilerOptions(const AContent: string): TLazCompilerOptions;
 var
-  Block: string;
+  Block, AfterProjectOptions: string;
+  P: Integer;
 begin
   Result.CompilerMode := 'delphi';
   Result.OptLevel := '2';
@@ -520,7 +532,18 @@ begin
   Result.UnitPaths := '';
   Result.UnitOutputDirTemplate := 'lib\$(TargetCPU)-$(TargetOS)';
 
-  Block := ExtractBlock(AContent, 'CompilerOptions');
+  // Lazarus stores the active compiler options in a root-level <CompilerOptions>
+  // block (after </ProjectOptions>). BuildModes can contain additional
+  // <CompilerOptions> sections; prefer the root block when present.
+  Block := '';
+  P := Pos('</ProjectOptions>', AContent);
+  if P > 0 then
+  begin
+    AfterProjectOptions := Copy(AContent, P, Length(AContent) - P + 1);
+    Block := ExtractBlock(AfterProjectOptions, 'CompilerOptions');
+  end;
+  if Block = '' then
+    Block := ExtractBlock(AContent, 'CompilerOptions');
   if Block = '' then
     Exit;
 
@@ -1330,6 +1353,7 @@ begin
   FBackendResolved := False;
   FPackageScope := TPackageScope.Required;
   FErrorCount := 0;
+  FRunBenchmark := False;
   // Honor the NO_COLOR convention (https://no-color.org): any value disables
   // ANSI colors. GitHub Actions renders ANSI in its log viewer, so default on.
   FUseColor := GetEnvironmentVariable('NO_COLOR') = '';
@@ -1415,6 +1439,20 @@ begin
   if Env = 'required' then
     Exit(TPackageScope.Required);
   raise Exception.CreateFmt('unknown MAKE_PACKAGE_SCOPE: "%s"', [Env]);
+end;
+
+function TMakeRunner.ParseBoolEnv(const AName: string; ADefault: Boolean): Boolean;
+var
+  Env: string;
+begin
+  Env := LowerCase(Trim(GetEnvironmentVariable(AName)));
+  if Env = '' then
+    Exit(ADefault);
+  if (Env = '1') or (Env = 'true') or (Env = 'yes') then
+    Exit(True);
+  if (Env = '0') or (Env = 'false') or (Env = 'no') then
+    Exit(False);
+  raise Exception.CreateFmt('unknown %s: "%s"', [AName, Env]);
 end;
 
 // Parse MAKE_DEFINES into a deduped list of conditional-define names. Accepts a
@@ -1601,7 +1639,7 @@ begin
     Candidate := Seeds[I];
     while Candidate <> '' do
     begin
-      DemoDir := IncludeTrailingPathDelimiter(ConcatPaths([Candidate, Target]));
+      DemoDir := IncludeTrailingPathDelimiter(ConcatPaths([Candidate, TestTargetFolder]));
       if DirectoryExists(DemoDir) then
         Exit(ExcludeTrailingPathDelimiter(Candidate));
       Parent := ExpandFileName(IncludeTrailingPathDelimiter(Candidate) + '..');
@@ -1615,7 +1653,12 @@ end;
 
 function TMakeRunner.TargetDirectory: string;
 begin
-  Result := IncludeTrailingPathDelimiter(ConcatPaths([RepoRoot, Target]));
+  Result := IncludeTrailingPathDelimiter(ConcatPaths([RepoRoot, TestTargetFolder]));
+end;
+
+function TMakeRunner.BenchmarkDirectory: string;
+begin
+  Result := IncludeTrailingPathDelimiter(ConcatPaths([RepoRoot, BenchmarkTargetFolder]));
 end;
 
 procedure TMakeRunner.ForEachLpkInDir(const ARoot: string;
@@ -1690,6 +1733,12 @@ begin
     Log(CSI_Yellow, 'defines: ' + FDefines.DelimitedText)
   else
     Log(CSI_Yellow, 'defines: (none)');
+
+  FRunBenchmark := ParseBoolEnv('MAKE_RUN_BENCHMARK', False);
+  if FRunBenchmark then
+    Log(CSI_Yellow, 'run benchmark: true')
+  else
+    Log(CSI_Yellow, 'run benchmark: false');
 end;
 
 procedure TMakeRunner.UpdateSubmodules;
@@ -1993,20 +2042,17 @@ begin
   end;
 end;
 
-// Union of RequiredPackages across the buildable (non-GUI) projects under the
-// target directory. Drives the fpc backend's 'required' scope so it compiles
-// only the dependency closure those projects need.
-function TMakeRunner.CollectProjectRequiredNames: TStringList;
+procedure TMakeRunner.CollectRequiredNamesFromDirectory(const ADirectory: string;
+  AResult: TStringList);
 var
   List: TStringList;
   Each: string;
   Proj: TLpiProject;
   I: Integer;
 begin
-  Result := TStringList.Create;
-  Result.Sorted := True;
-  Result.Duplicates := dupIgnore;
-  List := TProjectFiles.FindAll(TargetDirectory, '*.lpi');
+  if not DirectoryExists(ADirectory) then
+    Exit;
+  List := TProjectFiles.FindAll(ADirectory, '*.lpi');
   try
     for Each in List do
     begin
@@ -2016,7 +2062,7 @@ begin
       try
         if Proj.IsValid then
           for I := 0 to Proj.RequiredPackageNames.Count - 1 do
-            Result.Add(Proj.RequiredPackageNames[I]);
+            AResult.Add(Proj.RequiredPackageNames[I]);
       finally
         Proj.Free;
       end;
@@ -2024,6 +2070,19 @@ begin
   finally
     List.Free;
   end;
+end;
+
+// Union of RequiredPackages across the buildable (non-GUI) projects under the
+// test and (when enabled) benchmark directories. Drives the fpc backend's
+// 'required' scope so it compiles only the dependency closure those projects need.
+function TMakeRunner.CollectProjectRequiredNames: TStringList;
+begin
+  Result := TStringList.Create;
+  Result.Sorted := True;
+  Result.Duplicates := dupIgnore;
+  CollectRequiredNamesFromDirectory(TargetDirectory, Result);
+  if FRunBenchmark then
+    CollectRequiredNamesFromDirectory(BenchmarkDirectory, Result);
 end;
 
 function TMakeRunner.ExtractBinaryFromBuildLog(const AOutput,
@@ -2190,6 +2249,26 @@ begin
   Result := Pos('consoletestrunner', Content) > 0;
 end;
 
+function TMakeRunner.IsBenchmarkProject(const ALpiPath: string): Boolean;
+var
+  LprPath, Content, ProjectBaseName: string;
+begin
+  Result := False;
+  if not SameText(ExtractFileExt(ALpiPath), '.lpi') then
+    Exit;
+
+  ProjectBaseName := ChangeFileExt(ExtractFileName(ALpiPath), '');
+  if Pos('BenchmarkConsole', ProjectBaseName) > 0 then
+    Exit(True);
+
+  LprPath := ChangeFileExt(ALpiPath, '.lpr');
+  if not FileExists(LprPath) then
+    Exit;
+
+  Content := TLazXml.ReadFile(LprPath);
+  Result := Pos('TPerformanceBenchmark.Run', Content) > 0;
+end;
+
 procedure TMakeRunner.RunTestProject(const APath: string);
 var
   BinaryPath: string;
@@ -2271,6 +2350,65 @@ begin
   end;
 end;
 
+procedure TMakeRunner.RunBenchmarkProjects;
+var
+  List: TStringList;
+  Each, BinaryPath: string;
+begin
+  if not FRunBenchmark then
+  begin
+    Log(CSI_Yellow, 'benchmarks: skipped (MAKE_RUN_BENCHMARK=false)');
+    Exit;
+  end;
+
+  if not DirectoryExists(BenchmarkDirectory) then
+  begin
+    IncError;
+    Log(CSI_Red, 'benchmark directory missing: ' + BenchmarkDirectory);
+    Exit;
+  end;
+
+  Log(CSI_Cyan, 'using benchmark directory: ' + BenchmarkDirectory);
+  List := TProjectFiles.FindAll(BenchmarkDirectory, '*.lpi');
+  try
+    for Each in List do
+    begin
+      if IsGUIProject(Each) then
+      begin
+        if not LclSupported then
+        begin
+          Log(CSI_Yellow, 'skip GUI benchmark project ' + Each);
+          Continue;
+        end;
+        BuildGuiProject(Each);
+        Continue;
+      end;
+
+      if not IsBenchmarkProject(Each) then
+      begin
+        Log(CSI_Yellow, 'skip non-benchmark project ' + Each);
+        Continue;
+      end;
+
+      BinaryPath := BuildProject(Each);
+      if BinaryPath = '' then
+        Continue;
+      try
+        Log(CSI_Yellow, 'run benchmark ' + BinaryPath);
+        RunBuiltBinary(BinaryPath, [], 'benchmark failed: ' + BinaryPath);
+      except
+        on E: Exception do
+        begin
+          IncError;
+          Log(CSI_Red, E.ClassName + ': ' + E.Message);
+        end;
+      end;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
 function TMakeRunner.Execute: Integer;
 begin
   InitEnvironment;
@@ -2278,6 +2416,7 @@ begin
   UpdateSubmodules;
   InstallDependencies;
   BuildAllProjects;
+  RunBenchmarkProjects;
   ReportSummary;
   Result := FErrorCount;
 end;

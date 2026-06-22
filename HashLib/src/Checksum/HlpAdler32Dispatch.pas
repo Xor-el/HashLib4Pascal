@@ -113,7 +113,7 @@ begin
   end;
 end;
 
-{$ENDIF}
+{$IFEND}
 
 {$IFDEF HASHLIB_X86_SIMD}
 

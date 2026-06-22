@@ -188,7 +188,7 @@ begin
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
 
-{$ENDIF}
+{$IFEND}
 
 {$IFDEF HASHLIB_X86_SIMD}
 
