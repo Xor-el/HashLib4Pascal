@@ -74,16 +74,12 @@
   .long 0x6e7a8241                    // umlal2 v1.4s, v18.8h, v26.8h
   .long 0x2e7b8261                    // umlal v1.4s, v19.4h, v27.4h
   .long 0x6e7b8261                    // umlal2 v1.4s, v19.8h, v27.8h
-  .long 0x0ea0bc06                    // addp v6.2s, v0.2s, v0.2s
-  .long 0x6e004008                    // ext v8.16b, v0.16b, v0.16b, #8
-  .long 0x0ea8bd07                    // addp v7.2s, v8.2s, v8.2s
-  .long 0x0ea7bcc6                    // addp v6.2s, v6.2s, v7.2s
+  .long 0x4ea0bc06                    // addp v6.4s, v0.4s, v0.4s
+  .long 0x0ea6bcc6                    // addp v6.2s, v6.2s, v6.2s
   .long 0x0e043ccd                    // umov w13, v6.s[0]
   .long 0x0b0d014a                    // add w10, w10, w13
-  .long 0x0ea1bc26                    // addp v6.2s, v1.2s, v1.2s
-  .long 0x6e014028                    // ext v8.16b, v1.16b, v1.16b, #8
-  .long 0x0ea8bd07                    // addp v7.2s, v8.2s, v8.2s
-  .long 0x0ea7bcc6                    // addp v6.2s, v6.2s, v7.2s
+  .long 0x4ea1bc26                    // addp v6.4s, v1.4s, v1.4s
+  .long 0x0ea6bcc6                    // addp v6.2s, v6.2s, v6.2s
   .long 0x0e043ccb                    // umov w11, v6.s[0]
   .long 0xb900004a                    // str w10, [x2]
   .long 0xb900044b                    // str w11, [x2, #4]
