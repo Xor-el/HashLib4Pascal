@@ -230,14 +230,14 @@ begin
     end;
   end;
 {$ENDIF}
-{$IFDEF HASHLIB_AARCH64_ASM}
+(*{$IFDEF HASHLIB_AARCH64_ASM}
   case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
     TArmSimdLevel.NEON:
     begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Neon;
     end;
   end;
-{$ENDIF}
+{$ENDIF}  *)
 end;
 
 initialization
