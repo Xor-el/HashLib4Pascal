@@ -1,18 +1,9 @@
-// BLAKE2b AArch64 NEON implementation.
+// BLAKE2b compress AArch64 NEON implementation.
 // Expects AAPCS64: x0 = state ptr (8 x UInt64), x1 = message ptr (128 bytes),
 //   x2 = counter+flags ptr (32 bytes: t[0..1], f[0..1]), x3 = IV ptr (8 x UInt64).
-// Touches only caller-saved registers (x0-x3, v0-v7, v16-v19, v20-v23); no AAPCS64
-//   callee-saved register (x19-x28, or the low 64 bits of v8-v15) is used, so
-//   the 'nostackframe' leaf needs neither prologue nor epilogue.
-// Reference: BLAKE2/BLAKE2 neon/blake2b-neon.c; HashLib Blake2BCompressSse2_x86_64.inc.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only ret
-//   stays as text.
-//
+// Leaf nostackframe; uses v8-v15 for message block (d8-d15 lanes; no save/restore).
+// Reference: BLAKE2/BLAKE2 neon/blake2b-neon.c, HashLib Blake2BCompressSse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0, v1   = row1l, row1h (h[0..3] working, 2 x u64 each)
 //   v2, v3   = row2l, row2h (h[4..7] working)
@@ -22,7 +13,7 @@
 //   v16-v19  = saved initial row1l/h, row2l/h for the final feed-forward XOR
 //   v20      = message gather temp b0 (G function)
 //   v21-v23  = rotate / diagonalize temps (b1 gather uses v23)
-// u64 ror-by-32 uses rev64.4s (vrev64q_u32), matching blake2b-neon.c — not rev64.16b.
+//   u64 ror-by-32 uses rev64.4s (vrev64q_u32), not rev64.16b.
 
   .long 0xad400400                    // ldp q0, q1, [x0]
   .long 0xad410c02                    // ldp q2, q3, [x0, #32]

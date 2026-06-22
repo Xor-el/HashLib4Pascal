@@ -1,37 +1,11 @@
-// AArch64 NEON implementation of fused XOR + Salsa20/8 on Percival-permuted data.
-//
-// Reference: Colin Percival, "Stronger Key Derivation via Sequential
-// Memory-Hard Functions" (2009); Tarsnap scrypt crypto_scrypt_smix_sse2.c;
-// HashLib ScryptSalsa8Sse2_x86_64.inc. The (i*5 mod 16) data permutation
-// arranges each 16-word Salsa20 state into role-based diagonal order,
-// enabling lane-parallel SIMD processing of column and row quarter-rounds
-// with ext-based diagonalize/undiagonalize between them (each pshufd cyclic
-// lane rotation maps to a single AArch64 'ext').
-//
+// Scrypt Salsa20/8 XOR AArch64 NEON implementation (Percival-permuted data).
 // Expects AAPCS64: x0 = State ptr, x1 = Input ptr.
 // Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
-//   v0 = A = {w0,w5,w10,w15}, v1 = B = {w4,w9,w14,w3},
-//   v2 = C = {w8,w13,w2,w7},  v3 = D = {w12,w1,w6,w11}.
-// Operation: State = Salsa20/8(State XOR Input)
-// Uses v0-v5 + v16-v19; caller-saved only, leaf nostackframe, no stack frame.
-// The XOR'd state is copied into v16-v19 and added back at the end, kept in
-// registers rather than spilled to the stack.
-//
-// Column QR (lane-parallel):
-//   B ^= rotl(A+D,7); C ^= rotl(B+A,9); D ^= rotl(C+B,13); A ^= rotl(D+C,18)
-// Diag:   ext B,#12; C,#8; D,#4   (= pshufd $93/$4E/$39)
-// Row QR (lane-parallel, swapped B/D roles):
-//   D ^= rotl(A+B,7); C ^= rotl(D+A,9); B ^= rotl(C+D,13); A ^= rotl(B+C,18)
-// Undiag: ext B,#4; C,#8; D,#12   (= pshufd $39/$4E/$93)
-// rotl(x,n) is built as: shl t,x,n ; sri t,x,(32-n).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   stack/loop/ret mnemonics stay as text.
-//
+//   v0 = {w0,w5,w10,w15}, v1 = {w4,w9,w14,w3}, v2 = {w8,w13,w2,w7}, v3 = {w12,w1,w6,w11}.
+// Leaf nostackframe; caller-saved GPR/vector only.
+// Column/row quarter-rounds via lane-parallel ext-based diagonalize (see Tarsnap scrypt-sse.c).
+// Reference: Tarsnap crypto_scrypt-sse.c, HashLib ScryptSalsa8Sse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   w9       = double-round counter (4 iterations)
 //   v0       = A

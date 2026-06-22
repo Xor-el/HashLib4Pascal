@@ -1,25 +1,13 @@
-// SHA-3 (Keccak-F1600) ARMv8 Crypto Extension (FEAT_SHA3) sponge absorb.
+// Keccak-F1600 absorb AArch64 FEAT_SHA3 implementation.
 // Expects AAPCS64: x0 = state ptr (25 x UInt64), x1 = data ptr,
 //   w2 = numblocks, w3 = blocksize (bytes, = rate), x4 = iotas ptr.
-// For each block it XORs blocksize bytes (per 64-bit lane, little-endian)
-//   into the low lanes and runs the inlined 24-round permutation, resetting
-//   the iota pointer (x4 -> x10) before every permute. The per-lane
-//   cmp/b.lo/b.eq dispatch mirrors OpenSSL so any rate <= 200 bytes works;
-//   the outer loop counts blocks (HlpSHA3 contract) rather than byte length.
-//   v8-v15 (callee-saved d8-d15) are saved/restored; still a leaf (no calls).
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S (SHA3_absorb_cext).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
-//   (subscripted vector regs and the FEAT_SHA3 ops require FPC 3.3+, and
-//   ldp/stp/ldr/str with dN crash the 3.2.2 assembler). Each such instruction
-//   is emitted as its raw 32-bit '.long' opcode, with the equivalent mnemonic
-//   in the trailing comment; only mov/cmp/sub/cbz/cbnz/b.lo/b.eq/ret stay as
-//   text.
-//
+// Saves/restores d8-d15 on 64-byte frame; XORs blocksize bytes per block then permutes.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S, HashLib KeccakF1600Avx2Absorb_x86_64.inc.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
-//   v0-v24   = Keccak state lanes (data is XORed lane-by-lane into v0..)
-//   v25-v31  = permutation scratch; v31 also holds each loaded input lane
+//   v0-v24   = Keccak state lanes (data XORed lane-by-lane into v0..)
+//   v25-v30  = permutation scratch
+//   v31      = loaded input lane
 
   .long 0x6dbc27e8                    // stp d8, d9, [sp, #-64]!
   .long 0x6d012fea                    // stp d10, d11, [sp, #16]

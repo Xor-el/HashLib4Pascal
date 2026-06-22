@@ -1,20 +1,10 @@
-// SHA-256 ARMv8 Crypto Extension (FEAT_SHA256) implementation.
+// SHA-256 AArch64 FEAT_SHA256 implementation.
 // Expects AAPCS64: x0 = state ptr (8 x UInt32), x1 = data ptr,
 //   w2 = numblocks, x3 = K256 ptr (64 UInt32 round constants).
-// Touches only caller-saved registers (x0-x4, w2, v0-v7, v16-v19); no AAPCS64
-//   callee-saved register (x19-x28, or the low 64 bits of v8-v15) is used, so
-//   the 'nostackframe' leaf needs neither prologue nor epilogue. The K pointer
-//   is advanced with post-index loads and rewound once per block with
-//   'sub x3,x3,#240' (= 64*4 - 16), avoiding the need for a saved base register.
-// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S (sha256_block_armv8).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
-//   (subscripted vector regs and the FEAT_SHA256 ops require FPC 3.3+, and
-//   ldr/str/ldp with qN crash the 3.2.2 assembler). Each such instruction is
-//   therefore emitted as its raw 32-bit '.long' opcode, with the equivalent
-//   mnemonic in the trailing comment; only cbz/cbnz/sub/ret stay as text.
-//
+// Leaf nostackframe; caller-saved GPR/vector only.
+// K pointer rewound each block (sub x3, #240) after post-index loads.
+// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S, HashLib SHA256CompressSse2_x86_64.inc.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0, v1   = working state (ABCD, EFGH)
 //   v2       = sha256h2 temp (copy of v0 before each h/h2 pair)

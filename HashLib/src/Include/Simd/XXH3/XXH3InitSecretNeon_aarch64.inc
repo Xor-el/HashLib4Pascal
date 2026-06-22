@@ -1,16 +1,8 @@
 // XXH3 initCustomSecret AArch64 NEON implementation (192-byte custom secret).
 // Expects AAPCS64: x0 = customSecret ptr, x1 = defaultSecret ptr, x2 = seed (UInt64).
-// Touches caller-saved x2-x3, v0, v16-v17; leaf, no stack frame.
-// Reference (golden): HashLib XXH3InitSecretSse2_x86_64.inc (12 x 16-byte blocks:
-//   lo qword += seed, hi qword -= seed). No upstream NEON equivalent.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   neg/ret stay as text.
-//
+// Leaf nostackframe; caller-saved GPR/vector only.
+// Reference: HashLib XXH3InitSecretSse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   x3       = negated seed (-seed)
 //   v0       = vSeed broadcast vector [seed, -seed]

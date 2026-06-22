@@ -1,19 +1,9 @@
-// SHA-1 ARMv8 Crypto Extension (FEAT_SHA1) implementation.
+// SHA-1 AArch64 FEAT_SHA1 implementation.
 // Expects AAPCS64: x0 = state ptr (5 x UInt32), x1 = data ptr,
-//   w2 = numblocks, x3 = K_SHA1 ptr (16 UInt32: each of the four round
-//   constants replicated across 4 lanes).
-// Touches only caller-saved registers (x0-x3, w2, v0-v7, v16-v22); no AAPCS64
-//   callee-saved register (x19-x28, or the low 64 bits of v8-v15) is used, so
-//   the 'nostackframe' leaf needs neither prologue nor epilogue.
-// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S (sha1_block_armv8).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
-//   (subscripted vector regs and the FEAT_SHA1 ops require FPC 3.3+, and
-//   ldr/str/ldp with qN/sN crash the 3.2.2 assembler). Each such instruction is
-//   therefore emitted as its raw 32-bit '.long' opcode, with the equivalent
-//   mnemonic in the trailing comment; only cbz/cbnz/sub/ret stay as text.
-//
+//   w2 = numblocks, x3 = K_SHA1 ptr (16 UInt32: each round constant x4 lanes).
+// Leaf nostackframe; caller-saved GPR/vector only.
+// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S, HashLib SHA1CompressSse2_x86_64.inc.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0       = ABCD working state
 //   v1.s[0]  = E working state (single lane; sha1c/p/m consume it as a scalar)

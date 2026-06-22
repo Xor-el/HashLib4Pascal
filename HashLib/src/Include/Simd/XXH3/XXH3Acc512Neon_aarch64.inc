@@ -1,19 +1,9 @@
 // XXH3 accumulate_512 AArch64 NEON implementation (one 64-byte stripe).
 // Expects AAPCS64: x0 = acc ptr (8 x UInt64, 16-byte aligned), x1 = input ptr,
 //   x2 = secret ptr.
-// Touches only caller-saved registers (x0-x2, v0-v7, v16-v19); no AAPCS64
-//   callee-saved register is used, so the 'nostackframe' leaf needs no prologue.
-// Reference (golden): HashLib XXH3Acc512Sse2_x86_64.inc (semantic parity);
-//   Cyan4973/xxHash xxhash.h XXH3_accumulate_512_neon with XXH3_NEON_LANES=8
-//   (2 batch iterations, no scalar tail).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   neg/ret stay as text.
-//
+// Leaf nostackframe; caller-saved GPR/vector only.
+// Reference: Cyan4973/xxHash xxhash.h XXH3_accumulate_512_neon, HashLib XXH3Acc512Sse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v3    = acc[0..3] (4 x uint64x2)
 //   v4-v5    = data_vec_1/2 (input)

@@ -1,24 +1,10 @@
-// SHA-512 ARMv8 Crypto Extension (FEAT_SHA512) implementation.
+// SHA-512 AArch64 FEAT_SHA512 implementation.
 // Expects AAPCS64: x0 = state ptr (8 x UInt64), x1 = data ptr,
 //   w2 = numblocks, x3 = K512 ptr (80 UInt64 round constants).
-// Touches only caller-saved registers (x0-x4, w2, v0-v7, v16-v29); no AAPCS64
-//   callee-saved register (x19-x28, or the low 64 bits of v8-v15) is used, so
-//   the 'nostackframe' leaf needs neither prologue nor epilogue. The K pointer
-//   is advanced with post-index loads and rewound once per block with
-//   'sub x3,x3,#640' (= 80*8), avoiding the need for a saved base register.
-// Each iteration computes two SHA-512 rounds; the kernel prefetches the next
-//   block's input during the tail and uses 'csel' to re-read the final block
-//   instead of reading past the buffer (no out-of-bounds load).
-// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S (sha512_block_armv8).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
-//   (subscripted vector regs and the FEAT_SHA512 ops require FPC 3.3+, and
-//   ldr/str/ldp with qN crash the 3.2.2 assembler). Each such instruction is
-//   therefore emitted as its raw 32-bit '.long' opcode, with the equivalent
-//   mnemonic in the trailing comment; only cbz/cbnz/subs/sub/csel/ret stay as
-//   text.
-//
+// Leaf nostackframe; caller-saved GPR/vector only.
+// K pointer rewound each block (sub x3, #640). Two rounds per iteration; csel avoids OOB prefetch.
+// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S, HashLib SHA512CompressSse2_x86_64.inc.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v3    = working state (a..h, two UInt64 per register)
 //   v5, v6   = ext scratch (fg, de)  v7 = ext scratch (m9_10)

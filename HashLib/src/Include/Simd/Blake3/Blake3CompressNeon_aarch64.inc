@@ -1,17 +1,9 @@
 // BLAKE3 compress AArch64 NEON implementation.
 // Expects AAPCS64: x0 = state ptr (16 x UInt32), x1 = message ptr (64 bytes),
 //   x2 = CV ptr (8 x UInt32), x3 = counter+flags ptr (16 bytes: t[0..1], len, flags).
-// Reference (golden): HashLib Blake3CompressSse2_x86_64.inc (inter-round permute via
-//   SSE shufps/pshufd semantics); BLAKE3-team/BLAKE3 c/blake3_impl.h (round G / IV).
-//   Upstream blake3_neon.c has no NEON compress — uses portable C instead.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   mov/sub/cbz/ret stay as text.
-//
+// Stack frame 128 bytes; see register map.
+// Reference: BLAKE3-team/BLAKE3 c/blake3_impl.h, HashLib Blake3CompressSse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0       = a (v[0..3])
 //   v1       = b (v[4..7])

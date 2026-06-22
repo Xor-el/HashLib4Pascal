@@ -1,31 +1,11 @@
-// AArch64 NEON implementation of Argon2 FillBlock (BlaMka round function).
-//
-// Reference: jedisct1/libsodium crypto_pwhash/argon2/argon2-fill-block-neon.c,
-//   crypto_pwhash/argon2/blamka-round-neon.h; HashLib Argon2FillBlockSse2_x86_64.inc.
-//
+// Argon2 FillBlock AArch64 NEON implementation (BlaMka round function).
 // Expects AAPCS64: x0 = Left ptr, x1 = Right ptr, x2 = Current ptr, w3 = WithXor.
 // Each pointer addresses 128 UInt64 (1024 bytes).
-// Uses v0-v7 (A/B/C/D pairs), v16-v18 temps; caller-saved only, leaf nostackframe.
-// Stack: 2128 bytes — R_buf at [sp+64], Z_buf at [sp+1088], plus 16-byte SP pad.
-// x9 = R_buf, x11 = Z_buf during rounds; x2/w3 survive all loops.
-//
-// Steps (same semantics as SSE2):
-//   1. R_buf = Left XOR Right
-//   2. Z_buf = copy(R_buf)
-//   3. Eight column rounds on Z_buf (128-byte slices)
-//   4. Eight row rounds on Z_buf (stride-16 qword access)
-//   5. Current = R_buf XOR Z_buf [XOR Current if WithXor <> 0]
-// Indexed loads/stores in steps 1/2/5: ldr/str qN, [xBase, x10].
-// Column/row slices: x12 = x11 + x10, then ldr/str qN, [x12, #imm].
-// Diagonalize uses vext #8 (blamka-round-neon.h), not SSE2 shufpd.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   add/mov/cmp/sub/cbz/b.lo/b/ret stay as text (never ldr/str/ldp with qN).
-//
+// Stack frame 2128 bytes; see register map.
+// Steps: R=Left XOR Right; Z=copy(R); 8 column + 8 row BlaMka rounds on Z;
+//   Current = R XOR Z [XOR Current if WithXor]. Diagonalize via vext #8.
+// Reference: jedisct1/libsodium argon2-fill-block-neon.c, HashLib Argon2FillBlockSse2_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v1    = A0, A1
 //   v2-v3    = B0, B1

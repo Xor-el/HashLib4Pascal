@@ -1,23 +1,15 @@
-// SHA-3 (Keccak-F1600) ARMv8 Crypto Extension (FEAT_SHA3) permutation.
+// Keccak-F1600 permute AArch64 FEAT_SHA3 implementation.
 // Expects AAPCS64: x0 = state ptr (25 x UInt64, little-endian lanes),
 //   x1 = iotas ptr (24 x UInt64 round constants == HlpSHA3 RC table).
-// The 25 lanes occupy v0-v24, so the low 64 bits of v8-v15 (AAPCS64
-//   callee-saved d8-d15) are clobbered; the prologue/epilogue saves and
-//   restores them on a 64-byte frame. The permute loop is inlined (no calls)
-//   so the routine is still a leaf and x30 is untouched.
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S (KeccakF1600_ce loop).
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector/crypto mnemonics
-//   (subscripted vector regs and the FEAT_SHA3 ops require FPC 3.3+, and
-//   ldp/stp/ldr/str with dN crash the 3.2.2 assembler). Each such instruction
-//   is emitted as its raw 32-bit '.long' opcode, with the equivalent mnemonic
-//   in the trailing comment; only mov/sub/cbnz/ret stay as text.
-//
+// Saves/restores d8-d15 on 64-byte frame; state uses v0-v24 (clobbers d8-d15 lanes).
+// Leaf (no calls); x30 untouched.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S, HashLib KeccakF1600Avx2_x86_64.inc.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v24   = Keccak state lanes A[y][x] (lane k = v[k], 64 bits in low half)
-//   v25-v29  = Theta C[]/D[] column and Rho/Pi scratch
-//   v26      = iota round constant (ld1r), v30, v31 = Rho/Pi scratch
+//   v25-v29  = Theta C[]/D[] column scratch
+//   v26      = iota round constant (ld1r)
+//   v30-v31  = Rho/Pi scratch
 
   .long 0x6dbc27e8                    // stp d8, d9, [sp, #-64]!
   .long 0x6d012fea                    // stp d10, d11, [sp, #16]

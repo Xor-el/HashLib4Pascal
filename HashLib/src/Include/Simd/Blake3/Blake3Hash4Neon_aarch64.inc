@@ -1,18 +1,10 @@
 // BLAKE3 hash4 AArch64 NEON implementation (4 parallel 1 KiB chunks).
 // Expects AAPCS64: x0 = AInput, x1 = AKey, x2 = AOut,
 //   w3 = ANumChunks (unused; always 16 blocks like SSE2), x4 = ACounter, w5 = AFlags.
-// Reference (golden): HashLib Blake3Hash4Sse2_x86_64.inc (stack layout, msg indexing,
-//   output transpose / store offsets); BLAKE3-team/BLAKE3 c/blake3_impl.h (round_fn4,
-//   MSG_SCHEDULE); scripts/ref/blake3_neon.c (transpose_vecs_128 / round_fn4 structure).
-//   Output chunk order matches HashLib SSE2, not upstream blake3_neon.c store layout.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   mov/cmp/sub/cbz/cbnz/b.ne/ret stay as text.
-//
+// Stack frame 720 bytes; see register map.
+// Reference: BLAKE3-team/BLAKE3 c/blake3_impl.h, HashLib Blake3Hash4Sse2_x86_64.inc
+//   (output chunk order matches HashLib SSE2, not upstream blake3_neon.c store layout).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v7    = state v0..v7 (CV rows, 4-wide)
 //   v8-v11   = state v8..v11 (IV rows, updated each round)

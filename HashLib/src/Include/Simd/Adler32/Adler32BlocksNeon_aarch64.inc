@@ -1,18 +1,10 @@
 // Adler-32 ProcessBlocks AArch64 NEON implementation (32-byte blocks).
 // Expects AAPCS64: x0 = AData, w1 = ANumBlocks, x2 = ASums, x3 = AConstants.
 // ASums layout: [SumA: UInt32, SumB: UInt32]. Does NOT apply mod 65521.
-// Constants layout matches Adler32Constants: bytes [32..1] at offset 0..31
-// (two 16-byte halves; only the weight bytes are read here).
-// Reference (golden): HashLib Adler32BlocksSsse3_x86_64.inc;
-//   Chromium zlib adler32_simd.c ADLER32_SIMD_NEON column-sum + vmlal path.
-//
-// Instruction encodings (for assembler compatibility):
-//   FPC 3.2.2's inline assembler cannot encode AArch64 vector mnemonics
-//   (subscripted vector regs require FPC 3.3+, and ldr/str/ldp with qN crash the
-//   3.2.2 assembler). Each such instruction is therefore emitted as its raw 32-bit
-//   '.long' opcode, with the equivalent mnemonic in the trailing comment; only
-//   neg/ret stay as text.
-//
+// Constants layout matches Adler32Constants: bytes [32..1] at offset 0..31.
+// Leaf nostackframe; caller-saved GPR/vector only.
+// Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksSsse3_x86_64.inc.
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   w9       = block counter (from w1)
 //   w10      = SumA in / SumA out
