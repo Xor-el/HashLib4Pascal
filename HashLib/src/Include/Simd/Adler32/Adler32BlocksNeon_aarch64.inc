@@ -32,7 +32,8 @@
   .long 0xb940044b                    // ldr w11, [x2, #4]
   .long 0x1b017d4c                    // mul w12, w10, w1
   .long 0x2a0103e9                    // mov w9, w1
-  .long 0x4e040d94                    // dup v20.4s, w12
+  .long 0x6e341e94                    // eor v20.16b, v20.16b, v20.16b
+  .long 0x4e041d94                    // ins v20.s[0], w12
   .long 0x6e211c21                    // eor v1.16b, v1.16b, v1.16b
   .long 0x4e041d61                    // ins v1.s[0], w11
   .long 0x6e201c00                    // eor v0.16b, v0.16b, v0.16b
@@ -73,16 +74,16 @@
   .long 0x6e7a8241                    // umlal2 v1.4s, v18.8h, v26.8h
   .long 0x2e7b8261                    // umlal v1.4s, v19.4h, v27.4h
   .long 0x6e7b8261                    // umlal2 v1.4s, v19.8h, v27.8h
-  .long 0x0ea08406                    // addp v6.2s, v0.2s, v0.2s
+  .long 0x0ea0bc06                    // addp v6.2s, v0.2s, v0.2s
   .long 0x6e004008                    // ext v8.16b, v0.16b, v0.16b, #8
-  .long 0x0ea88507                    // addp v7.2s, v8.2s, v8.2s
-  .long 0x0ea784c6                    // addp v6.2s, v6.2s, v7.2s
+  .long 0x0ea8bd07                    // addp v7.2s, v8.2s, v8.2s
+  .long 0x0ea7bcc6                    // addp v6.2s, v6.2s, v7.2s
   .long 0x0e043ccd                    // umov w13, v6.s[0]
   .long 0x0b0d014a                    // add w10, w10, w13
-  .long 0x0ea18426                    // addp v6.2s, v1.2s, v1.2s
+  .long 0x0ea1bc26                    // addp v6.2s, v1.2s, v1.2s
   .long 0x6e014028                    // ext v8.16b, v1.16b, v1.16b, #8
-  .long 0x0ea88507                    // addp v7.2s, v8.2s, v8.2s
-  .long 0x0ea784c6                    // addp v6.2s, v6.2s, v7.2s
+  .long 0x0ea8bd07                    // addp v7.2s, v8.2s, v8.2s
+  .long 0x0ea7bcc6                    // addp v6.2s, v6.2s, v7.2s
   .long 0x0e043ccb                    // umov w11, v6.s[0]
   .long 0xb900004a                    // str w10, [x2]
   .long 0xb900044b                    // str w11, [x2, #4]
