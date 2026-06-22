@@ -141,7 +141,7 @@ end;
 begin
   try
     TPerformanceBenchmark.Run(ConsoleLog);
-    ReadLn;
+    // ReadLn; // TODO: restore for interactive IDE runs; disabled for CI 
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
