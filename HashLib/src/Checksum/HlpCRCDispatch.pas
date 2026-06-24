@@ -354,7 +354,7 @@ end;
 //
 //   i386:    SSE2
 //   x86_64:  VPCLMULQDQ, PCLMULQDQ, SSE2
-//   aarch64: —
+//   aarch64: PMULL
 // =============================================================================
 
 {$IFDEF HASHLIB_X86_64_ASM}
@@ -450,6 +450,22 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+function CRC_Fold_Reflected_Pmull(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldReflectedPmull_aarch64.inc}
+end;
+
+function CRC_Fold_Forward_Pmull(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\CRC\CRCFoldForwardPmull_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -468,6 +484,17 @@ begin
   CRC_Fold_Forward := @CRC_Fold_Forward_Scalar;
   CRC_Fold_Reflected32 := @CRC_Fold_Reflected32_Scalar;
   CRC_Fold_UsesCarrylessMul := False;
+
+{$IFDEF HASHLIB_AARCH64_ASM}
+  if TCpuFeatures.Arm.HasPMULL() then
+  begin
+    CRC_Fold_Reflected := @CRC_Fold_Reflected_Pmull;
+    CRC_Fold_Forward := @CRC_Fold_Forward_Pmull;
+    CRC_Fold_Reflected32 := @CRC_Fold_Reflected_Pmull;
+    CRC_Fold_UsesCarrylessMul := True;
+    Exit;
+  end;
+{$ENDIF HASHLIB_AARCH64_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
   if TCpuFeatures.X86.HasVPCLMULQDQ() then
