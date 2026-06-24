@@ -4,7 +4,7 @@
 // compatibility.
 //
 // Function signature (included after SimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Vpclmul_Msb(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Forward_Vpclmul(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):

@@ -3,7 +3,7 @@
 // AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler compatibility.
 //
 // Function signature (included after SimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Vpclmul(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Reflected_Vpclmul(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 //
 // Register mapping (MS x64 ABI after prologue):

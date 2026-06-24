@@ -1,4 +1,4 @@
-unit HlpGF2;
+unit HlpCRCFoldConstants;
 
 {$I ..\Include\HashLib.inc}
 

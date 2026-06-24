@@ -1,8 +1,8 @@
 // Reflected (LSB-first) 64-bit CRC: 16-byte slice using SSE2 loads + GPR table XOR.
 // Signature (after SimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Lsb_Sse2(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
-// MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx (PCRCFoldRuntimeCtx64).
+// MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx (PCRCFoldRuntimeCtx).
 // TableRow[i] begins at Ctx + SizeOf(TCRCFoldConstants) = Ctx + 96.
 //
 // SSE2: movdqu, movq, pxor, psrldq. No PCLMUL.
