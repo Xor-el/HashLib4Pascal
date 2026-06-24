@@ -46,7 +46,7 @@ env:
   MAKE_DEFINES: ''
   # When true, make.pas builds and runs console benchmarks after the test suite.
   # Override per job below, like MAKE_BUILD_BACKEND.
-  MAKE_RUN_BENCHMARK: false
+  MAKE_RUN_BENCHMARK: true
   # Set by the workflow_dispatch "debug" toggle; '1' enables `set -x` tracing in
   # install-fpc-lazarus.sh, '0' otherwise. Forwarded into the sandboxed jobs below.
   CI_DEBUG: ${{ github.event.inputs.debug == 'true' && '1' || '0' }}
