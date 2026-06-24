@@ -577,7 +577,7 @@ type
   type
     TCRCCacheValue = record
       Table: THashLibMatrixUInt64Array;
-      FoldRuntime: TCRCFoldRuntimeCtx64;
+      FoldRuntime: TCRCFoldRuntimeCtx;
     end;
 
   class var
@@ -1393,7 +1393,7 @@ begin
   if not FCache.TryGetValue(LKey, Result) then
   begin
     Result.Table := GenerateCRCTable(APoly, AWidth, AReflected);
-    CRCDispatch_InitRuntimeCtx64(Result.Table, APoly, AWidth, AReflected,
+    CRCDispatch_InitRuntimeCtx(Result.Table, APoly, AWidth, AReflected,
       Result.FoldRuntime);
     FCache.Add(LKey, Result);
   end;
@@ -1446,13 +1446,13 @@ begin
     begin
       if IsInputReflected then
       begin
-        LFoldFunc := CRC_Fold_Lsb;
+        LFoldFunc := CRC_Fold_Reflected;
         LState[0] := FHash;
       end
       else
       begin
-        LFoldFunc := CRC_Fold_Msb;
-        if CRC_Fold_UsesPclmul then
+        LFoldFunc := CRC_Fold_Forward;
+        if CRC_Fold_UsesCarrylessMul then
         begin
           if Width < 64 then
             LState[0] := FHash shl (64 - Width)

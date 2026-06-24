@@ -10,8 +10,8 @@ interface
 uses
   HlpHash, HlpHashBuffer, HlpHashCryptoNotBuildIn, HlpHashFactory, 
   HlpHashResult, HlpHashRounds, HlpHashSize, HlpHMACNotBuildInAdapter, 
-  HlpMultipleTransformNonBlock, HlpAdler32, HlpCRC, HlpCRC16, HlpCRC32, 
-  HlpCRC64, HlpGost, HlpGrindahl256, HlpGrindahl512, HlpHAS160, HlpHaval, 
+  HlpMultipleTransformNonBlock, HlpAdler32, HlpCRC, HlpCRCStandard, 
+  HlpGost, HlpGrindahl256, HlpGrindahl512, HlpHAS160, HlpHaval, 
   HlpMD2, HlpMD4, HlpMD5, HlpMDBase, HlpPanama, HlpRadioGatun32, 
   HlpRadioGatun64, HlpRIPEMD, HlpRIPEMD128, HlpRIPEMD160, HlpRIPEMD256, 
   HlpRIPEMD320, HlpSHA0, HlpSHA1, HlpSHA2_224, HlpSHA2_256, HlpSHA2_256Base, 
@@ -32,7 +32,7 @@ uses
   HlpXXHash3Dispatch, HlpBlake2BDispatch, HlpBlake2SDispatch, 
   HlpArgon2Dispatch, HlpScryptDispatch, HlpBlake3Dispatch, 
   HlpSHA2_256Dispatch, HlpSHA2_512Dispatch, HlpSHA1Dispatch, 
-  HlpAdler32Dispatch, HlpGF2, HlpCRCDispatch, HlpSHA3Dispatch, 
+  HlpAdler32Dispatch, HlpCRCFoldConstants, HlpCRCDispatch, HlpSHA3Dispatch, 
   HlpArmSimdFeatures, HlpSimdLevels, HlpX86SimdFeatures, HlpArmHwCapProvider, 
   HlpDarwinSysCtl;
 
