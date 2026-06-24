@@ -95,14 +95,16 @@
 {======================= Compiler Mode & Optimizations ========================}
 
 {$MODE DELPHI}
+{$MACRO ON}
+{$NOTES OFF}
+
 {$IF DEFINED(CPU386) OR DEFINED(CPUX64)}
   {$ASMMODE INTEL}
 {$IFEND}
+
 {$IF DEFINED(CPUARM) OR DEFINED(CPUAARCH64)}
   {$ASMMODE STANDARD}
 {$IFEND}
-{$MACRO ON}
-{$NOTES OFF}
 
 (*
 {$OPTIMIZATION LEVEL3}
