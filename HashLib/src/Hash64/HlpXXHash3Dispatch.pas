@@ -107,7 +107,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -133,8 +137,6 @@ end;
 
 {$IFDEF HASHLIB_X86_64_ASM}
 
-// ----- SSE2 -----
-
 procedure XXH3_Accumulate512_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
   {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
@@ -151,8 +153,6 @@ procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   {$I ..\Include\Simd\Common\SimdProc3Begin_x86_64.inc}
   {$I ..\Include\Simd\XXH3\XXH3InitSecretSse2_x86_64.inc}
 end;
-
-// ----- AVX2 -----
 
 procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
@@ -173,7 +173,7 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
-{$IFDEF HASHLIB_X86_SIMD}
+{$IF DEFINED(HASHLIB_X86_SIMD) OR DEFINED(HASHLIB_ARM_SIMD)}
 
 type
   TXXH3_Accumulate512Proc = procedure(AAcc, AInput, ASecret: Pointer);
@@ -187,6 +187,10 @@ begin
     AAcc512(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
       PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
 end;
+
+{$IFEND}
+
+{$IFDEF HASHLIB_X86_SIMD}
 
 procedure XXH3_Accumulate_Sse2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer; ANbStripes: Int32);
@@ -205,6 +209,37 @@ begin
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
+
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure XXH3_Accumulate512_Neon(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_aarch64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3Acc512Neon_aarch64.inc}
+end;
+
+procedure XXH3_ScrambleAcc_Neon(AAcc: Pointer; ASecret: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3ScrambleNeon_aarch64.inc}
+end;
+
+procedure XXH3_InitSecret_Neon(ACustomSecret: Pointer;
+  ADefaultSecret: Pointer; ASeed: UInt64);
+  {$I ..\Include\Simd\Common\SimdProc3Begin_aarch64.inc}
+  {$I ..\Include\Simd\XXH3\XXH3InitSecretNeon_aarch64.inc}
+end;
+
+{$IFDEF HASHLIB_ARM_SIMD}
+
+procedure XXH3_Accumulate_Neon(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32);
+begin
+  XXH3_Accumulate_Loop(AAcc, AInput, ASecret, ANbStripes, @XXH3_Accumulate512_Neon);
+end;
+
+{$ENDIF HASHLIB_ARM_SIMD}
+
+{$ENDIF HASHLIB_AARCH64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -242,6 +277,17 @@ begin
       XXH3_Accumulate := @XXH3_Accumulate_Sse2;
       XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Sse2;
       XXH3_InitSecret := @XXH3_InitSecret_Sse2;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      XXH3_Accumulate512 := @XXH3_Accumulate512_Neon;
+      XXH3_Accumulate := @XXH3_Accumulate_Neon;
+      XXH3_ScrambleAcc := @XXH3_ScrambleAcc_Neon;
+      XXH3_InitSecret := @XXH3_InitSecret_Neon;
     end;
   end;
 {$ENDIF}

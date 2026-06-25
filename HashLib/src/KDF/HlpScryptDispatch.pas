@@ -168,7 +168,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON (not registered)
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -193,6 +197,15 @@ procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
+
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Scrypt_SalsaXor_Neon(AState, AInput: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\Scrypt\ScryptSalsa8Neon_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
 
 // =============================================================================
 // Dispatch initialization
@@ -220,6 +233,28 @@ begin
       Scrypt_SalsaXor := @Scrypt_SalsaXor_Sse2;
     end;
   end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  // NEON intentionally NOT registered for scrypt: the scalar path is faster on
+  // AArch64. scrypt's Salsa20/8 is a single 64-byte block with a strictly serial
+  // dependency chain (BlockMix feeds each Salsa call from the previous one, and
+  // SMix is sequential by design), so there is no block-level parallelism for
+  // SIMD lanes to exploit at p=1. Meanwhile AArch64's 31 general-purpose
+  // registers let the scalar kernel hold the whole 16-word state with no spills
+  // and rotate via a single-cycle 'ror', whereas NEON adds a lane-shuffle (ext)
+  // tax and a 2-instruction (shl+sri) rotate. Benchmarks (Apple Silicon, FPC
+  // 3.2.2) confirm scalar wins at every N (e.g. N=16384: ~39 ms scalar vs
+  // ~56 ms NEON). This mirrors OpenSSL/libsodium/Tarsnap, which ship an x86 SSE2
+  // scrypt (to relieve x86's 16-register pressure) but no NEON variant. The
+  // Scrypt_SalsaXor_Neon kernel is kept (verified, correct) for reference and in
+  // case a future p>1 / multi-block batched path makes SIMD worthwhile.
+  //
+  // case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+  //   TArmSimdLevel.NEON:
+  //   begin
+  //     Scrypt_SalsaXor := @Scrypt_SalsaXor_Neon;
+  //   end;
+  // end;
 {$ENDIF}
 end;
 

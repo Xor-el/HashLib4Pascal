@@ -364,11 +364,9 @@
         <DCCReference Include="..\..\HashLib\src\Checksum\HlpAdler32Dispatch.pas"/>
         <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC.pas"/>
         <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRCDispatch.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpGF2.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC16.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC32.pas"/>
+        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRCFoldConstants.pas"/>
+        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRCStandard.pas"/>
         <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC32Fast.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC64.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGost.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGrindahl256.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGrindahl512.pas"/>

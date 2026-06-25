@@ -1,14 +1,13 @@
-program PerformanceBenchmarkConsole;
-
-{$APPTYPE CONSOLE}
+program HashLib.BenchmarkFMX;
 
 uses
-  Classes,
-  SysUtils,
-  uBenchmarkCommon in '..\src\Core\uBenchmarkCommon.pas',
-  uHashPerformanceBenchmark in '..\src\Core\uHashPerformanceBenchmark.pas',
-  uKdfPerformanceBenchmark in '..\src\Core\uKdfPerformanceBenchmark.pas',
-  uPerformanceBenchmark in '..\src\Core\uPerformanceBenchmark.pas',
+  System.StartUpCopy,
+  FMX.Forms,
+  fmxMainForm in '..\src\Forms\FMX\fmxMainForm.pas' {MainForm},
+  BenchmarkCommon in '..\src\Core\BenchmarkCommon.pas',
+  HashPerformanceBenchmark in '..\src\Core\HashPerformanceBenchmark.pas',
+  KdfPerformanceBenchmark in '..\src\Core\KdfPerformanceBenchmark.pas',
+  PerformanceBenchmark in '..\src\Core\PerformanceBenchmark.pas',
   HlpHash in '..\..\HashLib\src\Base\HlpHash.pas',
   HlpKDF in '..\..\HashLib\src\Base\HlpKDF.pas',
   HlpHashBuffer in '..\..\HashLib\src\Base\HlpHashBuffer.pas',
@@ -23,11 +22,9 @@ uses
   HlpAdler32Dispatch in '..\..\HashLib\src\Checksum\HlpAdler32Dispatch.pas',
   HlpCRC in '..\..\HashLib\src\Checksum\HlpCRC.pas',
   HlpCRCDispatch in '..\..\HashLib\src\Checksum\HlpCRCDispatch.pas',
-  HlpGF2 in '..\..\HashLib\src\Checksum\HlpGF2.pas',
-  HlpCRC16 in '..\..\HashLib\src\Checksum\HlpCRC16.pas',
-  HlpCRC32 in '..\..\HashLib\src\Checksum\HlpCRC32.pas',
+  HlpCRCFoldConstants in '..\..\HashLib\src\Checksum\HlpCRCFoldConstants.pas',
+  HlpCRCStandard in '..\..\HashLib\src\Checksum\HlpCRCStandard.pas',
   HlpCRC32Fast in '..\..\HashLib\src\Checksum\HlpCRC32Fast.pas',
-  HlpCRC64 in '..\..\HashLib\src\Checksum\HlpCRC64.pas',
   HlpGost in '..\..\HashLib\src\Crypto\HlpGost.pas',
   HlpGrindahl256 in '..\..\HashLib\src\Crypto\HlpGrindahl256.pas',
   HlpGrindahl512 in '..\..\HashLib\src\Crypto\HlpGrindahl512.pas',
@@ -128,22 +125,13 @@ uses
   HlpX86SimdFeatures in '..\..\HashLib\src\Utils\HlpX86SimdFeatures.pas',
   HlpArmSimdFeatures in '..\..\HashLib\src\Utils\HlpArmSimdFeatures.pas',
   HlpSimdLevels in '..\..\HashLib\src\Utils\HlpSimdLevels.pas',
-  HlpArmHwCapProvider in '..\..\HashLib\src\Utils\HlpArmHwCapProvider.pas',
-  HlpDarwinSysCtl in '..\..\HashLib\src\Utils\HlpDarwinSysCtl.pas',
   HlpHashLibTypes in '..\..\HashLib\src\Utils\HlpHashLibTypes.pas',
   HlpArrayUtils in '..\..\HashLib\src\Utils\HlpArrayUtils.pas';
 
-procedure ConsoleLog(const AMessage: String);
-begin
-  Writeln(AMessage);
-end;
+{$R *.res}
 
 begin
-  try
-    TPerformanceBenchmark.Run(ConsoleLog);
-    ReadLn;
-  except
-    on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
-  end;
+  Application.Initialize;
+  Application.CreateForm(TMainForm, MainForm);
+  Application.Run;
 end.

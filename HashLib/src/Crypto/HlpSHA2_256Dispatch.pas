@@ -104,7 +104,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 / SSSE3 (IA-32); ShaNi, SSE2, SSSE3, AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2, SSSE3
+//   x86_64:  ShaNi, AVX2, SSSE3, SSE2
+//   aarch64: SHA256 Crypto Extensions
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -184,6 +188,21 @@ end;
 
 {$ENDIF HASHLIB_X86_SIMD}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure SHA256_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\SHA256\SHA256CompressCryptoExt_aarch64.inc}
+end;
+
+procedure SHA256_Compress_CryptoExt_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA256_Compress_CryptoExt(AState, AData, ANumBlocks, @K256);
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -222,6 +241,12 @@ begin
     begin
       SHA256_Compress := @SHA256_Compress_Sse2_Wrap;
     end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  if TCpuFeatures.Arm.HasSHA256() then
+  begin
+    SHA256_Compress := @SHA256_Compress_CryptoExt_Wrap;
   end;
 {$ENDIF}
 end;

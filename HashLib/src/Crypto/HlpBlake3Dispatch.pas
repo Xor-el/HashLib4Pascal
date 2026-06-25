@@ -611,7 +611,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -703,6 +707,41 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Blake3_Compress_Neon(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3CompressNeon_aarch64.inc}
+end;
+
+procedure Blake3_Hash4_Neon(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\Include\Simd\Common\SimdProc6Begin_aarch64.inc}
+  {$I ..\Include\Simd\Blake3\Blake3Hash4Neon_aarch64.inc}
+end;
+
+// NEON hash_many: hash4 -> delegate remainder to scalar hash_many
+procedure Blake3_HashMany_Neon(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+var
+  LPInput, LPOut: PByte;
+begin
+  LPInput := PByte(AInput);
+  LPOut := PByte(AOut);
+  while ANumChunks >= 4 do
+  begin
+    Blake3_Hash4_Neon(LPInput, AKey, LPOut, 4, ACounter, AFlags);
+    System.Inc(LPInput, 4 * 1024);
+    System.Inc(LPOut, 4 * 32);
+    System.Inc(ACounter, 4);
+    System.Dec(ANumChunks, 4);
+  end;
+  if ANumChunks > 0 then
+    Blake3_HashMany_Scalar(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -734,6 +773,16 @@ begin
     begin
       Blake3_Compress := @Blake3_Compress_Sse2;
       Blake3_HashMany := @Blake3_HashMany_Sse2;
+      Blake3_ParallelDegree := 4;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      Blake3_Compress := @Blake3_Compress_Neon;
+      Blake3_HashMany := @Blake3_HashMany_Neon;
       Blake3_ParallelDegree := 4;
     end;
   end;

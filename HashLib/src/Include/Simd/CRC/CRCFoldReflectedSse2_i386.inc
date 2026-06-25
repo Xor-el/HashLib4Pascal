@@ -1,6 +1,6 @@
 // Reflected (LSB-first) 64-bit CRC: 16-byte slice (IA-32 SSE2 + GPR table XOR).
 // After SimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
-// TableRow[i] at Ctx + 96; each entry is a 32-bit pointer (PUInt64).
+// TableRow[i] at Ctx + 96; each entry is a 32-bit (untyped) Pointer.
 // Result UInt64 in edx:eax (high:low). Preserves Delphi/FPC i386 frame via push/pop ebp.
 
   push ebp

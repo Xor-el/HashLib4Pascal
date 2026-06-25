@@ -1,11 +1,11 @@
 // MSB-first 64-bit CRC: 16-byte slice (slicing-by-16) using SSE2 for load only.
-// IA-32 counterpart: CRCFoldMsbSse2_i386.inc.
+// IA-32 counterpart: CRCFoldForwardSse2_i386.inc.
 // Signature (after SimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Msb_Sse2(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 // MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx.
 // Callee-saved: rsi/rdi must be preserved (used as LTempCopy / LBIdx scratch).
-// Ctx = PCRCFoldRuntimeCtx64: FoldConstants.CrcBits at +80, TableRow at +96.
+// Ctx = PCRCFoldRuntimeCtx: FoldConstants.CrcBits at +80, TableRow at +96.
 // CrcMask = ((1 shl (W-1)) - 1) shl 1 or 1; W = dword [r9+80] (TCRC table path: W>=8).
 
   push rbx

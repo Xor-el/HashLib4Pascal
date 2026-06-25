@@ -1,10 +1,10 @@
 // CRC32 reflected (PKZIP-style) 16-byte slice: SSE2 movdqu + dword table XOR.
-// Little-endian host only (matches TConverters.le2me_32 = identity on LE).
+// Little-endian host only (x86/x64 asm reads 32-bit words directly from memory).
 // Signature (after SimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Lsb32_Sse2(AData: PByte; ALength: UInt32;
+//   function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 // State: low UInt32 of qword at AState is the running CRC.
-// Ctx: PCRCFoldRuntimeCtx32; TableRow offset = 96.
+// Ctx: PCRCFoldRuntimeCtx; TableRow offset = 96.
 
   push rbx
   push r12

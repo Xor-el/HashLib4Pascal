@@ -1,4 +1,4 @@
-unit uPerformanceBenchmark;
+unit PerformanceBenchmark;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -8,9 +8,7 @@ unit uPerformanceBenchmark;
 interface
 
 uses
-  uBenchmarkCommon,
-  uHashPerformanceBenchmark,
-  uKdfPerformanceBenchmark;
+  BenchmarkCommon;
 
 type
   TPerformanceBenchmark = class sealed(TObject)
@@ -23,7 +21,9 @@ type
 implementation
 
 uses
-  Math;
+  Math,
+  HashPerformanceBenchmark,
+  KdfPerformanceBenchmark;
 
 class procedure TPerformanceBenchmark.Run(ALogProc: TBenchmarkLogProc;
   const ABufferSizes: array of Int32);

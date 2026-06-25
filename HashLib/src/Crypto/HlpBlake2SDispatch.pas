@@ -95,8 +95,11 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations: SSE2 (IA-32); SSE2 / SSSE3 / AVX2 (x86-64)
-// IA-32: uses XMM0-XMM6 only.
+// SIMD implementations
+//
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+//   aarch64: NEON
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -122,6 +125,15 @@ end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
 
+{$IFDEF HASHLIB_AARCH64_ASM}
+
+procedure Blake2S_Compress_Neon(AState, AMsg, ACounterFlags, AIV: Pointer);
+  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Blake2S\Blake2SCompressNeon_aarch64.inc}
+end;
+
+{$ENDIF HASHLIB_AARCH64_ASM}
+
 // =============================================================================
 // Dispatch initialization
 // =============================================================================
@@ -146,6 +158,14 @@ begin
     TX86SimdLevel.SSE2:
     begin
       Blake2S_Compress := @Blake2S_Compress_Sse2;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_AARCH64_ASM}
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+    begin
+      Blake2S_Compress := @Blake2S_Compress_Neon;
     end;
   end;
 {$ENDIF}

@@ -1,4 +1,4 @@
-unit uHashPerformanceBenchmark;
+unit HashPerformanceBenchmark;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -13,7 +13,7 @@ uses
   HlpIHash,
   HlpHashFactory,
   HlpCRC,
-  uBenchmarkCommon;
+  BenchmarkCommon;
 
 type
   THashPerformanceBenchmark = class sealed(TObject)

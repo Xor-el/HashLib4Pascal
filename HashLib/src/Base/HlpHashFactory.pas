@@ -16,10 +16,8 @@ uses
   HlpAdler32,
   // CRC Units //
   HlpCRC,
-  HlpCRC16,
-  HlpCRC32,
+  HlpCRCStandard,
   HlpCRC32Fast,
-  HlpCRC64,
   // Hash32 Units //
   HlpAP,
   HlpBernstein,

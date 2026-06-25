@@ -41,7 +41,7 @@ type
 
     class var
       FCrc32PkzipTable: THashLibMatrixUInt32Array;
-      FCrc32PkzipFoldRuntime: TCRCFoldRuntimeCtx32;
+      FCrc32PkzipFoldRuntime: TCRCFoldRuntimeCtx;
 
     class constructor Crc32Pkzip();
 
@@ -63,7 +63,7 @@ type
 
     class var
       FCrc32CastagnoliTable: THashLibMatrixUInt32Array;
-      FCrc32CastagnoliFoldRuntime: TCRCFoldRuntimeCtx32;
+      FCrc32CastagnoliFoldRuntime: TCRCFoldRuntimeCtx;
 
     class constructor Crc32Castagnoli();
 
@@ -78,10 +78,10 @@ type
 implementation
 
 procedure CRC32FastInitFoldTables(const AReflectedPoly, AMsbPoly: UInt32;
-  var ATable: THashLibMatrixUInt32Array; var ACtx: TCRCFoldRuntimeCtx32);
+  var ATable: THashLibMatrixUInt32Array; var ACtx: TCRCFoldRuntimeCtx);
 begin
   ATable := CRCDispatch_BuildSlicingTable32Reflect(AReflectedPoly);
-  CRCDispatch_InitRuntimeCtx32(ATable, AMsbPoly, ACtx);
+  CRCDispatch_InitRuntimeCtx(ATable, AMsbPoly, ACtx);
 end;
 
 { TCRC32Fast }
