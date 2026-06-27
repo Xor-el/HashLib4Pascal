@@ -5,7 +5,7 @@
     { "id": "linux-arm64",        "name": "Native: Linux AArch64",                 "kind": "native", "default": true,  "runner": "ubuntu-24.04-arm", "fpc_target": "aarch64-linux" },
     { "id": "windows-x64",        "name": "Native: Windows x86_64",                "kind": "native", "default": true,  "runner": "windows-latest",   "fpc_target": "x86_64-win64" },
     { "id": "macos-arm64",        "name": "Native: macOS AArch64 (Apple Silicon)", "kind": "native", "default": true,  "runner": "macos-latest",     "fpc_target": "aarch64-darwin" },
-    { "id": "macos-x64",          "name": "Native: macOS x86_64 (Intel)",          "kind": "native", "default": true,  "runner": "macos-15-intel",   "fpc_target": "x86_64-darwin" },
+    { "id": "macos-x64",          "name": "Native: macOS x86_64 (Intel)",          "kind": "native", "default": true,  "runner": "macos-26-intel",   "fpc_target": "x86_64-darwin" },
     { "id": "linux-arm32",        "name": "QEMU: Linux ARMv7",                     "kind": "qemu",   "default": true, "runner": "ubuntu-latest",    "fpc_target": "arm-linux" },
     { "id": "linux-powerpc64-be", "name": "QEMU: Linux PowerPC64 BE",              "kind": "qemu",   "default": true, "runner": "ubuntu-latest",    "fpc_target": "powerpc64-linux" },
     { "id": "freebsd",            "name": "VM: FreeBSD x86_64",                    "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-freebsd", "fpc_tarball_target": "x86_64-freebsd11" },
