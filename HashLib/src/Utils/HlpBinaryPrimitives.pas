@@ -145,56 +145,80 @@ end;
 
 class function TBinaryPrimitives.LeToNativeUInt16(AValue: UInt16): UInt16;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := AValue;
+{$IFDEF FPC}
+  Result := LEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := AValue;
+  {$ELSE}
   Result := TBitOperations.ReverseBytesUInt16(AValue);
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 class function TBinaryPrimitives.LeToNativeUInt32(AValue: UInt32): UInt32;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := AValue;
+{$IFDEF FPC}
+  Result := LEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := AValue;
+  {$ELSE}
   Result := TBitOperations.ReverseBytesUInt32(AValue);
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 class function TBinaryPrimitives.LeToNativeUInt64(AValue: UInt64): UInt64;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := AValue;
+{$IFDEF FPC}
+  Result := LEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := AValue;
+  {$ELSE}
   Result := TBitOperations.ReverseBytesUInt64(AValue);
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 class function TBinaryPrimitives.BeToNativeUInt16(AValue: UInt16): UInt16;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := TBitOperations.ReverseBytesUInt16(AValue);
+{$IFDEF FPC}
+  Result := BEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := TBitOperations.ReverseBytesUInt16(AValue);
+  {$ELSE}
   Result := AValue;
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 class function TBinaryPrimitives.BeToNativeUInt32(AValue: UInt32): UInt32;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := TBitOperations.ReverseBytesUInt32(AValue);
+{$IFDEF FPC}
+  Result := BEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := TBitOperations.ReverseBytesUInt32(AValue);
+  {$ELSE}
   Result := AValue;
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 class function TBinaryPrimitives.BeToNativeUInt64(AValue: UInt64): UInt64;
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
-  Result := TBitOperations.ReverseBytesUInt64(AValue);
+{$IFDEF FPC}
+  Result := BEtoN(AValue);
 {$ELSE}
+  {$IFDEF HASHLIB_LITTLE_ENDIAN}
+  Result := TBitOperations.ReverseBytesUInt64(AValue);
+  {$ELSE}
   Result := AValue;
-{$ENDIF}
+  {$ENDIF HASHLIB_LITTLE_ENDIAN}
+{$ENDIF FPC}
 end;
 
 // ============================================================================
