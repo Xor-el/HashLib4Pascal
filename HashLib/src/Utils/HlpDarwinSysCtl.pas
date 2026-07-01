@@ -64,12 +64,17 @@ implementation
 
 class procedure TDarwinSysCtl.ResolveDynamicImports();
 var
-  LHandle: Pointer;
+  LHandle: NativeUInt;
 begin
   FSysCtlByName := nil;
 
+{$IFDEF FPC}
+  LHandle := NativeUInt(dlopen(nil, RTLD_NOW));
+{$ELSE}
   LHandle := dlopen(nil, RTLD_NOW);
-  if LHandle = nil then
+{$ENDIF}
+
+  if LHandle = 0 then
     Exit;
 
   try
