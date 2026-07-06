@@ -18,6 +18,8 @@
 //     [sp, #320..568] saved CV, counter vectors, IV, block len, AOut ptr, flags
 //   Message transpose uses trn1/trn2 + zip1/zip2 (equivalent to SSE punpck / neon transpose_vecs_128).
 
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_aarch64.inc}
+
   stp x19, x20, [sp, #-16]!
   sub sp, sp, #720
   .long 0xbd400020                    // ldr s0, [x1, #0]
@@ -1708,4 +1710,6 @@
   .long 0x3d801d23                    // str q3, [x9, #112]
   add sp, sp, #720
   ldp x19, x20, [sp], #16
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_aarch64.inc}
   ret
