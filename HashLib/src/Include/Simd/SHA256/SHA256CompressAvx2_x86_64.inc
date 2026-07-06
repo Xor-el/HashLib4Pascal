@@ -9,41 +9,40 @@
 //   Phase 1 (VEX-128 SIMD): Compute W+K[0..63] using message schedule, store to stack
 //   Phase 2 (GPR): Run 64 compression rounds reading W+K from stack
 //
-// MS x64 non-volatile saves: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15.
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 //
-// Stack layout (sub rsp, 376): same as SSSE3 version
-//   [rsp +   0.. 15]: xmm6 save
-//   [rsp +  16.. 31]: xmm7 save
-//   [rsp +  32.. 39]: rbx save
-//   [rsp +  40.. 47]: rbp save
-//   [rsp +  48.. 55]: rdi save
-//   [rsp +  56.. 63]: rsi save
-//   [rsp +  64.. 71]: r12 save
-//   [rsp +  72.. 79]: r13 save
-//   [rsp +  80.. 87]: r14 save
-//   [rsp +  88.. 95]: r15 save
-//   [rsp +  96..103]: K256 ptr save
-//   [rsp + 104..111]: BSWAP mask ptr save
-//   [rsp + 112..367]: W+K buffer (256 bytes, 16-byte aligned)
+// Stack layout (sub rsp, 344): same as SSSE3 version
+//   [rsp +   0..  7]: rbx save
+//   [rsp +   8.. 15]: rbp save
+//   [rsp +  16.. 23]: rdi save
+//   [rsp +  24.. 31]: rsi save
+//   [rsp +  32.. 39]: r12 save
+//   [rsp +  40.. 47]: r13 save
+//   [rsp +  48.. 55]: r14 save
+//   [rsp +  56.. 63]: r15 save
+//   [rsp +  64.. 71]: K256 ptr save
+//   [rsp +  72.. 79]: BSWAP mask ptr save
+//   [rsp +  80..335]: W+K buffer (256 bytes)
 
-  sub rsp, 376
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
-  db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
-  mov [rsp + $30], rdi
-  mov [rsp + $38], rsi
-  mov [rsp + $20], rbx
-  mov [rsp + $28], rbp
-  mov [rsp + $40], r12
-  mov [rsp + $48], r13
-  mov [rsp + $50], r14
-  mov [rsp + $58], r15
+  sub rsp, 344
+
+  mov [rsp + $10], rdi
+  mov [rsp + $18], rsi
+  mov [rsp + $00], rbx
+  mov [rsp + $08], rbp
+  mov [rsp + $20], r12
+  mov [rsp + $28], r13
+  mov [rsp + $30], r14
+  mov [rsp + $38], r15
 
   mov r12, rcx
   mov r13, rdx
   mov r14d, r8d
-  mov [rsp + $60], r9
-  mov [rsp + $68], r10
+  mov [rsp + $40], r9
+  mov [rsp + $48], r10
 
   test r14d, r14d
   jz @avx2_done
@@ -52,9 +51,9 @@
 
   // ========== Phase 1: Message Schedule (VEX-128) ==========
 
-  mov rax, [rsp + $68]
+  mov rax, [rsp + $48]
   db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
-  mov rax, [rsp + $60]
+  mov rax, [rsp + $40]
 
   db $C4, $C1, $7A, $6F, $45, $00               // vmovdqu xmm0, oword [r13]
   db $C4, $E2, $79, $00, $C7                    // vpshufb xmm0, xmm0, xmm7
@@ -65,7 +64,7 @@
   db $C4, $C1, $7A, $6F, $5D, $30               // vmovdqu xmm3, oword [r13 + $30]
   db $C4, $E2, $61, $00, $DF                    // vpshufb xmm3, xmm3, xmm7
 
-  lea rbp, [rsp + $70]
+  lea rbp, [rsp + $50]
 
   db $C5, $FA, $6F, $20                         // vmovdqu xmm4, oword [rax]
   db $C5, $F9, $FE, $E4                         // vpaddd  xmm4, xmm0, xmm4
@@ -160,8 +159,8 @@
   mov r10d, [r12 + $18]
   mov r11d, [r12 + $1C]
 
-  lea rbp, [rsp + $70]
-  lea r15, [rsp + $70 + $100]
+  lea rbp, [rsp + $50]
+  lea r15, [rsp + $50 + $100]
 
 @avx2_round_loop:
 
@@ -441,16 +440,16 @@
 
 @avx2_done:
 
-  mov rbx, [rsp + $20]
-  mov rbp, [rsp + $28]
-  mov r12, [rsp + $40]
-  mov r13, [rsp + $48]
-  mov r14, [rsp + $50]
-  mov r15, [rsp + $58]
-  mov rdi, [rsp + $30]
-  mov rsi, [rsp + $38]
-  db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
-  db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
-  add rsp, 376
+  mov rbx, [rsp + $00]
+  mov rbp, [rsp + $08]
+  mov r12, [rsp + $20]
+  mov r13, [rsp + $28]
+  mov r14, [rsp + $30]
+  mov r15, [rsp + $38]
+  mov rdi, [rsp + $10]
+  mov rsi, [rsp + $18]
+  add rsp, 344
 
   db $C5, $F8, $77                              // vzeroupper
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

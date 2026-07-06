@@ -26,6 +26,8 @@
 //   xmm0=000 xmm1=001 xmm2=010 xmm3=011 xmm4=100
 //   xmm5=101 xmm6=110 xmm7=111
 
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+
   // fold_1x128 is always needed (fold-by-1 loop and Barrett step 1)
   movdqu xmm7, dqword ptr [r9 + 16]   // fold_1x128
 
@@ -191,3 +193,5 @@
   // Extract high qword (bits 64..127) into rax.
   // pextrq rax, xmm0, 1: 66 48 0F 3A 16 C0 01
   db $66, $48, $0F, $3A, $16, $C0, $01
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

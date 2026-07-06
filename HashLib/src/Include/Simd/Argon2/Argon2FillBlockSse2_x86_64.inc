@@ -16,17 +16,14 @@
 // register pairs. Right-rotates require a 3-movdqa swap since shufpd
 // naturally places results in the opposite register for that direction.
 
-  sub rsp, 2120
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  movdqu oword [rsp + $20], xmm8
-  movdqu oword [rsp + $30], xmm9
+  sub rsp, 2056
 
   // =========================================================================
   // Step 1: Compute R_buf = Left XOR Right, store at [rsp+64]
   // =========================================================================
-  lea rax, [rsp + 64]
+  lea rax, [rsp]
   xor r10, r10
 @xor_loop:
   movdqu xmm0, oword [rcx + r10]
@@ -40,7 +37,7 @@
   // =========================================================================
   // Step 2: Copy R_buf to Z_buf at [rsp+1088]
   // =========================================================================
-  lea r11, [rsp + 1088]
+  lea r11, [rsp + 1024]
   xor r10, r10
 @copy_loop:
   movdqu xmm0, oword [rax + r10]
@@ -556,9 +553,6 @@
   jb @final_xor_loop
 
 @epilogue:
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  movdqu xmm8, oword [rsp + $20]
-  movdqu xmm9, oword [rsp + $30]
+  add rsp, 2056
 
-  add rsp, 2120
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

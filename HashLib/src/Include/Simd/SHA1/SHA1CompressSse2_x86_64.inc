@@ -28,17 +28,18 @@
 //   [rsp +  88.. 95]: padding
 //   [rsp +  96..415]: W buffer (320 bytes = 80 x 4, 16-byte aligned)
 
-  sub rsp, 424
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  movdqu oword [rsp], xmm6
-  mov [rsp + $20], rdi
-  mov [rsp + $28], rsi
-  mov [rsp + $10], rbx
-  mov [rsp + $18], rbp
-  mov [rsp + $30], r12
-  mov [rsp + $38], r13
-  mov [rsp + $40], r14
-  mov [rsp + $48], r15
+  sub rsp, 408
+
+  mov [rsp + $10], rdi
+  mov [rsp + $18], rsi
+  mov [rsp + $00], rbx
+  mov [rsp + $08], rbp
+  mov [rsp + $20], r12
+  mov [rsp + $28], r13
+  mov [rsp + $30], r14
+  mov [rsp + $38], r15
 
   mov r12, rcx
   mov r13, rdx
@@ -51,7 +52,7 @@
 
   // ========== Phase 1: SIMD message schedule ==========
 
-  lea r15, [rsp + $60]
+  lea r15, [rsp + $50]
 
   // SSE2 32-bit byte-swap: pshuflw/pshufhw swap 16-bit words, then swap bytes within words
   movdqu xmm0, oword [r13]
@@ -166,7 +167,7 @@
   mov edx, [r12 + $0C]
   mov r8d, [r12 + $10]
 
-  lea rbp, [rsp + $60]
+  lea rbp, [rsp + $50]
 
   // ---------- Rounds 0-19: Ch, K = $5A827999 ----------
 
@@ -461,13 +462,14 @@
 
 @sse2_sha1_done:
 
-  mov rbx, [rsp + $10]
-  mov rbp, [rsp + $18]
-  mov r12, [rsp + $30]
-  mov r13, [rsp + $38]
-  mov r14, [rsp + $40]
-  mov r15, [rsp + $48]
-  mov rdi, [rsp + $20]
-  mov rsi, [rsp + $28]
-  movdqu xmm6, oword [rsp]
-  add rsp, 424
+  mov rbx, [rsp + $00]
+  mov rbp, [rsp + $08]
+  mov r12, [rsp + $20]
+  mov r13, [rsp + $28]
+  mov r14, [rsp + $30]
+  mov r15, [rsp + $38]
+  mov rdi, [rsp + $10]
+  mov rsi, [rsp + $18]
+  add rsp, 408
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

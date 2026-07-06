@@ -23,24 +23,24 @@
 //   [rsp + 112..751]: W+K buffer (640 bytes = 80 * 8, 16-byte aligned)
 //   [rsp + 752..879]: W circular buffer (128 bytes = 16 * 8)
 
-  sub rsp, 1016
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
-  db $C5, $FA, $7F, $7C, $24, $10               // vmovdqu oword [rsp + $10], xmm7
-  mov [rsp + $30], rdi
-  mov [rsp + $38], rsi
-  mov [rsp + $20], rbx
-  mov [rsp + $28], rbp
-  mov [rsp + $40], r12
-  mov [rsp + $48], r13
-  mov [rsp + $50], r14
-  mov [rsp + $58], r15
+  sub rsp, 984
+
+  mov [rsp + $10], rdi
+  mov [rsp + $18], rsi
+  mov [rsp + $00], rbx
+  mov [rsp + $08], rbp
+  mov [rsp + $20], r12
+  mov [rsp + $28], r13
+  mov [rsp + $30], r14
+  mov [rsp + $38], r15
 
   mov r12, rcx
   mov r13, rdx
   mov r14d, r8d
-  mov [rsp + $60], r9
-  mov [rsp + $68], r10
+  mov [rsp + $40], r9
+  mov [rsp + $48], r10
 
   test r14d, r14d
   jz @avx2_512_done
@@ -49,12 +49,12 @@
 
   // ========== Phase 1: Load, byte-swap (VEX), expand ==========
 
-  mov rax, [rsp + $68]
+  mov rax, [rsp + $48]
   db $C5, $FA, $6F, $38                         // vmovdqu xmm7, oword [rax]
-  mov rax, [rsp + $60]
+  mov rax, [rsp + $40]
 
-  lea rbp, [rsp + $70]
-  lea r15, [rsp + $2F0]
+  lea rbp, [rsp + $50]
+  lea r15, [rsp + $2D0]
 
   // Load, byte-swap W[0..15], store to W circular buffer and compute W+K
   db $C4, $C1, $7A, $6F, $45, $00               // vmovdqu xmm0, oword [r13]
@@ -463,16 +463,16 @@
 
 @avx2_512_done:
 
-  mov rbx, [rsp + $20]
-  mov rbp, [rsp + $28]
-  mov r12, [rsp + $40]
-  mov r13, [rsp + $48]
-  mov r14, [rsp + $50]
-  mov r15, [rsp + $58]
-  mov rdi, [rsp + $30]
-  mov rsi, [rsp + $38]
-  db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
-  db $C5, $FA, $6F, $7C, $24, $10               // vmovdqu xmm7, oword [rsp + $10]
-  add rsp, 1016
+  mov rbx, [rsp + $00]
+  mov rbp, [rsp + $08]
+  mov r12, [rsp + $20]
+  mov r13, [rsp + $28]
+  mov r14, [rsp + $30]
+  mov r15, [rsp + $38]
+  mov rdi, [rsp + $10]
+  mov rsi, [rsp + $18]
+  add rsp, 984
 
   db $C5, $F8, $77                              // vzeroupper
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

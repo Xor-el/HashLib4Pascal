@@ -12,27 +12,28 @@
 //   Phase 1 (SIMD): Compute W+K[0..63] using SSE2 message schedule, store to stack
 //   Phase 2 (GPR): Run 64 compression rounds reading W+K from stack
 //
-// MS x64 non-volatile saves: xmm6-xmm7, rbx, rbp, rdi, rsi, r12-r15.
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 //
-// Stack layout (sub rsp, 376): same as SSSE3 version
+// Stack layout (sub rsp, 344): GPR saves at [rsp+$00..$47], W+K schedule at [rsp+$50..]
 
-  sub rsp, 376
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  mov [rsp + $30], rdi
-  mov [rsp + $38], rsi
-  mov [rsp + $20], rbx
-  mov [rsp + $28], rbp
-  mov [rsp + $40], r12
-  mov [rsp + $48], r13
-  mov [rsp + $50], r14
-  mov [rsp + $58], r15
+  sub rsp, 344
+
+  mov [rsp + $10], rdi
+  mov [rsp + $18], rsi
+  mov [rsp + $00], rbx
+  mov [rsp + $08], rbp
+  mov [rsp + $20], r12
+  mov [rsp + $28], r13
+  mov [rsp + $30], r14
+  mov [rsp + $38], r15
 
   mov r12, rcx
   mov r13, rdx
   mov r14d, r8d
-  mov [rsp + $60], r9
+  mov [rsp + $40], r9
 
   test r14d, r14d
   jz @sse2_256_done
@@ -41,7 +42,7 @@
 
   // ========== Phase 1: Message Schedule ==========
 
-  mov rax, [rsp + $60]
+  mov rax, [rsp + $40]
 
   // SSE2 32-bit byte-swap for W[0..15]
   movdqu xmm0, oword [r13]
@@ -76,7 +77,7 @@
   psllw  xmm4, 8
   por    xmm3, xmm4
 
-  lea rbp, [rsp + $70]
+  lea rbp, [rsp + $50]
 
   movdqa xmm4, xmm0
   movdqu xmm5, oword [rax]
@@ -191,8 +192,8 @@
   mov r10d, [r12 + $18]
   mov r11d, [r12 + $1C]
 
-  lea rbp, [rsp + $70]
-  lea r15, [rsp + $70 + $100]
+  lea rbp, [rsp + $50]
+  lea r15, [rsp + $50 + $100]
 
 @sse2_256_round_loop:
 
@@ -472,14 +473,14 @@
 
 @sse2_256_done:
 
-  mov rbx, [rsp + $20]
-  mov rbp, [rsp + $28]
-  mov r12, [rsp + $40]
-  mov r13, [rsp + $48]
-  mov r14, [rsp + $50]
-  mov r15, [rsp + $58]
-  mov rdi, [rsp + $30]
-  mov rsi, [rsp + $38]
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  add rsp, 376
+  mov rbx, [rsp + $00]
+  mov rbp, [rsp + $08]
+  mov r12, [rsp + $20]
+  mov r13, [rsp + $28]
+  mov r14, [rsp + $30]
+  mov r15, [rsp + $38]
+  mov rdi, [rsp + $10]
+  mov rsi, [rsp + $18]
+  add rsp, 344
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

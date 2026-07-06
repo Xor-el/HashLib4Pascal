@@ -22,10 +22,7 @@
 //   xmm7  = BSWAP mask, then E_SAVE
 //   xmm8  = ABCD_SAVE
 
-  sub rsp, 56
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  movdqu oword [rsp + $20], xmm8
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
   test r8d, r8d
   jz @sha1ni_done
@@ -228,7 +225,4 @@
 
 @sha1ni_done:
 
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  movdqu xmm8, oword [rsp + $20]
-  add rsp, 56
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

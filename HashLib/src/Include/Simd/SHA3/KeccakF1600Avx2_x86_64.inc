@@ -24,18 +24,9 @@
 //   [rsp+ 32..191]: xmm6-xmm15 save area
 //   [rsp+192..223]: padding
 
-  sub rsp, 224
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  db $C5, $FA, $7F, $74, $24, $20  // vmovdqu [rsp+32], xmm6
-  db $C5, $FA, $7F, $7C, $24, $30  // vmovdqu [rsp+48], xmm7
-  db $C4, $61, $7A, $7F, $44, $24, $40  // vmovdqu [rsp+64], xmm8
-  db $C4, $61, $7A, $7F, $4C, $24, $50  // vmovdqu [rsp+80], xmm9
-  db $C4, $61, $7A, $7F, $54, $24, $60  // vmovdqu [rsp+96], xmm10
-  db $C4, $61, $7A, $7F, $5C, $24, $70  // vmovdqu [rsp+112], xmm11
-  db $C4, $61, $7A, $7F, $A4, $24, $80, $00, $00, $00  // vmovdqu [rsp+128], xmm12
-  db $C4, $61, $7A, $7F, $AC, $24, $90, $00, $00, $00  // vmovdqu [rsp+144], xmm13
-  db $C4, $61, $7A, $7F, $B4, $24, $A0, $00, $00, $00  // vmovdqu [rsp+160], xmm14
-  db $C4, $61, $7A, $7F, $BC, $24, $B0, $00, $00, $00  // vmovdqu [rsp+176], xmm15
+  sub rsp, 64
 
   // Set up table pointers (biased by +96 for compact displacements)
   lea r8, [rdx + 96]
@@ -281,15 +272,6 @@
 
   db $C5, $F8, $77  // vzeroupper
 
-  db $C5, $FA, $6F, $74, $24, $20  // vmovdqu xmm6, [rsp+32]
-  db $C5, $FA, $6F, $7C, $24, $30  // vmovdqu xmm7, [rsp+48]
-  db $C4, $61, $7A, $6F, $44, $24, $40  // vmovdqu xmm8, [rsp+64]
-  db $C4, $61, $7A, $6F, $4C, $24, $50  // vmovdqu xmm9, [rsp+80]
-  db $C4, $61, $7A, $6F, $54, $24, $60  // vmovdqu xmm10, [rsp+96]
-  db $C4, $61, $7A, $6F, $5C, $24, $70  // vmovdqu xmm11, [rsp+112]
-  db $C4, $61, $7A, $6F, $A4, $24, $80, $00, $00, $00  // vmovdqu xmm12, [rsp+128]
-  db $C4, $61, $7A, $6F, $AC, $24, $90, $00, $00, $00  // vmovdqu xmm13, [rsp+144]
-  db $C4, $61, $7A, $6F, $B4, $24, $A0, $00, $00, $00  // vmovdqu xmm14, [rsp+160]
-  db $C4, $61, $7A, $6F, $BC, $24, $B0, $00, $00, $00  // vmovdqu xmm15, [rsp+176]
+  add rsp, 64
 
-  add rsp, 224
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

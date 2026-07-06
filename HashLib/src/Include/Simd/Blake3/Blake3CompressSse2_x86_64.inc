@@ -16,23 +16,19 @@
 //   [rsp + 96..111]: IV staging area (loaded into xmm2)
 //   [rsp +112..119]: padding
 
-  sub rsp, 120
-  movdqa oword [rsp], xmm6
-  movdqa oword [rsp + $10], xmm7
-  movdqa oword [rsp + $20], xmm8
-  movdqa oword [rsp + $30], xmm9
-  movdqa oword [rsp + $40], xmm11
-  movdqa oword [rsp + $50], xmm14
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+
+  sub rsp, 24
 
   mov eax, $6A09E667
-  mov dword ptr [rsp + $60], eax
+  mov dword ptr [rsp + $00], eax
   mov eax, $BB67AE85
-  mov dword ptr [rsp + $64], eax
+  mov dword ptr [rsp + $04], eax
   mov eax, $3C6EF372
-  mov dword ptr [rsp + $68], eax
+  mov dword ptr [rsp + $08], eax
   mov eax, $A54FF53A
-  mov dword ptr [rsp + $6C], eax
-  movdqa xmm2, oword [rsp + $60]
+  mov dword ptr [rsp + $0C], eax
+  movdqa xmm2, oword [rsp + $00]
 
   // Initialize state: a=CV[0..3], b=CV[4..7], c=IV[0..3], d=CounterFlags
   movdqu xmm0, oword [r8]
@@ -639,10 +635,6 @@
   movdqu oword [rcx + $20], xmm2
   movdqu oword [rcx + $30], xmm3
 
-  movdqa xmm6, oword [rsp]
-  movdqa xmm7, oword [rsp + $10]
-  movdqa xmm8, oword [rsp + $20]
-  movdqa xmm9, oword [rsp + $30]
-  movdqa xmm11, oword [rsp + $40]
-  movdqa xmm14, oword [rsp + $50]
-  add rsp, 120
+  add rsp, 24
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

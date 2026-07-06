@@ -21,11 +21,7 @@
 //   xmm8  = ABEF_SAVE
 //   xmm9  = CDGH_SAVE
 
-  sub rsp, 72
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  movdqu oword [rsp + $20], xmm8
-  movdqu oword [rsp + $30], xmm9
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
   test r8d, r8d
   jz @shani_done
@@ -250,8 +246,4 @@
 
 @shani_done:
 
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  movdqu xmm8, oword [rsp + $20]
-  movdqu xmm9, oword [rsp + $30]
-  add rsp, 72
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

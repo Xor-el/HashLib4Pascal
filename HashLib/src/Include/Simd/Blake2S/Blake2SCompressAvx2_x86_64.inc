@@ -7,8 +7,7 @@
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-  sub rsp, 16
-  db $C5, $FA, $7F, $34, $24                    // vmovdqu oword [rsp], xmm6
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   db $C5, $FA, $6F, $01                         // vmovdqu xmm0, oword [rcx]
@@ -992,7 +991,6 @@
   db $C5, $FA, $7F, $01                         // vmovdqu oword [rcx], xmm0
   db $C5, $FA, $7F, $49, $10                    // vmovdqu oword [rcx + $10], xmm1
 
-  db $C5, $FA, $6F, $34, $24                    // vmovdqu xmm6, oword [rsp]
-  add rsp, 16
-
   db $C5, $F8, $77                              // vzeroupper
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
