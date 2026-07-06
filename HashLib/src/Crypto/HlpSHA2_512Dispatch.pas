@@ -56,13 +56,6 @@ const
   );
 
 {$IFDEF HASHLIB_X86_SIMD}
-  // BSWAP64 shuffle mask for pshufb (x86 SIMD only): reverses bytes within each
-  // qword. Not a SHA-512 constant; passed separately to the SIMD kernels. ARM
-  // byte-swaps with REV64 and needs no mask table.
-  BSWAP64_MASK: array [0 .. 1] of UInt64 = (
-    UInt64($0001020304050607), UInt64($08090A0B0C0D0E0F)
-  );
-
   // Doubled K512 round constants plus the BSWAP64 mask, shared by the AVX2 and
   // SSE2 SIMD-schedule SHA-512 kernels. Each 128-bit K512 constant pair is stored
   // twice so one table feeds both the 256-bit AVX2 lanes and the 128-bit SSE2
