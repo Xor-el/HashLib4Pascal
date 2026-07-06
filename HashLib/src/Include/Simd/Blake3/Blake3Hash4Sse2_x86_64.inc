@@ -18,15 +18,9 @@
   push rbx
   push rbp
 
-  sub rsp, 712
-  movdqa oword [rsp + 576], xmm6
-  movdqa oword [rsp + 592], xmm7
-  movdqa oword [rsp + 608], xmm8
-  movdqa oword [rsp + 624], xmm9
-  movdqa oword [rsp + 640], xmm10
-  movdqa oword [rsp + 656], xmm11
-  movdqa oword [rsp + 672], xmm12
-  movdqa oword [rsp + 688], xmm13
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+
+  sub rsp, 584
 
   mov qword ptr [rsp + 560], r8
   mov dword ptr [rsp + 568], r11d
@@ -1832,15 +1826,9 @@
   movdqu oword [rax + 80], xmm4
   movdqu oword [rax + 112], xmm3
 
-  movdqa xmm6, oword [rsp + 576]
-  movdqa xmm7, oword [rsp + 592]
-  movdqa xmm8, oword [rsp + 608]
-  movdqa xmm9, oword [rsp + 624]
-  movdqa xmm10, oword [rsp + 640]
-  movdqa xmm11, oword [rsp + 656]
-  movdqa xmm12, oword [rsp + 672]
-  movdqa xmm13, oword [rsp + 688]
-  add rsp, 712
+  add rsp, 584
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
 
   pop rbp
   pop rbx

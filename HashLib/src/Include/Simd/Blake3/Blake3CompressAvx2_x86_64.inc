@@ -16,23 +16,19 @@
 //   [rsp + 96..111]: IV staging area (loaded into xmm2)
 //   [rsp +112..119]: padding
 
-  sub rsp, 120
-  db $C5, $F9, $7F, $34, $24                    // vmovdqa oword [rsp], xmm6
-  db $C5, $F9, $7F, $7C, $24, $10               // vmovdqa oword [rsp + $10], xmm7
-  db $C5, $79, $7F, $44, $24, $20               // vmovdqa oword [rsp + $20], xmm8
-  db $C5, $79, $7F, $4C, $24, $30               // vmovdqa oword [rsp + $30], xmm9
-  db $C5, $79, $7F, $5C, $24, $40               // vmovdqa oword [rsp + $40], xmm11
-  db $C5, $79, $7F, $74, $24, $50               // vmovdqa oword [rsp + $50], xmm14
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+
+  sub rsp, 24
 
   mov eax, $6A09E667
-  mov dword ptr [rsp + $60], eax
+  mov dword ptr [rsp + $00], eax
   mov eax, $BB67AE85
-  mov dword ptr [rsp + $64], eax
+  mov dword ptr [rsp + $04], eax
   mov eax, $3C6EF372
-  mov dword ptr [rsp + $68], eax
+  mov dword ptr [rsp + $08], eax
   mov eax, $A54FF53A
-  mov dword ptr [rsp + $6C], eax
-  db $C5, $F9, $6F, $54, $24, $60               // vmovdqa xmm2, oword [rsp + $60]
+  mov dword ptr [rsp + $0C], eax
+  db $C5, $F9, $6F, $54, $24, $00               // vmovdqa xmm2, oword [rsp + $00]
 
   // Initialize state
   db $C4, $C1, $7A, $6F, $00                    // vmovdqu xmm0, oword [r8]
@@ -586,10 +582,6 @@
   db $C5, $FA, $7F, $51, $20                    // vmovdqu oword [rcx + $20], xmm2
   db $C5, $FA, $7F, $59, $30                    // vmovdqu oword [rcx + $30], xmm3
 
-  db $C5, $F9, $6F, $34, $24                    // vmovdqa xmm6, oword [rsp]
-  db $C5, $F9, $6F, $7C, $24, $10               // vmovdqa xmm7, oword [rsp + $10]
-  db $C5, $79, $6F, $44, $24, $20               // vmovdqa xmm8, oword [rsp + $20]
-  db $C5, $79, $6F, $4C, $24, $30               // vmovdqa xmm9, oword [rsp + $30]
-  db $C5, $79, $6F, $5C, $24, $40               // vmovdqa xmm11, oword [rsp + $40]
-  db $C5, $79, $6F, $74, $24, $50               // vmovdqa xmm14, oword [rsp + $50]
-  add rsp, 120
+  add rsp, 24
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

@@ -52,19 +52,9 @@
   push rdi
   push rsi
 
-  sub rsp, 424
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  // Save XMM6-XMM15
-  db $C5, $FA, $7F, $B4, $24, $00, $01, $00, $00  // vmovdqu [rsp+256], xmm6
-  db $C5, $FA, $7F, $BC, $24, $10, $01, $00, $00  // vmovdqu [rsp+272], xmm7
-  db $C4, $61, $7A, $7F, $84, $24, $20, $01, $00, $00  // vmovdqu [rsp+288], xmm8
-  db $C4, $61, $7A, $7F, $8C, $24, $30, $01, $00, $00  // vmovdqu [rsp+304], xmm9
-  db $C4, $61, $7A, $7F, $94, $24, $40, $01, $00, $00  // vmovdqu [rsp+320], xmm10
-  db $C4, $61, $7A, $7F, $9C, $24, $50, $01, $00, $00  // vmovdqu [rsp+336], xmm11
-  db $C4, $61, $7A, $7F, $A4, $24, $60, $01, $00, $00  // vmovdqu [rsp+352], xmm12
-  db $C4, $61, $7A, $7F, $AC, $24, $70, $01, $00, $00  // vmovdqu [rsp+368], xmm13
-  db $C4, $61, $7A, $7F, $B4, $24, $80, $01, $00, $00  // vmovdqu [rsp+384], xmm14
-  db $C4, $61, $7A, $7F, $BC, $24, $90, $01, $00, $00  // vmovdqu [rsp+400], xmm15
+  sub rsp, 264
 
   // Save parameters to callee-saved registers
   mov r12, rcx
@@ -401,19 +391,9 @@
   // ===== Epilogue =====
   db $C5, $F8, $77  // vzeroupper
 
-  // Restore XMM6-XMM15
-  db $C5, $FA, $6F, $B4, $24, $00, $01, $00, $00  // vmovdqu xmm6, [rsp+256]
-  db $C5, $FA, $6F, $BC, $24, $10, $01, $00, $00  // vmovdqu xmm7, [rsp+272]
-  db $C4, $61, $7A, $6F, $84, $24, $20, $01, $00, $00  // vmovdqu xmm8, [rsp+288]
-  db $C4, $61, $7A, $6F, $8C, $24, $30, $01, $00, $00  // vmovdqu xmm9, [rsp+304]
-  db $C4, $61, $7A, $6F, $94, $24, $40, $01, $00, $00  // vmovdqu xmm10, [rsp+320]
-  db $C4, $61, $7A, $6F, $9C, $24, $50, $01, $00, $00  // vmovdqu xmm11, [rsp+336]
-  db $C4, $61, $7A, $6F, $A4, $24, $60, $01, $00, $00  // vmovdqu xmm12, [rsp+352]
-  db $C4, $61, $7A, $6F, $AC, $24, $70, $01, $00, $00  // vmovdqu xmm13, [rsp+368]
-  db $C4, $61, $7A, $6F, $B4, $24, $80, $01, $00, $00  // vmovdqu xmm14, [rsp+384]
-  db $C4, $61, $7A, $6F, $BC, $24, $90, $01, $00, $00  // vmovdqu xmm15, [rsp+400]
+  add rsp, 264
 
-  add rsp, 424
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
 
   pop rsi
   pop rdi

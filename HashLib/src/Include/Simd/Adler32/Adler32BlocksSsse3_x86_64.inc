@@ -5,10 +5,7 @@
 // Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
 // Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
 
-  sub rsp, 48
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  movdqu oword [rsp + $20], xmm8
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
   // Load constants
   movdqu xmm4, oword [r9]
@@ -79,7 +76,4 @@
   mov dword [r8], eax
   mov dword [r8 + 4], r10d
 
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  movdqu xmm8, oword [rsp + $20]
-  add rsp, 48
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

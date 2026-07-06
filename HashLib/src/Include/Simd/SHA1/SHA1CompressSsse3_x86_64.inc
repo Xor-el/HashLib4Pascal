@@ -30,24 +30,24 @@
 //   [rsp + 104..111]: BSWAP mask ptr save
 //   [rsp + 112..431]: W buffer (320 bytes = 80 x 4, 16-byte aligned)
 
-  sub rsp, 440
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  mov [rsp + $30], rdi
-  mov [rsp + $38], rsi
-  mov [rsp + $20], rbx
-  mov [rsp + $28], rbp
-  mov [rsp + $40], r12
-  mov [rsp + $48], r13
-  mov [rsp + $50], r14
-  mov [rsp + $58], r15
+  sub rsp, 408
+
+  mov [rsp + $10], rdi
+  mov [rsp + $18], rsi
+  mov [rsp + $00], rbx
+  mov [rsp + $08], rbp
+  mov [rsp + $20], r12
+  mov [rsp + $28], r13
+  mov [rsp + $30], r14
+  mov [rsp + $38], r15
 
   mov r12, rcx
   mov r13, rdx
   mov r14d, r8d
-  mov [rsp + $60], r9
-  mov [rsp + $68], r10
+  mov [rsp + $40], r9
+  mov [rsp + $48], r10
 
   test r14d, r14d
   jz @ssse3_sha1_done
@@ -56,11 +56,11 @@
 
   // ========== Phase 1: SIMD message schedule ==========
 
-  mov rax, [rsp + $68]
+  mov rax, [rsp + $48]
   movdqu xmm7, oword [rax]
-  mov rax, [rsp + $60]
+  mov rax, [rsp + $40]
 
-  lea r15, [rsp + $70]
+  lea r15, [rsp + $50]
 
   movdqu xmm0, oword [r13]
   pshufb xmm0, xmm7
@@ -157,7 +157,7 @@
   mov edx, [r12 + $0C]
   mov r8d, [r12 + $10]
 
-  lea rbp, [rsp + $70]
+  lea rbp, [rsp + $50]
 
   // ---------- Rounds 0-19: Ch, K = $5A827999 ----------
 
@@ -452,14 +452,14 @@
 
 @ssse3_sha1_done:
 
-  mov rbx, [rsp + $20]
-  mov rbp, [rsp + $28]
-  mov r12, [rsp + $40]
-  mov r13, [rsp + $48]
-  mov r14, [rsp + $50]
-  mov r15, [rsp + $58]
-  mov rdi, [rsp + $30]
-  mov rsi, [rsp + $38]
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  add rsp, 440
+  mov rbx, [rsp + $00]
+  mov rbp, [rsp + $08]
+  mov r12, [rsp + $20]
+  mov r13, [rsp + $28]
+  mov r14, [rsp + $30]
+  mov r15, [rsp + $38]
+  mov rdi, [rsp + $10]
+  mov rsi, [rsp + $18]
+  add rsp, 408
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

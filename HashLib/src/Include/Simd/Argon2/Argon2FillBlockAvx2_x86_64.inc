@@ -15,17 +15,14 @@
 // Diagonalize/Undiagonalize via vpermq (cross-lane 64-bit permute).
 // vzeroupper required before return.
 
-  sub rsp, 2184
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  db $C5, $FE, $7F, $34, $24                    // vmovdqu yword [rsp], ymm6
-  db $C5, $FE, $7F, $7C, $24, $20               // vmovdqu yword [rsp + $20], ymm7
-  db $C5, $7E, $7F, $44, $24, $40               // vmovdqu yword [rsp + $40], ymm8
-  db $C5, $7E, $7F, $4C, $24, $60               // vmovdqu yword [rsp + $60], ymm9
+  sub rsp, 2056
 
   // =========================================================================
   // Step 1: Compute R_buf = Left XOR Right, store at [rsp+128]
   // =========================================================================
-  lea rax, [rsp + 128]
+  lea rax, [rsp]
   xor r10, r10
 @xor_loop:
   db $C4, $A1, $7E, $6F, $04, $11               // vmovdqu ymm0, yword [rcx + r10]
@@ -38,7 +35,7 @@
   // =========================================================================
   // Step 2: Copy R_buf to Z_buf at [rsp+1152]
   // =========================================================================
-  lea r11, [rsp + 1152]
+  lea r11, [rsp + 1024]
   xor r10, r10
 @copy_loop:
   db $C4, $A1, $7E, $6F, $04, $10               // vmovdqu ymm0, yword [rax + r10]
@@ -326,10 +323,7 @@
   jb @final_xor_loop
 
 @epilogue:
-  db $C5, $FE, $6F, $34, $24                    // vmovdqu ymm6, yword [rsp]
-  db $C5, $FE, $6F, $7C, $24, $20               // vmovdqu ymm7, yword [rsp + $20]
-  db $C5, $7E, $6F, $44, $24, $40               // vmovdqu ymm8, yword [rsp + $40]
-  db $C5, $7E, $6F, $4C, $24, $60               // vmovdqu ymm9, yword [rsp + $60]
-
-  add rsp, 2184
+  add rsp, 2056
   db $C5, $F8, $77                              // vzeroupper
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

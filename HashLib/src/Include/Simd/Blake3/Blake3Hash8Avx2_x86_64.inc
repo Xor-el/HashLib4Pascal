@@ -18,6 +18,8 @@
 //
 // MS x64 non-volatile saves: xmm6-xmm13.
 
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+
   push rbx
   push rbp
   push r12
@@ -25,15 +27,7 @@
   mov r12, rsp
   and rsp, -32
 
-  sub rsp, 1280
-  db $C5, $FA, $7F, $B4, $24, $80, $04, $00, $00 // vmovdqu [rsp+1152], xmm6
-  db $C5, $FA, $7F, $BC, $24, $90, $04, $00, $00 // vmovdqu [rsp+1168], xmm7
-  db $C5, $7A, $7F, $84, $24, $A0, $04, $00, $00 // vmovdqu [rsp+1184], xmm8
-  db $C5, $7A, $7F, $8C, $24, $B0, $04, $00, $00 // vmovdqu [rsp+1200], xmm9
-  db $C5, $7A, $7F, $94, $24, $C0, $04, $00, $00 // vmovdqu [rsp+1216], xmm10
-  db $C5, $7A, $7F, $9C, $24, $D0, $04, $00, $00 // vmovdqu [rsp+1232], xmm11
-  db $C5, $7A, $7F, $A4, $24, $E0, $04, $00, $00 // vmovdqu [rsp+1248], xmm12
-  db $C5, $7A, $7F, $AC, $24, $F0, $04, $00, $00 // vmovdqu [rsp+1264], xmm13
+  sub rsp, 1152
 
   mov qword ptr [rsp + 1136], r12
   mov qword ptr [rsp + 1120], r8
@@ -1677,18 +1671,11 @@
   db $C5, $7E, $7F, $A0, $C0, $00, $00, $00  // vmovdqu [rax+192], ymm12
   db $C5, $7E, $7F, $A8, $E0, $00, $00, $00  // vmovdqu [rax+224], ymm13
 
-  db $C5, $FA, $6F, $B4, $24, $80, $04, $00, $00 // vmovdqu xmm6, [rsp+1152]
-  db $C5, $FA, $6F, $BC, $24, $90, $04, $00, $00 // vmovdqu xmm7, [rsp+1168]
-  db $C5, $7A, $6F, $84, $24, $A0, $04, $00, $00 // vmovdqu xmm8, [rsp+1184]
-  db $C5, $7A, $6F, $8C, $24, $B0, $04, $00, $00 // vmovdqu xmm9, [rsp+1200]
-  db $C5, $7A, $6F, $94, $24, $C0, $04, $00, $00 // vmovdqu xmm10, [rsp+1216]
-  db $C5, $7A, $6F, $9C, $24, $D0, $04, $00, $00 // vmovdqu xmm11, [rsp+1232]
-  db $C5, $7A, $6F, $A4, $24, $E0, $04, $00, $00 // vmovdqu xmm12, [rsp+1248]
-  db $C5, $7A, $6F, $AC, $24, $F0, $04, $00, $00 // vmovdqu xmm13, [rsp+1264]
-
   db $C5, $F8, $77                           // vzeroupper
 
   mov rsp, qword ptr [rsp + 1136]
   pop r12
   pop rbp
   pop rbx
+
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

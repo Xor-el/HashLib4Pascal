@@ -10,11 +10,7 @@
 //   weight bytes via pmaddwd (SSE2), producing the same 4 x i32 weighted
 //   sums per 16-byte half that pmaddubsw + pmaddwd would yield.
 
-  sub rsp, 64
-  movdqu oword [rsp], xmm6
-  movdqu oword [rsp + $10], xmm7
-  movdqu oword [rsp + $20], xmm8
-  movdqu oword [rsp + $30], xmm9
+  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
   // Zero constant
   pxor xmm3, xmm3
@@ -102,8 +98,4 @@
   mov dword [r8], eax
   mov dword [r8 + 4], r10d
 
-  movdqu xmm6, oword [rsp]
-  movdqu xmm7, oword [rsp + $10]
-  movdqu xmm8, oword [rsp + $20]
-  movdqu xmm9, oword [rsp + $30]
-  add rsp, 64
+  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
