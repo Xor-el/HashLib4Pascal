@@ -2,7 +2,7 @@
 // Expects AAPCS64: x0 = state ptr (25 x UInt64), x1 = data ptr,
 //   w2 = numblocks, w3 = blocksize (bytes, = rate), x4 = iotas ptr.
 // Saves/restores d8-d15 on 64-byte frame; XORs blocksize bytes per block then permutes.
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S, HashLib KeccakF1600Avx2Absorb_x86_64.inc.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
 // AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v24   = Keccak state lanes (data XORed lane-by-lane into v0..)

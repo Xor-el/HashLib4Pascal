@@ -1,486 +1,1153 @@
-// SHA-256 SSE2 implementation with SIMD message schedule.
-// Based on SSSE3 implementation (see SHA256CompressSsse3_x86_64.inc).
-// Same algorithm as SSSE3 version but replaces SSSE3-specific instructions:
-//   pshufb  -> SSE2 byte-swap (pshuflw/pshufhw + psrlw/psllw/por)
-//   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks, r9 = K256 ptr.
-// K256: 64 UInt32 round constants (256 bytes). SSE2 byte-swaps without a mask, so
-// no BSWAP mask ptr is needed (4-param path).
-// Uses xmm0-xmm7, all GPR.
-//
-// Two-phase per block:
-//   Phase 1 (SIMD): Compute W+K[0..63] using SSE2 message schedule, store to stack
-//   Phase 2 (GPR): Run 64 compression rounds reading W+K from stack
+// SHA-256 SSE2 SIMD-schedule implementation, derived from OpenSSL's SHA-256
+// SSSE3 kernel in sha512-x86_64.pl (CRYPTOGAMS). The message schedule runs in
+// SSE2 (paddd/psrld/pslld/pxor/pshufd) interleaved with the GPR compression
+// rounds, so the vector and integer units run in parallel. OpenSSL's two
+// SSSE3-only ops are emulated in SSE2: the pshufb dword byte-swap becomes
+// psrlw/psllw/por + pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por
+// (xmm8 is a free scratch).
+// Expects MS x64 ABI (after SimdProc4Begin): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = doubled-K256 ptr (read at a 32-byte stride so the
+//   duplicated halves are skipped; see K256_Doubled). No byte-swap mask table is
+//   needed - the swap is computed, not shuffled.
 //
 // MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
-//
-// Stack layout (sub rsp, 344): GPR saves at [rsp+$00..$47], W+K schedule at [rsp+$50..]
 
   {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
-  sub rsp, 344
+  mov    rax, rsp
+  push   r9
+  push   rbx
+  push   rbp
+  push   rsi
+  push   rdi
+  push   r12
+  push   r13
+  push   r14
+  push   r15
+  mov    rdi, rcx
+  mov    rsi, rdx
+  mov    edx, r8d
+  shl    rdx, $4
+  sub    rsp, $A0
+  lea    rdx, [rsi + rdx*4]
+  and    rsp, $FFFFFFFFFFFFFFC0
+  mov    qword [rsp + $40], rdi
+  mov    qword [rsp + $48], rsi
+  mov    qword [rsp + $50], rdx
+  mov    qword [rsp + $58], rax
 
-  mov [rsp + $10], rdi
-  mov [rsp + $18], rsi
-  mov [rsp + $00], rbx
-  mov [rsp + $08], rbp
-  mov [rsp + $20], r12
-  mov [rsp + $28], r13
-  mov [rsp + $30], r14
-  mov [rsp + $38], r15
+@prologue:
+  mov    eax, dword [rdi]
+  mov    ebx, dword [rdi + $4]
+  mov    ecx, dword [rdi + $8]
+  mov    edx, dword [rdi + $C]
+  mov    r8d, dword [rdi + $10]
+  mov    r9d, dword [rdi + $14]
+  mov    r10d, dword [rdi + $18]
+  mov    r11d, dword [rdi + $1C]
+  jmp @block_loop
 
-  mov r12, rcx
-  mov r13, rdx
-  mov r14d, r8d
-  mov [rsp + $40], r9
-
-  test r14d, r14d
-  jz @sse2_256_done
-
-@sse2_256_block_loop:
-
-  // ========== Phase 1: Message Schedule ==========
-
-  mov rax, [rsp + $40]
-
-  // SSE2 32-bit byte-swap for W[0..15]
-  movdqu xmm0, oword [r13]
+@block_loop:
+  movdqu xmm0, oword [rsi]
+  movdqu xmm1, oword [rsi + $10]
+  movdqu xmm2, oword [rsi + $20]
+  movdqa xmm8, xmm0
+  psrlw  xmm8, $8
+  psllw  xmm0, $8
+  por    xmm0, xmm8
   pshuflw xmm0, xmm0, $B1
   pshufhw xmm0, xmm0, $B1
-  movdqa xmm4, xmm0
-  psrlw  xmm0, 8
-  psllw  xmm4, 8
-  por    xmm0, xmm4
-
-  movdqu xmm1, oword [r13 + $10]
+  movdqu xmm3, oword [rsi + $30]
+  mov    rbp, qword [rsp + $58]
+  mov    rbp, qword [rbp - $8]
+  movdqa xmm8, xmm1
+  psrlw  xmm8, $8
+  psllw  xmm1, $8
+  por    xmm1, xmm8
   pshuflw xmm1, xmm1, $B1
   pshufhw xmm1, xmm1, $B1
-  movdqa xmm4, xmm1
-  psrlw  xmm1, 8
-  psllw  xmm4, 8
-  por    xmm1, xmm4
-
-  movdqu xmm2, oword [r13 + $20]
+  movdqu xmm4, oword [rbp + $0]
+  movdqu xmm5, oword [rbp + $20]
+  movdqa xmm8, xmm2
+  psrlw  xmm8, $8
+  psllw  xmm2, $8
+  por    xmm2, xmm8
   pshuflw xmm2, xmm2, $B1
   pshufhw xmm2, xmm2, $B1
-  movdqa xmm4, xmm2
-  psrlw  xmm2, 8
-  psllw  xmm4, 8
-  por    xmm2, xmm4
-
-  movdqu xmm3, oword [r13 + $30]
+  paddd  xmm4, xmm0
+  movdqu xmm6, oword [rbp + $40]
+  movdqa xmm8, xmm3
+  psrlw  xmm8, $8
+  psllw  xmm3, $8
+  por    xmm3, xmm8
   pshuflw xmm3, xmm3, $B1
   pshufhw xmm3, xmm3, $B1
-  movdqa xmm4, xmm3
-  psrlw  xmm3, 8
-  psllw  xmm4, 8
-  por    xmm3, xmm4
+  movdqu xmm7, oword [rbp + $60]
+  paddd  xmm5, xmm1
+  paddd  xmm6, xmm2
+  paddd  xmm7, xmm3
+  movdqa oword [rsp], xmm4
+  mov    r14d, eax
+  movdqa oword [rsp + $10], xmm5
+  mov    edi, ebx
+  movdqa oword [rsp + $20], xmm6
+  xor    edi, ecx
+  movdqa oword [rsp + $30], xmm7
+  mov    r13d, r8d
+  jmp @sched_loop
 
-  lea rbp, [rsp + $50]
-
-  movdqa xmm4, xmm0
-  movdqu xmm5, oword [rax]
-  paddd  xmm4, xmm5
-  movdqa oword [rbp], xmm4
-
+@sched_loop:
+  sub    rbp, $FFFFFFFFFFFFFF80
+  ror    r13d, $E
   movdqa xmm4, xmm1
-  movdqu xmm5, oword [rax + $10]
-  paddd  xmm4, xmm5
-  movdqa oword [rbp + $10], xmm4
-
-  movdqa xmm4, xmm2
-  movdqu xmm5, oword [rax + $20]
-  paddd  xmm4, xmm5
-  movdqa oword [rbp + $20], xmm4
-
-  movdqa xmm4, xmm3
-  movdqu xmm5, oword [rax + $30]
-  paddd  xmm4, xmm5
-  movdqa oword [rbp + $30], xmm4
-
-  add rax, $40
-  add rbp, $40
-  mov ecx, 12
-
-@sse2_256_expand_loop:
-
-  // sigma0(W[t-15..t-12]) - replaces palignr xmm4, xmm0, 4
-  movdqa xmm4, xmm0
-  psrldq xmm4, 4
-  movdqa xmm7, xmm1
-  pslldq xmm7, 12
-  por    xmm4, xmm7
-
-  movdqa xmm5, xmm4
-  movdqa xmm6, xmm4
-  psrld  xmm4, 3
-  psrld  xmm5, 7
-  pslld  xmm6, 14
-  pxor   xmm4, xmm5
-  psrld  xmm5, 11
-  pxor   xmm4, xmm6
-  pslld  xmm6, 11
-  pxor   xmm4, xmm5
-  pxor   xmm4, xmm6
-
-  paddd  xmm0, xmm4
-
-  // W[t-7..t-4] - replaces palignr xmm4, xmm2, 4
-  movdqa xmm4, xmm2
-  psrldq xmm4, 4
+  mov    eax, r14d
+  mov    r12d, r9d
   movdqa xmm7, xmm3
-  pslldq xmm7, 12
-  por    xmm4, xmm7
+  ror    r14d, $9
+  xor    r13d, r8d
+  xor    r12d, r10d
+  ror    r13d, $5
+  xor    r14d, eax
+  movdqa xmm8, xmm0
+  psrldq xmm8, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm8
+  and    r12d, r8d
+  xor    r13d, r8d
+  movdqa xmm8, xmm2
+  psrldq xmm8, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm8
+  add    r11d, dword [rsp]
+  mov    r15d, eax
+  xor    r12d, r10d
+  ror    r14d, $B
+  movdqa xmm5, xmm4
+  xor    r15d, ebx
+  add    r11d, r12d
+  movdqa xmm6, xmm4
+  ror    r13d, $6
+  and    edi, r15d
+  psrld  xmm4, $3
+  xor    r14d, eax
+  add    r11d, r13d
+  xor    edi, ebx
+  paddd  xmm0, xmm7
+  ror    r14d, $2
+  add    edx, r11d
+  psrld  xmm6, $7
+  add    r11d, edi
+  mov    r13d, edx
+  pshufd xmm7, xmm3, $FA
+  add    r14d, r11d
+  ror    r13d, $E
+  pslld  xmm5, $E
+  mov    r11d, r14d
+  mov    r12d, r8d
+  pxor   xmm4, xmm6
+  ror    r14d, $9
+  xor    r13d, edx
+  xor    r12d, r9d
+  ror    r13d, $5
+  psrld  xmm6, $B
+  xor    r14d, r11d
+  pxor   xmm4, xmm5
+  and    r12d, edx
+  xor    r13d, edx
+  pslld  xmm5, $B
+  add    r10d, dword [rsp + $4]
+  mov    edi, r11d
+  pxor   xmm4, xmm6
+  xor    r12d, r9d
+  ror    r14d, $B
+  movdqa xmm6, xmm7
+  xor    edi, eax
+  add    r10d, r12d
+  pxor   xmm4, xmm5
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r11d
+  psrld  xmm7, $A
+  add    r10d, r13d
+  xor    r15d, eax
   paddd  xmm0, xmm4
-
-  // sigma1 phase 1: W[t-2..t-1]
+  ror    r14d, $2
+  add    ecx, r10d
+  psrlq  xmm6, $11
+  add    r10d, r15d
+  mov    r13d, ecx
+  add    r14d, r10d
+  pxor   xmm7, xmm6
+  ror    r13d, $E
+  mov    r10d, r14d
+  mov    r12d, edx
+  ror    r14d, $9
+  psrlq  xmm6, $2
+  xor    r13d, ecx
+  xor    r12d, r8d
+  pxor   xmm7, xmm6
+  ror    r13d, $5
+  xor    r14d, r10d
+  and    r12d, ecx
+  pshufd xmm7, xmm7, $80
+  xor    r13d, ecx
+  add    r9d, dword [rsp + $8]
+  mov    r15d, r10d
+  psrldq xmm7, $8
+  xor    r12d, r8d
+  ror    r14d, $B
+  xor    r15d, r11d
+  add    r9d, r12d
+  ror    r13d, $6
+  paddd  xmm0, xmm7
+  and    edi, r15d
+  xor    r14d, r10d
+  add    r9d, r13d
+  pshufd xmm7, xmm0, $50
+  xor    edi, r11d
+  ror    r14d, $2
+  add    ebx, r9d
+  movdqa xmm6, xmm7
+  add    r9d, edi
+  mov    r13d, ebx
+  psrld  xmm7, $A
+  add    r14d, r9d
+  ror    r13d, $E
+  psrlq  xmm6, $11
+  mov    r9d, r14d
+  mov    r12d, ecx
+  pxor   xmm7, xmm6
+  ror    r14d, $9
+  xor    r13d, ebx
+  xor    r12d, edx
+  ror    r13d, $5
+  xor    r14d, r9d
+  psrlq  xmm6, $2
+  and    r12d, ebx
+  xor    r13d, ebx
+  add    r8d, dword [rsp + $C]
+  pxor   xmm7, xmm6
+  mov    edi, r9d
+  xor    r12d, edx
+  ror    r14d, $B
+  pshufd xmm7, xmm7, $8
+  xor    edi, r10d
+  add    r8d, r12d
+  movdqu xmm6, oword [rbp + $0]
+  ror    r13d, $6
+  and    r15d, edi
+  pslldq xmm7, $8
+  xor    r14d, r9d
+  add    r8d, r13d
+  xor    r15d, r10d
+  paddd  xmm0, xmm7
+  ror    r14d, $2
+  add    eax, r8d
+  add    r8d, r15d
+  paddd  xmm6, xmm0
+  mov    r13d, eax
+  add    r14d, r8d
+  movdqa oword [rsp], xmm6
+  ror    r13d, $E
+  movdqa xmm4, xmm2
+  mov    r8d, r14d
+  mov    r12d, ebx
+  movdqa xmm7, xmm0
+  ror    r14d, $9
+  xor    r13d, eax
+  xor    r12d, ecx
+  ror    r13d, $5
+  xor    r14d, r8d
+  movdqa xmm8, xmm1
+  psrldq xmm8, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm8
+  and    r12d, eax
+  xor    r13d, eax
+  movdqa xmm8, xmm3
+  psrldq xmm8, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm8
+  add    edx, dword [rsp + $10]
+  mov    r15d, r8d
+  xor    r12d, ecx
+  ror    r14d, $B
+  movdqa xmm5, xmm4
+  xor    r15d, r9d
+  add    edx, r12d
+  movdqa xmm6, xmm4
+  ror    r13d, $6
+  and    edi, r15d
+  psrld  xmm4, $3
+  xor    r14d, r8d
+  add    edx, r13d
+  xor    edi, r9d
+  paddd  xmm1, xmm7
+  ror    r14d, $2
+  add    r11d, edx
+  psrld  xmm6, $7
+  add    edx, edi
+  mov    r13d, r11d
+  pshufd xmm7, xmm0, $FA
+  add    r14d, edx
+  ror    r13d, $E
+  pslld  xmm5, $E
+  mov    edx, r14d
+  mov    r12d, eax
+  pxor   xmm4, xmm6
+  ror    r14d, $9
+  xor    r13d, r11d
+  xor    r12d, ebx
+  ror    r13d, $5
+  psrld  xmm6, $B
+  xor    r14d, edx
+  pxor   xmm4, xmm5
+  and    r12d, r11d
+  xor    r13d, r11d
+  pslld  xmm5, $B
+  add    ecx, dword [rsp + $14]
+  mov    edi, edx
+  pxor   xmm4, xmm6
+  xor    r12d, ebx
+  ror    r14d, $B
+  movdqa xmm6, xmm7
+  xor    edi, r8d
+  add    ecx, r12d
+  pxor   xmm4, xmm5
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, edx
+  psrld  xmm7, $A
+  add    ecx, r13d
+  xor    r15d, r8d
+  paddd  xmm1, xmm4
+  ror    r14d, $2
+  add    r10d, ecx
+  psrlq  xmm6, $11
+  add    ecx, r15d
+  mov    r13d, r10d
+  add    r14d, ecx
+  pxor   xmm7, xmm6
+  ror    r13d, $E
+  mov    ecx, r14d
+  mov    r12d, r11d
+  ror    r14d, $9
+  psrlq  xmm6, $2
+  xor    r13d, r10d
+  xor    r12d, eax
+  pxor   xmm7, xmm6
+  ror    r13d, $5
+  xor    r14d, ecx
+  and    r12d, r10d
+  pshufd xmm7, xmm7, $80
+  xor    r13d, r10d
+  add    ebx, dword [rsp + $18]
+  mov    r15d, ecx
+  psrldq xmm7, $8
+  xor    r12d, eax
+  ror    r14d, $B
+  xor    r15d, edx
+  add    ebx, r12d
+  ror    r13d, $6
+  paddd  xmm1, xmm7
+  and    edi, r15d
+  xor    r14d, ecx
+  add    ebx, r13d
+  pshufd xmm7, xmm1, $50
+  xor    edi, edx
+  ror    r14d, $2
+  add    r9d, ebx
+  movdqa xmm6, xmm7
+  add    ebx, edi
+  mov    r13d, r9d
+  psrld  xmm7, $A
+  add    r14d, ebx
+  ror    r13d, $E
+  psrlq  xmm6, $11
+  mov    ebx, r14d
+  mov    r12d, r10d
+  pxor   xmm7, xmm6
+  ror    r14d, $9
+  xor    r13d, r9d
+  xor    r12d, r11d
+  ror    r13d, $5
+  xor    r14d, ebx
+  psrlq  xmm6, $2
+  and    r12d, r9d
+  xor    r13d, r9d
+  add    eax, dword [rsp + $1C]
+  pxor   xmm7, xmm6
+  mov    edi, ebx
+  xor    r12d, r11d
+  ror    r14d, $B
+  pshufd xmm7, xmm7, $8
+  xor    edi, ecx
+  add    eax, r12d
+  movdqu xmm6, oword [rbp + $20]
+  ror    r13d, $6
+  and    r15d, edi
+  pslldq xmm7, $8
+  xor    r14d, ebx
+  add    eax, r13d
+  xor    r15d, ecx
+  paddd  xmm1, xmm7
+  ror    r14d, $2
+  add    r8d, eax
+  add    eax, r15d
+  paddd  xmm6, xmm1
+  mov    r13d, r8d
+  add    r14d, eax
+  movdqa oword [rsp + $10], xmm6
+  ror    r13d, $E
   movdqa xmm4, xmm3
-  psrldq xmm4, 8
+  mov    eax, r14d
+  mov    r12d, r9d
+  movdqa xmm7, xmm1
+  ror    r14d, $9
+  xor    r13d, r8d
+  xor    r12d, r10d
+  ror    r13d, $5
+  xor    r14d, eax
+  movdqa xmm8, xmm2
+  psrldq xmm8, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm8
+  and    r12d, r8d
+  xor    r13d, r8d
+  movdqa xmm8, xmm0
+  psrldq xmm8, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm8
+  add    r11d, dword [rsp + $20]
+  mov    r15d, eax
+  xor    r12d, r10d
+  ror    r14d, $B
   movdqa xmm5, xmm4
+  xor    r15d, ebx
+  add    r11d, r12d
   movdqa xmm6, xmm4
-  psrld  xmm4, 10
-  psrld  xmm5, 17
-  pslld  xmm6, 13
-  pxor   xmm4, xmm5
-  psrld  xmm5, 2
+  ror    r13d, $6
+  and    edi, r15d
+  psrld  xmm4, $3
+  xor    r14d, eax
+  add    r11d, r13d
+  xor    edi, ebx
+  paddd  xmm2, xmm7
+  ror    r14d, $2
+  add    edx, r11d
+  psrld  xmm6, $7
+  add    r11d, edi
+  mov    r13d, edx
+  pshufd xmm7, xmm1, $FA
+  add    r14d, r11d
+  ror    r13d, $E
+  pslld  xmm5, $E
+  mov    r11d, r14d
+  mov    r12d, r8d
   pxor   xmm4, xmm6
-  pslld  xmm6, 2
+  ror    r14d, $9
+  xor    r13d, edx
+  xor    r12d, r9d
+  ror    r13d, $5
+  psrld  xmm6, $B
+  xor    r14d, r11d
   pxor   xmm4, xmm5
+  and    r12d, edx
+  xor    r13d, edx
+  pslld  xmm5, $B
+  add    r10d, dword [rsp + $24]
+  mov    edi, r11d
   pxor   xmm4, xmm6
-  paddd  xmm0, xmm4
-
-  // sigma1 phase 2: W[t..t+1]
+  xor    r12d, r9d
+  ror    r14d, $B
+  movdqa xmm6, xmm7
+  xor    edi, eax
+  add    r10d, r12d
+  pxor   xmm4, xmm5
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r11d
+  psrld  xmm7, $A
+  add    r10d, r13d
+  xor    r15d, eax
+  paddd  xmm2, xmm4
+  ror    r14d, $2
+  add    ecx, r10d
+  psrlq  xmm6, $11
+  add    r10d, r15d
+  mov    r13d, ecx
+  add    r14d, r10d
+  pxor   xmm7, xmm6
+  ror    r13d, $E
+  mov    r10d, r14d
+  mov    r12d, edx
+  ror    r14d, $9
+  psrlq  xmm6, $2
+  xor    r13d, ecx
+  xor    r12d, r8d
+  pxor   xmm7, xmm6
+  ror    r13d, $5
+  xor    r14d, r10d
+  and    r12d, ecx
+  pshufd xmm7, xmm7, $80
+  xor    r13d, ecx
+  add    r9d, dword [rsp + $28]
+  mov    r15d, r10d
+  psrldq xmm7, $8
+  xor    r12d, r8d
+  ror    r14d, $B
+  xor    r15d, r11d
+  add    r9d, r12d
+  ror    r13d, $6
+  paddd  xmm2, xmm7
+  and    edi, r15d
+  xor    r14d, r10d
+  add    r9d, r13d
+  pshufd xmm7, xmm2, $50
+  xor    edi, r11d
+  ror    r14d, $2
+  add    ebx, r9d
+  movdqa xmm6, xmm7
+  add    r9d, edi
+  mov    r13d, ebx
+  psrld  xmm7, $A
+  add    r14d, r9d
+  ror    r13d, $E
+  psrlq  xmm6, $11
+  mov    r9d, r14d
+  mov    r12d, ecx
+  pxor   xmm7, xmm6
+  ror    r14d, $9
+  xor    r13d, ebx
+  xor    r12d, edx
+  ror    r13d, $5
+  xor    r14d, r9d
+  psrlq  xmm6, $2
+  and    r12d, ebx
+  xor    r13d, ebx
+  add    r8d, dword [rsp + $2C]
+  pxor   xmm7, xmm6
+  mov    edi, r9d
+  xor    r12d, edx
+  ror    r14d, $B
+  pshufd xmm7, xmm7, $8
+  xor    edi, r10d
+  add    r8d, r12d
+  movdqu xmm6, oword [rbp + $40]
+  ror    r13d, $6
+  and    r15d, edi
+  pslldq xmm7, $8
+  xor    r14d, r9d
+  add    r8d, r13d
+  xor    r15d, r10d
+  paddd  xmm2, xmm7
+  ror    r14d, $2
+  add    eax, r8d
+  add    r8d, r15d
+  paddd  xmm6, xmm2
+  mov    r13d, eax
+  add    r14d, r8d
+  movdqa oword [rsp + $20], xmm6
+  ror    r13d, $E
   movdqa xmm4, xmm0
-  pslldq xmm4, 8
+  mov    r8d, r14d
+  mov    r12d, ebx
+  movdqa xmm7, xmm2
+  ror    r14d, $9
+  xor    r13d, eax
+  xor    r12d, ecx
+  ror    r13d, $5
+  xor    r14d, r8d
+  movdqa xmm8, xmm3
+  psrldq xmm8, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm8
+  and    r12d, eax
+  xor    r13d, eax
+  movdqa xmm8, xmm1
+  psrldq xmm8, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm8
+  add    edx, dword [rsp + $30]
+  mov    r15d, r8d
+  xor    r12d, ecx
+  ror    r14d, $B
   movdqa xmm5, xmm4
+  xor    r15d, r9d
+  add    edx, r12d
   movdqa xmm6, xmm4
-  psrld  xmm4, 10
-  psrld  xmm5, 17
-  pslld  xmm6, 13
-  pxor   xmm4, xmm5
-  psrld  xmm5, 2
+  ror    r13d, $6
+  and    edi, r15d
+  psrld  xmm4, $3
+  xor    r14d, r8d
+  add    edx, r13d
+  xor    edi, r9d
+  paddd  xmm3, xmm7
+  ror    r14d, $2
+  add    r11d, edx
+  psrld  xmm6, $7
+  add    edx, edi
+  mov    r13d, r11d
+  pshufd xmm7, xmm2, $FA
+  add    r14d, edx
+  ror    r13d, $E
+  pslld  xmm5, $E
+  mov    edx, r14d
+  mov    r12d, eax
   pxor   xmm4, xmm6
-  pslld  xmm6, 2
+  ror    r14d, $9
+  xor    r13d, r11d
+  xor    r12d, ebx
+  ror    r13d, $5
+  psrld  xmm6, $B
+  xor    r14d, edx
   pxor   xmm4, xmm5
+  and    r12d, r11d
+  xor    r13d, r11d
+  pslld  xmm5, $B
+  add    ecx, dword [rsp + $34]
+  mov    edi, edx
   pxor   xmm4, xmm6
-  paddd  xmm0, xmm4
-
-  movdqu xmm4, oword [rax]
-  paddd  xmm4, xmm0
-  movdqa oword [rbp], xmm4
-
-  movdqa xmm4, xmm0
-  movdqa xmm0, xmm1
-  movdqa xmm1, xmm2
-  movdqa xmm2, xmm3
-  movdqa xmm3, xmm4
-
-  add rax, $10
-  add rbp, $10
-  dec ecx
-  jnz @sse2_256_expand_loop
-
-  // ========== Phase 2: 64 Compression Rounds ==========
-
-  mov eax, [r12]
-  mov ebx, [r12 + $04]
-  mov ecx, [r12 + $08]
-  mov edx, [r12 + $0C]
-  mov r8d, [r12 + $10]
-  mov r9d, [r12 + $14]
-  mov r10d, [r12 + $18]
-  mov r11d, [r12 + $1C]
-
-  lea rbp, [rsp + $50]
-  lea r15, [rsp + $50 + $100]
-
-@sse2_256_round_loop:
-
-  // Round 0: a=eax b=ebx c=ecx d=edx e=r8d f=r9d g=r10d h=r11d
-  mov esi, r8d
-  mov edi, r8d
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, r9d
-  xor edi, r10d
-  and edi, r8d
-  xor edi, r10d
-  add esi, r11d
-  add esi, edi
-  add esi, [rbp]
-  add edx, esi
-  mov edi, eax
-  mov r11d, eax
-  ror edi, 2
-  ror r11d, 13
-  xor edi, r11d
-  ror r11d, 9
-  xor edi, r11d
-  add esi, edi
-  mov r11d, eax
-  and r11d, ebx
-  mov edi, eax
-  xor edi, ebx
-  and edi, ecx
-  xor r11d, edi
-  add r11d, esi
-
-  // Round 1: a=r11d b=eax c=ebx d=ecx e=edx f=r8d g=r9d h=r10d
-  mov esi, edx
-  mov edi, edx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, r8d
-  xor edi, r9d
-  and edi, edx
-  xor edi, r9d
-  add esi, r10d
-  add esi, edi
-  add esi, [rbp + $04]
-  add ecx, esi
-  mov edi, r11d
-  mov r10d, r11d
-  ror edi, 2
-  ror r10d, 13
-  xor edi, r10d
-  ror r10d, 9
-  xor edi, r10d
-  add esi, edi
-  mov r10d, r11d
-  and r10d, eax
-  mov edi, r11d
-  xor edi, eax
-  and edi, ebx
-  xor r10d, edi
-  add r10d, esi
-
-  // Round 2: a=r10d b=r11d c=eax d=ebx e=ecx f=edx g=r8d h=r9d
-  mov esi, ecx
-  mov edi, ecx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, edx
-  xor edi, r8d
-  and edi, ecx
-  xor edi, r8d
-  add esi, r9d
-  add esi, edi
-  add esi, [rbp + $08]
-  add ebx, esi
-  mov edi, r10d
-  mov r9d, r10d
-  ror edi, 2
-  ror r9d, 13
-  xor edi, r9d
-  ror r9d, 9
-  xor edi, r9d
-  add esi, edi
-  mov r9d, r10d
-  and r9d, r11d
-  mov edi, r10d
-  xor edi, r11d
-  and edi, eax
-  xor r9d, edi
-  add r9d, esi
-
-  // Round 3: a=r9d b=r10d c=r11d d=eax e=ebx f=ecx g=edx h=r8d
-  mov esi, ebx
-  mov edi, ebx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, ecx
-  xor edi, edx
-  and edi, ebx
-  xor edi, edx
-  add esi, r8d
-  add esi, edi
-  add esi, [rbp + $0C]
-  add eax, esi
-  mov edi, r9d
-  mov r8d, r9d
-  ror edi, 2
-  ror r8d, 13
-  xor edi, r8d
-  ror r8d, 9
-  xor edi, r8d
-  add esi, edi
-  mov r8d, r9d
-  and r8d, r10d
-  mov edi, r9d
-  xor edi, r10d
-  and edi, r11d
-  xor r8d, edi
-  add r8d, esi
-
-  // Round 4: a=r8d b=r9d c=r10d d=r11d e=eax f=ebx g=ecx h=edx
-  mov esi, eax
-  mov edi, eax
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, ebx
-  xor edi, ecx
-  and edi, eax
-  xor edi, ecx
-  add esi, edx
-  add esi, edi
-  add esi, [rbp + $10]
-  add r11d, esi
-  mov edi, r8d
-  mov edx, r8d
-  ror edi, 2
-  ror edx, 13
-  xor edi, edx
-  ror edx, 9
-  xor edi, edx
-  add esi, edi
-  mov edx, r8d
-  and edx, r9d
-  mov edi, r8d
-  xor edi, r9d
-  and edi, r10d
-  xor edx, edi
-  add edx, esi
-
-  // Round 5: a=edx b=r8d c=r9d d=r10d e=r11d f=eax g=ebx h=ecx
-  mov esi, r11d
-  mov edi, r11d
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, eax
-  xor edi, ebx
-  and edi, r11d
-  xor edi, ebx
-  add esi, ecx
-  add esi, edi
-  add esi, [rbp + $14]
-  add r10d, esi
-  mov edi, edx
-  mov ecx, edx
-  ror edi, 2
-  ror ecx, 13
-  xor edi, ecx
-  ror ecx, 9
-  xor edi, ecx
-  add esi, edi
-  mov ecx, edx
-  and ecx, r8d
-  mov edi, edx
-  xor edi, r8d
-  and edi, r9d
-  xor ecx, edi
-  add ecx, esi
-
-  // Round 6: a=ecx b=edx c=r8d d=r9d e=r10d f=r11d g=eax h=ebx
-  mov esi, r10d
-  mov edi, r10d
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, r11d
-  xor edi, eax
-  and edi, r10d
-  xor edi, eax
-  add esi, ebx
-  add esi, edi
-  add esi, [rbp + $18]
-  add r9d, esi
-  mov edi, ecx
-  mov ebx, ecx
-  ror edi, 2
-  ror ebx, 13
-  xor edi, ebx
-  ror ebx, 9
-  xor edi, ebx
-  add esi, edi
-  mov ebx, ecx
-  and ebx, edx
-  mov edi, ecx
-  xor edi, edx
-  and edi, r8d
-  xor ebx, edi
-  add ebx, esi
-
-  // Round 7: a=ebx b=ecx c=edx d=r8d e=r9d f=r10d g=r11d h=eax
-  mov esi, r9d
-  mov edi, r9d
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, r10d
-  xor edi, r11d
-  and edi, r9d
-  xor edi, r11d
-  add esi, eax
-  add esi, edi
-  add esi, [rbp + $1C]
-  add r8d, esi
-  mov edi, ebx
-  mov eax, ebx
-  ror edi, 2
-  ror eax, 13
-  xor edi, eax
-  ror eax, 9
-  xor edi, eax
-  add esi, edi
-  mov eax, ebx
-  and eax, ecx
-  mov edi, ebx
-  xor edi, ecx
-  and edi, edx
-  xor eax, edi
-  add eax, esi
-
-  add rbp, $20
-  cmp rbp, r15
-  jb @sse2_256_round_loop
-
-  // Add round results to state
-  add [r12], eax
-  add [r12 + $04], ebx
-  add [r12 + $08], ecx
-  add [r12 + $0C], edx
-  add [r12 + $10], r8d
-  add [r12 + $14], r9d
-  add [r12 + $18], r10d
-  add [r12 + $1C], r11d
-
-  add r13, $40
-  dec r14d
-  jnz @sse2_256_block_loop
-
-@sse2_256_done:
-
-  mov rbx, [rsp + $00]
-  mov rbp, [rsp + $08]
-  mov r12, [rsp + $20]
-  mov r13, [rsp + $28]
-  mov r14, [rsp + $30]
-  mov r15, [rsp + $38]
-  mov rdi, [rsp + $10]
-  mov rsi, [rsp + $18]
-  add rsp, 344
+  xor    r12d, ebx
+  ror    r14d, $B
+  movdqa xmm6, xmm7
+  xor    edi, r8d
+  add    ecx, r12d
+  pxor   xmm4, xmm5
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, edx
+  psrld  xmm7, $A
+  add    ecx, r13d
+  xor    r15d, r8d
+  paddd  xmm3, xmm4
+  ror    r14d, $2
+  add    r10d, ecx
+  psrlq  xmm6, $11
+  add    ecx, r15d
+  mov    r13d, r10d
+  add    r14d, ecx
+  pxor   xmm7, xmm6
+  ror    r13d, $E
+  mov    ecx, r14d
+  mov    r12d, r11d
+  ror    r14d, $9
+  psrlq  xmm6, $2
+  xor    r13d, r10d
+  xor    r12d, eax
+  pxor   xmm7, xmm6
+  ror    r13d, $5
+  xor    r14d, ecx
+  and    r12d, r10d
+  pshufd xmm7, xmm7, $80
+  xor    r13d, r10d
+  add    ebx, dword [rsp + $38]
+  mov    r15d, ecx
+  psrldq xmm7, $8
+  xor    r12d, eax
+  ror    r14d, $B
+  xor    r15d, edx
+  add    ebx, r12d
+  ror    r13d, $6
+  paddd  xmm3, xmm7
+  and    edi, r15d
+  xor    r14d, ecx
+  add    ebx, r13d
+  pshufd xmm7, xmm3, $50
+  xor    edi, edx
+  ror    r14d, $2
+  add    r9d, ebx
+  movdqa xmm6, xmm7
+  add    ebx, edi
+  mov    r13d, r9d
+  psrld  xmm7, $A
+  add    r14d, ebx
+  ror    r13d, $E
+  psrlq  xmm6, $11
+  mov    ebx, r14d
+  mov    r12d, r10d
+  pxor   xmm7, xmm6
+  ror    r14d, $9
+  xor    r13d, r9d
+  xor    r12d, r11d
+  ror    r13d, $5
+  xor    r14d, ebx
+  psrlq  xmm6, $2
+  and    r12d, r9d
+  xor    r13d, r9d
+  add    eax, dword [rsp + $3C]
+  pxor   xmm7, xmm6
+  mov    edi, ebx
+  xor    r12d, r11d
+  ror    r14d, $B
+  pshufd xmm7, xmm7, $8
+  xor    edi, ecx
+  add    eax, r12d
+  movdqu xmm6, oword [rbp + $60]
+  ror    r13d, $6
+  and    r15d, edi
+  pslldq xmm7, $8
+  xor    r14d, ebx
+  add    eax, r13d
+  xor    r15d, ecx
+  paddd  xmm3, xmm7
+  ror    r14d, $2
+  add    r8d, eax
+  add    eax, r15d
+  paddd  xmm6, xmm3
+  mov    r13d, r8d
+  add    r14d, eax
+  movdqa oword [rsp + $30], xmm6
+  cmp    byte [rbp + $83], $0
+  jne @sched_loop
+  ror    r13d, $E
+  mov    eax, r14d
+  mov    r12d, r9d
+  ror    r14d, $9
+  xor    r13d, r8d
+  xor    r12d, r10d
+  ror    r13d, $5
+  xor    r14d, eax
+  and    r12d, r8d
+  xor    r13d, r8d
+  add    r11d, dword [rsp]
+  mov    r15d, eax
+  xor    r12d, r10d
+  ror    r14d, $B
+  xor    r15d, ebx
+  add    r11d, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, eax
+  add    r11d, r13d
+  xor    edi, ebx
+  ror    r14d, $2
+  add    edx, r11d
+  add    r11d, edi
+  mov    r13d, edx
+  add    r14d, r11d
+  ror    r13d, $E
+  mov    r11d, r14d
+  mov    r12d, r8d
+  ror    r14d, $9
+  xor    r13d, edx
+  xor    r12d, r9d
+  ror    r13d, $5
+  xor    r14d, r11d
+  and    r12d, edx
+  xor    r13d, edx
+  add    r10d, dword [rsp + $4]
+  mov    edi, r11d
+  xor    r12d, r9d
+  ror    r14d, $B
+  xor    edi, eax
+  add    r10d, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r11d
+  add    r10d, r13d
+  xor    r15d, eax
+  ror    r14d, $2
+  add    ecx, r10d
+  add    r10d, r15d
+  mov    r13d, ecx
+  add    r14d, r10d
+  ror    r13d, $E
+  mov    r10d, r14d
+  mov    r12d, edx
+  ror    r14d, $9
+  xor    r13d, ecx
+  xor    r12d, r8d
+  ror    r13d, $5
+  xor    r14d, r10d
+  and    r12d, ecx
+  xor    r13d, ecx
+  add    r9d, dword [rsp + $8]
+  mov    r15d, r10d
+  xor    r12d, r8d
+  ror    r14d, $B
+  xor    r15d, r11d
+  add    r9d, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, r10d
+  add    r9d, r13d
+  xor    edi, r11d
+  ror    r14d, $2
+  add    ebx, r9d
+  add    r9d, edi
+  mov    r13d, ebx
+  add    r14d, r9d
+  ror    r13d, $E
+  mov    r9d, r14d
+  mov    r12d, ecx
+  ror    r14d, $9
+  xor    r13d, ebx
+  xor    r12d, edx
+  ror    r13d, $5
+  xor    r14d, r9d
+  and    r12d, ebx
+  xor    r13d, ebx
+  add    r8d, dword [rsp + $C]
+  mov    edi, r9d
+  xor    r12d, edx
+  ror    r14d, $B
+  xor    edi, r10d
+  add    r8d, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r9d
+  add    r8d, r13d
+  xor    r15d, r10d
+  ror    r14d, $2
+  add    eax, r8d
+  add    r8d, r15d
+  mov    r13d, eax
+  add    r14d, r8d
+  ror    r13d, $E
+  mov    r8d, r14d
+  mov    r12d, ebx
+  ror    r14d, $9
+  xor    r13d, eax
+  xor    r12d, ecx
+  ror    r13d, $5
+  xor    r14d, r8d
+  and    r12d, eax
+  xor    r13d, eax
+  add    edx, dword [rsp + $10]
+  mov    r15d, r8d
+  xor    r12d, ecx
+  ror    r14d, $B
+  xor    r15d, r9d
+  add    edx, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, r8d
+  add    edx, r13d
+  xor    edi, r9d
+  ror    r14d, $2
+  add    r11d, edx
+  add    edx, edi
+  mov    r13d, r11d
+  add    r14d, edx
+  ror    r13d, $E
+  mov    edx, r14d
+  mov    r12d, eax
+  ror    r14d, $9
+  xor    r13d, r11d
+  xor    r12d, ebx
+  ror    r13d, $5
+  xor    r14d, edx
+  and    r12d, r11d
+  xor    r13d, r11d
+  add    ecx, dword [rsp + $14]
+  mov    edi, edx
+  xor    r12d, ebx
+  ror    r14d, $B
+  xor    edi, r8d
+  add    ecx, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, edx
+  add    ecx, r13d
+  xor    r15d, r8d
+  ror    r14d, $2
+  add    r10d, ecx
+  add    ecx, r15d
+  mov    r13d, r10d
+  add    r14d, ecx
+  ror    r13d, $E
+  mov    ecx, r14d
+  mov    r12d, r11d
+  ror    r14d, $9
+  xor    r13d, r10d
+  xor    r12d, eax
+  ror    r13d, $5
+  xor    r14d, ecx
+  and    r12d, r10d
+  xor    r13d, r10d
+  add    ebx, dword [rsp + $18]
+  mov    r15d, ecx
+  xor    r12d, eax
+  ror    r14d, $B
+  xor    r15d, edx
+  add    ebx, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, ecx
+  add    ebx, r13d
+  xor    edi, edx
+  ror    r14d, $2
+  add    r9d, ebx
+  add    ebx, edi
+  mov    r13d, r9d
+  add    r14d, ebx
+  ror    r13d, $E
+  mov    ebx, r14d
+  mov    r12d, r10d
+  ror    r14d, $9
+  xor    r13d, r9d
+  xor    r12d, r11d
+  ror    r13d, $5
+  xor    r14d, ebx
+  and    r12d, r9d
+  xor    r13d, r9d
+  add    eax, dword [rsp + $1C]
+  mov    edi, ebx
+  xor    r12d, r11d
+  ror    r14d, $B
+  xor    edi, ecx
+  add    eax, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, ebx
+  add    eax, r13d
+  xor    r15d, ecx
+  ror    r14d, $2
+  add    r8d, eax
+  add    eax, r15d
+  mov    r13d, r8d
+  add    r14d, eax
+  ror    r13d, $E
+  mov    eax, r14d
+  mov    r12d, r9d
+  ror    r14d, $9
+  xor    r13d, r8d
+  xor    r12d, r10d
+  ror    r13d, $5
+  xor    r14d, eax
+  and    r12d, r8d
+  xor    r13d, r8d
+  add    r11d, dword [rsp + $20]
+  mov    r15d, eax
+  xor    r12d, r10d
+  ror    r14d, $B
+  xor    r15d, ebx
+  add    r11d, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, eax
+  add    r11d, r13d
+  xor    edi, ebx
+  ror    r14d, $2
+  add    edx, r11d
+  add    r11d, edi
+  mov    r13d, edx
+  add    r14d, r11d
+  ror    r13d, $E
+  mov    r11d, r14d
+  mov    r12d, r8d
+  ror    r14d, $9
+  xor    r13d, edx
+  xor    r12d, r9d
+  ror    r13d, $5
+  xor    r14d, r11d
+  and    r12d, edx
+  xor    r13d, edx
+  add    r10d, dword [rsp + $24]
+  mov    edi, r11d
+  xor    r12d, r9d
+  ror    r14d, $B
+  xor    edi, eax
+  add    r10d, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r11d
+  add    r10d, r13d
+  xor    r15d, eax
+  ror    r14d, $2
+  add    ecx, r10d
+  add    r10d, r15d
+  mov    r13d, ecx
+  add    r14d, r10d
+  ror    r13d, $E
+  mov    r10d, r14d
+  mov    r12d, edx
+  ror    r14d, $9
+  xor    r13d, ecx
+  xor    r12d, r8d
+  ror    r13d, $5
+  xor    r14d, r10d
+  and    r12d, ecx
+  xor    r13d, ecx
+  add    r9d, dword [rsp + $28]
+  mov    r15d, r10d
+  xor    r12d, r8d
+  ror    r14d, $B
+  xor    r15d, r11d
+  add    r9d, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, r10d
+  add    r9d, r13d
+  xor    edi, r11d
+  ror    r14d, $2
+  add    ebx, r9d
+  add    r9d, edi
+  mov    r13d, ebx
+  add    r14d, r9d
+  ror    r13d, $E
+  mov    r9d, r14d
+  mov    r12d, ecx
+  ror    r14d, $9
+  xor    r13d, ebx
+  xor    r12d, edx
+  ror    r13d, $5
+  xor    r14d, r9d
+  and    r12d, ebx
+  xor    r13d, ebx
+  add    r8d, dword [rsp + $2C]
+  mov    edi, r9d
+  xor    r12d, edx
+  ror    r14d, $B
+  xor    edi, r10d
+  add    r8d, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, r9d
+  add    r8d, r13d
+  xor    r15d, r10d
+  ror    r14d, $2
+  add    eax, r8d
+  add    r8d, r15d
+  mov    r13d, eax
+  add    r14d, r8d
+  ror    r13d, $E
+  mov    r8d, r14d
+  mov    r12d, ebx
+  ror    r14d, $9
+  xor    r13d, eax
+  xor    r12d, ecx
+  ror    r13d, $5
+  xor    r14d, r8d
+  and    r12d, eax
+  xor    r13d, eax
+  add    edx, dword [rsp + $30]
+  mov    r15d, r8d
+  xor    r12d, ecx
+  ror    r14d, $B
+  xor    r15d, r9d
+  add    edx, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, r8d
+  add    edx, r13d
+  xor    edi, r9d
+  ror    r14d, $2
+  add    r11d, edx
+  add    edx, edi
+  mov    r13d, r11d
+  add    r14d, edx
+  ror    r13d, $E
+  mov    edx, r14d
+  mov    r12d, eax
+  ror    r14d, $9
+  xor    r13d, r11d
+  xor    r12d, ebx
+  ror    r13d, $5
+  xor    r14d, edx
+  and    r12d, r11d
+  xor    r13d, r11d
+  add    ecx, dword [rsp + $34]
+  mov    edi, edx
+  xor    r12d, ebx
+  ror    r14d, $B
+  xor    edi, r8d
+  add    ecx, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, edx
+  add    ecx, r13d
+  xor    r15d, r8d
+  ror    r14d, $2
+  add    r10d, ecx
+  add    ecx, r15d
+  mov    r13d, r10d
+  add    r14d, ecx
+  ror    r13d, $E
+  mov    ecx, r14d
+  mov    r12d, r11d
+  ror    r14d, $9
+  xor    r13d, r10d
+  xor    r12d, eax
+  ror    r13d, $5
+  xor    r14d, ecx
+  and    r12d, r10d
+  xor    r13d, r10d
+  add    ebx, dword [rsp + $38]
+  mov    r15d, ecx
+  xor    r12d, eax
+  ror    r14d, $B
+  xor    r15d, edx
+  add    ebx, r12d
+  ror    r13d, $6
+  and    edi, r15d
+  xor    r14d, ecx
+  add    ebx, r13d
+  xor    edi, edx
+  ror    r14d, $2
+  add    r9d, ebx
+  add    ebx, edi
+  mov    r13d, r9d
+  add    r14d, ebx
+  ror    r13d, $E
+  mov    ebx, r14d
+  mov    r12d, r10d
+  ror    r14d, $9
+  xor    r13d, r9d
+  xor    r12d, r11d
+  ror    r13d, $5
+  xor    r14d, ebx
+  and    r12d, r9d
+  xor    r13d, r9d
+  add    eax, dword [rsp + $3C]
+  mov    edi, ebx
+  xor    r12d, r11d
+  ror    r14d, $B
+  xor    edi, ecx
+  add    eax, r12d
+  ror    r13d, $6
+  and    r15d, edi
+  xor    r14d, ebx
+  add    eax, r13d
+  xor    r15d, ecx
+  ror    r14d, $2
+  add    r8d, eax
+  add    eax, r15d
+  mov    r13d, r8d
+  add    r14d, eax
+  mov    rdi, qword [rsp + $40]
+  mov    eax, r14d
+  add    eax, dword [rdi]
+  lea    rsi, [rsi + $40]
+  add    ebx, dword [rdi + $4]
+  add    ecx, dword [rdi + $8]
+  add    edx, dword [rdi + $C]
+  add    r8d, dword [rdi + $10]
+  add    r9d, dword [rdi + $14]
+  add    r10d, dword [rdi + $18]
+  add    r11d, dword [rdi + $1C]
+  cmp    rsi, qword [rsp + $50]
+  mov    dword [rdi], eax
+  mov    dword [rdi + $4], ebx
+  mov    dword [rdi + $8], ecx
+  mov    dword [rdi + $C], edx
+  mov    dword [rdi + $10], r8d
+  mov    dword [rdi + $14], r9d
+  mov    dword [rdi + $18], r10d
+  mov    dword [rdi + $1C], r11d
+  jb @block_loop
+  mov    rsi, qword [rsp + $58]
+  mov    r15, qword [rsi - $48]
+  mov    r14, qword [rsi - $40]
+  mov    r13, qword [rsi - $38]
+  mov    r12, qword [rsi - $30]
+  mov    rdi, qword [rsi - $28]
+  mov    rbp, qword [rsi - $18]
+  mov    rbx, qword [rsi - $10]
+  mov    rax, qword [rsi - $20]
+  lea    rsp, [rsi]
+  mov    rsi, rax
 
   {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}

@@ -3,7 +3,7 @@
 //   w2 = numblocks, x3 = K256 ptr (64 UInt32 round constants).
 // Leaf nostackframe; caller-saved GPR/vector only.
 // K pointer rewound each block (sub x3, #240) after post-index loads.
-// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S, HashLib SHA256CompressSse2_x86_64.inc.
+// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S.
 // AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0, v1   = working state (ABCD, EFGH)

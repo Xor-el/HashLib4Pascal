@@ -1,513 +1,1276 @@
-// SHA-256 SSE2 implementation with SIMD message schedule.
-// Based on SSSE3 implementation (see SHA256CompressSsse3_x86_64.inc).
-// Same algorithm as SSSE3 version but replaces SSSE3-specific instructions:
-//   pshufb  -> SSE2 byte-swap (pshuflw/pshufhw + psrlw/psllw/por)
-//   palignr -> SSE2 emulation (movdqa/psrldq/pslldq/por)
-// IA-32: after SimdProc4Begin_i386 — ebx = state, esi = data, edi = numblocks, eax = K256 ptr
-//   (parallel to MS x64 ABI: rcx, rdx, r8d, r9).
-// K256: 64 UInt32 round constants (256 bytes). SSE2 byte-swaps without a mask, so
-// no BSWAP mask ptr is needed (4-param path).
-// Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
-//
-// Two-phase per block:
-//   Phase 1 (SIMD): Compute W+K[0..63] using SSE2 message schedule, store to stack
-//   Phase 2 (GPR): Run 64 compression rounds reading W+K from stack
-//
-// Stack layout (sub esp, 376): same roles as x64; W+K via movdqu (ESP may be off 16-byte alignment).
-// Scratch dwords at [esp+$4C]..[esp+$54] in the round loop only. Sigma1 uses register rotates only.
+// SHA-256 SSE2 SIMD-schedule implementation (IA-32), derived from OpenSSL's
+// sha256-586 (CRYPTOGAMS) SSSE3 kernel. The message schedule runs in SSE2
+// (paddd/psrld/pslld/pxor/pshufd/psrldq/pslldq) interleaved with the GPR
+// compression rounds; the 32-bit state lives in eax/ebx/ecx plus the local frame
+// (IA-32 has too few GPRs to keep all eight in registers). OpenSSL's two SSSE3-only
+// ops are emulated in SSE2: the pshufb dword byte-swap becomes psrlw/psllw/por +
+// pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por.
+// Expects (after SimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
+//   eax = doubled-K256 ptr (read at a 32-byte stride so the duplicated halves are
+//   skipped; see K256_Doubled). SimdProc4Begin pushes ebx/esi/edi; ebp is pushed
+//   here as the K256 walk pointer; state loads into eax/ebx/ecx and the frame.
 
-  sub esp, 376
+  push   ebp
+  mov    ebp, eax
+  mov    eax, edi
+  mov    edi, esi
+  mov    esi, ebx
+  mov    ebx, esp
+  sub    esp, $10
+  and    esp, $FFFFFFC0
+  shl    eax, $6
+  add    eax, edi
+  mov    dword [esp], esi
+  mov    dword [esp + $4], edi
+  mov    dword [esp + $8], eax
+  mov    dword [esp + $C], ebx
+  lea    esp, [esp - $60]
+  mov    eax, dword [esi]
+  mov    ebx, dword [esi + $4]
+  mov    ecx, dword [esi + $8]
+  mov    edi, dword [esi + $C]
+  mov    dword [esp + $4], ebx
+  xor    ebx, ecx
+  mov    dword [esp + $8], ecx
+  mov    dword [esp + $C], edi
+  mov    edx, dword [esi + $10]
+  mov    edi, dword [esi + $14]
+  mov    ecx, dword [esi + $18]
+  mov    esi, dword [esi + $1C]
+  mov    dword [esp + $14], edi
+  mov    edi, dword [esp + $64]
+  mov    dword [esp + $18], ecx
+  mov    dword [esp + $1C], esi
+  jmp @block_loop
 
-  movdqu oword ptr [esp], xmm6
-  movdqu oword ptr [esp + $10], xmm7
-  mov [esp + $20], ebx
-  mov [esp + $24], esi
-  mov [esp + $28], edi
-  mov [esp + $2C], eax
-  mov [esp + $30], ebp
-
-  test edi, edi
-  jz @sse2_256_done
-
-@sse2_256_block_loop:
-
-  // ========== Phase 1: Message Schedule ==========
-
-  mov ebx, [esp + $2C]
-  mov esi, [esp + $24]
-  lea ebp, [esp + $70]
-
-  // SSE2 32-bit byte-swap for W[0..15]
-  movdqu xmm0, oword ptr [esi]
+@block_loop:
+  movdqu xmm0, oword [edi]
+  movdqu xmm1, oword [edi + $10]
+  movdqu xmm2, oword [edi + $20]
+  movdqu xmm3, oword [edi + $30]
+  add    edi, $40
+  movdqa xmm4, xmm0
+  psrlw  xmm4, $8
+  psllw  xmm0, $8
+  por    xmm0, xmm4
   pshuflw xmm0, xmm0, $B1
   pshufhw xmm0, xmm0, $B1
-  movdqa xmm4, xmm0
-  psrlw  xmm0, 8
-  psllw  xmm4, 8
-  por    xmm0, xmm4
-
-  movdqu xmm1, oword ptr [esi + $10]
+  mov    dword [esp + $64], edi
+  movdqa xmm4, xmm1
+  psrlw  xmm4, $8
+  psllw  xmm1, $8
+  por    xmm1, xmm4
   pshuflw xmm1, xmm1, $B1
   pshufhw xmm1, xmm1, $B1
-  movdqa xmm4, xmm1
-  psrlw  xmm1, 8
-  psllw  xmm4, 8
-  por    xmm1, xmm4
-
-  movdqu xmm2, oword ptr [esi + $20]
+  movdqu xmm4, oword [ebp + $0]
+  movdqa xmm5, xmm2
+  psrlw  xmm5, $8
+  psllw  xmm2, $8
+  por    xmm2, xmm5
   pshuflw xmm2, xmm2, $B1
   pshufhw xmm2, xmm2, $B1
-  movdqa xmm4, xmm2
-  psrlw  xmm2, 8
-  psllw  xmm4, 8
-  por    xmm2, xmm4
-
-  movdqu xmm3, oword ptr [esi + $30]
+  movdqu xmm5, oword [ebp + $20]
+  paddd  xmm4, xmm0
+  movdqa xmm6, xmm3
+  psrlw  xmm6, $8
+  psllw  xmm3, $8
+  por    xmm3, xmm6
   pshuflw xmm3, xmm3, $B1
   pshufhw xmm3, xmm3, $B1
-  movdqa xmm4, xmm3
-  psrlw  xmm3, 8
-  psllw  xmm4, 8
-  por    xmm3, xmm4
+  movdqu xmm6, oword [ebp + $40]
+  paddd  xmm5, xmm1
+  movdqu xmm7, oword [ebp + $60]
+  movdqa oword [esp + $20], xmm4
+  paddd  xmm6, xmm2
+  movdqa oword [esp + $30], xmm5
+  paddd  xmm7, xmm3
+  movdqa oword [esp + $40], xmm6
+  movdqa oword [esp + $50], xmm7
+  jmp @sched_loop
 
-  movdqa xmm4, xmm0
-  movdqu xmm5, oword ptr [ebx]
-  paddd  xmm4, xmm5
-  movdqu oword ptr [ebp], xmm4
-
+@sched_loop:
+  add    ebp, $80
+  mov    ecx, edx
   movdqa xmm4, xmm1
-  movdqu xmm5, oword ptr [ebx + $10]
-  paddd  xmm4, xmm5
-  movdqu oword ptr [ebp + $10], xmm4
-
-  movdqa xmm4, xmm2
-  movdqu xmm5, oword ptr [ebx + $20]
-  paddd  xmm4, xmm5
-  movdqu oword ptr [ebp + $20], xmm4
-
-  movdqa xmm4, xmm3
-  movdqu xmm5, oword ptr [ebx + $30]
-  paddd  xmm4, xmm5
-  movdqu oword ptr [ebp + $30], xmm4
-
-  add ebx, $40
-  add ebp, $40
-  mov ecx, 12
-
-@sse2_256_expand_loop:
-
-  // sigma0(W[t-15..t-12]) - replaces palignr xmm4, xmm0, 4
-  movdqa xmm4, xmm0
-  psrldq xmm4, 4
-  movdqa xmm7, xmm1
-  pslldq xmm7, 12
-  por    xmm4, xmm7
-
-  movdqa xmm5, xmm4
-  movdqa xmm6, xmm4
-  psrld  xmm4, 3
-  psrld  xmm5, 7
-  pslld  xmm6, 14
-  pxor   xmm4, xmm5
-  psrld  xmm5, 11
-  pxor   xmm4, xmm6
-  pslld  xmm6, 11
-  pxor   xmm4, xmm5
-  pxor   xmm4, xmm6
-
-  paddd  xmm0, xmm4
-
-  // W[t-7..t-4] - replaces palignr xmm4, xmm2, 4
-  movdqa xmm4, xmm2
-  psrldq xmm4, 4
+  ror    edx, $E
+  mov    esi, dword [esp + $14]
   movdqa xmm7, xmm3
-  pslldq xmm7, 12
-  por    xmm4, xmm7
+  xor    edx, ecx
+  mov    edi, dword [esp + $18]
+  movdqa xmm5, xmm0
+  psrldq xmm5, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm5
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  movdqa xmm5, xmm2
+  psrldq xmm5, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm5
+  mov    dword [esp + $10], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  movdqa xmm5, xmm4
+  ror    edx, $6
+  mov    ecx, eax
+  movdqa xmm6, xmm4
+  add    edx, edi
+  mov    edi, dword [esp + $4]
+  psrld  xmm4, $3
+  mov    esi, eax
+  ror    ecx, $9
+  paddd  xmm0, xmm7
+  mov    dword [esp], eax
+  xor    ecx, eax
+  psrld  xmm6, $7
+  xor    eax, edi
+  add    edx, dword [esp + $1C]
+  ror    ecx, $B
+  and    ebx, eax
+  pshufd xmm7, xmm3, $FA
+  xor    ecx, esi
+  add    edx, dword [esp + $20]
+  pslld  xmm5, $E
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm4, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $C]
+  psrld  xmm6, $B
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm4, xmm5
+  mov    esi, dword [esp + $10]
+  xor    edx, ecx
+  pslld  xmm5, $B
+  mov    edi, dword [esp + $14]
+  xor    esi, edi
+  ror    edx, $5
+  pxor   xmm4, xmm6
+  and    esi, ecx
+  mov    dword [esp + $C], ecx
+  movdqa xmm6, xmm7
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  pxor   xmm4, xmm5
+  mov    ecx, ebx
+  add    edx, edi
+  psrld  xmm7, $A
+  mov    edi, dword [esp]
+  mov    esi, ebx
+  ror    ecx, $9
   paddd  xmm0, xmm4
-
-  // sigma1 phase 1: W[t-2..t-1]
+  mov    dword [esp + $1C], ebx
+  xor    ecx, ebx
+  psrlq  xmm6, $11
+  xor    ebx, edi
+  add    edx, dword [esp + $18]
+  ror    ecx, $B
+  pxor   xmm7, xmm6
+  and    eax, ebx
+  xor    ecx, esi
+  psrlq  xmm6, $2
+  add    edx, dword [esp + $24]
+  xor    eax, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    eax, edx
+  add    edx, dword [esp + $8]
+  pshufd xmm7, xmm7, $80
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $C]
+  xor    edx, ecx
+  mov    edi, dword [esp + $10]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  psrldq xmm7, $8
+  mov    dword [esp + $8], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  paddd  xmm0, xmm7
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $1C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $18], eax
+  pshufd xmm7, xmm0, $50
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $14]
+  movdqa xmm6, xmm7
+  ror    ecx, $B
+  psrld  xmm7, $A
+  and    ebx, eax
+  psrlq  xmm6, $11
+  xor    ecx, esi
+  add    edx, dword [esp + $28]
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $4]
+  psrlq  xmm6, $2
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm7, xmm6
+  mov    esi, dword [esp + $8]
+  xor    edx, ecx
+  mov    edi, dword [esp + $C]
+  pshufd xmm7, xmm7, $8
+  xor    esi, edi
+  ror    edx, $5
+  movdqu xmm6, oword [ebp + $0]
+  and    esi, ecx
+  mov    dword [esp + $4], ecx
+  pslldq xmm7, $8
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $18]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm0, xmm7
+  mov    dword [esp + $14], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $10]
+  paddd  xmm6, xmm0
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $2C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp]
+  add    eax, ecx
+  movdqa oword [esp + $20], xmm6
+  mov    ecx, edx
+  movdqa xmm4, xmm2
+  ror    edx, $E
+  mov    esi, dword [esp + $4]
+  movdqa xmm7, xmm0
+  xor    edx, ecx
+  mov    edi, dword [esp + $8]
+  movdqa xmm5, xmm1
+  psrldq xmm5, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm5
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  movdqa xmm5, xmm3
+  psrldq xmm5, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm5
+  mov    dword [esp], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  movdqa xmm5, xmm4
+  ror    edx, $6
+  mov    ecx, eax
+  movdqa xmm6, xmm4
+  add    edx, edi
+  mov    edi, dword [esp + $14]
+  psrld  xmm4, $3
+  mov    esi, eax
+  ror    ecx, $9
+  paddd  xmm1, xmm7
+  mov    dword [esp + $10], eax
+  xor    ecx, eax
+  psrld  xmm6, $7
+  xor    eax, edi
+  add    edx, dword [esp + $C]
+  ror    ecx, $B
+  and    ebx, eax
+  pshufd xmm7, xmm0, $FA
+  xor    ecx, esi
+  add    edx, dword [esp + $30]
+  pslld  xmm5, $E
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm4, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $1C]
+  psrld  xmm6, $B
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm4, xmm5
+  mov    esi, dword [esp]
+  xor    edx, ecx
+  pslld  xmm5, $B
+  mov    edi, dword [esp + $4]
+  xor    esi, edi
+  ror    edx, $5
+  pxor   xmm4, xmm6
+  and    esi, ecx
+  mov    dword [esp + $1C], ecx
+  movdqa xmm6, xmm7
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  pxor   xmm4, xmm5
+  mov    ecx, ebx
+  add    edx, edi
+  psrld  xmm7, $A
+  mov    edi, dword [esp + $10]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm1, xmm4
+  mov    dword [esp + $C], ebx
+  xor    ecx, ebx
+  psrlq  xmm6, $11
+  xor    ebx, edi
+  add    edx, dword [esp + $8]
+  ror    ecx, $B
+  pxor   xmm7, xmm6
+  and    eax, ebx
+  xor    ecx, esi
+  psrlq  xmm6, $2
+  add    edx, dword [esp + $34]
+  xor    eax, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    eax, edx
+  add    edx, dword [esp + $18]
+  pshufd xmm7, xmm7, $80
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $1C]
+  xor    edx, ecx
+  mov    edi, dword [esp]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  psrldq xmm7, $8
+  mov    dword [esp + $18], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  paddd  xmm1, xmm7
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $8], eax
+  pshufd xmm7, xmm1, $50
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $4]
+  movdqa xmm6, xmm7
+  ror    ecx, $B
+  psrld  xmm7, $A
+  and    ebx, eax
+  psrlq  xmm6, $11
+  xor    ecx, esi
+  add    edx, dword [esp + $38]
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $14]
+  psrlq  xmm6, $2
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm7, xmm6
+  mov    esi, dword [esp + $18]
+  xor    edx, ecx
+  mov    edi, dword [esp + $1C]
+  pshufd xmm7, xmm7, $8
+  xor    esi, edi
+  ror    edx, $5
+  movdqu xmm6, oword [ebp + $20]
+  and    esi, ecx
+  mov    dword [esp + $14], ecx
+  pslldq xmm7, $8
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $8]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm1, xmm7
+  mov    dword [esp + $4], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp]
+  paddd  xmm6, xmm1
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $3C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $10]
+  add    eax, ecx
+  movdqa oword [esp + $30], xmm6
+  mov    ecx, edx
   movdqa xmm4, xmm3
-  psrldq xmm4, 8
+  ror    edx, $E
+  mov    esi, dword [esp + $14]
+  movdqa xmm7, xmm1
+  xor    edx, ecx
+  mov    edi, dword [esp + $18]
+  movdqa xmm5, xmm2
+  psrldq xmm5, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm5
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  movdqa xmm5, xmm0
+  psrldq xmm5, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm5
+  mov    dword [esp + $10], ecx
+  xor    edx, ecx
+  xor    edi, esi
   movdqa xmm5, xmm4
+  ror    edx, $6
+  mov    ecx, eax
   movdqa xmm6, xmm4
-  psrld  xmm4, 10
-  psrld  xmm5, 17
-  pslld  xmm6, 13
-  pxor   xmm4, xmm5
-  psrld  xmm5, 2
+  add    edx, edi
+  mov    edi, dword [esp + $4]
+  psrld  xmm4, $3
+  mov    esi, eax
+  ror    ecx, $9
+  paddd  xmm2, xmm7
+  mov    dword [esp], eax
+  xor    ecx, eax
+  psrld  xmm6, $7
+  xor    eax, edi
+  add    edx, dword [esp + $1C]
+  ror    ecx, $B
+  and    ebx, eax
+  pshufd xmm7, xmm1, $FA
+  xor    ecx, esi
+  add    edx, dword [esp + $40]
+  pslld  xmm5, $E
+  xor    ebx, edi
+  ror    ecx, $2
   pxor   xmm4, xmm6
-  pslld  xmm6, 2
+  add    ebx, edx
+  add    edx, dword [esp + $C]
+  psrld  xmm6, $B
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
   pxor   xmm4, xmm5
+  mov    esi, dword [esp + $10]
+  xor    edx, ecx
+  pslld  xmm5, $B
+  mov    edi, dword [esp + $14]
+  xor    esi, edi
+  ror    edx, $5
   pxor   xmm4, xmm6
-  paddd  xmm0, xmm4
-
-  // sigma1 phase 2: W[t..t+1]
+  and    esi, ecx
+  mov    dword [esp + $C], ecx
+  movdqa xmm6, xmm7
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  pxor   xmm4, xmm5
+  mov    ecx, ebx
+  add    edx, edi
+  psrld  xmm7, $A
+  mov    edi, dword [esp]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm2, xmm4
+  mov    dword [esp + $1C], ebx
+  xor    ecx, ebx
+  psrlq  xmm6, $11
+  xor    ebx, edi
+  add    edx, dword [esp + $18]
+  ror    ecx, $B
+  pxor   xmm7, xmm6
+  and    eax, ebx
+  xor    ecx, esi
+  psrlq  xmm6, $2
+  add    edx, dword [esp + $44]
+  xor    eax, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    eax, edx
+  add    edx, dword [esp + $8]
+  pshufd xmm7, xmm7, $80
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $C]
+  xor    edx, ecx
+  mov    edi, dword [esp + $10]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  psrldq xmm7, $8
+  mov    dword [esp + $8], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  paddd  xmm2, xmm7
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $1C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $18], eax
+  pshufd xmm7, xmm2, $50
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $14]
+  movdqa xmm6, xmm7
+  ror    ecx, $B
+  psrld  xmm7, $A
+  and    ebx, eax
+  psrlq  xmm6, $11
+  xor    ecx, esi
+  add    edx, dword [esp + $48]
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $4]
+  psrlq  xmm6, $2
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm7, xmm6
+  mov    esi, dword [esp + $8]
+  xor    edx, ecx
+  mov    edi, dword [esp + $C]
+  pshufd xmm7, xmm7, $8
+  xor    esi, edi
+  ror    edx, $5
+  movdqu xmm6, oword [ebp + $40]
+  and    esi, ecx
+  mov    dword [esp + $4], ecx
+  pslldq xmm7, $8
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $18]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm2, xmm7
+  mov    dword [esp + $14], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $10]
+  paddd  xmm6, xmm2
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $4C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp]
+  add    eax, ecx
+  movdqa oword [esp + $40], xmm6
+  mov    ecx, edx
   movdqa xmm4, xmm0
-  pslldq xmm4, 8
+  ror    edx, $E
+  mov    esi, dword [esp + $4]
+  movdqa xmm7, xmm2
+  xor    edx, ecx
+  mov    edi, dword [esp + $8]
+  movdqa xmm5, xmm3
+  psrldq xmm5, $4
+  pslldq xmm4, $C
+  por    xmm4, xmm5
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  movdqa xmm5, xmm1
+  psrldq xmm5, $4
+  pslldq xmm7, $C
+  por    xmm7, xmm5
+  mov    dword [esp], ecx
+  xor    edx, ecx
+  xor    edi, esi
   movdqa xmm5, xmm4
+  ror    edx, $6
+  mov    ecx, eax
   movdqa xmm6, xmm4
-  psrld  xmm4, 10
-  psrld  xmm5, 17
-  pslld  xmm6, 13
-  pxor   xmm4, xmm5
-  psrld  xmm5, 2
+  add    edx, edi
+  mov    edi, dword [esp + $14]
+  psrld  xmm4, $3
+  mov    esi, eax
+  ror    ecx, $9
+  paddd  xmm3, xmm7
+  mov    dword [esp + $10], eax
+  xor    ecx, eax
+  psrld  xmm6, $7
+  xor    eax, edi
+  add    edx, dword [esp + $C]
+  ror    ecx, $B
+  and    ebx, eax
+  pshufd xmm7, xmm2, $FA
+  xor    ecx, esi
+  add    edx, dword [esp + $50]
+  pslld  xmm5, $E
+  xor    ebx, edi
+  ror    ecx, $2
   pxor   xmm4, xmm6
-  pslld  xmm6, 2
+  add    ebx, edx
+  add    edx, dword [esp + $1C]
+  psrld  xmm6, $B
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
   pxor   xmm4, xmm5
+  mov    esi, dword [esp]
+  xor    edx, ecx
+  pslld  xmm5, $B
+  mov    edi, dword [esp + $4]
+  xor    esi, edi
+  ror    edx, $5
   pxor   xmm4, xmm6
-  paddd  xmm0, xmm4
-
-  movdqu xmm4, oword ptr [ebx]
-  paddd  xmm4, xmm0
-  movdqu oword ptr [ebp], xmm4
-
-  movdqa xmm4, xmm0
-  movdqa xmm0, xmm1
-  movdqa xmm1, xmm2
-  movdqa xmm2, xmm3
-  movdqa xmm3, xmm4
-
-  add ebx, $10
-  add ebp, $10
-  dec ecx
-  jnz @sse2_256_expand_loop
-
-  // ========== Phase 2: 64 Compression Rounds ==========
-
-  mov esi, [esp + $20]
-  mov eax, [esi]
-  mov ebx, [esi + $04]
-  mov ecx, [esi + $08]
-  mov edx, [esi + $0C]
-  mov edi, [esi + $10]
-  mov [esp + $34], edi
-  mov edi, [esi + $14]
-  mov [esp + $38], edi
-  mov edi, [esi + $18]
-  mov [esp + $3C], edi
-  mov edi, [esi + $1C]
-  mov [esp + $40], edi
-
-  lea edi, [esp + $70 + $100]
-  mov [esp + $44], edi
-  lea ebp, [esp + $70]
-
-@sse2_256_round_loop:
-
-  // Round 0: a=eax b=ebx c=ecx d=edx e=dword ptr [esp + $34] f=dword ptr [esp + $38] g=dword ptr [esp + $3C] h=dword ptr [esp + $40]
-  mov esi, dword ptr [esp + $34]
-  mov edi, dword ptr [esp + $34]
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, dword ptr [esp + $38]
-  xor edi, dword ptr [esp + $3C]
-  and edi, dword ptr [esp + $34]
-  xor edi, dword ptr [esp + $3C]
-  add esi, dword ptr [esp + $40]
-  add esi, edi
-  add esi, dword ptr [ebp]
-  add edx, esi
-  mov dword ptr [esp + $4C], eax
-  mov edi, dword ptr [esp + $4C]
-  ror edi, 2
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 13
-  xor edi, eax
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 22
-  xor edi, eax
-  add esi, edi
-  mov eax, dword ptr [esp + $4C]
-  mov dword ptr [esp + $40], eax
-  and dword ptr [esp + $40], ebx
-  mov edi, eax
-  xor edi, ebx
-  and edi, ecx
-  xor dword ptr [esp + $40], edi
-  add dword ptr [esp + $40], esi
-
-  // Round 1: a=dword ptr [esp + $40] b=eax c=ebx d=ecx e=edx f=dword ptr [esp + $34] g=dword ptr [esp + $38] h=dword ptr [esp + $3C]
-  mov esi, edx
-  mov edi, edx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, dword ptr [esp + $34]
-  xor edi, dword ptr [esp + $38]
-  and edi, edx
-  xor edi, dword ptr [esp + $38]
-  add esi, dword ptr [esp + $3C]
-  add esi, edi
-  add esi, dword ptr [ebp + $04]
-  add ecx, esi
-  mov dword ptr [esp + $50], eax
-  mov edi, dword ptr [esp + $40]
-  mov dword ptr [esp + $3C], edi
-  mov dword ptr [esp + $4C], edi
-  mov edi, dword ptr [esp + $4C]
-  ror edi, 2
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 13
-  xor edi, eax
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 22
-  xor edi, eax
-  add esi, edi
-  mov eax, dword ptr [esp + $50]
-  mov edi, dword ptr [esp + $40]
-  mov dword ptr [esp + $3C], edi
-  and dword ptr [esp + $3C], eax
-  xor edi, eax
-  and edi, ebx
-  xor dword ptr [esp + $3C], edi
-  add dword ptr [esp + $3C], esi
-
-  // Round 2: a=dword ptr [esp + $3C] b=dword ptr [esp + $40] c=eax d=ebx e=ecx f=edx g=dword ptr [esp + $34] h=dword ptr [esp + $38]
-  mov esi, ecx
-  mov edi, ecx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, edx
-  xor edi, dword ptr [esp + $34]
-  and edi, ecx
-  xor edi, dword ptr [esp + $34]
-  add esi, dword ptr [esp + $38]
-  add esi, edi
-  add esi, dword ptr [ebp + $08]
-  add ebx, esi
-  mov dword ptr [esp + $50], ebx
-  mov dword ptr [esp + $54], eax
-  mov edi, dword ptr [esp + $3C]
-  mov dword ptr [esp + $38], edi
-  mov dword ptr [esp + $4C], edi
-  mov edi, dword ptr [esp + $4C]
-  ror edi, 2
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 13
-  xor edi, eax
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 22
-  xor edi, eax
-  add esi, edi
-  mov eax, dword ptr [esp + $54]
-  mov ebx, dword ptr [esp + $50]
-  mov edi, dword ptr [esp + $3C]
-  and edi, dword ptr [esp + $40]
-  mov dword ptr [esp + $38], edi
-  mov edi, dword ptr [esp + $3C]
-  xor edi, dword ptr [esp + $40]
-  and edi, eax
-  xor dword ptr [esp + $38], edi
-  add dword ptr [esp + $38], esi
-
-  // Round 3: a=dword ptr [esp + $38] b=dword ptr [esp + $3C] c=dword ptr [esp + $40] d=eax e=ebx f=ecx g=edx h=dword ptr [esp + $34]
-  mov esi, ebx
-  mov edi, ebx
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, ecx
-  xor edi, edx
-  and edi, ebx
-  xor edi, edx
-  add esi, dword ptr [esp + $34]
-  add esi, edi
-  add esi, dword ptr [ebp + $0C]
-  add eax, esi
-  mov dword ptr [esp + $50], eax
-  mov dword ptr [esp + $54], ebx
-  mov edi, dword ptr [esp + $38]
-  mov dword ptr [esp + $34], edi
-  mov dword ptr [esp + $4C], edi
-  mov edi, dword ptr [esp + $4C]
-  ror edi, 2
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 13
-  xor edi, eax
-  mov eax, dword ptr [esp + $4C]
-  ror eax, 22
-  xor edi, eax
-  add esi, edi
-  mov eax, dword ptr [esp + $50]
-  mov ebx, dword ptr [esp + $54]
-  mov edi, dword ptr [esp + $38]
-  and edi, dword ptr [esp + $3C]
-  mov dword ptr [esp + $34], edi
-  mov edi, dword ptr [esp + $38]
-  xor edi, dword ptr [esp + $3C]
-  and edi, dword ptr [esp + $40]
-  xor dword ptr [esp + $34], edi
-  add dword ptr [esp + $34], esi
-
-  // Round 4: a=dword ptr [esp + $34] b=dword ptr [esp + $38] c=dword ptr [esp + $3C] d=dword ptr [esp + $40] e=eax f=ebx g=ecx h=edx
-  mov esi, eax
-  mov edi, eax
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, ebx
-  xor edi, ecx
-  and edi, eax
-  xor edi, ecx
-  add esi, edx
-  add esi, edi
-  add esi, dword ptr [ebp + $10]
-  add dword ptr [esp + $40], esi
-  mov edi, dword ptr [esp + $34]
-  mov edx, dword ptr [esp + $34]
-  ror edi, 2
-  ror edx, 13
-  xor edi, edx
-  ror edx, 9
-  xor edi, edx
-  add esi, edi
-  mov edx, dword ptr [esp + $34]
-  and edx, dword ptr [esp + $38]
-  mov edi, dword ptr [esp + $34]
-  xor edi, dword ptr [esp + $38]
-  and edi, dword ptr [esp + $3C]
-  xor edx, edi
-  add edx, esi
-
-  // Round 5: a=edx b=dword ptr [esp + $34] c=dword ptr [esp + $38] d=dword ptr [esp + $3C] e=dword ptr [esp + $40] f=eax g=ebx h=ecx
-  mov esi, dword ptr [esp + $40]
-  mov edi, dword ptr [esp + $40]
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, eax
-  xor edi, ebx
-  and edi, dword ptr [esp + $40]
-  xor edi, ebx
-  add esi, ecx
-  add esi, edi
-  add esi, dword ptr [ebp + $14]
-  add dword ptr [esp + $3C], esi
-  mov edi, edx
-  mov ecx, edx
-  ror edi, 2
-  ror ecx, 13
-  xor edi, ecx
-  ror ecx, 9
-  xor edi, ecx
-  add esi, edi
-  mov ecx, edx
-  and ecx, dword ptr [esp + $34]
-  mov edi, edx
-  xor edi, dword ptr [esp + $34]
-  and edi, dword ptr [esp + $38]
-  xor ecx, edi
-  add ecx, esi
-
-  // Round 6: a=ecx b=edx c=dword ptr [esp + $34] d=dword ptr [esp + $38] e=dword ptr [esp + $3C] f=dword ptr [esp + $40] g=eax h=ebx
-  mov esi, dword ptr [esp + $3C]
-  mov edi, dword ptr [esp + $3C]
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, dword ptr [esp + $40]
-  xor edi, eax
-  and edi, dword ptr [esp + $3C]
-  xor edi, eax
-  add esi, ebx
-  add esi, edi
-  add esi, dword ptr [ebp + $18]
-  add dword ptr [esp + $38], esi
-  mov edi, ecx
-  mov ebx, ecx
-  ror edi, 2
-  ror ebx, 13
-  xor edi, ebx
-  ror ebx, 9
-  xor edi, ebx
-  add esi, edi
-  mov ebx, ecx
-  and ebx, edx
-  mov edi, ecx
-  xor edi, edx
-  and edi, dword ptr [esp + $34]
-  xor ebx, edi
-  add ebx, esi
-
-  // Round 7: a=ebx b=ecx c=edx d=dword ptr [esp + $34] e=dword ptr [esp + $38] f=dword ptr [esp + $3C] g=dword ptr [esp + $40] h=eax
-  mov esi, dword ptr [esp + $38]
-  mov edi, dword ptr [esp + $38]
-  ror esi, 6
-  ror edi, 11
-  xor esi, edi
-  ror edi, 14
-  xor esi, edi
-  mov edi, dword ptr [esp + $3C]
-  xor edi, dword ptr [esp + $40]
-  and edi, dword ptr [esp + $38]
-  xor edi, dword ptr [esp + $40]
-  add esi, eax
-  add esi, edi
-  add esi, dword ptr [ebp + $1C]
-  add dword ptr [esp + $34], esi
-  mov edi, ebx
-  mov eax, ebx
-  ror edi, 2
-  ror eax, 13
-  xor edi, eax
-  ror eax, 9
-  xor edi, eax
-  add esi, edi
-  mov eax, ebx
-  and eax, ecx
-  mov edi, ebx
-  xor edi, ecx
-  and edi, edx
-  xor eax, edi
-  add eax, esi
-
-  add ebp, $20
-  cmp ebp, [esp + $44]
-  jb @sse2_256_round_loop
-
-  // Add round results to state
-  mov esi, [esp + $20]
-  add dword ptr [esi], eax
-  add dword ptr [esi + $04], ebx
-  add dword ptr [esi + $08], ecx
-  add dword ptr [esi + $0C], edx
-  mov eax, dword ptr [esp + $34]
-  add dword ptr [esi + $10], eax
-  mov eax, dword ptr [esp + $38]
-  add dword ptr [esi + $14], eax
-  mov eax, dword ptr [esp + $3C]
-  add dword ptr [esi + $18], eax
-  mov eax, dword ptr [esp + $40]
-  add dword ptr [esi + $1C], eax
-
-  mov esi, [esp + $24]
-  add esi, $40
-  mov [esp + $24], esi
-  dec dword ptr [esp + $28]
-  jnz @sse2_256_block_loop
-
-@sse2_256_done:
-
-  mov ebp, [esp + $30]
-  movdqu xmm6, oword ptr [esp]
-  movdqu xmm7, oword ptr [esp + $10]
-  add esp, 376
-  pop edi
-  pop esi
-  pop ebx
+  and    esi, ecx
+  mov    dword [esp + $1C], ecx
+  movdqa xmm6, xmm7
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  pxor   xmm4, xmm5
+  mov    ecx, ebx
+  add    edx, edi
+  psrld  xmm7, $A
+  mov    edi, dword [esp + $10]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm3, xmm4
+  mov    dword [esp + $C], ebx
+  xor    ecx, ebx
+  psrlq  xmm6, $11
+  xor    ebx, edi
+  add    edx, dword [esp + $8]
+  ror    ecx, $B
+  pxor   xmm7, xmm6
+  and    eax, ebx
+  xor    ecx, esi
+  psrlq  xmm6, $2
+  add    edx, dword [esp + $54]
+  xor    eax, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    eax, edx
+  add    edx, dword [esp + $18]
+  pshufd xmm7, xmm7, $80
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $1C]
+  xor    edx, ecx
+  mov    edi, dword [esp]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  psrldq xmm7, $8
+  mov    dword [esp + $18], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  paddd  xmm3, xmm7
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $8], eax
+  pshufd xmm7, xmm3, $50
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $4]
+  movdqa xmm6, xmm7
+  ror    ecx, $B
+  psrld  xmm7, $A
+  and    ebx, eax
+  psrlq  xmm6, $11
+  xor    ecx, esi
+  add    edx, dword [esp + $58]
+  xor    ebx, edi
+  ror    ecx, $2
+  pxor   xmm7, xmm6
+  add    ebx, edx
+  add    edx, dword [esp + $14]
+  psrlq  xmm6, $2
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  pxor   xmm7, xmm6
+  mov    esi, dword [esp + $18]
+  xor    edx, ecx
+  mov    edi, dword [esp + $1C]
+  pshufd xmm7, xmm7, $8
+  xor    esi, edi
+  ror    edx, $5
+  movdqu xmm6, oword [ebp + $60]
+  and    esi, ecx
+  mov    dword [esp + $14], ecx
+  pslldq xmm7, $8
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $8]
+  mov    esi, ebx
+  ror    ecx, $9
+  paddd  xmm3, xmm7
+  mov    dword [esp + $4], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp]
+  paddd  xmm6, xmm3
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $5C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $10]
+  add    eax, ecx
+  movdqa oword [esp + $50], xmm6
+  cmp    dword [ebp + $80], $10203
+  jne @sched_loop
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $14]
+  xor    edx, ecx
+  mov    edi, dword [esp + $18]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $10], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $4]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $1C]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $20]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $C]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $10]
+  xor    edx, ecx
+  mov    edi, dword [esp + $14]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $C], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $1C], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $18]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $24]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $8]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $C]
+  xor    edx, ecx
+  mov    edi, dword [esp + $10]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $8], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $1C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $18], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $14]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $28]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $4]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $8]
+  xor    edx, ecx
+  mov    edi, dword [esp + $C]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $4], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $18]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $14], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $10]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $2C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $4]
+  xor    edx, ecx
+  mov    edi, dword [esp + $8]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $14]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $10], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $C]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $30]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $1C]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp]
+  xor    edx, ecx
+  mov    edi, dword [esp + $4]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $1C], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $10]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $C], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $8]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $34]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $18]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $1C]
+  xor    edx, ecx
+  mov    edi, dword [esp]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $18], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $8], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $4]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $38]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $14]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $18]
+  xor    edx, ecx
+  mov    edi, dword [esp + $1C]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $14], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $8]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $4], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $3C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $10]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $14]
+  xor    edx, ecx
+  mov    edi, dword [esp + $18]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $10], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $4]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $1C]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $40]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $C]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $10]
+  xor    edx, ecx
+  mov    edi, dword [esp + $14]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $C], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $1C], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $18]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $44]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $8]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $C]
+  xor    edx, ecx
+  mov    edi, dword [esp + $10]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $8], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $1C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $18], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $14]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $48]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $4]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $8]
+  xor    edx, ecx
+  mov    edi, dword [esp + $C]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $4], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $18]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $14], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $10]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $4C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $4]
+  xor    edx, ecx
+  mov    edi, dword [esp + $8]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $14]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $10], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $C]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $50]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $1C]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp]
+  xor    edx, ecx
+  mov    edi, dword [esp + $4]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $1C], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $10]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $C], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp + $8]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $54]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $18]
+  add    eax, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $1C]
+  xor    edx, ecx
+  mov    edi, dword [esp]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $18], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, eax
+  add    edx, edi
+  mov    edi, dword [esp + $C]
+  mov    esi, eax
+  ror    ecx, $9
+  mov    dword [esp + $8], eax
+  xor    ecx, eax
+  xor    eax, edi
+  add    edx, dword [esp + $4]
+  ror    ecx, $B
+  and    ebx, eax
+  xor    ecx, esi
+  add    edx, dword [esp + $58]
+  xor    ebx, edi
+  ror    ecx, $2
+  add    ebx, edx
+  add    edx, dword [esp + $14]
+  add    ebx, ecx
+  mov    ecx, edx
+  ror    edx, $E
+  mov    esi, dword [esp + $18]
+  xor    edx, ecx
+  mov    edi, dword [esp + $1C]
+  xor    esi, edi
+  ror    edx, $5
+  and    esi, ecx
+  mov    dword [esp + $14], ecx
+  xor    edx, ecx
+  xor    edi, esi
+  ror    edx, $6
+  mov    ecx, ebx
+  add    edx, edi
+  mov    edi, dword [esp + $8]
+  mov    esi, ebx
+  ror    ecx, $9
+  mov    dword [esp + $4], ebx
+  xor    ecx, ebx
+  xor    ebx, edi
+  add    edx, dword [esp]
+  ror    ecx, $B
+  and    eax, ebx
+  xor    ecx, esi
+  add    edx, dword [esp + $5C]
+  xor    eax, edi
+  ror    ecx, $2
+  add    eax, edx
+  add    edx, dword [esp + $10]
+  add    eax, ecx
+  mov    esi, dword [esp + $60]
+  xor    ebx, edi
+  mov    ecx, dword [esp + $C]
+  add    eax, dword [esi]
+  add    ebx, dword [esi + $4]
+  add    edi, dword [esi + $8]
+  add    ecx, dword [esi + $C]
+  mov    dword [esi], eax
+  mov    dword [esi + $4], ebx
+  mov    dword [esi + $8], edi
+  mov    dword [esi + $C], ecx
+  mov    dword [esp + $4], ebx
+  xor    ebx, edi
+  mov    dword [esp + $8], edi
+  mov    dword [esp + $C], ecx
+  mov    edi, dword [esp + $14]
+  mov    ecx, dword [esp + $18]
+  add    edx, dword [esi + $10]
+  add    edi, dword [esi + $14]
+  add    ecx, dword [esi + $18]
+  mov    dword [esi + $10], edx
+  mov    dword [esi + $14], edi
+  mov    dword [esp + $14], edi
+  mov    edi, dword [esp + $1C]
+  mov    dword [esi + $18], ecx
+  add    edi, dword [esi + $1C]
+  mov    dword [esp + $18], ecx
+  mov    dword [esi + $1C], edi
+  mov    dword [esp + $1C], edi
+  mov    edi, dword [esp + $64]
+  sub    ebp, $180
+  cmp    edi, dword [esp + $68]
+  jb @block_loop
+  mov    esp, dword [esp + $6C]
+  pop    ebp
+  pop    edi
+  pop    esi
+  pop    ebx

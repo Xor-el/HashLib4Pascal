@@ -3,7 +3,7 @@
 //   x1 = iotas ptr (24 x UInt64 round constants == HlpSHA3 RC table).
 // Saves/restores d8-d15 on 64-byte frame; state uses v0-v24 (clobbers d8-d15 lanes).
 // Leaf (no calls); x30 untouched.
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S, HashLib KeccakF1600Avx2_x86_64.inc.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
 // AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v24   = Keccak state lanes A[y][x] (lane k = v[k], 64 bits in low half)
