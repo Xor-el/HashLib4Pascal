@@ -3,7 +3,7 @@
 //   w2 = numblocks, x3 = K512 ptr (80 UInt64 round constants).
 // Leaf nostackframe; caller-saved GPR/vector only.
 // K pointer rewound each block (sub x3, #640). Two rounds per iteration; csel avoids OOB prefetch.
-// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S, HashLib SHA512CompressSse2_x86_64.inc.
+// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S.
 // AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v3    = working state (a..h, two UInt64 per register)

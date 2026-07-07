@@ -2,7 +2,7 @@
 // Expects AAPCS64: x0 = state ptr (5 x UInt32), x1 = data ptr,
 //   w2 = numblocks, x3 = K_SHA1 ptr (16 UInt32: each round constant x4 lanes).
 // Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S, HashLib SHA1CompressSse2_x86_64.inc.
+// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S.
 // AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0       = ABCD working state
