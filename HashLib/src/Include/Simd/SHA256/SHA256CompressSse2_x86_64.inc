@@ -1,10 +1,10 @@
 // SHA-256 SSE2 SIMD-schedule implementation, derived from OpenSSL's SHA-256
 // SSSE3 kernel in sha512-x86_64.pl (CRYPTOGAMS). The message schedule runs in
 // SSE2 (paddd/psrld/pslld/pxor/pshufd) interleaved with the GPR compression
-// rounds, so the vector and integer units run in parallel - the design that
-// beats the older two-phase kernel. OpenSSL's two SSSE3-only ops are emulated in
-// SSE2: the pshufb dword byte-swap becomes psrlw/psllw/por + pshuflw/pshufhw,
-// and palignr becomes psrldq/pslldq/por (xmm8 is a free scratch).
+// rounds, so the vector and integer units run in parallel. OpenSSL's two
+// SSSE3-only ops are emulated in SSE2: the pshufb dword byte-swap becomes
+// psrlw/psllw/por + pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por
+// (xmm8 is a free scratch).
 // Expects MS x64 ABI (after SimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K256 ptr (read at a 32-byte stride so the
 //   duplicated halves are skipped; see K256_Doubled). No byte-swap mask table is
