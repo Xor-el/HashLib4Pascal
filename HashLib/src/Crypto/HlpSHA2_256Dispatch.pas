@@ -33,8 +33,8 @@ const
 
 {$IFDEF HASHLIB_X86_SIMD}
   // BSWAP32 shuffle mask for pshufb (x86 SIMD only): reverses bytes within each
-  // dword. Not a SHA-256 constant; passed separately to the SIMD kernels. ARM
-  // byte-swaps with REV32 and needs no mask table.
+  // dword. Not a SHA-256 constant; used only by the SHA-NI kernel. ARM byte-swaps
+  // with REV32 and needs no mask table.
   BSWAP32_MASK: array [0 .. 3] of UInt32 = (
     $00010203, $04050607, $08090A0B, $0C0D0E0F
   );

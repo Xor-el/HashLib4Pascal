@@ -1,25 +1,34 @@
-// SHA-256 SHA-NI implementation.
-// Expects MS x64 ABI: rcx = state ptr, rdx = data ptr, r8d = numblocks,
-//   r9 = K256 ptr (64 UInt32 round constants), r10 = BSWAP32 mask ptr (16 bytes).
-// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
-// Reference: Jeffrey Walton / Sean Gulley / Intel SHA Extensions whitepaper.
+// SHA-256 SHA-NI implementation (Intel SHA Extensions), the same design as
+// OpenSSL's x86_64 sha256_block_data_order_shaext (CRYPTOGAMS). Each 4-round
+// group is two sha256rnds2 with the message schedule (sha256msg1/sha256msg2 +
+// palignr) interleaved. The input is byte-swapped with pshufb against
+// BSWAP32_MASK (a plain per-dword swap - SHA-256 consumes its words in natural
+// order, so no dword reversal is needed).
 //
-// SHA-NI instruction db encodings (for assembler compatibility):
-//   sha256rnds2  dst, src  = $0F $38 $CB <ModRM>  (implicit xmm0)
+// Expects MS x64 ABI (after SimdProc5Begin): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = K256 ptr (64 UInt32 round constants), r10 = byte-swap
+//   mask ptr (16 bytes; see BSWAP32_MASK).
+//
+// SHA-NI instructions, db-encoded for assembler compatibility:
+//   sha256rnds2  dst, src  = $0F $38 $CB <ModRM>   (implicit xmm0)
 //   sha256msg1   dst, src  = $0F $38 $CC <ModRM>
 //   sha256msg2   dst, src  = $0F $38 $CD <ModRM>
+//   pshufb       dst, src  = $66 $0F $38 $00 <ModRM>
 //
 // Register map:
-//   xmm0  = temp MSG+K for sha256rnds2 (implicit operand)
-//   xmm1  = STATE0 (ABEF in SHA-NI format)
-//   xmm2  = STATE1 (CDGH in SHA-NI format)
-//   xmm3  = MSG0
-//   xmm4  = MSG1
-//   xmm5  = MSG2
-//   xmm6  = MSG3
-//   xmm7  = TMP (palignr scratch / BSWAP mask during load)
-//   xmm8  = ABEF_SAVE
-//   xmm9  = CDGH_SAVE
+//   xmm0 = MSG+K temp for sha256rnds2 (implicit operand)
+//   xmm1 = STATE0 (ABEF in SHA-NI format)
+//   xmm2 = STATE1 (CDGH in SHA-NI format)
+//   xmm3 = MSG0
+//   xmm4 = MSG1
+//   xmm5 = MSG2
+//   xmm6 = MSG3
+//   xmm7 = palignr scratch / byte-swap mask during load
+//   xmm8 = ABEF_SAVE
+//   xmm9 = CDGH_SAVE
+//
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// include (no-op on SysV); the kernel itself uses only volatile GPRs (rcx/rdx/r8-r10).
 
   {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
 
