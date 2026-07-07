@@ -59,8 +59,9 @@ const
   // Doubled K512 round constants plus the BSWAP64 mask, shared by the AVX2 and
   // SSE2 SIMD-schedule SHA-512 kernels. Each 128-bit K512 constant pair is stored
   // twice so one table feeds both the 256-bit AVX2 lanes and the 128-bit SSE2
-  // reads (read at a 32-byte stride); the 32-byte byte-swap mask (BSWAP64 pattern,
-  // twice) occupies [160..163]. Derived from K512.
+  // reads (both read at a 32-byte stride). Only the AVX2 kernel uses the appended
+  // byte-swap mask (BSWAP64 pattern, twice) at [160..163]; the SSE2 kernel computes
+  // its byte-swap and needs no mask. Derived from K512.
   K512_Doubled: array [0 .. 163] of UInt64 = (
     UInt64($428A2F98D728AE22), UInt64($7137449123EF65CD),
     UInt64($428A2F98D728AE22), UInt64($7137449123EF65CD),

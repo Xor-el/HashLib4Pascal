@@ -91,7 +91,8 @@
   psllw  xmm12, $8
   por    xmm5, xmm12
   movdqa xmm8, xmm0
-  paddq  xmm8, oword [rbp - $80]
+  movdqu xmm13, oword [rbp - $80]
+  paddq  xmm8, xmm13
   pshuflw xmm6, xmm6, $1B
   pshufhw xmm6, xmm6, $1B
   movdqa xmm12, xmm6
@@ -99,7 +100,8 @@
   psllw  xmm12, $8
   por    xmm6, xmm12
   movdqa xmm9, xmm1
-  paddq  xmm9, oword [rbp - $60]
+  movdqu xmm13, oword [rbp - $60]
+  paddq  xmm9, xmm13
   pshuflw xmm7, xmm7, $1B
   pshufhw xmm7, xmm7, $1B
   movdqa xmm12, xmm7
@@ -107,21 +109,27 @@
   psllw  xmm12, $8
   por    xmm7, xmm12
   movdqa xmm10, xmm2
-  paddq  xmm10, oword [rbp - $40]
+  movdqu xmm13, oword [rbp - $40]
+  paddq  xmm10, xmm13
   movdqa xmm11, xmm3
-  paddq  xmm11, oword [rbp - $20]
+  movdqu xmm13, oword [rbp - $20]
+  paddq  xmm11, xmm13
   movdqa oword [rsp], xmm8
   movdqa xmm8, xmm4
-  paddq  xmm8, oword [rbp + $0]
+  movdqu xmm13, oword [rbp + $0]
+  paddq  xmm8, xmm13
   movdqa oword [rsp + $10], xmm9
   movdqa xmm9, xmm5
-  paddq  xmm9, oword [rbp + $20]
+  movdqu xmm13, oword [rbp + $20]
+  paddq  xmm9, xmm13
   movdqa oword [rsp + $20], xmm10
   movdqa xmm10, xmm6
-  paddq  xmm10, oword [rbp + $40]
+  movdqu xmm13, oword [rbp + $40]
+  paddq  xmm10, xmm13
   movdqa oword [rsp + $30], xmm11
   movdqa xmm11, xmm7
-  paddq  xmm11, oword [rbp + $60]
+  movdqu xmm13, oword [rbp + $60]
+  paddq  xmm11, xmm13
   movdqa oword [rsp + $40], xmm8
   mov    r14, rax
   movdqa oword [rsp + $50], xmm9
@@ -213,7 +221,8 @@
   xor    r14, r11
   add    r10, r13
   movdqa xmm10, xmm0
-  paddq  xmm10, oword [rbp - $80]
+  movdqu xmm13, oword [rbp - $80]
+  paddq  xmm10, xmm13
   xor    r15, rax
   shrd   r14, r14, $1C
   add    rcx, r10
@@ -300,7 +309,8 @@
   xor    r14, r9
   add    r8, r13
   movdqa xmm10, xmm1
-  paddq  xmm10, oword [rbp - $60]
+  movdqu xmm13, oword [rbp - $60]
+  paddq  xmm10, xmm13
   xor    r15, r10
   shrd   r14, r14, $1C
   add    rax, r8
@@ -387,7 +397,8 @@
   xor    r14, rdx
   add    rcx, r13
   movdqa xmm10, xmm2
-  paddq  xmm10, oword [rbp - $40]
+  movdqu xmm13, oword [rbp - $40]
+  paddq  xmm10, xmm13
   xor    r15, r8
   shrd   r14, r14, $1C
   add    r10, rcx
@@ -474,7 +485,8 @@
   xor    r14, rbx
   add    rax, r13
   movdqa xmm10, xmm3
-  paddq  xmm10, oword [rbp - $20]
+  movdqu xmm13, oword [rbp - $20]
+  paddq  xmm10, xmm13
   xor    r15, rcx
   shrd   r14, r14, $1C
   add    r8, rax
@@ -561,7 +573,8 @@
   xor    r14, r11
   add    r10, r13
   movdqa xmm10, xmm4
-  paddq  xmm10, oword [rbp + $0]
+  movdqu xmm13, oword [rbp + $0]
+  paddq  xmm10, xmm13
   xor    r15, rax
   shrd   r14, r14, $1C
   add    rcx, r10
@@ -648,7 +661,8 @@
   xor    r14, r9
   add    r8, r13
   movdqa xmm10, xmm5
-  paddq  xmm10, oword [rbp + $20]
+  movdqu xmm13, oword [rbp + $20]
+  paddq  xmm10, xmm13
   xor    r15, r10
   shrd   r14, r14, $1C
   add    rax, r8
@@ -735,7 +749,8 @@
   xor    r14, rdx
   add    rcx, r13
   movdqa xmm10, xmm6
-  paddq  xmm10, oword [rbp + $40]
+  movdqu xmm13, oword [rbp + $40]
+  paddq  xmm10, xmm13
   xor    r15, r8
   shrd   r14, r14, $1C
   add    r10, rcx
@@ -822,7 +837,8 @@
   xor    r14, rbx
   add    rax, r13
   movdqa xmm10, xmm7
-  paddq  xmm10, oword [rbp + $60]
+  movdqu xmm13, oword [rbp + $60]
+  paddq  xmm10, xmm13
   xor    r15, rcx
   shrd   r14, r14, $1C
   add    r8, rax
