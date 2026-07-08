@@ -1,5 +1,5 @@
 // SSE2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
-// IA-32: after SimdProc4Begin_i386 — ebx = state, esi = msg, edi = counter+flags, eax = IV
+// IA-32: after HlpSimdProc4Begin_i386 — ebx = state, esi = msg, edi = counter+flags, eax = IV
 //   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
 // XMM8+ from x64 eliminated: xmm4 scratch + stack, xmm0/1 for diagonal work; uses xmm0–xmm7.
 // Non-volatile xmm6–xmm7 saved in stack frame (sub esp, 128).

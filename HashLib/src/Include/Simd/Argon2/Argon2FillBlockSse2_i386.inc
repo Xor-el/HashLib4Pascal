@@ -1,5 +1,5 @@
 // SSE2 implementation of Argon2 FillBlock.
-// IA-32: after SimdProc4Begin_i386 — ebx, esi, edi, eax = Left, Right, Current, WithXor
+// IA-32: after HlpSimdProc4Begin_i386 — ebx, esi, edi, eax = Left, Right, Current, WithXor
 //   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
 // Each pointer addresses 128 QWords (1024 bytes).
 // Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).

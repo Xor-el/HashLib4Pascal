@@ -10,7 +10,7 @@
 //   weight bytes via pmaddwd (SSE2), producing the same 4 x i32 weighted
 //   sums per 16-byte half that pmaddubsw + pmaddwd would yield.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Zero constant
   pxor xmm3, xmm3
@@ -98,4 +98,4 @@
   mov dword [r8], eax
   mov dword [r8 + 4], r10d
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

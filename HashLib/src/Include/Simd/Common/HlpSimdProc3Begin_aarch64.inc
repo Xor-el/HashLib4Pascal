@@ -5,7 +5,7 @@
 //   (unlike the x86 SysV/MS variants) is needed.
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer);
-//     {$I SimdProc3Begin_aarch64.inc}
+//     {$I HlpSimdProc3Begin_aarch64.inc}
 //     // ... SIMD instructions using x0, x1, w2 ...
 //   end;
 {$IFDEF FPC}

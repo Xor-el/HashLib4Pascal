@@ -5,9 +5,9 @@
 // (IA-32 has too few GPRs to keep all eight in registers). OpenSSL's two SSSE3-only
 // ops are emulated in SSE2: the pshufb dword byte-swap becomes psrlw/psllw/por +
 // pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por.
-// Expects (after SimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
+// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
 //   eax = doubled-K256 ptr (read at a 32-byte stride so the duplicated halves are
-//   skipped; see K256_Doubled). SimdProc4Begin pushes ebx/esi/edi; ebp is pushed
+//   skipped; see K256_Doubled). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is pushed
 //   here as the K256 walk pointer; state loads into eax/ebx/ecx and the frame.
 
   push   ebp

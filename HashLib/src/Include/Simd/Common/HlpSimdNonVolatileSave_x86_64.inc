@@ -1,6 +1,6 @@
 // Shared nonvolatile-XMM save (x86-64). Opt-in by inclusion: a kernel that uses
 // any of xmm6..xmm15 includes this at its save point (before it first writes
-// those registers), and the matching SimdNonVolatileRestore_x86_64.inc at its restore
+// those registers), and the matching HlpSimdNonVolatileRestore_x86_64.inc at its restore
 // point (after the last use, before returning). Light kernels that touch only
 // xmm0..xmm5 do NOT include it.
 //

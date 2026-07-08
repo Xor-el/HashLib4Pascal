@@ -3,7 +3,7 @@
 // FPC and Delphi Win32 share the same i386 register convention here.
 // Usage:
 //   procedure MyProc(P1: Pointer);
-//     {$I SimdProc1Begin_i386.inc}
+//     {$I HlpSimdProc1Begin_i386.inc}
 //     // ... SIMD instructions using ebx ...
 //   end;
 {$IFDEF FPC}

@@ -74,11 +74,11 @@ type
 {$IFDEF HASHLIB_X86_SIMD}
 
 procedure CpuIdQuery(ALeaf, ASubLeaf: UInt32; out AResult: TCpuIdResult);
-  {$I ..\Include\Simd\CpuFeatures\CpuIdQuery.inc}
+  {$I ..\Include\Simd\CpuFeatures\HlpCpuIdQuery.inc}
 end;
 
 procedure XGetBvQuery(out AResult: UInt64);
-  {$I ..\Include\Simd\CpuFeatures\XGetBvQuery.inc}
+  {$I ..\Include\Simd\CpuFeatures\HlpXGetBvQuery.inc}
 end;
 
 {$ENDIF}

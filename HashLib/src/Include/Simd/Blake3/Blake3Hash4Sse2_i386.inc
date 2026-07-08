@@ -4,7 +4,7 @@
 //   each chunk is processed one at a time with the inline SSE2 compress kernel.
 // Register map during rounds: xmm0=a(v0-3), xmm1=b(v4-7), xmm2=c(v8-11), xmm3=d(v12-15);
 //   xmm4={m0,m2,m4,m6}, xmm5={m1,m3,m5,m7}, xmm6={m14,m8,m10,m12}, xmm7={m15,m9,m11,m13}.
-// After SimdProc6Begin_i386: ebx=P1 (input), esi=P2 (key), edi=P3 (out), eax=P4 (num chunks),
+// After HlpSimdProc6Begin_i386: ebx=P1 (input), esi=P2 (key), edi=P3 (out), eax=P4 (num chunks),
 //   ecx=P5_lo, edx=P5_hi (chunk counter). Prologue pushed ebx/esi/edi — epilogue pops them.
 // Block index (0..15) is kept at [esp+$90] so ebp is never used as a temp (frame-friendly).
 // Stack layout (148 bytes, esp-relative after sub esp,148):

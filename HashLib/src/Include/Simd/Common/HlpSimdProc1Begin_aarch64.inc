@@ -5,7 +5,7 @@
 //   is needed.
 // Usage:
 //   procedure MyProc(P1: Pointer);
-//     {$I SimdProc1Begin_aarch64.inc}
+//     {$I HlpSimdProc1Begin_aarch64.inc}
 //     // ... SIMD instructions using x0 ...
 //   end;
 {$IFDEF FPC}

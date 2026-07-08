@@ -8,7 +8,7 @@
 // Uses "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM registers.
 // All VEX instructions are db-encoded for broad assembler compatibility.
 //
-// After SimdProc5Begin_x86_64.inc:
+// After HlpSimdProc5Begin_x86_64.inc:
 //   rcx = state ptr (25 x UInt64, standard layout)
 //   rdx = data ptr (input bytes, little-endian UInt64 words)
 //   r8d = block count
@@ -52,7 +52,7 @@
   push rdi
   push rsi
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 264
 
@@ -393,7 +393,7 @@
 
   add rsp, 264
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
 
   pop rsi
   pop rdi

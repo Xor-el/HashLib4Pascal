@@ -15,7 +15,7 @@
 // Diagonalize/Undiagonalize via vpermq (cross-lane 64-bit permute).
 // vzeroupper required before return.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 2056
 
@@ -326,4 +326,4 @@
   add rsp, 2056
   db $C5, $F8, $77                              // vzeroupper
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

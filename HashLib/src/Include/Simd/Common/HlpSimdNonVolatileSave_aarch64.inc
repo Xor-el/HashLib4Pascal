@@ -1,6 +1,6 @@
 // Shared nonvolatile-SIMD save (AArch64). Opt-in by inclusion: a kernel that
 // clobbers any of v8..v15 includes this at its save point (before it first
-// writes those registers), and the matching SimdNonVolatileRestore_aarch64.inc
+// writes those registers), and the matching HlpSimdNonVolatileRestore_aarch64.inc
 // at its restore point (after the last use, before returning). Kernels that
 // touch only v0..v7 / v16..v31 do NOT include it.
 //

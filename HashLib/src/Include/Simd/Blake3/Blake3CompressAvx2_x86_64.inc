@@ -16,7 +16,7 @@
 //   [rsp + 96..111]: IV staging area (loaded into xmm2)
 //   [rsp +112..119]: padding
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 24
 
@@ -584,4 +584,4 @@
 
   add rsp, 24
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

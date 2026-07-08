@@ -9,7 +9,7 @@
 //   the same register.
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer; P4: Int32; P5: UInt64; P6: UInt32);
-//     {$I SimdProc6Begin_aarch64.inc}
+//     {$I HlpSimdProc6Begin_aarch64.inc}
 //     // ... SIMD instructions using x0, x1, x2, x3, x4, x5 ...
 //   end;
 {$IFDEF FPC}

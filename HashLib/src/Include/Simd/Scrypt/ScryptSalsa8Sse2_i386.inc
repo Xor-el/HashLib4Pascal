@@ -7,7 +7,7 @@
 // enabling lane-parallel SIMD processing of column and row quarter-rounds
 // with pshufd-based diagonalize/undiagonalize between them.
 //
-// IA-32: after SimdProc2Begin_i386 — ebx = State ptr, esi = Input ptr
+// IA-32: after HlpSimdProc2Begin_i386 — ebx = State ptr, esi = Input ptr
 //   (parallel to MS x64 ABI: rcx, rdx).
 // Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
 //   xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},

@@ -4,16 +4,16 @@
 // scheduling two blocks at once is what makes this faster than the single-block
 // AVX path. AVX2 and BMI2 (rorx/andn) instructions are db-encoded for broad
 // assembler compatibility (every AVX2 CPU also provides BMI2).
-// Expects MS x64 ABI (after SimdProc4Begin): rcx = state ptr, rdx = data ptr,
+// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K512 ptr (each 128-bit K512 pair stored twice
 //   so one table feeds both 256-bit lanes, with the BSWAP64 mask appended; see
 //   K512_Doubled). The mask is read unaligned, so the Pascal const needs no
 //   special alignment.
 //
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   mov    rax, rsp
   push   r9
@@ -1344,4 +1344,4 @@
   lea    rsp, [rsi]
   mov    rsi, rax
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

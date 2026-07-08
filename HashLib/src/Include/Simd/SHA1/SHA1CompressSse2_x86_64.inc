@@ -5,15 +5,15 @@
 // the pshufb input byte-swap, which is emulated in SSE2 (psrlw/psllw/por +
 // pshuflw/pshufhw; xmm12 is a free scratch); the W-schedule uses no palignr. The
 // appended masks go unused - the byte-swap is computed, not shuffled.
-// Expects MS x64 ABI (after SimdProc4Begin): rcx = state ptr, rdx = data ptr,
+// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K_SHA1 ptr (read 128-bit at a 32-byte stride,
 //   r14 = K + 64, so the duplicated halves are skipped; see K_SHA1_Doubled).
 //
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
 // holds the caller rsp across the kernel for the unwind.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   mov    r11, rsp
   push   r9
@@ -1228,4 +1228,4 @@
   mov    rbx, qword [r11 - $10]
   lea    rsp, [r11]
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

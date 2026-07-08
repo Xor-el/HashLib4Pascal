@@ -1,7 +1,7 @@
-// Shared nonvolatile-XMM restore (x86-64). Mirror of SimdNonVolatileSave_x86_64.inc:
+// Shared nonvolatile-XMM restore (x86-64). Mirror of HlpSimdNonVolatileSave_x86_64.inc:
 // restores xmm6..xmm15 and frees the 160-byte save frame. Include it at the
 // kernel's restore point (after the last use of xmm6..15, and after any vzeroupper,
-// before returning), in any procedure that included SimdNonVolatileSave_x86_64.inc.
+// before returning), in any procedure that included HlpSimdNonVolatileSave_x86_64.inc.
 // Legacy movups here is safe because a ymm kernel has already issued vzeroupper,
 // and a VEX-128-only kernel leaves the upper halves clean. No-op on SysV x86-64.
 {$IFNDEF HASHLIB_SYSV_X64_ABI}

@@ -5,7 +5,7 @@
 // BSWAP32_MASK (a plain per-dword swap - SHA-256 consumes its words in natural
 // order, so no dword reversal is needed).
 //
-// Expects MS x64 ABI (after SimdProc5Begin): rcx = state ptr, rdx = data ptr,
+// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = K256 ptr (64 UInt32 round constants), r10 = byte-swap
 //   mask ptr (16 bytes; see BSWAP32_MASK).
 //
@@ -27,10 +27,10 @@
 //   xmm8 = ABEF_SAVE
 //   xmm9 = CDGH_SAVE
 //
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); the kernel itself uses only volatile GPRs (rcx/rdx/r8-r10).
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   test r8d, r8d
   jz @shani_done
@@ -255,4 +255,4 @@
 
 @shani_done:
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

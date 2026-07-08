@@ -361,19 +361,19 @@ end;
 
 function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflectedSse2_x86_64.inc}
 end;
 
 function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldForwardSse2_x86_64.inc}
 end;
 
 function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflected32Sse2_x86_64.inc}
 end;
 
@@ -383,19 +383,19 @@ end;
 
 function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflectedSse2_i386.inc}
 end;
 
 function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\CRC\CRCFoldForwardSse2_i386.inc}
 end;
 
 function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflected32Sse2_i386.inc}
 end;
 
@@ -426,25 +426,25 @@ end;
 
 function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflectedPclmul_x86_64.inc}
 end;
 
 function CRC_Fold_Reflected_Vpclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflectedVpclmul_x86_64.inc}
 end;
 
 function CRC_Fold_Forward_Pclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldForwardPclmul_x86_64.inc}
 end;
 
 function CRC_Fold_Forward_Vpclmul(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldForwardVpclmul_x86_64.inc}
 end;
 
@@ -454,13 +454,13 @@ end;
 
 function CRC_Fold_Reflected_Pmull(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldReflectedPmull_aarch64.inc}
 end;
 
 function CRC_Fold_Forward_Pmull(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
   {$I ..\Include\Simd\CRC\CRCFoldForwardPmull_aarch64.inc}
 end;
 

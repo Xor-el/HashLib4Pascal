@@ -469,7 +469,7 @@ const
   );
 
 procedure KeccakF1600_Avx2(AState: Pointer; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA3\KeccakF1600Avx2_x86_64.inc}
 end;
 
@@ -480,7 +480,7 @@ end;
 
 procedure KeccakF1600_Avx2_Absorb(AState: Pointer; AData: PByte;
   ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA3\KeccakF1600Avx2Absorb_x86_64.inc}
 end;
 
@@ -499,7 +499,7 @@ end;
 // 64-bit iota with ld1r), so no separate packed constant block is needed.
 
 procedure KeccakF1600_CryptoExt(AState: Pointer; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_aarch64.inc}
   {$I ..\Include\Simd\SHA3\KeccakF1600CryptoExt_aarch64.inc}
 end;
 
@@ -510,7 +510,7 @@ end;
 
 procedure KeccakF1600_CryptoExt_Absorb(AState: Pointer; AData: PByte;
   ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc5Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc5Begin_aarch64.inc}
   {$I ..\Include\Simd\SHA3\KeccakF1600CryptoExtAbsorb_aarch64.inc}
 end;
 

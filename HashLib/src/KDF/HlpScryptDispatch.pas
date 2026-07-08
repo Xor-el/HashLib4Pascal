@@ -178,7 +178,7 @@ end;
 {$IFDEF HASHLIB_I386_ASM}
 
 procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Sse2_i386.inc}
 end;
 
@@ -187,12 +187,12 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Sse2_x86_64.inc}
 end;
 
 procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Avx2_x86_64.inc}
 end;
 
@@ -201,7 +201,7 @@ end;
 {$IFDEF HASHLIB_AARCH64_ASM}
 
 procedure Scrypt_SalsaXor_Neon(AState, AInput: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc2Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc2Begin_aarch64.inc}
   {$I ..\Include\Simd\Scrypt\ScryptSalsa8Neon_aarch64.inc}
 end;
 

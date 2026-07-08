@@ -1,5 +1,5 @@
 // SSE2 implementation of Adler-32 block processing (IA-32).
-// After SimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
+// After HlpSimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
 // ASums: [SumA: UInt32, SumB: UInt32]. Constants: [weights_hi: 16B, weights_lo: 16B] (32 bytes).
 // Processes num_blocks x 32-byte blocks; caller applies mod 65521.
 //

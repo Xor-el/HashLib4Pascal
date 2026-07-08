@@ -1,5 +1,5 @@
 // SSE2 implementation of XXH3_initCustomSecret (fully unrolled, 12 x 16-byte chunks).
-// IA-32: after SimdProc3Begin_i386 — ebx = customSecret, esi = defaultSecret, edi = seed.lo32,
+// IA-32: after HlpSimdProc3Begin_i386 — ebx = customSecret, esi = defaultSecret, edi = seed.lo32,
 //   dword [esp+16] = seed.hi32 (UInt64 third parameter; high dword on stack).
 //   (parallel to MS x64 ABI: rcx, rdx, r8).
 // Uses only volatile XMM: xmm0–xmm2.

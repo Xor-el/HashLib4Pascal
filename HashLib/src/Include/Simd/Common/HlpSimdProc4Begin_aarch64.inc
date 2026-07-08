@@ -5,7 +5,7 @@
 //   register remapping (unlike the x86 SysV/MS variants) is needed.
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer; P4: Pointer);
-//     {$I SimdProc4Begin_aarch64.inc}
+//     {$I HlpSimdProc4Begin_aarch64.inc}
 //     // ... SIMD instructions using x0, x1, w2, x3 ...
 //   end;
 {$IFDEF FPC}

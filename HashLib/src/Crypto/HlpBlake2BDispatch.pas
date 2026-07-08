@@ -107,7 +107,7 @@ end;
 {$IFDEF HASHLIB_I386_ASM}
 
 procedure Blake2B_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2_i386.inc}
 end;
 
@@ -116,12 +116,12 @@ end;
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Blake2B_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressSse2_x86_64.inc}
 end;
 
 procedure Blake2B_Compress_Avx2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressAvx2_x86_64.inc}
 end;
 
@@ -130,7 +130,7 @@ end;
 {$IFDEF HASHLIB_AARCH64_ASM}
 
 procedure Blake2B_Compress_Neon(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
   {$I ..\Include\Simd\Blake2B\Blake2BCompressNeon_aarch64.inc}
 end;
 

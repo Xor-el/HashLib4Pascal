@@ -3,7 +3,7 @@
 // When HASHLIB_SYSV_X64_ABI is defined, remaps rdi,rsi -> rcx,rdx.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer);
-//     {$I SimdProc2Begin_x86_64.inc}
+//     {$I HlpSimdProc2Begin_x86_64.inc}
 //     // ... SIMD instructions using rcx, rdx ...
 //   end;
 {$IFDEF FPC}
