@@ -8,7 +8,7 @@
 //   ANumBlocks) are read through the wN view of the same register.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer; P3: UInt32; P4, P5: Pointer);
-//     {$I SimdProc5Begin_aarch64.inc}
+//     {$I HlpSimdProc5Begin_aarch64.inc}
 //     // ... SIMD instructions using x0, x1, w2, x3, x4 ...
 //   end;
 {$IFDEF FPC}

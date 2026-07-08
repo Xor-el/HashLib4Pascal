@@ -24,7 +24,7 @@
 //   [rsp+ 32..191]: xmm6-xmm15 save area
 //   [rsp+192..223]: padding
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 64
 
@@ -274,4 +274,4 @@
 
   add rsp, 64
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

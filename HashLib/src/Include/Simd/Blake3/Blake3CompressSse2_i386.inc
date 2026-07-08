@@ -1,6 +1,6 @@
 // SSE2 implementation of BLAKE3 compress (7 rounds with register-based message scheduling).
 // Reference: BLAKE3-team/BLAKE3 official SSE2 implementation (blake3_sse2_x86-64_windows_msvc.asm).
-// IA-32: after SimdProc4Begin_i386 — ebx = state, esi = msg, edi = CV, eax = counterflags ptr
+// IA-32: after HlpSimdProc4Begin_i386 — ebx = state, esi = msg, edi = CV, eax = counterflags ptr
 //   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
 // Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15);
 //   IA-32 uses xmm0–7 only — high-XMM temps from x64 are folded into xmm0/1/2 + stack spill;

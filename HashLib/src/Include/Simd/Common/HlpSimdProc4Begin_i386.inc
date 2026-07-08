@@ -7,7 +7,7 @@
 // the EBX push but before the ESI / EDI pushes (see asm).
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer; P4: Int32);
-//     {$I SimdProc4Begin_i386.inc}
+//     {$I HlpSimdProc4Begin_i386.inc}
 //     // ... SIMD instructions using ebx, esi, edi, eax ...
 //   end;
 {$IFDEF FPC}

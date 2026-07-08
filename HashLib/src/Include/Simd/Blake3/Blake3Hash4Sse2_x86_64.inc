@@ -3,7 +3,7 @@
 // Each XMM register holds the same 32-bit word from 4 different chunks (inter-chunk SIMD).
 // 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
 //
-// After SimdProc6Begin_x86_64.inc:
+// After HlpSimdProc6Begin_x86_64.inc:
 //   rcx = AInput, rdx = AKey, r8 = AOut,
 //   r9 = ANumChunks, r10 = ACounter, r11 = AFlags
 //
@@ -18,7 +18,7 @@
   push rbx
   push rbp
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 584
 
@@ -1828,7 +1828,7 @@
 
   add rsp, 584
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
 
   pop rbp
   pop rbx

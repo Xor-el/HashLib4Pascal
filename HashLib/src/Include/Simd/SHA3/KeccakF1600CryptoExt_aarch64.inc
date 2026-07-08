@@ -11,7 +11,7 @@
 //   v26      = iota round constant (ld1r)
 //   v30-v31  = Rho/Pi scratch
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
   .long 0x6d400400                    // ldp d0, d1, [x0]
   .long 0x6d410c02                    // ldp d2, d3, [x0, #16]
   .long 0x6d421404                    // ldp d4, d5, [x0, #32]
@@ -109,5 +109,5 @@
   .long 0x6d0a5414                    // stp d20, d21, [x0, #160]
   .long 0x6d0b5c16                    // stp d22, d23, [x0, #176]
   .long 0xfd006018                    // str d24, [x0, #192]
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_aarch64.inc}
   ret

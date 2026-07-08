@@ -3,7 +3,7 @@
 // Callee-saved EBX, ESI - epilogue must pop ESI, EBX.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer);
-//     {$I SimdProc2Begin_i386.inc}
+//     {$I HlpSimdProc2Begin_i386.inc}
 //     // ... SIMD instructions using ebx, esi ...
 //   end;
 {$IFDEF FPC}

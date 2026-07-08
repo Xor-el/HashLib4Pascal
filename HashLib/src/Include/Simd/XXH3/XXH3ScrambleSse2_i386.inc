@@ -1,5 +1,5 @@
 // SSE2 implementation of XXH3_scrambleAcc (fully unrolled, 4 x 16-byte chunks).
-// IA-32: after SimdProc2Begin_i386 — ebx = acc, esi = secret
+// IA-32: after HlpSimdProc2Begin_i386 — ebx = acc, esi = secret
 //   (parallel to MS x64 ABI: rcx, rdx).
 // Uses only volatile registers: xmm0–xmm5, eax.
 // Algorithm per 128-bit chunk:

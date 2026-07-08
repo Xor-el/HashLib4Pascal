@@ -164,7 +164,7 @@ end;
 
 procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressSse2_i386.inc}
 end;
 
@@ -174,7 +174,7 @@ end;
 
 procedure SHA256_Compress_ShaNi(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants, AMask: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc5Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressShaNi_x86_64.inc}
 end;
 
@@ -185,13 +185,13 @@ end;
 
 procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressSse2_x86_64.inc}
 end;
 
 procedure SHA256_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressAvx2_x86_64.inc}
 end;
 
@@ -215,7 +215,7 @@ end;
 
 procedure SHA256_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
   {$I ..\Include\Simd\SHA256\SHA256CompressCryptoExt_aarch64.inc}
 end;
 

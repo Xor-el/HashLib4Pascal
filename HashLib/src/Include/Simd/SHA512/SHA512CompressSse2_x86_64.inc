@@ -3,16 +3,16 @@
 // in 128-bit SSE2 and is interleaved with the 64-bit GPR compression rounds, so
 // the vector and integer units run in parallel. This is much faster than a scalar
 // message schedule.
-// Expects MS x64 ABI (after SimdProc4Begin): rcx = state ptr, rdx = data ptr,
+// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K512 ptr (K512_Doubled: each 128-bit K512 pair
 //   stored twice, read at a 32-byte stride). The big-endian input byte-swap is
 //   emulated with pshuflw/pshufhw/psrlw/psllw/por (SSE2 has no pshufb), so no mask
 //   table is needed.
 //
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared SimdNonVolatileSave/Restore
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   push   rbx
   push   rbp
@@ -1295,4 +1295,4 @@
   pop    rbp
   pop    rbx
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

@@ -4,7 +4,7 @@
 // All VEX instructions are db-encoded for broad assembler compatibility.
 // 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
 //
-// After SimdProc6Begin_x86_64.inc:
+// After HlpSimdProc6Begin_x86_64.inc:
 //   rcx = AInput, rdx = AKey, r8 = AOut,
 //   r9 = ANumChunks, r10 = ACounter, r11 = AFlags
 //
@@ -18,7 +18,7 @@
 //
 // MS x64 non-volatile saves: xmm6-xmm13.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   push rbx
   push rbp
@@ -1678,4 +1678,4 @@
   pop rbp
   pop rbx
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

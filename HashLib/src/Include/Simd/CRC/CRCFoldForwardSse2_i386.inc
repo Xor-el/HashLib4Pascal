@@ -1,6 +1,6 @@
 // MSB-first 64-bit CRC: 16-byte slice (IA-32; SSE2 not required — same as x64 MSB path).
 // x64 counterpart: CRCFoldForwardSse2_x86_64.inc.
-// After SimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
+// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
 // Ctx: FoldConstants.CrcBits at +80, TableRow at +96. CrcMask derived from width.
 // Result UInt64 in edx:eax.
 

@@ -125,13 +125,13 @@ end;
 
 procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksSse2_i386.inc}
 end;
 
 procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_i386.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3_i386.inc}
 end;
 
@@ -141,19 +141,19 @@ end;
 
 procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksSse2_x86_64.inc}
 end;
 
 procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksSsse3_x86_64.inc}
 end;
 
 procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksAvx2_x86_64.inc}
 end;
 
@@ -189,7 +189,7 @@ end;
 
 procedure Adler32_ProcessBlocks_Neon(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\Include\Simd\Common\SimdProc4Begin_aarch64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
   {$I ..\Include\Simd\Adler32\Adler32BlocksNeon_aarch64.inc}
 end;
 

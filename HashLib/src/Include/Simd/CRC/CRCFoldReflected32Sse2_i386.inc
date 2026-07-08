@@ -1,5 +1,5 @@
 // CRC32 reflected (PKZIP-style) 16-byte slice (IA-32 SSE2 + dword table XOR).
-// After SimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
+// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
 // Little-endian host only. PUInt32 rows at Ctx + 96.
 // d0 xor CRC saved at [esp+12]; d1 in edx; d2/d3 on stack. Result eax, edx=0.
 

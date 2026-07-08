@@ -4,9 +4,9 @@
 // OpenSSL's only SSSE3-only op is the pshufb input byte-swap, emulated in SSE2 as
 // psrlw/psllw/por + pshuflw/pshufhw (the freed byte-swap-mask register xmm6 is the
 // scratch); the W-schedule uses no palignr.
-// Expects (after SimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
+// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
 //   eax = doubled-K_SHA1 ptr (read at a 32-byte stride so the duplicated halves
-//   are skipped; see K_SHA1_Doubled). SimdProc4Begin pushes ebx/esi/edi; ebp is
+//   are skipped; see K_SHA1_Doubled). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is
 //   pushed here as the K pointer, then reused as the data pointer and for the
 //   state writeback.
 

@@ -8,7 +8,7 @@
 // Message loads via movd + punpcklqdq + shufps.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileSave_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   movdqu xmm0, oword [rcx]
@@ -1072,4 +1072,4 @@
   movdqu oword [rcx], xmm0
   movdqu oword [rcx + $10], xmm1
 
-  {$I ..\Include\Simd\Common\SimdNonVolatileRestore_x86_64.inc}
+  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

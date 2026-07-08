@@ -1,5 +1,5 @@
 // SSSE3 Adler-32 block processing (IA-32).
-// After SimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
+// After HlpSimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
 // Constants: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B] (48 bytes; same as x64 SSSE3).
 // No xmm8 on IA-32: psadbw uses a copy in xmm5 (first half) or xmm4 (second half), then reload weights.
 // Caller applies mod 65521.

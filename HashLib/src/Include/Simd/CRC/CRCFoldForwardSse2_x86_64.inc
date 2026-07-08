@@ -1,6 +1,6 @@
 // MSB-first 64-bit CRC: 16-byte slice (slicing-by-16) using SSE2 for load only.
 // IA-32 counterpart: CRCFoldForwardSse2_i386.inc.
-// Signature (after SimdProc4Begin_x86_64.inc):
+// Signature (after HlpSimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;
 // MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx.

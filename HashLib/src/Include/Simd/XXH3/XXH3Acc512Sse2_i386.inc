@@ -1,5 +1,5 @@
 // SSE2 implementation of XXH3_accumulate_512 (fully unrolled, 4 x 16-byte chunks).
-// IA-32: after SimdProc3Begin_i386 — ebx = acc, esi = input, edi = secret
+// IA-32: after HlpSimdProc3Begin_i386 — ebx = acc, esi = input, edi = secret
 //   (parallel to MS x64 ABI: rcx, rdx, r8).
 // Uses only volatile XMM: xmm0–xmm5.
 // Reference: official xxHash C - XXH3_accumulate_512_sse2 in xxhash.h
