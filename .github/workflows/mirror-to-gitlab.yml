@@ -1,0 +1,59 @@
+name: Mirror to GitLab
+
+# Non-destructive backup mirror of GitHub -> GitLab.
+# GitLab Free no longer offers native pull mirroring, so we drive the mirror
+# from the GitHub side. Runs on every push to master/main and on tag pushes.
+#
+# Design notes:
+#   * No --force, no --mirror, no --prune. This job only ever *adds* to GitLab;
+#     it never deletes branches/tags there and never rewrites its history.
+#     Deleting the GitHub repo simply stops future pushes; GitLab keeps its state.
+#   * A history rewrite (force-push) on GitHub will make this job FAIL rather
+#     than silently overwrite the backup -- that is intentional for a backup.
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    tags:
+      - '**'
+  workflow_dispatch: {}
+
+concurrency:
+  group: gitlab-mirror-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Push ref to GitLab
+        env:
+          GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GITLAB_MIRROR_TOKEN}" ]; then
+            echo "::error::GITLAB_MIRROR_TOKEN secret is not set; cannot mirror." >&2
+            exit 1
+          fi
+
+          remote="https://oauth2:${GITLAB_MIRROR_TOKEN}@gitlab.com/Xor-el/HashLib4Pascal.git"
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "Mirroring tag ${GITHUB_REF_NAME} to GitLab"
+            git push "${remote}" "refs/tags/${GITHUB_REF_NAME}"
+          else
+            echo "Mirroring branch ${GITHUB_REF_NAME} (and all tags) to GitLab"
+            git push "${remote}" "HEAD:refs/heads/${GITHUB_REF_NAME}"
+            git push "${remote}" --tags
+          fi
+
+          echo "Mirror push completed."
