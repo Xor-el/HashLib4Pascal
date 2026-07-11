@@ -1,0 +1,229 @@
+HashLib/src/Simd/Backend/HlpScryptArmBackend.pas
+  s_6b1649def2e9b5::t_b30d7084e5b0b9 1-49
+HashLib/src/KDF/HlpPBKDF_Argon2NotBuildInAdapter.pas
+  s_6b1649def2e9b5::t_38f6bdcfdca00c 24-29,372
+  s_6b1649def2e9b5::t_f259f18883810b 363-371,373-451,1412-1414
+HashLib/src/Simd/Backend/HlpBlake2SArmBackend.pas
+  s_6b1649def2e9b5::t_13a24a1641b9d9 1-55
+HashLib/src/Crypto/HlpBlake3.pas
+  s_6b1649def2e9b5::t_f27213b52fed47 20-34,268-606,608-610,612-614,616-622,624-626,628-630,632-638,640-642,646-648,650-656,658-660,662-664,666-672,674-676,678-680,682-692,694-696,698-700,702-704,706-708,712-714,716-718,720-722,724-726,728-730,732-734,736-742,744-746,748-758,760-762,764-766,768-770,772-774,795,797,799-801,809
+  s_6b1649def2e9b5::t_c806a4257f1efe 607,611,615,623,627,631,639,643-645,649,657,661,665,673,677,681,693,697,701,705,709-711,715,719,723,727,731,735,743,747,759,763,767,771,775-794,796,798,802-808,810-849,1509-1513
+HashLib/src/Simd/Backend/HlpSHA2_512X86Backend.pas
+  s_6b1649def2e9b5::t_3533518a1e5597 1-191
+HashLib/src/Simd/Backend/HlpScryptX86Backend.pas
+  s_6b1649def2e9b5::t_9a0e950e4e7f91 1-79
+HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
+  s_6b1649def2e9b5::t_26f50c2ed53e30 13
+  s_6b1649def2e9b5::t_1033ec211eaf93 32
+  s_6b1649def2e9b5::t_1d3896867beb5e 454-455,458-459,462-463,466-467,470-471,474-475,478-479,482-483,486-487,490-491,498-499,502-503,525-624
+HashLib.Benchmark/Delphi/HashLib.BenchmarkFMX.dpr
+  s_6b1649def2e9b5::t_d055b75f920f2b 23-24
+  s_6b1649def2e9b5::t_5c67f008975a21 26-28
+  s_6b1649def2e9b5::t_26f50c2ed53e30 29
+  s_6b1649def2e9b5::t_d736072e902cc5 22
+  s_6b1649def2e9b5::t_67e9b43fe3bbe1 52-54,57-62,69-71,78-80,82-84,115-117,132-134,138-140,143-145
+HashLib/src/Crypto/HlpBlake2B.pas
+  s_6b1649def2e9b5::t_ad66d1f10a1381 239-311
+  s_6b1649def2e9b5::t_95c4f3e93996b0 483-484
+  s_6b1649def2e9b5::t_35a563d40a54b8 1077-1079
+  s_6b1649def2e9b5::t_1a1e4649368f2c 21-34
+HashLib/src/Simd/Backend/HlpBlake2BArmBackend.pas
+  s_6b1649def2e9b5::t_7b48124c62dbf2 1-55
+HashLib/src/Simd/Backend/HlpBlake3X86Backend.pas
+  s_6b1649def2e9b5::t_070b77e532c2d9 1-186
+HashLib/src/Simd/Facade/HlpAdler32Simd.pas
+  s_6b1649def2e9b5::t_1aabcddc0091b5 1-46
+HashLib/src/Simd/Facade/HlpSHA2_256Simd.pas
+  s_6b1649def2e9b5::t_1033ec211eaf93 1-48
+HashLib/src/Simd/Backend/HlpSHA2_512ArmBackend.pas
+  s_6b1649def2e9b5::t_7462bfbb57b5c3 1-58
+HashLib/src/Simd/Facade/HlpXXHash3Simd.pas
+  s_6b1649def2e9b5::t_5d3def8c16d324 1-82
+HashLib/src/Checksum/HlpAdler32.pas
+  s_6b1649def2e9b5::t_7c42b596dad022 16-28,49-108,110-115,119,123,125-131,133-136
+  s_6b1649def2e9b5::t_c1a57dbb87fcc6 109,116-118,120-122,124,132,190-192
+HashLib.Tests/Delphi.Tests/HashLib.Tests.Mobile.dpr
+  s_6b1649def2e9b5::t_26f50c2ed53e30 29-31
+  s_6b1649def2e9b5::t_d055b75f920f2b 24-25
+  s_6b1649def2e9b5::t_5c67f008975a21 26,28
+  s_6b1649def2e9b5::t_6832f9aab5f4f2 54-56,59-64,71-73,80-82,84-86,117-119,134-136,140-142,145-147
+HashLib.Benchmark/Delphi/HashLib.BenchmarkConsole.dpr
+  s_6b1649def2e9b5::t_d055b75f920f2b 23-25
+  s_6b1649def2e9b5::t_26f50c2ed53e30 29-30
+  s_6b1649def2e9b5::t_5c67f008975a21 27-28
+  s_6b1649def2e9b5::t_a14d204df1e09d 53-55,58-63,70-72,79-81,83-85,116-118,133-135,139-141,144-146
+HashLib/src/Simd/Facade/HlpSHA3Simd.pas
+  s_6b1649def2e9b5::t_3421a8c2955fee 1-58
+HashLib/src/Packages/FPC/HashLib4PascalPackage.pas
+  s_6b1649def2e9b5::t_82434cedc37b67 21
+  s_6b1649def2e9b5::t_26f50c2ed53e30 19
+  s_6b1649def2e9b5::t_6317181f9e1a6c 14-15,22
+  s_6b1649def2e9b5::t_1033ec211eaf93 13
+  s_6b1649def2e9b5::t_d055b75f920f2b 17-18
+  s_6b1649def2e9b5::t_e67f40f8e51492 20
+  s_6b1649def2e9b5::t_8b4a80a7ca0996 16,23-25,32-34,36-44
+HashLib/src/Crypto/HlpSHA1.pas
+  s_6b1649def2e9b5::t_3d898e9e8271b3 47-122
+  s_6b1649def2e9b5::t_cd4af488334216 335-337
+  s_6b1649def2e9b5::t_bb722f4197edb3 11-27
+HashLib/src/Simd/Backend/HlpXXHash3ArmBackend.pas
+  s_6b1649def2e9b5::t_ea9dd8e8af9684 1-105
+HashLib/src/Simd/Facade/HlpCRCSimd.pas
+  s_6b1649def2e9b5::t_0cae056f776f69 1-54
+HashLib/src/Crypto/HlpBlake2S.pas
+  s_6b1649def2e9b5::t_4af73aade85851 21-34
+  s_6b1649def2e9b5::t_10c242ee4b6c11 479-480
+  s_6b1649def2e9b5::t_3289ed8405132a 237-307
+  s_6b1649def2e9b5::t_7b4596cd1276ef 1071-1073
+HashLib/src/Simd/Backend/HlpSHA2_256X86Backend.pas
+  s_6b1649def2e9b5::t_cef061d326d1ce 32
+  s_6b1649def2e9b5::t_8ec4559de49cfd 1-31,33-164
+HashLib/src/Crypto/HlpSHA3.pas
+  s_6b1649def2e9b5::t_9c204552c6ac71 28-45
+  s_6b1649def2e9b5::t_f348b9b7ea2881 19-27,416,755
+  s_6b1649def2e9b5::t_0b2114d38c72a3 407-415,417-754,756-772,1890-1893
+HashLib/src/Simd/Backend/HlpArgon2X86Backend.pas
+  s_6b1649def2e9b5::t_f6adcf73d2855b 1-79
+HashLib/src/Simd/Backend/HlpSHA2_256ArmBackend.pas
+  s_6b1649def2e9b5::t_5baafc576403b2 1-58
+HashLib/src/Simd/Facade/HlpBlake3Simd.pas
+  s_6b1649def2e9b5::t_7e6e6b4f3c5c33 1-70
+HashLib/src/Simd/Backend/HlpBlake3ArmBackend.pas
+  s_6b1649def2e9b5::t_fc9eccacce0bdb 1-107
+HashLib/src/Checksum/HlpCRCCore.pas
+  s_6b1649def2e9b5::t_137592b30b5e3f 1-375
+HashLib/src/Simd/Facade/HlpBlake2SSimd.pas
+  s_6b1649def2e9b5::t_d2a2fae07c238e 1-46
+HashLib/src/Simd/Backend/HlpBlake2SX86Backend.pas
+  s_6b1649def2e9b5::t_db94bfa620940b 1-82
+HashLib/src/Simd/Backend/HlpAdler32X86Backend.pas
+  s_6b1649def2e9b5::t_27b51796d03e27 1-116
+HashLib/src/Crypto/HlpSHA2_512Base.pas
+  s_6b1649def2e9b5::t_6405857082770e 11-52
+  s_6b1649def2e9b5::t_6374379493747c 53-62,84-111,121
+  s_6b1649def2e9b5::t_fcf91bb538a453 112-114
+  s_6b1649def2e9b5::t_7e76a5e0a00fff 115-120,122-142,229-231
+HashLib/src/Crypto/HlpSHA2_256Base.pas
+  s_6b1649def2e9b5::t_ca5542196d234d 25
+  s_6b1649def2e9b5::t_fbfdbf444ef62d 11-24,26-43,65-123,202-204
+HashLib/src/Simd/Facade/HlpArgon2Simd.pas
+  s_6b1649def2e9b5::t_d6207ef8f76e62 1-46
+HashLib/src/Simd/Facade/HlpSHA2_512Simd.pas
+  s_6b1649def2e9b5::t_2cd53e77bb8980 1-48
+HashLib/src/Simd/Facade/HlpBlake2BSimd.pas
+  s_6b1649def2e9b5::t_60ad5bfe5368e8 1-46
+HashLib/src/Simd/Facade/HlpSHA1Simd.pas
+  s_6b1649def2e9b5::t_725e6eaa3f38da 1-48
+HashLib/src/Simd/Facade/HlpScryptSimd.pas
+  s_6b1649def2e9b5::t_651c6e677dc76c 1-46
+HashLib/src/Simd/Backend/HlpSHA3X86Backend.pas
+  s_6b1649def2e9b5::t_8a3cb1a7bf3d53 1-136
+HashLib/src/Simd/Backend/HlpXXHash3X86Backend.pas
+  s_6b1649def2e9b5::t_566c232873f282 1-182
+HashLib/src/Simd/Backend/HlpArgon2ArmBackend.pas
+  s_6b1649def2e9b5::t_4d4deac1d7e0fd 1-54
+HashLib/src/Simd/Backend/HlpBlake2BX86Backend.pas
+  s_6b1649def2e9b5::t_dcad86cec75b29 1-82
+HashLib/src/KDF/HlpPBKDF_ScryptNotBuildInAdapter.pas
+  s_6b1649def2e9b5::t_2b29b152e60615 21-29,126-166,168,172,175,179-180,221,257,275
+  s_6b1649def2e9b5::t_c5f90cfb0e6bbb 167,169-171,173-174,176-178,181-220,222-256,258-274,276,508-510
+HashLib/src/Simd/Backend/HlpCRCX86Backend.pas
+  s_6b1649def2e9b5::t_0556c2b06c54b2 1-148
+HashLib/src/Simd/Backend/HlpSHA1X86Backend.pas
+  s_6b1649def2e9b5::t_036abe88082281 1-137
+HashLib/src/Simd/Backend/HlpAdler32ArmBackend.pas
+  s_6b1649def2e9b5::t_3b0538c12b7d61 1-60
+HashLib/src/Simd/Backend/HlpSHA3ArmBackend.pas
+  s_6b1649def2e9b5::t_fe28607b6502b4 1-83
+HashLib/src/Simd/Backend/HlpCRCArmBackend.pas
+  s_6b1649def2e9b5::t_78b15c3478dca2 1-70
+HashLib/src/Checksum/HlpCRC.pas
+  s_6b1649def2e9b5::t_146cf0cb250bce 21
+HashLib/src/Hash64/HlpXXHash3.pas
+  s_6b1649def2e9b5::t_240030ae47f70c 17-36,210,232,253,270,278-280
+  s_6b1649def2e9b5::t_18abc2b9ae3e12 196-209,211-231,233-252,254-269,271-277,281-286,393,412,418,451,853-858
+HashLib/src/Simd/Backend/HlpSHA1ArmBackend.pas
+  s_6b1649def2e9b5::t_710e2f79ae389f 1-58
+HashLib.Tests/Delphi.Tests/HashLib.Tests.Mobile.dproj
+  s_6b1649def2e9b5::t_ee4d2ef7529bfe 364-366,368-371,394-396,399-404,411-413,420-422,424-426,457-459,474-476,480-482,485-487
+HashLib.Tests/Delphi.Tests/HashLib.Tests.dpr
+  s_6b1649def2e9b5::t_2e7c0bd995f0ea 41-43,45-48,71-73,76-81,88-90,97-99,101-103,134-136,151-153,157-159,162-164
+HashLib/src/Checksum/HlpCRC32Fast.pas
+  s_6b1649def2e9b5::t_adf1f430e13431 15
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSse2_x86_64.inc
+  s_6b1649def2e9b5::t_885122b90a8ff1 13,101
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSsse3_x86_64.inc
+  s_6b1649def2e9b5::t_3b1cee19eda67a 8,79
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_6c9acc7b109248 18,329
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockSse2_x86_64.inc
+  s_6b1649def2e9b5::t_dd587d7a1c7bc6 19,558
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressNeon_aarch64.inc
+  s_6b1649def2e9b5::t_1a9706bfbaa131 18,1398
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_dfee9b3e4bff8e 8,1992
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_9114eb9e466be0 10,996
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_562d10cdc1a0ab 11,1075
+HashLib/src/Include/Simd/Blake3/Blake3CompressAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_03748128b2e71f 19,587
+HashLib/src/Include/Simd/Blake3/Blake3CompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_441a1e5bcefbc8 19,640
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Neon_aarch64.inc
+  s_6b1649def2e9b5::t_9823746aed79b7 21,1714
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Sse2_x86_64.inc
+  s_6b1649def2e9b5::t_42b9595a9e5c98 21,1831
+HashLib/src/Include/Simd/Blake3/Blake3Hash8Avx2_x86_64.inc
+  s_6b1649def2e9b5::t_c67bff45b9cce6 21,1681
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPclmul_x86_64.inc
+  s_6b1649def2e9b5::t_90cab94db8d0ee 32,198
+HashLib/src/Include/Simd/CRC/CRCFoldForwardVpclmul_x86_64.inc
+  s_6b1649def2e9b5::t_5618e2b498e447 29,243
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPclmul_x86_64.inc
+  s_6b1649def2e9b5::t_11d5fea2571dfd 29,197
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedVpclmul_x86_64.inc
+  s_6b1649def2e9b5::t_842b39adf548f1 28,219
+HashLib/src/Include/Simd/SHA1/SHA1CompressAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_c82ff961fce182 16,1682
+HashLib/src/Include/Simd/SHA1/SHA1CompressShaNi_x86_64.inc
+  s_6b1649def2e9b5::t_e0cc3d35d20638 37,206
+HashLib/src/Include/Simd/SHA1/SHA1CompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_76d31f1896bb36 16,1231
+HashLib/src/Include/Simd/SHA256/SHA256CompressAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_69daea584776f5 17,1255
+HashLib/src/Include/Simd/SHA256/SHA256CompressShaNi_x86_64.inc
+  s_6b1649def2e9b5::t_e99014d0c18b8c 33,258
+HashLib/src/Include/Simd/SHA256/SHA256CompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_3b0ef89a9d9975 16,1153
+HashLib/src/Include/Simd/SHA3/KeccakF1600Avx2Absorb_x86_64.inc
+  s_6b1649def2e9b5::t_56ec1b44feff13 55,396
+HashLib/src/Include/Simd/SHA3/KeccakF1600Avx2_x86_64.inc
+  s_6b1649def2e9b5::t_aa98b279df18b8 27,277
+HashLib/src/Include/Simd/SHA3/KeccakF1600CryptoExtAbsorb_aarch64.inc
+  s_6b1649def2e9b5::t_15905edcc25df2 12,203
+HashLib/src/Include/Simd/SHA3/KeccakF1600CryptoExt_aarch64.inc
+  s_6b1649def2e9b5::t_22b4d0571fdae3 14,112
+HashLib/src/Include/Simd/SHA512/SHA512CompressAvx2_x86_64.inc
+  s_6b1649def2e9b5::t_e390d9d37bd6b8 16,1347
+HashLib/src/Include/Simd/SHA512/SHA512CompressSse2_x86_64.inc
+  s_6b1649def2e9b5::t_bbd996acac34d8 15,1298
+HashLib/src/Packages/Delphi/HashLib4PascalPackage.dpk
+  s_6b1649def2e9b5::t_f63ec0f04fc45f 49-51,53-56,79-81,84-89,96-98,105-107,109-111,142-144,159-161,165-167,170-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "24b5d122af06f06af1784aff2bb480942fb02522",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
