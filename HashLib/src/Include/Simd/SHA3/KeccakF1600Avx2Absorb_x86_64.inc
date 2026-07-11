@@ -52,7 +52,7 @@
   push rdi
   push rsi
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 264
 
@@ -393,7 +393,7 @@
 
   add rsp, 264
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
 
   pop rsi
   pop rdi

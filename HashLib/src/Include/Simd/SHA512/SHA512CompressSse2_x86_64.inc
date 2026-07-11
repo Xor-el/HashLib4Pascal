@@ -12,7 +12,7 @@
 // MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   push   rbx
   push   rbp
@@ -1295,4 +1295,4 @@
   pop    rbp
   pop    rbx
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

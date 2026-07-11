@@ -34,7 +34,7 @@
 // MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); the kernel itself uses only volatile GPRs (rcx/rdx/r8-r11).
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   test r8d, r8d
   jz @sha1ni_done
@@ -203,4 +203,4 @@
 
 @sha1ni_done:
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

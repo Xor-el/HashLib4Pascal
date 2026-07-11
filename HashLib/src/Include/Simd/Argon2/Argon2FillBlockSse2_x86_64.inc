@@ -16,7 +16,7 @@
 // register pairs. Right-rotates require a 3-movdqa swap since shufpd
 // naturally places results in the opposite register for that direction.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 2056
 
@@ -555,4 +555,4 @@
 @epilogue:
   add rsp, 2056
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

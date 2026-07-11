@@ -13,7 +13,7 @@
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
 // holds the caller rsp across the kernel for the unwind.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   mov    r11, rsp
   push   r9
@@ -1679,4 +1679,4 @@
   mov    rbx, qword [r11 - $10]
   lea    rsp, [r11]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

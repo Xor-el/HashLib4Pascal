@@ -8,8 +8,23 @@ uses
   HlpBitOperations,
   HlpHashLibTypes,
   HlpSHA0,
-  HlpIHash,
-  HlpSHA1Dispatch;
+  HlpIHash;
+
+type
+  TSHA1CompressProc = procedure(AState, AData: Pointer; ANumBlocks: UInt32);
+
+var
+  SHA1_Compress: TSHA1CompressProc;
+
+const
+  // K round constants, each replicated across four lanes for the SIMD kernels;
+  // the scalar reference reads one per group ([0], [4], [8], [12]).
+  K_SHA1: array [0 .. 15] of UInt32 = (
+    $5A827999, $5A827999, $5A827999, $5A827999,
+    $6ED9EBA1, $6ED9EBA1, $6ED9EBA1, $6ED9EBA1,
+    $8F1BBCDC, $8F1BBCDC, $8F1BBCDC, $8F1BBCDC,
+    $CA62C1D6, $CA62C1D6, $CA62C1D6, $CA62C1D6
+  );
 
 type
   TSHA1 = class sealed(TSHA0)
@@ -28,6 +43,82 @@ type
   end;
 
 implementation
+
+uses
+  HlpBinaryPrimitives,
+  HlpSHA1Simd;
+
+// =============================================================================
+// Scalar reference implementation
+// =============================================================================
+
+procedure SHA1_Compress_Scalar(AState, AData: Pointer; ANumBlocks: UInt32);
+var
+  LPState: PCardinal;
+  LPData: PByte;
+  LA, LB, LC, LD, LE, LT: UInt32;
+  LW: array [0 .. 79] of UInt32;
+  LRound: Int32;
+begin
+  LPState := PCardinal(AState);
+  LPData := PByte(AData);
+
+  while ANumBlocks > 0 do
+  begin
+    TBinaryPrimitives.CopyUInt32BigEndian(LPData, 0, @LW[0], 0, 64);
+
+    for LRound := 16 to 79 do
+    begin
+      LT := LW[LRound - 3] xor LW[LRound - 8] xor LW[LRound - 14]
+        xor LW[LRound - 16];
+      LW[LRound] := TBitOperations.RotateLeft32(LT, 1);
+    end;
+
+    LA := LPState[0]; LB := LPState[1]; LC := LPState[2];
+    LD := LPState[3]; LE := LPState[4];
+
+    for LRound := 0 to 19 do
+    begin
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LD xor (LB and (LC xor LD)))
+        + LE + K_SHA1[0] + LW[LRound];
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
+      LB := LA; LA := LT;
+    end;
+
+    for LRound := 20 to 39 do
+    begin
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LB xor LC xor LD)
+        + LE + K_SHA1[4] + LW[LRound];
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
+      LB := LA; LA := LT;
+    end;
+
+    for LRound := 40 to 59 do
+    begin
+      LT := TBitOperations.RotateLeft32(LA, 5) +
+        ((LB and LC) or (LD and (LB or LC)))
+        + LE + K_SHA1[8] + LW[LRound];
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
+      LB := LA; LA := LT;
+    end;
+
+    for LRound := 60 to 79 do
+    begin
+      LT := TBitOperations.RotateLeft32(LA, 5) + (LB xor LC xor LD)
+        + LE + K_SHA1[12] + LW[LRound];
+      LE := LD; LD := LC; LC := TBitOperations.RotateLeft32(LB, 30);
+      LB := LA; LA := LT;
+    end;
+
+    LPState[0] := LPState[0] + LA; LPState[1] := LPState[1] + LB;
+    LPState[2] := LPState[2] + LC; LPState[3] := LPState[3] + LD;
+    LPState[4] := LPState[4] + LE;
+
+    System.FillChar(LW, System.SizeOf(LW), 0);
+    System.Inc(LPData, 64);
+    System.Dec(ANumBlocks);
+  end;
+end;
 
 { TSHA1 }
 
@@ -240,5 +331,8 @@ begin
   end;
 {$ENDIF USE_UNROLLED_VARIANT}
 end;
+
+initialization
+  SHA1_Compress := TSHA1Simd.Select(@SHA1_Compress_Scalar);
 
 end.

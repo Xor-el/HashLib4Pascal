@@ -1,0 +1,186 @@
+unit HlpBlake3X86Backend;
+
+{$I ..\..\Include\HashLib.inc}
+
+interface
+
+uses
+  HlpBlake3;
+
+type
+  /// <summary>
+  /// x86 SIMD backend for Blake3: owns the SSE2 / AVX2 compression and 4-/8-way
+  /// hash-many kernels (bodies in <c>Include\Simd\Blake3\</c>) and the runtime
+  /// tier selection via <c>TCpuFeatures.X86</c>. The hash-many wrappers process
+  /// full parallel groups in asm and delegate the remainder to the scalar
+  /// hash-many. Compiles on every target - without x86 SIMD the selectors return
+  /// the scalar routines / degree 1.
+  /// </summary>
+  TBlake3X86Backend = class sealed
+  public
+    class function SelectCompress(AScalar: TBlake3CompressProc): TBlake3CompressProc; static;
+    class function SelectHashMany(AScalar: TBlake3HashManyProc): TBlake3HashManyProc; static;
+    class function SelectParallelDegree(ADefault: Int32): Int32; static;
+  end;
+
+implementation
+
+{$IFDEF HASHLIB_X86_SIMD}
+
+uses
+  HlpCpuFeatures,
+  HlpSimdLevels;
+
+// =============================================================================
+// SIMD kernels
+//   i386:    SSE2
+//   x86_64:  AVX2, SSE2
+// =============================================================================
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_i386.inc}
+end;
+
+procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_i386.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_i386.inc}
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_x86_64.inc}
+end;
+
+procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3CompressAvx2_x86_64.inc}
+end;
+
+procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_x86_64.inc}
+end;
+
+procedure Blake3_Hash8_Avx2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3Hash8Avx2_x86_64.inc}
+end;
+
+{$ENDIF HASHLIB_X86_64_ASM}
+
+// SSE2 hash_many: hash4 -> delegate remainder to scalar hash_many
+procedure Blake3_HashMany_Sse2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+var
+  LPInput, LPOut: PByte;
+begin
+  LPInput := PByte(AInput);
+  LPOut := PByte(AOut);
+  while ANumChunks >= 4 do
+  begin
+    Blake3_Hash4_Sse2(LPInput, AKey, LPOut, 4, ACounter, AFlags);
+    System.Inc(LPInput, 4 * 1024);
+    System.Inc(LPOut, 4 * 32);
+    System.Inc(ACounter, 4);
+    System.Dec(ANumChunks, 4);
+  end;
+  if ANumChunks > 0 then
+    Blake3_HashMany_Scalar(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
+end;
+
+{$IFDEF HASHLIB_X86_64_ASM}
+
+// AVX2 hash_many: hash8 -> delegate remainder to SSE2 hash_many
+procedure Blake3_HashMany_Avx2(AInput, AKey, AOut: Pointer;
+  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
+var
+  LPInput, LPOut: PByte;
+begin
+  LPInput := PByte(AInput);
+  LPOut := PByte(AOut);
+  while ANumChunks >= 8 do
+  begin
+    Blake3_Hash8_Avx2(LPInput, AKey, LPOut, 8, ACounter, AFlags);
+    System.Inc(LPInput, 8 * 1024);
+    System.Inc(LPOut, 8 * 32);
+    System.Inc(ACounter, 8);
+    System.Dec(ANumChunks, 8);
+  end;
+  if ANumChunks > 0 then
+    Blake3_HashMany_Sse2(LPInput, AKey, LPOut, ANumChunks, ACounter, AFlags);
+end;
+
+{$ENDIF HASHLIB_X86_64_ASM}
+
+{$ENDIF HASHLIB_X86_SIMD}
+
+{ TBlake3X86Backend }
+
+class function TBlake3X86Backend.SelectCompress(AScalar: TBlake3CompressProc): TBlake3CompressProc;
+begin
+{$IFDEF HASHLIB_I386_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
+      Exit(@Blake3_Compress_Sse2);
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_X86_64_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.AVX2:
+      Exit(@Blake3_Compress_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@Blake3_Compress_Sse2);
+  end;
+{$ENDIF}
+  Result := AScalar;
+end;
+
+class function TBlake3X86Backend.SelectHashMany(AScalar: TBlake3HashManyProc): TBlake3HashManyProc;
+begin
+{$IFDEF HASHLIB_I386_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
+      Exit(@Blake3_HashMany_Sse2);
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_X86_64_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.AVX2:
+      Exit(@Blake3_HashMany_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@Blake3_HashMany_Sse2);
+  end;
+{$ENDIF}
+  Result := AScalar;
+end;
+
+class function TBlake3X86Backend.SelectParallelDegree(ADefault: Int32): Int32;
+begin
+{$IFDEF HASHLIB_I386_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.SSE2:
+      Exit(4);
+  end;
+{$ENDIF}
+{$IFDEF HASHLIB_X86_64_ASM}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.AVX2:
+      Exit(8);
+    TX86SimdLevel.SSE2:
+      Exit(4);
+  end;
+{$ENDIF}
+  Result := ADefault;
+end;
+
+end.

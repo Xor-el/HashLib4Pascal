@@ -15,7 +15,7 @@
 //   v21-v23  = rotate / diagonalize temps (b1 gather uses v23)
 //   u64 ror-by-32 uses rev64.4s (vrev64q_u32), not rev64.16b.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
 
   .long 0xad400400                    // ldp q0, q1, [x0]
   .long 0xad410c02                    // ldp q2, q3, [x0, #32]
@@ -1395,5 +1395,5 @@
   .long 0xad000400                    // stp q0, q1, [x0]
   .long 0xad010c02                    // stp q2, q3, [x0, #32]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_aarch64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_aarch64.inc}
   ret

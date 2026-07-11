@@ -12,7 +12,7 @@ uses
   HlpIHashInfo,
   HlpHashResult,
   HlpIHashResult,
-  HlpCRCDispatch;
+  HlpCRCCore;
 
 type
 

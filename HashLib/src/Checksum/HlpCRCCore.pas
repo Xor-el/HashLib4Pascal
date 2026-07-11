@@ -1,4 +1,4 @@
-unit HlpCRCDispatch;
+﻿unit HlpCRCCore;
 
 {
   CRC fold dispatch (scalar + SIMD + PCLMUL) and fast reflected-CRC32 update.
@@ -48,6 +48,15 @@ type
   TCRCFoldFunc = function(AData: PByte; ALength: UInt32;
     AState: Pointer; AConstants: Pointer): UInt64;
 
+  // Tier-selection result: the three fold entry points plus whether they use
+  // carry-less multiply (PCLMUL/VPCLMUL/PMULL) rather than table slicing.
+  TCRCFoldSelection = record
+    Reflected: TCRCFoldFunc;
+    Fwd: TCRCFoldFunc;
+    Reflected32: TCRCFoldFunc;
+    UsesCarrylessMul: Boolean;
+  end;
+
 procedure CRCDispatch_InitRuntimeCtx(const Table: THashLibMatrixUInt64Array;
   APoly: UInt64; AWidth: Int32; AReflected: Boolean;
   out Ctx: TCRCFoldRuntimeCtx); overload;
@@ -77,12 +86,7 @@ var
 implementation
 
 uses
-  HlpCpuFeatures,
-  HlpSimdLevels;
-
-// =============================================================================
-// Scalar fallback implementation
-// =============================================================================
+  HlpCRCSimd;
 
 function CrcTableU64(const Row: Pointer; B: Byte): UInt64; inline;
 begin
@@ -350,180 +354,22 @@ begin
 end;
 
 // =============================================================================
-// SIMD implementations
-//
-//   i386:    SSE2
-//   x86_64:  VPCLMULQDQ, PCLMULQDQ, SSE2
-//   aarch64: PMULL
+// Fold routine selection (once, at init)
 // =============================================================================
 
-{$IFDEF HASHLIB_X86_64_ASM}
-
-function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflectedSse2_x86_64.inc}
-end;
-
-function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldForwardSse2_x86_64.inc}
-end;
-
-function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflected32Sse2_x86_64.inc}
-end;
-
-{$ELSE}
-
-{$IFDEF HASHLIB_I386_ASM}
-
-function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflectedSse2_i386.inc}
-end;
-
-function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldForwardSse2_i386.inc}
-end;
-
-function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflected32Sse2_i386.inc}
-end;
-
-{$ELSE}
-
-function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
+procedure InitCRCFold();
+var
+  LSel: TCRCFoldSelection;
 begin
-  Result := CRC_Fold_Reflected_Scalar(AData, ALength, AState, AConstants);
-end;
-
-function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-begin
-  Result := CRC_Fold_Forward_Scalar(AData, ALength, AState, AConstants);
-end;
-
-function CRC_Fold_Reflected32_Sse2(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-begin
-  Result := CRC_Fold_Reflected32_Scalar(AData, ALength, AState, AConstants);
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
-{$ENDIF HASHLIB_X86_64_ASM}
-
-{$IFDEF HASHLIB_X86_64_ASM}
-
-function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflectedPclmul_x86_64.inc}
-end;
-
-function CRC_Fold_Reflected_Vpclmul(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflectedVpclmul_x86_64.inc}
-end;
-
-function CRC_Fold_Forward_Pclmul(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldForwardPclmul_x86_64.inc}
-end;
-
-function CRC_Fold_Forward_Vpclmul(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldForwardVpclmul_x86_64.inc}
-end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
-
-{$IFDEF HASHLIB_AARCH64_ASM}
-
-function CRC_Fold_Reflected_Pmull(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldReflectedPmull_aarch64.inc}
-end;
-
-function CRC_Fold_Forward_Pmull(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-  {$I ..\Include\Simd\Common\HlpSimdProc4Begin_aarch64.inc}
-  {$I ..\Include\Simd\CRC\CRCFoldForwardPmull_aarch64.inc}
-end;
-
-{$ENDIF HASHLIB_AARCH64_ASM}
-
-// =============================================================================
-// Dispatch initialization
-// =============================================================================
-
-procedure InitDispatch();
-
-  procedure BindSse2CrcFold;
-  begin
-    CRC_Fold_Reflected := @CRC_Fold_Reflected_Sse2;
-    CRC_Fold_Forward := @CRC_Fold_Forward_Sse2;
-    CRC_Fold_Reflected32 := @CRC_Fold_Reflected32_Sse2;
-  end;
-
-begin
-  CRC_Fold_Reflected := @CRC_Fold_Reflected_Scalar;
-  CRC_Fold_Forward := @CRC_Fold_Forward_Scalar;
-  CRC_Fold_Reflected32 := @CRC_Fold_Reflected32_Scalar;
-  CRC_Fold_UsesCarrylessMul := False;
-
-{$IFDEF HASHLIB_AARCH64_ASM}
-  if TCpuFeatures.Arm.HasPMULL() then
-  begin
-    CRC_Fold_Reflected := @CRC_Fold_Reflected_Pmull;
-    CRC_Fold_Forward := @CRC_Fold_Forward_Pmull;
-    CRC_Fold_Reflected32 := @CRC_Fold_Reflected_Pmull;
-    CRC_Fold_UsesCarrylessMul := True;
-    Exit;
-  end;
-{$ENDIF HASHLIB_AARCH64_ASM}
-
-{$IFDEF HASHLIB_X86_64_ASM}
-  if TCpuFeatures.X86.HasVPCLMULQDQ() then
-  begin
-    CRC_Fold_Reflected := @CRC_Fold_Reflected_Vpclmul;
-    CRC_Fold_Forward := @CRC_Fold_Forward_Vpclmul;
-    CRC_Fold_Reflected32 := @CRC_Fold_Reflected_Vpclmul;
-    CRC_Fold_UsesCarrylessMul := True;
-    Exit;
-  end;
-  if TCpuFeatures.X86.HasPCLMULQDQ() then
-  begin
-    CRC_Fold_Reflected := @CRC_Fold_Reflected_Pclmul;
-    CRC_Fold_Forward := @CRC_Fold_Forward_Pclmul;
-    CRC_Fold_Reflected32 := @CRC_Fold_Reflected_Pclmul;
-    CRC_Fold_UsesCarrylessMul := True;
-    Exit;
-  end;
-{$ENDIF HASHLIB_X86_64_ASM}
-
-{$IFDEF HASHLIB_X86_SIMD}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSE2:
-      BindSse2CrcFold;
-  end;
-{$ENDIF HASHLIB_X86_SIMD}
+  LSel := TCRCSimd.Select(@CRC_Fold_Reflected_Scalar,
+    @CRC_Fold_Forward_Scalar, @CRC_Fold_Reflected32_Scalar);
+  CRC_Fold_Reflected := LSel.Reflected;
+  CRC_Fold_Forward := LSel.Fwd;
+  CRC_Fold_Reflected32 := LSel.Reflected32;
+  CRC_Fold_UsesCarrylessMul := LSel.UsesCarrylessMul;
 end;
 
 initialization
-  InitDispatch();
+  InitCRCFold();
 
 end.

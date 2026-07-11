@@ -18,7 +18,7 @@ uses
   HlpHashResult,
   HlpIHashResult,
   HlpICRC,
-  HlpCRCDispatch;
+  HlpCRCCore;
 
 resourcestring
   SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';

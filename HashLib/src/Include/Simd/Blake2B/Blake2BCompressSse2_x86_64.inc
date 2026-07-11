@@ -5,7 +5,7 @@
 //   xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15), xmm8-9 = temps.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   movdqu xmm0, oword [rcx]
@@ -1989,4 +1989,4 @@
   movdqu oword [rcx + $20], xmm2
   movdqu oword [rcx + $30], xmm3
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

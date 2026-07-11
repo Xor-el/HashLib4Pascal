@@ -26,7 +26,7 @@
 //   2-byte: C5 [R.vvvv.L.pp]
 //   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   cmp edx, 128
   jb @xmm_path
@@ -240,4 +240,4 @@
   // movq rax, xmm0: 66 48 0F 7E C0
   db $66, $48, $0F, $7E, $C0
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

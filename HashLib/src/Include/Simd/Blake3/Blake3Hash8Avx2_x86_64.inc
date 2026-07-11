@@ -18,7 +18,7 @@
 //
 // MS x64 non-volatile saves: xmm6-xmm13.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   push rbx
   push rbp
@@ -1678,4 +1678,4 @@
   pop rbp
   pop rbx
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

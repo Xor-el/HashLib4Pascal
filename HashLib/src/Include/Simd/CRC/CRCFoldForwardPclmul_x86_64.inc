@@ -29,7 +29,7 @@
 // pshufb xmm_dst, xmm_src (SSSE3):
 //   66 0F 38 00 ModRM
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // BswapMask is always needed (kept in xmm6 throughout)
   movdqu xmm6, dqword ptr [r9 + 64]   // BswapMask
@@ -195,4 +195,4 @@
   // movq rax, xmm0: 66 48 0F 7E C0
   db $66, $48, $0F, $7E, $C0
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

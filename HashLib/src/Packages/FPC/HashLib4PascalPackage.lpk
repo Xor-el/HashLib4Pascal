@@ -10,7 +10,7 @@
       <PathDelim Value="\"/>
       <SearchPaths>
         <IncludeFiles Value="..\..\Include;..\..\Include\Simd\Common"/>
-        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams"/>
+        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams;..\..\Simd\Facade;..\..\Simd\Backend"/>
         <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -29,7 +29,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="3"/>
-    <Files Count="123">
+    <Files Count="148">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -451,56 +451,56 @@
         <UnitName Value="HlpCpuFeatures"/>
       </Item105>
       <Item106>
-        <Filename Value="..\..\Hash64\HlpXXHash3Dispatch.pas"/>
-        <UnitName Value="HlpXXHash3Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\HlpXXHash3Simd.pas"/>
+        <UnitName Value="HlpXXHash3Simd"/>
       </Item106>
       <Item107>
-        <Filename Value="..\..\Crypto\HlpBlake2BDispatch.pas"/>
-        <UnitName Value="HlpBlake2BDispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpBlake2BSimd.pas"/>
+        <UnitName Value="HlpBlake2BSimd"/>
       </Item107>
       <Item108>
-        <Filename Value="..\..\Crypto\HlpBlake2SDispatch.pas"/>
-        <UnitName Value="HlpBlake2SDispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpBlake2SSimd.pas"/>
+        <UnitName Value="HlpBlake2SSimd"/>
       </Item108>
       <Item109>
-        <Filename Value="..\..\KDF\HlpArgon2Dispatch.pas"/>
-        <UnitName Value="HlpArgon2Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpArgon2Simd.pas"/>
+        <UnitName Value="HlpArgon2Simd"/>
       </Item109>
       <Item110>
-        <Filename Value="..\..\KDF\HlpScryptDispatch.pas"/>
-        <UnitName Value="HlpScryptDispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpScryptSimd.pas"/>
+        <UnitName Value="HlpScryptSimd"/>
       </Item110>
       <Item111>
-        <Filename Value="..\..\Crypto\HlpBlake3Dispatch.pas"/>
-        <UnitName Value="HlpBlake3Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpBlake3Simd.pas"/>
+        <UnitName Value="HlpBlake3Simd"/>
       </Item111>
       <Item112>
-        <Filename Value="..\..\Crypto\HlpSHA2_256Dispatch.pas"/>
-        <UnitName Value="HlpSHA2_256Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\HlpSHA2_256Simd.pas"/>
+        <UnitName Value="HlpSHA2_256Simd"/>
       </Item112>
       <Item113>
-        <Filename Value="..\..\Crypto\HlpSHA2_512Dispatch.pas"/>
-        <UnitName Value="HlpSHA2_512Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpSHA2_512Simd.pas"/>
+        <UnitName Value="HlpSHA2_512Simd"/>
       </Item113>
       <Item114>
-        <Filename Value="..\..\Crypto\HlpSHA1Dispatch.pas"/>
-        <UnitName Value="HlpSHA1Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpSHA1Simd.pas"/>
+        <UnitName Value="HlpSHA1Simd"/>
       </Item114>
       <Item115>
-        <Filename Value="..\..\Checksum\HlpAdler32Dispatch.pas"/>
-        <UnitName Value="HlpAdler32Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpAdler32Simd.pas"/>
+        <UnitName Value="HlpAdler32Simd"/>
       </Item115>
       <Item116>
         <Filename Value="..\..\Checksum\HlpCRCFoldConstants.pas"/>
         <UnitName Value="HlpCRCFoldConstants"/>
       </Item116>
       <Item117>
-        <Filename Value="..\..\Checksum\HlpCRCDispatch.pas"/>
-        <UnitName Value="HlpCRCDispatch"/>
+        <Filename Value="..\..\Checksum\HlpCRCCore.pas"/>
+        <UnitName Value="HlpCRCCore"/>
       </Item117>
       <Item118>
-        <Filename Value="..\..\Crypto\HlpSHA3Dispatch.pas"/>
-        <UnitName Value="HlpSHA3Dispatch"/>
+        <Filename Value="..\..\Simd\Facade\\HlpSHA3Simd.pas"/>
+        <UnitName Value="HlpSHA3Simd"/>
       </Item118>
       <Item119>
         <Filename Value="..\..\Utils\HlpArmSimdFeatures.pas"/>
@@ -522,6 +522,106 @@
         <Filename Value="..\..\Utils\HlpDarwinSysCtl.pas"/>
         <UnitName Value="HlpDarwinSysCtl"/>
       </Item123>
+      <Item124>
+        <Filename Value="..\..\Simd\Backend\HlpSHA2_256X86Backend.pas"/>
+        <UnitName Value="HlpSHA2_256X86Backend"/>
+      </Item124>
+      <Item125>
+        <Filename Value="..\..\Simd\Backend\HlpSHA2_256ArmBackend.pas"/>
+        <UnitName Value="HlpSHA2_256ArmBackend"/>
+      </Item125>
+      <Item126>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA1X86Backend.pas"/>
+        <UnitName Value="HlpSHA1X86Backend"/>
+      </Item126>
+      <Item127>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA1ArmBackend.pas"/>
+        <UnitName Value="HlpSHA1ArmBackend"/>
+      </Item127>
+      <Item128>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA2_512X86Backend.pas"/>
+        <UnitName Value="HlpSHA2_512X86Backend"/>
+      </Item128>
+      <Item129>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA2_512ArmBackend.pas"/>
+        <UnitName Value="HlpSHA2_512ArmBackend"/>
+      </Item129>
+      <Item130>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA3X86Backend.pas"/>
+        <UnitName Value="HlpSHA3X86Backend"/>
+      </Item130>
+      <Item131>
+        <Filename Value="..\..\Simd\Backend\\HlpSHA3ArmBackend.pas"/>
+        <UnitName Value="HlpSHA3ArmBackend"/>
+      </Item131>
+      <Item132>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake2BX86Backend.pas"/>
+        <UnitName Value="HlpBlake2BX86Backend"/>
+      </Item132>
+      <Item133>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake2BArmBackend.pas"/>
+        <UnitName Value="HlpBlake2BArmBackend"/>
+      </Item133>
+      <Item134>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake2SX86Backend.pas"/>
+        <UnitName Value="HlpBlake2SX86Backend"/>
+      </Item134>
+      <Item135>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake2SArmBackend.pas"/>
+        <UnitName Value="HlpBlake2SArmBackend"/>
+      </Item135>
+      <Item136>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake3X86Backend.pas"/>
+        <UnitName Value="HlpBlake3X86Backend"/>
+      </Item136>
+      <Item137>
+        <Filename Value="..\..\Simd\Backend\\HlpBlake3ArmBackend.pas"/>
+        <UnitName Value="HlpBlake3ArmBackend"/>
+      </Item137>
+      <Item138>
+        <Filename Value="..\..\Simd\Backend\\HlpXXHash3X86Backend.pas"/>
+        <UnitName Value="HlpXXHash3X86Backend"/>
+      </Item138>
+      <Item139>
+        <Filename Value="..\..\Simd\Backend\\HlpXXHash3ArmBackend.pas"/>
+        <UnitName Value="HlpXXHash3ArmBackend"/>
+      </Item139>
+      <Item140>
+        <Filename Value="..\..\Simd\Backend\\HlpAdler32X86Backend.pas"/>
+        <UnitName Value="HlpAdler32X86Backend"/>
+      </Item140>
+      <Item141>
+        <Filename Value="..\..\Simd\Backend\\HlpAdler32ArmBackend.pas"/>
+        <UnitName Value="HlpAdler32ArmBackend"/>
+      </Item141>
+      <Item142>
+        <Filename Value="..\..\Simd\Backend\\HlpArgon2X86Backend.pas"/>
+        <UnitName Value="HlpArgon2X86Backend"/>
+      </Item142>
+      <Item143>
+        <Filename Value="..\..\Simd\Backend\\HlpArgon2ArmBackend.pas"/>
+        <UnitName Value="HlpArgon2ArmBackend"/>
+      </Item143>
+      <Item144>
+        <Filename Value="..\..\Simd\Backend\\HlpScryptX86Backend.pas"/>
+        <UnitName Value="HlpScryptX86Backend"/>
+      </Item144>
+      <Item145>
+        <Filename Value="..\..\Simd\Backend\\HlpScryptArmBackend.pas"/>
+        <UnitName Value="HlpScryptArmBackend"/>
+      </Item145>
+      <Item146>
+        <Filename Value="..\..\Simd\Facade\HlpCRCSimd.pas"/>
+        <UnitName Value="HlpCRCSimd"/>
+      </Item146>
+      <Item147>
+        <Filename Value="..\..\Simd\Backend\HlpCRCX86Backend.pas"/>
+        <UnitName Value="HlpCRCX86Backend"/>
+      </Item147>
+      <Item148>
+        <Filename Value="..\..\Simd\Backend\HlpCRCArmBackend.pas"/>
+        <UnitName Value="HlpCRCArmBackend"/>
+      </Item148>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

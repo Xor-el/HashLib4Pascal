@@ -18,7 +18,7 @@
   push rbx
   push rbp
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 584
 
@@ -1828,7 +1828,7 @@
 
   add rsp, 584
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
 
   pop rbp
   pop rbx
