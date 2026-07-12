@@ -1,9 +1,9 @@
-// SHA-256 SHA-NI implementation (Intel SHA Extensions), the same design as
-// OpenSSL's x86_64 sha256_block_data_order_shaext (CRYPTOGAMS). Each 4-round
+// SHA-256 SHA-NI implementation (Intel SHA Extensions). Each 4-round
 // group is two sha256rnds2 with the message schedule (sha256msg1/sha256msg2 +
 // palignr) interleaved. The input is byte-swapped with pshufb against
 // BSWAP32_MASK (a plain per-dword swap - SHA-256 consumes its words in natural
 // order, so no dword reversal is needed).
+// Reference: OpenSSL CRYPTOGAMS x86_64 sha256_block_data_order_shaext.
 //
 // Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = K256 ptr (64 UInt32 round constants), r10 = byte-swap

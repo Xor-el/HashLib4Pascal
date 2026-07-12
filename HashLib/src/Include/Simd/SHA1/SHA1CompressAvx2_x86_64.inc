@@ -1,9 +1,9 @@
-// SHA-1 AVX2 two-block implementation (VEX-256), ported from OpenSSL's
-// sha1-x86_64.pl (CRYPTOGAMS). Two message blocks are scheduled together in
-// 256-bit lanes and the 80 rounds are interleaved with the SIMD schedule, so the
-// vector and integer units run in parallel. AVX2 and BMI (rorx/andn/shlx)
-// instructions are db-encoded for broad assembler compatibility (every AVX2 CPU
-// also provides BMI).
+// SHA-1 AVX2 two-block implementation (VEX-256). Two message blocks are
+// scheduled together in 256-bit lanes and the 80 rounds are interleaved with
+// the SIMD schedule, so the vector and integer units run in parallel. AVX2 and
+// BMI (rorx/andn/shlx) instructions are db-encoded for broad assembler
+// compatibility (every AVX2 CPU also provides BMI).
+// Reference: OpenSSL CRYPTOGAMS sha1-x86_64.pl (AVX2 kernel).
 // Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = K_SHA1_Doubled ptr (the four SHA-1 round constants each
 //   replicated across 256 bits, then the byte-swap mask and a reverse mask; see

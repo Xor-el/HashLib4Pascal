@@ -1,10 +1,17 @@
 // AVX2 implementation of Argon2 FillBlock.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = Left ptr, rdx = Right ptr, r8 = Current ptr, r9 = WithXor (0 or 1).
+// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = Left ptr, rdx = Right ptr,
+//   r8 = Current ptr, r9 = WithXor (0 or 1), r10 = byte-rotation masks ptr
+//   (see ARGON2_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   Pascal const needs no special alignment; consumed by the entry mask loads,
+//   r10 is scratch afterwards).
 // Each pointer addresses 128 QWords (1024 bytes).
-// Uses ymm0-ymm9; ymm6-ymm9 are MS x64 non-volatile (saved/restored).
+// Uses ymm0-ymm11; ymm6-ymm11 are MS x64 non-volatile (saved/restored).
 // Register map during G rounds: ymm0 = A(v0..v3), ymm1 = B(v4..v7),
-//   ymm2 = C(v8..v11), ymm3 = D(v12..v15), ymm4-ymm5 = temps.
+//   ymm2 = C(v8..v11), ymm3 = D(v12..v15), ymm4-ymm5 = temps,
+//   ymm10 = rot24 mask, ymm11 = rot16 mask.
+// Rotations: rot32 via vpshufd, rot24/16 via vpshufb against the resident
+//   masks, rot63 via shift+or (not byte-aligned).
 // Stack layout (sub rsp, 2184):
 //   [rsp+0..127]    ymm6-9 save area (4 * 32 = 128 bytes)
 //   [rsp+128..1151] R_buf (1024 bytes)
@@ -16,6 +23,10 @@
 // vzeroupper required before return.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+
+  // Load byte-rotation masks (resident for the whole kernel)
+  db $C4, $41, $7E, $6F, $12                    // vmovdqu ymm10, yword [r10]
+  db $C4, $41, $7E, $6F, $5A, $20               // vmovdqu ymm11, yword [r10 + $20]
 
   sub rsp, 2056
 
@@ -77,9 +88,7 @@
 
   // b = rotr64(b ^ c, 24)
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
+  db $C4, $C2, $75, $00, $CA                    // vpshufb ymm1, ymm1, ymm10
 
   // fBlaMka(a, b)
   db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
@@ -89,9 +98,7 @@
 
   // d = rotr64(d ^ a, 16)
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
+  db $C4, $C2, $65, $00, $DB                    // vpshufb ymm3, ymm3, ymm11
 
   // fBlaMka(c, d)
   db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
@@ -129,9 +136,7 @@
   db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
+  db $C4, $C2, $75, $00, $CA                    // vpshufb ymm1, ymm1, ymm10
 
   db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -139,9 +144,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
+  db $C4, $C2, $65, $00, $DB                    // vpshufb ymm3, ymm3, ymm11
 
   db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -207,9 +210,7 @@
   db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
+  db $C4, $C2, $75, $00, $CA                    // vpshufb ymm1, ymm1, ymm10
 
   db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -217,9 +218,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
+  db $C4, $C2, $65, $00, $DB                    // vpshufb ymm3, ymm3, ymm11
 
   db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -252,9 +251,7 @@
   db $C5, $ED, $D4, $D4                         // vpaddq ymm2, ymm2, ymm4
 
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $DD, $73, $D1, $18                    // vpsrlq ymm4, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CC                         // vpor ymm1, ymm1, ymm4
+  db $C4, $C2, $75, $00, $CA                    // vpshufb ymm1, ymm1, ymm10
 
   db $C5, $FD, $F4, $E1                         // vpmuludq ymm4, ymm0, ymm1
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -262,9 +259,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
 
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $DD, $73, $D3, $10                    // vpsrlq ymm4, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DC                         // vpor ymm3, ymm3, ymm4
+  db $C4, $C2, $65, $00, $DB                    // vpshufb ymm3, ymm3, ymm11
 
   db $C5, $ED, $F4, $E3                         // vpmuludq ymm4, ymm2, ymm3
   db $C5, $DD, $73, $F4, $01                    // vpsllq ymm4, ymm4, 1
@@ -296,7 +291,7 @@
   jb @row_loop
 
   // =========================================================================
-  // Step 5: Final XOR — Current = R_buf XOR Z_buf [XOR Current]
+  // Step 5: Final XOR - Current = R_buf XOR Z_buf [XOR Current]
   // =========================================================================
   test r9, r9
   jnz @final_with_xor

@@ -1,13 +1,13 @@
-// SHA-512 SSE2 implementation with a SIMD message schedule: the sigma schedule
-// runs in 128-bit SSE2 and is interleaved with the 64-bit GPR compression
-// rounds, so the vector and integer units run in parallel. This is much faster
-// than a scalar message schedule.
+// SHA-512 SSSE3 implementation with a SIMD message schedule; SSE2 sibling:
+// SHA512CompressSse2_x86_64.inc. The sigma schedule runs in 128-bit SIMD and
+// is interleaved with the 64-bit GPR compression rounds, so the vector and
+// integer units run in parallel. Unlike the SSE2 sibling the big-endian input
+// byte-swaps are real pshufb (db-encoded for broad assembler compatibility)
+// against the BSWAP64 mask kept resident in xmm12 for the whole kernel.
 // Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (AVX single-block kernel).
 // Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K512 ptr (K512_Doubled: each 128-bit K512 pair
-//   stored twice, read at a 32-byte stride). The big-endian input byte-swap is
-//   emulated with pshuflw/pshufhw/psrlw/psllw/por (SSE2 has no pshufb), so no mask
-//   table is needed.
+//   stored twice, read at a 32-byte stride; the BSWAP64 mask sits at +1280).
 //
 // MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
@@ -27,6 +27,7 @@
   and    rsp, $FFFFFFFFFFFFFFC0
   mov    qword [rsp + $98], rax
   mov    qword [rsp + $A0], r9
+  movdqu xmm12, oword [r9 + $500]  // BSWAP64 mask (K512_Doubled + 1280)
   mov    qword [rsp + $80], rcx
   mov    r11d, r8d
   shl    r11, $7
@@ -49,65 +50,25 @@
   add    rbp, $80
   movdqu xmm1, oword [rsi + $10]
   movdqu xmm2, oword [rsi + $20]
-  pshuflw xmm0, xmm0, $1B
-  pshufhw xmm0, xmm0, $1B
-  movdqa xmm12, xmm0
-  psrlw  xmm0, $8
-  psllw  xmm12, $8
-  por    xmm0, xmm12
+  db $66, $41, $0F, $38, $00, $C4              // pshufb xmm0, xmm12
   movdqu xmm3, oword [rsi + $30]
-  pshuflw xmm1, xmm1, $1B
-  pshufhw xmm1, xmm1, $1B
-  movdqa xmm12, xmm1
-  psrlw  xmm1, $8
-  psllw  xmm12, $8
-  por    xmm1, xmm12
+  db $66, $41, $0F, $38, $00, $CC              // pshufb xmm1, xmm12
   movdqu xmm4, oword [rsi + $40]
-  pshuflw xmm2, xmm2, $1B
-  pshufhw xmm2, xmm2, $1B
-  movdqa xmm12, xmm2
-  psrlw  xmm2, $8
-  psllw  xmm12, $8
-  por    xmm2, xmm12
+  db $66, $41, $0F, $38, $00, $D4              // pshufb xmm2, xmm12
   movdqu xmm5, oword [rsi + $50]
-  pshuflw xmm3, xmm3, $1B
-  pshufhw xmm3, xmm3, $1B
-  movdqa xmm12, xmm3
-  psrlw  xmm3, $8
-  psllw  xmm12, $8
-  por    xmm3, xmm12
+  db $66, $41, $0F, $38, $00, $DC              // pshufb xmm3, xmm12
   movdqu xmm6, oword [rsi + $60]
-  pshuflw xmm4, xmm4, $1B
-  pshufhw xmm4, xmm4, $1B
-  movdqa xmm12, xmm4
-  psrlw  xmm4, $8
-  psllw  xmm12, $8
-  por    xmm4, xmm12
+  db $66, $41, $0F, $38, $00, $E4              // pshufb xmm4, xmm12
   movdqu xmm7, oword [rsi + $70]
-  pshuflw xmm5, xmm5, $1B
-  pshufhw xmm5, xmm5, $1B
-  movdqa xmm12, xmm5
-  psrlw  xmm5, $8
-  psllw  xmm12, $8
-  por    xmm5, xmm12
+  db $66, $41, $0F, $38, $00, $EC              // pshufb xmm5, xmm12
   movdqa xmm8, xmm0
   movdqu xmm13, oword [rbp - $80]
   paddq  xmm8, xmm13
-  pshuflw xmm6, xmm6, $1B
-  pshufhw xmm6, xmm6, $1B
-  movdqa xmm12, xmm6
-  psrlw  xmm6, $8
-  psllw  xmm12, $8
-  por    xmm6, xmm12
+  db $66, $41, $0F, $38, $00, $F4              // pshufb xmm6, xmm12
   movdqa xmm9, xmm1
   movdqu xmm13, oword [rbp - $60]
   paddq  xmm9, xmm13
-  pshuflw xmm7, xmm7, $1B
-  pshufhw xmm7, xmm7, $1B
-  movdqa xmm12, xmm7
-  psrlw  xmm7, $8
-  psllw  xmm12, $8
-  por    xmm7, xmm12
+  db $66, $41, $0F, $38, $00, $FC              // pshufb xmm7, xmm12
   movdqa xmm10, xmm2
   movdqu xmm13, oword [rbp - $40]
   paddq  xmm10, xmm13

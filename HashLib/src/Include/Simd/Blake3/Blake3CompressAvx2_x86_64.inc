@@ -2,14 +2,21 @@
 // message scheduling).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE3-team/BLAKE3 official SSE2/AVX2 implementation.
-// Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = CV ptr, r9 = counterflags ptr.
+// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+//   r8 = CV ptr, r9 = counterflags ptr, r10 = byte-rotation masks ptr
+//   (see BLAKE3_ROT_MASKS: rot16 at +0, rot8 at +32; read unaligned, so the
+//   Pascal const needs no special alignment).
 // Register map: xmm0 = a, xmm1 = b, xmm2 = c, xmm3 = d,
-//   xmm4 = m0, xmm5 = m1, xmm6 = m2, xmm7 = m3, xmm8/xmm9 = temp, xmm11/xmm14 = temp.
+//   xmm4 = m0, xmm5 = m1, xmm6 = m2, xmm7 = m3, xmm8/xmm9 = temp, xmm11/xmm14 = temp,
+//   xmm10 = rot16 mask, xmm12 = rot8 mask.
+// Rotations: ROT16/8 via vpshufb against the resident masks, ROT12/7 via
+//   shift+or (not byte-aligned; shifts are the known-best form).
 // 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
 // Blend emulations use vshufps+vpshufd (blend_0xCC) and vpunpckhdq+vshufps (blend_0xC0),
 // avoiding the need for mask constants.
 //
-// MS x64 non-volatile saves: xmm6, xmm7, xmm8, xmm9, xmm11, xmm14.
+// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
+// include (no-op on SysV).
 //
 // Stack layout (sub rsp, 120):
 //   [rsp +  0.. 95]: xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 * 16)
@@ -17,6 +24,10 @@
 //   [rsp +112..119]: padding
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+
+  // Load byte-rotation masks (resident for the whole kernel)
+  db $C4, $41, $7A, $6F, $12                    // vmovdqu xmm10, oword [r10]
+  db $C4, $41, $7A, $6F, $62, $20               // vmovdqu xmm12, oword [r10 + $20]
 
   sub rsp, 24
 
@@ -56,8 +67,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -67,9 +77,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -83,8 +91,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -94,9 +101,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -133,8 +138,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -144,9 +148,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -160,8 +162,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -171,9 +172,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -210,8 +209,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -221,9 +219,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -237,8 +233,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -248,9 +243,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -287,8 +280,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -298,9 +290,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -314,8 +304,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -325,9 +314,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -364,8 +351,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -375,9 +361,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -391,8 +375,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -402,9 +385,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -441,8 +422,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -452,9 +432,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -468,8 +446,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -479,9 +456,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -518,8 +493,7 @@
   db $C5, $F9, $FE, $C4                         // vpaddd xmm0, xmm0, xmm4
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -529,9 +503,7 @@
   db $C5, $F9, $FE, $C5                         // vpaddd xmm0, xmm0, xmm5
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25
@@ -545,8 +517,7 @@
   db $C5, $F9, $FE, $C6                         // vpaddd xmm0, xmm0, xmm6
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $FB, $70, $DB, $B1                    // vpshuflw xmm3, xmm3, $B1
-  db $C5, $FA, $70, $DB, $B1                    // vpshufhw xmm3, xmm3, $B1
+  db $C4, $C2, $61, $00, $DA                    // vpshufb xmm3, xmm3, xmm10
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $14                    // vpslld xmm11, xmm1, 20
@@ -556,9 +527,7 @@
   db $C5, $F9, $FE, $C7                         // vpaddd xmm0, xmm0, xmm7
   db $C5, $F9, $FE, $C1                         // vpaddd xmm0, xmm0, xmm1
   db $C5, $E1, $EF, $D8                         // vpxor xmm3, xmm3, xmm0
-  db $C5, $89, $72, $D3, $08                    // vpsrld xmm14, xmm3, 8
-  db $C5, $E1, $72, $F3, $18                    // vpslld xmm3, xmm3, 24
-  db $C4, $C1, $61, $EF, $DE                    // vpxor xmm3, xmm3, xmm14
+  db $C4, $C2, $61, $00, $DC                    // vpshufb xmm3, xmm3, xmm12
   db $C5, $E9, $FE, $D3                         // vpaddd xmm2, xmm2, xmm3
   db $C5, $F1, $EF, $CA                         // vpxor xmm1, xmm1, xmm2
   db $C5, $A1, $72, $F1, $19                    // vpslld xmm11, xmm1, 25

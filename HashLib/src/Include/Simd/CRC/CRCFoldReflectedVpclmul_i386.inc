@@ -4,10 +4,9 @@
 // so the structure carries over 1:1 (all vector registers are volatile on
 // IA-32 - no save/restore needed, just vzeroupper before returning).
 // AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler
-// compatibility; bytes machine-encoded via scripts/x86_s2db.py --i386
-// (binutils 2.28 lacks the 2018 VPCLMULQDQ-ymm form, so those are assembled
-// as same-shape vpblendd and the opcode byte $02 -> $44 patched, each result
-// asserted byte-identical to the verified x86_64 kernel's encoding).
+// compatibility; every register-register byte sequence is identical to the
+// verified x86_64 kernel's encoding (regs 0-7 carry no REX/VEX extension
+// bits), and the memory forms are machine-assembled for the IA-32 bases.
 //
 // After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength (>= 16),
 //   edi = AState, eax = Ctx (PCRCFoldRuntimeCtx; FoldConstants at +0).

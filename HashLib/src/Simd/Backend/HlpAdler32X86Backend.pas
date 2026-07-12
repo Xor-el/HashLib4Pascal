@@ -30,7 +30,7 @@ uses
 
 // =============================================================================
 // SIMD kernels
-//   i386:    SSE2, SSSE3
+//   i386:    AVX2, SSSE3, SSE2
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
@@ -46,6 +46,12 @@ procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\..\Include\Simd\Adler32\Adler32BlocksSsse3_i386.inc}
+end;
+
+procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
+  ASums, AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\Adler32\Adler32BlocksAvx2_i386.inc}
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -82,14 +88,10 @@ begin
   Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Ssse3);
 end;
 
-{$IFDEF HASHLIB_X86_64_ASM}
-
 procedure Adler32_Update_Avx2(AData: PByte; ALength: UInt32; ASums: Pointer);
 begin
   Adler32_Update_Simd(AData, ALength, ASums, @Adler32_ProcessBlocks_Avx2);
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 
@@ -97,17 +99,15 @@ end;
 
 class function TAdler32X86Backend.Select(AScalar: TAdler32UpdateProc): TAdler32UpdateProc;
 begin
-{$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSSE3: Exit(@Adler32_Update_Ssse3);
-    TX86SimdLevel.SSE2: Exit(@Adler32_Update_Sse2);
-  end;
-{$ENDIF}
-{$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.AVX2: Exit(@Adler32_Update_Avx2);
-    TX86SimdLevel.SSSE3: Exit(@Adler32_Update_Ssse3);
-    TX86SimdLevel.SSE2: Exit(@Adler32_Update_Sse2);
+{$IFDEF HASHLIB_X86_SIMD}
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3,
+    TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.AVX2:
+      Exit(@Adler32_Update_Avx2);
+    TX86SimdLevel.SSSE3:
+      Exit(@Adler32_Update_Ssse3);
+    TX86SimdLevel.SSE2:
+      Exit(@Adler32_Update_Sse2);
   end;
 {$ENDIF}
   Result := AScalar;

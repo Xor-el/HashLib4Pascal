@@ -1,14 +1,14 @@
-// SHA-256 SSE2 SIMD-schedule implementation. The message schedule runs in
-// SSE2 (paddd/psrld/pslld/pxor/pshufd) interleaved with the GPR compression
-// rounds, so the vector and integer units run in parallel. The original's two
-// SSSE3-only ops are emulated in SSE2: the pshufb dword byte-swap becomes
-// psrlw/psllw/por + pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por
-// (xmm8 is a free scratch).
+// SHA-256 SSSE3 SIMD-schedule implementation; SSE2 sibling:
+// SHA256CompressSse2_x86_64.inc. The message schedule runs in SIMD
+// (paddd/psrld/pslld/pxor/pshufd) interleaved with the GPR compression
+// rounds, so the vector and integer units run in parallel. Unlike the SSE2
+// sibling, the two SSSE3 ops are the real instructions (db-encoded for broad
+// assembler compatibility): pshufb dword byte-swap against the mask kept in
+// xmm8 for the whole kernel, and palignr $4 in the schedule.
 // Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (SHA-256 SSSE3 kernel).
 // Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K256 ptr (read at a 32-byte stride so the
-//   duplicated halves are skipped; see K256_Doubled). No byte-swap mask table is
-//   needed - the swap is computed, not shuffled.
+//   duplicated halves are skipped; the byte-swap mask sits at +512).
 //
 // MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
 // include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
@@ -17,6 +17,7 @@
 
   mov    rax, rsp
   push   r9
+  movdqu xmm8, oword [r9 + $200]   // dword byte-swap mask (K256_Doubled + 512)
   push   rbx
   push   rbp
   push   rsi
@@ -52,37 +53,17 @@
   movdqu xmm0, oword [rsi]
   movdqu xmm1, oword [rsi + $10]
   movdqu xmm2, oword [rsi + $20]
-  movdqa xmm8, xmm0
-  psrlw  xmm8, $8
-  psllw  xmm0, $8
-  por    xmm0, xmm8
-  pshuflw xmm0, xmm0, $B1
-  pshufhw xmm0, xmm0, $B1
+  db $66, $41, $0F, $38, $00, $C0              // pshufb xmm0, xmm8
   movdqu xmm3, oword [rsi + $30]
   mov    rbp, qword [rsp + $58]
   mov    rbp, qword [rbp - $8]
-  movdqa xmm8, xmm1
-  psrlw  xmm8, $8
-  psllw  xmm1, $8
-  por    xmm1, xmm8
-  pshuflw xmm1, xmm1, $B1
-  pshufhw xmm1, xmm1, $B1
+  db $66, $41, $0F, $38, $00, $C8              // pshufb xmm1, xmm8
   movdqu xmm4, oword [rbp + $0]
   movdqu xmm5, oword [rbp + $20]
-  movdqa xmm8, xmm2
-  psrlw  xmm8, $8
-  psllw  xmm2, $8
-  por    xmm2, xmm8
-  pshuflw xmm2, xmm2, $B1
-  pshufhw xmm2, xmm2, $B1
+  db $66, $41, $0F, $38, $00, $D0              // pshufb xmm2, xmm8
   paddd  xmm4, xmm0
   movdqu xmm6, oword [rbp + $40]
-  movdqa xmm8, xmm3
-  psrlw  xmm8, $8
-  psllw  xmm3, $8
-  por    xmm3, xmm8
-  pshuflw xmm3, xmm3, $B1
-  pshufhw xmm3, xmm3, $B1
+  db $66, $41, $0F, $38, $00, $D8              // pshufb xmm3, xmm8
   movdqu xmm7, oword [rbp + $60]
   paddd  xmm5, xmm1
   paddd  xmm6, xmm2
@@ -109,16 +90,10 @@
   xor    r12d, r10d
   ror    r13d, $5
   xor    r14d, eax
-  movdqa xmm8, xmm0
-  psrldq xmm8, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm8
+  db $66, $0F, $3A, $0F, $E0, $04              // palignr xmm4, xmm0, 4
   and    r12d, r8d
   xor    r13d, r8d
-  movdqa xmm8, xmm2
-  psrldq xmm8, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm8
+  db $66, $0F, $3A, $0F, $FA, $04              // palignr xmm7, xmm2, 4
   add    r11d, dword [rsp]
   mov    r15d, eax
   xor    r12d, r10d
@@ -259,16 +234,10 @@
   xor    r12d, ecx
   ror    r13d, $5
   xor    r14d, r8d
-  movdqa xmm8, xmm1
-  psrldq xmm8, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm8
+  db $66, $0F, $3A, $0F, $E1, $04              // palignr xmm4, xmm1, 4
   and    r12d, eax
   xor    r13d, eax
-  movdqa xmm8, xmm3
-  psrldq xmm8, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm8
+  db $66, $0F, $3A, $0F, $FB, $04              // palignr xmm7, xmm3, 4
   add    edx, dword [rsp + $10]
   mov    r15d, r8d
   xor    r12d, ecx
@@ -409,16 +378,10 @@
   xor    r12d, r10d
   ror    r13d, $5
   xor    r14d, eax
-  movdqa xmm8, xmm2
-  psrldq xmm8, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm8
+  db $66, $0F, $3A, $0F, $E2, $04              // palignr xmm4, xmm2, 4
   and    r12d, r8d
   xor    r13d, r8d
-  movdqa xmm8, xmm0
-  psrldq xmm8, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm8
+  db $66, $0F, $3A, $0F, $F8, $04              // palignr xmm7, xmm0, 4
   add    r11d, dword [rsp + $20]
   mov    r15d, eax
   xor    r12d, r10d
@@ -559,16 +522,10 @@
   xor    r12d, ecx
   ror    r13d, $5
   xor    r14d, r8d
-  movdqa xmm8, xmm3
-  psrldq xmm8, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm8
+  db $66, $0F, $3A, $0F, $E3, $04              // palignr xmm4, xmm3, 4
   and    r12d, eax
   xor    r13d, eax
-  movdqa xmm8, xmm1
-  psrldq xmm8, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm8
+  db $66, $0F, $3A, $0F, $F9, $04              // palignr xmm7, xmm1, 4
   add    edx, dword [rsp + $30]
   mov    r15d, r8d
   xor    r12d, ecx

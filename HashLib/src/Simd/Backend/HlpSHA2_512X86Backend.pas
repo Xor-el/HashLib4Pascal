@@ -122,7 +122,7 @@ const
 // =============================================================================
 // SIMD kernels
 //   i386:    SSE2
-//   x86_64:  AVX2, SSE2
+//   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
 {$IFDEF HASHLIB_I386_ASM}
@@ -143,10 +143,21 @@ procedure SHA512_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   {$I ..\..\Include\Simd\SHA512\SHA512CompressSse2_x86_64.inc}
 end;
 
+procedure SHA512_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+  {$I ..\..\Include\Simd\SHA512\SHA512CompressSsse3_x86_64.inc}
+end;
+
 procedure SHA512_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\..\Include\Simd\SHA512\SHA512CompressAvx2_x86_64.inc}
+end;
+
+procedure SHA512_Compress_Ssse3_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA512_Compress_Ssse3(AState, AData, ANumBlocks, @K512_Doubled);
 end;
 
 procedure SHA512_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
@@ -178,9 +189,12 @@ begin
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_X86_64_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3,
+    TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
       Exit(@SHA512_Compress_Avx2_Wrap);
+    TX86SimdLevel.SSSE3:
+      Exit(@SHA512_Compress_Ssse3_Wrap);
     TX86SimdLevel.SSE2:
       Exit(@SHA512_Compress_Sse2_Wrap);
   end;

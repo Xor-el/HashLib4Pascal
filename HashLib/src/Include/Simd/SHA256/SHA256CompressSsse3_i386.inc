@@ -1,9 +1,11 @@
-// SHA-256 SSE2 SIMD-schedule implementation (IA-32). The message schedule runs
-// in SSE2 (paddd/psrld/pslld/pxor/pshufd/psrldq/pslldq) interleaved with the GPR
-// compression rounds; the 32-bit state lives in eax/ebx/ecx plus the local frame
-// (IA-32 has too few GPRs to keep all eight in registers). The original's two
-// SSSE3-only ops are emulated in SSE2: the pshufb dword byte-swap becomes
-// psrlw/psllw/por + pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por.
+// SHA-256 SSSE3 SIMD-schedule implementation (IA-32); SSE2 sibling:
+// SHA256CompressSse2_i386.inc.
+// The message schedule runs in SIMD interleaved with the GPR compression
+// rounds; the 32-bit state lives in eax/ebx/ecx plus the local frame (IA-32
+// has too few GPRs to keep all eight in registers). Unlike the SSE2 sibling,
+// the two SSSE3 ops are the real instructions (db-encoded for broad assembler
+// compatibility): pshufb dword byte-swap against the mask kept in xmm7 for
+// the block head, and palignr $4 in the schedule.
 // Reference: OpenSSL CRYPTOGAMS sha256-586.pl (SSSE3 kernel).
 // Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
 //   eax = doubled-K256 ptr (read at a 32-byte stride so the duplicated halves are
@@ -49,34 +51,15 @@
   movdqu xmm2, oword [edi + $20]
   movdqu xmm3, oword [edi + $30]
   add    edi, $40
-  movdqa xmm4, xmm0
-  psrlw  xmm4, $8
-  psllw  xmm0, $8
-  por    xmm0, xmm4
-  pshuflw xmm0, xmm0, $B1
-  pshufhw xmm0, xmm0, $B1
+  movdqu xmm7, oword [ebp + $200]   // dword byte-swap mask (K256_Doubled + 512)
+  db $66, $0F, $38, $00, $C7                   // pshufb xmm0, xmm7
   mov    dword [esp + $64], edi
-  movdqa xmm4, xmm1
-  psrlw  xmm4, $8
-  psllw  xmm1, $8
-  por    xmm1, xmm4
-  pshuflw xmm1, xmm1, $B1
-  pshufhw xmm1, xmm1, $B1
+  db $66, $0F, $38, $00, $CF                   // pshufb xmm1, xmm7
   movdqu xmm4, oword [ebp + $0]
-  movdqa xmm5, xmm2
-  psrlw  xmm5, $8
-  psllw  xmm2, $8
-  por    xmm2, xmm5
-  pshuflw xmm2, xmm2, $B1
-  pshufhw xmm2, xmm2, $B1
+  db $66, $0F, $38, $00, $D7                   // pshufb xmm2, xmm7
   movdqu xmm5, oword [ebp + $20]
   paddd  xmm4, xmm0
-  movdqa xmm6, xmm3
-  psrlw  xmm6, $8
-  psllw  xmm3, $8
-  por    xmm3, xmm6
-  pshuflw xmm3, xmm3, $B1
-  pshufhw xmm3, xmm3, $B1
+  db $66, $0F, $38, $00, $DF                   // pshufb xmm3, xmm7
   movdqu xmm6, oword [ebp + $40]
   paddd  xmm5, xmm1
   movdqu xmm7, oword [ebp + $60]
@@ -97,17 +80,11 @@
   movdqa xmm7, xmm3
   xor    edx, ecx
   mov    edi, dword [esp + $18]
-  movdqa xmm5, xmm0
-  psrldq xmm5, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm5
+  db $66, $0F, $3A, $0F, $E0, $04              // palignr xmm4, xmm0, 4
   xor    esi, edi
   ror    edx, $5
   and    esi, ecx
-  movdqa xmm5, xmm2
-  psrldq xmm5, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm5
+  db $66, $0F, $3A, $0F, $FA, $04              // palignr xmm7, xmm2, 4
   mov    dword [esp + $10], ecx
   xor    edx, ecx
   xor    edi, esi
@@ -263,17 +240,11 @@
   movdqa xmm7, xmm0
   xor    edx, ecx
   mov    edi, dword [esp + $8]
-  movdqa xmm5, xmm1
-  psrldq xmm5, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm5
+  db $66, $0F, $3A, $0F, $E1, $04              // palignr xmm4, xmm1, 4
   xor    esi, edi
   ror    edx, $5
   and    esi, ecx
-  movdqa xmm5, xmm3
-  psrldq xmm5, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm5
+  db $66, $0F, $3A, $0F, $FB, $04              // palignr xmm7, xmm3, 4
   mov    dword [esp], ecx
   xor    edx, ecx
   xor    edi, esi
@@ -429,17 +400,11 @@
   movdqa xmm7, xmm1
   xor    edx, ecx
   mov    edi, dword [esp + $18]
-  movdqa xmm5, xmm2
-  psrldq xmm5, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm5
+  db $66, $0F, $3A, $0F, $E2, $04              // palignr xmm4, xmm2, 4
   xor    esi, edi
   ror    edx, $5
   and    esi, ecx
-  movdqa xmm5, xmm0
-  psrldq xmm5, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm5
+  db $66, $0F, $3A, $0F, $F8, $04              // palignr xmm7, xmm0, 4
   mov    dword [esp + $10], ecx
   xor    edx, ecx
   xor    edi, esi
@@ -595,17 +560,11 @@
   movdqa xmm7, xmm2
   xor    edx, ecx
   mov    edi, dword [esp + $8]
-  movdqa xmm5, xmm3
-  psrldq xmm5, $4
-  pslldq xmm4, $C
-  por    xmm4, xmm5
+  db $66, $0F, $3A, $0F, $E3, $04              // palignr xmm4, xmm3, 4
   xor    esi, edi
   ror    edx, $5
   and    esi, ecx
-  movdqa xmm5, xmm1
-  psrldq xmm5, $4
-  pslldq xmm7, $C
-  por    xmm7, xmm5
+  db $66, $0F, $3A, $0F, $F9, $04              // palignr xmm7, xmm1, 4
   mov    dword [esp], ecx
   xor    edx, ecx
   xor    edi, esi

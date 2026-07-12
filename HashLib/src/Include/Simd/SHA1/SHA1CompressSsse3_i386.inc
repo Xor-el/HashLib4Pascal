@@ -1,9 +1,9 @@
-// SHA-1 SSE2 SIMD-schedule implementation (IA-32). The message schedule runs
-// in SSE2 (pxor/pshufd/psrldq/pslldq) interleaved with the GPR compression
-// rounds. The original's only SSSE3-only op is the pshufb input byte-swap,
-// emulated in SSE2 as psrlw/psllw/por + pshuflw/pshufhw (the freed
-// byte-swap-mask register xmm6 is the scratch); the W-schedule uses no
-// palignr.
+// SHA-1 SSSE3 SIMD-schedule implementation (IA-32); SSE2 sibling:
+// SHA1CompressSse2_i386.inc.
+// The message schedule runs in SIMD (pxor/pshufd/psrldq/pslldq) interleaved
+// with the GPR compression rounds. Unlike the SSE2 sibling the input
+// byte-swaps are real pshufb (db-encoded for broad assembler compatibility)
+// against the mask kept resident in xmm6; the W-schedule uses no palignr.
 // Reference: OpenSSL CRYPTOGAMS sha1-586.pl (SSSE3 kernel).
 // Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
 //   eax = doubled-K_SHA1 ptr (read at a 32-byte stride so the duplicated halves
@@ -47,31 +47,11 @@
   movdqu xmm1, oword [ebp - $30]
   movdqu xmm2, oword [ebp - $20]
   movdqu xmm3, oword [ebp - $10]
-  movdqa xmm6, xmm0
-  psrlw  xmm6, $8
-  psllw  xmm0, $8
-  por    xmm0, xmm6
-  pshuflw xmm0, xmm0, $B1
-  pshufhw xmm0, xmm0, $B1
-  movdqa xmm6, xmm1
-  psrlw  xmm6, $8
-  psllw  xmm1, $8
-  por    xmm1, xmm6
-  pshuflw xmm1, xmm1, $B1
-  pshufhw xmm1, xmm1, $B1
-  movdqa xmm6, xmm2
-  psrlw  xmm6, $8
-  psllw  xmm2, $8
-  por    xmm2, xmm6
-  pshuflw xmm2, xmm2, $B1
-  pshufhw xmm2, xmm2, $B1
+  db $66, $0F, $38, $00, $C6                   // pshufb xmm0, xmm6
+  db $66, $0F, $38, $00, $CE                   // pshufb xmm1, xmm6
+  db $66, $0F, $38, $00, $D6                   // pshufb xmm2, xmm6
   movdqa oword [esp + $60], xmm7
-  movdqa xmm6, xmm3
-  psrlw  xmm6, $8
-  psllw  xmm3, $8
-  por    xmm3, xmm6
-  pshuflw xmm3, xmm3, $B1
-  pshufhw xmm3, xmm3, $B1
+  db $66, $0F, $38, $00, $DE                   // pshufb xmm3, xmm6
   paddd  xmm0, xmm7
   paddd  xmm1, xmm7
   paddd  xmm2, xmm7
@@ -998,12 +978,7 @@
   movdqu xmm2, oword [ebp + $20]
   movdqu xmm3, oword [ebp + $30]
   add    ebp, $40
-  movdqa xmm6, xmm0
-  psrlw  xmm6, $8
-  psllw  xmm0, $8
-  por    xmm0, xmm6
-  pshuflw xmm0, xmm0, $B1
-  pshufhw xmm0, xmm0, $B1
+  db $66, $0F, $38, $00, $C6                   // pshufb xmm0, xmm6
   mov    dword [esp + $C4], ebp
   movdqa oword [esp + $60], xmm7
   add    ebx, dword [esp + $10]
@@ -1013,12 +988,7 @@
   add    ebx, esi
   xor    ebp, edi
   ror    edx, $7
-  movdqa xmm6, xmm1
-  psrlw  xmm6, $8
-  psllw  xmm1, $8
-  por    xmm1, xmm6
-  pshuflw xmm1, xmm1, $B1
-  pshufhw xmm1, xmm1, $B1
+  db $66, $0F, $38, $00, $CE                   // pshufb xmm1, xmm6
   add    ebx, ecx
   add    eax, dword [esp + $14]
   xor    ebp, edx
@@ -1054,12 +1024,7 @@
   add    ecx, esi
   xor    ebp, eax
   ror    edi, $7
-  movdqa xmm6, xmm2
-  psrlw  xmm6, $8
-  psllw  xmm2, $8
-  por    xmm2, xmm6
-  pshuflw xmm2, xmm2, $B1
-  pshufhw xmm2, xmm2, $B1
+  db $66, $0F, $38, $00, $D6                   // pshufb xmm2, xmm6
   add    ecx, edx
   add    ebx, dword [esp + $24]
   xor    ebp, edi
@@ -1095,12 +1060,7 @@
   add    edx, esi
   xor    ebp, ebx
   ror    eax, $7
-  movdqa xmm6, xmm3
-  psrlw  xmm6, $8
-  psllw  xmm3, $8
-  por    xmm3, xmm6
-  pshuflw xmm3, xmm3, $B1
-  pshufhw xmm3, xmm3, $B1
+  db $66, $0F, $38, $00, $DE                   // pshufb xmm3, xmm6
   add    edx, edi
   add    ecx, dword [esp + $34]
   xor    ebp, eax

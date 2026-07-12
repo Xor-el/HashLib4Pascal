@@ -32,7 +32,7 @@ uses
 
 // =============================================================================
 // SIMD kernels
-//   i386:    SSE2
+//   i386:    AVX2, SSE2
 //   x86_64:  AVX2, SSE2
 // =============================================================================
 
@@ -53,6 +53,23 @@ procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
   ADefaultSecret: Pointer; ASeed: UInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_i386.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretSse2_i386.inc}
+end;
+
+procedure XXH3_Accumulate512_Avx2(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_i386.inc}
+  {$I ..\..\Include\Simd\XXH3\XXH3Acc512Avx2_i386.inc}
+end;
+
+procedure XXH3_ScrambleAcc_Avx2(AAcc: Pointer; ASecret: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
+  {$I ..\..\Include\Simd\XXH3\XXH3ScrambleAvx2_i386.inc}
+end;
+
+procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
+  ADefaultSecret: Pointer; ASeed: UInt64);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_i386.inc}
+  {$I ..\..\Include\Simd\XXH3\XXH3InitSecretAvx2_i386.inc}
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -101,15 +118,11 @@ begin
   XXH3_Accumulate_Loop(AAcc, AInput, ASecret, ANbStripes, @XXH3_Accumulate512_Sse2);
 end;
 
-{$IFDEF HASHLIB_X86_64_ASM}
-
 procedure XXH3_Accumulate_Avx2(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer; ANbStripes: Int32);
 begin
   XXH3_Accumulate_Loop(AAcc, AInput, ASecret, ANbStripes, @XXH3_Accumulate512_Avx2);
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 
@@ -117,15 +130,12 @@ end;
 
 class function TXXHash3X86Backend.SelectAccumulate512(AScalar: TXXH3Accumulate512Proc): TXXH3Accumulate512Proc;
 begin
-{$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSE2: Exit(@XXH3_Accumulate512_Sse2);
-  end;
-{$ENDIF}
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.AVX2: Exit(@XXH3_Accumulate512_Avx2);
-    TX86SimdLevel.SSE2: Exit(@XXH3_Accumulate512_Sse2);
+    TX86SimdLevel.AVX2:
+      Exit(@XXH3_Accumulate512_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@XXH3_Accumulate512_Sse2);
   end;
 {$ENDIF}
   Result := AScalar;
@@ -133,15 +143,12 @@ end;
 
 class function TXXHash3X86Backend.SelectAccumulate(AScalar: TXXH3AccumulateProc): TXXH3AccumulateProc;
 begin
-{$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSE2: Exit(@XXH3_Accumulate_Sse2);
-  end;
-{$ENDIF}
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.AVX2: Exit(@XXH3_Accumulate_Avx2);
-    TX86SimdLevel.SSE2: Exit(@XXH3_Accumulate_Sse2);
+    TX86SimdLevel.AVX2:
+      Exit(@XXH3_Accumulate_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@XXH3_Accumulate_Sse2);
   end;
 {$ENDIF}
   Result := AScalar;
@@ -149,15 +156,12 @@ end;
 
 class function TXXHash3X86Backend.SelectScrambleAcc(AScalar: TXXH3ScrambleAccProc): TXXH3ScrambleAccProc;
 begin
-{$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSE2: Exit(@XXH3_ScrambleAcc_Sse2);
-  end;
-{$ENDIF}
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.AVX2: Exit(@XXH3_ScrambleAcc_Avx2);
-    TX86SimdLevel.SSE2: Exit(@XXH3_ScrambleAcc_Sse2);
+    TX86SimdLevel.AVX2:
+      Exit(@XXH3_ScrambleAcc_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@XXH3_ScrambleAcc_Sse2);
   end;
 {$ENDIF}
   Result := AScalar;
@@ -165,15 +169,12 @@ end;
 
 class function TXXHash3X86Backend.SelectInitSecret(AScalar: TXXH3InitSecretProc): TXXH3InitSecretProc;
 begin
-{$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.SSE2: Exit(@XXH3_InitSecret_Sse2);
-  end;
-{$ENDIF}
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
-    TX86SimdLevel.AVX2: Exit(@XXH3_InitSecret_Avx2);
-    TX86SimdLevel.SSE2: Exit(@XXH3_InitSecret_Sse2);
+    TX86SimdLevel.AVX2:
+      Exit(@XXH3_InitSecret_Avx2);
+    TX86SimdLevel.SSE2:
+      Exit(@XXH3_InitSecret_Sse2);
   end;
 {$ENDIF}
   Result := AScalar;

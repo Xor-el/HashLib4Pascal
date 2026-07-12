@@ -1,11 +1,11 @@
-// SHA-1 SHA-NI implementation (Intel SHA Extensions), the same design as
-// OpenSSL's x86_64 sha1_block_data_order_shaext (CRYPTOGAMS). The 20 sha1rnds4
+// SHA-1 SHA-NI implementation (Intel SHA Extensions). The 20 sha1rnds4
 // groups run with the message schedule (sha1msg1/sha1msg2/sha1nexte) interleaved.
 // The input is byte-swapped with a single pshufb against a full-reverse mask
 // (byte-swap and dword-reverse folded into one mask, loaded once into xmm3), so
 // no per-word pshufd is needed. The next block's message loads are software-
 // pipelined into rounds 64-79 and the data pointer is advanced branchlessly
 // (cmovnz).
+// Reference: OpenSSL CRYPTOGAMS x86_64 sha1_block_data_order_shaext.
 //
 // Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = round-constant ptr (unused - sha1rnds4 has the round

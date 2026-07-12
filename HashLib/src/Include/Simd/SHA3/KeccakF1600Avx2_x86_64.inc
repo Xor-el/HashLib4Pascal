@@ -1,5 +1,5 @@
 // Keccak-f[1600] AVX2 permutation.
-// Ported from Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS project),
+// Reference: Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS project),
 // as adopted by XKCP (eXtended Keccak Code Package):
 //   https://github.com/dot-asm/cryptogams/blob/master/x86_64/keccak1600-avx2.pl
 //   https://github.com/XKCP/XKCP/blob/master/lib/low/KeccakP-1600/AVX2/KeccakP-1600-AVX2.s

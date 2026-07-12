@@ -1,9 +1,10 @@
-// SHA-512 AVX2 two-block implementation (VEX-256), ported from OpenSSL's
-// sha512-x86_64.pl (CRYPTOGAMS). Two message blocks are scheduled together in
-// 256-bit lanes; the compression rounds stay serial (as SHA-512 requires), so
-// scheduling two blocks at once is what makes this faster than the single-block
-// AVX path. AVX2 and BMI2 (rorx/andn) instructions are db-encoded for broad
-// assembler compatibility (every AVX2 CPU also provides BMI2).
+// SHA-512 AVX2 two-block implementation (VEX-256). Two message blocks are
+// scheduled together in 256-bit lanes; the compression rounds stay serial (as
+// SHA-512 requires), so scheduling two blocks at once is what makes this faster
+// than the single-block AVX path. AVX2 and BMI2 (rorx/andn) instructions are
+// db-encoded for broad assembler compatibility (every AVX2 CPU also provides
+// BMI2).
+// Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (AVX2 kernel).
 // Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K512 ptr (each 128-bit K512 pair stored twice
 //   so one table feeds both 256-bit lanes, with the BSWAP64 mask appended; see
