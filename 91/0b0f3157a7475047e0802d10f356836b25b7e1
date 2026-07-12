@@ -1,0 +1,21 @@
+scripts/maintenance/check-duplicate-guids.ps1
+  s_db3d375ac4a65a::t_8cd9a06e07ad65 13-14
+scripts/maintenance/sync-mobile-testdata.ps1
+  s_db3d375ac4a65a::t_cf96c06979ac79 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "910b0f3157a7475047e0802d10f356836b25b7e1",
+  "prompts": {},
+  "sessions": {
+    "s_db3d375ac4a65a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31d8c528-12de-4647-99f0-163b1e376cfb",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
