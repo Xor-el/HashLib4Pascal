@@ -1,0 +1,21 @@
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockAvx2_i386.inc
+  s_db3d375ac4a65a::t_41796b20c2a94c 1-276
+HashLib/src/Simd/Backend/HlpArgon2X86Backend.pas
+  s_db3d375ac4a65a::t_ccc141e6954880 45,56-61,90-91,106-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "2e4f49a9292381ec3f3da915c1f9275c32d4bb7f",
+  "prompts": {},
+  "sessions": {
+    "s_db3d375ac4a65a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31d8c528-12de-4647-99f0-163b1e376cfb",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
