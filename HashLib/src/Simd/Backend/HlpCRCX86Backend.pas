@@ -30,7 +30,7 @@ uses
 
 // =============================================================================
 // SIMD kernels
-//   i386:    SSE2
+//   i386:    VPCLMULQDQ, PCLMULQDQ, SSE2
 //   x86_64:  VPCLMULQDQ, PCLMULQDQ, SSE2
 // =============================================================================
 
@@ -46,6 +46,30 @@ function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\..\Include\Simd\CRC\CRCFoldForwardSse2_i386.inc}
+end;
+
+function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldReflectedPclmul_i386.inc}
+end;
+
+function CRC_Fold_Forward_Pclmul(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldForwardPclmul_i386.inc}
+end;
+
+function CRC_Fold_Reflected_Vpclmul(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldReflectedVpclmul_i386.inc}
+end;
+
+function CRC_Fold_Forward_Vpclmul(AData: PByte; ALength: UInt32;
+  AState: Pointer; AConstants: Pointer): UInt64;
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldForwardVpclmul_i386.inc}
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -101,7 +125,7 @@ begin
   Result.Fwd := AForwardScalar;
   Result.UsesCarrylessMul := False;
 
-{$IFDEF HASHLIB_X86_64_ASM}
+{$IFDEF HASHLIB_X86_SIMD}
   if TCpuFeatures.X86.HasVPCLMULQDQ() then
   begin
     Result.Reflected := @CRC_Fold_Reflected_Vpclmul;
@@ -109,6 +133,7 @@ begin
     Result.UsesCarrylessMul := True;
     Exit;
   end;
+
   if TCpuFeatures.X86.HasPCLMULQDQ() then
   begin
     Result.Reflected := @CRC_Fold_Reflected_Pclmul;
@@ -116,9 +141,7 @@ begin
     Result.UsesCarrylessMul := True;
     Exit;
   end;
-{$ENDIF HASHLIB_X86_64_ASM}
 
-{$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
     TX86SimdLevel.SSE2:
     begin
