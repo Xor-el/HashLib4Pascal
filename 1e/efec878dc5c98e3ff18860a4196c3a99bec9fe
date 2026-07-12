@@ -1,0 +1,85 @@
+HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
+  s_aa1fcfc5f6c773::t_869c284bdf2940 32,80-81,84-85,88-89,92-93,96-97,100-101,104-105,108-109,112-113,116-117,120-121,124-125,128-129,132-133,136-137,140-141,144-145,148-149,152-153,156-157,160-161,164-165,168-169,172-173,176-177,180-181,184-185,188-189,192-193,196-197,200-201,204-205,208-209,212-213,216-217,220-221,224-225,228-229,232-233,236-237,240-241,244-245,248-249,252-253,256-257,260-261,264-265
+  s_aa1fcfc5f6c773::t_4766dc3d84c5a9 268-269,272-273,276-277,280-281,284-285,288-289,292-293,296-297,300-301,304-305,308-309,312-313,316-319,322,328-329,332-333,336-337,340-341,344-345,348-349,352-353,356-357,360-361,364-365,368-369,372-373,376-377,380-381,384-385,388-389,392-393,396-397,400-401,404-405,408-409,412-413,416-417,420-421,424-425,428-429,432-433,436-437,440-441,444-445,448-449,452-453,456-457,460-461,464-465,468-469,472-473,476-477,480-481,484-485,488-489,492-493,496-497,500-501,504-505,508-509,512-513,516-517,520-521,524-525,528-529,532-533,536-537,540-541,544-545,548-549,552-553,556-557,560-561,564-565,568-569,572-573,576-577,580-581,584-585,588-589,592-593,596-597,600-601,604-605,608-609,612
+HashLib/src/Checksum/HlpCRCCore.pas
+  s_aa1fcfc5f6c773::t_c3841c7113f61d 345-346,363
+  s_aa1fcfc5f6c773::t_17e0277678db2f 1,4-19,27,33-35,43-47,51,56-62,64,69,77-97,99-122,124-129,131-133,135,137-145,147-153,155,157-176,178-186,188-206,208-212,214-283,286-289,291-344,349-354,361,365,367,370,372,380,382,389,491
+  s_aa1fcfc5f6c773::t_62bfa7b224de92 98
+  s_aa1fcfc5f6c773::t_c903fd037a11b5 348
+  s_aa1fcfc5f6c773::t_6f92a85704cb8c 36-41
+  s_aa1fcfc5f6c773::t_4cf148a98fc77e 347
+  s_aa1fcfc5f6c773::t_568bf5b7055bdf 42
+  s_aa1fcfc5f6c773::t_aec1b57b3dd13d 48
+  s_aa1fcfc5f6c773::t_618da28baae6ba 355-360
+  s_aa1fcfc5f6c773::t_08a3304a9dce2e 362
+  s_aa1fcfc5f6c773::t_8114d4a3f9160d 364
+  s_aa1fcfc5f6c773::t_248056b628d02f 366
+  s_aa1fcfc5f6c773::t_37266c92e02bd0 368-369
+  s_aa1fcfc5f6c773::t_a04241d7329f5a 371
+  s_aa1fcfc5f6c773::t_9951e5ad75a311 373-375,377-379
+  s_aa1fcfc5f6c773::t_2a9b1964655ab6 381
+  s_aa1fcfc5f6c773::t_4f5e913a280756 383-388
+  s_aa1fcfc5f6c773::t_2c0c44df20c61c 390
+  s_aa1fcfc5f6c773::t_301f2b5bf708cd 376,430,439,458,487,507-508
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPclmul_x86_64.inc
+  s_aa1fcfc5f6c773::t_8772b78fd9fa29 11,16,23-24,27,34-136,140-143,147-150,154-157
+  s_aa1fcfc5f6c773::t_907b356358b9fc 137-139
+  s_aa1fcfc5f6c773::t_e52c84b157b20e 144-146
+  s_aa1fcfc5f6c773::t_32f930a3c5b7ed 151-153
+  s_aa1fcfc5f6c773::t_fb3744bf4b2cec 158-160
+  s_aa1fcfc5f6c773::t_1bc8510dd9a4d1 161-162
+HashLib/src/Simd/Backend/HlpCRCX86Backend.pas
+  s_aa1fcfc5f6c773::t_9bcbfaf1ce3712 19-20,97-98
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPclmul_x86_64.inc
+  s_aa1fcfc5f6c773::t_f6db25978a6a24 11,16,24-25,28,30,37-156,160-163,167-170,174-177
+  s_aa1fcfc5f6c773::t_af91e76ba5a913 157-159
+  s_aa1fcfc5f6c773::t_5e5a9fcd1a047f 164-166
+  s_aa1fcfc5f6c773::t_c4fcd071710841 171-173
+  s_aa1fcfc5f6c773::t_15cb86ad653dad 178-180
+  s_aa1fcfc5f6c773::t_ac12ce7e0be6fa 181-182
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPmull_aarch64.inc
+  s_aa1fcfc5f6c773::t_f43ebb6d1e776f 5,8,16,21,23-98,100-103,105-108,110-113
+  s_aa1fcfc5f6c773::t_55fa5d21617bbd 99,104,109,114-116
+HashLib/src/Checksum/HlpCRC.pas
+  s_aa1fcfc5f6c773::t_ed2bf55be7d37e 447,454,456,461,464
+  s_aa1fcfc5f6c773::t_f1d98d4ffb0286 80-81
+  s_aa1fcfc5f6c773::t_c814a3a2837a22 64
+  s_aa1fcfc5f6c773::t_fe2350aa668a5e 3-12,20,36,38-56,68,70,83-90,92,117-124,126-363,365,402-405,407-444,448-450,452-453,455,457-460,462-463,465,468-470,472-513,516-518,520-522,525,527,530,532,535,537,540,542,545,547,550,552,555,557,560,562,565,567,570,572-575,590,613-614,616-619,629,631,633-634,637-650,653,658-669,671,677-688
+  s_aa1fcfc5f6c773::t_5afb8ae33ceb84 364,366,368-383,386-388,390-391,394,396-397,400-401
+  s_aa1fcfc5f6c773::t_1d44eb474f183a 604
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPmull_aarch64.inc
+  s_aa1fcfc5f6c773::t_f43ebb6d1e776f 5,9,18,20,22-120,122-125,127-130
+  s_aa1fcfc5f6c773::t_401165c3d8edb6 121,126,131-133
+HashLib/src/Simd/Backend/HlpCRCArmBackend.pas
+  s_aa1fcfc5f6c773::t_ae17e199bc6684 19-20,51-52
+HashLib/src/Simd/Facade/HlpCRCSimd.pas
+  s_aa1fcfc5f6c773::t_fb264ad6121c7d 13-16,21-22,37-38,41,43
+HashLib/src/Include/Simd/CRC/CRCFoldForwardVpclmul_x86_64.inc
+  s_aa1fcfc5f6c773::t_046dacabc2ec6b 12
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedVpclmul_x86_64.inc
+  s_aa1fcfc5f6c773::t_14ce8e19431a36 11
+HashLib/src/Base/HlpHashFactory.pas
+  s_aa1fcfc5f6c773::t_870c0e4bbcac17 697-698,703,710-711,716,721,728-729,734
+HashLib/src/Include/Simd/CRC/CRCFoldForwardSse2_i386.inc
+  s_aa1fcfc5f6c773::t_6811d4b2d62a50 19-21,60-67
+HashLib/src/Include/Simd/CRC/CRCFoldForwardSse2_x86_64.inc
+  s_aa1fcfc5f6c773::t_93764f4439f3fe 23,41-47
+HashLib/src/Packages/FPC/HashLib4PascalPackage.pas
+  s_aa1fcfc5f6c773::t_57843ef69b2e14 13,27,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "1eefec878dc5c98e3ff18860a4196c3a99bec9fe",
+  "prompts": {},
+  "sessions": {
+    "s_aa1fcfc5f6c773": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1b750aa-3e2b-4561-9c92-1f6ea2a6349b",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
