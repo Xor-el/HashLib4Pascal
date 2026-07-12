@@ -42,7 +42,7 @@ const
 
 // =============================================================================
 // SIMD kernels
-//   i386:    SSE2
+//   i386:    AVX2, SSE2
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
@@ -51,6 +51,12 @@ const
 procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
   {$I ..\..\Include\Simd\Argon2\Argon2FillBlockSse2_i386.inc}
+end;
+
+procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer;
+  AWithXor: Int32; AMasks: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
+  {$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_i386.inc}
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -81,14 +87,14 @@ procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer;
   {$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_x86_64.inc}
 end;
 
+{$ENDIF HASHLIB_X86_64_ASM}
+
 procedure Argon2_FillBlock_Avx2_Wrap(ALeft, ARight, ACurrent: Pointer;
   AWithXor: Int32);
 begin
   Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent, AWithXor,
     @ARGON2_ROT_MASKS);
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 
@@ -97,7 +103,9 @@ end;
 class function TArgon2X86Backend.Select(AScalar: TArgon2FillBlockProc): TArgon2FillBlockProc;
 begin
 {$IFDEF HASHLIB_I386_ASM}
-  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.SSE2]) of
+  case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
+    TX86SimdLevel.AVX2:
+      Exit(@Argon2_FillBlock_Avx2_Wrap);
     TX86SimdLevel.SSE2:
       Exit(@Argon2_FillBlock_Sse2);
   end;
