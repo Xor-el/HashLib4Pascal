@@ -8,29 +8,158 @@
 //
 // Register mapping (MS x64 ABI after prologue):
 //   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
-//   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
+//   AState: pointer to the initial CRC (reflected) as one UInt64.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128
 //     [16..31] = Fold_1x128
 //     [32..47] = Barrett
-//     [48..63] = Fold_8x128 (unused by this path)
+//     [48..63] = Fold_8x128
 //     [64..79] = BswapMask  (unused by this path)
 //     [80..87] = CrcBits
 //   Returns: final CRC in RAX.
 //
 // Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
 //
-// pclmulqdq xmm_dst, xmm_src, imm8 (register-register, no REX for xmm0-7):
-//   66 0F 3A 44 ModRM imm8
+// pclmulqdq xmm_dst, xmm_src, imm8 (register-register):
+//   66 [REX] 0F 3A 44 ModRM imm8   (REX = $44 = REX.R for xmm8-15 dst)
 // ModRM for reg-reg: 11_dst_src
 //   xmm0=000 xmm1=001 xmm2=010 xmm3=011 xmm4=100
-//   xmm5=101 xmm6=110 xmm7=111
+//   xmm5=101 xmm6=110 xmm7=111 xmm8-15=REX.R + 000..111
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // fold_1x128 is always needed (fold-by-1 loop and Barrett step 1)
   movdqu xmm7, dqword ptr [r9 + 16]   // fold_1x128
 
+  cmp edx, 128
+  jb @check64
+
+  // ===== Very large input (>= 128 bytes): fold-by-8, 128 bytes/iter =====
+  movdqu xmm6, dqword ptr [r9 + 48]   // fold_8x128 (stride 1024)
+
+  movdqu xmm0, dqword ptr [rcx]
+  movdqu xmm1, dqword ptr [rcx + 16]
+  movdqu xmm2, dqword ptr [rcx + 32]
+  movdqu xmm3, dqword ptr [rcx + 48]
+  movdqu xmm8, dqword ptr [rcx + 64]
+  movdqu xmm9, dqword ptr [rcx + 80]
+  movdqu xmm10, dqword ptr [rcx + 96]
+  movdqu xmm11, dqword ptr [rcx + 112]
+
+  movq xmm4, qword ptr [r8]
+  pxor xmm0, xmm4
+
+  add rcx, 128
+  sub edx, 128
+
+  cmp edx, 128
+  jb @fold8_reduce
+
+@fold8_loop:
+  // Fold xmm0
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C6, $00              // pclmulqdq xmm0, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm0, xmm4
+  movdqu xmm5, dqword ptr [rcx]
+  pxor xmm0, xmm5
+
+  // Fold xmm1
+  movdqa xmm4, xmm1
+  db $66, $0F, $3A, $44, $CE, $00              // pclmulqdq xmm1, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm1, xmm4
+  movdqu xmm5, dqword ptr [rcx + 16]
+  pxor xmm1, xmm5
+
+  // Fold xmm2
+  movdqa xmm4, xmm2
+  db $66, $0F, $3A, $44, $D6, $00              // pclmulqdq xmm2, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm2, xmm4
+  movdqu xmm5, dqword ptr [rcx + 32]
+  pxor xmm2, xmm5
+
+  // Fold xmm3
+  movdqa xmm4, xmm3
+  db $66, $0F, $3A, $44, $DE, $00              // pclmulqdq xmm3, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm3, xmm4
+  movdqu xmm5, dqword ptr [rcx + 48]
+  pxor xmm3, xmm5
+
+  // Fold xmm8
+  movdqa xmm4, xmm8
+  db $66, $44, $0F, $3A, $44, $C6, $00         // pclmulqdq xmm8, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm8, xmm4
+  movdqu xmm5, dqword ptr [rcx + 64]
+  pxor xmm8, xmm5
+
+  // Fold xmm9
+  movdqa xmm4, xmm9
+  db $66, $44, $0F, $3A, $44, $CE, $00         // pclmulqdq xmm9, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm9, xmm4
+  movdqu xmm5, dqword ptr [rcx + 80]
+  pxor xmm9, xmm5
+
+  // Fold xmm10
+  movdqa xmm4, xmm10
+  db $66, $44, $0F, $3A, $44, $D6, $00         // pclmulqdq xmm10, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm10, xmm4
+  movdqu xmm5, dqword ptr [rcx + 96]
+  pxor xmm10, xmm5
+
+  // Fold xmm11
+  movdqa xmm4, xmm11
+  db $66, $44, $0F, $3A, $44, $DE, $00         // pclmulqdq xmm11, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm11, xmm4
+  movdqu xmm5, dqword ptr [rcx + 112]
+  pxor xmm11, xmm5
+
+  add rcx, 128
+  sub edx, 128
+  cmp edx, 128
+  jae @fold8_loop
+
+@fold8_reduce:
+  // --- Reduce 8 accumulators to 4 using fold_4x128 (stride 512) ---
+  movdqu xmm6, dqword ptr [r9]        // fold_4x128
+
+  // xmm0 = fold(xmm0) XOR xmm8
+  movdqa xmm4, xmm0
+  db $66, $0F, $3A, $44, $C6, $00              // pclmulqdq xmm0, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm0, xmm4
+  pxor xmm0, xmm8
+
+  // xmm1 = fold(xmm1) XOR xmm9
+  movdqa xmm4, xmm1
+  db $66, $0F, $3A, $44, $CE, $00              // pclmulqdq xmm1, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm1, xmm4
+  pxor xmm1, xmm9
+
+  // xmm2 = fold(xmm2) XOR xmm10
+  movdqa xmm4, xmm2
+  db $66, $0F, $3A, $44, $D6, $00              // pclmulqdq xmm2, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm2, xmm4
+  pxor xmm2, xmm10
+
+  // xmm3 = fold(xmm3) XOR xmm11
+  movdqa xmm4, xmm3
+  db $66, $0F, $3A, $44, $DE, $00              // pclmulqdq xmm3, xmm6, $00
+  db $66, $0F, $3A, $44, $E6, $11              // pclmulqdq xmm4, xmm6, $11
+  pxor xmm3, xmm4
+  pxor xmm3, xmm11
+
+  jmp @fold4_done
+
+@check64:
   cmp edx, 64
   jae @large_input
 

@@ -16,8 +16,8 @@ type
   /// </summary>
   TCRCArmBackend = class sealed
   public
-    class function Select(AReflectedScalar, AForwardScalar,
-      AReflected32Scalar: TCRCFoldFunc): TCRCFoldSelection; static;
+    class function Select(AReflectedScalar, AForwardScalar: TCRCFoldFunc)
+      : TCRCFoldSelection; static;
   end;
 
 implementation
@@ -48,12 +48,11 @@ end;
 
 { TCRCArmBackend }
 
-class function TCRCArmBackend.Select(AReflectedScalar, AForwardScalar,
-  AReflected32Scalar: TCRCFoldFunc): TCRCFoldSelection;
+class function TCRCArmBackend.Select(AReflectedScalar,
+  AForwardScalar: TCRCFoldFunc): TCRCFoldSelection;
 begin
   Result.Reflected := AReflectedScalar;
   Result.Fwd := AForwardScalar;
-  Result.Reflected32 := AReflected32Scalar;
   Result.UsesCarrylessMul := False;
 
 {$IFDEF HASHLIB_AARCH64_ASM}
@@ -61,7 +60,6 @@ begin
   begin
     Result.Reflected := @CRC_Fold_Reflected_Pmull;
     Result.Fwd := @CRC_Fold_Forward_Pmull;
-    Result.Reflected32 := @CRC_Fold_Reflected_Pmull;
     Result.UsesCarrylessMul := True;
   end;
 {$ENDIF HASHLIB_AARCH64_ASM}

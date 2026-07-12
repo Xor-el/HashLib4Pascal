@@ -1,7 +1,15 @@
 unit HlpCRC;
 
-// A vast majority if not all of the parameters for these CRC standards
-// were gotten from http://reveng.sourceforge.net/crc-catalogue/.
+{
+  Generic CRC engine for any width 3..64 and any polynomial, plus the catalogue
+  of named standards (parameters from http://reveng.sourceforge.net/crc-catalogue/).
+
+  One engine path serves every width: a slicing-by-16 table plus the SIMD /
+  scalar fold selected in HlpCRCCore. Widths below 8 with MSB-first input are
+  computed in a left-aligned domain (polynomial and state shifted up by
+  8 - Width, un-shifted at finalization); LSB-first (reflected) CRCs are
+  width-agnostic and run as-is.
+}
 
 {$I ..\Include\HashLib.inc}
 
@@ -9,7 +17,7 @@ interface
 
 uses
   SysUtils,
-  TypInfo,
+  SyncObjs,
   Generics.Collections,
   HlpHashLibTypes,
   HlpHash,
@@ -21,625 +29,68 @@ uses
   HlpCRCCore;
 
 resourcestring
-  SUnSupportedCRCType = 'UnSupported CRC Type: "%s"';
   SWidthOutOfRange = 'Width Must be Between 3 and 64. "%d"';
 
 type
   /// <summary>
-  /// Enum of all defined and implemented CRC standards.
+  /// All defined and implemented CRC standards.
   /// </summary>
-  TCRCStandard = (
-
-    /// <summary>
-    /// CRC standard named "CRC3_GSM".
-    /// </summary>
-    CRC3_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC3_ROHC".
-    /// </summary>
-    CRC3_ROHC,
-
-    /// <summary>
-    /// CRC standard named "CRC4_INTERLAKEN".
-    /// </summary>
-    CRC4_INTERLAKEN,
-
-    /// <summary>
-    /// CRC standard named "CRC4_ITU".
-    /// </summary>
-    CRC4_ITU,
-
-    /// <summary>
-    /// CRC standard named "CRC5_EPC".
-    /// </summary>
-    CRC5_EPC,
-
-    /// <summary>
-    /// CRC standard named "CRC5_ITU".
-    /// </summary>
-    CRC5_ITU,
-
-    /// <summary>
-    /// CRC standard named "CRC5_USB".
-    /// </summary>
-    CRC5_USB,
-
-    /// <summary>
-    /// CRC standard named "CRC6_CDMA2000A".
-    /// </summary>
-    CRC6_CDMA2000A,
-
-    /// <summary>
-    /// CRC standard named "CRC6_CDMA2000B".
-    /// </summary>
-    CRC6_CDMA2000B,
-
-    /// <summary>
-    /// CRC standard named "CRC6_DARC".
-    /// </summary>
-    CRC6_DARC,
-
-    /// <summary>
-    /// CRC standard named "CRC6_GSM".
-    /// </summary>
-    CRC6_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC6_ITU".
-    /// </summary>
-    CRC6_ITU,
-
-    /// <summary>
-    /// CRC standard named "CRC7".
-    /// </summary>
-    CRC7,
-
-    /// <summary>
-    /// CRC standard named "CRC7_ROHC".
-    /// </summary>
-    CRC7_ROHC,
-
-    /// <summary>
-    /// CRC standard named "CRC7_UMTS".
-    /// </summary>
-    CRC7_UMTS,
-
-    /// <summary>
-    /// CRC standard named "CRC8".
-    /// </summary>
-    CRC8,
-
-    /// <summary>
-    /// CRC standard named "CRC8_AUTOSAR".
-    /// </summary>
-    CRC8_AUTOSAR,
-
-    /// <summary>
-    /// CRC standard named "CRC8_BLUETOOTH".
-    /// </summary>
-    CRC8_BLUETOOTH,
-
-    /// <summary>
-    /// CRC standard named "CRC8_CDMA2000".
-    /// </summary>
-    CRC8_CDMA2000,
-
-    /// <summary>
-    /// CRC standard named "CRC8_DARC".
-    /// </summary>
-    CRC8_DARC,
-
-    /// <summary>
-    /// CRC standard named "CRC8_DVBS2".
-    /// </summary>
-    CRC8_DVBS2,
-
-    /// <summary>
-    /// CRC standard named "CRC8_EBU".
-    /// </summary>
-    CRC8_EBU,
-
-    /// <summary>
-    /// CRC standard named "CRC8_GSMA".
-    /// </summary>
-    CRC8_GSMA,
-
-    /// <summary>
-    /// CRC standard named "CRC8_GSMB".
-    /// </summary>
-    CRC8_GSMB,
-
-    /// <summary>
-    /// CRC standard named "CRC8_ICODE".
-    /// </summary>
-    CRC8_ICODE,
-
-    /// <summary>
-    /// CRC standard named "CRC8_ITU".
-    /// </summary>
-    CRC8_ITU,
-
-    /// <summary>
-    /// CRC standard named "CRC8_LTE".
-    /// </summary>
-    CRC8_LTE,
-
-    /// <summary>
-    /// CRC standard named "CRC8_MAXIM".
-    /// </summary>
-    CRC8_MAXIM,
-
-    /// <summary>
-    /// CRC standard named "CRC8_OPENSAFETY".
-    /// </summary>
-    CRC8_OPENSAFETY,
-
-    /// <summary>
-    /// CRC standard named "CRC8_ROHC".
-    /// </summary>
-    CRC8_ROHC,
-
-    /// <summary>
-    /// CRC standard named "CRC8_SAEJ1850".
-    /// </summary>
-    CRC8_SAEJ1850,
-
-    /// <summary>
-    /// CRC standard named "CRC8_WCDMA".
-    /// </summary>
-    CRC8_WCDMA,
-
-    /// <summary>
-    /// CRC standard named "CRC8_MIFAREMAD".
-    /// </summary>
-    CRC8_MIFAREMAD,
-
-    /// <summary>
-    /// CRC standard named "CRC8_NRSC5".
-    /// </summary>
-    CRC8_NRSC5,
-
-    /// <summary>
-    /// CRC standard named "CRC10".
-    /// </summary>
-    CRC10,
-
-    /// <summary>
-    /// CRC standard named "CRC10_CDMA2000".
-    /// </summary>
-    CRC10_CDMA2000,
-
-    /// <summary>
-    /// CRC standard named "CRC10_GSM".
-    /// </summary>
-    CRC10_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC11".
-    /// </summary>
-    CRC11,
-
-    /// <summary>
-    /// CRC standard named "CRC11_UMTS".
-    /// </summary>
-    CRC11_UMTS,
-
-    /// <summary>
-    /// CRC standard named "CRC12_CDMA2000".
-    /// </summary>
-    CRC12_CDMA2000,
-
-    /// <summary>
-    /// CRC standard named "CRC12_DECT".
-    /// </summary>
-    CRC12_DECT,
-
-    /// <summary>
-    /// CRC standard named "CRC12_GSM".
-    /// </summary>
-    CRC12_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC12_UMTS".
-    /// </summary>
-    CRC12_UMTS,
-
-    /// <summary>
-    /// CRC standard named "CRC13_BBC".
-    /// </summary>
-    CRC13_BBC,
-
-    /// <summary>
-    /// CRC standard named "CRC14_DARC".
-    /// </summary>
-    CRC14_DARC,
-
-    /// <summary>
-    /// CRC standard named "CRC14_GSM".
-    /// </summary>
-    CRC14_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC15".
-    /// </summary>
-    CRC15,
-
-    /// <summary>
-    /// CRC standard named "CRC15_MPT1327".
-    /// </summary>
-    CRC15_MPT1327,
-
-    /// <summary>
-    /// CRC standard named "ARC".
-    /// </summary>
-    ARC,
-
-    /// <summary>
-    /// CRC standard named "CRC16_AUGCCITT".
-    /// </summary>
-    CRC16_AUGCCITT,
-
-    /// <summary>
-    /// CRC standard named "CRC16_BUYPASS".
-    /// </summary>
-    CRC16_BUYPASS,
-
-    /// <summary>
-    /// CRC standard named "CRC16_CCITTFALSE".
-    /// </summary>
-    CRC16_CCITTFALSE,
-
-    /// <summary>
-    /// CRC standard named "CRC16_CDMA2000".
-    /// </summary>
-    CRC16_CDMA2000,
-
-    /// <summary>
-    /// CRC standard named "CRC16_CMS".
-    /// </summary>
-    CRC16_CMS,
-
-    /// <summary>
-    /// CRC standard named "CRC16_DDS110".
-    /// </summary>
-    CRC16_DDS110,
-
-    /// <summary>
-    /// CRC standard named "CRC16_DECTR".
-    /// </summary>
-    CRC16_DECTR,
-
-    /// <summary>
-    /// CRC standard named "CRC16_DECTX".
-    /// </summary>
-    CRC16_DECTX,
-
-    /// <summary>
-    /// CRC standard named "CRC16_DNP".
-    /// </summary>
-    CRC16_DNP,
-
-    /// <summary>
-    /// CRC standard named "CRC16_EN13757".
-    /// </summary>
-    CRC16_EN13757,
-
-    /// <summary>
-    /// CRC standard named "CRC16_GENIBUS".
-    /// </summary>
-    CRC16_GENIBUS,
-
-    /// <summary>
-    /// CRC standard named "CRC16_GSM".
-    /// </summary>
-    CRC16_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC16_LJ1200".
-    /// </summary>
-    CRC16_LJ1200,
-
-    /// <summary>
-    /// CRC standard named "CRC16_MAXIM".
-    /// </summary>
-    CRC16_MAXIM,
-
-    /// <summary>
-    /// CRC standard named "CRC16_MCRF4XX".
-    /// </summary>
-    CRC16_MCRF4XX,
-
-    /// <summary>
-    /// CRC standard named "CRC16_OPENSAFETYA".
-    /// </summary>
-    CRC16_OPENSAFETYA,
-
-    /// <summary>
-    /// CRC standard named "CRC16_OPENSAFETYB".
-    /// </summary>
-    CRC16_OPENSAFETYB,
-
-    /// <summary>
-    /// CRC standard named "CRC16_PROFIBUS".
-    /// </summary>
-    CRC16_PROFIBUS,
-
-    /// <summary>
-    /// CRC standard named "CRC16_RIELLO".
-    /// </summary>
-    CRC16_RIELLO,
-
-    /// <summary>
-    /// CRC standard named "CRC16_T10DIF".
-    /// </summary>
-    CRC16_T10DIF,
-
-    /// <summary>
-    /// CRC standard named "CRC16_TELEDISK".
-    /// </summary>
-    CRC16_TELEDISK,
-
-    /// <summary>
-    /// CRC standard named "CRC16_TMS37157".
-    /// </summary>
-    CRC16_TMS37157,
-
-    /// <summary>
-    /// CRC standard named "CRC16_USB".
-    /// </summary>
-    CRC16_USB,
-
-    /// <summary>
-    /// CRC standard named "CRCA".
-    /// </summary>
-    CRCA,
-
-    /// <summary>
-    /// CRC standard named "KERMIT".
-    /// </summary>
-    KERMIT,
-
-    /// <summary>
-    /// CRC standard named "MODBUS".
-    /// </summary>
-    MODBUS,
-
-    /// <summary>
-    /// CRC standard named "X25".
-    /// </summary>
-    X25,
-
-    /// <summary>
-    /// CRC standard named "XMODEM".
-    /// </summary>
-    XMODEM,
-
-    /// <summary>
-    /// CRC standard named "CRC16_NRSC5".
-    /// </summary>
-    CRC16_NRSC5,
-
-    /// <summary>
-    /// CRC standard named "CRC17_CANFD".
-    /// </summary>
-    CRC17_CANFD,
-
-    /// <summary>
-    /// CRC standard named "CRC21_CANFD".
-    /// </summary>
-    CRC21_CANFD,
-
-    /// <summary>
-    /// CRC standard named "CRC24".
-    /// </summary>
-    CRC24,
-
-    /// <summary>
-    /// CRC standard named "CRC24_BLE".
-    /// </summary>
-    CRC24_BLE,
-
-    /// <summary>
-    /// CRC standard named "CRC24_FLEXRAYA".
-    /// </summary>
-    CRC24_FLEXRAYA,
-
-    /// <summary>
-    /// CRC standard named "CRC24_FLEXRAYB".
-    /// </summary>
-    CRC24_FLEXRAYB,
-
-    /// <summary>
-    /// CRC standard named "CRC24_INTERLAKEN".
-    /// </summary>
-    CRC24_INTERLAKEN,
-
-    /// <summary>
-    /// CRC standard named "CRC24_LTEA".
-    /// </summary>
-    CRC24_LTEA,
-
-    /// <summary>
-    /// CRC standard named "CRC24_LTEB".
-    /// </summary>
-    CRC24_LTEB,
-
-    /// <summary>
-    /// CRC standard named "CRC24_OS9".
-    /// </summary>
-    CRC24_OS9,
-
-    /// <summary>
-    /// CRC standard named "CRC30_CDMA".
-    /// </summary>
-    CRC30_CDMA,
-
-    /// <summary>
-    /// CRC standard named "CRC31_PHILIPS".
-    /// </summary>
-    CRC31_PHILIPS,
-
-    /// <summary>
-    /// CRC standard named "CRC32".
-    /// </summary>
-    CRC32,
-
-    /// <summary>
-    /// CRC standard named "CRC32_AUTOSAR".
-    /// </summary>
-    CRC32_AUTOSAR,
-
-    /// <summary>
-    /// CRC standard named "CRC32_BZIP2".
-    /// </summary>
-    CRC32_BZIP2,
-
-    /// <summary>
-    /// CRC standard named "CRC32C".
-    /// </summary>
-    CRC32C,
-
-    /// <summary>
-    /// CRC standard named "CRC32D".
-    /// </summary>
-    CRC32D,
-
-    /// <summary>
-    /// CRC standard named "CRC32_MPEG2".
-    /// </summary>
-    CRC32_MPEG2,
-
-    /// <summary>
-    /// CRC standard named "CRC32_POSIX".
-    /// </summary>
-    CRC32_POSIX,
-
-    /// <summary>
-    /// CRC standard named "CRC32Q".
-    /// </summary>
-    CRC32Q,
-
-    /// <summary>
-    /// CRC standard named "JAMCRC".
-    /// </summary>
-    JAMCRC,
-
-    /// <summary>
-    /// CRC standard named "XFER".
-    /// </summary>
-    XFER,
-
-    /// <summary>
-    /// CRC standard named "CRC32_CDROMEDC".
-    /// </summary>
-    CRC32_CDROMEDC,
-
-    /// <summary>
-    /// CRC standard named "CRC40_GSM".
-    /// </summary>
-    CRC40_GSM,
-
-    /// <summary>
-    /// CRC standard named "CRC64".
-    /// </summary>
-    CRC64,
-
-    /// <summary>
-    /// CRC standard named "CRC64_GOISO".
-    /// </summary>
-    CRC64_GOISO,
-
-    /// <summary>
-    /// CRC standard named "CRC64_WE".
-    /// </summary>
-    CRC64_WE,
-
-    /// <summary>
-    /// CRC standard named "CRC64_XZ".
-    /// </summary>
-    CRC64_XZ,
-
-    /// <summary>
-    /// CRC standard named "CRC64_1B".
-    /// </summary>
-    CRC64_1B,
-
-    /// <summary>
-    /// CRC standard named "CRC64_Jones".
-    /// </summary>
-    CRC64_Jones);
+  TCRCStandard = (CRC3_GSM, CRC3_ROHC, CRC4_INTERLAKEN, CRC4_ITU, CRC5_EPC,
+    CRC5_ITU, CRC5_USB, CRC6_CDMA2000A, CRC6_CDMA2000B, CRC6_DARC, CRC6_GSM,
+    CRC6_ITU, CRC7, CRC7_ROHC, CRC7_UMTS, CRC8, CRC8_AUTOSAR, CRC8_BLUETOOTH,
+    CRC8_CDMA2000, CRC8_DARC, CRC8_DVBS2, CRC8_EBU, CRC8_GSMA, CRC8_GSMB,
+    CRC8_ICODE, CRC8_ITU, CRC8_LTE, CRC8_MAXIM, CRC8_OPENSAFETY, CRC8_ROHC,
+    CRC8_SAEJ1850, CRC8_WCDMA, CRC8_MIFAREMAD, CRC8_NRSC5, CRC10,
+    CRC10_CDMA2000, CRC10_GSM, CRC11, CRC11_UMTS, CRC12_CDMA2000, CRC12_DECT,
+    CRC12_GSM, CRC12_UMTS, CRC13_BBC, CRC14_DARC, CRC14_GSM, CRC15,
+    CRC15_MPT1327, ARC, CRC16_AUGCCITT, CRC16_BUYPASS, CRC16_CCITTFALSE,
+    CRC16_CDMA2000, CRC16_CMS, CRC16_DDS110, CRC16_DECTR, CRC16_DECTX,
+    CRC16_DNP, CRC16_EN13757, CRC16_GENIBUS, CRC16_GSM, CRC16_LJ1200,
+    CRC16_MAXIM, CRC16_MCRF4XX, CRC16_OPENSAFETYA, CRC16_OPENSAFETYB,
+    CRC16_PROFIBUS, CRC16_RIELLO, CRC16_T10DIF, CRC16_TELEDISK, CRC16_TMS37157,
+    CRC16_USB, CRCA, KERMIT, MODBUS, X25, XMODEM, CRC16_NRSC5, CRC17_CANFD,
+    CRC21_CANFD, CRC24, CRC24_BLE, CRC24_FLEXRAYA, CRC24_FLEXRAYB,
+    CRC24_INTERLAKEN, CRC24_LTEA, CRC24_LTEB, CRC24_OS9, CRC30_CDMA,
+    CRC31_PHILIPS, CRC32, CRC32_AUTOSAR, CRC32_BZIP2, CRC32C, CRC32D,
+    CRC32_MPEG2, CRC32_POSIX, CRC32Q, JAMCRC, XFER, CRC32_CDROMEDC, CRC40_GSM,
+    CRC64, CRC64_GOISO, CRC64_WE, CRC64_XZ, CRC64_1B, CRC64_Jones);
 
 type
   TCRC = class sealed(THash, IChecksum, ICRC, ITransformBlock)
 
   strict private
-  type
-    TCRCCacheValue = record
-      Table: THashLibMatrixUInt64Array;
-      FoldRuntime: TCRCFoldRuntimeCtx;
-    end;
-
   class var
     FCache: TDictionary<String, TCRCCacheValue>;
+    FCacheLock: TCriticalSection;
 
   var
     FNames: THashLibStringArray;
-    FWidth: Int32;
+    FWidth, FEngineWidth, FEngineShift: Int32;
     FPolynomial, FInitialValue, FOutputXor, FCheckValue, FCRCMask,
-      FCRCHighBitMask, FHash: UInt64;
+      FHash: UInt64;
     FIsInputReflected, FIsOutputReflected: Boolean;
 
     FCacheEntry: TCRCCacheValue;
 
-  const
-    MinTableWidth = Int32(7);
-
     class constructor CreateCRCCache;
     class destructor DestroyCRCCache;
 
-    class function MakeCacheKey(APoly: UInt64; AWidth: Int32;
-      AReflected: Boolean): String; static;
-    class function GetOrCreateCacheEntry(APoly: UInt64; AWidth: Int32;
-      AReflected: Boolean): TCRCCacheValue; static;
     class function GenerateCRCTable(APoly: UInt64; AWidth: Int32;
       AReflected: Boolean): THashLibMatrixUInt64Array; static;
+    class function GetOrCreateCacheEntry(APoly: UInt64; AWidth: Int32;
+      AReflected: Boolean): TCRCCacheValue; static;
 
-    function GetNames: THashLibStringArray; inline;
-    procedure SetNames(const AValue: THashLibStringArray); inline;
-    function GetWidth: Int32; inline;
-    procedure SetWidth(AValue: Int32); inline;
-    function GetPolynomial: UInt64; inline;
-    procedure SetPolynomial(AValue: UInt64); inline;
-    function GetInitialValue: UInt64; inline;
-    procedure SetInitialValue(AValue: UInt64); inline;
-    function GetIsInputReflected: Boolean; inline;
-    procedure SetIsInputReflected(AValue: Boolean); inline;
-    function GetIsOutputReflected: Boolean; inline;
-    procedure SetIsOutputReflected(AValue: Boolean); inline;
-    function GetOutputXor: UInt64; inline;
-    procedure SetOutputXor(AValue: UInt64); inline;
-    function GetCheckValue: UInt64; inline;
-    procedure SetCheckValue(AValue: UInt64); inline;
+    function GetNames: THashLibStringArray;
+    function GetWidth: Int32;
+    function GetPolynomial: UInt64;
+    function GetInitialValue: UInt64;
+    function GetIsInputReflected: Boolean;
+    function GetIsOutputReflected: Boolean;
+    function GetOutputXor: UInt64;
+    function GetCheckValue: UInt64;
 
-    // Table-driven byte path: length < MinSimdBytes or tail after fold (no 16-byte block).
+    // Table-driven byte path: length < MinSimdBytes or tail after fold.
     procedure UpdateCRCViaByteTable(AData: PByte; ADataLength, AIndex: Int32);
-    // Bit-serial update without table (width <= MinTableWidth).
-    procedure UpdateCRCViaBitSerial(AData: PByte; ADataLength, AIndex: Int32);
-
-    // reflects the lower 'width' LBits of 'value'
-    class function Reflect(AValue: UInt64; AWidth: Int32): UInt64; static;
-
-    property Names: THashLibStringArray read GetNames write SetNames;
-    property Width: Int32 read GetWidth write SetWidth;
-    property Polynomial: UInt64 read GetPolynomial write SetPolynomial;
-    property InitialValue: UInt64 read GetInitialValue write SetInitialValue;
-    property IsInputReflected: Boolean read GetIsInputReflected
-      write SetIsInputReflected;
-    property IsOutputReflected: Boolean read GetIsOutputReflected
-      write SetIsOutputReflected;
-    property OutputXor: UInt64 read GetOutputXor write SetOutputXor;
-    property CheckValue: UInt64 read GetCheckValue write SetCheckValue;
 
   strict protected
     function GetName: String; override;
@@ -663,678 +114,287 @@ type
 
 implementation
 
+type
+  TCRCStandardDef = record
+    Width: Int32;
+    Poly, Init: UInt64;
+    RefIn, RefOut: Boolean;
+    XorOut, Check: UInt64;
+    Names: String; // comma-separated aliases; first one is the primary name
+  end;
+
+const
+  CRCStandardDefs: array [TCRCStandard] of TCRCStandardDef = (
+    (Width: 3; Poly: $3; Init: $0; RefIn: False; RefOut: False; XorOut: $7;
+      Check: $4; Names: 'CRC-3/GSM'),
+    (Width: 3; Poly: $3; Init: $7; RefIn: True; RefOut: True; XorOut: $0;
+      Check: $6; Names: 'CRC-3/ROHC'),
+    (Width: 4; Poly: $3; Init: $F; RefIn: False; RefOut: False; XorOut: $F;
+      Check: $B; Names: 'CRC-4/INTERLAKEN'),
+    (Width: 4; Poly: $3; Init: $0; RefIn: True; RefOut: True; XorOut: $0;
+      Check: $7; Names: 'CRC-4/ITU,CRC-4/G-704'),
+    (Width: 5; Poly: $9; Init: $9; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $00; Names: 'CRC-5/EPC,CRC-5/EPC-C1G2'),
+    (Width: 5; Poly: $15; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $07; Names: 'CRC-5/ITU,CRC-5/G-704'),
+    (Width: 5; Poly: $05; Init: $1F; RefIn: True; RefOut: True; XorOut: $1F;
+      Check: $19; Names: 'CRC-5/USB'),
+    (Width: 6; Poly: $27; Init: $3F; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $0D; Names: 'CRC-6/CDMA2000-A'),
+    (Width: 6; Poly: $07; Init: $3F; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $3B; Names: 'CRC-6/CDMA2000-B'),
+    (Width: 6; Poly: $19; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $26; Names: 'CRC-6/DARC'),
+    (Width: 6; Poly: $2F; Init: $00; RefIn: False; RefOut: False; XorOut: $3F;
+      Check: $13; Names: 'CRC-6/GSM'),
+    (Width: 6; Poly: $03; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $06; Names: 'CRC-6/ITU,CRC-6/G-704'),
+    (Width: 7; Poly: $09; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $75; Names: 'CRC-7,CRC-7/MMC'),
+    (Width: 7; Poly: $4F; Init: $7F; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $53; Names: 'CRC-7/ROHC'),
+    (Width: 7; Poly: $45; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $61; Names: 'CRC-7/UMTS'),
+    (Width: 8; Poly: $07; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $F4; Names: 'CRC-8,CRC-8/SMBUS'),
+    (Width: 8; Poly: $2F; Init: $FF; RefIn: False; RefOut: False; XorOut: $FF;
+      Check: $DF; Names: 'CRC-8/AUTOSAR'),
+    (Width: 8; Poly: $A7; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $26; Names: 'CRC-8/BLUETOOTH'),
+    (Width: 8; Poly: $9B; Init: $FF; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $DA; Names: 'CRC-8/CDMA2000'),
+    (Width: 8; Poly: $39; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $15; Names: 'CRC-8/DARC'),
+    (Width: 8; Poly: $D5; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $BC; Names: 'CRC-8/DVB-S2'),
+    (Width: 8; Poly: $1D; Init: $FF; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $97; Names: 'CRC-8/EBU,CRC-8/AES,CRC-8/TECH-3250'),
+    (Width: 8; Poly: $1D; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $37; Names: 'CRC-8/GSM-A'),
+    (Width: 8; Poly: $49; Init: $00; RefIn: False; RefOut: False; XorOut: $FF;
+      Check: $94; Names: 'CRC-8/GSM-B'),
+    (Width: 8; Poly: $1D; Init: $FD; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $7E; Names: 'CRC-8/I-CODE'),
+    (Width: 8; Poly: $07; Init: $00; RefIn: False; RefOut: False; XorOut: $55;
+      Check: $A1; Names: 'CRC-8/ITU,CRC-8/I-432-1'),
+    (Width: 8; Poly: $9B; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $EA; Names: 'CRC-8/LTE'),
+    (Width: 8; Poly: $31; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $A1; Names: 'CRC-8/MAXIM,DOW-CRC,CRC-8/MAXIM-DOW'),
+    (Width: 8; Poly: $2F; Init: $00; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $3E; Names: 'CRC-8/OPENSAFETY'),
+    (Width: 8; Poly: $07; Init: $FF; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $D0; Names: 'CRC-8/ROHC'),
+    (Width: 8; Poly: $1D; Init: $FF; RefIn: False; RefOut: False; XorOut: $FF;
+      Check: $4B; Names: 'CRC-8/SAE-J1850'),
+    (Width: 8; Poly: $9B; Init: $00; RefIn: True; RefOut: True; XorOut: $00;
+      Check: $25; Names: 'CRC-8/WCDMA'),
+    (Width: 8; Poly: $1D; Init: $C7; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $99; Names: 'CRC-8/MIFARE-MAD'),
+    (Width: 8; Poly: $31; Init: $FF; RefIn: False; RefOut: False; XorOut: $00;
+      Check: $F7; Names: 'CRC-8/NRSC-5'),
+    (Width: 10; Poly: $233; Init: $000; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $199; Names: 'CRC-10,CRC-10/ATM,CRC-10/I-610'),
+    (Width: 10; Poly: $3D9; Init: $3FF; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $233; Names: 'CRC-10/CDMA2000'),
+    (Width: 10; Poly: $175; Init: $000; RefIn: False; RefOut: False;
+      XorOut: $3FF; Check: $12A; Names: 'CRC-10/GSM'),
+    (Width: 11; Poly: $385; Init: $01A; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $5A3; Names: 'CRC-11,CRC-11/FLEXRAY'),
+    (Width: 11; Poly: $307; Init: $000; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $061; Names: 'CRC-11/UMTS'),
+    (Width: 12; Poly: $F13; Init: $FFF; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $D4D; Names: 'CRC-12/CDMA2000'),
+    (Width: 12; Poly: $80F; Init: $000; RefIn: False; RefOut: False;
+      XorOut: $000; Check: $F5B; Names: 'CRC-12/DECT,X-CRC-12'),
+    (Width: 12; Poly: $D31; Init: $000; RefIn: False; RefOut: False;
+      XorOut: $FFF; Check: $B34; Names: 'CRC-12/GSM'),
+    (Width: 12; Poly: $80F; Init: $000; RefIn: False; RefOut: True;
+      XorOut: $000; Check: $DAF; Names: 'CRC-12/UMTS,CRC-12/3GPP'),
+    (Width: 13; Poly: $1CF5; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $04FA; Names: 'CRC-13/BBC'),
+    (Width: 14; Poly: $0805; Init: $0000; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $082D; Names: 'CRC-14/DARC'),
+    (Width: 14; Poly: $202D; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $3FFF; Check: $30AE; Names: 'CRC-14/GSM'),
+    (Width: 15; Poly: $4599; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $059E; Names: 'CRC-15,CRC-15/CAN'),
+    (Width: 15; Poly: $6815; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0001; Check: $2566; Names: 'CRC-15/MPT1327'),
+    (Width: 16; Poly: $8005; Init: $0000; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $BB3D;
+      Names: 'CRC-16,ARC,CRC-IBM,CRC-16/ARC,CRC-16/LHA'),
+    (Width: 16; Poly: $1021; Init: $1D0F; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $E5CC;
+      Names: 'CRC-16/AUG-CCITT,CRC-16/SPI-FUJITSU'),
+    (Width: 16; Poly: $8005; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $FEE8;
+      Names: 'CRC-16/BUYPASS,CRC-16/VERIFONE,CRC-16/UMTS'),
+    (Width: 16; Poly: $1021; Init: $FFFF; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $29B1;
+      Names: 'CRC-16/CCITT-False,CRC-16/AUTOSAR,CRC-16/IBM-3740'),
+    (Width: 16; Poly: $C867; Init: $FFFF; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $4C06; Names: 'CRC-16/CDMA2000'),
+    (Width: 16; Poly: $8005; Init: $FFFF; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $AEE7; Names: 'CRC-16/CMS'),
+    (Width: 16; Poly: $8005; Init: $800D; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $9ECF; Names: 'CRC-16/DDS-110'),
+    (Width: 16; Poly: $0589; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0001; Check: $007E; Names: 'CRC-16/DECT-R,R-CRC-16'),
+    (Width: 16; Poly: $0589; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $007F; Names: 'CRC-16/DECT-X,X-CRC-16'),
+    (Width: 16; Poly: $3D65; Init: $0000; RefIn: True; RefOut: True;
+      XorOut: $FFFF; Check: $EA82; Names: 'CRC-16/DNP'),
+    (Width: 16; Poly: $3D65; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $FFFF; Check: $C2B7; Names: 'CRC-16/EN13757'),
+    (Width: 16; Poly: $1021; Init: $FFFF; RefIn: False; RefOut: False;
+      XorOut: $FFFF; Check: $D64E;
+      Names: 'CRC-16/GENIBUS,CRC-16/EPC,CRC-16/I-CODE,CRC-16/DARC,CRC-16/EPC-C1G2'),
+    (Width: 16; Poly: $1021; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $FFFF; Check: $CE3C; Names: 'CRC-16/GSM'),
+    (Width: 16; Poly: $6F63; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $BDF4; Names: 'CRC-16/LJ1200'),
+    (Width: 16; Poly: $8005; Init: $0000; RefIn: True; RefOut: True;
+      XorOut: $FFFF; Check: $44C2; Names: 'CRC-16/MAXIM,CRC-16/MAXIM-DOW'),
+    (Width: 16; Poly: $1021; Init: $FFFF; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $6F91; Names: 'CRC-16/MCRF4XX'),
+    (Width: 16; Poly: $5935; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $5D38; Names: 'CRC-16/OPENSAFETY-A'),
+    (Width: 16; Poly: $755B; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $20FE; Names: 'CRC-16/OPENSAFETY-B'),
+    (Width: 16; Poly: $1DCF; Init: $FFFF; RefIn: False; RefOut: False;
+      XorOut: $FFFF; Check: $A819; Names: 'CRC-16/PROFIBUS,CRC-16/IEC-61158-2'),
+    (Width: 16; Poly: $1021; Init: $B2AA; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $63D0; Names: 'CRC-16/RIELLO'),
+    (Width: 16; Poly: $8BB7; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $D0DB; Names: 'CRC-16/T10-DIF'),
+    (Width: 16; Poly: $A097; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $0FB3; Names: 'CRC-16/TELEDISK'),
+    (Width: 16; Poly: $1021; Init: $89EC; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $26B1; Names: 'CRC-16/TMS37157'),
+    (Width: 16; Poly: $8005; Init: $FFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFF; Check: $B4C8; Names: 'CRC-16/USB'),
+    (Width: 16; Poly: $1021; Init: $C6C6; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $BF05; Names: 'CRC-A,CRC-16/ISO-IEC-14443-3-A'),
+    (Width: 16; Poly: $1021; Init: $0000; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $2189;
+      Names: 'KERMIT,CRC-16/CCITT,CRC-16/CCITT-True,CRC-CCITT,CRC-16/KERMIT,CRC-16/V-41-LSB'),
+    (Width: 16; Poly: $8005; Init: $FFFF; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $4B37; Names: 'MODBUS,CRC-16/MODBUS'),
+    (Width: 16; Poly: $1021; Init: $FFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFF; Check: $906E;
+      Names: 'X-25,CRC-16/IBM-SDLC,CRC-16/ISO-HDLC,CRC-16/ISO-IEC-14443-3-B,CRC-B,CRC-16/X-25'),
+    (Width: 16; Poly: $1021; Init: $0000; RefIn: False; RefOut: False;
+      XorOut: $0000; Check: $31C3;
+      Names: 'XMODEM,ZMODEM,CRC-16/ACORN,CRC-16/XMODEM,CRC-16/V-41-MSB'),
+    (Width: 16; Poly: $080B; Init: $FFFF; RefIn: True; RefOut: True;
+      XorOut: $0000; Check: $A066; Names: 'CRC-16/NRSC-5'),
+    (Width: 17; Poly: $1685B; Init: $00000; RefIn: False; RefOut: False;
+      XorOut: $00000; Check: $04F03; Names: 'CRC-17/CAN-FD'),
+    (Width: 21; Poly: $102899; Init: $00000; RefIn: False; RefOut: False;
+      XorOut: $00000; Check: $0ED841; Names: 'CRC-21/CAN-FD'),
+    (Width: 24; Poly: $864CFB; Init: $B704CE; RefIn: False; RefOut: False;
+      XorOut: $000000; Check: $21CF02; Names: 'CRC-24,CRC-24/OPENPGP'),
+    (Width: 24; Poly: $00065B; Init: $555555; RefIn: True; RefOut: True;
+      XorOut: $000000; Check: $C25A56; Names: 'CRC-24/BLE'),
+    (Width: 24; Poly: $5D6DCB; Init: $FEDCBA; RefIn: False; RefOut: False;
+      XorOut: $000000; Check: $7979BD; Names: 'CRC-24/FLEXRAY-A'),
+    (Width: 24; Poly: $5D6DCB; Init: $ABCDEF; RefIn: False; RefOut: False;
+      XorOut: $000000; Check: $1F23B8; Names: 'CRC-24/FLEXRAY-B'),
+    (Width: 24; Poly: $328B63; Init: $FFFFFF; RefIn: False; RefOut: False;
+      XorOut: $FFFFFF; Check: $B4F3E6; Names: 'CRC-24/INTERLAKEN'),
+    (Width: 24; Poly: $864CFB; Init: $000000; RefIn: False; RefOut: False;
+      XorOut: $000000; Check: $CDE703; Names: 'CRC-24/LTE-A'),
+    (Width: 24; Poly: $800063; Init: $000000; RefIn: False; RefOut: False;
+      XorOut: $000000; Check: $23EF52; Names: 'CRC-24/LTE-B'),
+    (Width: 24; Poly: $800063; Init: $FFFFFF; RefIn: False; RefOut: False;
+      XorOut: $FFFFFF; Check: $200FA5; Names: 'CRC-24/OS-9'),
+    (Width: 30; Poly: $2030B9C7; Init: $3FFFFFFF; RefIn: False; RefOut: False;
+      XorOut: $3FFFFFFF; Check: $04C34ABF; Names: 'CRC-30/CDMA'),
+    (Width: 31; Poly: $04C11DB7; Init: $7FFFFFFF; RefIn: False; RefOut: False;
+      XorOut: $7FFFFFFF; Check: $0CE9E46C; Names: 'CRC-31/PHILLIPS'),
+    (Width: 32; Poly: $04C11DB7; Init: $FFFFFFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFFFFFF; Check: $CBF43926;
+      Names: 'CRC-32,CRC-32/ADCCP,CRC-32/V-42,CRC-32/XZ,PKZIP,CRC-32/ISO-HDLC'),
+    (Width: 32; Poly: $F4ACFB13; Init: $FFFFFFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFFFFFF; Check: $1697D06A; Names: 'CRC-32/AUTOSAR'),
+    (Width: 32; Poly: $04C11DB7; Init: $FFFFFFFF; RefIn: False; RefOut: False;
+      XorOut: $FFFFFFFF; Check: $FC891918;
+      Names: 'CRC-32/BZIP2,CRC-32/AAL5,CRC-32/DECT-B,B-CRC-32'),
+    (Width: 32; Poly: $1EDC6F41; Init: $FFFFFFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFFFFFF; Check: $E3069283;
+      Names: 'CRC-32C,CRC-32/BASE91-C,CRC-32/CASTAGNOLI,CRC-32/INTERLAKEN,CRC-32/ISCSI'),
+    (Width: 32; Poly: $A833982B; Init: $FFFFFFFF; RefIn: True; RefOut: True;
+      XorOut: $FFFFFFFF; Check: $87315576; Names: 'CRC-32D,CRC-32/BASE91-D'),
+    (Width: 32; Poly: $04C11DB7; Init: $FFFFFFFF; RefIn: False; RefOut: False;
+      XorOut: $00000000; Check: $0376E6E7; Names: 'CRC-32/MPEG-2'),
+    (Width: 32; Poly: $04C11DB7; Init: $FFFFFFFF; RefIn: False; RefOut: False;
+      XorOut: $00000000; Check: $0376E6E7; Names: 'CRC-32/POSIX,CKSUM'),
+    (Width: 32; Poly: $814141AB; Init: $00000000; RefIn: False; RefOut: False;
+      XorOut: $00000000; Check: $3010BF7F; Names: 'CRC-32Q,CRC-32/AIXM'),
+    (Width: 32; Poly: $04C11DB7; Init: $FFFFFFFF; RefIn: True; RefOut: True;
+      XorOut: $00000000; Check: $340BC6D9; Names: 'JAMCRC,CRC-32/JAMCRC'),
+    (Width: 32; Poly: $000000AF; Init: $00000000; RefIn: False; RefOut: False;
+      XorOut: $00000000; Check: $BD0BE338; Names: 'XFER,CRC-32/XFER'),
+    (Width: 32; Poly: $8001801B; Init: $00000000; RefIn: True; RefOut: True;
+      XorOut: $00000000; Check: $6EC2EDC4; Names: 'CRC-32/CD-ROM-EDC'),
+    (Width: 40; Poly: $0004820009; Init: $0000000000; RefIn: False;
+      RefOut: False; XorOut: $FFFFFFFFFF; Check: $D4164FC646;
+      Names: 'CRC-40/GSM'),
+    (Width: 64; Poly: $42F0E1EBA9EA3693; Init: $0000000000000000;
+      RefIn: False; RefOut: False; XorOut: $0000000000000000;
+      Check: $6C40DF5F0B497347; Names: 'CRC-64,CRC-64/ECMA-182'),
+    (Width: 64; Poly: $000000000000001B; Init: UInt64($FFFFFFFFFFFFFFFF);
+      RefIn: True; RefOut: True; XorOut: UInt64($FFFFFFFFFFFFFFFF);
+      Check: UInt64($B90956C775A41001); Names: 'CRC-64/GO-ISO'),
+    (Width: 64; Poly: $42F0E1EBA9EA3693; Init: UInt64($FFFFFFFFFFFFFFFF);
+      RefIn: False; RefOut: False; XorOut: UInt64($FFFFFFFFFFFFFFFF);
+      Check: $62EC59E3F1A4F00A; Names: 'CRC-64/WE'),
+    (Width: 64; Poly: $42F0E1EBA9EA3693; Init: UInt64($FFFFFFFFFFFFFFFF);
+      RefIn: True; RefOut: True; XorOut: UInt64($FFFFFFFFFFFFFFFF);
+      Check: UInt64($995DC9BBDF1939FA); Names: 'CRC-64/XZ,CRC-64/GO-ECMA'),
+    (Width: 64; Poly: $000000000000001B; Init: $0000000000000000;
+      RefIn: True; RefOut: True; XorOut: $0000000000000000;
+      Check: $46A5A9388A5BEFFE; Names: 'CRC-64/1B'),
+    (Width: 64; Poly: UInt64($AD93D23594C935A9);
+      Init: UInt64($FFFFFFFFFFFFFFFF); RefIn: True; RefOut: True;
+      XorOut: $0000000000000000; Check: UInt64($CAA717168609F281);
+      Names: 'CRC-64/Jones'));
+
+function SplitNames(const ACsv: String): THashLibStringArray;
+var
+  LCount, LPos, LStart, LIdx: Int32;
+begin
+  LCount := 1;
+  for LPos := 1 to System.Length(ACsv) do
+    if ACsv[LPos] = ',' then
+      System.Inc(LCount);
+  System.SetLength(Result, LCount);
+  LIdx := 0;
+  LStart := 1;
+  for LPos := 1 to System.Length(ACsv) do
+    if ACsv[LPos] = ',' then
+    begin
+      Result[LIdx] := System.Copy(ACsv, LStart, LPos - LStart);
+      System.Inc(LIdx);
+      LStart := LPos + 1;
+    end;
+  Result[LIdx] := System.Copy(ACsv, LStart,
+    System.Length(ACsv) - LStart + 1);
+end;
+
 { TCRC }
-
-function TCRC.GetCheckValue: UInt64;
-begin
-  Result := FCheckValue;
-end;
-
-function TCRC.GetInitialValue: UInt64;
-begin
-  Result := FInitialValue;
-end;
-
-function TCRC.GetNames: THashLibStringArray;
-begin
-  Result := FNames;
-end;
-
-function TCRC.GetPolynomial: UInt64;
-begin
-  Result := FPolynomial;
-end;
-
-function TCRC.GetIsInputReflected: Boolean;
-begin
-  Result := FIsInputReflected;
-end;
-
-function TCRC.GetIsOutputReflected: Boolean;
-begin
-  Result := FIsOutputReflected;
-end;
-
-function TCRC.GetWidth: Int32;
-begin
-  Result := FWidth;
-end;
-
-function TCRC.GetOutputXor: UInt64;
-begin
-  Result := FOutputXor;
-end;
-
-procedure TCRC.SetCheckValue(AValue: UInt64);
-begin
-  FCheckValue := AValue;
-end;
-
-procedure TCRC.SetInitialValue(AValue: UInt64);
-begin
-  FInitialValue := AValue;
-end;
-
-procedure TCRC.SetNames(const AValue: THashLibStringArray);
-begin
-  FNames := AValue;
-end;
-
-procedure TCRC.SetPolynomial(AValue: UInt64);
-begin
-  FPolynomial := AValue;
-end;
-
-procedure TCRC.SetIsInputReflected(AValue: Boolean);
-begin
-  FIsInputReflected := AValue;
-end;
-
-procedure TCRC.SetIsOutputReflected(AValue: Boolean);
-begin
-  FIsOutputReflected := AValue;
-end;
-
-procedure TCRC.SetWidth(AValue: Int32);
-begin
-  FWidth := AValue;
-end;
-
-procedure TCRC.SetOutputXor(AValue: UInt64);
-begin
-  FOutputXor := AValue;
-end;
-
-function TCRC.GetName: String;
-begin
-  Result := Format('T%s', [Names[0]]);
-end;
-
-procedure TCRC.UpdateCRCViaByteTable(AData: PByte; ADataLength, AIndex: Int32);
-var
-  LLength: Int32;
-  LTemp: UInt64;
-  LCRCTable: THashLibMatrixUInt64Array;
-  LPtrData: PByte;
-begin
-  LLength := ADataLength;
-  LPtrData := AData + AIndex;
-  LTemp := FHash;
-  LCRCTable := FCacheEntry.Table;
-
-  if IsInputReflected then
-  begin
-    while LLength > 0 do
-    begin
-      LTemp := (LTemp shr 8) xor LCRCTable[0][Byte(LTemp xor LPtrData^)];
-      System.Inc(LPtrData);
-      System.Dec(LLength);
-    end;
-  end
-  else
-  begin
-    while LLength > 0 do
-    begin
-      LTemp := (LTemp shl 8) xor LCRCTable[0]
-        [Byte((LTemp shr (Width - 8)) xor LPtrData^)];
-      System.Inc(LPtrData);
-      System.Dec(LLength);
-    end;
-  end;
-
-  FHash := LTemp;
-end;
-
-procedure TCRC.UpdateCRCViaBitSerial(AData: PByte; ADataLength, AIndex: Int32);
-begin
-  CRC_UpdateViaBitSerial(AData, ADataLength, AIndex, FHash, Polynomial, Width,
-    IsInputReflected, FCRCHighBitMask);
-end;
-
-function TCRC.Clone(): IHash;
-var
-  LHashInstance: TCRC;
-begin
-  LHashInstance := TCRC.Create(Width, Polynomial, InitialValue,
-    IsInputReflected, IsOutputReflected, OutputXor, CheckValue,
-    System.Copy(Names));
-  LHashInstance.FHash := FHash;
-  Result := LHashInstance;
-  Result.BufferSize := BufferSize;
-end;
-
-constructor TCRC.Create(AWidth: Int32; APolynomial, AInitial: UInt64;
-  AIsInputReflected, AIsOutputReflected: Boolean;
-  AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray);
-begin
-
-  if not(AWidth in [3 .. 64]) then
-  begin
-    raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SWidthOutOfRange,
-      [AWidth]);
-  end;
-
-  inherited Create(-1, -1); // Dummy State
-
-  case AWidth of
-    0 .. 7:
-      begin
-        Self.HashSize := 1;
-        Self.BlockSize := 1;
-      end;
-
-    8 .. 16:
-      begin
-        Self.HashSize := 2;
-        Self.BlockSize := 1;
-      end;
-
-    17 .. 39:
-      begin
-        Self.HashSize := 4;
-        Self.BlockSize := 1;
-      end;
-
-  else
-    begin
-      Self.HashSize := 8;
-      Self.BlockSize := 1;
-    end;
-
-  end;
-
-  Names := ANames;
-  Width := AWidth;
-  Polynomial := APolynomial;
-  InitialValue := AInitial;
-  IsInputReflected := AIsInputReflected;
-  IsOutputReflected := AIsOutputReflected;
-  OutputXor := AOutputXor;
-  CheckValue := ACheckValue;
-
-  FCRCHighBitMask := UInt64(1) shl (Width - 1);
-  FCRCMask := ((FCRCHighBitMask - 1) shl 1) or 1;
-
-  if Width > MinTableWidth then
-    FCacheEntry := GetOrCreateCacheEntry(Polynomial, Width, IsInputReflected);
-end;
-
-class function TCRC.CreateCRCObject(AValue: TCRCStandard): ICRC;
-begin
-  case AValue of
-
-    TCRCStandard.CRC3_GSM:
-      Result := TCRC.Create(3, $3, $0, False, False, $7, $4,
-        THashLibStringArray.Create('CRC-3/GSM'));
-
-    TCRCStandard.CRC3_ROHC:
-      Result := TCRC.Create(3, $3, $7, True, True, $0, $6,
-        THashLibStringArray.Create('CRC-3/ROHC'));
-
-    TCRCStandard.CRC4_INTERLAKEN:
-      Result := TCRC.Create(4, $3, $F, False, False, $F, $B,
-        THashLibStringArray.Create('CRC-4/INTERLAKEN'));
-
-    TCRCStandard.CRC4_ITU:
-      Result := TCRC.Create(4, $3, $0, True, True, $0, $7,
-        THashLibStringArray.Create('CRC-4/ITU', 'CRC-4/G-704'));
-
-    TCRCStandard.CRC5_EPC:
-      Result := TCRC.Create(5, $9, $9, False, False, $00, $00,
-        THashLibStringArray.Create('CRC-5/EPC', 'CRC-5/EPC-C1G2'));
-
-    TCRCStandard.CRC5_ITU:
-      Result := TCRC.Create(5, $15, $00, True, True, $00, $07,
-        THashLibStringArray.Create('CRC-5/ITU', 'CRC-5/G-704'));
-
-    TCRCStandard.CRC5_USB:
-      Result := TCRC.Create(5, $05, $1F, True, True, $1F, $19,
-        THashLibStringArray.Create('CRC-5/USB'));
-
-    TCRCStandard.CRC6_CDMA2000A:
-      Result := TCRC.Create(6, $27, $3F, False, False, $00, $0D,
-        THashLibStringArray.Create('CRC-6/CDMA2000-A'));
-
-    TCRCStandard.CRC6_CDMA2000B:
-      Result := TCRC.Create(6, $07, $3F, False, False, $00, $3B,
-        THashLibStringArray.Create('CRC-6/CDMA2000-B'));
-
-    TCRCStandard.CRC6_DARC:
-      Result := TCRC.Create(6, $19, $00, True, True, $00, $26,
-        THashLibStringArray.Create('CRC-6/DARC'));
-
-    TCRCStandard.CRC6_GSM:
-      Result := TCRC.Create(6, $2F, $00, False, False, $3F, $13,
-        THashLibStringArray.Create('CRC-6/GSM'));
-
-    TCRCStandard.CRC6_ITU:
-      Result := TCRC.Create(6, $03, $00, True, True, $00, $06,
-        THashLibStringArray.Create('CRC-6/ITU', 'CRC-6/G-704'));
-
-    TCRCStandard.CRC7:
-      Result := TCRC.Create(7, $09, $00, False, False, $00, $75,
-        THashLibStringArray.Create('CRC-7', 'CRC-7/MMC'));
-
-    TCRCStandard.CRC7_ROHC:
-      Result := TCRC.Create(7, $4F, $7F, True, True, $00, $53,
-        THashLibStringArray.Create('CRC-7/ROHC'));
-
-    TCRCStandard.CRC7_UMTS:
-      Result := TCRC.Create(7, $45, $00, False, False, $00, $61,
-        THashLibStringArray.Create('CRC-7/UMTS'));
-
-    TCRCStandard.CRC8:
-      Result := TCRC.Create(8, $07, $00, False, False, $00, $F4,
-        THashLibStringArray.Create('CRC-8', 'CRC-8/SMBUS'));
-
-    TCRCStandard.CRC8_AUTOSAR:
-      Result := TCRC.Create(8, $2F, $FF, False, False, $FF, $DF,
-        THashLibStringArray.Create('CRC-8/AUTOSAR'));
-
-    TCRCStandard.CRC8_BLUETOOTH:
-      Result := TCRC.Create(8, $A7, $00, True, True, $00, $26,
-        THashLibStringArray.Create('CRC-8/BLUETOOTH'));
-
-    TCRCStandard.CRC8_CDMA2000:
-      Result := TCRC.Create(8, $9B, $FF, False, False, $00, $DA,
-        THashLibStringArray.Create('CRC-8/CDMA2000'));
-
-    TCRCStandard.CRC8_DARC:
-      Result := TCRC.Create(8, $39, $00, True, True, $00, $15,
-        THashLibStringArray.Create('CRC-8/DARC'));
-
-    TCRCStandard.CRC8_DVBS2:
-      Result := TCRC.Create(8, $D5, $00, False, False, $00, $BC,
-        THashLibStringArray.Create('CRC-8/DVB-S2'));
-
-    TCRCStandard.CRC8_EBU:
-      Result := TCRC.Create(8, $1D, $FF, True, True, $00, $97,
-        THashLibStringArray.Create('CRC-8/EBU', 'CRC-8/AES',
-        'CRC-8/TECH-3250'));
-
-    TCRCStandard.CRC8_GSMA:
-      Result := TCRC.Create(8, $1D, $00, False, False, $00, $37,
-        THashLibStringArray.Create('CRC-8/GSM-A'));
-
-    TCRCStandard.CRC8_GSMB:
-      Result := TCRC.Create(8, $49, $00, False, False, $FF, $94,
-        THashLibStringArray.Create('CRC-8/GSM-B'));
-
-    TCRCStandard.CRC8_ICODE:
-      Result := TCRC.Create(8, $1D, $FD, False, False, $00, $7E,
-        THashLibStringArray.Create('CRC-8/I-CODE'));
-
-    TCRCStandard.CRC8_ITU:
-      Result := TCRC.Create(8, $07, $00, False, False, $55, $A1,
-        THashLibStringArray.Create('CRC-8/ITU', 'CRC-8/I-432-1'));
-
-    TCRCStandard.CRC8_LTE:
-      Result := TCRC.Create(8, $9B, $00, False, False, $00, $EA,
-        THashLibStringArray.Create('CRC-8/LTE'));
-
-    TCRCStandard.CRC8_MAXIM:
-      Result := TCRC.Create(8, $31, $00, True, True, $00, $A1,
-        THashLibStringArray.Create('CRC-8/MAXIM', 'DOW-CRC',
-        'CRC-8/MAXIM-DOW'));
-
-    TCRCStandard.CRC8_OPENSAFETY:
-      Result := TCRC.Create(8, $2F, $00, False, False, $00, $3E,
-        THashLibStringArray.Create('CRC-8/OPENSAFETY'));
-
-    TCRCStandard.CRC8_ROHC:
-      Result := TCRC.Create(8, $07, $FF, True, True, $00, $D0,
-        THashLibStringArray.Create('CRC-8/ROHC'));
-
-    TCRCStandard.CRC8_SAEJ1850:
-      Result := TCRC.Create(8, $1D, $FF, False, False, $FF, $4B,
-        THashLibStringArray.Create('CRC-8/SAE-J1850'));
-
-    TCRCStandard.CRC8_WCDMA:
-      Result := TCRC.Create(8, $9B, $00, True, True, $00, $25,
-        THashLibStringArray.Create('CRC-8/WCDMA'));
-
-    TCRCStandard.CRC8_MIFAREMAD:
-      Result := TCRC.Create(8, $1D, $C7, False, False, $00, $99,
-        THashLibStringArray.Create('CRC-8/MIFARE-MAD'));
-
-    TCRCStandard.CRC8_NRSC5:
-      Result := TCRC.Create(8, $31, $FF, False, False, $00, $F7,
-        THashLibStringArray.Create('CRC-8/NRSC-5'));
-
-    TCRCStandard.CRC10:
-      Result := TCRC.Create(10, $233, $000, False, False, $000, $199,
-        THashLibStringArray.Create('CRC-10', 'CRC-10/ATM', 'CRC-10/I-610'));
-
-    TCRCStandard.CRC10_CDMA2000:
-      Result := TCRC.Create(10, $3D9, $3FF, False, False, $000, $233,
-        THashLibStringArray.Create('CRC-10/CDMA2000'));
-
-    TCRCStandard.CRC10_GSM:
-      Result := TCRC.Create(10, $175, $000, False, False, $3FF, $12A,
-        THashLibStringArray.Create('CRC-10/GSM'));
-
-    TCRCStandard.CRC11:
-      Result := TCRC.Create(11, $385, $01A, False, False, $000, $5A3,
-        THashLibStringArray.Create('CRC-11', 'CRC-11/FLEXRAY'));
-
-    TCRCStandard.CRC11_UMTS:
-      Result := TCRC.Create(11, $307, $000, False, False, $000, $061,
-        THashLibStringArray.Create('CRC-11/UMTS'));
-
-    TCRCStandard.CRC12_CDMA2000:
-      Result := TCRC.Create(12, $F13, $FFF, False, False, $000, $D4D,
-        THashLibStringArray.Create('CRC-12/CDMA2000'));
-
-    TCRCStandard.CRC12_DECT:
-      Result := TCRC.Create(12, $80F, $000, False, False, $000, $F5B,
-        THashLibStringArray.Create('CRC-12/DECT', 'X-CRC-12'));
-
-    TCRCStandard.CRC12_GSM:
-      Result := TCRC.Create(12, $D31, $000, False, False, $FFF, $B34,
-        THashLibStringArray.Create('CRC-12/GSM'));
-
-    TCRCStandard.CRC12_UMTS:
-      Result := TCRC.Create(12, $80F, $000, False, True, $000, $DAF,
-        THashLibStringArray.Create('CRC-12/UMTS', 'CRC-12/3GPP'));
-
-    TCRCStandard.CRC13_BBC:
-      Result := TCRC.Create(13, $1CF5, $0000, False, False, $0000, $04FA,
-        THashLibStringArray.Create('CRC-13/BBC'));
-
-    TCRCStandard.CRC14_DARC:
-      Result := TCRC.Create(14, $0805, $0000, True, True, $0000, $082D,
-        THashLibStringArray.Create('CRC-14/DARC'));
-
-    TCRCStandard.CRC14_GSM:
-      Result := TCRC.Create(14, $202D, $0000, False, False, $3FFF, $30AE,
-        THashLibStringArray.Create('CRC-14/GSM'));
-
-    TCRCStandard.CRC15:
-      Result := TCRC.Create(15, $4599, $0000, False, False, $0000, $059E,
-        THashLibStringArray.Create('CRC-15', 'CRC-15/CAN'));
-
-    TCRCStandard.CRC15_MPT1327:
-      Result := TCRC.Create(15, $6815, $0000, False, False, $0001, $2566,
-        THashLibStringArray.Create('CRC-15/MPT1327'));
-
-    TCRCStandard.ARC:
-      Result := TCRC.Create(16, $8005, $0000, True, True, $0000, $BB3D,
-        THashLibStringArray.Create('CRC-16', 'ARC', 'CRC-IBM', 'CRC-16/ARC',
-        'CRC-16/LHA'));
-
-    TCRCStandard.CRC16_AUGCCITT:
-      Result := TCRC.Create(16, $1021, $1D0F, False, False, $0000, $E5CC,
-        THashLibStringArray.Create('CRC-16/AUG-CCITT', 'CRC-16/SPI-FUJITSU'));
-
-    TCRCStandard.CRC16_BUYPASS:
-      Result := TCRC.Create(16, $8005, $0000, False, False, $0000, $FEE8,
-        THashLibStringArray.Create('CRC-16/BUYPASS', 'CRC-16/VERIFONE',
-        'CRC-16/UMTS'));
-
-    TCRCStandard.CRC16_CCITTFALSE:
-      Result := TCRC.Create(16, $1021, $FFFF, False, False, $0000, $29B1,
-        THashLibStringArray.Create('CRC-16/CCITT-False', 'CRC-16/AUTOSAR',
-        'CRC-16/IBM-3740'));
-
-    TCRCStandard.CRC16_CDMA2000:
-      Result := TCRC.Create(16, $C867, $FFFF, False, False, $0000, $4C06,
-        THashLibStringArray.Create('CRC-16/CDMA2000'));
-
-    TCRCStandard.CRC16_CMS:
-      Result := TCRC.Create(16, $8005, $FFFF, False, False, $0000, $AEE7,
-        THashLibStringArray.Create('CRC-16/CMS'));
-
-    TCRCStandard.CRC16_DDS110:
-      Result := TCRC.Create(16, $8005, $800D, False, False, $0000, $9ECF,
-        THashLibStringArray.Create('CRC-16/DDS-110'));
-
-    TCRCStandard.CRC16_DECTR:
-      Result := TCRC.Create(16, $0589, $0000, False, False, $0001, $007E,
-        THashLibStringArray.Create('CRC-16/DECT-R', 'R-CRC-16'));
-
-    TCRCStandard.CRC16_DECTX:
-      Result := TCRC.Create(16, $0589, $0000, False, False, $0000, $007F,
-        THashLibStringArray.Create('CRC-16/DECT-X', 'X-CRC-16'));
-
-    TCRCStandard.CRC16_DNP:
-      Result := TCRC.Create(16, $3D65, $0000, True, True, $FFFF, $EA82,
-        THashLibStringArray.Create('CRC-16/DNP'));
-
-    TCRCStandard.CRC16_EN13757:
-      Result := TCRC.Create(16, $3D65, $0000, False, False, $FFFF, $C2B7,
-        THashLibStringArray.Create('CRC-16/EN13757'));
-
-    TCRCStandard.CRC16_GENIBUS:
-      Result := TCRC.Create(16, $1021, $FFFF, False, False, $FFFF, $D64E,
-        THashLibStringArray.Create('CRC-16/GENIBUS', 'CRC-16/EPC',
-        'CRC-16/I-CODE', 'CRC-16/DARC', 'CRC-16/EPC-C1G2'));
-
-    TCRCStandard.CRC16_GSM:
-      Result := TCRC.Create(16, $1021, $0000, False, False, $FFFF, $CE3C,
-        THashLibStringArray.Create('CRC-16/GSM'));
-
-    TCRCStandard.CRC16_LJ1200:
-      Result := TCRC.Create(16, $6F63, $0000, False, False, $0000, $BDF4,
-        THashLibStringArray.Create('CRC-16/LJ1200'));
-
-    TCRCStandard.CRC16_MAXIM:
-      Result := TCRC.Create(16, $8005, $0000, True, True, $FFFF, $44C2,
-        THashLibStringArray.Create('CRC-16/MAXIM', 'CRC-16/MAXIM-DOW'));
-
-    TCRCStandard.CRC16_MCRF4XX:
-      Result := TCRC.Create(16, $1021, $FFFF, True, True, $0000, $6F91,
-        THashLibStringArray.Create('CRC-16/MCRF4XX'));
-
-    TCRCStandard.CRC16_OPENSAFETYA:
-      Result := TCRC.Create(16, $5935, $0000, False, False, $0000, $5D38,
-        THashLibStringArray.Create('CRC-16/OPENSAFETY-A'));
-
-    TCRCStandard.CRC16_OPENSAFETYB:
-      Result := TCRC.Create(16, $755B, $0000, False, False, $0000, $20FE,
-        THashLibStringArray.Create('CRC-16/OPENSAFETY-B'));
-
-    TCRCStandard.CRC16_PROFIBUS:
-      Result := TCRC.Create(16, $1DCF, $FFFF, False, False, $FFFF, $A819,
-        THashLibStringArray.Create('CRC-16/PROFIBUS', 'CRC-16/IEC-61158-2'));
-
-    TCRCStandard.CRC16_RIELLO:
-      Result := TCRC.Create(16, $1021, $B2AA, True, True, $0000, $63D0,
-        THashLibStringArray.Create('CRC-16/RIELLO'));
-
-    TCRCStandard.CRC16_T10DIF:
-      Result := TCRC.Create(16, $8BB7, $0000, False, False, $0000, $D0DB,
-        THashLibStringArray.Create('CRC-16/T10-DIF'));
-
-    TCRCStandard.CRC16_TELEDISK:
-      Result := TCRC.Create(16, $A097, $0000, False, False, $0000, $0FB3,
-        THashLibStringArray.Create('CRC-16/TELEDISK'));
-
-    TCRCStandard.CRC16_TMS37157:
-      Result := TCRC.Create(16, $1021, $89EC, True, True, $0000, $26B1,
-        THashLibStringArray.Create('CRC-16/TMS37157'));
-
-    TCRCStandard.CRC16_USB:
-      Result := TCRC.Create(16, $8005, $FFFF, True, True, $FFFF, $B4C8,
-        THashLibStringArray.Create('CRC-16/USB'));
-
-    TCRCStandard.CRCA:
-      Result := TCRC.Create(16, $1021, $C6C6, True, True, $0000, $BF05,
-        THashLibStringArray.Create('CRC-A', 'CRC-16/ISO-IEC-14443-3-A'));
-
-    TCRCStandard.KERMIT:
-      Result := TCRC.Create(16, $1021, $0000, True, True, $0000, $2189,
-        THashLibStringArray.Create('KERMIT', 'CRC-16/CCITT',
-        'CRC-16/CCITT-True', 'CRC-CCITT', 'CRC-16/KERMIT', 'CRC-16/V-41-LSB'));
-
-    TCRCStandard.MODBUS:
-      Result := TCRC.Create(16, $8005, $FFFF, True, True, $0000, $4B37,
-        THashLibStringArray.Create('MODBUS', 'CRC-16/MODBUS'));
-
-    TCRCStandard.X25:
-      Result := TCRC.Create(16, $1021, $FFFF, True, True, $FFFF, $906E,
-        THashLibStringArray.Create('X-25', 'CRC-16/IBM-SDLC', 'CRC-16/ISO-HDLC',
-        'CRC-16/ISO-IEC-14443-3-B', 'CRC-B', 'CRC-16/X-25'));
-
-    TCRCStandard.XMODEM:
-      Result := TCRC.Create(16, $1021, $0000, False, False, $0000, $31C3,
-        THashLibStringArray.Create('XMODEM', 'ZMODEM', 'CRC-16/ACORN',
-        'CRC-16/XMODEM', 'CRC-16/V-41-MSB'));
-
-    TCRCStandard.CRC16_NRSC5:
-      Result := TCRC.Create(16, $080B, $FFFF, True, True, $0000, $A066,
-        THashLibStringArray.Create('CRC-16/NRSC-5'));
-
-    TCRCStandard.CRC17_CANFD:
-      Result := TCRC.Create(17, $1685B, $00000, False, False, $00000, $04F03,
-        THashLibStringArray.Create('CRC-17/CAN-FD'));
-
-    TCRCStandard.CRC21_CANFD:
-      Result := TCRC.Create(21, $102899, $00000, False, False, $00000, $0ED841,
-        THashLibStringArray.Create('CRC-21/CAN-FD'));
-
-    TCRCStandard.CRC24:
-      Result := TCRC.Create(24, $864CFB, $B704CE, False, False, $000000,
-        $21CF02, THashLibStringArray.Create('CRC-24', 'CRC-24/OPENPGP'));
-
-    TCRCStandard.CRC24_BLE:
-      Result := TCRC.Create(24, $00065B, $555555, True, True, $000000, $C25A56,
-        THashLibStringArray.Create('CRC-24/BLE'));
-
-    TCRCStandard.CRC24_FLEXRAYA:
-      Result := TCRC.Create(24, $5D6DCB, $FEDCBA, False, False, $000000,
-        $7979BD, THashLibStringArray.Create('CRC-24/FLEXRAY-A'));
-
-    TCRCStandard.CRC24_FLEXRAYB:
-      Result := TCRC.Create(24, $5D6DCB, $ABCDEF, False, False, $000000,
-        $1F23B8, THashLibStringArray.Create('CRC-24/FLEXRAY-B'));
-
-    TCRCStandard.CRC24_INTERLAKEN:
-      Result := TCRC.Create(24, $328B63, $FFFFFF, False, False, $FFFFFF,
-        $B4F3E6, THashLibStringArray.Create('CRC-24/INTERLAKEN'));
-
-    TCRCStandard.CRC24_LTEA:
-      Result := TCRC.Create(24, $864CFB, $000000, False, False, $000000,
-        $CDE703, THashLibStringArray.Create('CRC-24/LTE-A'));
-
-    TCRCStandard.CRC24_LTEB:
-      Result := TCRC.Create(24, $800063, $000000, False, False, $000000,
-        $23EF52, THashLibStringArray.Create('CRC-24/LTE-B'));
-
-    TCRCStandard.CRC24_OS9:
-      Result := TCRC.Create(24, $800063, $FFFFFF, False, False, $FFFFFF,
-        $200FA5, THashLibStringArray.Create('CRC-24/OS-9'));
-
-    TCRCStandard.CRC30_CDMA:
-      Result := TCRC.Create(30, $2030B9C7, $3FFFFFFF, False, False, $3FFFFFFF,
-        $04C34ABF, THashLibStringArray.Create('CRC-30/CDMA'));
-
-    TCRCStandard.CRC31_PHILIPS:
-      Result := TCRC.Create(31, $04C11DB7, $7FFFFFFF, False, False, $7FFFFFFF,
-        $0CE9E46C, THashLibStringArray.Create('CRC-31/PHILLIPS'));
-
-    TCRCStandard.CRC32:
-      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $FFFFFFFF,
-        $CBF43926, THashLibStringArray.Create('CRC-32', 'CRC-32/ADCCP',
-        'CRC-32/V-42', 'CRC-32/XZ', 'PKZIP', 'CRC-32/ISO-HDLC'));
-
-    TCRCStandard.CRC32_AUTOSAR:
-      Result := TCRC.Create(32, $F4ACFB13, $FFFFFFFF, True, True, $FFFFFFFF,
-        $1697D06A, THashLibStringArray.Create('CRC-32/AUTOSAR'));
-
-    TCRCStandard.CRC32_BZIP2:
-      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $FFFFFFFF,
-        $FC891918, THashLibStringArray.Create('CRC-32/BZIP2', 'CRC-32/AAL5',
-        'CRC-32/DECT-B', 'B-CRC-32'));
-
-    TCRCStandard.CRC32C:
-      Result := TCRC.Create(32, $1EDC6F41, $FFFFFFFF, True, True, $FFFFFFFF,
-        $E3069283, THashLibStringArray.Create('CRC-32C', 'CRC-32/BASE91-C',
-        'CRC-32/CASTAGNOLI', 'CRC-32/INTERLAKEN', 'CRC-32/ISCSI'));
-
-    TCRCStandard.CRC32D:
-      Result := TCRC.Create(32, $A833982B, $FFFFFFFF, True, True, $FFFFFFFF,
-        $87315576, THashLibStringArray.Create('CRC-32D', 'CRC-32/BASE91-D'));
-
-    TCRCStandard.CRC32_MPEG2:
-      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
-        $0376E6E7, THashLibStringArray.Create('CRC-32/MPEG-2'));
-
-    TCRCStandard.CRC32_POSIX:
-      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, False, False, $00000000,
-        $0376E6E7, THashLibStringArray.Create('CRC-32/POSIX', 'CKSUM'));
-
-    TCRCStandard.CRC32Q:
-      Result := TCRC.Create(32, $814141AB, $00000000, False, False, $00000000,
-        $3010BF7F, THashLibStringArray.Create('CRC-32Q', 'CRC-32/AIXM'));
-
-    TCRCStandard.JAMCRC:
-      Result := TCRC.Create(32, $04C11DB7, $FFFFFFFF, True, True, $00000000,
-        $340BC6D9, THashLibStringArray.Create('JAMCRC', 'CRC-32/JAMCRC'));
-
-    TCRCStandard.XFER:
-      Result := TCRC.Create(32, $000000AF, $00000000, False, False, $00000000,
-        $BD0BE338, THashLibStringArray.Create('XFER', 'CRC-32/XFER'));
-
-    TCRCStandard.CRC32_CDROMEDC:
-      Result := TCRC.Create(32, $8001801B, $00000000, True, True, $00000000,
-        $6EC2EDC4, THashLibStringArray.Create('CRC-32/CD-ROM-EDC'));
-
-    TCRCStandard.CRC40_GSM:
-      Result := TCRC.Create(40, $0004820009, $0000000000, False, False,
-        $FFFFFFFFFF, $D4164FC646, THashLibStringArray.Create('CRC-40/GSM'));
-
-    TCRCStandard.CRC64:
-      Result := TCRC.Create(64, $42F0E1EBA9EA3693, $0000000000000000, False,
-        False, $0000000000000000, $6C40DF5F0B497347,
-        THashLibStringArray.Create('CRC-64', 'CRC-64/ECMA-182'));
-
-    TCRCStandard.CRC64_GOISO:
-      Result := TCRC.Create(64, $000000000000001B, UInt64($FFFFFFFFFFFFFFFF),
-        True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($B90956C775A41001),
-        THashLibStringArray.Create('CRC-64/GO-ISO'));
-
-    TCRCStandard.CRC64_WE:
-      Result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
-        False, False, UInt64($FFFFFFFFFFFFFFFF), $62EC59E3F1A4F00A,
-        THashLibStringArray.Create('CRC-64/WE'));
-
-    TCRCStandard.CRC64_XZ:
-      Result := TCRC.Create(64, $42F0E1EBA9EA3693, UInt64($FFFFFFFFFFFFFFFF),
-        True, True, UInt64($FFFFFFFFFFFFFFFF), UInt64($995DC9BBDF1939FA),
-        THashLibStringArray.Create('CRC-64/XZ', 'CRC-64/GO-ECMA'));
-
-    TCRCStandard.CRC64_1B:
-      Result := TCRC.Create(64, $000000000000001B, UInt64($0000000000000000),
-        True, True, UInt64($0000000000000000), $46A5A9388A5BEFFE,
-        THashLibStringArray.Create('CRC-64/1B'));
-
-    TCRCStandard.CRC64_Jones:
-      Result := TCRC.Create(64, UInt64($AD93D23594C935A9),
-        UInt64($FFFFFFFFFFFFFFFF), True, True, UInt64($0000000000000000),
-        UInt64($CAA717168609F281), THashLibStringArray.Create('CRC-64/Jones'))
-
-  else
-    raise EArgumentInvalidHashLibException.CreateResFmt(@SUnSupportedCRCType,
-      [GetEnumName(TypeInfo(TCRCStandard), Ord(AValue))]);
-
-  end;
-end;
 
 class constructor TCRC.CreateCRCCache;
 begin
   FCache := TDictionary<String, TCRCCacheValue>.Create;
+  FCacheLock := TCriticalSection.Create;
 end;
 
 class destructor TCRC.DestroyCRCCache;
 begin
   FCache.Free;
-end;
-
-class function TCRC.MakeCacheKey(APoly: UInt64; AWidth: Int32;
-  AReflected: Boolean): String;
-begin
-  Result := Format('Poly-%x:Width-%d:Reflected-%s',
-    [APoly, AWidth, BoolToStr(AReflected, True)]);
+  FCacheLock.Free;
 end;
 
 class function TCRC.GenerateCRCTable(APoly: UInt64; AWidth: Int32;
@@ -1350,7 +410,7 @@ begin
 
   if AReflected then
   begin
-    LReflectedPoly := Reflect(APoly, AWidth);
+    LReflectedPoly := TGF2.BitReverse(APoly, AWidth);
     for LIdx := 0 to 255 do
     begin
       LCRC := UInt64(LIdx);
@@ -1389,39 +449,165 @@ class function TCRC.GetOrCreateCacheEntry(APoly: UInt64; AWidth: Int32;
 var
   LKey: String;
 begin
-  LKey := MakeCacheKey(APoly, AWidth, AReflected);
-  if not FCache.TryGetValue(LKey, Result) then
-  begin
-    Result.Table := GenerateCRCTable(APoly, AWidth, AReflected);
-    CRCDispatch_InitRuntimeCtx(Result.Table, APoly, AWidth, AReflected,
-      Result.FoldRuntime);
-    FCache.Add(LKey, Result);
+  LKey := Format('Poly-%x:Width-%d:Reflected-%s',
+    [APoly, AWidth, BoolToStr(AReflected, True)]);
+  FCacheLock.Acquire;
+  try
+    if not FCache.TryGetValue(LKey, Result) then
+    begin
+      Result.Table := GenerateCRCTable(APoly, AWidth, AReflected);
+      CRC_InitFoldRuntimeCtx(Result.Table, APoly, AWidth, AReflected,
+        Result.FoldRuntime);
+      FCache.Add(LKey, Result);
+    end;
+  finally
+    FCacheLock.Release;
   end;
+end;
+
+constructor TCRC.Create(AWidth: Int32; APolynomial, AInitial: UInt64;
+  AIsInputReflected, AIsOutputReflected: Boolean;
+  AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray);
+begin
+  if not(AWidth in [3 .. 64]) then
+  begin
+    raise EArgumentOutOfRangeHashLibException.CreateResFmt(@SWidthOutOfRange,
+      [AWidth]);
+  end;
+
+  inherited Create(-1, -1); // Dummy State
+
+  case AWidth of
+    3 .. 7:
+      Self.HashSize := 1;
+    8 .. 16:
+      Self.HashSize := 2;
+    17 .. 39:
+      Self.HashSize := 4;
+  else
+    Self.HashSize := 8;
+  end;
+  Self.BlockSize := 1;
+
+  FNames := ANames;
+  FWidth := AWidth;
+  FPolynomial := APolynomial;
+  FInitialValue := AInitial;
+  FIsInputReflected := AIsInputReflected;
+  FIsOutputReflected := AIsOutputReflected;
+  FOutputXor := AOutputXor;
+  FCheckValue := ACheckValue;
+
+  // MSB-first CRCs narrower than a byte run left-aligned at width 8
+  // (polynomial and state shifted up by FEngineShift, un-shifted at
+  // finalization). LSB-first CRCs are width-agnostic and run as-is.
+  if (AWidth < 8) and not AIsInputReflected then
+    FEngineShift := 8 - AWidth
+  else
+    FEngineShift := 0;
+  FEngineWidth := AWidth + FEngineShift;
+
+  FCRCMask := (((UInt64(1) shl (FEngineWidth - 1)) - 1) shl 1) or 1;
+
+  FCacheEntry := GetOrCreateCacheEntry(APolynomial shl FEngineShift,
+    FEngineWidth, AIsInputReflected);
+end;
+
+class function TCRC.CreateCRCObject(AValue: TCRCStandard): ICRC;
+var
+  LDef: TCRCStandardDef;
+begin
+  LDef := CRCStandardDefs[AValue];
+  Result := TCRC.Create(LDef.Width, LDef.Poly, LDef.Init, LDef.RefIn,
+    LDef.RefOut, LDef.XorOut, LDef.Check, SplitNames(LDef.Names));
+end;
+
+function TCRC.GetNames: THashLibStringArray;
+begin
+  Result := FNames;
+end;
+
+function TCRC.GetWidth: Int32;
+begin
+  Result := FWidth;
+end;
+
+function TCRC.GetPolynomial: UInt64;
+begin
+  Result := FPolynomial;
+end;
+
+function TCRC.GetInitialValue: UInt64;
+begin
+  Result := FInitialValue;
+end;
+
+function TCRC.GetIsInputReflected: Boolean;
+begin
+  Result := FIsInputReflected;
+end;
+
+function TCRC.GetIsOutputReflected: Boolean;
+begin
+  Result := FIsOutputReflected;
+end;
+
+function TCRC.GetOutputXor: UInt64;
+begin
+  Result := FOutputXor;
+end;
+
+function TCRC.GetCheckValue: UInt64;
+begin
+  Result := FCheckValue;
+end;
+
+function TCRC.GetName: String;
+begin
+  Result := Format('T%s', [FNames[0]]);
 end;
 
 procedure TCRC.Initialize;
 begin
-  FHash := InitialValue;
-  if (Width > MinTableWidth) and IsInputReflected then
-    FHash := Reflect(FHash, Width);
+  if FIsInputReflected then
+    FHash := TGF2.BitReverse(FInitialValue, FWidth)
+  else
+    FHash := FInitialValue shl FEngineShift;
 end;
 
-class function TCRC.Reflect(AValue: UInt64; AWidth: Int32): UInt64;
+procedure TCRC.UpdateCRCViaByteTable(AData: PByte; ADataLength, AIndex: Int32);
 var
-  LIdx, LJdx: UInt64;
+  LLength: Int32;
+  LTemp: UInt64;
+  LCRCTable: THashLibMatrixUInt64Array;
+  LPtrData: PByte;
 begin
-  LJdx := 1;
-  Result := 0;
-  LIdx := UInt64(1) shl (AWidth - 1);
-  while LIdx <> 0 do
+  LLength := ADataLength;
+  LPtrData := AData + AIndex;
+  LTemp := FHash;
+  LCRCTable := FCacheEntry.Table;
+
+  if FIsInputReflected then
   begin
-    if ((AValue and LIdx) <> 0) then
+    while LLength > 0 do
     begin
-      Result := Result or LJdx;
+      LTemp := (LTemp shr 8) xor LCRCTable[0][Byte(LTemp xor LPtrData^)];
+      System.Inc(LPtrData);
+      System.Dec(LLength);
     end;
-    LJdx := LJdx shl 1;
-    LIdx := LIdx shr 1;
+  end
+  else
+  begin
+    while LLength > 0 do
+    begin
+      LTemp := (LTemp shl 8) xor LCRCTable[0]
+        [Byte((LTemp shr (FEngineWidth - 8)) xor LPtrData^)];
+      System.Inc(LPtrData);
+      System.Dec(LLength);
+    end;
   end;
+
+  FHash := LTemp;
 end;
 
 procedure TCRC.TransformBytes(const AData: THashLibByteArray;
@@ -1429,7 +615,7 @@ procedure TCRC.TransformBytes(const AData: THashLibByteArray;
 var
   LPtrAData: PByte;
   LFoldFunc: TCRCFoldFunc;
-  LState: array [0 .. 1] of UInt64;
+  LState: UInt64;
   LProcessed, LTail: Int32;
 begin
 {$IFDEF DEBUG}
@@ -1440,111 +626,64 @@ begin
 
   LPtrAData := PByte(AData);
 
-  if Width > MinTableWidth then
+  if ALength >= MinSimdBytes then
   begin
-    if ALength >= MinSimdBytes then
+    if FIsInputReflected then
     begin
-      if IsInputReflected then
-      begin
-        LFoldFunc := CRC_Fold_Reflected;
-        LState[0] := FHash;
-      end
-      else
-      begin
-        LFoldFunc := CRC_Fold_Forward;
-        if CRC_Fold_UsesCarrylessMul then
-        begin
-          if Width < 64 then
-            LState[0] := FHash shl (64 - Width)
-          else
-            LState[0] := FHash;
-        end
-        else
-          LState[0] := FHash;
-      end;
-
-      LState[1] := 0;
-      LProcessed := ALength and (not Int32(15));
-      FHash := LFoldFunc(LPtrAData + AIndex, UInt32(LProcessed), @LState[0],
-        @FCacheEntry.FoldRuntime) and FCRCMask;
-      LTail := ALength - LProcessed;
-      if LTail > 0 then
-        UpdateCRCViaByteTable(LPtrAData, LTail, AIndex + LProcessed);
+      LFoldFunc := CRC_Fold.Reflected;
+      LState := FHash;
     end
     else
-      UpdateCRCViaByteTable(LPtrAData, ALength, AIndex);
+    begin
+      LFoldFunc := CRC_Fold.Fwd;
+      if CRC_Fold.UsesCarrylessMul then
+        LState := FHash shl (64 - FEngineWidth)
+      else
+        LState := FHash;
+    end;
+
+    LProcessed := ALength and (not Int32(15));
+    FHash := LFoldFunc(LPtrAData + AIndex, UInt32(LProcessed), @LState,
+      @FCacheEntry.FoldRuntime) and FCRCMask;
+    LTail := ALength - LProcessed;
+    if LTail > 0 then
+      UpdateCRCViaByteTable(LPtrAData, LTail, AIndex + LProcessed);
   end
   else
-    UpdateCRCViaBitSerial(LPtrAData, ALength, AIndex);
+    UpdateCRCViaByteTable(LPtrAData, ALength, AIndex);
 end;
 
 function TCRC.TransformFinal: IHashResult;
-var
-  LUInt64: UInt64;
-  LUInt32: UInt32;
-  LUInt16: UInt16;
-  LUInt8: UInt8;
 begin
+  FHash := FHash shr FEngineShift;
+  if FIsInputReflected xor FIsOutputReflected then
+    FHash := TGF2.BitReverse(FHash, FWidth);
+  FHash := (FHash xor FOutputXor) and (FCRCMask shr FEngineShift);
 
-  if Width > MinTableWidth then
-  begin
-    if (IsInputReflected xor IsOutputReflected) then
-    begin
-      FHash := Reflect(FHash, Width);
-    end;
-  end
+  case HashSize of
+    1:
+      Result := THashResult.Create(UInt8(FHash));
+    2:
+      Result := THashResult.Create(UInt16(FHash));
+    4:
+      Result := THashResult.Create(UInt32(FHash));
   else
-  begin
-    if (IsOutputReflected) then
-    begin
-      FHash := Reflect(FHash, Width);
-    end;
-  end;
-
-  FHash := FHash xor OutputXor;
-  FHash := FHash and FCRCMask;
-
-  if Width = 21 then // special case
-  begin
-    LUInt32 := UInt32(FHash);
-
-    Result := THashResult.Create(LUInt32);
-
-    Initialize();
-
-    Exit;
-  end;
-
-  case Width shr 3 of
-    0:
-      begin
-        LUInt8 := UInt8(FHash);
-        Result := THashResult.Create(LUInt8);
-
-      end;
-
-    1 .. 2:
-      begin
-        LUInt16 := UInt16(FHash);
-
-        Result := THashResult.Create(LUInt16);
-      end;
-
-    3 .. 4:
-      begin
-        LUInt32 := UInt32(FHash);
-
-        Result := THashResult.Create(LUInt32);
-      end
-  else
-    begin
-      LUInt64 := (FHash);
-
-      Result := THashResult.Create(LUInt64);
-    end;
+    Result := THashResult.Create(FHash);
   end;
 
   Initialize();
+end;
+
+function TCRC.Clone(): IHash;
+var
+  LHashInstance: TCRC;
+begin
+  LHashInstance := TCRC.Create(FWidth, FPolynomial, FInitialValue,
+    FIsInputReflected, FIsOutputReflected, FOutputXor, FCheckValue,
+    System.Copy(FNames));
+  LHashInstance.FHash := FHash;
+  Result := LHashInstance;
+  Result.BufferSize := BufferSize;
 end;
 
 end.

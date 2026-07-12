@@ -1,19 +1,22 @@
-﻿unit HlpCRCCore;
+unit HlpCRCCore;
 
 {
-  CRC fold dispatch (scalar + SIMD + PCLMUL) and fast reflected-CRC32 update.
+  CRC engine internals, in three parts:
 
-  TCRC (HlpCRC.pas): generic widths, UInt64 table rows, FHash state — uses
-  CRC_Fold_Reflected/Forward + UpdateCRCViaByteTable; not the PKZIP wire inverted form.
+  1. TGF2 - GF(2) polynomial math (carry-less multiply, division, PowerMod)
+     used to generate the PCLMUL/VPCLMUL/PMULL folding and Barrett reduction
+     constants at runtime for ANY generator polynomial (Linux kernel
+     gen-crc-consts.py algorithm). One generic carry-less-multiply kernel per
+     arch serves every CRC standard through these computed constants.
 
-  CRC32Fast (HlpCRC32Fast.pas): PKZIP/Castagnoli only; FCurrentCRC with not/xor
-  convention; uses CRCDispatch_UpdateReflectedCrc32 + TCRCFoldRuntimeCtx.
+  2. TCRCFoldRuntimeCtx - the runtime context handed to the fold kernels.
+     The carry-less-multiply paths read FoldConstants (offset 0) only; the
+     scalar/SSE2 slicing tiers read the 16 slicing-table row pointers at
+     offset 96 (= SizeOf(TCRCFoldConstants)), matching the fixed
+     +96+I*SizeOf(Pointer) offsets in the CRCFold*.inc kernels.
 
-  TCRCFoldRuntimeCtx: FoldConstants + TableRow only. One record serves both the
-  UInt64 generic table and the UInt32 CRC32 table (TableRow stores untyped
-  pointers, cast at point of use). MSB fold reads CRC width from
-  FoldConstants.CrcBits (see TGF2.GenerateFoldConstants) and derives the state
-  mask the same way as TCRC.FCRCMask.
+  3. Scalar slicing-by-16 fold routines - the portable fallback selected by
+     TCRCSimd when no SIMD backend is built/available.
 }
 
 {$I ..\Include\HashLib.inc}
@@ -21,81 +24,370 @@
 interface
 
 uses
-  HlpHashLibTypes,
-  HlpCRCFoldConstants;
+  HlpHashLibTypes;
 
 const
   MinSimdBytes = Int32(16);
 
 type
-  // Unified fold runtime context. The PCLMUL/VPCLMUL (and future PMULL) paths
-  // read FoldConstants only (offset 0). The scalar/SSE2 slicing tiers read
-  // TableRow at offset 96 (= SizeOf(TCRCFoldConstants)); rows point at UInt64
-  // (generic CRC) or UInt32 (CRC32 fast path) tables and are cast at point of
-  // use. TableRow is declared as Pointer so one record serves both table cell
-  // widths with identical byte layout on i386 (4-byte rows) and x86_64
-  // (8-byte rows) — matching the fixed +96+I*SizeOf(Pointer) asm offsets.
+  TUInt128 = record
+    Lo, Hi: UInt64;
+  end;
+
+  // PCLMULQDQ / VPCLMULQDQ / PMULL CRC folding and Barrett reduction constants.
+  // Layout must match the assembly expectations in the CRCFold*.inc files.
+  TCRCFoldConstants = packed record
+    Fold_4x128: array [0 .. 1] of UInt64;   // offset  0: fold-by-4 constants (stride 512)
+    Fold_1x128: array [0 .. 1] of UInt64;   // offset 16: fold-by-1 constants (stride 128)
+    Barrett: array [0 .. 1] of UInt64;       // offset 32: Barrett reduction constants
+    Fold_8x128: array [0 .. 1] of UInt64;   // offset 48: fold-by-8 constants (stride 1024)
+    BswapMask: array [0 .. 15] of Byte;      // offset 64: byte-reverse mask for MSB-first CRCs
+    CrcBits: UInt64;                          // offset 80: CRC width (8..64)
+    BarrettShift: UInt64;                     // offset 88: = 64 - CrcBits (MSB psrlq alignment)
+  end;
+
   TCRCFoldRuntimeCtx = packed record
     FoldConstants: TCRCFoldConstants;
-    TableRow: array [0 .. 15] of Pointer;
+    TableRow: array [0 .. 15] of PUInt64;
   end;
 
   PCRCFoldRuntimeCtx = ^TCRCFoldRuntimeCtx;
 
+  // A slicing table plus its fold runtime context, cached by TCRC per
+  // (polynomial, width, reflection).
+  TCRCCacheValue = record
+    Table: THashLibMatrixUInt64Array;
+    FoldRuntime: TCRCFoldRuntimeCtx;
+  end;
+
   // AData: data pointer, ALength: byte count (>= MinSimdBytes, multiple of 16).
-  // AState: pointer to 2 x UInt64 ([0]=CRC / state, [1]=0 for PCLMUL).
+  // AState: pointer to UInt64 (the running CRC / fold state).
   // AConstants: pointer to TCRCFoldRuntimeCtx (FoldConstants at offset 0).
   TCRCFoldFunc = function(AData: PByte; ALength: UInt32;
     AState: Pointer; AConstants: Pointer): UInt64;
 
-  // Tier-selection result: the three fold entry points plus whether they use
+  // Tier-selection result: the two fold entry points plus whether they use
   // carry-less multiply (PCLMUL/VPCLMUL/PMULL) rather than table slicing.
   TCRCFoldSelection = record
     Reflected: TCRCFoldFunc;
     Fwd: TCRCFoldFunc;
-    Reflected32: TCRCFoldFunc;
     UsesCarrylessMul: Boolean;
   end;
 
-procedure CRCDispatch_InitRuntimeCtx(const Table: THashLibMatrixUInt64Array;
+  TGF2 = class sealed
+  strict private
+    class function BitLength64(A: UInt64): Int32; static;
+    class function BitLength128(const A: TUInt128): Int32; static; inline;
+
+    // 64 x 64 -> 128 carry-less multiply (MSB-first polynomial arithmetic).
+    class function CLMul(A, B: UInt64): TUInt128; static;
+
+    // 128-bit polynomial mod G, where G = x^ABits + APoly.
+    // Returns remainder (degree < ABits, fits in UInt64).
+    class function Reduce(const A: TUInt128; APoly: UInt64;
+      ABits: Int32): UInt64; static;
+
+    // floor(A / G) where G = x^ABits + APoly. Returns quotient.
+    class function DivPoly(const A: TUInt128; APoly: UInt64;
+      ABits: Int32): UInt64; static;
+
+    // XOR G << AShift into LVal (128-bit), G = x^ABits + APoly.
+    class procedure XorShiftedG(var AVal: TUInt128; APoly: UInt64;
+      ABits, AShift: Int32); static;
+
+    // One (x^(AStride+64), x^AStride) fold constant pair, stored in the
+    // domain (bit-reflected or plain) the kernels expect.
+    class procedure FoldConstPair(AStride: Int32; APoly: UInt64;
+      ABits, AK: Int32; AReflected: Boolean;
+      var APair: array of UInt64); static;
+
+  public
+    // Compute x^N mod G using repeated squaring.
+    // APoly: generator polynomial WITHOUT the leading x^ABits term.
+    // ABits: CRC width (degree of G).
+    class function PowerMod(N: Int32; APoly: UInt64;
+      ABits: Int32): UInt64; static;
+
+    // Reverse the lowest ANumBits bits of AValue.
+    class function BitReverse(AValue: UInt64; ANumBits: Int32): UInt64; static;
+
+    // Generate PCLMULQDQ fold and Barrett reduction constants for a CRC.
+    // APoly: generator polynomial (MSB-first, without leading bit).
+    // ABits: CRC width (8..64).
+    // AReflected: True for LSB-first (reflected input) CRCs.
+    class procedure GenerateFoldConstants(APoly: UInt64; ABits: Int32;
+      AReflected: Boolean; out AConstants: TCRCFoldConstants); static;
+  end;
+
+procedure CRC_InitFoldRuntimeCtx(const Table: THashLibMatrixUInt64Array;
   APoly: UInt64; AWidth: Int32; AReflected: Boolean;
-  out Ctx: TCRCFoldRuntimeCtx); overload;
-
-procedure CRCDispatch_InitRuntimeCtx(const Table: THashLibMatrixUInt32Array;
-  AMsbPoly: UInt32; out Ctx: TCRCFoldRuntimeCtx); overload;
-
-// 16 x 256 slicing-by-16 table for reflected CRC32 (AReflectedPoly = e.g. $EDB88320).
-function CRCDispatch_BuildSlicingTable32Reflect(AReflectedPoly: UInt32)
-  : THashLibMatrixUInt32Array;
-
-// PKZIP-style reflected CRC32: updates AWireCrc (e.g. FCurrentCRC) with ALength
-// bytes at AData using fold dispatch + row-0 tail (same as former LocalCRCCompute).
-procedure CRCDispatch_UpdateReflectedCrc32(var AWireCrc: UInt32;
-  AData: PByte; ALength: UInt32; ACtx: PCRCFoldRuntimeCtx);
-
-procedure CRC_UpdateViaBitSerial(AData: PByte; ADataLength, AIndex: Int32;
-  var AHash: UInt64; APolynomial: UInt64; AWidth: Int32;
-  AInputReflected: Boolean; AHighBitMask: UInt64);
+  out Ctx: TCRCFoldRuntimeCtx);
 
 var
-  CRC_Fold_Reflected: TCRCFoldFunc;
-  CRC_Fold_Forward: TCRCFoldFunc;
-  CRC_Fold_Reflected32: TCRCFoldFunc;
-  CRC_Fold_UsesCarrylessMul: Boolean;
+  CRC_Fold: TCRCFoldSelection;
 
 implementation
 
 uses
+  HlpBinaryPrimitives,
   HlpCRCSimd;
 
-function CrcTableU64(const Row: Pointer; B: Byte): UInt64; inline;
+{ TGF2 }
+
+class function TGF2.BitLength64(A: UInt64): Int32;
 begin
-  Result := PUInt64(NativeUInt(Row) + UInt64(B) * SizeOf(UInt64))^;
+  Result := 0;
+  while A <> 0 do
+  begin
+    System.Inc(Result);
+    A := A shr 1;
+  end;
 end;
 
-function CrcTableU32(const Row: Pointer; B: Byte): UInt32; inline;
+class function TGF2.BitLength128(const A: TUInt128): Int32;
 begin
-  Result := PUInt32(NativeUInt(Row) + UInt64(B) * SizeOf(UInt32))^;
+  if A.Hi <> 0 then
+    Result := 64 + BitLength64(A.Hi)
+  else
+    Result := BitLength64(A.Lo);
+end;
+
+class function TGF2.CLMul(A, B: UInt64): TUInt128;
+var
+  I: Int32;
+begin
+  Result.Lo := 0;
+  Result.Hi := 0;
+  for I := 0 to 63 do
+  begin
+    if (B and (UInt64(1) shl I)) <> 0 then
+    begin
+      if I = 0 then
+      begin
+        Result.Lo := Result.Lo xor A;
+      end
+      else
+      begin
+        Result.Lo := Result.Lo xor (A shl I);
+        Result.Hi := Result.Hi xor (A shr (64 - I));
+      end;
+    end;
+  end;
+end;
+
+class procedure TGF2.XorShiftedG(var AVal: TUInt128; APoly: UInt64;
+  ABits, AShift: Int32);
+var
+  LGLo, LGHi: UInt64;
+  LLeadPos: Int32;
+begin
+  LGLo := 0;
+  LGHi := 0;
+  LLeadPos := ABits + AShift;
+
+  if AShift < 64 then
+  begin
+    LGLo := APoly shl AShift;
+    if AShift > 0 then
+      LGHi := APoly shr (64 - AShift);
+  end
+  else
+  begin
+    LGHi := APoly shl (AShift - 64);
+  end;
+
+  if LLeadPos < 64 then
+    LGLo := LGLo xor (UInt64(1) shl LLeadPos)
+  else
+    LGHi := LGHi xor (UInt64(1) shl (LLeadPos - 64));
+
+  AVal.Lo := AVal.Lo xor LGLo;
+  AVal.Hi := AVal.Hi xor LGHi;
+end;
+
+class function TGF2.Reduce(const A: TUInt128; APoly: UInt64;
+  ABits: Int32): UInt64;
+var
+  LVal: TUInt128;
+  LDeg, LShift: Int32;
+begin
+  LVal := A;
+  while True do
+  begin
+    LDeg := BitLength128(LVal) - 1;
+    if LDeg < ABits then
+      Break;
+    LShift := LDeg - ABits;
+    XorShiftedG(LVal, APoly, ABits, LShift);
+  end;
+  Result := LVal.Lo;
+end;
+
+class function TGF2.DivPoly(const A: TUInt128; APoly: UInt64;
+  ABits: Int32): UInt64;
+var
+  LVal: TUInt128;
+  LDeg, LShift: Int32;
+  LQuotient: UInt64;
+begin
+  LVal := A;
+  LQuotient := 0;
+  while True do
+  begin
+    LDeg := BitLength128(LVal) - 1;
+    if LDeg < ABits then
+      Break;
+    LShift := LDeg - ABits;
+    LQuotient := LQuotient xor (UInt64(1) shl LShift);
+    XorShiftedG(LVal, APoly, ABits, LShift);
+  end;
+  Result := LQuotient;
+end;
+
+class function TGF2.PowerMod(N: Int32; APoly: UInt64;
+  ABits: Int32): UInt64;
+var
+  LBase, LResult: UInt64;
+  LProduct: TUInt128;
+begin
+  if N = 0 then
+    Exit(1);
+  LResult := 1;
+  LBase := 2;
+  while N > 0 do
+  begin
+    if (N and 1) <> 0 then
+    begin
+      LProduct := CLMul(LResult, LBase);
+      LResult := Reduce(LProduct, APoly, ABits);
+    end;
+    N := N shr 1;
+    if N > 0 then
+    begin
+      LProduct := CLMul(LBase, LBase);
+      LBase := Reduce(LProduct, APoly, ABits);
+    end;
+  end;
+  Result := LResult;
+end;
+
+class function TGF2.BitReverse(AValue: UInt64; ANumBits: Int32): UInt64;
+var
+  I: Int32;
+begin
+  Result := 0;
+  for I := 0 to ANumBits - 1 do
+  begin
+    if (AValue and (UInt64(1) shl I)) <> 0 then
+      Result := Result or (UInt64(1) shl (ANumBits - 1 - I));
+  end;
+end;
+
+class procedure TGF2.FoldConstPair(AStride: Int32; APoly: UInt64;
+  ABits, AK: Int32; AReflected: Boolean; var APair: array of UInt64);
+var
+  LHiExp, LLoExp: UInt64;
+begin
+  LHiExp := PowerMod(AStride + 64 + AK, APoly, ABits);
+  LLoExp := PowerMod(AStride + AK, APoly, ABits);
+  if AReflected then
+  begin
+    APair[0] := BitReverse(LHiExp shl (64 - ABits), 64);
+    APair[1] := BitReverse(LLoExp shl (64 - ABits), 64);
+  end
+  else
+  begin
+    APair[0] := LLoExp;
+    APair[1] := LHiExp;
+  end;
+end;
+
+class procedure TGF2.GenerateFoldConstants(APoly: UInt64; ABits: Int32;
+  AReflected: Boolean; out AConstants: TCRCFoldConstants);
+var
+  LK, LPowOfX, I: Int32;
+  LBarrett0, LGMinusXn: UInt64;
+  LDiv128: TUInt128;
+begin
+  // Following the Linux kernel gen-crc-consts.py algorithm.
+  // G(x) = x^ABits + APoly  (MSB-first representation).
+  // For LSB-first (reflected): each constant is computed in MSB domain,
+  // then bit-reflected to 64 bits before storage.
+
+  if AReflected then
+    LK := ABits - 65
+  else
+    LK := 0;
+
+  FoldConstPair(512, APoly, ABits, LK, AReflected, AConstants.Fold_4x128);
+  FoldConstPair(128, APoly, ABits, LK, AReflected, AConstants.Fold_1x128);
+  FoldConstPair(1024, APoly, ABits, LK, AReflected, AConstants.Fold_8x128);
+
+  // --- Barrett reduction constants ---
+  LGMinusXn := APoly;
+
+  if AReflected then
+  begin
+    // LSB-first: m = 63.
+    // Barrett[0] = bitreflect(floor(x^(63+n) / G), 64)
+    // Barrett[1] = bitreflect(G, n+1)  (truncated: for n=64, x^0 removed)
+    LDiv128.Lo := 0;
+    LDiv128.Hi := 0;
+    if (63 + ABits) < 64 then
+      LDiv128.Lo := UInt64(1) shl (63 + ABits)
+    else if (63 + ABits) = 64 then
+      LDiv128.Hi := 1
+    else
+      LDiv128.Hi := UInt64(1) shl ((63 + ABits) - 64);
+    LBarrett0 := DivPoly(LDiv128, APoly, ABits);
+
+    AConstants.Barrett[0] := BitReverse(LBarrett0, 64);
+    if ABits < 64 then
+    begin
+      LPowOfX := 64 - ABits - 1;
+      AConstants.Barrett[1] := BitReverse(LGMinusXn shl LPowOfX, 64);
+    end
+    else
+      AConstants.Barrett[1] := BitReverse(LGMinusXn shr 1, 64);
+  end
+  else
+  begin
+    // MSB-first: m = 64.  Two-round Barrett per Linux kernel.
+    // Barrett[0] = floor(x^(64+n) / G) - x^64  (mu, low 64 bits)
+    //   Since floor(x^(64+n)/G) = x^64 + floor(APoly*x^64 / G),
+    //   we compute Barrett[0] = DivPoly(APoly*x^64, G) to avoid the x^64 overflow.
+    // Barrett[1] = G  (full generator polynomial; for n=64, x^64 term implicit)
+    LDiv128.Hi := APoly;
+    LDiv128.Lo := 0;
+    AConstants.Barrett[0] := DivPoly(LDiv128, APoly, ABits);
+    if ABits < 64 then
+      AConstants.Barrett[1] := (UInt64(1) shl ABits) or APoly
+    else
+      AConstants.Barrett[1] := APoly;
+  end;
+
+  // --- Byte-swap mask for MSB-first CRCs ---
+  if AReflected then
+    FillChar(AConstants.BswapMask[0], 16, 0)
+  else
+    for I := 0 to 15 do
+      AConstants.BswapMask[I] := Byte(15 - I);
+
+  // --- Metadata ---
+  AConstants.CrcBits := UInt64(ABits);
+  if ABits < 64 then
+    AConstants.BarrettShift := UInt64(64 - ABits)
+  else
+    AConstants.BarrettShift := 0;
+end;
+
+// =============================================================================
+// Scalar slicing-by-16 fold routines
+// =============================================================================
+
+function CrcTableU64(const Row: PUInt64; B: Byte): UInt64; inline;
+begin
+  Result := PUInt64(NativeUInt(Row) + UInt64(B) * SizeOf(UInt64))^;
 end;
 
 function CRCMaskFromWidth(AWidth: Int32): UInt64; inline;
@@ -135,7 +427,7 @@ begin
   Ctx := PCRCFoldRuntimeCtx(AConstants);
   LPtr := AData;
   LLen := ALength;
-  LTemp := PUInt64(AState)^;
+  LTemp := TBinaryPrimitives.LoadUInt64(PUInt64(AState));
 
   while LLen >= 16 do
   begin
@@ -144,7 +436,7 @@ begin
     System.Dec(LLen, 16);
   end;
 
-  PUInt64(AState)^ := LTemp;
+  TBinaryPrimitives.StoreUInt64(PUInt64(AState), LTemp);
   Result := LTemp;
 end;
 
@@ -163,7 +455,7 @@ begin
   Ctx := PCRCFoldRuntimeCtx(AConstants);
   LPtr := AData;
   LLen := ALength;
-  LTemp := PUInt64(AState)^;
+  LTemp := TBinaryPrimitives.LoadUInt64(PUInt64(AState));
   LWidth := Int32(Ctx.FoldConstants.CrcBits);
   LCrcMask := CRCMaskFromWidth(LWidth);
   LCrcBytes := (LWidth + 7) shr 3;
@@ -192,89 +484,11 @@ begin
     System.Dec(LLen, 16);
   end;
 
-  PUInt64(AState)^ := LTemp;
+  TBinaryPrimitives.StoreUInt64(PUInt64(AState), LTemp);
   Result := LTemp;
 end;
 
-procedure CRC32_FoldReflected32_OneSlice(Ctx: PCRCFoldRuntimeCtx;
-  var LCRC: UInt32; LPtr: PByte);
-var
-  LTempCrc: UInt32;
-begin
-  LTempCrc := LCRC;
-  LCRC := CrcTableU32(Ctx.TableRow[0], LPtr[15])
-    xor CrcTableU32(Ctx.TableRow[1], LPtr[14])
-    xor CrcTableU32(Ctx.TableRow[2], LPtr[13])
-    xor CrcTableU32(Ctx.TableRow[3], LPtr[12])
-    xor CrcTableU32(Ctx.TableRow[4], LPtr[11])
-    xor CrcTableU32(Ctx.TableRow[5], LPtr[10])
-    xor CrcTableU32(Ctx.TableRow[6], LPtr[9])
-    xor CrcTableU32(Ctx.TableRow[7], LPtr[8])
-    xor CrcTableU32(Ctx.TableRow[8], LPtr[7])
-    xor CrcTableU32(Ctx.TableRow[9], LPtr[6])
-    xor CrcTableU32(Ctx.TableRow[10], LPtr[5])
-    xor CrcTableU32(Ctx.TableRow[11], LPtr[4])
-    xor CrcTableU32(Ctx.TableRow[12], LPtr[3] xor Byte(LTempCrc shr 24))
-    xor CrcTableU32(Ctx.TableRow[13], LPtr[2] xor Byte(LTempCrc shr 16))
-    xor CrcTableU32(Ctx.TableRow[14], LPtr[1] xor Byte(LTempCrc shr 8))
-    xor CrcTableU32(Ctx.TableRow[15], LPtr[0] xor Byte(LTempCrc));
-end;
-
-function CRC_Fold_Reflected32_Scalar(AData: PByte; ALength: UInt32;
-  AState: Pointer; AConstants: Pointer): UInt64;
-var
-  Ctx: PCRCFoldRuntimeCtx;
-  LCRC: UInt32;
-  LPtr: PByte;
-  LLen: UInt32;
-begin
-  Ctx := PCRCFoldRuntimeCtx(AConstants);
-  LPtr := AData;
-  LLen := ALength;
-  LCRC := UInt32(PUInt64(AState)^);
-
-  while LLen >= 16 do
-  begin
-    CRC32_FoldReflected32_OneSlice(Ctx, LCRC, LPtr);
-    System.Inc(LPtr, 16);
-    System.Dec(LLen, 16);
-  end;
-
-  PUInt64(AState)^ := LCRC;
-  Result := LCRC;
-end;
-
-procedure CRCDispatch_UpdateReflectedCrc32(var AWireCrc: UInt32;
-  AData: PByte; ALength: UInt32; ACtx: PCRCFoldRuntimeCtx);
-var
-  LInternal: UInt32;
-  LPtr: PByte;
-  LLen, LProcessed: UInt32;
-  LState: array [0 .. 1] of UInt64;
-begin
-  LInternal := not AWireCrc;
-  LPtr := AData;
-  LLen := ALength;
-  if LLen >= UInt32(MinSimdBytes) then
-  begin
-    LProcessed := LLen and (not UInt32(15));
-    LState[0] := UInt64(LInternal);
-    LState[1] := 0;
-    LInternal := UInt32(CRC_Fold_Reflected32(LPtr, LProcessed, @LState[0], ACtx));
-    System.Inc(LPtr, LProcessed);
-    System.Dec(LLen, LProcessed);
-  end;
-  while LLen > 0 do
-  begin
-    LInternal := (LInternal shr 8) xor CrcTableU32(ACtx.TableRow[0],
-      Byte(LInternal and $FF) xor LPtr^);
-    System.Inc(LPtr);
-    System.Dec(LLen);
-  end;
-  AWireCrc := not LInternal;
-end;
-
-procedure CRCDispatch_InitRuntimeCtx(const Table: THashLibMatrixUInt64Array;
+procedure CRC_InitFoldRuntimeCtx(const Table: THashLibMatrixUInt64Array;
   APoly: UInt64; AWidth: Int32; AReflected: Boolean;
   out Ctx: TCRCFoldRuntimeCtx);
 var
@@ -285,91 +499,12 @@ begin
     Ctx.TableRow[I] := @Table[I][0];
 end;
 
-procedure CRCDispatch_InitRuntimeCtx(const Table: THashLibMatrixUInt32Array;
-  AMsbPoly: UInt32; out Ctx: TCRCFoldRuntimeCtx);
-var
-  I: Int32;
-begin
-  TGF2.GenerateFoldConstants(UInt64(AMsbPoly), 32, True, Ctx.FoldConstants);
-  for I := 0 to 15 do
-    Ctx.TableRow[I] := @Table[I][0];
-end;
-
-function CRCDispatch_BuildSlicingTable32Reflect(AReflectedPoly: UInt32)
-  : THashLibMatrixUInt32Array;
-var
-  LIdx, LJIdx, LKIdx: Int32;
-  LRes: UInt32;
-begin
-  System.SetLength(Result, 16);
-  for LIdx := System.Low(Result) to System.High(Result) do
-    System.SetLength(Result[LIdx], 256);
-  for LIdx := 0 to System.Pred(256) do
-  begin
-    LRes := LIdx;
-    for LJIdx := 0 to System.Pred(16) do
-    begin
-      LKIdx := 0;
-      while LKIdx < System.Pred(9) do
-      begin
-        LRes := (LRes shr 1) xor (-Int32(LRes and 1) and AReflectedPoly);
-        Result[LJIdx][LIdx] := LRes;
-        System.Inc(LKIdx);
-      end;
-    end;
-  end;
-end;
-
-procedure CRC_UpdateViaBitSerial(AData: PByte; ADataLength, AIndex: Int32;
-  var AHash: UInt64; APolynomial: UInt64; AWidth: Int32;
-  AInputReflected: Boolean; AHighBitMask: UInt64);
-var
-  LLength, LIdx: Int32;
-  LTemp, LBit, LJdx, LHash: UInt64;
-begin
-  LLength := ADataLength;
-  LIdx := AIndex;
-  while LLength > 0 do
-  begin
-    LTemp := UInt64(AData[LIdx]);
-    if AInputReflected then
-      LTemp := TGF2.BitReverse(LTemp, 8);
-
-    LJdx := $80;
-    LHash := AHash;
-    while LJdx > 0 do
-    begin
-      LBit := LHash and AHighBitMask;
-      LHash := LHash shl 1;
-      if ((LTemp and LJdx) > 0) then
-        LBit := LBit xor AHighBitMask;
-      if (LBit > 0) then
-        LHash := LHash xor APolynomial;
-      LJdx := LJdx shr 1;
-    end;
-    AHash := LHash;
-    System.Inc(LIdx);
-    System.Dec(LLength);
-  end;
-end;
-
 // =============================================================================
 // Fold routine selection (once, at init)
 // =============================================================================
 
-procedure InitCRCFold();
-var
-  LSel: TCRCFoldSelection;
-begin
-  LSel := TCRCSimd.Select(@CRC_Fold_Reflected_Scalar,
-    @CRC_Fold_Forward_Scalar, @CRC_Fold_Reflected32_Scalar);
-  CRC_Fold_Reflected := LSel.Reflected;
-  CRC_Fold_Forward := LSel.Fwd;
-  CRC_Fold_Reflected32 := LSel.Reflected32;
-  CRC_Fold_UsesCarrylessMul := LSel.UsesCarrylessMul;
-end;
-
 initialization
-  InitCRCFold();
+  CRC_Fold := TCRCSimd.Select(@CRC_Fold_Reflected_Scalar,
+    @CRC_Fold_Forward_Scalar);
 
 end.

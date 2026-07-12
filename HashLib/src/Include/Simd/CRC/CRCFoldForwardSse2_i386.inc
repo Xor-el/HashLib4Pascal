@@ -16,13 +16,11 @@
   // [esp+32]     LBIdx
   // [esp+36]     saved esi (remaining length)
 
-@MsbSse2_outer:
-  cmp esi, 16
-  jb @MsbSse2_done
-
+  // Loop invariants: Width from CrcBits [ebp+80]; 64-bit mask into
+  // [esp+8],[esp+12]; LCrcBytes into [esp+16]; top-byte shift into [esp+20].
+  // esi (length) is scratch during the mask build - park it in [esp+36].
   mov dword ptr [esp + 36], esi
 
-  // Width from CrcBits [ebp+80]; build 64-bit mask into [esp+8],[esp+12]
   mov eax, dword ptr [ebp + 80]
   mov ecx, eax
   dec ecx
@@ -50,8 +48,6 @@
   mov dword ptr [esp + 8], eax
   mov dword ptr [esp + 12], edx
 
-  mov esi, dword ptr [esp + 36]
-
   mov eax, dword ptr [ebp + 80]
   add eax, 7
   shr eax, 3
@@ -60,6 +56,14 @@
   mov eax, dword ptr [ebp + 80]
   sub eax, 8
   mov dword ptr [esp + 20], eax
+
+  mov esi, dword ptr [esp + 36]
+
+@MsbSse2_outer:
+  cmp esi, 16
+  jb @MsbSse2_done
+
+  mov dword ptr [esp + 36], esi
 
   mov eax, dword ptr [edi]
   mov edx, dword ptr [edi + 4]

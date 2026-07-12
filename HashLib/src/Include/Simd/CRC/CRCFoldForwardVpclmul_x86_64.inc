@@ -9,7 +9,7 @@
 //
 // Register mapping (MS x64 ABI after prologue):
 //   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
-//   AState: [0..7] = initial CRC pre-shifted left by (64 - Width), [8..15] = 0.
+//   AState: pointer to the initial CRC pre-shifted left by (64 - Width) as one UInt64.
 //   AConstants layout (TCRCFoldConstants):
 //     [0..15]  = Fold_4x128  (stride 512)
 //     [16..31] = Fold_1x128  (stride 128)

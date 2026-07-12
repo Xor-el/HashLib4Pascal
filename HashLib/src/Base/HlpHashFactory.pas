@@ -16,8 +16,6 @@ uses
   HlpAdler32,
   // CRC Units //
   HlpCRC,
-  HlpCRCStandard,
-  HlpCRC32Fast,
   // Hash32 Units //
   HlpAP,
   HlpBernstein,
@@ -696,44 +694,44 @@ class function THashFactory.TChecksum.TCRC.CreateCRC16(APolynomial,
   AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
-  Result := TCRC16.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
-    AOutputXor, ACheckValue, ANames);
+  Result := HlpCRC.TCRC.Create(16, APolynomial, AInitialValue, AReflectIn,
+    AReflectOut, AOutputXor, ACheckValue, ANames);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC16_BUYPASS: IHash;
 begin
-  Result := TCRC16_BUYPASS.Create();
+  Result := HlpCRC.TCRC.CreateCRCObject(TCRCStandard.CRC16_BUYPASS);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC32(APolynomial,
   AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
-  Result := TCRC32.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
-    AOutputXor, ACheckValue, ANames);
+  Result := HlpCRC.TCRC.Create(32, APolynomial, AInitialValue, AReflectIn,
+    AReflectOut, AOutputXor, ACheckValue, ANames);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC32_CASTAGNOLI: IHash;
 begin
-  Result := HlpCRC32Fast.TCRC32_CASTAGNOLI.Create();
+  Result := HlpCRC.TCRC.CreateCRCObject(TCRCStandard.CRC32C);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC32_PKZIP: IHash;
 begin
-  Result := HlpCRC32Fast.TCRC32_PKZIP.Create();
+  Result := HlpCRC.TCRC.CreateCRCObject(TCRCStandard.CRC32);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC64(APolynomial,
   AInitialValue: UInt64; AReflectIn, AReflectOut: Boolean;
   AOutputXor, ACheckValue: UInt64; const ANames: THashLibStringArray): IHash;
 begin
-  Result := TCRC64.Create(APolynomial, AInitialValue, AReflectIn, AReflectOut,
-    AOutputXor, ACheckValue, ANames);
+  Result := HlpCRC.TCRC.Create(64, APolynomial, AInitialValue, AReflectIn,
+    AReflectOut, AOutputXor, ACheckValue, ANames);
 end;
 
 class function THashFactory.TChecksum.TCRC.CreateCRC64_ECMA_182: IHash;
 begin
-  Result := TCRC64_ECMA_182.Create();
+  Result := HlpCRC.TCRC.CreateCRCObject(TCRCStandard.CRC64);
 end;
 
 { THashFactory.TChecksum }

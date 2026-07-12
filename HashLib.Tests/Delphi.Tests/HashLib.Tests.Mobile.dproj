@@ -369,9 +369,6 @@
         <DCCReference Include="..\..\HashLib\src\Simd\Facade\HlpCRCSimd.pas"/>
         <DCCReference Include="..\..\HashLib\src\Simd\Backend\HlpCRCX86Backend.pas"/>
         <DCCReference Include="..\..\HashLib\src\Simd\Backend\HlpCRCArmBackend.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRCFoldConstants.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRCStandard.pas"/>
-        <DCCReference Include="..\..\HashLib\src\Checksum\HlpCRC32Fast.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGost.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGrindahl256.pas"/>
         <DCCReference Include="..\..\HashLib\src\Crypto\HlpGrindahl512.pas"/>

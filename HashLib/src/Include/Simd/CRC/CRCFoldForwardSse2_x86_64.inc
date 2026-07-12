@@ -20,10 +20,7 @@
   mov rbx, qword ptr [r8]          // LTemp
   mov r15, rcx                     // data pointer (stable)
 
-@MsbSse2_outer:
-  cmp edx, 16
-  jb @MsbSse2_done
-
+  // Loop invariants (width, mask, byte count, top-byte shift)
   mov r14d, dword ptr [r9 + 80]    // Width from FoldConstants.CrcBits
 
   // r12 = CRCMaskFromWidth(r14d)
@@ -41,12 +38,16 @@
   shr eax, 3                        // LCrcBytes
   mov r13d, eax
 
+  mov ecx, r14d
+  sub ecx, 8                        // Width - 8, shift count for top byte
+
+@MsbSse2_outer:
+  cmp edx, 16
+  jb @MsbSse2_done
+
   xor rbp, rbp                      // LNewTemp
   mov rsi, rbx                      // LTempCopy
   xor edi, edi                      // LBIdx
-
-  mov ecx, r14d
-  sub ecx, 8                        // Width - 8, shift count for top byte
 
 @MsbSse2_m1:
   cmp edi, r13d
