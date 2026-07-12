@@ -10,8 +10,8 @@
 
 $ErrorActionPreference = 'Stop'
 
-# Repo root: script lives in <repo>/scripts/check-duplicate-guids.ps1
-$root = if ($PSScriptRoot) { Split-Path $PSScriptRoot -Parent } else { Get-Location }
+# Repo root: script lives in <repo>/scripts/maintenance/check-duplicate-guids.ps1
+$root = if ($PSScriptRoot) { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent } else { Get-Location }
 $pasFiles = Get-ChildItem -Path $root -Filter '*.pas' -Recurse -File -ErrorAction SilentlyContinue |
   Where-Object { $_.FullName -notmatch '\.git\\' }
 

@@ -5,7 +5,7 @@
 # Re-run when files under HashLib.Tests/Data change (or AppDeployFolderName changes), then rebuild the mobile test host.
 
 param(
-    [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
+    [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
     [string]$DeployProjName = "HashLib.Tests.Mobile.TestData.deployproj",
     [string]$AppDeployFolderName = "HashLib.Tests.Mobile"
 )
