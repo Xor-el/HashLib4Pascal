@@ -1,0 +1,21 @@
+HashLib/src/Crypto/HlpBlake2B.pas
+  s_6b1649def2e9b5::t_52d57a462f48ee 270-271,275-276,289,291,293-299,314-316
+HashLib/src/Crypto/HlpBlake2S.pas
+  s_6b1649def2e9b5::t_3691f1f842dc0f 266-267,271-272,285,287,289-295,310-312
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "e9d43f82b41329fae06d9f9d2b8f13f2f12ec7db",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
