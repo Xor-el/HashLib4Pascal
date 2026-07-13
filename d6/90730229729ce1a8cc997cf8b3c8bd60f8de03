@@ -1,0 +1,36 @@
+HashLib.Tests/src/Hash64Tests.pas
+  s_db3d375ac4a65a::t_4a16232708ce05 6
+  s_db3d375ac4a65a::t_3bfd3bff574e9d 14,75-86,205-267
+HashLib/src/Hash64/HlpXXHash3.pas
+  s_6b1649def2e9b5::t_fbec36bf3f04d8 24,252,256,258,453
+HashLib/src/Include/Simd/XXH3/XXH3InitSecretAvx2_i386.inc
+  s_db3d375ac4a65a::t_4ef78102e55a67 6-7,14-15,18,29
+HashLib/src/Simd/Backend/HlpXXHash3ArmBackend.pas
+  s_6b1649def2e9b5::t_1669bf969c0803 50
+HashLib/src/Simd/Backend/HlpXXHash3X86Backend.pas
+  s_db3d375ac4a65a::t_21a9dfffd8da85 53,70,91,108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "d690730229729ce1a8cc997cf8b3c8bd60f8de03",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_db3d375ac4a65a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31d8c528-12de-4647-99f0-163b1e376cfb",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
