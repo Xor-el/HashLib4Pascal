@@ -267,11 +267,13 @@ var
 
   procedure G(AA, AB, AC, AD, AMsgIdx0, AMsgIdx1: Int32);
   begin
-    LV[AA] := LV[AA] + LV[AB] + PUInt64(LPMsg + AMsgIdx0 * SizeOf(UInt64))^;
+    LV[AA] := LV[AA] + LV[AB] + TBinaryPrimitives.LoadUInt64
+      (PUInt64(LPMsg + AMsgIdx0 * SizeOf(UInt64)));
     LV[AD] := TBitOperations.RotateRight64(LV[AD] xor LV[AA], 32);
     LV[AC] := LV[AC] + LV[AD];
     LV[AB] := TBitOperations.RotateRight64(LV[AB] xor LV[AC], 24);
-    LV[AA] := LV[AA] + LV[AB] + PUInt64(LPMsg + AMsgIdx1 * SizeOf(UInt64))^;
+    LV[AA] := LV[AA] + LV[AB] + TBinaryPrimitives.LoadUInt64
+      (PUInt64(LPMsg + AMsgIdx1 * SizeOf(UInt64)));
     LV[AD] := TBitOperations.RotateRight64(LV[AD] xor LV[AA], 16);
     LV[AC] := LV[AC] + LV[AD];
     LV[AB] := TBitOperations.RotateRight64(LV[AB] xor LV[AC], 63);
@@ -284,14 +286,17 @@ begin
   LPIV := PByte(AIV);
 
   for I := 0 to 7 do
-    LV[I] := PUInt64(LPState + I * SizeOf(UInt64))^;
+    LV[I] := TBinaryPrimitives.LoadUInt64(PUInt64(LPState + I * SizeOf(UInt64)));
   for I := 0 to 7 do
-    LV[I + 8] := PUInt64(LPIV + I * SizeOf(UInt64))^;
+    LV[I + 8] := TBinaryPrimitives.LoadUInt64(PUInt64(LPIV + I * SizeOf(UInt64)));
 
-  LV[12] := LV[12] xor PUInt64(LPCounterFlags)^;
-  LV[13] := LV[13] xor PUInt64(LPCounterFlags + SizeOf(UInt64))^;
-  LV[14] := LV[14] xor PUInt64(LPCounterFlags + 2 * SizeOf(UInt64))^;
-  LV[15] := LV[15] xor PUInt64(LPCounterFlags + 3 * SizeOf(UInt64))^;
+  LV[12] := LV[12] xor TBinaryPrimitives.LoadUInt64(PUInt64(LPCounterFlags));
+  LV[13] := LV[13] xor TBinaryPrimitives.LoadUInt64
+    (PUInt64(LPCounterFlags + SizeOf(UInt64)));
+  LV[14] := LV[14] xor TBinaryPrimitives.LoadUInt64
+    (PUInt64(LPCounterFlags + 2 * SizeOf(UInt64)));
+  LV[15] := LV[15] xor TBinaryPrimitives.LoadUInt64
+    (PUInt64(LPCounterFlags + 3 * SizeOf(UInt64)));
 
   for LRound := 0 to 11 do
   begin
@@ -306,8 +311,9 @@ begin
   end;
 
   for I := 0 to 7 do
-    PUInt64(LPState + I * SizeOf(UInt64))^ :=
-      PUInt64(LPState + I * SizeOf(UInt64))^ xor (LV[I] xor LV[I + 8]);
+    TBinaryPrimitives.StoreUInt64(PUInt64(LPState + I * SizeOf(UInt64)),
+      TBinaryPrimitives.LoadUInt64(PUInt64(LPState + I * SizeOf(UInt64)))
+      xor (LV[I] xor LV[I + 8]));
 end;
 
 type

@@ -263,11 +263,13 @@ var
 
   procedure G(AA, AB, AC, AD, AMsgIdx0, AMsgIdx1: Int32);
   begin
-    LV[AA] := LV[AA] + LV[AB] + PUInt32(LPMsg + AMsgIdx0 * SizeOf(UInt32))^;
+    LV[AA] := LV[AA] + LV[AB] + TBinaryPrimitives.LoadUInt32
+      (PCardinal(LPMsg + AMsgIdx0 * SizeOf(UInt32)));
     LV[AD] := TBitOperations.RotateRight32(LV[AD] xor LV[AA], 16);
     LV[AC] := LV[AC] + LV[AD];
     LV[AB] := TBitOperations.RotateRight32(LV[AB] xor LV[AC], 12);
-    LV[AA] := LV[AA] + LV[AB] + PUInt32(LPMsg + AMsgIdx1 * SizeOf(UInt32))^;
+    LV[AA] := LV[AA] + LV[AB] + TBinaryPrimitives.LoadUInt32
+      (PCardinal(LPMsg + AMsgIdx1 * SizeOf(UInt32)));
     LV[AD] := TBitOperations.RotateRight32(LV[AD] xor LV[AA], 8);
     LV[AC] := LV[AC] + LV[AD];
     LV[AB] := TBitOperations.RotateRight32(LV[AB] xor LV[AC], 7);
@@ -280,14 +282,17 @@ begin
   LPIV := PByte(AIV);
 
   for I := 0 to 7 do
-    LV[I] := PUInt32(LPState + I * SizeOf(UInt32))^;
+    LV[I] := TBinaryPrimitives.LoadUInt32(PCardinal(LPState + I * SizeOf(UInt32)));
   for I := 0 to 7 do
-    LV[I + 8] := PUInt32(LPIV + I * SizeOf(UInt32))^;
+    LV[I + 8] := TBinaryPrimitives.LoadUInt32(PCardinal(LPIV + I * SizeOf(UInt32)));
 
-  LV[12] := LV[12] xor PUInt32(LPCounterFlags)^;
-  LV[13] := LV[13] xor PUInt32(LPCounterFlags + SizeOf(UInt32))^;
-  LV[14] := LV[14] xor PUInt32(LPCounterFlags + 2 * SizeOf(UInt32))^;
-  LV[15] := LV[15] xor PUInt32(LPCounterFlags + 3 * SizeOf(UInt32))^;
+  LV[12] := LV[12] xor TBinaryPrimitives.LoadUInt32(PCardinal(LPCounterFlags));
+  LV[13] := LV[13] xor TBinaryPrimitives.LoadUInt32
+    (PCardinal(LPCounterFlags + SizeOf(UInt32)));
+  LV[14] := LV[14] xor TBinaryPrimitives.LoadUInt32
+    (PCardinal(LPCounterFlags + 2 * SizeOf(UInt32)));
+  LV[15] := LV[15] xor TBinaryPrimitives.LoadUInt32
+    (PCardinal(LPCounterFlags + 3 * SizeOf(UInt32)));
 
   for LRound := 0 to 9 do
   begin
@@ -302,8 +307,9 @@ begin
   end;
 
   for I := 0 to 7 do
-    PUInt32(LPState + I * SizeOf(UInt32))^ :=
-      PUInt32(LPState + I * SizeOf(UInt32))^ xor (LV[I] xor LV[I + 8]);
+    TBinaryPrimitives.StoreUInt32(PCardinal(LPState + I * SizeOf(UInt32)),
+      TBinaryPrimitives.LoadUInt32(PCardinal(LPState + I * SizeOf(UInt32)))
+      xor (LV[I] xor LV[I + 8]));
 end;
 
 type
