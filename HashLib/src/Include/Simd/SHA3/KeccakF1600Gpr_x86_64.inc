@@ -1,7 +1,5 @@
 // Keccak-f[1600] permutation for x86-64, pure 64-bit GPR code (no SIMD
-// registers at all) - the fastest non-AVX2 form of Keccak on x86-64, so it
-// fills the SSE2 dispatch slot for pre-AVX2 CPUs (house precedent: the CRC
-// "SSE2" slicing kernels are GPR too).
+// registers at all) - the fastest non-AVX2 form of Keccak on x86-64.
 // Reference: OpenSSL CRYPTOGAMS keccak1600-x86_64.pl by Andy Polyakov.
 //
 // The inner routine works in the LANE-COMPLEMENTED domain (lanes 1, 2, 8,

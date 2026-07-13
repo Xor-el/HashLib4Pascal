@@ -1,4 +1,4 @@
-// AVX2 (VEX-128) implementation of fused XOR + Salsa20/8 on Percival-permuted data.
+// AVX (VEX-128) implementation of fused XOR + Salsa20/8 on Percival-permuted data.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 //
 // Reference: Colin Percival, "Stronger Key Derivation via Sequential

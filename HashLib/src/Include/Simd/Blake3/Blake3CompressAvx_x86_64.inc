@@ -1,4 +1,4 @@
-// AVX2 implementation of BLAKE3 compress (VEX-encoded 128-bit, 7 rounds with register-based
+// AVX (VEX-128) implementation of BLAKE3 compress (7 rounds with register-based
 // message scheduling).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE3-team/BLAKE3 official SSE2/AVX2 implementation.

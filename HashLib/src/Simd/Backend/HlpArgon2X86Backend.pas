@@ -46,27 +46,18 @@ const
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
-{$IFDEF HASHLIB_I386_ASM}
-
 procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Argon2\Argon2FillBlockSse2_i386.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Argon2\Argon2FillBlockSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Argon2\Argon2FillBlockSse2_i386.inc}
+{$ENDIF}
 end;
-
-procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer;
-  AWithXor: Int32; AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
-  {$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_i386.inc}
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
-
-procedure Argon2_FillBlock_Sse2(ALeft, ARight, ACurrent: Pointer; AWithXor: Int32);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Argon2\Argon2FillBlockSse2_x86_64.inc}
-end;
 
 procedure Argon2_FillBlock_Ssse3(ALeft, ARight, ACurrent: Pointer;
   AWithXor: Int32; AMasks: Pointer);
@@ -81,13 +72,19 @@ begin
     @ARGON2_ROT_MASKS);
 end;
 
+{$ENDIF HASHLIB_X86_64_ASM}
+
 procedure Argon2_FillBlock_Avx2(ALeft, ARight, ACurrent: Pointer;
   AWithXor: Int32; AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
+{$I ..\..\Include\Simd\Argon2\Argon2FillBlockAvx2_i386.inc}
+{$ENDIF}
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 procedure Argon2_FillBlock_Avx2_Wrap(ALeft, ARight, ACurrent: Pointer;
   AWithXor: Int32);

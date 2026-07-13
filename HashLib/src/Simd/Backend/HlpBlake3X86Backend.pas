@@ -50,27 +50,18 @@ const
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
-{$IFDEF HASHLIB_I386_ASM}
-
 procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_i386.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_i386.inc}
+{$ENDIF}
 end;
-
-procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
-  ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_i386.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_i386.inc}
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
-
-procedure Blake3_Compress_Sse2(AState, AMsg, ACV, ACounterFlags: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3CompressSse2_x86_64.inc}
-end;
 
 procedure Blake3_Compress_Ssse3(AState, AMsg, ACV, ACounterFlags,
   AMasks: Pointer);
@@ -85,24 +76,34 @@ begin
     @BLAKE3_ROT_MASKS);
 end;
 
-procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags,
+procedure Blake3_Compress_Avx(AState, AMsg, ACV, ACounterFlags,
   AMasks: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3CompressAvx2_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3CompressAvx_x86_64.inc}
 end;
 
-procedure Blake3_Compress_Avx2_Wrap(AState, AMsg, ACV,
+procedure Blake3_Compress_Avx_Wrap(AState, AMsg, ACV,
   ACounterFlags: Pointer);
 begin
-  Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags,
+  Blake3_Compress_Avx(AState, AMsg, ACV, ACounterFlags,
     @BLAKE3_ROT_MASKS);
 end;
 
+{$ENDIF HASHLIB_X86_64_ASM}
+
 procedure Blake3_Hash4_Sse2(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc6Begin_i386.inc}
+{$I ..\..\Include\Simd\Blake3\Blake3Hash4Sse2_i386.inc}
+{$ENDIF}
 end;
+
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure Blake3_Hash4_Ssse3(AInput, AKey, AOut: Pointer;
   ANumChunks: Int32; ACounter: UInt64; AFlags: UInt32; AMasks: Pointer);
@@ -200,7 +201,7 @@ begin
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3,
     TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
-      Exit(@Blake3_Compress_Avx2_Wrap);
+      Exit(@Blake3_Compress_Avx_Wrap);
     TX86SimdLevel.SSSE3:
       Exit(@Blake3_Compress_Ssse3_Wrap);
     TX86SimdLevel.SSE2:

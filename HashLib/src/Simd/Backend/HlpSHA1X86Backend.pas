@@ -75,24 +75,6 @@ begin
   SHA1_Compress_ShaNi(AState, AData, ANumBlocks, @K_SHA1_Doubled);
 end;
 
-procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA1\SHA1CompressSse2_i386.inc}
-end;
-
-procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA1\SHA1CompressSsse3_i386.inc}
-end;
-
-procedure SHA1_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA1\SHA1CompressAvx2_i386.inc}
-end;
-
 {$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
@@ -108,22 +90,58 @@ begin
   SHA1_Compress_ShaNi(AState, AData, ANumBlocks, @K_SHA1, @BSWAP32_MASK);
 end;
 
+{$ENDIF HASHLIB_X86_64_ASM}
+
 procedure SHA1_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA1\SHA1CompressSse2_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\SHA1\SHA1CompressSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\SHA1\SHA1CompressSse2_i386.inc}
+{$ENDIF}
 end;
 
 procedure SHA1_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA1\SHA1CompressSsse3_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\SHA1\SHA1CompressSsse3_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\SHA1\SHA1CompressSsse3_i386.inc}
+{$ENDIF}
 end;
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA1_Compress_Avx(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\SHA1\SHA1CompressAvx_i386.inc}
+end;
+
+procedure SHA1_Compress_Avx_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA1_Compress_Avx(AState, AData, ANumBlocks, @K_SHA1_Doubled);
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA1_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
   {$I ..\..\Include\Simd\SHA1\SHA1CompressAvx2_x86_64.inc}
+end;
+
+procedure SHA1_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA1_Compress_Avx2(AState, AData, ANumBlocks, @K_SHA1_Doubled);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
@@ -138,11 +156,6 @@ begin
   SHA1_Compress_Ssse3(AState, AData, ANumBlocks, @K_SHA1_Doubled);
 end;
 
-procedure SHA1_Compress_Avx2_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
-begin
-  SHA1_Compress_Avx2(AState, AData, ANumBlocks, @K_SHA1_Doubled);
-end;
-
 {$ENDIF HASHLIB_X86_SIMD}
 
 { TSHA1X86Backend }
@@ -155,7 +168,7 @@ begin
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3,
     TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
-      Exit(@SHA1_Compress_Avx2_Wrap);
+      Exit(@SHA1_Compress_Avx_Wrap);
     TX86SimdLevel.SSSE3:
       Exit(@SHA1_Compress_Ssse3_Wrap);
     TX86SimdLevel.SSE2:

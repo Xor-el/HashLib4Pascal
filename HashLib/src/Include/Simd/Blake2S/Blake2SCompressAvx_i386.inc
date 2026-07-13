@@ -1,5 +1,5 @@
-// AVX2 implementation of BLAKE2s compress (IA-32; VEX-encoded 128-bit, fully
-// unrolled 10 rounds). Same structure as Blake2SCompressAvx2_x86_64.inc,
+// AVX (VEX-128) implementation of BLAKE2s compress (IA-32; fully unrolled
+// 10 rounds). Same structure as Blake2SCompressAvx_x86_64.inc,
 // with the rot8 mask read as a VEX memory operand per site (IA-32 has only
 // xmm0-7, so no register is free to keep it resident; VEX memory operands
 // are read unaligned, so the Pascal const needs no special alignment).

@@ -34,49 +34,41 @@ uses
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
-{$IFDEF HASHLIB_I386_ASM}
-
 procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksSse2_i386.inc}
-end;
-
-procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksSsse3_i386.inc}
-end;
-
-procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksAvx2_i386.inc}
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
-
 {$IFDEF HASHLIB_X86_64_ASM}
-
-procedure Adler32_ProcessBlocks_Sse2(AData: PByte; ANumBlocks: UInt32;
-  ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksSse2_x86_64.inc}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksSse2_i386.inc}
+{$ENDIF}
 end;
 
 procedure Adler32_ProcessBlocks_Ssse3(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksSsse3_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksSsse3_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksSsse3_i386.inc}
+{$ENDIF}
 end;
 
 procedure Adler32_ProcessBlocks_Avx2(AData: PByte; ANumBlocks: UInt32;
   ASums, AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Adler32\Adler32BlocksAvx2_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksAvx2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Adler32\Adler32BlocksAvx2_i386.inc}
+{$ENDIF}
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 procedure Adler32_Update_Sse2(AData: PByte; ALength: UInt32; ASums: Pointer);
 begin

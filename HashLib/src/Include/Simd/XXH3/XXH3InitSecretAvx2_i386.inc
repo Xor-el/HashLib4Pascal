@@ -3,20 +3,19 @@
 // x86_64 version's vmovq xmm, r64 seed transfers (not encodable in 32-bit
 // mode) become the SSE2 i386 sibling's push/vmovq-from-stack pattern, with
 // the negation done in 32-bit halves (not/not + add/adc carry).
-// IA-32: after HlpSimdProc3Begin_i386 - ebx = customSecret,
-//   esi = defaultSecret, edi = seed.lo32, dword [esp+16] = seed.hi32
-//   (UInt64 third parameter; high dword on stack).
+// IA-32: after HlpSimdProc3Begin_i386 - ebx = customSecret, esi = defaultSecret,
+//   edi = seed ptr (PUInt64).
 // Uses only volatile registers: ymm0-ymm1, eax, ecx, edx (edi reused).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: official xxHash C - XXH3_initCustomSecret_avx2 in xxhash.h,
 // HashLib XXH3InitSecretAvx2_x86_64.inc.
 
   // Build seed vector ymm0 = [seed, -seed, seed, -seed]
-  mov    eax, edi
-  mov    edx, dword ptr [esp + $10]
+  mov    eax, dword ptr [edi]
+  mov    edx, dword ptr [edi + $4]
 
-  push   eax
   push   edx
+  push   eax
   db $C5, $FA, $7E, $04, $24                    // vmovq  xmm0, qword [esp]
   add    esp, $8
 
@@ -26,8 +25,8 @@
   not    edi
   add    ecx, $1
   adc    edi, $0
-  push   ecx
   push   edi
+  push   ecx
   db $C5, $FA, $7E, $0C, $24                    // vmovq  xmm1, qword [esp]
   add    esp, $8
   db $C5, $F9, $6C, $C1                         // vpunpcklqdq xmm0, xmm0, xmm1

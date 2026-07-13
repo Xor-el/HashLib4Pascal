@@ -21,9 +21,9 @@
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
   .long 0x3dc00021                    // ldr q1, [x1, #0x0]
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
-  .long 0x4ea69c03                    // mul v3.4s, v0.4s, v4.4s
+  .long 0x4ea49c03                    // mul v3.4s, v0.4s, v4.4s
   .long 0x0ea12801                    // xtn v1.2s, v0.2d
-  .long 0x2ea78023                    // umlal v3.2d, v1.2s, v5.2s
+  .long 0x2ea58023                    // umlal v3.2d, v1.2s, v5.2s
   .long 0x3d800003                    // str q3, [x0, #0x0]
   // --- chunk 1: acc[2..3], secret[0x10..] ---
   .long 0x3dc00400                    // ldr q0, [x0, #0x10]
@@ -31,9 +31,9 @@
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
   .long 0x3dc00421                    // ldr q1, [x1, #0x10]
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
-  .long 0x4ea69c03                    // mul v3.4s, v0.4s, v4.4s
+  .long 0x4ea49c03                    // mul v3.4s, v0.4s, v4.4s
   .long 0x0ea12801                    // xtn v1.2s, v0.2d
-  .long 0x2ea78023                    // umlal v3.2d, v1.2s, v5.2s
+  .long 0x2ea58023                    // umlal v3.2d, v1.2s, v5.2s
   .long 0x3d800403                    // str q3, [x0, #0x10]
   // --- chunk 2: acc[4..5], secret[0x20..] ---
   .long 0x3dc00800                    // ldr q0, [x0, #0x20]
@@ -41,9 +41,9 @@
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
   .long 0x3dc00821                    // ldr q1, [x1, #0x20]
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
-  .long 0x4ea69c03                    // mul v3.4s, v0.4s, v4.4s
+  .long 0x4ea49c03                    // mul v3.4s, v0.4s, v4.4s
   .long 0x0ea12801                    // xtn v1.2s, v0.2d
-  .long 0x2ea78023                    // umlal v3.2d, v1.2s, v5.2s
+  .long 0x2ea58023                    // umlal v3.2d, v1.2s, v5.2s
   .long 0x3d800803                    // str q3, [x0, #0x20]
   // --- chunk 3: acc[6..7], secret[0x30..] ---
   .long 0x3dc00c00                    // ldr q0, [x0, #0x30]
@@ -51,8 +51,8 @@
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
   .long 0x3dc00c21                    // ldr q1, [x1, #0x30]
   .long 0x6e211c00                    // eor v0.16b, v0.16b, v1.16b
-  .long 0x4ea69c03                    // mul v3.4s, v0.4s, v4.4s
+  .long 0x4ea49c03                    // mul v3.4s, v0.4s, v4.4s
   .long 0x0ea12801                    // xtn v1.2s, v0.2d
-  .long 0x2ea78023                    // umlal v3.2d, v1.2s, v5.2s
+  .long 0x2ea58023                    // umlal v3.2d, v1.2s, v5.2s
   .long 0x3d800c03                    // str q3, [x0, #0x30]
   ret

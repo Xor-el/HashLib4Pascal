@@ -1,9 +1,9 @@
 // Keccak-f[1600] sponge absorb for x86-64, pure 64-bit GPR code - the
-// asm twin of the AVX2 absorb for the SSE2 dispatch slot: XORs whole blocks
+// asm twin of the AVX2 absorb: XORs whole blocks
 // into the state and permutes, keeping the state in the lane-complemented
 // domain across the entire batch (the NOT conversion is hoisted out of the
 // block loop - the standalone permute pays it per call).
-// The permutation body is the same inner as KeccakF1600Sse2_x86_64.inc
+// The permutation body is the same inner as KeccakF1600Gpr_x86_64.inc
 // (embedded again because local labels cannot cross include files), with the
 // same end-pointer loop termination via the sentinel at [rsp].
 // Reference: OpenSSL CRYPTOGAMS keccak1600-x86_64.pl (SHA3_absorb) by

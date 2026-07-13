@@ -3,6 +3,7 @@ unit Hash64Tests;
 interface
 
 uses
+  SysUtils,
 {$IFDEF FPC}
   fpcunit,
   testregistry,
@@ -10,6 +11,7 @@ uses
   TestFramework,
 {$ENDIF FPC}
   HashLibTestBase,
+  HlpIHashInfo,
   HlpHashFactory;
 
 // Hash64
@@ -69,6 +71,18 @@ type
   protected
     procedure SetUp; override;
     procedure TearDown; override;
+
+  published
+    // Known-answer tests for the long-input paths (values cross-checked
+    // against the official xxHash implementation): the self-consistency
+    // chunked tests alone cannot catch a wrong SIMD kernel because both
+    // sides run the same code.
+    procedure TestChunkedDataKnownAnswer;          // 299 bytes: accumulate512
+    procedure TestTwoKiBDataKnownAnswer;           // 2048 bytes: scrambleAcc
+    procedure TestChunkedDataWithMaxUInt64AsKeyKnownAnswer; // seeded: initSecret
+    // An asymmetric key (lo32 <> hi32) - a symmetric one like MaxUInt64
+    // cannot catch seed dword swaps or wrong hi/lo pickup in the kernels.
+    procedure TestChunkedDataWithAsymmetricKeyKnownAnswer;
 
   end;
 
@@ -186,6 +200,69 @@ procedure TTestXXHash3.TearDown;
 begin
   HashInstance := nil;
   inherited;
+end;
+
+procedure TTestXXHash3.TestChunkedDataKnownAnswer;
+begin
+  ExpectedString := '3D3D7245B763ACE8';
+  ActualString := HashInstance.ComputeString(ChunkedData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TTestXXHash3.TestTwoKiBDataKnownAnswer;
+var
+  LData: TBytes;
+  LIdx: Int32;
+begin
+  System.SetLength(LData, 2048);
+  for LIdx := 0 to 2047 do
+  begin
+    LData[LIdx] := Byte(LIdx and $FF);
+  end;
+  ExpectedString := 'DD420471FF96BD00';
+  ActualString := HashInstance.ComputeBytes(LData).ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TTestXXHash3.TestChunkedDataWithAsymmetricKeyKnownAnswer;
+var
+  LIHashWithKey: IHashWithKey;
+  LKey: TBytes;
+begin
+  // key = $0123456789ABCDEF (little-endian bytes below)
+  ExpectedString := 'FBF9CD92890CC82A';
+  CheckTrue(Supports(HashInstance, IHashWithKey, LIHashWithKey),
+    'HashInstance must support IHashWithKey');
+  LKey := TBytes.Create($EF, $CD, $AB, $89, $67, $45, $23, $01);
+  LIHashWithKey.Key := LKey;
+  ActualString := LIHashWithKey.ComputeString(ChunkedData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
+end;
+
+procedure TTestXXHash3.TestChunkedDataWithMaxUInt64AsKeyKnownAnswer;
+var
+  LIHashWithKey: IHashWithKey;
+  LKey: TBytes;
+  LIdx: Int32;
+begin
+  ExpectedString := '7DEFEE70FC854900';
+  CheckTrue(Supports(HashInstance, IHashWithKey, LIHashWithKey),
+    'HashInstance must support IHashWithKey');
+  System.SetLength(LKey, System.SizeOf(UInt64));
+  for LIdx := 0 to System.High(LKey) do
+  begin
+    LKey[LIdx] := $FF;
+  end;
+  LIHashWithKey.Key := LKey;
+  ActualString := LIHashWithKey.ComputeString(ChunkedData, TEncoding.UTF8)
+    .ToString();
+  CheckEquals(ExpectedString, ActualString, Format('Expected %s but got %s.',
+    [ExpectedString, ActualString]));
 end;
 
 initialization

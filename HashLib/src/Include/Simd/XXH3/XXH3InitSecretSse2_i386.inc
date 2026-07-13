@@ -1,15 +1,14 @@
 // SSE2 implementation of XXH3_initCustomSecret (fully unrolled, 12 x 16-byte chunks).
-// IA-32: after HlpSimdProc3Begin_i386 — ebx = customSecret, esi = defaultSecret, edi = seed.lo32,
-//   dword [esp+16] = seed.hi32 (UInt64 third parameter; high dword on stack).
-//   (parallel to MS x64 ABI: rcx, rdx, r8).
-// Uses only volatile XMM: xmm0–xmm2.
+// IA-32: after HlpSimdProc3Begin_i386 - ebx = customSecret, esi = defaultSecret,
+//   edi = seed ptr (PUInt64).
+// Uses only volatile XMM: xmm0-xmm2.
 // Reference: official xxHash C - XXH3_initCustomSecret_sse2 in xxhash.h
 
-  mov eax, edi
-  mov edx, dword ptr [esp + 16]
+  mov eax, dword ptr [edi]
+  mov edx, dword ptr [edi + 4]
 
-  push eax
   push edx
+  push eax
   movq xmm0, qword ptr [esp]
   add esp, 8
 
@@ -19,8 +18,8 @@
   not edi
   add ecx, 1
   adc edi, 0
-  push ecx
   push edi
+  push ecx
   movq xmm1, qword ptr [esp]
   add esp, 8
   punpcklqdq xmm0, xmm1
