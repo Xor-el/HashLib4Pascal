@@ -1,4 +1,4 @@
-// AVX2 implementation of BLAKE2s compress (VEX-encoded 128-bit, fully unrolled 10 rounds).
+// AVX (VEX-128) implementation of BLAKE2s compress (fully unrolled 10 rounds).
 // Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
 //   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
 //   (see BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the

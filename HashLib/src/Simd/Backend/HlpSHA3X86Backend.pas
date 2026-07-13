@@ -31,7 +31,7 @@ uses
 
 const
   // Plain 24-entry iota round constants (stride 8) for the scalar-layout
-  // kernels (i386 + x86_64 SSE2; the AVX2 kernel uses the x4-broadcast
+  // kernels (i386 SSE2 + x86_64 GPR; the AVX2 kernel uses the x4-broadcast
   // table below).
   K_KECCAK_IOTAS: array [0 .. 23] of UInt64 = (
     UInt64($0000000000000001), UInt64($0000000000008082),
@@ -117,15 +117,15 @@ procedure KeccakF1600_Avx2_Absorb(AState: Pointer; AData: PByte;
   {$I ..\..\Include\Simd\SHA3\KeccakF1600Avx2Absorb_x86_64.inc}
 end;
 
-procedure KeccakF1600_Sse2(AState: Pointer; AConstants: Pointer);
+procedure KeccakF1600_Gpr(AState: Pointer; AConstants: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2_x86_64.inc}
+  {$I ..\..\Include\Simd\SHA3\KeccakF1600Gpr_x86_64.inc}
 end;
 
-procedure KeccakF1600_Sse2_Absorb(AState: Pointer; AData: PByte;
+procedure KeccakF1600_Gpr_Absorb(AState: Pointer; AData: PByte;
   ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2Absorb_x86_64.inc}
+  {$I ..\..\Include\Simd\SHA3\KeccakF1600GprAbsorb_x86_64.inc}
 end;
 
 procedure KeccakF1600_Avx2_Wrap(AState: Pointer);
@@ -137,6 +137,18 @@ procedure KeccakF1600_Avx2_Absorb_Wrap(AState: Pointer; AData: PByte;
   ABlockCount: Int32; ABlockSize: Int32);
 begin
   KeccakF1600_Avx2_Absorb(AState, AData, ABlockCount, ABlockSize, @K_KECCAK);
+end;
+
+procedure KeccakF1600_Gpr_Wrap(AState: Pointer);
+begin
+  KeccakF1600_Gpr(AState, @K_KECCAK_IOTAS);
+end;
+
+procedure KeccakF1600_Gpr_Absorb_Wrap(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32);
+begin
+  KeccakF1600_Gpr_Absorb(AState, AData, ABlockCount, ABlockSize,
+    @K_KECCAK_IOTAS);
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
@@ -154,8 +166,6 @@ procedure KeccakF1600_Sse2_Absorb(AState: Pointer; AData: PByte;
   {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2Absorb_i386.inc}
 end;
 
-{$ENDIF HASHLIB_I386_ASM}
-
 procedure KeccakF1600_Sse2_Wrap(AState: Pointer);
 begin
   KeccakF1600_Sse2(AState, @K_KECCAK_IOTAS);
@@ -168,6 +178,8 @@ begin
     @K_KECCAK_IOTAS);
 end;
 
+{$ENDIF HASHLIB_I386_ASM}
+
 {$ENDIF HASHLIB_X86_SIMD}
 
 { TSHA3X86Backend }
@@ -179,7 +191,7 @@ begin
     TX86SimdLevel.AVX2:
       Exit(@KeccakF1600_Avx2_Wrap);
     TX86SimdLevel.SSE2:
-      Exit(@KeccakF1600_Sse2_Wrap);
+      Exit(@KeccakF1600_Gpr_Wrap);
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_I386_ASM}
@@ -198,7 +210,7 @@ begin
     TX86SimdLevel.AVX2:
       Exit(@KeccakF1600_Avx2_Absorb_Wrap);
     TX86SimdLevel.SSE2:
-      Exit(@KeccakF1600_Sse2_Absorb_Wrap);
+      Exit(@KeccakF1600_Gpr_Absorb_Wrap);
   end;
 {$ENDIF}
 {$IFDEF HASHLIB_I386_ASM}

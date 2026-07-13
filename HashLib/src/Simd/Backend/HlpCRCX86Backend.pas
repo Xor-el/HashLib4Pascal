@@ -42,10 +42,10 @@ function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
   {$I ..\..\Include\Simd\CRC\CRCFoldReflectedSse2_i386.inc}
 end;
 
-function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
+function CRC_Fold_Forward_Gpr(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\CRC\CRCFoldForwardSse2_i386.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldForwardGpr_i386.inc}
 end;
 
 function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
@@ -82,10 +82,10 @@ function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
   {$I ..\..\Include\Simd\CRC\CRCFoldReflectedSse2_x86_64.inc}
 end;
 
-function CRC_Fold_Forward_Sse2(AData: PByte; ALength: UInt32;
+function CRC_Fold_Forward_Gpr(AData: PByte; ALength: UInt32;
   AState: Pointer; AConstants: Pointer): UInt64;
   {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\CRC\CRCFoldForwardSse2_x86_64.inc}
+  {$I ..\..\Include\Simd\CRC\CRCFoldForwardGpr_x86_64.inc}
 end;
 
 function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
@@ -146,7 +146,7 @@ begin
     TX86SimdLevel.SSE2:
     begin
       Result.Reflected := @CRC_Fold_Reflected_Sse2;
-      Result.Fwd := @CRC_Fold_Forward_Sse2;
+      Result.Fwd := @CRC_Fold_Forward_Gpr;
     end;
   end;
 {$ENDIF HASHLIB_X86_SIMD}

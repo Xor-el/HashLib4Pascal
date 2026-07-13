@@ -1,5 +1,5 @@
 // Keccak-f[1600] sponge absorb for IA-32, pure SSE2 - the asm twin of the
-// x86-64 absorb for the SSE2 dispatch slot: XORs whole blocks into the state
+// x86-64 absorb: XORs whole blocks into the state
 // and permutes. MMX converted to SSE2 like the permute.
 // The permutation body is the same inner as KeccakF1600Sse2_i386.inc
 // (embedded again because local labels cannot cross include files).

@@ -1,7 +1,6 @@
 // SHA-1 AVX SIMD-schedule implementation (IA-32). VEX-128 (AVX1)
-// instructions only - there is no i386 AVX2 SHA-1 upstream - dispatched at
-// the AVX2 tier (every AVX2 CPU has AVX1; AVX1-only CPUs fall to the SSSE3
-// tier). The 3-operand VEX forms eliminate the SSSE3 kernel's register-copy
+// instructions only - there is no i386 AVX2 SHA-1 upstream. The 3-operand
+// VEX forms eliminate the SSSE3 kernel's register-copy
 // movdqa traffic in the interleaved message schedule. All VEX instructions
 // are db-encoded for broad assembler compatibility.
 // The four round constants and the byte-swap mask are read from

@@ -85,16 +85,16 @@ begin
     @BLAKE3_ROT_MASKS);
 end;
 
-procedure Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags,
+procedure Blake3_Compress_Avx(AState, AMsg, ACV, ACounterFlags,
   AMasks: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake3\Blake3CompressAvx2_x86_64.inc}
+  {$I ..\..\Include\Simd\Blake3\Blake3CompressAvx_x86_64.inc}
 end;
 
-procedure Blake3_Compress_Avx2_Wrap(AState, AMsg, ACV,
+procedure Blake3_Compress_Avx_Wrap(AState, AMsg, ACV,
   ACounterFlags: Pointer);
 begin
-  Blake3_Compress_Avx2(AState, AMsg, ACV, ACounterFlags,
+  Blake3_Compress_Avx(AState, AMsg, ACV, ACounterFlags,
     @BLAKE3_ROT_MASKS);
 end;
 
@@ -200,7 +200,7 @@ begin
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSSE3,
     TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
-      Exit(@Blake3_Compress_Avx2_Wrap);
+      Exit(@Blake3_Compress_Avx_Wrap);
     TX86SimdLevel.SSSE3:
       Exit(@Blake3_Compress_Ssse3_Wrap);
     TX86SimdLevel.SSE2:

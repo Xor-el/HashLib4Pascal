@@ -24,11 +24,12 @@ implementation
 {$IFDEF HASHLIB_AARCH64_ASM}
 
 uses
-  HlpCpuFeatures;
+  HlpCpuFeatures,
+  HlpSimdLevels;
 
 // =============================================================================
 // SIMD kernels
-//   aarch64: SHA1 Crypto Extensions
+//   aarch64: SHA1 Crypto Extensions, NEON
 // =============================================================================
 
 procedure SHA1_Compress_CryptoExt(AState, AData: Pointer; ANumBlocks: UInt32;
@@ -42,6 +43,11 @@ begin
   SHA1_Compress_CryptoExt(AState, AData, ANumBlocks, @K_SHA1);
 end;
 
+procedure SHA1_Compress_Gpr(AState, AData: Pointer; ANumBlocks: UInt32);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_aarch64.inc}
+  {$I ..\..\Include\Simd\SHA1\SHA1CompressGpr_aarch64.inc}
+end;
+
 {$ENDIF HASHLIB_AARCH64_ASM}
 
 { TSHA1ArmBackend }
@@ -51,6 +57,10 @@ begin
 {$IFDEF HASHLIB_AARCH64_ASM}
   if TCpuFeatures.Arm.HasSHA1() then
     Exit(@SHA1_Compress_CryptoExt_Wrap);
+  case TCpuFeatures.Arm.SelectSlot([TArmSimdLevel.NEON]) of
+    TArmSimdLevel.NEON:
+      Exit(@SHA1_Compress_Gpr);
+  end;
 {$ENDIF}
   Result := AScalar;
 end;

@@ -1,4 +1,6 @@
 // Reflected (LSB-first) 64-bit CRC: 16-byte slice using SSE2 loads + GPR table XOR.
+// GPR slicing core; SSE2 is genuinely required for the 128-bit loads and the
+// CRC state shuttle - the Sse2 name states the ISA requirement.
 // Signature (after HlpSimdProc4Begin_x86_64.inc):
 //   function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
 //     AState: Pointer; AConstants: Pointer): UInt64;

@@ -40,9 +40,9 @@ procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
   {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_i386.inc}
 end;
 
-procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
+procedure Scrypt_SalsaXor_Avx(AState, AInput: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx2_i386.inc}
+  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_i386.inc}
 end;
 
 {$ENDIF HASHLIB_I386_ASM}
@@ -54,9 +54,9 @@ procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
   {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_x86_64.inc}
 end;
 
-procedure Scrypt_SalsaXor_Avx2(AState, AInput: Pointer);
+procedure Scrypt_SalsaXor_Avx(AState, AInput: Pointer);
   {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx2_x86_64.inc}
+  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_x86_64.inc}
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
@@ -70,7 +70,7 @@ begin
 {$IFDEF HASHLIB_X86_SIMD}
   case TCpuFeatures.X86.SelectSlot([TX86SimdLevel.AVX2, TX86SimdLevel.SSE2]) of
     TX86SimdLevel.AVX2:
-      Exit(@Scrypt_SalsaXor_Avx2);
+      Exit(@Scrypt_SalsaXor_Avx);
     TX86SimdLevel.SSE2:
       Exit(@Scrypt_SalsaXor_Sse2);
   end;

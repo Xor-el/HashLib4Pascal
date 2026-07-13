@@ -1,5 +1,5 @@
-// AVX2 (VEX-128) implementation of fused XOR + Salsa20/8 on Percival-permuted
-// data (IA-32). Same structure as ScryptSalsa8Avx2_x86_64.inc; the state
+// AVX (VEX-128) implementation of fused XOR + Salsa20/8 on Percival-permuted
+// data (IA-32). Same structure as ScryptSalsa8Avx_x86_64.inc; the state
 // save/reload uses vmovdqu (IA-32 stacks are only 4-aligned), so the frame is
 // 64 bytes with no alignment padding.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
