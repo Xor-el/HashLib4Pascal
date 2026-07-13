@@ -11,12 +11,14 @@
 //   v2-v3    = B0, B1
 //   v4-v5    = C0, C1
 //   v6-v7    = D0, D1
-//   v16-v18  = fBlaMka / rotr temps
+//   v16-v18  = fBlaMka / rotate temps (2-op insert rotates rename B/D rows
+//     through v16/v17; rows return home before each slice store)
 //   x9       = R_buf base ([sp+64])
 //   x10      = loop byte offset (steps 1-5)
 //   x11      = Z_buf base ([sp+1088])
 //   x12      = Z slice pointer (column/row load/store)
 //   w3       = WithXor (0 or 1)
+
   sub sp, sp, #2128
   add x9, sp, #64
   mov x10, #0
@@ -78,138 +80,126 @@
   .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
   .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
   .long 0x6f680450                    // ushr v16.2d, v2.2d, #24
-  .long 0x4f685451                    // shl v17.2d, v2.2d, #40
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x6f680470                    // ushr v16.2d, v3.2d, #24
-  .long 0x4f685471                    // shl v17.2d, v3.2d, #40
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x0ea12810                    // xtn v16.2s, v0.2d
-  .long 0x0ea12851                    // xtn v17.2s, v2.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6f685450                    // sli v16.2d, v2.2d, #40
+  .long 0x6f680471                    // ushr v17.2d, v3.2d, #24
+  .long 0x6f685471                    // sli v17.2d, v3.2d, #40
+  .long 0x0ea12802                    // xtn v2.2s, v0.2d
+  .long 0x0ea12a03                    // xtn v3.2s, v16.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
+  .long 0x4ef08400                    // add v0.2d, v0.2d, v16.2d
   .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
-  .long 0x0ea12871                    // xtn v17.2s, v3.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea12822                    // xtn v2.2s, v1.2d
+  .long 0x0ea12a23                    // xtn v3.2s, v17.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
+  .long 0x4ef18421                    // add v1.2d, v1.2d, v17.2d
   .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
   .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
   .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x6f7004d0                    // ushr v16.2d, v6.2d, #16
-  .long 0x4f7054d1                    // shl v17.2d, v6.2d, #48
-  .long 0x4eb11e06                    // orr v6.16b, v16.16b, v17.16b
-  .long 0x6f7004f0                    // ushr v16.2d, v7.2d, #16
-  .long 0x4f7054f1                    // shl v17.2d, v7.2d, #48
-  .long 0x4eb11e07                    // orr v7.16b, v16.16b, v17.16b
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
-  .long 0x0ea128d1                    // xtn v17.2s, v6.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6f7004c2                    // ushr v2.2d, v6.2d, #16
+  .long 0x6f7054c2                    // sli v2.2d, v6.2d, #48
+  .long 0x6f7004e3                    // ushr v3.2d, v7.2d, #16
+  .long 0x6f7054e3                    // sli v3.2d, v7.2d, #48
+  .long 0x0ea12886                    // xtn v6.2s, v4.2d
+  .long 0x0ea12847                    // xtn v7.2s, v2.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
+  .long 0x4ee28484                    // add v4.2d, v4.2d, v2.2d
   .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
-  .long 0x0ea128f1                    // xtn v17.2s, v7.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea128a6                    // xtn v6.2s, v5.2d
+  .long 0x0ea12867                    // xtn v7.2s, v3.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
+  .long 0x4ee384a5                    // add v5.2d, v5.2d, v3.2d
   .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x4ee28450                    // add v16.2d, v2.2d, v2.2d
-  .long 0x6f410451                    // ushr v17.2d, v2.2d, #63
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x4ee38470                    // add v16.2d, v3.2d, v3.2d
-  .long 0x6f410471                    // ushr v17.2d, v3.2d, #63
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x6e034050                    // ext v16.16b, v2.16b, v3.16b, #8
-  .long 0x6e024071                    // ext v17.16b, v3.16b, v2.16b, #8
-  .long 0x4eb01e02                    // orr v2.16b, v16.16b, v16.16b
-  .long 0x4eb11e23                    // orr v3.16b, v17.16b, v17.16b
+  .long 0x6e241e10                    // eor v16.16b, v16.16b, v4.16b
+  .long 0x6e251e31                    // eor v17.16b, v17.16b, v5.16b
+  .long 0x4ef08606                    // add v6.2d, v16.2d, v16.2d
+  .long 0x6f414606                    // sri v6.2d, v16.2d, #63
+  .long 0x4ef18627                    // add v7.2d, v17.2d, v17.2d
+  .long 0x6f414627                    // sri v7.2d, v17.2d, #63
+  .long 0x6e0740d0                    // ext v16.16b, v6.16b, v7.16b, #8
+  .long 0x6e0640f1                    // ext v17.16b, v7.16b, v6.16b, #8
+  .long 0x4eb01e06                    // orr v6.16b, v16.16b, v16.16b
+  .long 0x4eb11e27                    // orr v7.16b, v17.16b, v17.16b
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x4ea51ca4                    // orr v4.16b, v5.16b, v5.16b
   .long 0x4eb01e05                    // orr v5.16b, v16.16b, v16.16b
-  .long 0x6e0740d0                    // ext v16.16b, v6.16b, v7.16b, #8
-  .long 0x6e0640f1                    // ext v17.16b, v7.16b, v6.16b, #8
-  .long 0x4eb11e26                    // orr v6.16b, v17.16b, v17.16b
-  .long 0x4eb01e07                    // orr v7.16b, v16.16b, v16.16b
+  .long 0x6e034050                    // ext v16.16b, v2.16b, v3.16b, #8
+  .long 0x6e024071                    // ext v17.16b, v3.16b, v2.16b, #8
+  .long 0x4eb11e22                    // orr v2.16b, v17.16b, v17.16b
+  .long 0x4eb01e03                    // orr v3.16b, v16.16b, v16.16b
   .long 0x0ea12810                    // xtn v16.2s, v0.2d
-  .long 0x0ea12851                    // xtn v17.2s, v2.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
-  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
-  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
-  .long 0x0ea12871                    // xtn v17.2s, v3.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
-  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
-  .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
-  .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
-  .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x4ea008c6                    // rev64 v6.4s, v6.4s
-  .long 0x4ea008e7                    // rev64 v7.4s, v7.4s
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
   .long 0x0ea128d1                    // xtn v17.2s, v6.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
-  .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
+  .long 0x4ee68400                    // add v0.2d, v0.2d, v6.2d
+  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
+  .long 0x0ea12830                    // xtn v16.2s, v1.2d
   .long 0x0ea128f1                    // xtn v17.2s, v7.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
-  .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x6f680450                    // ushr v16.2d, v2.2d, #24
-  .long 0x4f685451                    // shl v17.2d, v2.2d, #40
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x6f680470                    // ushr v16.2d, v3.2d, #24
-  .long 0x4f685471                    // shl v17.2d, v3.2d, #40
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x0ea12810                    // xtn v16.2s, v0.2d
+  .long 0x4ee78421                    // add v1.2d, v1.2d, v7.2d
+  .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
+  .long 0x6e201c42                    // eor v2.16b, v2.16b, v0.16b
+  .long 0x6e211c63                    // eor v3.16b, v3.16b, v1.16b
+  .long 0x4ea00842                    // rev64 v2.4s, v2.4s
+  .long 0x4ea00863                    // rev64 v3.4s, v3.4s
+  .long 0x0ea12890                    // xtn v16.2s, v4.2d
   .long 0x0ea12851                    // xtn v17.2s, v2.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
-  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
+  .long 0x4ee28484                    // add v4.2d, v4.2d, v2.2d
+  .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
+  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
   .long 0x0ea12871                    // xtn v17.2s, v3.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
+  .long 0x4ee384a5                    // add v5.2d, v5.2d, v3.2d
+  .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
+  .long 0x6e241cc6                    // eor v6.16b, v6.16b, v4.16b
+  .long 0x6e251ce7                    // eor v7.16b, v7.16b, v5.16b
+  .long 0x6f6804d0                    // ushr v16.2d, v6.2d, #24
+  .long 0x6f6854d0                    // sli v16.2d, v6.2d, #40
+  .long 0x6f6804f1                    // ushr v17.2d, v7.2d, #24
+  .long 0x6f6854f1                    // sli v17.2d, v7.2d, #40
+  .long 0x0ea12806                    // xtn v6.2s, v0.2d
+  .long 0x0ea12a07                    // xtn v7.2s, v16.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
+  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
+  .long 0x4ef08400                    // add v0.2d, v0.2d, v16.2d
+  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
+  .long 0x0ea12826                    // xtn v6.2s, v1.2d
+  .long 0x0ea12a27                    // xtn v7.2s, v17.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
+  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
+  .long 0x4ef18421                    // add v1.2d, v1.2d, v17.2d
   .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
-  .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
-  .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x6f7004d0                    // ushr v16.2d, v6.2d, #16
-  .long 0x4f7054d1                    // shl v17.2d, v6.2d, #48
-  .long 0x4eb11e06                    // orr v6.16b, v16.16b, v17.16b
-  .long 0x6f7004f0                    // ushr v16.2d, v7.2d, #16
-  .long 0x4f7054f1                    // shl v17.2d, v7.2d, #48
-  .long 0x4eb11e07                    // orr v7.16b, v16.16b, v17.16b
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
-  .long 0x0ea128d1                    // xtn v17.2s, v6.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6e201c42                    // eor v2.16b, v2.16b, v0.16b
+  .long 0x6e211c63                    // eor v3.16b, v3.16b, v1.16b
+  .long 0x6f700446                    // ushr v6.2d, v2.2d, #16
+  .long 0x6f705446                    // sli v6.2d, v2.2d, #48
+  .long 0x6f700467                    // ushr v7.2d, v3.2d, #16
+  .long 0x6f705467                    // sli v7.2d, v3.2d, #48
+  .long 0x0ea12882                    // xtn v2.2s, v4.2d
+  .long 0x0ea128c3                    // xtn v3.2s, v6.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
   .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
   .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
-  .long 0x0ea128f1                    // xtn v17.2s, v7.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea128a2                    // xtn v2.2s, v5.2d
+  .long 0x0ea128e3                    // xtn v3.2s, v7.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
   .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
   .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x4ee28450                    // add v16.2d, v2.2d, v2.2d
-  .long 0x6f410451                    // ushr v17.2d, v2.2d, #63
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x4ee38470                    // add v16.2d, v3.2d, v3.2d
-  .long 0x6f410471                    // ushr v17.2d, v3.2d, #63
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
+  .long 0x6e241e10                    // eor v16.16b, v16.16b, v4.16b
+  .long 0x6e251e31                    // eor v17.16b, v17.16b, v5.16b
+  .long 0x4ef08602                    // add v2.2d, v16.2d, v16.2d
+  .long 0x6f414602                    // sri v2.2d, v16.2d, #63
+  .long 0x4ef18623                    // add v3.2d, v17.2d, v17.2d
+  .long 0x6f414623                    // sri v3.2d, v17.2d, #63
   .long 0x6e024070                    // ext v16.16b, v3.16b, v2.16b, #8
   .long 0x6e034051                    // ext v17.16b, v2.16b, v3.16b, #8
   .long 0x4eb01e02                    // orr v2.16b, v16.16b, v16.16b
@@ -275,138 +265,126 @@
   .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
   .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
   .long 0x6f680450                    // ushr v16.2d, v2.2d, #24
-  .long 0x4f685451                    // shl v17.2d, v2.2d, #40
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x6f680470                    // ushr v16.2d, v3.2d, #24
-  .long 0x4f685471                    // shl v17.2d, v3.2d, #40
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x0ea12810                    // xtn v16.2s, v0.2d
-  .long 0x0ea12851                    // xtn v17.2s, v2.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6f685450                    // sli v16.2d, v2.2d, #40
+  .long 0x6f680471                    // ushr v17.2d, v3.2d, #24
+  .long 0x6f685471                    // sli v17.2d, v3.2d, #40
+  .long 0x0ea12802                    // xtn v2.2s, v0.2d
+  .long 0x0ea12a03                    // xtn v3.2s, v16.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
+  .long 0x4ef08400                    // add v0.2d, v0.2d, v16.2d
   .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
-  .long 0x0ea12871                    // xtn v17.2s, v3.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea12822                    // xtn v2.2s, v1.2d
+  .long 0x0ea12a23                    // xtn v3.2s, v17.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
+  .long 0x4ef18421                    // add v1.2d, v1.2d, v17.2d
   .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
   .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
   .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x6f7004d0                    // ushr v16.2d, v6.2d, #16
-  .long 0x4f7054d1                    // shl v17.2d, v6.2d, #48
-  .long 0x4eb11e06                    // orr v6.16b, v16.16b, v17.16b
-  .long 0x6f7004f0                    // ushr v16.2d, v7.2d, #16
-  .long 0x4f7054f1                    // shl v17.2d, v7.2d, #48
-  .long 0x4eb11e07                    // orr v7.16b, v16.16b, v17.16b
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
-  .long 0x0ea128d1                    // xtn v17.2s, v6.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6f7004c2                    // ushr v2.2d, v6.2d, #16
+  .long 0x6f7054c2                    // sli v2.2d, v6.2d, #48
+  .long 0x6f7004e3                    // ushr v3.2d, v7.2d, #16
+  .long 0x6f7054e3                    // sli v3.2d, v7.2d, #48
+  .long 0x0ea12886                    // xtn v6.2s, v4.2d
+  .long 0x0ea12847                    // xtn v7.2s, v2.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
+  .long 0x4ee28484                    // add v4.2d, v4.2d, v2.2d
   .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
-  .long 0x0ea128f1                    // xtn v17.2s, v7.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea128a6                    // xtn v6.2s, v5.2d
+  .long 0x0ea12867                    // xtn v7.2s, v3.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
+  .long 0x4ee384a5                    // add v5.2d, v5.2d, v3.2d
   .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x4ee28450                    // add v16.2d, v2.2d, v2.2d
-  .long 0x6f410451                    // ushr v17.2d, v2.2d, #63
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x4ee38470                    // add v16.2d, v3.2d, v3.2d
-  .long 0x6f410471                    // ushr v17.2d, v3.2d, #63
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x6e034050                    // ext v16.16b, v2.16b, v3.16b, #8
-  .long 0x6e024071                    // ext v17.16b, v3.16b, v2.16b, #8
-  .long 0x4eb01e02                    // orr v2.16b, v16.16b, v16.16b
-  .long 0x4eb11e23                    // orr v3.16b, v17.16b, v17.16b
+  .long 0x6e241e10                    // eor v16.16b, v16.16b, v4.16b
+  .long 0x6e251e31                    // eor v17.16b, v17.16b, v5.16b
+  .long 0x4ef08606                    // add v6.2d, v16.2d, v16.2d
+  .long 0x6f414606                    // sri v6.2d, v16.2d, #63
+  .long 0x4ef18627                    // add v7.2d, v17.2d, v17.2d
+  .long 0x6f414627                    // sri v7.2d, v17.2d, #63
+  .long 0x6e0740d0                    // ext v16.16b, v6.16b, v7.16b, #8
+  .long 0x6e0640f1                    // ext v17.16b, v7.16b, v6.16b, #8
+  .long 0x4eb01e06                    // orr v6.16b, v16.16b, v16.16b
+  .long 0x4eb11e27                    // orr v7.16b, v17.16b, v17.16b
   .long 0x4ea41c90                    // orr v16.16b, v4.16b, v4.16b
   .long 0x4ea51ca4                    // orr v4.16b, v5.16b, v5.16b
   .long 0x4eb01e05                    // orr v5.16b, v16.16b, v16.16b
-  .long 0x6e0740d0                    // ext v16.16b, v6.16b, v7.16b, #8
-  .long 0x6e0640f1                    // ext v17.16b, v7.16b, v6.16b, #8
-  .long 0x4eb11e26                    // orr v6.16b, v17.16b, v17.16b
-  .long 0x4eb01e07                    // orr v7.16b, v16.16b, v16.16b
+  .long 0x6e034050                    // ext v16.16b, v2.16b, v3.16b, #8
+  .long 0x6e024071                    // ext v17.16b, v3.16b, v2.16b, #8
+  .long 0x4eb11e22                    // orr v2.16b, v17.16b, v17.16b
+  .long 0x4eb01e03                    // orr v3.16b, v16.16b, v16.16b
   .long 0x0ea12810                    // xtn v16.2s, v0.2d
-  .long 0x0ea12851                    // xtn v17.2s, v2.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
-  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
-  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
-  .long 0x0ea12871                    // xtn v17.2s, v3.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
-  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
-  .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
-  .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
-  .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x4ea008c6                    // rev64 v6.4s, v6.4s
-  .long 0x4ea008e7                    // rev64 v7.4s, v7.4s
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
   .long 0x0ea128d1                    // xtn v17.2s, v6.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
-  .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
+  .long 0x4ee68400                    // add v0.2d, v0.2d, v6.2d
+  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
+  .long 0x0ea12830                    // xtn v16.2s, v1.2d
   .long 0x0ea128f1                    // xtn v17.2s, v7.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
-  .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x6f680450                    // ushr v16.2d, v2.2d, #24
-  .long 0x4f685451                    // shl v17.2d, v2.2d, #40
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x6f680470                    // ushr v16.2d, v3.2d, #24
-  .long 0x4f685471                    // shl v17.2d, v3.2d, #40
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
-  .long 0x0ea12810                    // xtn v16.2s, v0.2d
+  .long 0x4ee78421                    // add v1.2d, v1.2d, v7.2d
+  .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
+  .long 0x6e201c42                    // eor v2.16b, v2.16b, v0.16b
+  .long 0x6e211c63                    // eor v3.16b, v3.16b, v1.16b
+  .long 0x4ea00842                    // rev64 v2.4s, v2.4s
+  .long 0x4ea00863                    // rev64 v3.4s, v3.4s
+  .long 0x0ea12890                    // xtn v16.2s, v4.2d
   .long 0x0ea12851                    // xtn v17.2s, v2.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee28400                    // add v0.2d, v0.2d, v2.2d
-  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
-  .long 0x0ea12830                    // xtn v16.2s, v1.2d
+  .long 0x4ee28484                    // add v4.2d, v4.2d, v2.2d
+  .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
+  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
   .long 0x0ea12871                    // xtn v17.2s, v3.2d
   .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
-  .long 0x4ee38421                    // add v1.2d, v1.2d, v3.2d
+  .long 0x4ee384a5                    // add v5.2d, v5.2d, v3.2d
+  .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
+  .long 0x6e241cc6                    // eor v6.16b, v6.16b, v4.16b
+  .long 0x6e251ce7                    // eor v7.16b, v7.16b, v5.16b
+  .long 0x6f6804d0                    // ushr v16.2d, v6.2d, #24
+  .long 0x6f6854d0                    // sli v16.2d, v6.2d, #40
+  .long 0x6f6804f1                    // ushr v17.2d, v7.2d, #24
+  .long 0x6f6854f1                    // sli v17.2d, v7.2d, #40
+  .long 0x0ea12806                    // xtn v6.2s, v0.2d
+  .long 0x0ea12a07                    // xtn v7.2s, v16.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
+  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
+  .long 0x4ef08400                    // add v0.2d, v0.2d, v16.2d
+  .long 0x4ef28400                    // add v0.2d, v0.2d, v18.2d
+  .long 0x0ea12826                    // xtn v6.2s, v1.2d
+  .long 0x0ea12a27                    // xtn v7.2s, v17.2d
+  .long 0x2ea7c0d2                    // umull v18.2d, v6.2s, v7.2s
+  .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
+  .long 0x4ef18421                    // add v1.2d, v1.2d, v17.2d
   .long 0x4ef28421                    // add v1.2d, v1.2d, v18.2d
-  .long 0x6e201cc6                    // eor v6.16b, v6.16b, v0.16b
-  .long 0x6e211ce7                    // eor v7.16b, v7.16b, v1.16b
-  .long 0x6f7004d0                    // ushr v16.2d, v6.2d, #16
-  .long 0x4f7054d1                    // shl v17.2d, v6.2d, #48
-  .long 0x4eb11e06                    // orr v6.16b, v16.16b, v17.16b
-  .long 0x6f7004f0                    // ushr v16.2d, v7.2d, #16
-  .long 0x4f7054f1                    // shl v17.2d, v7.2d, #48
-  .long 0x4eb11e07                    // orr v7.16b, v16.16b, v17.16b
-  .long 0x0ea12890                    // xtn v16.2s, v4.2d
-  .long 0x0ea128d1                    // xtn v17.2s, v6.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x6e201c42                    // eor v2.16b, v2.16b, v0.16b
+  .long 0x6e211c63                    // eor v3.16b, v3.16b, v1.16b
+  .long 0x6f700446                    // ushr v6.2d, v2.2d, #16
+  .long 0x6f705446                    // sli v6.2d, v2.2d, #48
+  .long 0x6f700467                    // ushr v7.2d, v3.2d, #16
+  .long 0x6f705467                    // sli v7.2d, v3.2d, #48
+  .long 0x0ea12882                    // xtn v2.2s, v4.2d
+  .long 0x0ea128c3                    // xtn v3.2s, v6.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
   .long 0x4ee68484                    // add v4.2d, v4.2d, v6.2d
   .long 0x4ef28484                    // add v4.2d, v4.2d, v18.2d
-  .long 0x0ea128b0                    // xtn v16.2s, v5.2d
-  .long 0x0ea128f1                    // xtn v17.2s, v7.2d
-  .long 0x2eb1c212                    // umull v18.2d, v16.2s, v17.2s
+  .long 0x0ea128a2                    // xtn v2.2s, v5.2d
+  .long 0x0ea128e3                    // xtn v3.2s, v7.2d
+  .long 0x2ea3c052                    // umull v18.2d, v2.2s, v3.2s
   .long 0x4ef28652                    // add v18.2d, v18.2d, v18.2d
   .long 0x4ee784a5                    // add v5.2d, v5.2d, v7.2d
   .long 0x4ef284a5                    // add v5.2d, v5.2d, v18.2d
-  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
-  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
-  .long 0x4ee28450                    // add v16.2d, v2.2d, v2.2d
-  .long 0x6f410451                    // ushr v17.2d, v2.2d, #63
-  .long 0x4eb11e02                    // orr v2.16b, v16.16b, v17.16b
-  .long 0x4ee38470                    // add v16.2d, v3.2d, v3.2d
-  .long 0x6f410471                    // ushr v17.2d, v3.2d, #63
-  .long 0x4eb11e03                    // orr v3.16b, v16.16b, v17.16b
+  .long 0x6e241e10                    // eor v16.16b, v16.16b, v4.16b
+  .long 0x6e251e31                    // eor v17.16b, v17.16b, v5.16b
+  .long 0x4ef08602                    // add v2.2d, v16.2d, v16.2d
+  .long 0x6f414602                    // sri v2.2d, v16.2d, #63
+  .long 0x4ef18623                    // add v3.2d, v17.2d, v17.2d
+  .long 0x6f414623                    // sri v3.2d, v17.2d, #63
   .long 0x6e024070                    // ext v16.16b, v3.16b, v2.16b, #8
   .long 0x6e034051                    // ext v17.16b, v2.16b, v3.16b, #8
   .long 0x4eb01e02                    // orr v2.16b, v16.16b, v16.16b
