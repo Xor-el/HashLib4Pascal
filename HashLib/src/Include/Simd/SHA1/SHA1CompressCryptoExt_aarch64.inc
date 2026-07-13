@@ -1,9 +1,7 @@
-// SHA-1 AArch64 FEAT_SHA1 implementation.
-// Expects AAPCS64: x0 = state ptr (5 x UInt32), x1 = data ptr,
-//   w2 = numblocks, x3 = K_SHA1 ptr (16 UInt32: each round constant x4 lanes).
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S.
-// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// CryptoExt (FEAT_SHA1) implementation of SHA-1 compress.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (5 x UInt32),
+//   x1 = data ptr, w2 = numblocks, x3 = K_SHA1 ptr (16 UInt32: each round
+//   constant x4 lanes).
 // Register map:
 //   v0       = ABCD working state
 //   v1.s[0]  = E working state (single lane; sha1c/p/m consume it as a scalar)
@@ -12,6 +10,9 @@
 //   v16-v19  = K round constants (K_00_19, K_20_39, K_40_59, K_60_79)
 //   v20, v21 = W+K per round
 //   v22      = saved ABCD for the final add
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// Reference: OpenSSL CRYPTOGAMS sha1-armv8.S.
 
   cbz w2, .Lcryptoext_sha1_done
   .long 0x6e211c21                    // eor v1.16b, v1.16b, v1.16b

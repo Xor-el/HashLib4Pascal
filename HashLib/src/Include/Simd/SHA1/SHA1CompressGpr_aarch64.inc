@@ -1,11 +1,11 @@
-// SHA-1 pure-GPR implementation (AArch64) for cores without the SHA-1
-// crypto extension; the Gpr name states the ISA requirement: none beyond
-// base AArch64. Serial SHA maps better onto the 31 GPRs than onto NEON
-// lanes (single dependency chain, 1-op ror, rotate-folded eor operands).
-// The four round constants are materialized as movz/movk immediates - no
-// K table is read.
-// Expects AAPCS64 (after HlpSimdProc3Begin_aarch64): x0 = state ptr
-//   (5 x UInt32), x1 = data ptr, w2 = numblocks.
+// Gpr implementation of SHA-1 compress (AArch64) for cores without the
+// SHA-1 crypto extension; the Gpr name states the ISA requirement: none
+// beyond base AArch64. Serial SHA maps better onto the 31 GPRs than onto
+// NEON lanes (single dependency chain, 1-op ror, rotate-folded eor
+// operands). The four round constants are materialized as movz/movk
+// immediates - no K table is read.
+// ABI (after HlpSimdProc3Begin_aarch64.inc): x0 = state ptr (5 x UInt32),
+//   x1 = data ptr, w2 = numblocks.
 // Frame: 96-byte AAPCS64 frame (x29/x30 + x19-x28 callee-saved).
 // AArch64 instructions are .long-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha1-armv8.pl (sha1_block_data_order, the

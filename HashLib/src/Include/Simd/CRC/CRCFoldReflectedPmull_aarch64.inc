@@ -1,14 +1,13 @@
-// CRC folding (PMULL/PMULL2) + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
-// Expects AAPCS64: x0 = AData, w1 = ALength (>= 16, multiple of 16),
-//   x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx; FoldConstants at +0).
-//   AState: pointer to the initial CRC (reflected) as one UInt64.
+// PMULL implementation of CRC folding (PMULL/PMULL2) + Barrett reduction for
+// reflected (LSB-first) CRCs with width 8..64. CRC-64 uses a special Barrett
+// path for the 65-bit G.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = AData, w1 = ALength (>= 16,
+//   multiple of 16), x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx;
+//   FoldConstants at +0).
+//   AState: pointer to the initial CRC (reflected) as one UInt64. Returns
+//   the final CRC in x0.
 //   AConstants: [+0] Fold_4x128, [+16] Fold_1x128, [+32] Barrett,
-//               [+80] CrcBits.  Returns final CRC in x0.
-// Leaf nostackframe; caller-saved GPR/vector only (v0-v7, v16-v22).
-// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers),
-//   HashLib CRCFoldReflectedPclmul_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+//               [+80] CrcBits.
 // Register map:
 //   v0-v3    = fold accumulators (xmm0-3)
 //   v4       = pmull-hi temp (xmm4)
@@ -19,6 +18,12 @@
 //   v17      = dup staging for clmul lo*hi ($10) Barrett mixes
 //   v18      = saved Barrett q (CRC-64 x^0 correction)
 //   v19-v22  = fold-by-8 upper accumulators (xmm8-11)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only: v0-v7,
+//   v16-v22).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers), HashLib
+//   CRCFoldReflectedPclmul_x86_64.inc.
+
   .long 0x3dc00467                    // ldr q7, [x3, #16]
   .long 0x7102003f                    // cmp w1, #128
   b.lo .Lcrc_refl_check64

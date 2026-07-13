@@ -1,10 +1,9 @@
-// Adler-32 ProcessBlocks AArch64 NEON implementation (32-byte blocks).
-// Expects AAPCS64: x0 = AData, w1 = ANumBlocks, x2 = ASums, x3 = AConstants.
-// ASums layout: [SumA: UInt32, SumB: UInt32]. Does NOT apply mod 65521.
-// Constants layout matches Adler32Constants: bytes [32..1] at offset 0..31.
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksSsse3_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of Adler-32 block processing (num_blocks x 32-byte blocks).
+// Does NOT apply mod 65521 (the caller does).
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = data ptr, w1 = num_blocks,
+//   x2 = sums ptr, x3 = constants ptr.
+//   Sums layout: [SumA: UInt32, SumB: UInt32].
+//   Constants layout matches Adler32Constants: bytes [32..1] at offsets 0..31.
 // Register map:
 //   w9       = block counter (from w1)
 //   w10      = SumA in / SumA out
@@ -20,6 +19,10 @@
 //   v24-v27  = widened weight vectors for vmlal
 //   v28-v29  = weight byte loads from AConstants
 //   v30      = ext scratch for weight / reduce halves
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksSsse3_x86_64.inc.
+
   .long 0xb940004a                    // ldr w10, [x2]
   .long 0xb940044b                    // ldr w11, [x2, #4]
   .long 0x1b017d4c                    // mul w12, w10, w1

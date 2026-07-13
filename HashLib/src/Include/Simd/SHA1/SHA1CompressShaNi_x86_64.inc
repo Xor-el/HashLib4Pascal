@@ -1,38 +1,28 @@
-// SHA-1 SHA-NI implementation (Intel SHA Extensions). The 20 sha1rnds4
-// groups run with the message schedule (sha1msg1/sha1msg2/sha1nexte) interleaved.
-// The input is byte-swapped with a single pshufb against a full-reverse mask
-// (byte-swap and dword-reverse folded into one mask, loaded once into xmm3), so
-// no per-word pshufd is needed. The next block's message loads are software-
-// pipelined into rounds 64-79 and the data pointer is advanced branchlessly
-// (cmovnz).
+// SHA-NI implementation of SHA-1 compress (Intel SHA Extensions). The 20
+// sha1rnds4 groups run with the message schedule (sha1msg1/sha1msg2/
+// sha1nexte) interleaved. The input is byte-swapped with a single pshufb
+// against a full-reverse mask (byte-swap and dword-reverse folded into one
+// mask, loaded once into xmm3), so no per-word pshufd is needed. The next
+// block's message loads are software-pipelined into rounds 64-79 and the
+// data pointer is advanced branchlessly (cmovnz).
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = round-constant ptr (unused - sha1rnds4 has the
+//   round constants built in), r10 = byte-swap mask ptr (16 bytes; see
+//   BSWAP32_MASK, matching OpenSSL K_XX_XX+0xa0).
+// Register map (identical to OpenSSL): xmm0 = ABCD state, xmm1 = E,
+//   xmm2 = E' (ping-pong), xmm3 = byte-swap mask (loaded once),
+//   xmm4-xmm7 = MSG0-MSG3, xmm8 = ABCD_SAVE, xmm9 = E_SAVE.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); the kernel itself uses only volatile GPRs
+//   (rcx/rdx/r8-r11).
+// SHA-NI instructions are db-encoded for broad assembler compatibility.
+// Encoding notes:
+//   sha1rnds4 dst, src, imm = $0F $3A $CC <ModRM> <imm8>
+//   sha1nexte dst, src      = $0F $38 $C8 <ModRM>
+//   sha1msg1  dst, src      = $0F $38 $C9 <ModRM>
+//   sha1msg2  dst, src      = $0F $38 $CA <ModRM>
+//   pshufb    dst, src      = $66 $0F $38 $00 <ModRM>
 // Reference: OpenSSL CRYPTOGAMS x86_64 sha1_block_data_order_shaext.
-//
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = data ptr,
-//   r8d = numblocks, r9 = round-constant ptr (unused - sha1rnds4 has the round
-//   constants built in), r10 = byte-swap mask ptr (16 bytes; see BSWAP32_MASK,
-//   matching OpenSSL K_XX_XX+0xa0).
-//
-// SHA-NI instructions, db-encoded for assembler compatibility:
-//   sha1rnds4  dst, src, imm  = $0F $3A $CC <ModRM> <imm8>
-//   sha1nexte  dst, src       = $0F $38 $C8 <ModRM>
-//   sha1msg1   dst, src       = $0F $38 $C9 <ModRM>
-//   sha1msg2   dst, src       = $0F $38 $CA <ModRM>
-//   pshufb     dst, src       = $66 $0F $38 $00 <ModRM>
-//
-// Register map (identical to OpenSSL):
-//   xmm0 = ABCD state
-//   xmm1 = E
-//   xmm2 = E' (ping-pong E register)
-//   xmm3 = byte-swap mask (loaded once)
-//   xmm4 = MSG0
-//   xmm5 = MSG1
-//   xmm6 = MSG2
-//   xmm7 = MSG3
-//   xmm8 = ABCD_SAVE
-//   xmm9 = E_SAVE
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); the kernel itself uses only volatile GPRs (rcx/rdx/r8-r11).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

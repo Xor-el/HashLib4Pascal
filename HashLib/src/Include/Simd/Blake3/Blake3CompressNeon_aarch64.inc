@@ -1,9 +1,8 @@
-// BLAKE3 compress AArch64 NEON implementation.
-// Expects AAPCS64: x0 = state ptr (16 x UInt32), x1 = message ptr (64 bytes),
-//   x2 = CV ptr (8 x UInt32), x3 = counter+flags ptr (16 bytes: t[0..1], len, flags).
-// Stack frame 128 bytes; see register map.
-// Reference: BLAKE3-team/BLAKE3 c/blake3_impl.h, HashLib Blake3CompressSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of BLAKE3 compress (7 rounds with register-based
+// message scheduling).
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (16 x UInt32),
+//   x1 = message ptr (64 bytes), x2 = CV ptr (8 x UInt32),
+//   x3 = counter+flags ptr (16 bytes: t[0..1], len, flags).
 // Register map:
 //   v0       = a (v[0..3])
 //   v1       = b (v[4..7])
@@ -15,8 +14,12 @@
 //   v18-v19  = rotate temps (2-op ushr+sli rotates rename rows b/d through them)
 //   v20      = shufps / non-cyclic pshufd scratch (t14); cyclic diagonalize
 //              shuffles use in-place 'ext' instead
-//   Stack (128 bytes): [sp, #0] transient t9 (v17) spill during inter-round permute;
-//     [sp, #96..111] IV constant staging in prologue.
+// Frame: 128 bytes ([sp, #0] transient t9 (v17) spill during the inter-round
+//   permute; [sp, #96..111] IV constant staging in the prologue).
+// Saves: none (caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: BLAKE3-team/BLAKE3 c/blake3_impl.h, HashLib
+//   Blake3CompressSse2_x86_64.inc.
 
   sub sp, sp, #128
   .long 0x529ccceb                    // movz w11, #0xe667, lsl #0

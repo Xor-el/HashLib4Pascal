@@ -1,8 +1,8 @@
-// AVX2 implementation of XXH3_accumulate_512 (IA-32; fully unrolled,
-// 2 x 32-byte chunks). Same structure as XXH3Acc512Avx2_x86_64.inc.
-// IA-32: after HlpSimdProc3Begin_i386 - ebx = acc, esi = input, edi = secret
-//   (parallel to MS x64 ABI: rcx, rdx, r8).
-// Uses only volatile registers: ymm0-ymm3.
+// AVX2 implementation of XXH3_accumulate_512 (fully unrolled, 2 x 32-byte
+// chunks; IA-32). Same structure as XXH3Acc512Avx2_x86_64.inc.
+// ABI (after HlpSimdProc3Begin_i386.inc): ebx = acc ptr, esi = input ptr,
+//   edi = secret ptr.
+// Saves: none (uses ymm0-ymm3 only; all volatile on IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: official xxHash C - XXH3_accumulate_512_avx2 in xxhash.h,
 // HashLib XXH3Acc512Avx2_x86_64.inc.

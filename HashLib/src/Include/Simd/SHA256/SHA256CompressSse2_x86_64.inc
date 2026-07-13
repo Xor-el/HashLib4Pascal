@@ -1,17 +1,16 @@
-// SHA-256 SSE2 SIMD-schedule implementation. The message schedule runs in
-// SSE2 (paddd/psrld/pslld/pxor/pshufd) interleaved with the GPR compression
-// rounds, so the vector and integer units run in parallel. The original's two
-// SSSE3-only ops are emulated in SSE2: the pshufb dword byte-swap becomes
-// psrlw/psllw/por + pshuflw/pshufhw, and palignr becomes psrldq/pslldq/por
-// (xmm8 is a free scratch).
-// Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (SHA-256 SSSE3 kernel).
-// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
+// SSE2 implementation of SHA-256 compress (SIMD schedule). The message
+// schedule runs in SSE2 (paddd/psrld/pslld/pxor/pshufd) interleaved with
+// the GPR compression rounds, so the vector and integer units run in
+// parallel. The original's two SSSE3-only ops are emulated in SSE2: the
+// pshufb dword byte-swap becomes psrlw/psllw/por + pshuflw/pshufhw, and
+// palignr becomes psrldq/pslldq/por (xmm8 is a free scratch).
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
 //   r8d = numblocks, r9 = doubled-K256 ptr (read at a 32-byte stride so the
-//   duplicated halves are skipped; see K256_Doubled). No byte-swap mask table is
-//   needed - the swap is computed, not shuffled.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
+//   duplicated halves are skipped; see K256_Doubled). No byte-swap mask
+//   table is needed - the swap is computed, not shuffled.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
+// Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (SHA-256 SSSE3 kernel).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

@@ -1,21 +1,22 @@
-// AVX (VEX-128) implementation of BLAKE2s compress (IA-32; fully unrolled
-// 10 rounds). Same structure as Blake2SCompressAvx_x86_64.inc,
-// with the rot8 mask read as a VEX memory operand per site (IA-32 has only
-// xmm0-7, so no register is free to keep it resident; VEX memory operands
-// are read unaligned, so the Pascal const needs no special alignment).
-// IA-32: after HlpSimdProc5Begin_i386 - ebx = state ptr, esi = msg ptr,
+// AVX (VEX-128) implementation of BLAKE2s compress (fully unrolled 10
+// rounds; IA-32); the Avx name states the ISA requirement: VEX-128
+// encodings only, no 256-bit ymm. Same structure as
+// Blake2SCompressAvx_x86_64.inc, with the rot8 mask read as a VEX memory
+// operand per site (IA-32 has only xmm0-xmm7, so no register is free to
+// keep it resident; VEX memory operands are read unaligned, so the Pascal
+// const needs no special alignment). Rotations: rot16 via vpshufb against
+// the resident xmm7 mask, rot8 via vpshufb against the [ecx+$10] memory
+// operand, rot12/7 via shift+or (not byte-aligned).
+// ABI (after HlpSimdProc5Begin_i386.inc): ebx = state ptr, esi = msg ptr,
 //   edi = counter+flags ptr, eax = IV ptr, ecx = byte-rotation masks ptr
-//   (see BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16).
-// Uses xmm0-xmm7; xmm6/xmm7 saved/restored defensively (volatile on IA-32).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load), xmm7 = rot16 mask.
-// Rotations: ROT16 via vpshufb against the resident xmm7 mask, ROT8 via
-//   vpshufb against the [ecx+$10] memory operand, ROT12/7 via shift+or
-//   (not byte-aligned; shifts are the known-best form).
-// 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
+//   (BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16).
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = message buffer, xmm5 = temp,
+//   xmm6 = temp (msg load), xmm7 = rot16 mask.
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves, HashLib
-// Blake2SCompressAvx2_x86_64.inc.
+// Blake2SCompressAvx_x86_64.inc.
 
   // Defensive save of xmm6/xmm7 (volatile on IA-32; saved like the
   // SSE2 sibling to be safe under every RTL)

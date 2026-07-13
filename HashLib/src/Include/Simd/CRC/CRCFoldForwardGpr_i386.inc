@@ -1,8 +1,11 @@
-// MSB-first 64-bit CRC: 16-byte slice (IA-32; SSE2 not required — same as x64 MSB path).
-// x64 counterpart: CRCFoldForwardGpr_x86_64.inc.
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
-// Ctx: FoldConstants.CrcBits at +80, TableRow at +96. CrcMask derived from width.
-// Result UInt64 in edx:eax.
+// Gpr implementation of the MSB-first 64-bit CRC 16-byte slice (IA-32;
+// slicing-by-16); the Gpr name states the ISA requirement: none beyond
+// base IA-32. x64 counterpart: CRCFoldForwardGpr_x86_64.inc.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = AData, esi = ALength,
+//   edi = AState, eax = Ctx (PCRCFoldRuntimeCtx).
+//   Ctx: FoldConstants.CrcBits at +80, TableRow at +96. CrcMask derived
+//   from the width. Returns the final CRC UInt64 in edx:eax.
+// Reference: classic slicing-by-16 table CRC.
 
   push ebp
   mov ebp, eax

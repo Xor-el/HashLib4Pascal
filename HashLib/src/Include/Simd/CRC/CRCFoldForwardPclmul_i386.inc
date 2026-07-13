@@ -1,22 +1,24 @@
-// SSE2 + SSSE3 + PCLMULQDQ CRC folding + Barrett reduction for non-reflected
-// (MSB-first) CRCs with width 8..64 (IA-32). Fold-by-4 only: the fold-by-8
-// upper path of the x86-64 kernel needs xmm8-11, which IA-32 does not have.
-// PCLMULQDQ/PSHUFB instructions are db-encoded for broad assembler
-// compatibility; all byte sequences are verbatim from
-// CRCFoldForwardPclmul_x86_64.inc (xmm0-7 forms carry no REX prefix and
-// encode identically on IA-32).
-//
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength (>= 16),
-//   edi = AState, eax = Ctx (PCRCFoldRuntimeCtx; FoldConstants at +0).
+// SSE2 + SSSE3 + PCLMULQDQ implementation of CRC folding + Barrett
+// reduction for non-reflected (MSB-first) CRCs with width 8..64 (IA-32).
+// Fold-by-4 only: the fold-by-8 upper path of the x86-64 kernel needs
+// xmm8-xmm11, which IA-32 does not have. All byte sequences are verbatim
+// from CRCFoldForwardPclmul_x86_64.inc (xmm0-7 forms carry no REX prefix
+// and encode identically on IA-32).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = AData, esi = ALength
+//   (>= 16), edi = AState, eax = Ctx (PCRCFoldRuntimeCtx; FoldConstants
+//   at +0).
 //   AState: pointer to the initial CRC pre-shifted left by (64 - Width)
-//   as one UInt64.
+//   as one UInt64. Returns the final CRC UInt64 in edx:eax (low qword
+//   of xmm0).
 //   Ctx: [+0] Fold_4x128, [+16] Fold_1x128, [+32] Barrett, [+64] BswapMask,
 //        [+80] CrcBits, [+88] BarrettShift.
-// Result UInt64 in edx:eax (low qword of xmm0).
-//
-// pclmulqdq xmm_dst, xmm_src, imm8: 66 0F 3A 44 ModRM imm8
-// pshufb    xmm_dst, xmm_src:       66 0F 38 00 ModRM
-// ModRM = 11_dst_src.
+// PCLMULQDQ/pshufb instructions are db-encoded for broad assembler
+// compatibility. Encoding notes:
+//   pclmulqdq xmm_dst, xmm_src, imm8: 66 0F 3A 44 ModRM imm8
+//   pshufb    xmm_dst, xmm_src:       66 0F 38 00 ModRM
+//   ModRM = 11_dst_src.
+// Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google),
+// HashLib CRCFoldForwardPclmul_x86_64.inc.
 
   push ebp
   mov ebp, eax                        // Ctx

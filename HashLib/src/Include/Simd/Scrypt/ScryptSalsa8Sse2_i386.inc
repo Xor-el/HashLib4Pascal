@@ -1,21 +1,20 @@
-// SSE2 implementation of fused XOR + Salsa20/8 on Percival-permuted data.
-//
+// SSE2 implementation of fused XOR + Salsa20/8 on Percival-permuted data
+// (IA-32). Column QR / diagonal / row QR: same structure as
+// ScryptSalsa8Sse2_x86_64.inc.
+// The (i*5 mod 16) Percival data permutation arranges each 16-word Salsa20
+// state into role-based diagonal order, enabling lane-parallel SIMD
+// processing of column and row quarter-rounds with pshufd-based
+// diagonalize/undiagonalize between them. Operation:
+// State = Salsa20/8(State XOR Input).
+// ABI (after HlpSimdProc2Begin_i386.inc): ebx = State ptr, esi = Input ptr.
+//   Each pointer addresses 16 UInt32 (64 bytes) in permuted order.
+// Register map: xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
+//   xmm2 = C = {w8,w13,w2,w7}, xmm3 = D = {w12,w1,w6,w11}, xmm4-xmm5 = temps.
+// Frame (sub esp, 72): 64 for the saved XOR'd state + 8 alignment padding.
+// Saves: none (uses xmm0-xmm5 only; all volatile on IA-32).
 // Reference: Colin Percival, "Stronger Key Derivation via Sequential
-// Memory-Hard Functions" (2009), and the Tarsnap scrypt reference
-// implementation (crypto_scrypt-sse.c). The (i*5 mod 16) data permutation
-// arranges each 16-word Salsa20 state into role-based diagonal order,
-// enabling lane-parallel SIMD processing of column and row quarter-rounds
-// with pshufd-based diagonalize/undiagonalize between them.
-//
-// IA-32: after HlpSimdProc2Begin_i386 — ebx = State ptr, esi = Input ptr
-//   (parallel to MS x64 ABI: rcx, rdx).
-// Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
-//   xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
-//   xmm2 = C = {w8,w13,w2,w7},  xmm3 = D = {w12,w1,w6,w11}.
-// Operation: State = Salsa20/8(State XOR Input)
-// Uses xmm0–xmm5. Stack: sub esp, 72 (64 for saved XOR'd state + 8 alignment padding).
-//
-// Column QR / diagonal / row QR: same structure as ScryptSalsa8Sse2_x86_64.inc header on x86-64.
+// Memory-Hard Functions" (2009); Tarsnap crypto_scrypt-sse.c; HashLib
+// ScryptSalsa8Sse2_x86_64.inc.
 
   sub esp, 72
 

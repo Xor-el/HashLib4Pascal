@@ -1,15 +1,17 @@
-// AVX (VEX-128) implementation of BLAKE2s compress (fully unrolled 10 rounds).
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+// AVX (VEX-128) implementation of BLAKE2s compress (fully unrolled 10
+// rounds); the Avx name states the ISA requirement: VEX-128 encodings only,
+// no 256-bit ymm. 3-operand VEX form eliminates the movdqa copies the SSE2
+// rotations need. Rotations: rot16/8 via vpshufb against the resident
+// masks, rot12/7 via shift+or (not byte-aligned; shifts are the known-best
+// form).
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
 //   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
+//   (BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load),
-//   xmm7 = rot16 mask, xmm8 = rot8 mask.
-// Rotations: ROT16/8 via vpshufb against the resident masks, ROT12/7 via
-//   shift+or (not byte-aligned; shifts are the known-best form).
-// 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = message buffer, xmm5 = temp,
+//   xmm6 = temp (msg load), xmm7 = rot16 mask, xmm8 = rot8 mask.
+// Saves: xmm6-xmm8 (MS x64 non-volatile); uses xmm0-xmm8.
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 

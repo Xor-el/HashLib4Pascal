@@ -1,17 +1,17 @@
 // SSSE3 implementation of BLAKE2s compress (fully unrolled 10 rounds); SSE2
-// sibling: Blake2SCompressSse2_x86_64.inc.
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+// sibling: Blake2SCompressSse2_x86_64.inc. Rotations: rot16/8 via pshufb
+// against the resident masks; rot12/7 via psrld/pslld/por (not
+// byte-aligned). Diagonalize/Undiagonalize via pshufd. Message loads via
+// movd + punpcklqdq + shufps.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
 //   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
+//   (BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load),
-//   xmm7 = rot16 mask, xmm8 = rot8 mask.
-// Rotations: ROT16/8 via pshufb (db-encoded for broad assembler compatibility)
-//   against the resident masks; ROT12/7 via psrld/pslld/por (not byte-aligned).
-// Diagonalize/Undiagonalize via pshufd.
-// Message loads via movd + punpcklqdq + shufps.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = message buffer, xmm5 = temp,
+//   xmm6 = temp (msg load), xmm7 = rot16 mask, xmm8 = rot8 mask.
+// Saves: xmm6-xmm8 (MS x64 non-volatile); uses xmm0-xmm8.
+// pshufb instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}

@@ -1,29 +1,27 @@
-// SSSE3 implementation of Argon2 FillBlock; SSE2 sibling:
-// Argon2FillBlockSse2_x86_64.inc. Unlike the SSE2 sibling, the byte-aligned
-// rotations (rot24/rot16) are single pshufb (db-encoded for broad assembler
-// compatibility) against masks resident in xmm10/xmm11; rot32 stays pshufd and
-// rot63 stays shift+or (not byte-aligned).
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = Left ptr, rdx = Right ptr,
+// SSSE3 implementation of Argon2 FillBlock (BlaMka round function); SSE2
+// sibling: Argon2FillBlockSse2_x86_64.inc. Unlike the sibling, the
+// byte-aligned rotations (rot24/rot16) are single pshufb against masks
+// resident in xmm10/xmm11; rot32 stays pshufd and rot63 stays shift+or
+// (not byte-aligned). Diagonalize/Undiagonalize use shufpd (right-rotates
+// via a 3-movdqa swap).
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = Left ptr, rdx = Right ptr,
 //   r8 = Current ptr, r9 = WithXor (0 or 1), r10 = byte-rotation masks ptr
-//   (see ARGON2_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
-//   Pascal const needs no special alignment; consumed by the entry mask loads,
-//   r10 is scratch afterwards).
-// Each pointer addresses 128 QWords (1024 bytes).
-// Uses xmm0-xmm11; xmm6-xmm11 are MS x64 non-volatile (saved/restored).
-// Register map during G rounds: xmm0-1 = A(0..3), xmm2-3 = B(4..7),
+//   (ARGON2_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   Pascal const needs no special alignment; consumed by the entry mask
+//   loads, r10 is scratch afterwards).
+//   Each pointer addresses 128 QWords (1024 bytes). ARight and ACurrent may
+//   alias; R_buf buffering handles this. r8/r9 survive all loops.
+// Register map (G rounds): xmm0-1 = A(0..3), xmm2-3 = B(4..7),
 //   xmm4-5 = C(8..11), xmm6-7 = D(12..15), xmm8-9 = temps,
 //   xmm10 = rot24 mask, xmm11 = rot16 mask.
-// Stack layout (sub rsp, 2120):
-//   [rsp+0..63]     xmm6-9 save area
-//   [rsp+64..1087]  R_buf (1024 bytes)
-//   [rsp+1088..2111] Z_buf (1024 bytes)
-//   [rsp+2112..2119] alignment padding
-// r8 (Current) and r9 (WithXor) survive all loops (not clobbered).
-// ARight and ACurrent may alias; R_buf buffering handles this.
-//
-// Diagonalize/Undiagonalize use shufpd to rotate QWord positions within
-// register pairs. Right-rotates require a 3-movdqa swap since shufpd
-// naturally places results in the opposite register for that direction.
+// Frame (sub rsp, 2120):
+//   [rsp+0..63]      = xmm6-xmm9 save area
+//   [rsp+64..1087]   = R_buf (1024 bytes)
+//   [rsp+1088..2111] = Z_buf (1024 bytes)
+//   [rsp+2112..2119] = alignment padding
+// Saves: xmm6-xmm11 (MS x64 non-volatile); uses xmm0-xmm11.
+// pshufb instructions are db-encoded for broad assembler compatibility.
+// Reference: official Argon2 SSSE3 (blamka-round-opt.h).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

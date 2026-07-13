@@ -1,30 +1,19 @@
-// SSE2 + PCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
-// PCLMULQDQ instructions are db-encoded for broad assembler compatibility.
-//
-// Function signature (included after HlpSimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Reflected_Pclmul(AData: PByte; ALength: UInt32;
-//     AState: Pointer; AConstants: Pointer): UInt64;
-//
-// Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
+// SSE2 + PCLMULQDQ implementation of CRC folding + Barrett reduction for
+// reflected (LSB-first) CRCs with width 8..64. CRC-64 uses a special
+// Barrett path for the 65-bit G.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = AData, edx = ALength
+//   (>= 16), r8 = AState, r9 = AConstants.
 //   AState: pointer to the initial CRC (reflected) as one UInt64.
+//   Returns the final CRC in rax.
 //   AConstants layout (TCRCFoldConstants):
-//     [0..15]  = Fold_4x128
-//     [16..31] = Fold_1x128
-//     [32..47] = Barrett
-//     [48..63] = Fold_8x128
-//     [64..79] = BswapMask  (unused by this path)
-//     [80..87] = CrcBits
-//   Returns: final CRC in RAX.
-//
+//     [0..15]  = Fold_4x128     [48..63] = Fold_8x128
+//     [16..31] = Fold_1x128     [64..79] = BswapMask (unused by this path)
+//     [32..47] = Barrett        [80..87] = CrcBits
+// PCLMULQDQ instructions are db-encoded for broad assembler compatibility.
+// Encoding notes:
+//   pclmulqdq xmm_dst, xmm_src, imm8: 66 [REX] 0F 3A 44 ModRM imm8
+//     (REX = $44 = REX.R for xmm8-15 dst); ModRM reg-reg: 11_dst_src.
 // Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
-//
-// pclmulqdq xmm_dst, xmm_src, imm8 (register-register):
-//   66 [REX] 0F 3A 44 ModRM imm8   (REX = $44 = REX.R for xmm8-15 dst)
-// ModRM for reg-reg: 11_dst_src
-//   xmm0=000 xmm1=001 xmm2=010 xmm3=011 xmm4=100
-//   xmm5=101 xmm6=110 xmm7=111 xmm8-15=REX.R + 000..111
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

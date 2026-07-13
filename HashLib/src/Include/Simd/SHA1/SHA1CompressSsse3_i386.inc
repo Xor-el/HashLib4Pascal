@@ -1,15 +1,15 @@
-// SHA-1 SSSE3 SIMD-schedule implementation (IA-32); SSE2 sibling:
-// SHA1CompressSse2_i386.inc.
-// The message schedule runs in SIMD (pxor/pshufd/psrldq/pslldq) interleaved
-// with the GPR compression rounds. Unlike the SSE2 sibling the input
-// byte-swaps are real pshufb (db-encoded for broad assembler compatibility)
-// against the mask kept resident in xmm6; the W-schedule uses no palignr.
+// SSSE3 implementation of SHA-1 compress (SIMD schedule; IA-32); SSE2
+// sibling: SHA1CompressSse2_i386.inc. The message schedule runs in SIMD
+// (pxor/pshufd/psrldq/pslldq) interleaved with the GPR compression rounds.
+// Unlike the SSE2 sibling the input byte-swaps are real pshufb against the
+// mask kept resident in xmm6; the W-schedule uses no palignr.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = doubled-K_SHA1 ptr (read at a 32-byte stride so
+//   the duplicated halves are skipped; see K_SHA1_Doubled).
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K
+//   pointer, then reused as the data pointer and for the state writeback.
+// pshufb instructions are db-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha1-586.pl (SSSE3 kernel).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
-//   eax = doubled-K_SHA1 ptr (read at a 32-byte stride so the duplicated halves
-//   are skipped; see K_SHA1_Doubled). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is
-//   pushed here as the K pointer, then reused as the data pointer and for the
-//   state writeback.
 
   push   ebp
   mov    ebp, eax

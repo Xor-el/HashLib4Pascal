@@ -1,13 +1,13 @@
-// AVX2 implementation of Adler-32 block processing (IA-32; 256-bit ymm
-// integer ops work in 32-bit mode - only ymm0-7 exist, which this kernel
-// fits). Same structure as Adler32BlocksAvx2_x86_64.inc.
-// IA-32: after HlpSimdProc4Begin_i386 - ebx = data ptr, esi = num_blocks,
+// AVX2 implementation of Adler-32 block processing (num_blocks x 32-byte blocks;
+// IA-32: 256-bit ymm integer ops work in 32-bit mode and only ymm0-ymm7 exist,
+// which this kernel fits). Same structure as Adler32BlocksAvx2_x86_64.inc.
+// Does NOT apply mod 65521 (the caller does).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = data ptr, esi = num_blocks,
 //   edi = sums ptr, eax = constants ptr (moved to ecx at entry; eax then
 //   accumulates SumA). SumB rides xmm1 end-to-end via vmovd memory forms.
-// ASums layout: [SumA: UInt32, SumB: UInt32].
-// Constants layout: [weights: 32B, ones_16: 32B] at offsets 0 and 32.
-// Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
-// Uses ymm0-ymm5 only (all volatile on IA-32; no saves needed).
+//   Sums layout: [SumA: UInt32, SumB: UInt32].
+//   Constants layout: [weights: 32B, ones_16: 32B] at offsets 0 and 32.
+// Saves: none (uses ymm0-ymm5 only; all volatile on IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksAvx2_x86_64.inc.
 

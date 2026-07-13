@@ -1,27 +1,26 @@
-// AVX (VEX-128) implementation of BLAKE3 compress (7 rounds with register-based
-// message scheduling).
+// AVX (VEX-128) implementation of BLAKE3 compress (7 rounds with
+// register-based message scheduling); the Avx name states the ISA
+// requirement: VEX-128 encodings only, no 256-bit ymm. 3-operand VEX form
+// eliminates the movdqa copies the SSE2 rotations need. Rotations: rot16/8
+// via vpshufb against the resident masks, rot12/7 via shift+or (not
+// byte-aligned; shifts are the known-best form). Blend emulations use
+// vshufps+vpshufd (blend_0xCC) and vpunpckhdq+vshufps (blend_0xC0),
+// avoiding the need for mask constants.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
+//   r8 = CV ptr, r9 = counterflags ptr, r10 = byte-rotation masks ptr
+//   (BLAKE3_ROT_MASKS: rot16 at +0, rot8 at +32; read unaligned, so the
+//   Pascal const needs no special alignment).
+// Register map: xmm0 = a, xmm1 = b, xmm2 = c, xmm3 = d, xmm4-xmm7 = m0-m3,
+//   xmm8/xmm9 = temp, xmm11/xmm14 = temp, xmm10 = rot16 mask,
+//   xmm12 = rot8 mask.
+// Frame (sub rsp, 120):
+//   [rsp +  0.. 95] = xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 x 16)
+//   [rsp + 96..111] = IV staging area (loaded into xmm2)
+//   [rsp +112..119] = padding
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE3-team/BLAKE3 official SSE2/AVX2 implementation.
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
-//   r8 = CV ptr, r9 = counterflags ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE3_ROT_MASKS: rot16 at +0, rot8 at +32; read unaligned, so the
-//   Pascal const needs no special alignment).
-// Register map: xmm0 = a, xmm1 = b, xmm2 = c, xmm3 = d,
-//   xmm4 = m0, xmm5 = m1, xmm6 = m2, xmm7 = m3, xmm8/xmm9 = temp, xmm11/xmm14 = temp,
-//   xmm10 = rot16 mask, xmm12 = rot8 mask.
-// Rotations: ROT16/8 via vpshufb against the resident masks, ROT12/7 via
-//   shift+or (not byte-aligned; shifts are the known-best form).
-// 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
-// Blend emulations use vshufps+vpshufd (blend_0xCC) and vpunpckhdq+vshufps (blend_0xC0),
-// avoiding the need for mask constants.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV).
-//
-// Stack layout (sub rsp, 120):
-//   [rsp +  0.. 95]: xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 * 16)
-//   [rsp + 96..111]: IV staging area (loaded into xmm2)
-//   [rsp +112..119]: padding
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

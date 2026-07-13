@@ -1,12 +1,14 @@
-// SSE2 implementation of BLAKE3 compress (7 rounds with register-based message scheduling).
-// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation (blake3_sse2_x86-64_windows_msvc.asm).
-// IA-32: after HlpSimdProc4Begin_i386 — ebx = state, esi = msg, edi = CV, eax = counterflags ptr
-//   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15);
-//   IA-32 uses xmm0–7 only — high-XMM temps from x64 are folded into xmm0/1/2 + stack spill;
-//   rotations use xmm0 + [esp+$20].
+// SSE2 implementation of BLAKE3 compress (7 rounds with register-based
+// message scheduling; IA-32). Message scheduling / diagonalize: same
+// strategy as the x64 sibling (blend emulation, pshufd), per sneves.
 // Rotations: rot16 via pshuflw+pshufhw; rot12/8/7 via pslld/psrld/por.
-// Message scheduling / diagonalize: same strategy as x64 (blend emulation, pshufd), per sneves.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = msg ptr,
+//   edi = CV ptr, eax = counterflags ptr.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15); IA-32 uses xmm0-xmm7 only - high-XMM temps from x64
+//   are folded into xmm0/1/2 + stack spill; rotations use xmm0 + [esp+$20].
+// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation
+// (blake3_sse2_x86-64_windows_msvc.asm), HashLib Blake3CompressSse2_x86_64.inc.
 
   sub esp, 120
   movdqu oword ptr [esp], xmm6
@@ -26,7 +28,7 @@
   // Initialize state: a=CV[0..3], b=CV[4..7], c=IV[0..3], d=CounterFlags
   movdqu xmm0, oword ptr [edi]
   movdqu xmm1, oword ptr [edi + $10]
-  // xmm2 = IV (loaded above); eax clobbered by IV stores — reload counterflags
+  // xmm2 = IV (loaded above); eax clobbered by IV stores - reload counterflags
   mov eax, dword ptr [esp + $30]
   movdqu xmm3, oword ptr [eax]
 

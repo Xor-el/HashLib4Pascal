@@ -1,16 +1,17 @@
-// SHA-256 pure-GPR implementation (AArch64) for cores without the SHA-256
-// crypto extension; the Gpr name states the ISA requirement: none beyond
-// base AArch64. Serial SHA maps better onto the 31 GPRs than onto NEON
-// lanes (single dependency chain, 1-op ror, rotate-folded eor operands).
-// Expects AAPCS64 (after HlpSimdProc4Begin_aarch64): x0 = state ptr
-//   (8 x UInt32), x1 = data ptr, w2 = numblocks, x3 = K256_Gpr ptr.
-// K256_Gpr carries the 64 round constants PLUS a zero terminator word - the
-// message-schedule loop ends when the loaded K word is zero (cbnz), exactly
-// like the original's sentinel-terminated table; a plain K256 const cannot
-// drive this loop.
-// Frame: 128-byte AAPCS64 frame (x29/x30 + x19-x28 callee-saved) + 16 bytes
-// schedule scratch; x30 (LR) is repurposed as the K walk pointer between the
-// save and the restore, as in the original.
+// Gpr implementation of SHA-256 compress (AArch64) for cores without the
+// SHA-256 crypto extension; the Gpr name states the ISA requirement: none
+// beyond base AArch64. Serial SHA maps better onto the 31 GPRs than onto
+// NEON lanes (single dependency chain, 1-op ror, rotate-folded eor
+// operands).
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (8 x UInt32),
+//   x1 = data ptr, w2 = numblocks, x3 = K256_Gpr ptr.
+//   K256_Gpr carries the 64 round constants PLUS a zero terminator word -
+//   the message-schedule loop ends when the loaded K word is zero (cbnz),
+//   exactly like the original's sentinel-terminated table; a plain K256
+//   const cannot drive this loop.
+// Frame: 128-byte AAPCS64 frame (x29/x30 + x19-x28 callee-saved) + 16
+//   bytes schedule scratch; x30 (LR) is repurposed as the K walk pointer
+//   between the save and the restore, as in the original.
 // AArch64 instructions are .long-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha512-armv8.pl (sha256_block_data_order,
 // the plain path; the generator emits both SHA-256 and SHA-512).

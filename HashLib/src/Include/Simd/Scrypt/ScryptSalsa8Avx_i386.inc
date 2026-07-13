@@ -1,27 +1,23 @@
 // AVX (VEX-128) implementation of fused XOR + Salsa20/8 on Percival-permuted
-// data (IA-32). Same structure as ScryptSalsa8Avx_x86_64.inc; the state
-// save/reload uses vmovdqu (IA-32 stacks are only 4-aligned), so the frame is
-// 64 bytes with no alignment padding.
+// data (IA-32); the Avx name states the ISA requirement: VEX-128 encodings
+// only, no 256-bit ymm. Same structure as ScryptSalsa8Avx_x86_64.inc; the
+// state save/reload uses vmovdqu (IA-32 stacks are only 4-aligned), so the
+// frame is 64 bytes with no alignment padding.
+// The (i*5 mod 16) Percival data permutation arranges each 16-word Salsa20
+// state into role-based diagonal order, enabling lane-parallel SIMD
+// processing of column and row quarter-rounds with pshufd-based
+// diagonalize/undiagonalize between them. Operation:
+// State = Salsa20/8(State XOR Input).
+// ABI (after HlpSimdProc2Begin_i386.inc): ebx = State ptr, esi = Input ptr.
+//   Each pointer addresses 16 UInt32 (64 bytes) in permuted order.
+// Register map: xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
+//   xmm2 = C = {w8,w13,w2,w7}, xmm3 = D = {w12,w1,w6,w11}, xmm4-xmm5 = temps.
+// Frame: 64 bytes (saved XOR'd state; no alignment padding).
+// Saves: none (uses xmm0-xmm5 and eax only; all volatile on IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-//
 // Reference: Colin Percival, "Stronger Key Derivation via Sequential
-// Memory-Hard Functions" (2009), and the Tarsnap scrypt reference
-// implementation (crypto_scrypt-sse.c). The (i*5 mod 16) data permutation
-// arranges each 16-word Salsa20 state into role-based diagonal order,
-// enabling lane-parallel SIMD processing of column and row quarter-rounds
-// with vpshufd-based diagonalize/undiagonalize between them.
-//
-// Identical algorithm to the SSE2 variant but uses VEX-128 3-operand
-// encoding, eliminating movdqa register copies and reducing each QR step
-// from 7 to 5 instructions.
-//
-// IA-32: after HlpSimdProc2Begin_i386 - ebx = State ptr, esi = Input ptr
-//   (parallel to MS x64 ABI: rcx, rdx).
-// Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
-//   xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
-//   xmm2 = C = {w8,w13,w2,w7},  xmm3 = D = {w12,w1,w6,w11}.
-// Operation: State = Salsa20/8(State XOR Input)
-// Uses xmm0-xmm5 and eax (all volatile). No spills needed.
+// Memory-Hard Functions" (2009); Tarsnap crypto_scrypt-sse.c; HashLib
+// ScryptSalsa8Avx_x86_64.inc.
 
   sub    esp, $40
 

@@ -1,18 +1,18 @@
-// SSSE3 implementation of BLAKE2s compress (fully unrolled 10 rounds); SSE2
-// sibling: Blake2SCompressSse2_i386.inc.
-// IA-32: after HlpSimdProc5Begin_i386 - ebx = state, esi = msg,
-//   edi = counter+flags, eax = IV, ecx = byte-rotation masks ptr
-//   (see BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
+// SSSE3 implementation of BLAKE2s compress (fully unrolled 10 rounds; IA-32);
+// SSE2 sibling: Blake2SCompressSse2_i386.inc. Rotations: rot16 via pshufb
+// against the resident xmm7 mask; rot8 via a per-site mask reload into the
+// xmm5 temp + pshufb (only xmm7 is free); rot12/7 via psrld/pslld/por (not
+// byte-aligned). Diagonalize/Undiagonalize via pshufd. Message loads via
+// movd + punpcklqdq + shufps.
+// ABI (after HlpSimdProc5Begin_i386.inc): ebx = state ptr, esi = msg ptr,
+//   edi = counter+flags ptr, eax = IV ptr, ecx = byte-rotation masks ptr
+//   (BLAKE2S_ROT_MASKS: rot16 at +0, rot8 at +16; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Uses xmm0-xmm7; xmm6/xmm7 saved/restored defensively (volatile on i386).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load), xmm7 = rot16 mask.
-// Rotations: ROT16 via pshufb (db-encoded for broad assembler compatibility)
-//   against the resident xmm7 mask; ROT8 via a per-site mask reload into the
-//   xmm5 temp + pshufb (only xmm7 is free); ROT12/7 via psrld/pslld/por
-//   (not byte-aligned).
-// Diagonalize/Undiagonalize via pshufd.
-// Message loads via movd + punpcklqdq + shufps.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = message buffer, xmm5 = temp,
+//   xmm6 = temp (msg load), xmm7 = rot16 mask.
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
+// pshufb instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
   sub esp, 32

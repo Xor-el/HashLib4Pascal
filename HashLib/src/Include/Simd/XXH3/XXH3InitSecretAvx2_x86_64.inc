@@ -1,9 +1,10 @@
-// AVX2 implementation of XXH3_initCustomSecret (fully unrolled, 6 x 32-byte chunks).
+// AVX2 implementation of XXH3_initCustomSecret (fully unrolled, 6 x
+// 32-byte chunks).
+// ABI (after HlpSimdProc3Begin_x86_64.inc): rcx = customSecret ptr,
+//   rdx = defaultSecret ptr, r8 = seed ptr (PUInt64).
+// Saves: none (uses ymm0-ymm2 and rax only; volatile under both ABIs).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = customSecret ptr, rdx = defaultSecret ptr,
-//   r8 = seed ptr (PUInt64).
-// Uses only volatile registers: ymm0-ymm2, rax.
-// Reference: official xxHash C - XXH3_initCustomSecret_avx2 in xxhash.h
+// Reference: official xxHash C - XXH3_initCustomSecret_avx2 in xxhash.h.
 
   // Build seed vector ymm0 = [seed, -seed, seed, -seed]
   mov r8, qword [r8]

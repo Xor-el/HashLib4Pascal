@@ -1,16 +1,18 @@
-// SHA-256 SSSE3 SIMD-schedule implementation (IA-32); SSE2 sibling:
-// SHA256CompressSse2_i386.inc.
-// The message schedule runs in SIMD interleaved with the GPR compression
-// rounds; the 32-bit state lives in eax/ebx/ecx plus the local frame (IA-32
-// has too few GPRs to keep all eight in registers). Unlike the SSE2 sibling,
-// the two SSSE3 ops are the real instructions (db-encoded for broad assembler
-// compatibility): pshufb dword byte-swap against the mask kept in xmm7 for
-// the block head, and palignr $4 in the schedule.
+// SSSE3 implementation of SHA-256 compress (SIMD schedule; IA-32); SSE2
+// sibling: SHA256CompressSse2_i386.inc. The message schedule runs in SIMD
+// interleaved with the GPR compression rounds; the 32-bit state lives in
+// eax/ebx/ecx plus the local frame (IA-32 has too few GPRs to keep all
+// eight in registers). Unlike the SSE2 sibling, the two SSSE3 ops are the
+// real instructions: pshufb dword byte-swap against the mask kept in xmm7
+// for the block head, and palignr $4 in the schedule.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = doubled-K256 ptr (read at a 32-byte stride so
+//   the duplicated halves are skipped; see K256_Doubled).
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K256
+//   walk pointer; state loads into eax/ebx/ecx and the frame.
+// pshufb/palignr instructions are db-encoded for broad assembler
+// compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha256-586.pl (SSSE3 kernel).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
-//   eax = doubled-K256 ptr (read at a 32-byte stride so the duplicated halves are
-//   skipped; see K256_Doubled). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is pushed
-//   here as the K256 walk pointer; state loads into eax/ebx/ecx and the frame.
 
   push   ebp
   mov    ebp, eax

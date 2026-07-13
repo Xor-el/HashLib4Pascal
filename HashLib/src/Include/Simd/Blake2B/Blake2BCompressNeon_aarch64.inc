@@ -1,9 +1,8 @@
-// BLAKE2b compress AArch64 NEON implementation.
-// Expects AAPCS64: x0 = state ptr (8 x UInt64), x1 = message ptr (128 bytes),
-//   x2 = counter+flags ptr (32 bytes: t[0..1], f[0..1]), x3 = IV ptr (8 x UInt64).
-// Leaf nostackframe; uses v8-v15 for message block (d8-d15 lanes; no save/restore).
-// Reference: BLAKE2/BLAKE2 neon/blake2b-neon.c, HashLib Blake2BCompressSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of BLAKE2b compress (fully unrolled 12 rounds).
+// u64 ror-by-32 uses rev64.4s (vrev64q_u32), not rev64.16b.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (8 x UInt64),
+//   x1 = message ptr (128 bytes), x2 = counter+flags ptr (32 bytes: t[0..1],
+//   f[0..1]), x3 = IV ptr (8 x UInt64).
 // Register map:
 //   v0, v1   = row1l, row1h (h[0..3] working, 2 x u64 each)
 //   v2, v3   = row2l, row2h (h[4..7] working)
@@ -14,7 +13,11 @@
 //   v20      = message gather temp b0 (G function)
 //   v21-v23  = rotate / diagonalize temps (2-op insert rotates rename the
 //     rotated row halves through v21/v22; b1 gather uses v23)
-//   u64 ror-by-32 uses rev64.4s (vrev64q_u32), not rev64.16b.
+// Saves: d8-d15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (v8-v15 hold the message block).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: BLAKE2/BLAKE2 neon/blake2b-neon.c, HashLib
+//   Blake2BCompressSse2_x86_64.inc.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
 

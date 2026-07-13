@@ -1,11 +1,9 @@
-// SSE2 implementation of XXH3_scrambleAcc (fully unrolled, 4 x 16-byte chunks).
-// Expects MS x64 ABI: rcx = acc ptr, rdx = secret ptr.
-// Uses only volatile registers: xmm0-xmm5, eax.
-// Algorithm per 128-bit chunk:
-//   acc ^= (acc >> 47)
-//   acc ^= secret
-//   acc *= XXH_PRIME32_1
-// Reference: official xxHash C - XXH3_scrambleAcc_sse2 in xxhash.h
+// SSE2 implementation of XXH3_scrambleAcc (fully unrolled, 4 x 16-byte
+// chunks). Algorithm per 128-bit chunk: acc ^= (acc >> 47); acc ^= secret;
+// acc *= XXH_PRIME32_1.
+// ABI (after HlpSimdProc2Begin_x86_64.inc): rcx = acc ptr, rdx = secret ptr.
+// Saves: none (uses xmm0-xmm5 and eax only; volatile under both ABIs).
+// Reference: official xxHash C - XXH3_scrambleAcc_sse2 in xxhash.h.
 
   // Load XXH_PRIME32_1 ($9E3779B1) into xmm5 as broadcast dword
   mov eax, $9E3779B1

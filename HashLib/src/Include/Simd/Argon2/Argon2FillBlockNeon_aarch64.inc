@@ -1,11 +1,9 @@
-// Argon2 FillBlock AArch64 NEON implementation (BlaMka round function).
-// Expects AAPCS64: x0 = Left ptr, x1 = Right ptr, x2 = Current ptr, w3 = WithXor.
-// Each pointer addresses 128 UInt64 (1024 bytes).
-// Stack frame 2128 bytes; see register map.
-// Steps: R=Left XOR Right; Z=copy(R); 8 column + 8 row BlaMka rounds on Z;
-//   Current = R XOR Z [XOR Current if WithXor]. Diagonalize via vext #8.
-// Reference: jedisct1/libsodium argon2-fill-block-neon.c, HashLib Argon2FillBlockSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of Argon2 FillBlock (BlaMka round function).
+// Steps: R = Left XOR Right; Z = copy(R); 8 column + 8 row BlaMka rounds on
+//   Z; Current = R XOR Z [XOR Current if WithXor]. Diagonalize via vext #8.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = Left ptr, x1 = Right ptr,
+//   x2 = Current ptr, w3 = WithXor (0 or 1).
+//   Each pointer addresses 128 QWords (1024 bytes).
 // Register map:
 //   v0-v1    = A0, A1
 //   v2-v3    = B0, B1
@@ -18,6 +16,11 @@
 //   x11      = Z_buf base ([sp+1088])
 //   x12      = Z slice pointer (column/row load/store)
 //   w3       = WithXor (0 or 1)
+// Frame: 2128 bytes (R_buf at [sp+64], Z_buf at [sp+1088], 16-byte SP pad).
+// Saves: none (caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: jedisct1/libsodium argon2-fill-block-neon.c, HashLib
+//   Argon2FillBlockSse2_x86_64.inc.
 
   sub sp, sp, #2128
   add x9, sp, #64

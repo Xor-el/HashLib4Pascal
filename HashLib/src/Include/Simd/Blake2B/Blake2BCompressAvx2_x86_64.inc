@@ -1,18 +1,18 @@
 // AVX2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+// Rotations: rot32 via vpshufd, rot24/16 via vpshufb against the resident
+// masks, rot63 via shift+or (not byte-aligned; shifts are the known-best
+// form). Diagonalize/Undiagonalize via vpermq.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
 //   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE2B_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   (BLAKE2B_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Register map: ymm0 = a (v0-3), ymm1 = b (v4-7), ymm2 = c (v8-11), ymm3 = d (v12-15),
-//   ymm4 = message temp, ymm5 = computation temp, ymm6 = rot24 mask, ymm7 = rot16 mask.
-// Rotations: ROT32 via vpshufd, ROT16/24 via vpshufb against the resident
-//   masks, ROT63 via shift+or (not byte-aligned; shifts are the known-best form).
-// Diagonalize/Undiagonalize via vpermq.
+// Register map: ymm0 = a (v0-3), ymm1 = b (v4-7), ymm2 = c (v8-11),
+//   ymm3 = d (v12-15), ymm4 = message temp, ymm5 = computation temp,
+//   ymm6 = rot24 mask, ymm7 = rot16 mask.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV; only xmm6/xmm7 are clobbered here - by the mask loads).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: sneves/blake2-avx2 by Samuel Neves.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV; only xmm6/xmm7 are clobbered here - by the mask loads).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

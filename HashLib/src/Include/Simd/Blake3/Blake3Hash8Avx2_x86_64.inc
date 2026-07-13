@@ -1,29 +1,28 @@
-// AVX2 implementation of BLAKE3 hash8: processes 8 independent chunks simultaneously.
-// Reference: BLAKE3-team/BLAKE3 official AVX2 implementation (blake3_avx2.c / blake3_hash_many).
-// Each YMM register holds the same 32-bit word from 8 different chunks (inter-chunk SIMD).
-// All VEX instructions are db-encoded for broad assembler compatibility.
-// 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
-//
-// After HlpSimdProc7Begin_x86_64.inc:
-//   rcx = AInput, rdx = AKey, r8 = AOut,
-//   r9 = ANumChunks, r10 = ACounter, r11 = AFlags,
-//   rax = byte-rotation masks ptr (see BLAKE3_ROT_MASKS: rot16 at +0, rot8
-//   at +32; read unaligned, so the Pascal const needs no special alignment;
+// AVX2 implementation of BLAKE3 hash8: processes 8 independent chunks
+// simultaneously. Each YMM register holds the same 32-bit word from 8
+// different chunks (inter-chunk SIMD); 7 rounds per block fully unrolled;
+// 16-block loop with branch for chunk start/end flags. Message transpose:
+// chunks paired (0+4, 1+5, ...) via vinserti128, then per-lane 4x4. Output
+// transpose: full 8x8 via vperm2i128 + vpunpckl/hdq + vpunpcklq/hqdq.
+// Rotations: rot16/8 via vpshufb against the resident masks, rot12/7 via
+// shift+or (not byte-aligned; shifts are the known-best form). 3-operand
+// VEX form eliminates the movdqa copies the SSE2 rotations need.
+// ABI (after HlpSimdProc7Begin_x86_64.inc): rcx = AInput, rdx = AKey,
+//   r8 = AOut, r9 = ANumChunks, r10 = ACounter, r11 = AFlags,
+//   rax = byte-rotation masks ptr (BLAKE3_ROT_MASKS: rot16 at +0, rot8 at
+//   +32; read unaligned, so the Pascal const needs no special alignment;
 //   consumed by the entry mask loads, rax is scratch afterwards).
-//
 // Register map: ymm0-ymm7 = state v0-v7, ymm8-ymm11 = state v8-v11,
 //   ymm12-ymm13 = temp, ymm14 = rot16 mask, ymm15 = rot8 mask,
 //   v12-v15 spilled to stack.
-// Rotations: ROT16/8 via vpshufb against the resident masks, ROT12/7 via
-//   shift+or (not byte-aligned; shifts are the known-best form).
-// GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block byte offset.
-// Message transpose: chunks paired (0+4, 1+5, ...) via vinserti128, then per-lane 4x4.
-// Output transpose: full 8x8 via vperm2i128 + vpunpckl/hdq + vpunpcklq/hqdq.
-// 3-operand VEX form eliminates movdqa copies needed in SSE2 rotations.
-// Stack 32-byte aligned via "and rsp, -32" for YMM movdqu stores.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV).
+//   GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block
+//   byte offset.
+// Frame: stack 32-byte aligned via "and rsp, -32" for YMM movdqu stores.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV).
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
+// Reference: BLAKE3-team/BLAKE3 official AVX2 implementation
+// (blake3_avx2.c / blake3_hash_many).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

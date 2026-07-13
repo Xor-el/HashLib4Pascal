@@ -1,22 +1,22 @@
-// SSSE3 implementation of BLAKE3 compress (7 rounds with register-based message
-// scheduling); SSE2 sibling: Blake3CompressSse2_x86_64.inc.
-// Reference: BLAKE3-team/BLAKE3 official SSE2/SSE4.1 implementations.
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+// SSSE3 implementation of BLAKE3 compress (7 rounds with register-based
+// message scheduling); SSE2 sibling: Blake3CompressSse2_x86_64.inc.
+// Message scheduling: all 16 words kept in xmm4-xmm7, permuted between
+// rounds via shufps/pshufd (blend_0xCC emulated via shufps+pshufd,
+// blend_0xC0 via punpckhdq+shufps). Rotations: rot16/8 via pshufb against
+// the resident masks; rot12/7 via pslld/psrld/por (not byte-aligned).
+// Diagonalize/Undiagonalize via pshufd (row1 unrotated, per sneves
+// optimization).
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
 //   r8 = CV ptr, r9 = counterflags ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE3_ROT_MASKS: rot16 at +0, rot8 at +32; read unaligned, so the
+//   (BLAKE3_ROT_MASKS: rot16 at +0, rot8 at +32; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = m0 (col G1 msg), xmm5 = m1 (col G2 msg), xmm6 = m2 (diag G1 msg),
-//   xmm7 = m3 (diag G2 msg), xmm8/xmm9 = temp (msg perm), xmm11/xmm14 = temp (rotations),
-//   xmm10 = rot16 mask, xmm12 = rot8 mask.
-// Rotations: rot16/8 via pshufb (db-encoded for broad assembler compatibility)
-//   against the resident masks; rot12/7 via pslld/psrld/por (not byte-aligned).
-// Message scheduling: all 16 words kept in xmm4-7, permuted between rounds using
-//   shufps/pshufd (blend_0xCC emulated via shufps+pshufd, blend_0xC0 via punpckhdq+shufps).
-// Diagonalize/Undiagonalize via pshufd (row1 unrotated, per sneves optimization).
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV).
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4-xmm7 = m0-m3, xmm8/xmm9 = temp (msg perm),
+//   xmm11/xmm14 = temp (rotations), xmm10 = rot16 mask, xmm12 = rot8 mask.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV).
+// pshufb instructions are db-encoded for broad assembler compatibility.
+// Reference: BLAKE3-team/BLAKE3 official SSE2/SSE4.1 implementations.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

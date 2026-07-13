@@ -3,7 +3,7 @@
 //   (i386 register convention).
 // FPC: param4 and param5 are at [esp+20] and [esp+16] after push EBX/ESI/EDI (see asm).
 // Delphi Win32: first 3 params in EAX/EDX/ECX; param4 at [ebp+12], param5 at [ebp+8].
-// Callee-saved EBX, ESI, EDI — epilogue must pop EDI, ESI, EBX.
+// Callee-saved EBX, ESI, EDI - epilogue must pop EDI, ESI, EBX.
 // Usage:
 //   procedure MyProc(P1, P2: Pointer; P3, P4: Int32; P5: Pointer);
 //     {$I HlpSimdProc5Begin_i386.inc}

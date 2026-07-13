@@ -1,21 +1,20 @@
-// Keccak-f[1600] sponge absorb for x86-64, pure 64-bit GPR code - the
-// asm twin of the AVX2 absorb: XORs whole blocks
-// into the state and permutes, keeping the state in the lane-complemented
-// domain across the entire batch (the NOT conversion is hoisted out of the
-// block loop - the standalone permute pays it per call).
-// The permutation body is the same inner as KeccakF1600Gpr_x86_64.inc
-// (embedded again because local labels cannot cross include files), with the
-// same end-pointer loop termination via the sentinel at [rsp].
+// Gpr implementation of the Keccak-f[1600] multi-block absorb (pure 64-bit
+// GPR code) - the asm twin of the AVX2 absorb: XORs whole blocks into the
+// state and permutes, keeping the state in the lane-complemented domain
+// across the entire batch (the NOT conversion is hoisted out of the block
+// loop - the standalone permute pays it per call). The permutation body is
+// the same inner as KeccakF1600Gpr_x86_64.inc (embedded again because
+// local labels cannot cross include files), with the same end-pointer loop
+// termination via the sentinel at [rsp].
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = AState (25 x UInt64,
+//   standard layout), rdx = AData, r8 = ABlockCount, r9 = ABlockSize (both
+//   Int32 - upper halves undefined, zero-extended here), r10 = AConstants
+//   (iotas: 24 x UInt64).
+// Frame: 200-byte scratch plane at [rsp+16] (rsi biased +100), sentinel at
+//   [rsp], spills at [rsi+100..116].
+// Saves: every callee-saved GPR is pushed here (clobbers all GPRs).
 // Reference: OpenSSL CRYPTOGAMS keccak1600-x86_64.pl (SHA3_absorb) by
 // Andy Polyakov.
-//
-// After HlpSimdProc5Begin_x86_64: rcx = AState (25 x UInt64, standard
-// layout), rdx = AData, r8 = ABlockCount, r9 = ABlockSize (both Int32 -
-// upper halves undefined, zero-extended here), r10 = AConstants (iotas:
-// 24 x UInt64 round constants).
-// Frame: 200-byte scratch plane at [rsp+16] (rsi biased +100), sentinel at
-// [rsp], spills at [rsi+100..116]. Clobbers all GPRs; every callee-saved
-// one is pushed here.
 
   push rbx
   push rbp

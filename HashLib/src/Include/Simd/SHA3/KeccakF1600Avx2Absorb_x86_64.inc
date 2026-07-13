@@ -1,21 +1,12 @@
-// Keccak-f[1600] AVX2 multi-block absorb.
-// Fuses data-XOR + permutation into a single loop with one gather/scatter.
-// Reference: Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS project),
-// as adopted by XKCP (eXtended Keccak Code Package):
-//   https://github.com/dot-asm/cryptogams/blob/master/x86_64/keccak1600-avx2.pl
-//   https://github.com/XKCP/XKCP/blob/master/lib/low/KeccakP-1600/AVX2/KeccakP-1600-AVX2.s
-//
-// Uses "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM registers.
-// All VEX instructions are db-encoded for broad assembler compatibility.
-//
-// After HlpSimdProc5Begin_x86_64.inc:
-//   rcx = state ptr (25 x UInt64, standard layout)
-//   rdx = data ptr (input bytes, little-endian UInt64 words)
-//   r8d = block count
-//   r9d = block size in bytes
-//   r10 = constants ptr (K_KECCAK: rhotates, iotas, A_JAGGED)
-//
-// YMM register mapping (after gather):
+// AVX2 implementation of the Keccak-f[1600] multi-block absorb. Fuses
+// data-XOR + permutation into a single loop with one gather/scatter. Uses
+// the "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM
+// registers.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr (25 x UInt64,
+//   standard layout), rdx = data ptr (little-endian UInt64 words),
+//   r8d = block count, r9d = block size in bytes, r10 = constants ptr
+//   (K_KECCAK: rhotates, iotas, A_JAGGED).
+// Register map (after gather):
 //   ymm0 = broadcast(state[0])
 //   ymm1 = { state[1],  state[2],  state[3],  state[4]  }
 //   ymm2 = { state[10], state[20], state[5],  state[15] }
@@ -23,24 +14,20 @@
 //   ymm4 = { state[11], state[22], state[8],  state[19] }
 //   ymm5 = { state[21], state[17], state[13], state[9]  }
 //   ymm6 = { state[6],  state[12], state[18], state[24] }
-//
-// MS x64 non-volatile saves: xmm6-xmm15, rbx, rbp, r12-r15, rdi, rsi.
-// rdi/rsi are also pushed under non-MS ABIs because the absorb loop uses rsi
-// as the A_JAGGED base pointer for the duration of the routine.
-//
-// Stack layout (sub rsp, 424):
-//   [rsp+  0..223]: jagged buffer (7 x 32 bytes)
-//   [rsp+224..255]: scratch
-//   [rsp+256..415]: xmm6-xmm15 save area
-//
-// Register allocation across absorb loop:
-//   r12  = state pointer (for final scatter)
-//   r13  = data pointer (advances per block)
-//   r14d = block count (decremented per block)
-//   r15d = block size in bytes (constant)
-//   rbx  = constants pointer (constant)
-//   ebp  = block size in qwords (constant)
-//   rsi  = A_JAGGED base pointer (constant)
+//   Absorb-loop GPRs: r12 = state ptr (final scatter), r13 = data ptr
+//   (advances per block), r14d = block count (decremented), r15d = block
+//   size in bytes, rbx = constants ptr, ebp = block size in qwords,
+//   rsi = A_JAGGED base pointer.
+// Frame (sub rsp, 424):
+//   [rsp+  0..223] = jagged buffer (7 x 32 bytes)
+//   [rsp+224..255] = scratch
+//   [rsp+256..415] = xmm6-xmm15 save area
+// Saves: xmm6-xmm15, rbx, rbp, r12-r15, rdi, rsi. rdi/rsi are also pushed
+//   under non-MS ABIs because the absorb loop uses rsi as the A_JAGGED
+//   base pointer for the duration of the routine.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
+// Reference: Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS), as adopted
+// by XKCP (KeccakP-1600-AVX2.s).
 
   // ===== Prologue: save callee-saved GPRs =====
   push rbx

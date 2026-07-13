@@ -1,18 +1,18 @@
-// SHA-1 AVX SIMD-schedule implementation (IA-32). VEX-128 (AVX1)
-// instructions only - there is no i386 AVX2 SHA-1 upstream. The 3-operand
-// VEX forms eliminate the SSSE3 kernel's register-copy
-// movdqa traffic in the interleaved message schedule. All VEX instructions
-// are db-encoded for broad assembler compatibility.
-// The four round constants and the byte-swap mask are read from
+// AVX (VEX-128) implementation of SHA-1 compress (SIMD schedule; IA-32);
+// the Avx name states the ISA requirement: VEX-128 encodings only - there
+// is no i386 AVX2 SHA-1 upstream. The 3-operand VEX forms eliminate the
+// SSSE3 kernel's register-copy movdqa traffic in the interleaved message
+// schedule. The four round constants and the byte-swap mask are read from
 // K_SHA1_Doubled at a 32-byte stride (VEX memory operands are read
-// unaligned, so the Pascal const needs no special alignment) and spilled to
-// the local frame like the original; the original's PIC table setup and
+// unaligned, so the Pascal const needs no special alignment) and spilled
+// to the local frame like the original; the original's PIC table setup and
 // stack-argument reads are replaced by the shared-prologue registers.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = K_SHA1_Doubled ptr.
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here, giving the
+//   4-deep frame the original epilogue unwinds via its saved-esp slot.
+// AVX instructions are db-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha1-586.pl (AVX function).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data,
-//   edi = numblocks, eax = K_SHA1_Doubled ptr. HlpSimdProc4Begin pushes
-//   ebx/esi/edi; ebp is pushed here, giving the 4-deep frame the original
-//   epilogue unwinds via its saved-esp slot.
 
   push   ebp
   mov    ebp, eax
