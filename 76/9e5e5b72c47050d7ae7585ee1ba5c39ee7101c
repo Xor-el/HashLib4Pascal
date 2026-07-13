@@ -1,0 +1,231 @@
+HashLib/src/Include/Simd/Adler32/Adler32BlocksAvx2_i386.inc
+  s_db3d375ac4a65a::t_b611451adf298a 1-5,8-10
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockAvx2_i386.inc
+  s_db3d375ac4a65a::t_8ce351fa612825 1-4,7,11-12,15-19
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressAvx2_i386.inc
+  s_db3d375ac4a65a::t_e39b1f5a56f218 1,3-9,11,13-16
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressSsse3_i386.inc
+  s_db3d375ac4a65a::t_126c2d8157c0a1 1-2,4-16
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_95384ffe591d13 2-5,7,12-13
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressAvx_i386.inc
+  s_db3d375ac4a65a::t_0f13005e639672 1-10,12-16,19
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressSsse3_i386.inc
+  s_db3d375ac4a65a::t_faf3df10e1805e 1-9,11-15
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_149873221b684d 2-6,8,10-14
+HashLib/src/Include/Simd/SHA1/SHA1CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_5ebdf19542c0f8 1-8
+HashLib/src/Include/Simd/SHA256/SHA256CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_1ceacac3601df1 1-14
+HashLib/src/Include/Simd/SHA512/SHA512CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_8c762b618868fa 1-14
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Avx_i386.inc
+  s_db3d375ac4a65a::t_5fd29f02888c4d 2-16,19-20
+HashLib/src/Include/Simd/XXH3/XXH3Acc512Avx2_i386.inc
+  s_db3d375ac4a65a::t_b20eeea2a943e6 1-5
+HashLib/src/Include/Simd/XXH3/XXH3InitSecretAvx2_i386.inc
+  s_db3d375ac4a65a::t_8fc258b174dd0f 1-10
+HashLib/src/Include/Simd/XXH3/XXH3ScrambleAvx2_i386.inc
+  s_db3d375ac4a65a::t_495fff3575dc75 1-4
+HashLib/src/Include/Simd/Adler32/Adler32BlocksAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_cea4d699545c2a 1-8,10
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSse2_i386.inc
+  s_db3d375ac4a65a::t_4920c26c37a38f 1-15
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSse2_x86_64.inc
+  s_6b1649def2e9b5::t_147b04f8ec1f29 1-11
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSsse3_i386.inc
+  s_db3d375ac4a65a::t_74879d49aa76a4 1-10
+HashLib/src/Include/Simd/Adler32/Adler32BlocksSsse3_x86_64.inc
+  s_6b1649def2e9b5::t_a8ae05cc473a2f 1-8
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_4e1af641a6e7a3 1-5,7-12,15-22
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockNeon_aarch64.inc
+  s_db3d375ac4a65a::t_5b4754ccba1342 1-6,19-23
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockSse2_i386.inc
+  s_db3d375ac4a65a::t_21162f3ff8e416 1-16,704
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockSse2_x86_64.inc
+  s_db3d375ac4a65a::t_8d242ec3c07130 1,3,5-17,526
+HashLib/src/Include/Simd/Argon2/Argon2FillBlockSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_d2e2951f2ee5c6 1-7,9-14,17-24
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_db33e93aa631d2 2-5,7,9-13
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressNeon_aarch64.inc
+  s_6b1649def2e9b5::t_09d3fb112bd29a 1-5,16-20
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressSse2_i386.inc
+  s_db3d375ac4a65a::t_c077bce6e9f39a 1-10
+HashLib/src/Include/Simd/Blake2B/Blake2BCompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_2832612fda76ac 2-3,6
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressAvx_x86_64.inc
+  s_db3d375ac4a65a::t_0ae78edf66739e 1-7,9,11-14
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressSse2_i386.inc
+  s_db3d375ac4a65a::t_0c852d825bcf29 1-9
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_6d3cfb33af4c2d 2-9
+HashLib/src/Include/Simd/Blake3/Blake3CompressAvx_x86_64.inc
+  s_db3d375ac4a65a::t_a1ec1dde83af86 1-9,11,13-23
+HashLib/src/Include/Simd/Blake3/Blake3CompressSse2_i386.inc
+  s_db3d375ac4a65a::t_7750de90ba9517 1-3,5-11,31
+HashLib/src/Include/Simd/Blake3/Blake3CompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_c3a5f459a1d2aa 1-19
+HashLib/src/Include/Simd/Blake3/Blake3CompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_fa34bd43a0c491 1-9,11,13-19
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Neon_aarch64.inc
+  s_6b1649def2e9b5::t_f4fb45aa2204d7 1-6,10-12,15-24
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Sse2_i386.inc
+  s_db3d375ac4a65a::t_ace946d1100ad5 1-24,70
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Sse2_x86_64.inc
+  s_db3d375ac4a65a::t_400a07d06e5f2f 1-8,11-15
+HashLib/src/Include/Simd/Blake3/Blake3Hash4Ssse3_x86_64.inc
+  s_db3d375ac4a65a::t_148786f79d13c7 2-11,16-22
+HashLib/src/Include/Simd/Blake3/Blake3Hash8Avx2_x86_64.inc
+  s_db3d375ac4a65a::t_ad387c3d5ccfe3 1-13,18-25
+HashLib/src/Include/Simd/CRC/CRCFoldForwardGpr_i386.inc
+  s_db3d375ac4a65a::t_34b6c09315b8d8 1-8
+HashLib/src/Include/Simd/CRC/CRCFoldForwardGpr_x86_64.inc
+  s_db3d375ac4a65a::t_0309be4ec24422 1-10
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPclmul_i386.inc
+  s_db3d375ac4a65a::t_20940e88d63a20 1-9,11-12,15-21
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPclmul_x86_64.inc
+  s_db3d375ac4a65a::t_24ce9fd7892837 1-6,8-16
+HashLib/src/Include/Simd/CRC/CRCFoldForwardPmull_aarch64.inc
+  s_db3d375ac4a65a::t_f046a7ae1f427c 1-7,18-23
+HashLib/src/Include/Simd/CRC/CRCFoldForwardVpclmul_i386.inc
+  s_db3d375ac4a65a::t_6203ed964d3cf7 1-10,12-13,17-21
+HashLib/src/Include/Simd/CRC/CRCFoldForwardVpclmul_x86_64.inc
+  s_db3d375ac4a65a::t_2c3babba40a4c6 1-6,8-14
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPclmul_i386.inc
+  s_db3d375ac4a65a::t_3ae20f2539e35f 1-12,14-19
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPclmul_x86_64.inc
+  s_db3d375ac4a65a::t_1f707d709666a7 1-5,7,9-15
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedPmull_aarch64.inc
+  s_db3d375ac4a65a::t_3c997949ef95ce 1-8,10,21-26
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedSse2_i386.inc
+  s_db3d375ac4a65a::t_3f67f172e0b4db 1-10
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedSse2_x86_64.inc
+  s_db3d375ac4a65a::t_2da4077db2b7dc 1-10
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedVpclmul_i386.inc
+  s_db3d375ac4a65a::t_3559a6b939a427 1-13,16-21
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedVpclmul_x86_64.inc
+  s_db3d375ac4a65a::t_171efcc358f876 1-7,9-16
+HashLib/src/Include/Simd/Common/HlpSimdProc4Begin_aarch64.inc
+  s_db3d375ac4a65a::t_fdf3cdc6fb962c 4
+HashLib/src/Include/Simd/Common/HlpSimdProc5Begin_i386.inc
+  s_db3d375ac4a65a::t_1f16e1a91109dd 6
+HashLib/src/Include/Simd/Common/HlpSimdProc6Begin_i386.inc
+  s_db3d375ac4a65a::t_5f18a475b825a4 7
+HashLib/src/Include/Simd/SHA1/SHA1CompressAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_218ec8937848b0 1-14
+HashLib/src/Include/Simd/SHA1/SHA1CompressAvx_i386.inc
+  s_db3d375ac4a65a::t_3adbd88030cb0e 1-5,7-8,10-14
+HashLib/src/Include/Simd/SHA1/SHA1CompressCryptoExt_aarch64.inc
+  s_6b1649def2e9b5::t_bb6e120e087c09 1-4,13-15
+HashLib/src/Include/Simd/SHA1/SHA1CompressShaNi_i386.inc
+  s_db3d375ac4a65a::t_232bd87d687b13 1-13
+HashLib/src/Include/Simd/SHA1/SHA1CompressShaNi_x86_64.inc
+  s_db3d375ac4a65a::t_d6ce12a7f8dc44 1-24
+HashLib/src/Include/Simd/SHA1/SHA1CompressSse2_i386.inc
+  s_db3d375ac4a65a::t_c9bfd54b50d1a3 1-11
+HashLib/src/Include/Simd/SHA1/SHA1CompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_828b6ca6700d53 1-14
+HashLib/src/Include/Simd/SHA1/SHA1CompressSsse3_i386.inc
+  s_db3d375ac4a65a::t_c4919b2e398bc7 1-11
+HashLib/src/Include/Simd/SHA1/SHA1CompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_4c1d673c010117 1-14
+HashLib/src/Include/Simd/SHA256/SHA256CompressAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_75ed2a919c62bb 1-15
+HashLib/src/Include/Simd/SHA256/SHA256CompressAvx_i386.inc
+  s_db3d375ac4a65a::t_e5d5acc927e0f8 1-14
+HashLib/src/Include/Simd/SHA256/SHA256CompressCryptoExt_aarch64.inc
+  s_6b1649def2e9b5::t_dbc57eb22716e6 1-4,11-13
+HashLib/src/Include/Simd/SHA256/SHA256CompressShaNi_i386.inc
+  s_db3d375ac4a65a::t_6267566d45aa0c 1-13
+HashLib/src/Include/Simd/SHA256/SHA256CompressShaNi_x86_64.inc
+  s_db3d375ac4a65a::t_a57d78425deee3 1-21
+HashLib/src/Include/Simd/SHA256/SHA256CompressSse2_i386.inc
+  s_db3d375ac4a65a::t_e2121025d7087a 1-12
+HashLib/src/Include/Simd/SHA256/SHA256CompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_002ef6a34f08b0 1-7,9-13
+HashLib/src/Include/Simd/SHA256/SHA256CompressSsse3_i386.inc
+  s_db3d375ac4a65a::t_ae4619954e0d44 1-14
+HashLib/src/Include/Simd/SHA256/SHA256CompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_57ad9068002a23 1,5-8,11-15
+HashLib/src/Include/Simd/SHA3/KeccakF1600Avx2Absorb_x86_64.inc
+  s_db3d375ac4a65a::t_fe9aea86ab9ab5 1-9,17-30
+HashLib/src/Include/Simd/SHA3/KeccakF1600Avx2_x86_64.inc
+  s_db3d375ac4a65a::t_82e55fb55e9196 1-7,15-22
+HashLib/src/Include/Simd/SHA3/KeccakF1600CryptoExtAbsorb_aarch64.inc
+  s_6b1649def2e9b5::t_193710df59248e 1-5,10-13
+HashLib/src/Include/Simd/SHA3/KeccakF1600CryptoExt_aarch64.inc
+  s_6b1649def2e9b5::t_8504144f444b5a 1-4,10-13
+HashLib/src/Include/Simd/SHA3/KeccakF1600GprAbsorb_aarch64.inc
+  s_db3d375ac4a65a::t_61f740da8383c7 1-13
+HashLib/src/Include/Simd/SHA3/KeccakF1600GprAbsorb_x86_64.inc
+  s_db3d375ac4a65a::t_f797276cb4c631 1-15
+HashLib/src/Include/Simd/SHA3/KeccakF1600Gpr_aarch64.inc
+  s_db3d375ac4a65a::t_4a21f823c79791 1-13
+HashLib/src/Include/Simd/SHA3/KeccakF1600Gpr_x86_64.inc
+  s_db3d375ac4a65a::t_c71cb20e01fe71 1-16
+HashLib/src/Include/Simd/SHA3/KeccakF1600Sse2Absorb_i386.inc
+  s_db3d375ac4a65a::t_de0e81a1584eb8 1-13
+HashLib/src/Include/Simd/SHA3/KeccakF1600Sse2_i386.inc
+  s_db3d375ac4a65a::t_4a8f1bcca693ec 1-16
+HashLib/src/Include/Simd/SHA512/SHA512CompressAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_80fee92a145a90 1-13
+HashLib/src/Include/Simd/SHA512/SHA512CompressCryptoExt_aarch64.inc
+  s_6b1649def2e9b5::t_7bd8c6b4fe2166 1-5,12-14
+HashLib/src/Include/Simd/SHA512/SHA512CompressSse2_i386.inc
+  s_db3d375ac4a65a::t_b864824b1b0e7f 1-8
+HashLib/src/Include/Simd/SHA512/SHA512CompressSse2_x86_64.inc
+  s_db3d375ac4a65a::t_a06a79e5aad0a2 1-11
+HashLib/src/Include/Simd/SHA512/SHA512CompressSsse3_x86_64.inc
+  s_db3d375ac4a65a::t_a8830ea9b8125a 1-13
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Avx_x86_64.inc
+  s_db3d375ac4a65a::t_856a964cf8af83 1-16,19
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Sse2_i386.inc
+  s_db3d375ac4a65a::t_a17428a873ed8b 1-14,16-17
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Sse2_x86_64.inc
+  s_db3d375ac4a65a::t_86c4100a1b1dab 2-6,13-20
+HashLib/src/Include/Simd/XXH3/XXH3Acc512Avx2_x86_64.inc
+  s_db3d375ac4a65a::t_a8109cac39a7ca 1-5,7
+HashLib/src/Include/Simd/XXH3/XXH3Acc512Sse2_i386.inc
+  s_db3d375ac4a65a::t_98216eac1073c5 1-6
+HashLib/src/Include/Simd/XXH3/XXH3Acc512Sse2_x86_64.inc
+  s_db3d375ac4a65a::t_7c5796618aeb1a 1-6
+HashLib/src/Include/Simd/XXH3/XXH3InitSecretAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_179706cb21392e 1-5,7
+HashLib/src/Include/Simd/XXH3/XXH3InitSecretSse2_i386.inc
+  s_db3d375ac4a65a::t_4380f324416ad7 1-7
+HashLib/src/Include/Simd/XXH3/XXH3InitSecretSse2_x86_64.inc
+  s_db3d375ac4a65a::t_4351e3b107f5a0 1-7
+HashLib/src/Include/Simd/XXH3/XXH3ScrambleAvx2_x86_64.inc
+  s_db3d375ac4a65a::t_e83cc332299d85 1-4,6
+HashLib/src/Include/Simd/XXH3/XXH3ScrambleSse2_i386.inc
+  s_db3d375ac4a65a::t_81495a5bc30deb 1-6
+HashLib/src/Include/Simd/XXH3/XXH3ScrambleSse2_x86_64.inc
+  s_db3d375ac4a65a::t_28226336af9ac0 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "769e5e5b72c47050d7ae7585ee1ba5c39ee7101c",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "unknown"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_db3d375ac4a65a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31d8c528-12de-4647-99f0-163b1e376cfb",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
