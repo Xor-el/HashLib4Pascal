@@ -1,23 +1,27 @@
-// SSE2 i386 implementation of BLAKE3 hash4: processes up to 4 chunks sequentially.
-// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation (blake3_sse2.c / hash_one).
-// i386 has only xmm0-xmm7 (8 registers), so inter-chunk parallelism is not possible;
-//   each chunk is processed one at a time with the inline SSE2 compress kernel.
-// Register map during rounds: xmm0=a(v0-3), xmm1=b(v4-7), xmm2=c(v8-11), xmm3=d(v12-15);
-//   xmm4={m0,m2,m4,m6}, xmm5={m1,m3,m5,m7}, xmm6={m14,m8,m10,m12}, xmm7={m15,m9,m11,m13}.
-// After HlpSimdProc6Begin_i386: ebx=P1 (input), esi=P2 (key), edi=P3 (out), eax=P4 (num chunks),
-//   ecx=P5_lo, edx=P5_hi (chunk counter). Prologue pushed ebx/esi/edi — epilogue pops them.
-// Block index (0..15) is kept at [esp+$90] so ebp is never used as a temp (frame-friendly).
-// Stack layout (148 bytes, esp-relative after sub esp,148):
-//   [esp+$00..0F] xmm6 save      [esp+$10..1F] xmm7 save
-//   [esp+$20..2F] TEMP_A (xmm0 spill during rounds)
-//   [esp+$30..3F] TEMP_B (xmm1 spill during msg permutation — also D_VEC build slot)
-//   [esp+$40..4F] TEMP_C (xmm2 spill during msg permutation)
-//   [esp+$50..5F] IV_VEC {$6A09E667,$BB67AE85,$3C6EF372,$A54FF53A}
-//   [esp+$60..6F] CV_LO (running chaining value low 16 bytes)
-//   [esp+$70..7F] CV_HI (running chaining value high 16 bytes)
-//   [esp+$80]     CTR_LO  [esp+$84] CTR_HI  [esp+$88] BASE_FLAGS  [esp+$8C] SAVE_NC
-//   [esp+$90]     BLOCK_IDX (current block within chunk, 0..15)
-// P6 (flags): FPC i386 [esp+$A4] (16+148 after sub esp,148). Delphi [ebp+8].
+// SSE2 implementation of BLAKE3 hash4 (IA-32): processes up to 4 chunks
+// sequentially. IA-32 has only xmm0-xmm7, so inter-chunk parallelism is not
+// possible; each chunk runs one at a time through the inline SSE2 compress
+// kernel. The block index (0..15) is kept at [esp+$90] so ebp is never used
+// as a temp (frame-friendly).
+// ABI (after HlpSimdProc6Begin_i386.inc): ebx = AInput, esi = AKey,
+//   edi = AOut, eax = ANumChunks, ecx = ACounter.lo32, edx = ACounter.hi32.
+//   P6 (AFlags) is a stack parameter: FPC i386 [esp+$A4] (16+148 after
+//   sub esp,148); Delphi [ebp+8].
+// Register map (rounds): xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15); xmm4 = {m0,m2,m4,m6}, xmm5 = {m1,m3,m5,m7},
+//   xmm6 = {m14,m8,m10,m12}, xmm7 = {m15,m9,m11,m13}.
+// Frame (sub esp, 148):
+//   [esp+$00..0F] = xmm6 save        [esp+$10..1F] = xmm7 save
+//   [esp+$20..2F] = TEMP_A (xmm0 spill during rounds)
+//   [esp+$30..3F] = TEMP_B (xmm1 spill during msg permutation / D_VEC build)
+//   [esp+$40..4F] = TEMP_C (xmm2 spill during msg permutation)
+//   [esp+$50..5F] = IV_VEC {$6A09E667,$BB67AE85,$3C6EF372,$A54FF53A}
+//   [esp+$60..6F] = CV_LO   [esp+$70..7F] = CV_HI (running chaining value)
+//   [esp+$80] = CTR_LO  [esp+$84] = CTR_HI  [esp+$88] = BASE_FLAGS
+//   [esp+$8C] = SAVE_NC  [esp+$90] = BLOCK_IDX (current block, 0..15)
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
+// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation
+// (blake3_sse2.c / hash_one).
 
   sub esp, 148
 
@@ -63,7 +67,7 @@
 
 @h4_block_loop:
   // Build D_VEC = {CTR_LO, CTR_HI, BLKLEN=64, flags} at TEMP_B slot [esp+$30]
-  // (TEMP_B will be overwritten by msg permutation later — that is expected)
+  // (TEMP_B will be overwritten by msg permutation later - that is expected)
   mov ecx, dword ptr [esp + $80]          // CTR_LO
   mov edx, dword ptr [esp + $84]          // CTR_HI
   mov eax, dword ptr [esp + $88]          // BASE_FLAGS

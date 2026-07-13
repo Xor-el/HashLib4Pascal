@@ -1,20 +1,22 @@
-// SSE2 implementation of BLAKE3 compress (7 rounds with register-based message scheduling).
-// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation (blake3_sse2_x86-64_windows_msvc.asm).
-// Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = CV ptr, r9 = counterflags ptr.
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = m0 (col G1 msg), xmm5 = m1 (col G2 msg), xmm6 = m2 (diag G1 msg),
-//   xmm7 = m3 (diag G2 msg), xmm8/xmm9 = temp (msg perm), xmm11/xmm14 = temp (rotations).
-// Rotations: rot16 via pshuflw+pshufhw; rot12/8/7 via pslld/psrld/por.
-// Message scheduling: all 16 words kept in xmm4-7, permuted between rounds using
-//   shufps/pshufd (blend_0xCC emulated via shufps+pshufd, blend_0xC0 via punpckhdq+shufps).
-// Diagonalize/Undiagonalize via pshufd (row1 unrotated, per sneves optimization).
-//
-// MS x64 non-volatile saves: xmm6, xmm7, xmm8, xmm9, xmm11, xmm14.
-//
-// Stack layout (sub rsp, 120):
-//   [rsp +  0.. 95]: xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 * 16)
-//   [rsp + 96..111]: IV staging area (loaded into xmm2)
-//   [rsp +112..119]: padding
+// SSE2 implementation of BLAKE3 compress (7 rounds with register-based
+// message scheduling). All 16 message words stay in xmm4-xmm7, permuted
+// between rounds via shufps/pshufd (blend_0xCC emulated via shufps+pshufd,
+// blend_0xC0 via punpckhdq+shufps). Rotations: rot16 via pshuflw+pshufhw;
+// rot12/8/7 via pslld/psrld/por. Diagonalize/Undiagonalize via pshufd
+// (row1 unrotated, per sneves optimization).
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
+//   r8 = CV ptr, r9 = counterflags ptr.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = m0 (col G1 msg), xmm5 = m1 (col G2 msg),
+//   xmm6 = m2 (diag G1 msg), xmm7 = m3 (diag G2 msg),
+//   xmm8/xmm9 = temp (msg perm), xmm11/xmm14 = temp (rotations).
+// Frame (sub rsp, 120):
+//   [rsp +  0.. 95] = xmm6/xmm7/xmm8/xmm9/xmm11/xmm14 save area (6 x 16)
+//   [rsp + 96..111] = IV staging area (loaded into xmm2)
+//   [rsp +112..119] = padding
+// Saves: xmm6, xmm7, xmm8, xmm9, xmm11, xmm14 (MS x64 non-volatile).
+// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation
+// (blake3_sse2_x86-64_windows_msvc.asm).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

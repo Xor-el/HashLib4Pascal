@@ -1,16 +1,16 @@
-// Keccak-f[1600] pure-GPR permutation (AArch64) for cores without FEAT_SHA3;
-// the Gpr name states the ISA requirement: none beyond base AArch64. The 25
-// lanes live in x0-x17/x19-x25 with x26-x28/x30 as temps; chi is computed
-// directly with bic, so no lane complementing exists in this lineage.
-// Expects AAPCS64 (after HlpSimdProc2Begin_aarch64): x0 = AState
-//   (25 x UInt64, standard layout), x1 = AConstants (iotas: 24 x UInt64).
-// The original round loop ended on a 256-ALIGNED iotas table (tst #255),
-// which a Pascal const cannot guarantee - the termination is patched to an
-// end-pointer compare (iotas end stashed at [sp,#40]; the Iota xor is
-// hoisted to free x30 for the test; the intervening bic/eor stream writes
-// no flags, so the b.ne polarity is unchanged).
-// The inner keeps the original called shape (bl/ret); x30 (LR) doubles as a
-// temp inside the rounds, as in the original.
+// Gpr implementation of the Keccak-f[1600] permutation (AArch64) for cores
+// without FEAT_SHA3; the Gpr name states the ISA requirement: none beyond
+// base AArch64. The 25 lanes live in x0-x17/x19-x25 with x26-x28/x30 as
+// temps; chi is computed directly with bic, so no lane complementing
+// exists in this lineage. The original round loop ended on a 256-ALIGNED
+// iotas table (tst #255), which a Pascal const cannot guarantee - the
+// termination is patched to an end-pointer compare (iotas end stashed at
+// [sp,#40]; the Iota xor is hoisted to free x30 for the test; the
+// intervening bic/eor stream writes no flags, so the b.ne polarity is
+// unchanged). The inner keeps the original called shape (bl/ret); x30 (LR)
+// doubles as a temp inside the rounds, as in the original.
+// ABI (after HlpSimdProc2Begin_aarch64.inc): x0 = AState (25 x UInt64,
+//   standard layout), x1 = AConstants (iotas: 24 x UInt64).
 // AArch64 instructions are .long-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.pl (KeccakF1600 +
 // KeccakF1600_int, the plain path) by Andy Polyakov.

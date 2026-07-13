@@ -1,12 +1,13 @@
-// AVX2 implementation of Adler-32 block processing.
-// Expects MS x64 ABI: rcx = data ptr, edx = num_blocks, r8 = sums ptr, r9 = constants ptr.
-// ASums layout: [SumA: UInt32, SumB: UInt32].
-// Constants layout: [weights: 32B, ones_16: 32B] at offsets 0 and 32.
-// Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
-// Uses ymm0-ymm5 only (volatile under both ABIs; no saves needed).
-// Weights and ones are reloaded from memory each iteration to avoid
-// using non-volatile ymm registers.
+// AVX2 implementation of Adler-32 block processing (num_blocks x 32-byte blocks).
+// Does NOT apply mod 65521 (the caller does). Weights and ones are reloaded
+// from memory each iteration so no non-volatile ymm register is needed.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = data ptr, edx = num_blocks,
+//   r8 = sums ptr, r9 = constants ptr.
+//   Sums layout: [SumA: UInt32, SumB: UInt32].
+//   Constants layout: [weights: 32B, ones_16: 32B] at offsets 0 and 32.
+// Saves: none (uses ymm0-ymm5 only; volatile under both ABIs).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
+// Reference: Chromium zlib adler32_simd.c.
 
   // Zero register
   db $C5, $E5, $EF, $DB                         // vpxor ymm3, ymm3, ymm3

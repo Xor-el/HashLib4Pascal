@@ -1,13 +1,16 @@
-// Keccak-F1600 absorb AArch64 FEAT_SHA3 implementation.
-// Expects AAPCS64: x0 = state ptr (25 x UInt64), x1 = data ptr,
-//   w2 = numblocks, w3 = blocksize (bytes, = rate), x4 = iotas ptr.
-// Saves/restores d8-d15 on 64-byte frame; XORs blocksize bytes per block then permutes.
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
-// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// CryptoExt (FEAT_SHA3) implementation of the Keccak-f[1600] multi-block
+// absorb: XORs blocksize bytes per block into the state, then permutes.
+// ABI (after HlpSimdProc5Begin_aarch64.inc): x0 = state ptr (25 x UInt64),
+//   x1 = data ptr, w2 = numblocks, w3 = blocksize (bytes, = rate),
+//   x4 = iotas ptr.
 // Register map:
 //   v0-v24   = Keccak state lanes (data XORed lane-by-lane into v0..)
 //   v25-v30  = permutation scratch
 //   v31      = loaded input lane
+// Saves: d8-d15 via the shared HlpSimdNonVolatileSave/Restore include (the
+//   state uses v0-v24).
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
   .long 0x6d400400                    // ldp d0, d1, [x0]

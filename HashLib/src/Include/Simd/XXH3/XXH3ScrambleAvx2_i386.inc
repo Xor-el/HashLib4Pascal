@@ -1,8 +1,7 @@
-// AVX2 implementation of XXH3_scrambleAcc (IA-32; fully unrolled,
-// 2 x 32-byte chunks). Same structure as XXH3ScrambleAvx2_x86_64.inc.
-// IA-32: after HlpSimdProc2Begin_i386 - ebx = acc, esi = secret
-//   (parallel to MS x64 ABI: rcx, rdx).
-// Uses only volatile registers: ymm0-ymm4, eax.
+// AVX2 implementation of XXH3_scrambleAcc (fully unrolled, 2 x 32-byte
+// chunks; IA-32). Same structure as XXH3ScrambleAvx2_x86_64.inc.
+// ABI (after HlpSimdProc2Begin_i386.inc): ebx = acc ptr, esi = secret ptr.
+// Saves: none (uses ymm0-ymm4 and eax only; all volatile on IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: official xxHash C - XXH3_scrambleAcc_avx2 in xxhash.h,
 // HashLib XXH3ScrambleAvx2_x86_64.inc.

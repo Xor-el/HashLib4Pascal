@@ -1,27 +1,25 @@
 // SSSE3 implementation of BLAKE3 hash4: processes 4 independent chunks
-// simultaneously; SSE2 sibling: Blake3Hash4Sse2_x86_64.inc.
-// Reference: BLAKE3-team/BLAKE3 official SSE2/SSE4.1 implementations
-// (blake3_hash_many).
-// Each XMM register holds the same 32-bit word from 4 different chunks (inter-chunk SIMD).
-// 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
-//
-// After HlpSimdProc7Begin_x86_64.inc:
-//   rcx = AInput, rdx = AKey, r8 = AOut,
-//   r9 = ANumChunks, r10 = ACounter, r11 = AFlags,
-//   rax = byte-rotation masks ptr (see BLAKE3_ROT_MASKS: rot16 at +0, rot8
-//   at +32; read unaligned, so the Pascal const needs no special alignment;
+// simultaneously; SSE2 sibling: Blake3Hash4Sse2_x86_64.inc. Each XMM
+// register holds the same 32-bit word from 4 different chunks (inter-chunk
+// SIMD); 7 rounds per block fully unrolled; 16-block loop with branch for
+// chunk start/end flags. Message transpose: 4x4 via punpckldq/punpckhdq +
+// punpcklqdq/punpckhqdq (pure SSE2). Rotations: rot16/8 via pshufb against
+// the resident masks; rot12/7 via pslld/psrld/por (not byte-aligned).
+// ABI (after HlpSimdProc7Begin_x86_64.inc): rcx = AInput, rdx = AKey,
+//   r8 = AOut, r9 = ANumChunks, r10 = ACounter, r11 = AFlags,
+//   rax = byte-rotation masks ptr (BLAKE3_ROT_MASKS: rot16 at +0, rot8 at
+//   +32; read unaligned, so the Pascal const needs no special alignment;
 //   consumed by the entry mask loads, rax is scratch afterwards).
-//
 // Register map: xmm0-xmm7 = state v0-v7, xmm8-xmm11 = state v8-v11,
 //   xmm12-xmm13 = temp, xmm14 = rot16 mask, xmm15 = rot8 mask,
 //   v12-v15 spilled to stack.
-// GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block byte offset.
-// Message transpose: 4x4 via punpckldq/punpckhdq + punpcklqdq/punpckhqdq (pure SSE2).
-// Rotations: rot16/8 via pshufb (db-encoded for broad assembler compatibility)
-//   against the resident masks; rot12/7 via pslld/psrld/por (not byte-aligned).
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV).
+//   GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block
+//   byte offset.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV).
+// pshufb instructions are db-encoded for broad assembler compatibility.
+// Reference: BLAKE3-team/BLAKE3 official SSE2/SSE4.1 implementations
+// (blake3_hash_many).
 
   push rbx
   push rbp

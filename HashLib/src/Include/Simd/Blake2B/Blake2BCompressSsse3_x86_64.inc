@@ -1,16 +1,16 @@
 // SSSE3 implementation of BLAKE2b compress (fully unrolled 12 rounds); SSE2
-// sibling: Blake2BCompressSse2_x86_64.inc. Unlike the SSE2 sibling, the
-// byte-aligned rotations (rot24/rot16) are single pshufb (db-encoded for
-// broad assembler compatibility) against masks resident in xmm10/xmm11;
-// rot63 stays shift+or (not byte-aligned).
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = state ptr, rdx = msg ptr,
+// sibling: Blake2BCompressSse2_x86_64.inc. Unlike the sibling, the
+// byte-aligned rotations (rot24/rot16) are single pshufb against masks
+// resident in xmm10/xmm11; rot63 stays shift+or (not byte-aligned).
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
 //   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
-//   (see BLAKE2B_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   (BLAKE2B_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
 //   Pascal const needs no special alignment).
-// Uses xmm0-xmm11; xmm6-xmm11 are MS x64 non-volatile (saved/restored).
 // Register map: xmm0-1 = row1 (v0-3), xmm2-3 = row2 (v4-7),
 //   xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15), xmm8-9 = temps,
 //   xmm10 = rot24 mask, xmm11 = rot16 mask.
+// Saves: xmm6-xmm11 (MS x64 non-volatile); uses xmm0-xmm11.
+// pshufb instructions are db-encoded for broad assembler compatibility.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}

@@ -1,16 +1,16 @@
-// Keccak-f[1600] pure-GPR multi-block absorb (AArch64) for cores without
-// FEAT_SHA3; the Gpr name states the ISA requirement: none beyond base
-// AArch64. XORs each rate-sized block into the state (unrolled per-lane
-// ladder driven by the block size), then runs the same GPR permutation as
-// KeccakF1600Gpr_aarch64.inc - the inner is this file's own copy.
-// Expects AAPCS64 (after HlpSimdProc5Begin_aarch64): x0 = AState
-//   (25 x UInt64, standard layout), x1 = AData, w2 = ABlockCount,
-//   w3 = ABlockSize (bytes), x4 = AConstants (iotas: 24 x UInt64).
-// The reference takes a byte length; it is computed as
-// ABlockCount * ABlockSize on entry. The reference frame grows 64 -> 80
-// because its own slots occupy [sp,#32..63] - the iotas end pointer for the
-// permutation's end-pointer termination (see the permute kernel's header)
-// lives at [sp,#64].
+// Gpr implementation of the Keccak-f[1600] multi-block absorb (AArch64)
+// for cores without FEAT_SHA3; the Gpr name states the ISA requirement:
+// none beyond base AArch64. XORs each rate-sized block into the state
+// (unrolled per-lane ladder driven by the block size), then runs the same
+// GPR permutation as KeccakF1600Gpr_aarch64.inc - the inner is this file's
+// own copy. The reference takes a byte length; it is computed as
+// ABlockCount * ABlockSize on entry.
+// ABI (after HlpSimdProc5Begin_aarch64.inc): x0 = AState (25 x UInt64,
+//   standard layout), x1 = AData, w2 = ABlockCount, w3 = ABlockSize
+//   (bytes), x4 = AConstants (iotas: 24 x UInt64).
+// Frame: the reference frame grows 64 -> 80 because its own slots occupy
+//   [sp,#32..63] - the iotas end pointer for the permutation's end-pointer
+//   termination (see the permute kernel's header) lives at [sp,#64].
 // AArch64 instructions are .long-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.pl (SHA3_absorb +
 // KeccakF1600_int, the plain path) by Andy Polyakov.

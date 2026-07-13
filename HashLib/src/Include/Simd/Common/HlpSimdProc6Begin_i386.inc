@@ -4,7 +4,7 @@
 // FPC: param4 at [esp+28]; param5 at [esp+20]/[esp+24]; param6 at [esp+16] after push EBX/ESI/EDI (see asm).
 // Delphi Win32: first 3 params in EAX/EDX/ECX; param4 at [ebp+20],
 //   param5 at [ebp+12]/[ebp+16], param6 at [ebp+8].
-// Callee-saved EBX, ESI, EDI — epilogue must pop EDI, ESI, EBX; SIMD bodies may adjust ESP for locals.
+// Callee-saved EBX, ESI, EDI - epilogue must pop EDI, ESI, EBX; SIMD bodies may adjust ESP for locals.
 // Usage:
 //   procedure MyProc(P1, P2, P3: Pointer; P4: Int32; P5: UInt64; P6: UInt32);
 //     {$I HlpSimdProc6Begin_i386.inc}

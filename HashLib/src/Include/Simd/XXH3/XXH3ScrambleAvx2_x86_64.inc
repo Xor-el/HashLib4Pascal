@@ -1,8 +1,9 @@
-// AVX2 implementation of XXH3_scrambleAcc (fully unrolled, 2 x 32-byte chunks).
+// AVX2 implementation of XXH3_scrambleAcc (fully unrolled, 2 x 32-byte
+// chunks).
+// ABI (after HlpSimdProc2Begin_x86_64.inc): rcx = acc ptr, rdx = secret ptr.
+// Saves: none (uses ymm0-ymm4 and eax only; volatile under both ABIs).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = acc ptr, rdx = secret ptr.
-// Uses only volatile registers: ymm0-ymm4, eax.
-// Reference: official xxHash C - XXH3_scrambleAcc_avx2 in xxhash.h
+// Reference: official xxHash C - XXH3_scrambleAcc_avx2 in xxhash.h.
 
   // Broadcast XXH_PRIME32_1 ($9E3779B1) to all dword lanes of ymm4
   mov eax, $9E3779B1

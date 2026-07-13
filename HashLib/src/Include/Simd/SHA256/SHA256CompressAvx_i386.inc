@@ -1,17 +1,18 @@
-// SHA-256 AVX SIMD-schedule implementation (IA-32). VEX-128 (AVX1)
-// instructions only - there is no i386 AVX2 SHA-256 upstream. The 3-operand
-// VEX forms eliminate the SSSE3 kernel's register-copy
-// movdqa traffic; the byte-swap mask stays resident in xmm7. All VEX
-// instructions are db-encoded for broad assembler compatibility.
-// K256 is read from K256_Doubled at a 32-byte stride (the walk and offsets
-// are doubled relative to the original; VEX memory operands are read
-// unaligned, so the Pascal const needs no special alignment).
+// AVX (VEX-128) implementation of SHA-256 compress (SIMD schedule; IA-32);
+// the Avx name states the ISA requirement: VEX-128 encodings only - there
+// is no i386 AVX2 SHA-256 upstream. The 3-operand VEX forms eliminate the
+// SSSE3 kernel's register-copy movdqa traffic; the byte-swap mask stays
+// resident in xmm7. K256 is read from K256_Doubled at a 32-byte stride
+// (the walk and offsets are doubled relative to the original; VEX memory
+// operands are read unaligned, so the Pascal const needs no special
+// alignment).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = K256_Doubled ptr.
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K walk
+//   pointer. Frame and slot layout (ctx@96/data@100/end@104/savedsp@108)
+//   mirror the SSE2/SSSE3 siblings.
+// AVX instructions are db-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha256-586.pl (AVX section).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data,
-//   edi = numblocks, eax = K256_Doubled ptr. HlpSimdProc4Begin pushes
-//   ebx/esi/edi; ebp is pushed here as the K walk pointer. Frame and slot
-//   layout (ctx@96/data@100/end@104/savedsp@108) mirror the SSE2/SSSE3
-//   siblings.
 
   push   ebp
   mov    ebp, eax
@@ -27,7 +28,7 @@
   mov    dword ptr [esp + $4], edi
   mov    dword ptr [esp + $8], eax
   mov    dword ptr [esp + $C], ebx
-  lea    esp, [esp - $60]
+  sub    esp, $60
   db $C5, $FC, $77                                // vzeroall
   mov    eax, dword ptr [esi]
   mov    ebx, dword ptr [esi + $4]

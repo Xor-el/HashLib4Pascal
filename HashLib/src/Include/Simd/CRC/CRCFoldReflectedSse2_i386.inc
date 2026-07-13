@@ -1,9 +1,13 @@
-// Reflected (LSB-first) 64-bit CRC: 16-byte slice (IA-32 SSE2 + GPR table XOR).
-// GPR slicing core; SSE2 is genuinely required for the 128-bit loads and the
-// CRC state shuttle - the Sse2 name states the ISA requirement.
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength, edi = AState, eax = Ctx.
-// TableRow[i] at Ctx + 96; each entry is a 32-bit (untyped) Pointer.
-// Result UInt64 in edx:eax (high:low). Preserves Delphi/FPC i386 frame via push/pop ebp.
+// SSE2 implementation of the reflected (LSB-first) 64-bit CRC 16-byte slice
+// (IA-32; SSE2 loads + GPR table XOR). GPR slicing core; SSE2 is genuinely
+// required for the 128-bit loads and the CRC state shuttle - the Sse2 name
+// states the ISA requirement.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = AData, esi = ALength,
+//   edi = AState, eax = Ctx (PCRCFoldRuntimeCtx).
+//   TableRow[i] at Ctx + 96; each entry is a 32-bit (untyped) Pointer.
+//   Returns the final CRC UInt64 in edx:eax (high:low).
+// Frame: preserves the i386 frame via push/pop ebp.
+// Reference: classic slicing-by-16 table CRC.
 
   push ebp
   mov ebp, eax

@@ -1,9 +1,7 @@
-// BLAKE2s compress AArch64 NEON implementation.
-// Expects AAPCS64: x0 = state ptr (8 x UInt32), x1 = message ptr (64 bytes),
-//   x2 = counter+flags ptr (16 bytes: t[0..1], f[0..1]), x3 = IV ptr (8 x UInt32).
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: BLAKE2/BLAKE2 neon/blake2s-neon.c, HashLib Blake2SCompressSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of BLAKE2s compress (fully unrolled 10 rounds).
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (8 x UInt32),
+//   x1 = message ptr (64 bytes), x2 = counter+flags ptr (16 bytes: t[0..1],
+//   f[0..1]), x3 = IV ptr (8 x UInt32).
 // Register map:
 //   v0       = row1 (h[0..3] working)
 //   v1       = row2 (h[4..7] working)
@@ -14,6 +12,10 @@
 //   v20      = message gather temp (G function)
 //   v21-v23  = rotate temps (2-op ushr+sli rotates rename the rotated row
 //     through them; rows return home before the final feed-forward)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: BLAKE2/BLAKE2 neon/blake2s-neon.c, HashLib
+//   Blake2SCompressSse2_x86_64.inc.
 
   .long 0xad400400                    // ldp q0, q1, [x0]
   .long 0x4ea01c10                    // orr v16.16b, v0.16b, v0.16b

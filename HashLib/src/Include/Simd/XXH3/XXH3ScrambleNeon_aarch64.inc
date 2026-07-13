@@ -1,14 +1,17 @@
-// XXH3 scrambleAcc AArch64 NEON implementation (64-byte secret slice).
-// Expects AAPCS64: x0 = acc ptr (8 x UInt64, 16-byte aligned), x1 = secret ptr.
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: Cyan4973/xxHash xxhash.h XXH3_scrambleAcc_neon, HashLib XXH3ScrambleSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of XXH3_scrambleAcc (64-byte secret slice).
+// ABI (after HlpSimdProc2Begin_aarch64.inc): x0 = acc ptr (8 x UInt64,
+//   16-byte aligned), x1 = secret ptr.
 // Register map:
 //   w10      = XXH_PRIME32_1 constant loader
 //   v4       = kPrimeHi ({0, PRIME32_1, 0, PRIME32_1} as u32x4)
 //   v5       = kPrimeLo (PRIME32_1 broadcast to u32x2)
 //   v3       = prod_hi (vmul u32) / final chunk result
 //   v1       = shifted acc, secret key, or data_key_lo (xtn)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Cyan4973/xxHash xxhash.h XXH3_scrambleAcc_neon, HashLib
+//   XXH3ScrambleSse2_x86_64.inc.
+
   .long 0x528f362a                    // movz w10, #0x79b1, lsl #0
   .long 0x72b3c6ea                    // movk w10, #0x9e37, lsl #16
   .long 0x0e040d45                    // dup v5.2s, w10

@@ -1,19 +1,20 @@
-// Keccak-f[1600] permutation for IA-32, pure SSE2 (64-bit lanes in the low
-// qwords of xmm0-xmm7; upper halves carry garbage that is never stored).
-// The original MMX inner function is converted to SSE2: mm0-7 -> xmm0-7,
-// packed memory-source ops rewritten through a liveness-proven dead scratch
-// register (SSE2 has no m64 forms), emms dropped. The round loop XOR-swaps
-// esi/edi to ping-pong between the state and the stack scratch plane each
-// round (24 rounds = even, so pointers end where they started).
+// SSE2 implementation of the Keccak-f[1600] permutation (IA-32; 64-bit
+// lanes in the low qwords of xmm0-xmm7, upper halves carry garbage that is
+// never stored). The original MMX inner function is converted to SSE2:
+// mm0-7 -> xmm0-7, packed memory-source ops rewritten through a
+// liveness-proven dead scratch register (SSE2 has no m64 forms), emms
+// dropped. The round loop XOR-swaps esi/edi to ping-pong between the state
+// and the stack scratch plane each round (24 rounds = even, so pointers
+// end where they started).
+// ABI (after HlpSimdProc2Begin_i386.inc): ebx = AState (25 x UInt64,
+//   standard layout), esi = AConstants (iotas: 24 x UInt64).
+// Frame: mirrors the OpenSSL wrapper - 240-byte scratch, esp 8-aligned,
+//   edi = esp + 140, esi biased by +100. The inner routine keeps the
+//   original calling shape (call/ret) so its esp-relative spill slots stay
+//   valid.
+// Saves: edi/ebp saved here (the shared prologue only saves ebx/esi);
+//   clobbers eax, ecx, edx, xmm0-xmm7.
 // Reference: OpenSSL CRYPTOGAMS keccak1600-mmx.pl by Andy Polyakov.
-//
-// After HlpSimdProc2Begin_i386: ebx = AState (25 x UInt64, standard layout),
-//   esi = AConstants (iotas: 24 x UInt64 round constants).
-// The inner routine keeps the original calling shape (call/ret) so its
-// esp-relative spill slots stay valid; frame mirrors the OpenSSL wrapper:
-// 240-byte scratch, esp 8-aligned, edi = esp + 140, esi biased by +100.
-// Clobbers eax, ecx, edx, xmm0-xmm7; edi/ebp saved here (the shared prologue
-// only saves ebx/esi).
 
   push edi
   push ebp

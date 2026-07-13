@@ -1,16 +1,17 @@
-// SHA-1 SHA-NI implementation (IA-32; Intel SHA Extensions work in 32-bit
-// mode). The twenty sha1rnds4 steps carry their round constants as
-// immediates; the only table read is the 16-byte flip mask, taken from
-// K_SHA1_Doubled at +160 (byte-identical to the original's .LK_XX_XX+80; read
-// unaligned - Pascal consts have no alignment guarantee). SHA-NI and shuffle
-// instructions are db-encoded for broad assembler compatibility. The
-// original's PIC table setup and stack-argument reads are replaced by the
-// shared-prologue registers.
+// SHA-NI implementation of SHA-1 compress (IA-32; Intel SHA Extensions
+// work in 32-bit mode). The twenty sha1rnds4 steps carry their round
+// constants as immediates; the only table read is the 16-byte flip mask,
+// taken from K_SHA1_Doubled at +160 (byte-identical to the original's
+// .LK_XX_XX+80; read unaligned - Pascal consts have no alignment
+// guarantee). The original's PIC table setup and stack-argument reads are
+// replaced by the shared-prologue registers.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = K_SHA1_Doubled ptr.
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here, giving the
+//   4-deep frame the original epilogue unwinds via its saved-esp register.
+// SHA-NI and shuffle instructions are db-encoded for broad assembler
+// compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha1-586.pl (shaext function).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data,
-//   edi = numblocks, eax = K_SHA1_Doubled ptr. HlpSimdProc4Begin pushes
-//   ebx/esi/edi; ebp is pushed here, giving the 4-deep frame the original
-//   epilogue unwinds via its saved-esp register.
 
   push   ebp
   mov    ebp, eax

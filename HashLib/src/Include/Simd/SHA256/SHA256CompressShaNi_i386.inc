@@ -1,15 +1,17 @@
-// SHA-256 SHA-NI implementation (IA-32; Intel SHA Extensions work in 32-bit
-// mode), with the unified function's common prologue reproduced by the same
-// proven head as the SSE2/SSSE3/AVX siblings (slots ctx/data/end/savedsp;
-// the section's sub $32 shifts them to 32/36/40/44). K256 is read from
-// K256_Doubled at a 32-byte stride (bias and offsets doubled; read unaligned
-// - Pascal consts have no alignment guarantee); the byte-swap mask sits at
-// the doubled +512 (= biased +256). SHA-NI and shuffle instructions are
-// db-encoded for broad assembler compatibility.
+// SHA-NI implementation of SHA-256 compress (IA-32; Intel SHA Extensions
+// work in 32-bit mode), with the unified function's common prologue
+// reproduced by the same proven head as the SSE2/SSSE3/AVX siblings (slots
+// ctx/data/end/savedsp; the section's sub $32 shifts them to 32/36/40/44).
+// K256 is read from K256_Doubled at a 32-byte stride (bias and offsets
+// doubled; read unaligned - Pascal consts have no alignment guarantee); the
+// byte-swap mask sits at the doubled +512 (= biased +256).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = K256_Doubled ptr.
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K
+//   pointer.
+// SHA-NI and shuffle instructions are db-encoded for broad assembler
+// compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha256-586.pl (shaext section).
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data,
-//   edi = numblocks, eax = K256_Doubled ptr. HlpSimdProc4Begin pushes
-//   ebx/esi/edi; ebp is pushed here as the K pointer.
 
   push   ebp
   mov    ebp, eax

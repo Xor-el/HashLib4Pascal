@@ -1,15 +1,12 @@
-// CRC folding (PMULL/PMULL2 + TBL byte-reverse) + Barrett reduction for
-// non-reflected (MSB-first) CRCs with width 8..64.
-// Expects AAPCS64: x0 = AData, w1 = ALength (>= 16, multiple of 16),
-//   x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx; FoldConstants at +0).
-//   AState: pointer to the initial CRC pre-shifted left by (64 - Width) as one UInt64.
+// PMULL implementation of CRC folding (PMULL/PMULL2 + TBL byte-reverse) +
+// Barrett reduction for non-reflected (MSB-first) CRCs with width 8..64.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = AData, w1 = ALength (>= 16,
+//   multiple of 16), x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx;
+//   FoldConstants at +0).
+//   AState: pointer to the initial CRC pre-shifted left by (64 - Width) as
+//   one UInt64. Returns the final CRC in x0.
 //   AConstants: [+0] Fold_4x128, [+16] Fold_1x128, [+32] Barrett,
 //               [+64] BswapMask, [+80] CrcBits, [+88] BarrettShift.
-//   Returns final CRC in x0.
-// Leaf nostackframe; caller-saved GPR/vector only (v0-v7, v17, v19-v22).
-// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers),
-//   HashLib CRCFoldForwardPclmul_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
 // Register map:
 //   v0-v3    = fold accumulators (xmm0-3)
 //   v4       = pmull-hi temp (xmm4)
@@ -18,6 +15,12 @@
 //   v7       = Fold_8x128 / Fold_4x128 then Fold_1x128 (xmm7)
 //   v17      = dup staging for clmul hi*lo ($01) Barrett mix
 //   v19-v22  = fold-by-8 upper accumulators (xmm8-11)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only: v0-v7, v17,
+//   v19-v22).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers), HashLib
+//   CRCFoldForwardPclmul_x86_64.inc.
+
   .long 0x3dc01066                    // ldr q6, [x3, #64]
   .long 0x7102003f                    // cmp w1, #128
   b.lo .Lcrc_fwd_check64

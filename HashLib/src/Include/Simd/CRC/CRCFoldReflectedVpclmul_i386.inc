@@ -1,19 +1,24 @@
-// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64 (IA-32). CRC-64 uses a special Barrett path for the
-// 65-bit G. Mirrors CRCFoldReflectedVpclmul_x86_64.inc; ymm0-7/xmm0-7 only,
-// so the structure carries over 1:1 (all vector registers are volatile on
-// IA-32 - no save/restore needed, just vzeroupper before returning).
-// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler
-// compatibility; every register-register byte sequence is identical to the
-// verified x86_64 kernel's encoding (regs 0-7 carry no REX/VEX extension
-// bits), and the memory forms are machine-assembled for the IA-32 bases.
-//
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ALength (>= 16),
-//   edi = AState, eax = Ctx (PCRCFoldRuntimeCtx; FoldConstants at +0).
-//   AState: pointer to the initial CRC (reflected) as one UInt64.
+// AVX2 + VPCLMULQDQ implementation of CRC folding + Barrett reduction for
+// reflected (LSB-first) CRCs with width 8..64 (IA-32). CRC-64 uses a
+// special Barrett path for the 65-bit G. Mirrors
+// CRCFoldReflectedVpclmul_x86_64.inc; ymm0-7/xmm0-7 only, so the structure
+// carries over 1:1. Every register-register byte sequence is identical to
+// the verified x86_64 kernel's encoding (regs 0-7 carry no REX/VEX
+// extension bits); the memory forms are machine-assembled for the IA-32
+// bases. vzeroupper before returning.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = AData, esi = ALength
+//   (>= 16), edi = AState, eax = Ctx (PCRCFoldRuntimeCtx; FoldConstants
+//   at +0).
+//   AState: pointer to the initial CRC (reflected) as one UInt64. Returns
+//   the final CRC UInt64 in edx:eax (high qword of xmm0).
 //   Ctx: [+0] Fold_4x128, [+16] Fold_1x128, [+32] Barrett,
 //        [+48] Fold_8x128, [+80] CrcBits.
-// Result UInt64 in edx:eax (high qword of xmm0).
+// Saves: none (all vector registers are volatile on IA-32).
+// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler
+// compatibility.
+// Reference: zlib-ng crc32_pclmulqdq_tpl.h and Linux kernel
+// crc-pclmul-template.S by Eric Biggers, HashLib
+// CRCFoldReflectedVpclmul_x86_64.inc.
 
   push ebp
   mov ebp, eax

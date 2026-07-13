@@ -1,29 +1,19 @@
-// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
-// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler compatibility.
-//
-// Function signature (included after HlpSimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Reflected_Vpclmul(AData: PByte; ALength: UInt32;
-//     AState: Pointer; AConstants: Pointer): UInt64;
-//
-// Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
-//   AState: pointer to the initial CRC (reflected) as one UInt64.
+// AVX2 + VPCLMULQDQ implementation of CRC folding + Barrett reduction for
+// reflected (LSB-first) CRCs with width 8..64. CRC-64 uses a special
+// Barrett path for the 65-bit G.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = AData, edx = ALength
+//   (>= 16), r8 = AState, r9 = AConstants.
+//   AState: pointer to the initial CRC (reflected) as one UInt64. Returns
+//   the final CRC in rax.
 //   AConstants layout (TCRCFoldConstants):
-//     [0..15]  = Fold_4x128  (stride 512)
-//     [16..31] = Fold_1x128  (stride 128)
-//     [32..47] = Barrett
-//     [48..63] = Fold_8x128  (stride 1024)
-//     [64..79] = BswapMask   (unused by this path)
-//     [80..87] = CrcBits
-//   Returns: final CRC in RAX.
-//
-// Reference: zlib-ng crc32_pclmulqdq_tpl.h (256-bit VPCLMULQDQ path)
-// and Linux kernel crc-pclmul-template.S by Eric Biggers (Barrett reduction).
-//
-// VEX byte layout reference:
-//   2-byte: C5 [R.vvvv.L.pp]
-//   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]
+//     [0..15]  = Fold_4x128 (stride 512)   [48..63] = Fold_8x128 (stride 1024)
+//     [16..31] = Fold_1x128 (stride 128)   [64..79] = BswapMask (unused here)
+//     [32..47] = Barrett                   [80..87] = CrcBits
+// AVX2/VPCLMULQDQ instructions are db-encoded for broad assembler
+// compatibility. Encoding notes (VEX byte layout):
+//   2-byte: C5 [R.vvvv.L.pp]   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]
+// Reference: zlib-ng crc32_pclmulqdq_tpl.h (256-bit VPCLMULQDQ path) and
+// Linux kernel crc-pclmul-template.S by Eric Biggers (Barrett reduction).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

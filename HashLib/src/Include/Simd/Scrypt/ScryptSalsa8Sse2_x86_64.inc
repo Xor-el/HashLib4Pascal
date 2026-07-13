@@ -1,26 +1,23 @@
 // SSE2 implementation of fused XOR + Salsa20/8 on Percival-permuted data.
-//
-// Reference: Colin Percival, "Stronger Key Derivation via Sequential
-// Memory-Hard Functions" (2009), and the Tarsnap scrypt reference
-// implementation (crypto_scrypt-sse.c). The (i*5 mod 16) data permutation
-// arranges each 16-word Salsa20 state into role-based diagonal order,
-// enabling lane-parallel SIMD processing of column and row quarter-rounds
-// with pshufd-based diagonalize/undiagonalize between them.
-//
-// Expects MS x64 ABI: rcx = State ptr, rdx = Input ptr.
-// Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
-//   xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
-//   xmm2 = C = {w8,w13,w2,w7},  xmm3 = D = {w12,w1,w6,w11}.
-// Operation: State = Salsa20/8(State XOR Input)
-// Uses xmm0-xmm5 (volatile under both ABIs; no saves needed).
-// Stack: 72 bytes (64 for saved XOR'd state + 8 alignment padding).
-//
+// The (i*5 mod 16) Percival data permutation arranges each 16-word Salsa20
+// state into role-based diagonal order, enabling lane-parallel SIMD
+// processing of column and row quarter-rounds with pshufd-based
+// diagonalize/undiagonalize between them. Operation:
+// State = Salsa20/8(State XOR Input).
 // Column QR (lane-parallel):
 //   B ^= rotl(A+D,7); C ^= rotl(B+A,9); D ^= rotl(C+B,13); A ^= rotl(D+C,18)
 // Diag:   pshufd B,$93; pshufd C,$4E; pshufd D,$39
 // Row QR (lane-parallel, swapped B/D roles):
 //   D' ^= rotl(A+B',7); C' ^= rotl(D'+A,9); B' ^= rotl(C'+D',13); A ^= rotl(B'+C',18)
 // Undiag: pshufd B,$39; pshufd C,$4E; pshufd D,$93
+// ABI (after HlpSimdProc2Begin_x86_64.inc): rcx = State ptr, rdx = Input ptr.
+//   Each pointer addresses 16 UInt32 (64 bytes) in permuted order.
+// Register map: xmm0 = A = {w0,w5,w10,w15}, xmm1 = B = {w4,w9,w14,w3},
+//   xmm2 = C = {w8,w13,w2,w7}, xmm3 = D = {w12,w1,w6,w11}, xmm4-xmm5 = temps.
+// Frame: 72 bytes (64 for the saved XOR'd state + 8 alignment padding).
+// Saves: none (uses xmm0-xmm5 only; volatile under both ABIs).
+// Reference: Colin Percival, "Stronger Key Derivation via Sequential
+// Memory-Hard Functions" (2009); Tarsnap crypto_scrypt-sse.c.
 
   sub rsp, 72
 

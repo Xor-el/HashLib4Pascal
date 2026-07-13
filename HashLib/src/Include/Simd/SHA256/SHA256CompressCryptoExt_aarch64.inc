@@ -1,16 +1,16 @@
-// SHA-256 AArch64 FEAT_SHA256 implementation.
-// Expects AAPCS64: x0 = state ptr (8 x UInt32), x1 = data ptr,
-//   w2 = numblocks, x3 = K256 ptr (64 UInt32 round constants).
-// Leaf nostackframe; caller-saved GPR/vector only.
-// K pointer rewound each block (sub x3, #240) after post-index loads.
-// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S.
-// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// CryptoExt (FEAT_SHA256) implementation of SHA-256 compress.
+// The K pointer is rewound each block (sub x3, #240) after post-index loads.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (8 x UInt32),
+//   x1 = data ptr, w2 = numblocks, x3 = K256 ptr (64 UInt32 round constants).
 // Register map:
 //   v0, v1   = working state (ABCD, EFGH)
 //   v2       = sha256h2 temp (copy of v0 before each h/h2 pair)
 //   v4-v7    = message schedule (W)
 //   v16, v17 = W+K for sha256h / sha256h2 (ping-pong)
 //   v18, v19 = saved state (ABCD, EFGH) for the final add
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// Reference: OpenSSL CRYPTOGAMS sha256-armv8.S.
 
   cbz w2, .Lcryptoext_sha256_done
   .long 0xad400400                    // ldp q0, q1, [x0]

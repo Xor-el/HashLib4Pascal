@@ -1,13 +1,13 @@
-// Reflected (LSB-first) 64-bit CRC: 16-byte slice using SSE2 loads + GPR table XOR.
-// GPR slicing core; SSE2 is genuinely required for the 128-bit loads and the
-// CRC state shuttle - the Sse2 name states the ISA requirement.
-// Signature (after HlpSimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Reflected_Sse2(AData: PByte; ALength: UInt32;
-//     AState: Pointer; AConstants: Pointer): UInt64;
-// MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx (PCRCFoldRuntimeCtx).
-// TableRow[i] begins at Ctx + SizeOf(TCRCFoldConstants) = Ctx + 96.
-//
-// SSE2: movdqu, movq, pxor, psrldq. No PCLMUL.
+// SSE2 implementation of the reflected (LSB-first) 64-bit CRC 16-byte slice
+// (SSE2 loads + GPR table XOR). GPR slicing core; SSE2 is genuinely
+// required for the 128-bit loads and the CRC state shuttle - the Sse2 name
+// states the ISA requirement. SSE2 ops: movdqu, movq, pxor, psrldq;
+// no PCLMUL.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = AData, edx = ALength,
+//   r8 = AState, r9 = Ctx (PCRCFoldRuntimeCtx).
+//   TableRow[i] begins at Ctx + SizeOf(TCRCFoldConstants) = Ctx + 96.
+//   Returns the final CRC in rax.
+// Reference: classic slicing-by-16 table CRC.
 
   push rbx
   push r12

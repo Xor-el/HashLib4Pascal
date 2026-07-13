@@ -1,16 +1,15 @@
-// SHA-512 SSE2 implementation with a SIMD message schedule: the sigma schedule
-// runs in 128-bit SSE2 and is interleaved with the 64-bit GPR compression
-// rounds, so the vector and integer units run in parallel. This is much faster
-// than a scalar message schedule.
+// SSE2 implementation of SHA-512 compress (SIMD schedule): the sigma
+// schedule runs in 128-bit SSE2 and is interleaved with the 64-bit GPR
+// compression rounds, so the vector and integer units run in parallel -
+// much faster than a scalar message schedule. The big-endian input
+// byte-swap is emulated with pshuflw/pshufhw/psrlw/psllw/por (SSE2 has no
+// pshufb), so no mask table is needed.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = doubled-K512 ptr (K512_Doubled: each 128-bit K512
+//   pair stored twice, read at a 32-byte stride).
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 // Reference: OpenSSL CRYPTOGAMS sha512-x86_64.pl (AVX single-block kernel).
-// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
-//   r8d = numblocks, r9 = doubled-K512 ptr (K512_Doubled: each 128-bit K512 pair
-//   stored twice, read at a 32-byte stride). The big-endian input byte-swap is
-//   emulated with pshuflw/pshufhw/psrlw/psllw/por (SSE2 has no pshufb), so no mask
-//   table is needed.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r15 in the local frame.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

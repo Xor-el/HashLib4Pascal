@@ -1,13 +1,13 @@
-// MSB-first 64-bit CRC: 16-byte slice (slicing-by-16), pure GPR - no vector
-// instructions (the Gpr name states the ISA requirement: none beyond base x86-64).
-// IA-32 counterpart: CRCFoldForwardGpr_i386.inc.
-// Signature (after HlpSimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Forward_Gpr(AData: PByte; ALength: UInt32;
-//     AState: Pointer; AConstants: Pointer): UInt64;
-// MS x64: rcx=AData, edx=ALength, r8=AState, r9=Ctx.
-// Callee-saved: rsi/rdi must be preserved (used as LTempCopy / LBIdx scratch).
-// Ctx = PCRCFoldRuntimeCtx: FoldConstants.CrcBits at +80, TableRow at +96.
-// CrcMask = ((1 shl (W-1)) - 1) shl 1 or 1; W = dword [r9+80] (TCRC table path: W>=8).
+// Gpr implementation of the MSB-first 64-bit CRC 16-byte slice
+// (slicing-by-16); the Gpr name states the ISA requirement: none beyond
+// base x86-64. IA-32 counterpart: CRCFoldForwardGpr_i386.inc.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = AData, edx = ALength,
+//   r8 = AState, r9 = Ctx (PCRCFoldRuntimeCtx).
+//   Ctx: FoldConstants.CrcBits at +80, TableRow at +96.
+//   CrcMask = ((1 shl (W-1)) - 1) shl 1 or 1; W = dword [r9+80]
+//   (TCRC table path: W >= 8). Returns the final CRC in rax.
+// Saves: rsi/rdi preserved (used as LTempCopy / LBIdx scratch).
+// Reference: classic slicing-by-16 table CRC.
 
   push rbx
   push rbp

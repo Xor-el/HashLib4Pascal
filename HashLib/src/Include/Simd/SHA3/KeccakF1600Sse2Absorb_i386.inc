@@ -1,18 +1,18 @@
-// Keccak-f[1600] sponge absorb for IA-32, pure SSE2 - the asm twin of the
-// x86-64 absorb: XORs whole blocks into the state
-// and permutes. MMX converted to SSE2 like the permute.
-// The permutation body is the same inner as KeccakF1600Sse2_i386.inc
-// (embedded again because local labels cannot cross include files).
+// SSE2 implementation of the Keccak-f[1600] multi-block absorb (IA-32) -
+// the asm twin of the x86-64 absorb: XORs whole blocks into the state and
+// permutes. MMX converted to SSE2 like the permute. The permutation body
+// is the same inner as KeccakF1600Sse2_i386.inc (embedded again because
+// local labels cannot cross include files).
+// ABI (after HlpSimdProc5Begin_i386.inc): ebx = AState (25 x UInt64,
+//   standard layout), esi = AData, edi = ABlockCount, eax = ABlockSize,
+//   ecx = AConstants (iotas: 24 x UInt64).
+// Frame: mirrors the OpenSSL wrapper - ebp = saved esp with spills at
+//   [ebp-4/-8], 248-byte scratch, esp 8-aligned, inner scratch plane at
+//   esp+140, state biased by +100.
+// Saves: ebp saved here (the shared prologue saves ebx/esi/edi); clobbers
+//   eax, ecx, edx, xmm0-xmm7.
 // Reference: OpenSSL CRYPTOGAMS keccak1600-mmx.pl (SHA3_absorb) by
 // Andy Polyakov.
-//
-// After HlpSimdProc5Begin_i386: ebx = AState (25 x UInt64, standard layout),
-//   esi = AData, edi = ABlockCount, eax = ABlockSize, ecx = AConstants
-//   (iotas: 24 x UInt64 round constants).
-// Frame mirrors the OpenSSL wrapper: ebp = saved esp with spills at
-// [ebp-4/-8], 248-byte scratch, esp 8-aligned, inner scratch plane at
-// esp+140, state biased by +100. Clobbers eax, ecx, edx, xmm0-xmm7;
-// ebp saved here (the shared prologue saves ebx/esi/edi).
 
   push ebp
   mov ebp, esp

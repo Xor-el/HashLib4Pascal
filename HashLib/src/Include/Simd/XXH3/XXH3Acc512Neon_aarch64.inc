@@ -1,15 +1,17 @@
-// XXH3 accumulate_512 AArch64 NEON implementation (one 64-byte stripe).
-// Expects AAPCS64: x0 = acc ptr (8 x UInt64, 16-byte aligned), x1 = input ptr,
-//   x2 = secret ptr.
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: Cyan4973/xxHash xxhash.h XXH3_accumulate_512_neon, HashLib XXH3Acc512Sse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of XXH3_accumulate_512 (one 64-byte stripe).
+// ABI (after HlpSimdProc3Begin_aarch64.inc): x0 = acc ptr (8 x UInt64,
+//   16-byte aligned), x1 = input ptr, x2 = secret ptr.
 // Register map:
 //   v0-v3    = acc[0..3] (4 x uint64x2)
 //   v4-v5    = data_vec_1/2 (input)
 //   v6-v7    = key_vec / uzp temps (data_key_lo, data_key_hi)
 //   v16-v17  = data_swap_1/2 (vext input by 8 bytes)
 //   v18-v19  = sum_1/sum_2 (umlal / umlal2 widen-multiply-add into swap)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Cyan4973/xxHash xxhash.h XXH3_accumulate_512_neon, HashLib
+//   XXH3Acc512Sse2_x86_64.inc.
+
   // --- batch i=0: acc[0..1], input[0x0..], secret[0x0..] ---
   .long 0x3dc00024                    // ldr q4, [x1, #0x0]
   .long 0x3dc00425                    // ldr q5, [x1, #0x10]

@@ -1,11 +1,13 @@
-// AVX2 implementation of XXH3_initCustomSecret (IA-32; fully unrolled,
-// 6 x 32-byte chunks). Same structure as XXH3InitSecretAvx2_x86_64.inc; the
-// x86_64 version's vmovq xmm, r64 seed transfers (not encodable in 32-bit
-// mode) become the SSE2 i386 sibling's push/vmovq-from-stack pattern, with
-// the negation done in 32-bit halves (not/not + add/adc carry).
-// IA-32: after HlpSimdProc3Begin_i386 - ebx = customSecret, esi = defaultSecret,
-//   edi = seed ptr (PUInt64).
-// Uses only volatile registers: ymm0-ymm1, eax, ecx, edx (edi reused).
+// AVX2 implementation of XXH3_initCustomSecret (fully unrolled, 6 x
+// 32-byte chunks; IA-32). Same structure as XXH3InitSecretAvx2_x86_64.inc;
+// the x86_64 version's vmovq xmm, r64 seed transfers (not encodable in
+// 32-bit mode) become the SSE2 i386 sibling's push/vmovq-from-stack
+// pattern, with the negation done in 32-bit halves (not/not + add/adc
+// carry).
+// ABI (after HlpSimdProc3Begin_i386.inc): ebx = customSecret ptr,
+//   esi = defaultSecret ptr, edi = seed ptr (PUInt64).
+// Saves: none (uses ymm0-ymm1, eax, ecx, edx; edi reused; all volatile on
+//   IA-32).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: official xxHash C - XXH3_initCustomSecret_avx2 in xxhash.h,
 // HashLib XXH3InitSecretAvx2_x86_64.inc.

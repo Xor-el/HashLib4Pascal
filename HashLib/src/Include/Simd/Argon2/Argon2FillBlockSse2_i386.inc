@@ -1,15 +1,19 @@
-// SSE2 implementation of Argon2 FillBlock.
-// IA-32: after HlpSimdProc4Begin_i386 — ebx, esi, edi, eax = Left, Right, Current, WithXor
-//   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
-// Each pointer addresses 128 QWords (1024 bytes).
-// Uses xmm0–xmm7; xmm6–xmm7 saved/restored defensively (volatile on i386).
-// Register map during G rounds: xmm0-1 = A(0..3), xmm2-3 = B(4..7),
-//   xmm4-5 = C(8..11), xmm6-7 = D(12..15) / temps (same roles as x64, fewer XMM).
-// IA-32 stack (sub esp, 2132): WithXor at [esp+2128]; spill slots [esp+2080],[esp+2096],[esp+2112];
-//   R_buf at lea eax,[esp+32]; ECX = loop offset; EBX = Z_buf base after copy; EDI = Current.
-// r8/r9 analogues (Current, WithXor) are not clobbered across loops. ARight and ACurrent may alias.
-//
-// Diagonalize/Undiagonalize use shufpd (see x64 header in Argon2FillBlockSse2_x86_64.inc).
+// SSE2 implementation of Argon2 FillBlock (BlaMka round function; IA-32).
+// Same roles as Argon2FillBlockSse2_x86_64.inc with fewer XMM registers;
+// Diagonalize/Undiagonalize use shufpd (see the x64 sibling's header).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = Left ptr, esi = Right ptr,
+//   edi = Current ptr, eax = WithXor (0 or 1).
+//   Each pointer addresses 128 QWords (1024 bytes). ARight and ACurrent may
+//   alias; R_buf buffering handles this. Current/WithXor analogues are not
+//   clobbered across loops.
+// Register map (G rounds): xmm0-1 = A(0..3), xmm2-3 = B(4..7),
+//   xmm4-5 = C(8..11), xmm6-7 = D(12..15) / temps.
+// Frame (sub esp, 2132): WithXor at [esp+2128]; spill slots [esp+2080],
+//   [esp+2096], [esp+2112]; R_buf at lea eax,[esp+32]; ecx = loop offset;
+//   ebx = Z_buf base after the copy; edi = Current.
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
+// Reference: official Argon2 SSE2 (blamka-round-ref/opt), HashLib
+// Argon2FillBlockSse2_x86_64.inc.
 
   sub esp, 2132
 
@@ -697,7 +701,7 @@
   jb @row_loop
 
   // =========================================================================
-  // Step 5: Final XOR — Current = R_buf XOR Z_buf [XOR Current]
+  // Step 5: Final XOR - Current = R_buf XOR Z_buf [XOR Current]
   // =========================================================================
   cmp dword ptr [esp + 2128], 0
   jnz @final_with_xor

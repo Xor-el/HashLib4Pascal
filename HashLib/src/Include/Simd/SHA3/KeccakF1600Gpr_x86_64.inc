@@ -1,20 +1,20 @@
-// Keccak-f[1600] permutation for x86-64, pure 64-bit GPR code (no SIMD
-// registers at all) - the fastest non-AVX2 form of Keccak on x86-64.
+// Gpr implementation of the Keccak-f[1600] permutation (pure 64-bit GPR
+// code, no SIMD registers at all) - the fastest non-AVX2 form of Keccak on
+// x86-64; the Gpr name states the ISA requirement: none beyond base
+// x86-64. The inner routine works in the LANE-COMPLEMENTED domain (lanes
+// 1, 2, 8, 12, 17 and 20 stored inverted to save NOTs in chi); this
+// wrapper converts in and out around the call. The original loop
+// terminated on a 256-aligned iotas table (test r15, 255) which a Pascal
+// const cannot guarantee - the termination is patched to compare against
+// an end pointer stashed at [rsp] (the inner sees it at [rsp + 8] across
+// the call).
+// ABI (after HlpSimdProc2Begin_x86_64.inc): rcx = AState (25 x UInt64,
+//   standard layout), rdx = AConstants (iotas: 24 x UInt64).
+// Frame: mirrors the OpenSSL wrapper - 200-byte scratch plane (+16 for the
+//   sentinel slot), rdi/rsi biased by +100, r15 = iotas. The inner keeps
+//   the original called shape.
+// Saves: every callee-saved GPR is pushed here (clobbers all GPRs).
 // Reference: OpenSSL CRYPTOGAMS keccak1600-x86_64.pl by Andy Polyakov.
-//
-// The inner routine works in the LANE-COMPLEMENTED domain (lanes 1, 2, 8,
-// 12, 17 and 20 stored inverted to save NOTs in chi); this wrapper converts
-// in and out around the call. The original loop terminated on a 256-aligned
-// iotas table (test r15, 255) which a Pascal const cannot guarantee - the
-// termination is patched to compare against an end pointer stashed at
-// [rsp] (the inner sees it at [rsp + 8] across the call).
-//
-// After HlpSimdProc2Begin_x86_64: rcx = AState (25 x UInt64, standard
-// layout), rdx = AConstants (iotas: 24 x UInt64 round constants).
-// The inner keeps the original called shape; frame mirrors the OpenSSL
-// wrapper: 200-byte scratch plane (+16 for the sentinel slot), rdi/rsi
-// biased by +100, r15 = iotas. Clobbers rax-rdx, r8-r15, rsi, rdi (all
-// GPRs); every callee-saved one is pushed here.
 
   push rbx
   push rbp

@@ -1,16 +1,17 @@
-// SHA-512 AArch64 FEAT_SHA512 implementation.
-// Expects AAPCS64: x0 = state ptr (8 x UInt64), x1 = data ptr,
-//   w2 = numblocks, x3 = K512 ptr (80 UInt64 round constants).
-// Leaf nostackframe; caller-saved GPR/vector only.
-// K pointer rewound each block (sub x3, #640). Two rounds per iteration; csel avoids OOB prefetch.
-// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S.
-// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// CryptoExt (FEAT_SHA512) implementation of SHA-512 compress.
+// The K pointer is rewound each block (sub x3, #640). Two rounds per
+// iteration; csel avoids OOB prefetch.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = state ptr (8 x UInt64),
+//   x1 = data ptr, w2 = numblocks, x3 = K512 ptr (80 UInt64 round constants).
 // Register map:
 //   v0-v3    = working state (a..h, two UInt64 per register)
 //   v5, v6   = ext scratch (fg, de)  v7 = ext scratch (m9_10)
 //   v16-v23  = message schedule (W)
 //   v24, v25 = K + W ping-pong pair
 //   v26-v29  = saved state for the final add
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// Reference: OpenSSL CRYPTOGAMS sha512-armv8.S.
 
   cbz w2, .Lcryptoext_sha512_done
   .long 0xacc14430                    // ldp q16, q17, [x1], #32

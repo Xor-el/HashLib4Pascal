@@ -1,22 +1,22 @@
-// AVX2 implementation of Argon2 FillBlock (IA-32). 256-bit ymm integer ops
-// work in 32-bit mode; same algorithm and buffer layout as
-// Argon2FillBlockAvx2_x86_64.inc, redesigned for the IA-32 register budget:
+// AVX2 implementation of Argon2 FillBlock (BlaMka round function; IA-32).
+// 256-bit ymm integer ops work in 32-bit mode; same algorithm and buffer
+// layout as Argon2FillBlockAvx2_x86_64.inc, redesigned for the IA-32
+// register budget:
 //  - the byte-rotation masks are VEX memory operands (rot24 at [masks],
 //    rot16 at [masks+$20]; read unaligned, so the Pascal const needs no
-//    special alignment) - the kernel touches only ymm0-ymm4, all volatile,
-//    so nothing is saved;
+//    special alignment) - the kernel touches only ymm0-ymm4;
 //  - R_buf/Z_buf sit at [esp]/[esp+1024] and are addressed [esp+edx+disp]
 //    (edx = loop offset) - no buffer pointer registers are needed;
 //  - Left/Right are dead after step 1's XOR.
-// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// IA-32: after HlpSimdProc5Begin_i386 - ebx = Left ptr, esi = Right ptr,
+// Diagonalize/Undiagonalize via vpermq. vzeroupper required before return.
+// ABI (after HlpSimdProc5Begin_i386.inc): ebx = Left ptr, esi = Right ptr,
 //   edi = Current ptr, eax = WithXor (0 or 1; live until the final step),
 //   ecx = byte-rotation masks ptr (ARGON2_ROT_MASKS; live throughout).
-// Each pointer addresses 128 QWords (1024 bytes).
-// Stack layout (sub esp, 2048): [esp+0..1023] R_buf, [esp+1024..2047] Z_buf.
-// ARight and ACurrent may alias; R_buf buffering handles this.
-// Diagonalize/Undiagonalize via vpermq (cross-lane 64-bit permute).
-// vzeroupper required before return.
+//   Each pointer addresses 128 QWords (1024 bytes). ARight and ACurrent may
+//   alias; R_buf buffering handles this.
+// Frame (sub esp, 2048): [esp+0..1023] R_buf, [esp+1024..2047] Z_buf.
+// Saves: none (uses ymm0-ymm4 only; all volatile on IA-32).
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: official Argon2 AVX2 (blamka-round-opt.h), HashLib
 // Argon2FillBlockAvx2_x86_64.inc.
 

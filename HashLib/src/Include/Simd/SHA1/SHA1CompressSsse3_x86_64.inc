@@ -1,18 +1,18 @@
-// SHA-1 SSSE3 SIMD-schedule implementation; SSE2 sibling:
-// SHA1CompressSse2_x86_64.inc.
-// The message schedule runs in SIMD (pxor/pshufd/psrldq/pslldq) interleaved
-// with the GPR compression rounds, so the vector and integer units run in
-// parallel. Unlike the SSE2 sibling the input byte-swaps are real pshufb
-// (db-encoded for broad assembler compatibility) against the mask kept
-// resident in xmm12 (K_SHA1_Doubled + 128); the W-schedule uses no palignr.
+// SSSE3 implementation of SHA-1 compress (SIMD schedule); SSE2 sibling:
+// SHA1CompressSse2_x86_64.inc. The message schedule runs in SIMD
+// (pxor/pshufd/psrldq/pslldq) interleaved with the GPR compression rounds,
+// so the vector and integer units run in parallel. Unlike the SSE2 sibling
+// the input byte-swaps are real pshufb against the mask kept resident in
+// xmm12 (K_SHA1_Doubled + 128); the W-schedule uses no palignr.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = doubled-K_SHA1 ptr (read 128-bit at a 32-byte
+//   stride, r14 = K + 64, so the duplicated halves are skipped; see
+//   K_SHA1_Doubled).
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
+//   holds the caller rsp across the kernel for the unwind.
+// pshufb instructions are db-encoded for broad assembler compatibility.
 // Reference: OpenSSL CRYPTOGAMS sha1-x86_64.pl (SSSE3 kernel).
-// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
-//   r8d = numblocks, r9 = doubled-K_SHA1 ptr (read 128-bit at a 32-byte stride,
-//   r14 = K + 64, so the duplicated halves are skipped; see K_SHA1_Doubled).
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
-// holds the caller rsp across the kernel for the unwind.
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 

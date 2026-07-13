@@ -1,26 +1,25 @@
-// AVX2 implementation of Argon2 FillBlock.
-// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI (after HlpSimdProc5Begin): rcx = Left ptr, rdx = Right ptr,
+// AVX2 implementation of Argon2 FillBlock (BlaMka round function).
+// Rotations: rot32 via vpshufd, rot24/16 via vpshufb against the resident
+// masks, rot63 via shift+or (not byte-aligned). Diagonalize/Undiagonalize
+// via vpermq (cross-lane 64-bit permute). vzeroupper required before return.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = Left ptr, rdx = Right ptr,
 //   r8 = Current ptr, r9 = WithXor (0 or 1), r10 = byte-rotation masks ptr
-//   (see ARGON2_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
-//   Pascal const needs no special alignment; consumed by the entry mask loads,
-//   r10 is scratch afterwards).
-// Each pointer addresses 128 QWords (1024 bytes).
-// Uses ymm0-ymm11; ymm6-ymm11 are MS x64 non-volatile (saved/restored).
-// Register map during G rounds: ymm0 = A(v0..v3), ymm1 = B(v4..v7),
+//   (ARGON2_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   Pascal const needs no special alignment; consumed by the entry mask
+//   loads, r10 is scratch afterwards).
+//   Each pointer addresses 128 QWords (1024 bytes). ARight and ACurrent may
+//   alias; R_buf buffering handles this. r8/r9 survive all loops.
+// Register map (G rounds): ymm0 = A(v0..v3), ymm1 = B(v4..v7),
 //   ymm2 = C(v8..v11), ymm3 = D(v12..v15), ymm4-ymm5 = temps,
 //   ymm10 = rot24 mask, ymm11 = rot16 mask.
-// Rotations: rot32 via vpshufd, rot24/16 via vpshufb against the resident
-//   masks, rot63 via shift+or (not byte-aligned).
-// Stack layout (sub rsp, 2184):
-//   [rsp+0..127]    ymm6-9 save area (4 * 32 = 128 bytes)
-//   [rsp+128..1151] R_buf (1024 bytes)
-//   [rsp+1152..2175] Z_buf (1024 bytes)
-//   [rsp+2176..2183] alignment padding
-// r8 (Current) and r9 (WithXor) survive all loops (not clobbered).
-// ARight and ACurrent may alias; R_buf buffering handles this.
-// Diagonalize/Undiagonalize via vpermq (cross-lane 64-bit permute).
-// vzeroupper required before return.
+// Frame (sub rsp, 2184):
+//   [rsp+0..127]     = ymm6-ymm9 save area (4 x 32 bytes)
+//   [rsp+128..1151]  = R_buf (1024 bytes)
+//   [rsp+1152..2175] = Z_buf (1024 bytes)
+//   [rsp+2176..2183] = alignment padding
+// Saves: ymm6-ymm11 (MS x64 non-volatile); uses ymm0-ymm11.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
+// Reference: official Argon2 AVX2 (blamka-round-opt.h).
 
   {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
