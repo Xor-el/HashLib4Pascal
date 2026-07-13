@@ -1,0 +1,19 @@
+HashLib/src/Include/HashLib.inc
+  s_0adb0de1316667::t_d5966cbec03876 176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "73d09ede6493ca084e6d76641e9f034ad09e959d",
+  "prompts": {},
+  "sessions": {
+    "s_0adb0de1316667": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "20e60260-8d84-497f-b653-1e4a543d9add",
+        "model": "composer-2.5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
