@@ -208,43 +208,46 @@ const
 procedure XXH3_Accumulate512_Scalar(AAcc: Pointer; AInput: Pointer;
   ASecret: Pointer);
 var
-  LPAcc: PUInt64;
-  LPInput, LPSecret: PByte;
+  LPAcc, LPInput, LPSecret: PByte;
+  LPLane: PUInt64;
   I: Int32;
   LDataVal, LDataKey: UInt64;
 begin
-  LPAcc := PUInt64(AAcc);
+  LPAcc := PByte(AAcc);
   LPInput := PByte(AInput);
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
     LDataVal := TBinaryPrimitives.ReadUInt64LittleEndian(LPInput, I * 8);
     LDataKey := LDataVal xor TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
-    PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ :=
-      PUInt64(PByte(LPAcc) + (I xor 1) * 8)^ + LDataVal;
-    PUInt64(PByte(LPAcc) + I * 8)^ :=
-      PUInt64(PByte(LPAcc) + I * 8)^ +
-      UInt64(UInt32(LDataKey)) * UInt64(UInt32(LDataKey shr 32));
+    LPLane := PUInt64(LPAcc + (I xor 1) * 8);
+    TBinaryPrimitives.StoreUInt64(LPLane,
+      TBinaryPrimitives.LoadUInt64(LPLane) + LDataVal);
+    LPLane := PUInt64(LPAcc + I * 8);
+    TBinaryPrimitives.StoreUInt64(LPLane,
+      TBinaryPrimitives.LoadUInt64(LPLane) +
+      UInt64(UInt32(LDataKey)) * UInt64(UInt32(LDataKey shr 32)));
   end;
 end;
 
 procedure XXH3_ScrambleAcc_Scalar(AAcc: Pointer; ASecret: Pointer);
 var
-  LPAcc: PUInt64;
-  LPSecret: PByte;
+  LPAcc, LPSecret: PByte;
+  LPLane: PUInt64;
   I: Int32;
   LKey64, LAcc64: UInt64;
 begin
-  LPAcc := PUInt64(AAcc);
+  LPAcc := PByte(AAcc);
   LPSecret := PByte(ASecret);
   for I := 0 to XXH_ACC_NB - 1 do
   begin
     LKey64 := TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
-    LAcc64 := PUInt64(PByte(LPAcc) + I * 8)^;
+    LPLane := PUInt64(LPAcc + I * 8);
+    LAcc64 := TBinaryPrimitives.LoadUInt64(LPLane);
     LAcc64 := LAcc64 xor (LAcc64 shr 47);
     LAcc64 := LAcc64 xor LKey64;
     LAcc64 := LAcc64 * XXH_PRIME32_1;
-    PUInt64(PByte(LPAcc) + I * 8)^ := LAcc64;
+    TBinaryPrimitives.StoreUInt64(LPLane, LAcc64);
   end;
 end;
 
@@ -258,12 +261,13 @@ begin
   ASeed := ASeedPtr^;
   LPSrc := PByte(ADefaultSecret);
   LPDst := PByte(ACustomSecret);
+
   for I := 0 to (192 div 16) - 1 do
   begin
-    PUInt64(LPDst + 16 * I)^ :=
-      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I) + ASeed;
-    PUInt64(LPDst + 16 * I + 8)^ :=
-      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I + 8) - ASeed;
+    TBinaryPrimitives.WriteUInt64LittleEndian(LPDst, 16 * I,
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I) + ASeed);
+    TBinaryPrimitives.WriteUInt64LittleEndian(LPDst, 16 * I + 8,
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I + 8) - ASeed);
   end;
 end;
 
