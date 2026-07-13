@@ -1,0 +1,112 @@
+HashLib/src/Include/Simd/SHA3/KeccakF1600Gpr_x86_64.inc
+  s_aa1fcfc5f6c773::t_ed0c3fc0b62ef5 1,4-273
+  s_db3d375ac4a65a::t_ff96e6c68927da 2
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 3
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Avx_x86_64.inc
+  s_db3d375ac4a65a::t_ff96e6c68927da 1
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 2-142
+HashLib/src/Include/Simd/SHA256/SHA256CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_a52051785edc63 1-948
+HashLib/src/Include/Simd/Blake3/Blake3CompressAvx_x86_64.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 1
+HashLib/src/Include/Simd/SHA1/SHA1CompressAvx_i386.inc
+  s_db3d375ac4a65a::t_ff96e6c68927da 1-1174
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedSse2_i386.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 2
+  s_db3d375ac4a65a::t_b1053bc36bd001 3
+HashLib/src/Simd/Backend/HlpSHA3ArmBackend.pas
+  s_db3d375ac4a65a::t_f7a152ee9676f0 29
+  s_db3d375ac4a65a::t_d6a915bfa214d8 33,35-36
+  s_db3d375ac4a65a::t_586a8a85e99597 28
+  s_db3d375ac4a65a::t_8a087428f6b314 37
+  s_db3d375ac4a65a::t_660ff279047021 62-83,93-96,106-109
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressAvx_x86_64.inc
+  s_db3d375ac4a65a::t_ff96e6c68927da 1
+HashLib/src/Include/Simd/SHA512/SHA512CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_84031fae95e53a 2-5
+  s_db3d375ac4a65a::t_a4f34bba60b94e 1,6-949
+HashLib/src/Include/Simd/CRC/CRCFoldReflectedSse2_x86_64.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 2
+  s_db3d375ac4a65a::t_89334564438261 3
+HashLib/src/Simd/Backend/HlpSHA2_256ArmBackend.pas
+  s_db3d375ac4a65a::t_f806ed34bf5d7c 27-43
+  s_6b1649def2e9b5::t_bddd2e579da931 44-53,57,71-81,91-94
+HashLib/src/Simd/Backend/HlpSHA2_512ArmBackend.pas
+  s_db3d375ac4a65a::t_9cb4cb1be3d8ad 52
+  s_db3d375ac4a65a::t_39a0f43a32bc8c 53,56,59,61,66
+  s_db3d375ac4a65a::t_e980b4bdea51d2 27-51,54-55,57-58,60,62-65,67
+  s_db3d375ac4a65a::t_ab640614ced357 68-70
+  s_db3d375ac4a65a::t_3ca77b2349d630 71-77,81,95-105,115-118
+HashLib/src/Include/Simd/SHA1/SHA1CompressGpr_aarch64.inc
+  s_db3d375ac4a65a::t_8be0aed134674b 1-1038
+HashLib/src/Include/Simd/Blake2S/Blake2SCompressAvx_i386.inc
+  s_db3d375ac4a65a::t_ff96e6c68927da 2
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 1,3-941
+HashLib/src/Include/Simd/SHA256/SHA256CompressAvx_i386.inc
+  s_db3d375ac4a65a::t_ff96e6c68927da 1-1207
+HashLib/src/Include/Simd/CRC/CRCFoldForwardGpr_x86_64.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 1-3
+  s_db3d375ac4a65a::t_38a663354a9ebc 5
+HashLib/src/Include/Simd/SHA3/KeccakF1600GprAbsorb_x86_64.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 1,3-307
+  s_db3d375ac4a65a::t_ff96e6c68927da 2
+HashLib/src/Include/Simd/Scrypt/ScryptSalsa8Avx_i386.inc
+  s_db3d375ac4a65a::t_88aad0eb7e0f09 1,3-130
+  s_db3d375ac4a65a::t_ff96e6c68927da 2
+HashLib/src/Include/Simd/CRC/CRCFoldForwardGpr_i386.inc
+  s_db3d375ac4a65a::t_2152aae6fc7a9c 2
+HashLib/src/Include/Simd/SHA3/KeccakF1600Sse2Absorb_i386.inc
+  s_db3d375ac4a65a::t_df17d536b4814f 2
+HashLib/src/Simd/Backend/HlpBlake2SX86Backend.pas
+  s_db3d375ac4a65a::t_156062b274fd65 31,65,68,71,74,100,103,106,109,125
+HashLib/src/Simd/Backend/HlpBlake3X86Backend.pas
+  s_db3d375ac4a65a::t_1798d4170324f3 88,91,94,97,203
+HashLib/src/Simd/Backend/HlpCRCX86Backend.pas
+  s_db3d375ac4a65a::t_8bf1f4f4643f00 45,48,85,88,149
+HashLib/src/Simd/Backend/HlpSHA1ArmBackend.pas
+  s_db3d375ac4a65a::t_2b097f1e9ac91e 27-28,32,46-50,60-63
+HashLib/src/Simd/Backend/HlpSHA1X86Backend.pas
+  s_db3d375ac4a65a::t_0c22e7287c97da 90,93-98,134-138,163
+HashLib/src/Simd/Backend/HlpSHA2_256X86Backend.pas
+  s_db3d375ac4a65a::t_36875c2791b087 117,120-125,161-165,190
+HashLib/src/Simd/Backend/HlpSHA3X86Backend.pas
+  s_db3d375ac4a65a::t_33316b58876b94 34,120,122,125,128,142-153,181-182,194,213
+HashLib/src/Simd/Backend/HlpScryptX86Backend.pas
+  s_db3d375ac4a65a::t_80fc6a57e3250d 43,45,57,59,73
+HashLib/src/Include/Simd/SHA3/KeccakF1600GprAbsorb_aarch64.inc
+  s_db3d375ac4a65a::t_d7812d679d63e9 1-352
+HashLib/src/Include/Simd/SHA3/KeccakF1600Gpr_aarch64.inc
+  s_db3d375ac4a65a::t_2fae82afb21f12 1-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "883081ff5365893423626d87b264ea9caadbf731",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_aa1fcfc5f6c773": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1b750aa-3e2b-4561-9c92-1f6ea2a6349b",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_db3d375ac4a65a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31d8c528-12de-4647-99f0-163b1e376cfb",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
