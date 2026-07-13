@@ -21,7 +21,7 @@ type
     ASecret: Pointer; ANbStripes: Int32);
   TXXH3ScrambleAccProc = procedure(AAcc: Pointer; ASecret: Pointer);
   TXXH3InitSecretProc = procedure(ACustomSecret: Pointer;
-    ADefaultSecret: Pointer; ASeed: UInt64);
+    ADefaultSecret: Pointer; ASeedPtr: PUInt64);
 
 var
   XXH3_Accumulate512: TXXH3Accumulate512Proc;
@@ -249,11 +249,13 @@ begin
 end;
 
 procedure XXH3_InitSecret_Scalar(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
 var
   I: Int32;
   LPSrc, LPDst: PByte;
+  ASeed: UInt64;
 begin
+  ASeed := ASeedPtr^;
   LPSrc := PByte(ADefaultSecret);
   LPDst := PByte(ACustomSecret);
   for I := 0 to (192 div 16) - 1 do
@@ -448,7 +450,7 @@ end;
 class procedure TXXH3Core.XXH3_initCustomSecret(ACustomSecret: PByte;
   ASeed: UInt64);
 begin
-  HlpXXHash3.XXH3_InitSecret(ACustomSecret, @XXH3_SECRET[0], ASeed);
+  HlpXXHash3.XXH3_InitSecret(ACustomSecret, @XXH3_SECRET[0], @ASeed);
 end;
 
 class procedure TXXH3Core.XXH3_consumeStripes(var AAcc: TXXH3AccArray;

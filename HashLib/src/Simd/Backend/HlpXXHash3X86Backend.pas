@@ -50,7 +50,7 @@ procedure XXH3_ScrambleAcc_Sse2(AAcc: Pointer; ASecret: Pointer);
 end;
 
 procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_i386.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretSse2_i386.inc}
 end;
@@ -67,7 +67,7 @@ procedure XXH3_ScrambleAcc_Avx2(AAcc: Pointer; ASecret: Pointer);
 end;
 
 procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_i386.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretAvx2_i386.inc}
 end;
@@ -88,7 +88,7 @@ procedure XXH3_ScrambleAcc_Sse2(AAcc: Pointer; ASecret: Pointer);
 end;
 
 procedure XXH3_InitSecret_Sse2(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_x86_64.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretSse2_x86_64.inc}
 end;
@@ -105,7 +105,7 @@ procedure XXH3_ScrambleAcc_Avx2(AAcc: Pointer; ASecret: Pointer);
 end;
 
 procedure XXH3_InitSecret_Avx2(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_x86_64.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretAvx2_x86_64.inc}
 end;

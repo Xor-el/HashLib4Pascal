@@ -19,8 +19,8 @@
   .long 0x6e0540b1                    // ext v17.16b, v5.16b, v5.16b, #8
   .long 0x6e261c84                    // eor v4.16b, v4.16b, v6.16b
   .long 0x6e271ca5                    // eor v5.16b, v5.16b, v7.16b
-  .long 0x4e871886                    // uzp1 v6.4s, v4.4s, v5.4s
-  .long 0x4e875887                    // uzp2 v7.4s, v4.4s, v5.4s
+  .long 0x4e851886                    // uzp1 v6.4s, v4.4s, v5.4s
+  .long 0x4e855887                    // uzp2 v7.4s, v4.4s, v5.4s
   .long 0x2ea780d0                    // umlal v16.2d, v6.2s, v7.2s
   .long 0x6ea780d1                    // umlal2 v17.2d, v6.4s, v7.4s
   .long 0x3dc00000                    // ldr q0, [x0, #0x0]
@@ -38,8 +38,8 @@
   .long 0x6e0540b1                    // ext v17.16b, v5.16b, v5.16b, #8
   .long 0x6e261c84                    // eor v4.16b, v4.16b, v6.16b
   .long 0x6e271ca5                    // eor v5.16b, v5.16b, v7.16b
-  .long 0x4e871886                    // uzp1 v6.4s, v4.4s, v5.4s
-  .long 0x4e875887                    // uzp2 v7.4s, v4.4s, v5.4s
+  .long 0x4e851886                    // uzp1 v6.4s, v4.4s, v5.4s
+  .long 0x4e855887                    // uzp2 v7.4s, v4.4s, v5.4s
   .long 0x2ea780d0                    // umlal v16.2d, v6.2s, v7.2s
   .long 0x6ea780d1                    // umlal2 v17.2d, v6.4s, v7.4s
   .long 0x3dc00802                    // ldr q2, [x0, #0x20]

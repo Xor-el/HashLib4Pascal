@@ -47,7 +47,7 @@ procedure XXH3_ScrambleAcc_Neon(AAcc: Pointer; ASecret: Pointer);
 end;
 
 procedure XXH3_InitSecret_Neon(ACustomSecret: Pointer;
-  ADefaultSecret: Pointer; ASeed: UInt64);
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
   {$I ..\..\Include\Simd\Common\HlpSimdProc3Begin_aarch64.inc}
   {$I ..\..\Include\Simd\XXH3\XXH3InitSecretNeon_aarch64.inc}
 end;
