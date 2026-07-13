@@ -1,0 +1,19 @@
+HashLib/src/Hash64/HlpXXHash3.pas
+  s_6b1649def2e9b5::t_cb955fbe1506db 211-212,216,223-229,235-236,240,245-246,250,264,267-270
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "df2d9d9b64339c63446c2c65e7c8bebf163506b9",
+  "prompts": {},
+  "sessions": {
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
