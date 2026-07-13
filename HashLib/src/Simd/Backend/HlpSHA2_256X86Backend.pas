@@ -102,29 +102,6 @@ begin
   SHA256_Compress_ShaNi(AState, AData, ANumBlocks, @K256_Doubled);
 end;
 
-procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA256\SHA256CompressSse2_i386.inc}
-end;
-
-procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA256\SHA256CompressSsse3_i386.inc}
-end;
-
-procedure SHA256_Compress_Avx(AState, AData: Pointer; ANumBlocks: UInt32;
-  AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA256\SHA256CompressAvx_i386.inc}
-end;
-
-procedure SHA256_Compress_Avx_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
-begin
-  SHA256_Compress_Avx(AState, AData, ANumBlocks, @K256_Doubled);
-end;
-
 {$ENDIF HASHLIB_I386_ASM}
 
 {$IFDEF HASHLIB_X86_64_ASM}
@@ -140,17 +117,48 @@ begin
   SHA256_Compress_ShaNi(AState, AData, ANumBlocks, @K256, @BSWAP32_MASK);
 end;
 
+{$ENDIF HASHLIB_X86_64_ASM}
+
 procedure SHA256_Compress_Sse2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA256\SHA256CompressSse2_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\SHA256\SHA256CompressSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\SHA256\SHA256CompressSse2_i386.inc}
+{$ENDIF}
 end;
 
 procedure SHA256_Compress_Ssse3(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\SHA256\SHA256CompressSsse3_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\SHA256\SHA256CompressSsse3_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\SHA256\SHA256CompressSsse3_i386.inc}
+{$ENDIF}
 end;
+
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure SHA256_Compress_Avx(AState, AData: Pointer; ANumBlocks: UInt32;
+  AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+  {$I ..\..\Include\Simd\SHA256\SHA256CompressAvx_i386.inc}
+end;
+
+procedure SHA256_Compress_Avx_Wrap(AState, AData: Pointer; ANumBlocks: UInt32);
+begin
+  SHA256_Compress_Avx(AState, AData, ANumBlocks, @K256_Doubled);
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
+{$IFDEF HASHLIB_X86_64_ASM}
 
 procedure SHA256_Compress_Avx2(AState, AData: Pointer; ANumBlocks: UInt32;
   AConstants: Pointer);

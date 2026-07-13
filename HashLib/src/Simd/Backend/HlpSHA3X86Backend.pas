@@ -104,6 +104,33 @@ const
 //   x86_64:  AVX2, SSE2
 // =============================================================================
 
+{$IFDEF HASHLIB_I386_ASM}
+
+procedure KeccakF1600_Sse2(AState: Pointer; AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
+  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2_i386.inc}
+end;
+
+procedure KeccakF1600_Sse2_Absorb(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
+  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
+  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2Absorb_i386.inc}
+end;
+
+procedure KeccakF1600_Sse2_Wrap(AState: Pointer);
+begin
+  KeccakF1600_Sse2(AState, @K_KECCAK_IOTAS);
+end;
+
+procedure KeccakF1600_Sse2_Absorb_Wrap(AState: Pointer; AData: PByte;
+  ABlockCount: Int32; ABlockSize: Int32);
+begin
+  KeccakF1600_Sse2_Absorb(AState, AData, ABlockCount, ABlockSize,
+    @K_KECCAK_IOTAS);
+end;
+
+{$ENDIF HASHLIB_I386_ASM}
+
 {$IFDEF HASHLIB_X86_64_ASM}
 
 procedure KeccakF1600_Avx2(AState: Pointer; AConstants: Pointer);
@@ -152,33 +179,6 @@ begin
 end;
 
 {$ENDIF HASHLIB_X86_64_ASM}
-
-{$IFDEF HASHLIB_I386_ASM}
-
-procedure KeccakF1600_Sse2(AState: Pointer; AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2_i386.inc}
-end;
-
-procedure KeccakF1600_Sse2_Absorb(AState: Pointer; AData: PByte;
-  ABlockCount: Int32; ABlockSize: Int32; AConstants: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
-  {$I ..\..\Include\Simd\SHA3\KeccakF1600Sse2Absorb_i386.inc}
-end;
-
-procedure KeccakF1600_Sse2_Wrap(AState: Pointer);
-begin
-  KeccakF1600_Sse2(AState, @K_KECCAK_IOTAS);
-end;
-
-procedure KeccakF1600_Sse2_Absorb_Wrap(AState: Pointer; AData: PByte;
-  ABlockCount: Int32; ABlockSize: Int32);
-begin
-  KeccakF1600_Sse2_Absorb(AState, AData, ABlockCount, ABlockSize,
-    @K_KECCAK_IOTAS);
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 

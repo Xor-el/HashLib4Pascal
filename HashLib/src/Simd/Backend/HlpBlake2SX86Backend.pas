@@ -42,52 +42,27 @@ const
 //   x86_64:  AVX2, SSSE3, SSE2
 // =============================================================================
 
-{$IFDEF HASHLIB_I386_ASM}
-
 procedure Blake2S_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressSse2_i386.inc}
-end;
-
-procedure Blake2S_Compress_Ssse3(AState, AMsg, ACounterFlags, AIV,
-  AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressSsse3_i386.inc}
-end;
-
-procedure Blake2S_Compress_Ssse3_Wrap(AState, AMsg, ACounterFlags,
-  AIV: Pointer);
-begin
-  Blake2S_Compress_Ssse3(AState, AMsg, ACounterFlags, AIV,
-    @BLAKE2S_ROT_MASKS);
-end;
-
-procedure Blake2S_Compress_Avx(AState, AMsg, ACounterFlags, AIV,
-  AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressAvx_i386.inc}
-end;
-
-procedure Blake2S_Compress_Avx_Wrap(AState, AMsg, ACounterFlags,
-  AIV: Pointer);
-begin
-  Blake2S_Compress_Avx(AState, AMsg, ACounterFlags, AIV,
-    @BLAKE2S_ROT_MASKS);
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
-
 {$IFDEF HASHLIB_X86_64_ASM}
-
-procedure Blake2S_Compress_Sse2(AState, AMsg, ACounterFlags, AIV: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressSse2_x86_64.inc}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressSse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc4Begin_i386.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressSse2_i386.inc}
+{$ENDIF}
 end;
 
 procedure Blake2S_Compress_Ssse3(AState, AMsg, ACounterFlags, AIV,
   AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressSsse3_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressSsse3_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressSsse3_i386.inc}
+{$ENDIF}
 end;
 
 procedure Blake2S_Compress_Ssse3_Wrap(AState, AMsg, ACounterFlags,
@@ -99,8 +74,14 @@ end;
 
 procedure Blake2S_Compress_Avx(AState, AMsg, ACounterFlags, AIV,
   AMasks: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Blake2S\Blake2SCompressAvx_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressAvx_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc5Begin_i386.inc}
+{$I ..\..\Include\Simd\Blake2S\Blake2SCompressAvx_i386.inc}
+{$ENDIF}
 end;
 
 procedure Blake2S_Compress_Avx_Wrap(AState, AMsg, ACounterFlags,
@@ -109,8 +90,6 @@ begin
   Blake2S_Compress_Avx(AState, AMsg, ACounterFlags, AIV,
     @BLAKE2S_ROT_MASKS);
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 

@@ -33,33 +33,27 @@ uses
 //   x86_64:  AVX2, SSE2
 // =============================================================================
 
-{$IFDEF HASHLIB_I386_ASM}
-
 procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_i386.inc}
-end;
-
-procedure Scrypt_SalsaXor_Avx(AState, AInput: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_i386.inc}
-end;
-
-{$ENDIF HASHLIB_I386_ASM}
-
 {$IFDEF HASHLIB_X86_64_ASM}
-
-procedure Scrypt_SalsaXor_Sse2(AState, AInput: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_x86_64.inc}
+{$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
+{$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Sse2_i386.inc}
+{$ENDIF}
 end;
 
 procedure Scrypt_SalsaXor_Avx(AState, AInput: Pointer);
-  {$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
-  {$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_x86_64.inc}
+{$IFDEF HASHLIB_X86_64_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_x86_64.inc}
+{$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_x86_64.inc}
+{$ENDIF}
+{$IFDEF HASHLIB_I386_ASM}
+{$I ..\..\Include\Simd\Common\HlpSimdProc2Begin_i386.inc}
+{$I ..\..\Include\Simd\Scrypt\ScryptSalsa8Avx_i386.inc}
+{$ENDIF}
 end;
-
-{$ENDIF HASHLIB_X86_64_ASM}
 
 {$ENDIF HASHLIB_X86_SIMD}
 
