@@ -1,10 +1,13 @@
-// SSSE3 Adler-32 block processing (IA-32).
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
-// Constants: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B] (48 bytes; same as x64 SSSE3).
-// No xmm8 on IA-32: psadbw uses a copy in xmm5 (first half) or xmm4 (second half), then reload weights.
-// Caller applies mod 65521.
-//
-// xmm6–xmm7 saved/restored defensively (volatile on i386).
+// SSSE3 implementation of Adler-32 block processing (num_blocks x 32-byte blocks;
+// IA-32). Does NOT apply mod 65521 (the caller does). No xmm8 on IA-32:
+// psadbw uses a copy in xmm5 (first half) or xmm4 (second half), then the
+// weights are reloaded.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = data ptr, esi = num_blocks,
+//   edi = sums ptr, eax = constants ptr.
+//   Constants layout: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B]
+//   (48 bytes; same as the x64 SSSE3 kernel).
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
+// Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksSsse3_x86_64.inc.
 
   push eax
 

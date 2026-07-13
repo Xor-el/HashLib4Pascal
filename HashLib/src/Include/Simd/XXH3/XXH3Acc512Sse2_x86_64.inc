@@ -1,7 +1,9 @@
-// SSE2 implementation of XXH3_accumulate_512 (fully unrolled, 4 x 16-byte chunks).
-// Expects MS x64 ABI: rcx = acc ptr, rdx = input ptr, r8 = secret ptr.
-// Uses only volatile registers: xmm0-xmm5.
-// Reference: official xxHash C - XXH3_accumulate_512_sse2 in xxhash.h
+// SSE2 implementation of XXH3_accumulate_512 (fully unrolled, 4 x 16-byte
+// chunks).
+// ABI (after HlpSimdProc3Begin_x86_64.inc): rcx = acc ptr, rdx = input ptr,
+//   r8 = secret ptr.
+// Saves: none (uses xmm0-xmm5 only; volatile under both ABIs).
+// Reference: official xxHash C - XXH3_accumulate_512_sse2 in xxhash.h.
 
   // --- Chunk 0: acc[0..1], input[0..15], secret[0..15] ---
   movdqu xmm0, oword [rcx]

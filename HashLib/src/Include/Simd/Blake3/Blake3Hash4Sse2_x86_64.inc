@@ -1,24 +1,23 @@
-// SSE2 implementation of BLAKE3 hash4: processes 4 independent chunks simultaneously.
-// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation (blake3_sse2.c / blake3_hash_many).
-// Each XMM register holds the same 32-bit word from 4 different chunks (inter-chunk SIMD).
-// 7 rounds per block fully unrolled; 16-block loop with branch for chunk start/end flags.
-//
-// After HlpSimdProc6Begin_x86_64.inc:
-//   rcx = AInput, rdx = AKey, r8 = AOut,
-//   r9 = ANumChunks, r10 = ACounter, r11 = AFlags
-//
+// SSE2 implementation of BLAKE3 hash4: processes 4 independent chunks
+// simultaneously. Each XMM register holds the same 32-bit word from 4
+// different chunks (inter-chunk SIMD); 7 rounds per block fully unrolled;
+// 16-block loop with branch for chunk start/end flags. Message transpose:
+// 4x4 via punpckldq/punpckhdq + punpcklqdq/punpckhqdq (pure SSE2).
+// Rotations: rot16 via pshuflw+pshufhw; rot12/8/7 via pslld/psrld/por.
+// ABI (after HlpSimdProc6Begin_x86_64.inc): rcx = AInput, rdx = AKey,
+//   r8 = AOut, r9 = ANumChunks, r10 = ACounter, r11 = AFlags.
 // Register map: xmm0-xmm7 = state v0-v7, xmm8-xmm11 = state v8-v11,
 //   xmm12-xmm13 = temp, v12-v15 spilled to stack.
-// GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block byte offset.
-// Message transpose: 4x4 via punpckldq/punpckhdq + punpcklqdq/punpckhqdq (pure SSE2).
-// Rotations: rot16 via pshuflw+pshufhw; rot12/8/7 via pslld/psrld/por.
-//
-// MS x64 non-volatile saves: xmm6-xmm13.
+//   GPR: rcx = input pointer, rbx = block counter (0..15), rbp = block
+//   byte offset.
+// Saves: xmm6-xmm13 (MS x64 non-volatile).
+// Reference: BLAKE3-team/BLAKE3 official SSE2 implementation
+// (blake3_sse2.c / blake3_hash_many).
 
   push rbx
   push rbp
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 584
 
@@ -1828,7 +1827,7 @@
 
   add rsp, 584
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
 
   pop rbp
   pop rbx

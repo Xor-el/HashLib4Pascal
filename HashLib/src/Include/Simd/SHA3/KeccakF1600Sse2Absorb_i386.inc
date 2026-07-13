@@ -1,0 +1,427 @@
+// SSE2 implementation of the Keccak-f[1600] multi-block absorb (IA-32) -
+// the asm twin of the x86-64 absorb: XORs whole blocks into the state and
+// permutes. MMX converted to SSE2 like the permute. The permutation body
+// is the same inner as KeccakF1600Sse2_i386.inc (embedded again because
+// local labels cannot cross include files).
+// ABI (after HlpSimdProc5Begin_i386.inc): ebx = AState (25 x UInt64,
+//   standard layout), esi = AData, edi = ABlockCount, eax = ABlockSize,
+//   ecx = AConstants (iotas: 24 x UInt64).
+// Frame: mirrors the OpenSSL wrapper - ebp = saved esp with spills at
+//   [ebp-4/-8], 248-byte scratch, esp 8-aligned, inner scratch plane at
+//   esp+140, state biased by +100.
+// Saves: ebp saved here (the shared prologue saves ebx/esi/edi); clobbers
+//   eax, ecx, edx, xmm0-xmm7.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-mmx.pl (SHA3_absorb) by
+// Andy Polyakov.
+
+  push ebp
+  mov ebp, esp
+
+  // remap to the OpenSSL absorb roles:
+  //   esi = state+100, edi = xor walk, eax = input, ecx = remaining length,
+  //   edx = block size, ebx = iotas
+  imul edi, eax           // total length in bytes (count * size)
+  mov edx, eax            // block size
+  mov eax, esi            // input pointer
+  mov esi, ebx            // state
+  mov ebx, ecx            // iotas
+  mov ecx, edi            // remaining length
+  mov edi, esi            // xor walk = state base
+  lea esi, [esi + 100]    // biased state pointer
+
+  mov dword ptr [ebp - 4], edx   // block size, reloaded after each permute
+  sub esp, 248
+  and esp, $FFFFFFF8
+
+@absorb_loop:
+  cmp ecx, edx
+  jb @absorb_done
+
+  shr edx, 3
+
+@absorb_block:
+  movq xmm0, qword ptr [eax]
+  lea eax, [eax + 8]
+  movq xmm1, qword ptr [edi]
+  pxor xmm0, xmm1
+  lea edi, [edi + 8]
+  sub ecx, 8
+  movq qword ptr [edi - 8], xmm0
+  dec edx
+  jnz @absorb_block
+
+  lea edi, [esp + 140]    // scratch plane for the inner routine
+  mov dword ptr [ebp - 8], ecx
+  call @keccak_inner
+  mov ecx, dword ptr [ebp - 8]
+  mov edx, dword ptr [ebp - 4]
+  lea edi, [esi - 100]    // reset the xor walk to the state base
+  jmp @absorb_loop
+
+@absorb_done:
+  mov esp, ebp
+  pop ebp
+  pop edi
+  pop esi
+  pop ebx
+  jmp @absorb_end
+
+@keccak_inner:
+  movq xmm0, qword ptr [esi + 60]
+  movq xmm1, qword ptr [esi + 68]
+  movq xmm2, qword ptr [esi + 76]
+  movq xmm3, qword ptr [esi + 84]
+  movq xmm4, qword ptr [esi + 92]
+  mov ecx, 24
+  jmp @keccak_round_loop
+
+@keccak_round_loop:
+  movq xmm5, qword ptr [esi - 100]
+  pxor xmm0, xmm5
+  movq xmm5, qword ptr [esi - 92]
+  pxor xmm1, xmm5
+  movq xmm5, qword ptr [esi - 84]
+  pxor xmm2, xmm5
+  movq xmm5, qword ptr [esi - 76]
+  pxor xmm3, xmm5
+  movq xmm5, qword ptr [esi - 68]
+  pxor xmm4, xmm5
+  movq xmm5, qword ptr [esi - 60]
+  pxor xmm0, xmm5
+  movq xmm5, qword ptr [esi - 52]
+  pxor xmm1, xmm5
+  movq xmm5, qword ptr [esi - 44]
+  pxor xmm2, xmm5
+  movq xmm5, qword ptr [esi - 36]
+  pxor xmm3, xmm5
+  movq xmm5, qword ptr [esi - 28]
+  pxor xmm4, xmm5
+  movq xmm5, qword ptr [esi - 20]
+  pxor xmm0, xmm5
+  movq xmm5, qword ptr [esi - 12]
+  pxor xmm1, xmm5
+  movq xmm5, qword ptr [esi - 4]
+  pxor xmm2, xmm5
+  movq xmm5, qword ptr [esi + 4]
+  pxor xmm3, xmm5
+  movq xmm5, qword ptr [esi + 12]
+  pxor xmm4, xmm5
+  movq xmm5, qword ptr [esi + 36]
+  pxor xmm2, xmm5
+  movq xmm5, qword ptr [esi + 20]
+  pxor xmm0, xmm5
+  movq xmm5, qword ptr [esi + 28]
+  pxor xmm1, xmm5
+  movq xmm5, qword ptr [esi + 44]
+  pxor xmm3, xmm5
+  movq xmm5, xmm2
+  movq xmm6, qword ptr [esi + 52]
+  pxor xmm4, xmm6
+  movq xmm7, xmm2
+  psrlq xmm5, 63
+  movq xmm6, xmm0
+  psllq xmm7, 1
+  pxor xmm5, xmm0
+  psrlq xmm0, 63
+  pxor xmm5, xmm7
+  psllq xmm6, 1
+  movq xmm7, xmm1
+  movq qword ptr [esp + 12], xmm5
+  pxor xmm6, xmm0
+  psrlq xmm7, 63
+  pxor xmm6, xmm3
+  movq xmm0, xmm1
+  movq qword ptr [esp + 36], xmm6
+  psllq xmm0, 1
+  pxor xmm7, xmm4
+  pxor xmm0, xmm7
+  movq xmm7, xmm3
+  psrlq xmm3, 63
+  movq qword ptr [esp + 4], xmm0
+  psllq xmm7, 1
+  movq xmm5, xmm4
+  psrlq xmm4, 63
+  pxor xmm1, xmm3
+  psllq xmm5, 1
+  pxor xmm1, xmm7
+  pxor xmm2, xmm4
+  movq qword ptr [esp + 20], xmm1
+  pxor xmm2, xmm5
+  movq xmm3, qword ptr [esi + 44]
+  movq qword ptr [esp + 28], xmm2
+  pxor xmm3, xmm2
+  movq xmm4, qword ptr [esi + 92]
+  movq xmm7, xmm3
+  psrlq xmm3, 43
+  pxor xmm4, xmm6
+  psllq xmm7, 21
+  movq xmm6, xmm4
+  psrlq xmm4, 50
+  por xmm3, xmm7
+  psllq xmm6, 14
+  movq xmm2, qword ptr [esi - 4]
+  por xmm4, xmm6
+  pxor xmm2, xmm1
+  movq xmm1, qword ptr [esi - 52]
+  movq xmm6, xmm2
+  psrlq xmm2, 21
+  movq xmm5, qword ptr [esp + 12]
+  pxor xmm1, xmm5
+  psllq xmm6, 43
+  movq xmm7, xmm1
+  psrlq xmm1, 20
+  por xmm2, xmm6
+  psllq xmm7, 44
+  movq xmm5, qword ptr [esi - 100]
+  pxor xmm0, xmm5
+  por xmm1, xmm7
+  movq xmm5, xmm1
+  movq xmm6, xmm2
+  pandn xmm5, xmm2
+  pandn xmm2, xmm3
+  pxor xmm5, xmm0
+  pxor xmm2, xmm1
+  movq xmm7, qword ptr [ebx]
+  pxor xmm5, xmm7
+  lea ebx, [ebx + 8]
+  movq xmm7, xmm3
+  movq qword ptr [edi - 100], xmm5
+  movq xmm5, xmm4
+  pandn xmm3, xmm4
+  pandn xmm4, xmm0
+  pxor xmm3, xmm6
+  movq qword ptr [edi - 92], xmm2
+  pxor xmm4, xmm7
+  movq xmm7, qword ptr [esi - 76]
+  movq qword ptr [edi - 84], xmm3
+  pandn xmm0, xmm1
+  movq qword ptr [edi - 76], xmm4
+  pxor xmm0, xmm5
+  movq xmm1, qword ptr [esp + 28]
+  pxor xmm7, xmm1
+  movq qword ptr [edi - 68], xmm0
+  movq xmm0, xmm7
+  psrlq xmm7, 36
+  movq xmm1, qword ptr [esi - 28]
+  psllq xmm0, 28
+  movq xmm2, qword ptr [esp + 36]
+  pxor xmm1, xmm2
+  por xmm0, xmm7
+  movq xmm6, xmm1
+  psrlq xmm1, 44
+  movq xmm2, qword ptr [esi - 20]
+  psllq xmm6, 20
+  movq xmm3, qword ptr [esp + 4]
+  pxor xmm2, xmm3
+  por xmm1, xmm6
+  movq xmm7, xmm2
+  psrlq xmm2, 61
+  movq xmm3, qword ptr [esi + 28]
+  psllq xmm7, 3
+  movq xmm4, qword ptr [esp + 12]
+  pxor xmm3, xmm4
+  por xmm2, xmm7
+  movq xmm5, xmm3
+  psrlq xmm3, 19
+  movq xmm4, qword ptr [esi + 76]
+  psllq xmm5, 45
+  movq xmm6, qword ptr [esp + 20]
+  pxor xmm4, xmm6
+  por xmm3, xmm5
+  movq xmm6, xmm4
+  psrlq xmm4, 3
+  psllq xmm6, 61
+  por xmm4, xmm6
+  movq xmm5, xmm1
+  movq xmm6, xmm2
+  pandn xmm5, xmm2
+  pandn xmm2, xmm3
+  pxor xmm5, xmm0
+  pxor xmm2, xmm1
+  movq xmm7, xmm3
+  movq qword ptr [edi - 60], xmm5
+  movq xmm5, xmm4
+  pandn xmm3, xmm4
+  pandn xmm4, xmm0
+  pxor xmm3, xmm6
+  movq qword ptr [edi - 52], xmm2
+  pxor xmm4, xmm7
+  movq xmm7, qword ptr [esi - 92]
+  movq qword ptr [edi - 44], xmm3
+  pandn xmm0, xmm1
+  movq qword ptr [edi - 36], xmm4
+  pxor xmm0, xmm5
+  movq xmm1, qword ptr [esp + 12]
+  pxor xmm7, xmm1
+  movq qword ptr [edi - 28], xmm0
+  movq xmm0, xmm7
+  psrlq xmm7, 63
+  movq xmm1, qword ptr [esi - 44]
+  psllq xmm0, 1
+  movq xmm2, qword ptr [esp + 20]
+  pxor xmm1, xmm2
+  por xmm0, xmm7
+  movq xmm6, xmm1
+  psrlq xmm1, 58
+  movq xmm2, qword ptr [esi + 4]
+  psllq xmm6, 6
+  movq xmm3, qword ptr [esp + 28]
+  pxor xmm2, xmm3
+  por xmm1, xmm6
+  movq xmm7, xmm2
+  psrlq xmm2, 39
+  movq xmm3, qword ptr [esi + 52]
+  psllq xmm7, 25
+  movq xmm4, qword ptr [esp + 36]
+  pxor xmm3, xmm4
+  por xmm2, xmm7
+  movq xmm5, xmm3
+  psrlq xmm3, 56
+  movq xmm4, qword ptr [esi + 60]
+  psllq xmm5, 8
+  movq xmm6, qword ptr [esp + 4]
+  pxor xmm4, xmm6
+  por xmm3, xmm5
+  movq xmm6, xmm4
+  psrlq xmm4, 46
+  psllq xmm6, 18
+  por xmm4, xmm6
+  movq xmm5, xmm1
+  movq xmm6, xmm2
+  pandn xmm5, xmm2
+  pandn xmm2, xmm3
+  pxor xmm5, xmm0
+  pxor xmm2, xmm1
+  movq xmm7, xmm3
+  movq qword ptr [edi - 20], xmm5
+  movq xmm5, xmm4
+  pandn xmm3, xmm4
+  pandn xmm4, xmm0
+  pxor xmm3, xmm6
+  movq qword ptr [edi - 12], xmm2
+  pxor xmm4, xmm7
+  movq xmm7, qword ptr [esi - 68]
+  movq qword ptr [edi - 4], xmm3
+  pandn xmm0, xmm1
+  movq qword ptr [edi + 4], xmm4
+  pxor xmm0, xmm5
+  movq xmm1, qword ptr [esp + 36]
+  pxor xmm7, xmm1
+  movq qword ptr [edi + 12], xmm0
+  movq xmm0, xmm7
+  psrlq xmm7, 37
+  movq xmm1, qword ptr [esi - 60]
+  psllq xmm0, 27
+  movq xmm2, qword ptr [esp + 4]
+  pxor xmm1, xmm2
+  por xmm0, xmm7
+  movq xmm6, xmm1
+  psrlq xmm1, 28
+  movq xmm2, qword ptr [esi - 12]
+  psllq xmm6, 36
+  movq xmm3, qword ptr [esp + 12]
+  pxor xmm2, xmm3
+  por xmm1, xmm6
+  movq xmm7, xmm2
+  psrlq xmm2, 54
+  movq xmm3, qword ptr [esi + 36]
+  psllq xmm7, 10
+  movq xmm4, qword ptr [esp + 20]
+  pxor xmm3, xmm4
+  por xmm2, xmm7
+  movq xmm5, xmm3
+  psrlq xmm3, 49
+  movq xmm4, qword ptr [esi + 84]
+  psllq xmm5, 15
+  movq xmm6, qword ptr [esp + 28]
+  pxor xmm4, xmm6
+  por xmm3, xmm5
+  movq xmm6, xmm4
+  psrlq xmm4, 8
+  psllq xmm6, 56
+  por xmm4, xmm6
+  movq xmm5, xmm1
+  movq xmm6, xmm2
+  pandn xmm5, xmm2
+  pandn xmm2, xmm3
+  pxor xmm5, xmm0
+  pxor xmm2, xmm1
+  movq xmm7, xmm3
+  movq qword ptr [edi + 20], xmm5
+  movq xmm5, xmm4
+  pandn xmm3, xmm4
+  pandn xmm4, xmm0
+  pxor xmm3, xmm6
+  movq qword ptr [edi + 28], xmm2
+  pxor xmm4, xmm7
+  movq xmm7, qword ptr [esi - 84]
+  movq qword ptr [edi + 36], xmm3
+  pandn xmm0, xmm1
+  movq qword ptr [edi + 44], xmm4
+  pxor xmm0, xmm5
+  movq xmm1, qword ptr [esp + 20]
+  pxor xmm7, xmm1
+  movq qword ptr [edi + 52], xmm0
+  movq xmm0, xmm7
+  psrlq xmm7, 2
+  movq xmm1, qword ptr [esi - 36]
+  psllq xmm0, 62
+  movq xmm2, qword ptr [esp + 28]
+  pxor xmm1, xmm2
+  por xmm0, xmm7
+  movq xmm6, xmm1
+  psrlq xmm1, 9
+  movq xmm2, qword ptr [esi + 12]
+  psllq xmm6, 55
+  movq xmm3, qword ptr [esp + 36]
+  pxor xmm2, xmm3
+  por xmm1, xmm6
+  movq xmm7, xmm2
+  psrlq xmm2, 25
+  movq xmm3, qword ptr [esi + 20]
+  psllq xmm7, 39
+  movq xmm4, qword ptr [esp + 4]
+  pxor xmm3, xmm4
+  por xmm2, xmm7
+  movq xmm5, xmm3
+  psrlq xmm3, 23
+  movq xmm4, qword ptr [esi + 68]
+  psllq xmm5, 41
+  movq xmm6, qword ptr [esp + 12]
+  pxor xmm4, xmm6
+  por xmm3, xmm5
+  movq xmm6, xmm4
+  psrlq xmm4, 62
+  psllq xmm6, 2
+  por xmm4, xmm6
+  movq xmm5, xmm0
+  xor edi, esi
+  movq qword ptr [esp + 12], xmm1
+  xor esi, edi
+  xor edi, esi
+  movq xmm6, xmm1
+  movq xmm7, xmm2
+  pandn xmm6, xmm2
+  pandn xmm7, xmm3
+  pxor xmm0, xmm6
+  pxor xmm1, xmm7
+  movq xmm6, xmm3
+  movq qword ptr [esi + 60], xmm0
+  pandn xmm6, xmm4
+  movq qword ptr [esi + 68], xmm1
+  pxor xmm2, xmm6
+  movq xmm7, xmm4
+  movq qword ptr [esi + 76], xmm2
+  pandn xmm7, xmm5
+  movq xmm6, qword ptr [esp + 12]
+  pandn xmm5, xmm6
+  pxor xmm3, xmm7
+  pxor xmm4, xmm5
+  movq qword ptr [esi + 84], xmm3
+  sub ecx, 1
+  movq qword ptr [esi + 92], xmm4
+  jnz @keccak_round_loop
+  lea ebx, [ebx - 192]
+  ret
+
+@absorb_end:

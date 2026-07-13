@@ -1,19 +1,20 @@
-// SHA-1 SSE2 SIMD-schedule implementation, derived from OpenSSL's SHA-1 SSSE3
-// kernel in sha1-x86_64.pl (CRYPTOGAMS). The message schedule runs in SSE2
-// (pxor/pshufd/psrldq/pslldq) interleaved with the GPR compression rounds, so the
-// vector and integer units run in parallel. OpenSSL's only SSSE3-only op here is
-// the pshufb input byte-swap, which is emulated in SSE2 (psrlw/psllw/por +
-// pshuflw/pshufhw; xmm12 is a free scratch); the W-schedule uses no palignr. The
-// appended masks go unused - the byte-swap is computed, not shuffled.
-// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
-//   r8d = numblocks, r9 = doubled-K_SHA1 ptr (read 128-bit at a 32-byte stride,
-//   r14 = K + 64, so the duplicated halves are skipped; see K_SHA1_Doubled).
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
-// holds the caller rsp across the kernel for the unwind.
+// SSE2 implementation of SHA-1 compress (SIMD schedule). The message
+// schedule runs in SSE2 (pxor/pshufd/psrldq/pslldq) interleaved with the
+// GPR compression rounds, so the vector and integer units run in parallel.
+// The original's only SSSE3-only op here is the pshufb input byte-swap,
+// emulated in SSE2 (psrlw/psllw/por + pshuflw/pshufhw; xmm12 is a free
+// scratch); the W-schedule uses no palignr. The appended masks go unused -
+// the byte-swap is computed, not shuffled.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = doubled-K_SHA1 ptr (read 128-bit at a 32-byte
+//   stride, r14 = K + 64, so the duplicated halves are skipped; see
+//   K_SHA1_Doubled).
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
+//   holds the caller rsp across the kernel for the unwind.
+// Reference: OpenSSL CRYPTOGAMS sha1-x86_64.pl (SSSE3 kernel).
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   mov    r11, rsp
   push   r9
@@ -1228,4 +1229,4 @@
   mov    rbx, qword [r11 - $10]
   lea    rsp, [r11]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

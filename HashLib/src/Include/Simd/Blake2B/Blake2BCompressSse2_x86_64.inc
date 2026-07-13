@@ -1,11 +1,12 @@
 // SSE2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
-// Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
+//   r8 = counter+flags ptr, r9 = IV ptr.
 // Register map: xmm0-1 = row1 (v0-3), xmm2-3 = row2 (v4-7),
 //   xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15), xmm8-9 = temps.
+// Saves: xmm6-xmm9 (MS x64 non-volatile); uses xmm0-xmm9.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   movdqu xmm0, oword [rcx]
@@ -1989,4 +1990,4 @@
   movdqu oword [rcx + $20], xmm2
   movdqu oword [rcx + $30], xmm3
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

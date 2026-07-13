@@ -1,10 +1,13 @@
-// SSE2 implementation of XXH3_initCustomSecret (fully unrolled, 12 x 16-byte chunks).
-// Expects MS x64 ABI: rcx = customSecret ptr, rdx = defaultSecret ptr, r8 = seed (UInt64).
-// Uses only volatile registers: xmm0-xmm2.
-// Algorithm: for each 16-byte block, lo_qword += seed, hi_qword -= seed.
-// Reference: official xxHash C - XXH3_initCustomSecret_sse2 in xxhash.h
+// SSE2 implementation of XXH3_initCustomSecret (fully unrolled, 12 x
+// 16-byte chunks). For each 16-byte block: lo_qword += seed,
+// hi_qword -= seed.
+// ABI (after HlpSimdProc3Begin_x86_64.inc): rcx = customSecret ptr,
+//   rdx = defaultSecret ptr, r8 = seed ptr (PUInt64).
+// Saves: none (uses xmm0-xmm2 only; volatile under both ABIs).
+// Reference: official xxHash C - XXH3_initCustomSecret_sse2 in xxhash.h.
 
   // Build seed vector xmm0 = [seed, -seed]
+  mov r8, qword [r8]
   movq xmm0, r8
   mov rax, r8
   neg rax

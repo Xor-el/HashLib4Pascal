@@ -1,10 +1,12 @@
-// SHA-512 SSE2 implementation (IA-32), derived from OpenSSL's sha512-586
-// (CRYPTOGAMS). The 64-bit state and message schedule are held in xmm0-xmm7 (low
-// 64 bits) and computed entirely in SSE2 (paddq/psrlq/psllq/pxor), so the whole
-// hash runs in the vector unit - avoiding IA-32's 32-bit-GPR bottleneck.
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
-//   eax = K512 ptr (80 UInt64). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is pushed
-//   here as the K512 walk pointer; state is loaded into xmm0-xmm7.
+// SSE2 implementation of SHA-512 compress (IA-32). The 64-bit state and
+// message schedule are held in xmm0-xmm7 (low 64 bits) and computed
+// entirely in SSE2 (paddq/psrlq/psllq/pxor), so the whole hash runs in the
+// vector unit - avoiding IA-32's 32-bit-GPR bottleneck.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = K512 ptr (80 UInt64).
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K512
+//   walk pointer; state is loaded into xmm0-xmm7.
+// Reference: OpenSSL CRYPTOGAMS sha512-586.pl.
 
   push   ebp
   mov    ebp, eax

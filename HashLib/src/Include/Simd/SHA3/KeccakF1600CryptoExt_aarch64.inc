@@ -1,17 +1,18 @@
-// Keccak-F1600 permute AArch64 FEAT_SHA3 implementation.
-// Expects AAPCS64: x0 = state ptr (25 x UInt64, little-endian lanes),
-//   x1 = iotas ptr (24 x UInt64 round constants == HlpSHA3 RC table).
-// Saves/restores d8-d15 on 64-byte frame; state uses v0-v24 (clobbers d8-d15 lanes).
-// Leaf (no calls); x30 untouched.
-// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
-// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// CryptoExt (FEAT_SHA3) implementation of the Keccak-f[1600] permutation.
+// ABI (after HlpSimdProc2Begin_aarch64.inc): x0 = state ptr (25 x UInt64,
+//   little-endian lanes), x1 = iotas ptr (24 x UInt64 round constants ==
+//   HlpSHA3 RC table).
 // Register map:
 //   v0-v24   = Keccak state lanes A[y][x] (lane k = v[k], 64 bits in low half)
 //   v25-v29  = Theta C[]/D[] column scratch
 //   v26      = iota round constant (ld1r)
 //   v30-v31  = Rho/Pi scratch
+// Saves: d8-d15 via the shared HlpSimdNonVolatileSave/Restore include (the
+//   state uses v0-v24). Leaf (no calls); x30 untouched.
+// AArch64 vector/crypto instructions are .long-encoded for broad assembler compatibility.
+// Reference: OpenSSL CRYPTOGAMS keccak1600-armv8.S.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_aarch64.inc}
   .long 0x6d400400                    // ldp d0, d1, [x0]
   .long 0x6d410c02                    // ldp d2, d3, [x0, #16]
   .long 0x6d421404                    // ldp d4, d5, [x0, #32]
@@ -109,5 +110,5 @@
   .long 0x6d0a5414                    // stp d20, d21, [x0, #160]
   .long 0x6d0b5c16                    // stp d22, d23, [x0, #176]
   .long 0xfd006018                    // str d24, [x0, #192]
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_aarch64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_aarch64.inc}
   ret

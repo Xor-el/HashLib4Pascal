@@ -1,18 +1,30 @@
 // AVX2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
-// Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses ymm0-ymm5 only (volatile under both ABIs; no saves needed).
-// Register map: ymm0 = a (v0-3), ymm1 = b (v4-7), ymm2 = c (v8-11), ymm3 = d (v12-15),
-//   ymm4 = message temp, ymm5 = computation temp.
-// Rotations: ROT32 via vpshufd, ROT16/24/63 via shift+or.
-// Diagonalize/Undiagonalize via vpermq.
+// Rotations: rot32 via vpshufd, rot24/16 via vpshufb against the resident
+// masks, rot63 via shift+or (not byte-aligned; shifts are the known-best
+// form). Diagonalize/Undiagonalize via vpermq.
+// ABI (after HlpSimdProc5Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
+//   r8 = counter+flags ptr, r9 = IV ptr, r10 = byte-rotation masks ptr
+//   (BLAKE2B_ROT_MASKS: rot24 at +0, rot16 at +32; read unaligned, so the
+//   Pascal const needs no special alignment).
+// Register map: ymm0 = a (v0-3), ymm1 = b (v4-7), ymm2 = c (v8-11),
+//   ymm3 = d (v12-15), ymm4 = message temp, ymm5 = computation temp,
+//   ymm6 = rot24 mask, ymm7 = rot16 mask.
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV; only xmm6/xmm7 are clobbered here - by the mask loads).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
 // Reference: sneves/blake2-avx2 by Samuel Neves.
+
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   db $C5, $FE, $6F, $01                         // vmovdqu ymm0, yword [rcx]
   db $C5, $FE, $6F, $49, $20                    // vmovdqu ymm1, yword [rcx + $20]
   db $C4, $C1, $7E, $6F, $11                    // vmovdqu ymm2, yword [r9]
   db $C4, $C1, $7E, $6F, $59, $20               // vmovdqu ymm3, yword [r9 + $20]
+
+  // Load byte-rotation masks (resident for the whole kernel)
+  db $C4, $C1, $7E, $6F, $32                    // vmovdqu ymm6, yword [r10]
+  db $C4, $C1, $7E, $6F, $7A, $20               // vmovdqu ymm7, yword [r10 + $20]
 
   // XOR d with counter and flags
   db $C4, $C1, $7E, $6F, $20                    // vmovdqu ymm4, yword [r8]
@@ -33,9 +45,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m1,m3,m5,m7)
   db $C4, $E1, $F9, $6E, $62, $08               // vmovq xmm4, qword [rdx + $08]
@@ -46,9 +56,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -74,9 +82,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m15,m9,m11,m13)
   db $C4, $E1, $F9, $6E, $62, $78               // vmovq xmm4, qword [rdx + $78]
@@ -87,9 +93,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -117,9 +121,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m10,m8,m15,m6)
   db $C4, $E1, $F9, $6E, $62, $50               // vmovq xmm4, qword [rdx + $50]
@@ -130,9 +132,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -158,9 +158,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m3,m12,m2,m7)
   db $C4, $E1, $F9, $6E, $62, $18               // vmovq xmm4, qword [rdx + $18]
@@ -171,9 +169,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -201,9 +197,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m8,m0,m2,m13)
   db $C4, $E1, $F9, $6E, $62, $40               // vmovq xmm4, qword [rdx + $40]
@@ -214,9 +208,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -242,9 +234,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m4,m14,m6,m1)
   db $C4, $E1, $F9, $6E, $62, $20               // vmovq xmm4, qword [rdx + $20]
@@ -255,9 +245,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -285,9 +273,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m9,m1,m12,m14)
   db $C4, $E1, $F9, $6E, $62, $48               // vmovq xmm4, qword [rdx + $48]
@@ -298,9 +284,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -326,9 +310,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m8,m6,m10,m0)
   db $C4, $E1, $F9, $6E, $62, $40               // vmovq xmm4, qword [rdx + $40]
@@ -339,9 +321,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -369,9 +349,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m0,m7,m4,m15)
   db $C4, $E1, $F9, $6E, $22                    // vmovq xmm4, qword [rdx]
@@ -382,9 +360,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -410,9 +386,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m13,m1,m12,m8)
   db $C4, $E1, $F9, $6E, $62, $68               // vmovq xmm4, qword [rdx + $68]
@@ -423,9 +397,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -453,9 +425,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m12,m10,m11,m3)
   db $C4, $E1, $F9, $6E, $62, $60               // vmovq xmm4, qword [rdx + $60]
@@ -466,9 +436,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -494,9 +462,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m9,m13,m5,m14)
   db $C4, $E1, $F9, $6E, $62, $48               // vmovq xmm4, qword [rdx + $48]
@@ -507,9 +473,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -537,9 +501,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m5,m15,m13,m10)
   db $C4, $E1, $F9, $6E, $62, $28               // vmovq xmm4, qword [rdx + $28]
@@ -550,9 +512,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -578,9 +538,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m11,m7,m3,m2)
   db $C4, $E1, $F9, $6E, $62, $58               // vmovq xmm4, qword [rdx + $58]
@@ -591,9 +549,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -621,9 +577,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m11,m14,m1,m9)
   db $C4, $E1, $F9, $6E, $62, $58               // vmovq xmm4, qword [rdx + $58]
@@ -634,9 +588,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -662,9 +614,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m10,m0,m4,m6)
   db $C4, $E1, $F9, $6E, $62, $50               // vmovq xmm4, qword [rdx + $50]
@@ -675,9 +625,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -705,9 +653,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m15,m9,m3,m8)
   db $C4, $E1, $F9, $6E, $62, $78               // vmovq xmm4, qword [rdx + $78]
@@ -718,9 +664,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -746,9 +690,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m5,m2,m7,m4)
   db $C4, $E1, $F9, $6E, $62, $28               // vmovq xmm4, qword [rdx + $28]
@@ -759,9 +701,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -789,9 +729,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m2,m4,m6,m5)
   db $C4, $E1, $F9, $6E, $62, $10               // vmovq xmm4, qword [rdx + $10]
@@ -802,9 +740,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -830,9 +766,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m0,m11,m14,m12)
   db $C4, $E1, $F9, $6E, $22                    // vmovq xmm4, qword [rdx]
@@ -843,9 +777,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -873,9 +805,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m1,m3,m5,m7)
   db $C4, $E1, $F9, $6E, $62, $08               // vmovq xmm4, qword [rdx + $08]
@@ -886,9 +816,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -914,9 +842,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m15,m9,m11,m13)
   db $C4, $E1, $F9, $6E, $62, $78               // vmovq xmm4, qword [rdx + $78]
@@ -927,9 +853,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -957,9 +881,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 columns (msg: m10,m8,m15,m6)
   db $C4, $E1, $F9, $6E, $62, $50               // vmovq xmm4, qword [rdx + $50]
@@ -970,9 +892,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -998,9 +918,7 @@
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
-  db $C5, $D5, $73, $D1, $18                    // vpsrlq ymm5, ymm1, 24
-  db $C5, $F5, $73, $F1, $28                    // vpsllq ymm1, ymm1, 40
-  db $C5, $F5, $EB, $CD                         // vpor ymm1, ymm1, ymm5
+  db $C4, $E2, $75, $00, $CE                    // vpshufb ymm1, ymm1, ymm6
 
   // G2 diagonals (msg: m3,m12,m2,m7)
   db $C4, $E1, $F9, $6E, $62, $18               // vmovq xmm4, qword [rdx + $18]
@@ -1011,9 +929,7 @@
   db $C5, $FD, $D4, $C4                         // vpaddq ymm0, ymm0, ymm4
   db $C5, $FD, $D4, $C1                         // vpaddq ymm0, ymm0, ymm1
   db $C5, $E5, $EF, $D8                         // vpxor ymm3, ymm3, ymm0
-  db $C5, $D5, $73, $D3, $10                    // vpsrlq ymm5, ymm3, 16
-  db $C5, $E5, $73, $F3, $30                    // vpsllq ymm3, ymm3, 48
-  db $C5, $E5, $EB, $DD                         // vpor ymm3, ymm3, ymm5
+  db $C4, $E2, $65, $00, $DF                    // vpshufb ymm3, ymm3, ymm7
 
   db $C5, $ED, $D4, $D3                         // vpaddq ymm2, ymm2, ymm3
   db $C5, $F5, $EF, $CA                         // vpxor ymm1, ymm1, ymm2
@@ -1039,3 +955,5 @@
   db $C5, $FE, $7F, $49, $20                    // vmovdqu yword [rcx + $20], ymm1
 
   db $C5, $F8, $77                              // vzeroupper
+
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

@@ -1,19 +1,20 @@
-// SHA-1 AVX2 two-block implementation (VEX-256), ported from OpenSSL's
-// sha1-x86_64.pl (CRYPTOGAMS). Two message blocks are scheduled together in
-// 256-bit lanes and the 80 rounds are interleaved with the SIMD schedule, so the
-// vector and integer units run in parallel. AVX2 and BMI (rorx/andn/shlx)
-// instructions are db-encoded for broad assembler compatibility (every AVX2 CPU
-// also provides BMI).
-// Expects MS x64 ABI (after HlpSimdProc4Begin): rcx = state ptr, rdx = data ptr,
-//   r8d = numblocks, r9 = K_SHA1_Doubled ptr (the four SHA-1 round constants each
-//   replicated across 256 bits, then the byte-swap mask and a reverse mask; see
-//   K_SHA1_Doubled). The masks are read unaligned, so the const needs no alignment.
-//
-// MS x64 non-volatile saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore
-// include (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
-// holds the caller rsp across the kernel for the unwind.
+// AVX2 implementation of SHA-1 compress (VEX-256, two-block). Two message
+// blocks are scheduled together in 256-bit lanes and the 80 rounds are
+// interleaved with the SIMD schedule, so the vector and integer units run
+// in parallel.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = data ptr,
+//   r8d = numblocks, r9 = K_SHA1_Doubled ptr (the four SHA-1 round
+//   constants each replicated across 256 bits, then the byte-swap mask and
+//   a reverse mask; the masks are read unaligned, so the const needs no
+//   special alignment).
+// Saves: xmm6-xmm15 via the shared HlpSimdNonVolatileSave/Restore include
+//   (no-op on SysV); rbx, rbp, rdi, rsi, r12-r14 in the local frame; r11
+//   holds the caller rsp across the kernel for the unwind.
+// AVX2 and BMI (rorx/andn/shlx) instructions are db-encoded for broad
+// assembler compatibility (every AVX2 CPU also provides BMI).
+// Reference: OpenSSL CRYPTOGAMS sha1-x86_64.pl (AVX2 kernel).
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   mov    r11, rsp
   push   r9
@@ -1679,4 +1680,4 @@
   mov    rbx, qword [r11 - $10]
   lea    rsp, [r11]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

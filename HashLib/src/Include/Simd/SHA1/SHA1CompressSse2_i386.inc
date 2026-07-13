@@ -1,14 +1,15 @@
-// SHA-1 SSE2 SIMD-schedule implementation (IA-32), derived from OpenSSL's
-// sha1-586 (CRYPTOGAMS) SSSE3 kernel. The message schedule runs in SSE2
-// (pxor/pshufd/psrldq/pslldq) interleaved with the GPR compression rounds.
-// OpenSSL's only SSSE3-only op is the pshufb input byte-swap, emulated in SSE2 as
-// psrlw/psllw/por + pshuflw/pshufhw (the freed byte-swap-mask register xmm6 is the
-// scratch); the W-schedule uses no palignr.
-// Expects (after HlpSimdProc4Begin_i386): ebx = state, esi = data, edi = numblocks,
-//   eax = doubled-K_SHA1 ptr (read at a 32-byte stride so the duplicated halves
-//   are skipped; see K_SHA1_Doubled). HlpSimdProc4Begin pushes ebx/esi/edi; ebp is
-//   pushed here as the K pointer, then reused as the data pointer and for the
-//   state writeback.
+// SSE2 implementation of SHA-1 compress (SIMD schedule; IA-32). The message
+// schedule runs in SSE2 (pxor/pshufd/psrldq/pslldq) interleaved with the
+// GPR compression rounds. The original's only SSSE3-only op is the pshufb
+// input byte-swap, emulated in SSE2 as psrlw/psllw/por + pshuflw/pshufhw
+// (the freed byte-swap-mask register xmm6 is the scratch); the W-schedule
+// uses no palignr.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = data ptr,
+//   edi = numblocks, eax = doubled-K_SHA1 ptr (read at a 32-byte stride so
+//   the duplicated halves are skipped; see K_SHA1_Doubled).
+// Frame: the prologue pushes ebx/esi/edi; ebp is pushed here as the K
+//   pointer, then reused as the data pointer and for the state writeback.
+// Reference: OpenSSL CRYPTOGAMS sha1-586.pl (SSSE3 kernel).
 
   push   ebp
   mov    ebp, eax

@@ -1,14 +1,10 @@
-// Keccak-f[1600] AVX2 permutation.
-// Ported from Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS project),
-// as adopted by XKCP (eXtended Keccak Code Package):
-//   https://github.com/dot-asm/cryptogams/blob/master/x86_64/keccak1600-avx2.pl
-//   https://github.com/XKCP/XKCP/blob/master/lib/low/KeccakP-1600/AVX2/KeccakP-1600-AVX2.s
-// Uses "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM registers.
-// All VEX instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = state ptr (25 x UInt64, standard layout),
-//   rdx = constants ptr (rhotates_left[24], rhotates_right[24], iotas[96]).
-//
-// YMM register mapping (after gather):
+// AVX2 implementation of the Keccak-f[1600] permutation. Uses the
+// "plane-per-register" technique: 25 Keccak lanes packed into 7 YMM
+// registers.
+// ABI (after HlpSimdProc2Begin_x86_64.inc): rcx = state ptr (25 x UInt64,
+//   standard layout), rdx = constants ptr (rhotates_left[24],
+//   rhotates_right[24], iotas[96]).
+// Register map (after gather):
 //   ymm0 = broadcast(state[0])
 //   ymm1 = { state[1],  state[2],  state[3],  state[4]  }
 //   ymm2 = { state[10], state[20], state[5],  state[15] }
@@ -16,15 +12,16 @@
 //   ymm4 = { state[11], state[22], state[8],  state[19] }
 //   ymm5 = { state[21], state[17], state[13], state[9]  }
 //   ymm6 = { state[6],  state[12], state[18], state[24] }
-//
-// MS x64 non-volatile saves: xmm6-xmm15.
-//
-// Stack layout (sub rsp, 224):
-//   [rsp+  0.. 31]: 32-byte temp buffer for gather/scatter
-//   [rsp+ 32..191]: xmm6-xmm15 save area
-//   [rsp+192..223]: padding
+// Frame (sub rsp, 224):
+//   [rsp+  0.. 31] = 32-byte temp buffer for gather/scatter
+//   [rsp+ 32..191] = xmm6-xmm15 save area
+//   [rsp+192..223] = padding
+// Saves: xmm6-xmm15 (MS x64 non-volatile) in the frame.
+// AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
+// Reference: Andy Polyakov's keccak1600-avx2.pl (CRYPTOGAMS), as adopted
+// by XKCP (KeccakP-1600-AVX2.s).
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 64
 
@@ -274,4 +271,4 @@
 
   add rsp, 64
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

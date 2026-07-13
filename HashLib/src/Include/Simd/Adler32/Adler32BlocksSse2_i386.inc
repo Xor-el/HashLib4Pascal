@@ -1,20 +1,18 @@
-// SSE2 implementation of Adler-32 block processing (IA-32).
-// After HlpSimdProc4Begin_i386: ebx = AData, esi = ANumBlocks, edi = ASums, eax = AConstants.
-// ASums: [SumA: UInt32, SumB: UInt32]. Constants: [weights_hi: 16B, weights_lo: 16B] (32 bytes).
-// Processes num_blocks x 32-byte blocks; caller applies mod 65521.
-//
-// x64 uses xmm6-xmm9 for widened weights; IA-32 only has xmm0-xmm7, so widened weights
-// live on stack (4 x 16 bytes). xmm6–xmm7 saved/restored defensively (volatile on i386).
-//
-// Same SSE2 emulation as Adler32BlocksSse2_x86_64.inc (punpcklbw/hbw + pmaddwd).
-//
-// Stack layout (sub esp, 96):
-//   [esp +  0..15]: xmm6 save
-//   [esp + 16..31]: xmm7 save
-//   [esp + 32..47]: w0 (weights_hi low)
-//   [esp + 48..63]: w1 (weights_hi high)
-//   [esp + 64..79]: w2 (weights_lo low)
-//   [esp + 80..95]: w3 (weights_lo high)
+// SSE2 implementation of Adler-32 block processing (num_blocks x 32-byte blocks;
+// IA-32). Does NOT apply mod 65521 (the caller does). Same SSE2 pmaddubsw
+// emulation as Adler32BlocksSse2_x86_64.inc (punpcklbw/hbw + pmaddwd); x64
+// keeps the widened weights in xmm6-xmm9, IA-32 only has xmm0-xmm7 so they
+// live on the stack (4 x 16 bytes).
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = data ptr, esi = num_blocks,
+//   edi = sums ptr, eax = constants ptr.
+//   Sums layout: [SumA: UInt32, SumB: UInt32].
+//   Constants layout: [weights_hi: 16B, weights_lo: 16B] (32 bytes).
+// Frame (sub esp, 96):
+//   [esp +  0..15] = xmm6 save        [esp + 48..63] = w1 (weights_hi high)
+//   [esp + 16..31] = xmm7 save        [esp + 64..79] = w2 (weights_lo low)
+//   [esp + 32..47] = w0 (weights_hi low)  [esp + 80..95] = w3 (weights_lo high)
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
+// Reference: Chromium zlib adler32_simd.c, HashLib Adler32BlocksSse2_x86_64.inc.
 
   // Preserve constants pointer (eax) before GPR reloads from ASums
   push eax

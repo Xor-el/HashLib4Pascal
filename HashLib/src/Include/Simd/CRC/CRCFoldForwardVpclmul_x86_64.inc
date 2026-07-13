@@ -1,32 +1,20 @@
-// AVX2 + VPCLMULQDQ CRC folding + Barrett reduction for non-reflected
-// (MSB-first) CRCs with width 8..64.
-// AVX2/VPCLMULQDQ/SSSE3 instructions are db-encoded for broad assembler
-// compatibility.
-//
-// Function signature (included after HlpSimdProc4Begin_x86_64.inc):
-//   function CRC_Fold_Forward_Vpclmul(AData: PByte; ALength: UInt32;
-//     AState: Pointer; AConstants: Pointer): UInt64;
-//
-// Register mapping (MS x64 ABI after prologue):
-//   rcx = AData, edx = ALength (>= 16), r8 = AState, r9 = AConstants
-//   AState: [0..7] = initial CRC pre-shifted left by (64 - Width), [8..15] = 0.
+// AVX2 + VPCLMULQDQ implementation of CRC folding + Barrett reduction for
+// non-reflected (MSB-first) CRCs with width 8..64.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = AData, edx = ALength
+//   (>= 16), r8 = AState, r9 = AConstants.
+//   AState: pointer to the initial CRC pre-shifted left by (64 - Width)
+//   as one UInt64. Returns the final CRC in rax.
 //   AConstants layout (TCRCFoldConstants):
-//     [0..15]  = Fold_4x128  (stride 512)
-//     [16..31] = Fold_1x128  (stride 128)
-//     [32..47] = Barrett
-//     [48..63] = Fold_8x128  (stride 1024)
-//     [64..79] = BswapMask
-//     [80..87] = CrcBits
-//     [88..95] = BarrettShift
-//   Returns: final CRC in RAX.
-//
+//     [0..15]  = Fold_4x128 (stride 512)   [48..63] = Fold_8x128 (stride 1024)
+//     [16..31] = Fold_1x128 (stride 128)   [64..79] = BswapMask
+//     [32..47] = Barrett                   [80..87] = CrcBits
+//                                          [88..95] = BarrettShift
+// AVX2/VPCLMULQDQ/SSSE3 instructions are db-encoded for broad assembler
+// compatibility. Encoding notes (VEX byte layout):
+//   2-byte: C5 [R.vvvv.L.pp]   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]
 // Reference: Linux kernel crc-pclmul-template.S by Eric Biggers (Google).
-//
-// VEX byte layout reference:
-//   2-byte: C5 [R.vvvv.L.pp]
-//   3-byte: C4 [R.X.B.mmmmm] [W.vvvv.L.pp]
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   cmp edx, 128
   jb @xmm_path
@@ -240,4 +228,4 @@
   // movq rax, xmm0: 66 48 0F 7E C0
   db $66, $48, $0F, $7E, $C0
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

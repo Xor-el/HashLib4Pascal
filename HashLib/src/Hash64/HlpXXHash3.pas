@@ -14,6 +14,26 @@ uses
   HlpIHashResult,
   HlpBitOperations;
 
+type
+  TXXH3Accumulate512Proc = procedure(AAcc: Pointer; AInput: Pointer;
+    ASecret: Pointer);
+  TXXH3AccumulateProc = procedure(AAcc: Pointer; AInput: Pointer;
+    ASecret: Pointer; ANbStripes: Int32);
+  TXXH3ScrambleAccProc = procedure(AAcc: Pointer; ASecret: Pointer);
+  TXXH3InitSecretProc = procedure(ACustomSecret: Pointer;
+    ADefaultSecret: Pointer; ASeedPtr: PUInt64);
+
+var
+  XXH3_Accumulate512: TXXH3Accumulate512Proc;
+  XXH3_Accumulate: TXXH3AccumulateProc;
+  XXH3_ScrambleAcc: TXXH3ScrambleAccProc;
+  XXH3_InitSecret: TXXH3InitSecretProc;
+
+// Generic stripe-accumulation loop, exposed so the SIMD backends can drive their
+// own Accumulate512 kernel over ANbStripes stripes.
+procedure XXH3_Accumulate_Loop(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32; AAcc512: TXXH3Accumulate512Proc);
+
 resourcestring
   SInvalidKeyLength = 'KeyLength Must Be Equal to %d';
 
@@ -21,11 +41,8 @@ type
   TXXH3AccArray = array [0 .. 7] of UInt64;
 
   TXXH3Core = class sealed(TObject)
-
   public
-
     const
-
     XXH3_SECRET_DEFAULT_SIZE = Int32(192);
     XXH3_SECRET_SIZE_MIN = Int32(136);
     XXH_STRIPE_LEN = Int32(64);
@@ -111,11 +128,9 @@ type
   end;
 
   TXXHash3 = class sealed(THash, IHash64, IHashWithKey, ITransformBlock)
-
   strict private
   var
     FKey, FHash: UInt64;
-
   const
     CKEY = UInt64(0);
 
@@ -124,9 +139,7 @@ type
     procedure SetKey(const AValue: THashLibByteArray); inline;
 
   type
-
     TXXH3_State = record
-
     private
     var
       FAcc: TXXH3AccArray;
@@ -180,7 +193,103 @@ type
 implementation
 
 uses
-  HlpXXHash3Dispatch;
+  HlpXXHash3Simd;
+
+const
+  XXH_STRIPE_LEN = 64;
+  XXH_ACC_NB = 8;
+  XXH_SECRET_CONSUME_RATE = 8;
+  XXH_PRIME32_1 = UInt32($9E3779B1);
+
+// =============================================================================
+// Scalar fallback implementations
+// =============================================================================
+
+procedure XXH3_Accumulate512_Scalar(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer);
+var
+  LPAcc, LPInput, LPSecret: PByte;
+  LPLane: PUInt64;
+  I: Int32;
+  LDataVal, LDataKey: UInt64;
+begin
+  LPAcc := PByte(AAcc);
+  LPInput := PByte(AInput);
+  LPSecret := PByte(ASecret);
+  for I := 0 to XXH_ACC_NB - 1 do
+  begin
+    LDataVal := TBinaryPrimitives.ReadUInt64LittleEndian(LPInput, I * 8);
+    LDataKey := LDataVal xor TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
+    LPLane := PUInt64(LPAcc + (I xor 1) * 8);
+    TBinaryPrimitives.StoreUInt64(LPLane,
+      TBinaryPrimitives.LoadUInt64(LPLane) + LDataVal);
+    LPLane := PUInt64(LPAcc + I * 8);
+    TBinaryPrimitives.StoreUInt64(LPLane,
+      TBinaryPrimitives.LoadUInt64(LPLane) +
+      UInt64(UInt32(LDataKey)) * UInt64(UInt32(LDataKey shr 32)));
+  end;
+end;
+
+procedure XXH3_ScrambleAcc_Scalar(AAcc: Pointer; ASecret: Pointer);
+var
+  LPAcc, LPSecret: PByte;
+  LPLane: PUInt64;
+  I: Int32;
+  LKey64, LAcc64: UInt64;
+begin
+  LPAcc := PByte(AAcc);
+  LPSecret := PByte(ASecret);
+  for I := 0 to XXH_ACC_NB - 1 do
+  begin
+    LKey64 := TBinaryPrimitives.ReadUInt64LittleEndian(LPSecret, I * 8);
+    LPLane := PUInt64(LPAcc + I * 8);
+    LAcc64 := TBinaryPrimitives.LoadUInt64(LPLane);
+    LAcc64 := LAcc64 xor (LAcc64 shr 47);
+    LAcc64 := LAcc64 xor LKey64;
+    LAcc64 := LAcc64 * XXH_PRIME32_1;
+    TBinaryPrimitives.StoreUInt64(LPLane, LAcc64);
+  end;
+end;
+
+procedure XXH3_InitSecret_Scalar(ACustomSecret: Pointer;
+  ADefaultSecret: Pointer; ASeedPtr: PUInt64);
+var
+  I: Int32;
+  LPSrc, LPDst: PByte;
+  ASeed: UInt64;
+begin
+  ASeed := ASeedPtr^;
+  LPSrc := PByte(ADefaultSecret);
+  LPDst := PByte(ACustomSecret);
+
+  for I := 0 to (192 div 16) - 1 do
+  begin
+    TBinaryPrimitives.WriteUInt64LittleEndian(LPDst, 16 * I,
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I) + ASeed);
+    TBinaryPrimitives.WriteUInt64LittleEndian(LPDst, 16 * I + 8,
+      TBinaryPrimitives.ReadUInt64LittleEndian(LPSrc, 16 * I + 8) - ASeed);
+  end;
+end;
+
+procedure XXH3_Accumulate_Scalar(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32);
+var
+  N: Int32;
+begin
+  for N := 0 to ANbStripes - 1 do
+    XXH3_Accumulate512_Scalar(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+      PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
+end;
+
+procedure XXH3_Accumulate_Loop(AAcc: Pointer; AInput: Pointer;
+  ASecret: Pointer; ANbStripes: Int32; AAcc512: TXXH3Accumulate512Proc);
+var
+  N: Int32;
+begin
+  for N := 0 to ANbStripes - 1 do
+    AAcc512(AAcc, PByte(AInput) + N * XXH_STRIPE_LEN,
+      PByte(ASecret) + N * XXH_SECRET_CONSUME_RATE);
+end;
 
 { TXXH3Core }
 
@@ -287,7 +396,7 @@ end;
 class procedure TXXH3Core.XXH3_accumulate_512(var AAcc: TXXH3AccArray;
   AInput, ASecret: PByte);
 begin
-  HlpXXHash3Dispatch.XXH3_Accumulate512(@AAcc[0], AInput, ASecret);
+  HlpXXHash3.XXH3_Accumulate512(@AAcc[0], AInput, ASecret);
 end;
 
 class procedure TXXH3Core.XXH3_scalarScrambleRound(var AAcc: TXXH3AccArray;
@@ -306,13 +415,13 @@ end;
 class procedure TXXH3Core.XXH3_scrambleAcc(var AAcc: TXXH3AccArray;
   ASecret: PByte);
 begin
-  HlpXXHash3Dispatch.XXH3_ScrambleAcc(@AAcc[0], ASecret);
+  HlpXXHash3.XXH3_ScrambleAcc(@AAcc[0], ASecret);
 end;
 
 class procedure TXXH3Core.XXH3_accumulate(var AAcc: TXXH3AccArray;
   AInput, ASecret: PByte; ANbStripes: Int32);
 begin
-  HlpXXHash3Dispatch.XXH3_Accumulate(@AAcc[0], AInput, ASecret, ANbStripes);
+  HlpXXHash3.XXH3_Accumulate(@AAcc[0], AInput, ASecret, ANbStripes);
 end;
 
 class procedure TXXH3Core.XXH3_hashLong_internal_loop(
@@ -345,7 +454,7 @@ end;
 class procedure TXXH3Core.XXH3_initCustomSecret(ACustomSecret: PByte;
   ASeed: UInt64);
 begin
-  HlpXXHash3Dispatch.XXH3_InitSecret(ACustomSecret, @XXH3_SECRET[0], ASeed);
+  HlpXXHash3.XXH3_InitSecret(ACustomSecret, @XXH3_SECRET[0], @ASeed);
 end;
 
 class procedure TXXH3Core.XXH3_consumeStripes(var AAcc: TXXH3AccArray;
@@ -746,5 +855,11 @@ begin
   Result := THashResult.Create(FHash);
   Initialize();
 end;
+
+initialization
+  XXH3_Accumulate512 := TXXHash3Simd.SelectAccumulate512(@XXH3_Accumulate512_Scalar);
+  XXH3_Accumulate := TXXHash3Simd.SelectAccumulate(@XXH3_Accumulate_Scalar);
+  XXH3_ScrambleAcc := TXXHash3Simd.SelectScrambleAcc(@XXH3_ScrambleAcc_Scalar);
+  XXH3_InitSecret := TXXHash3Simd.SelectInitSecret(@XXH3_InitSecret_Scalar);
 
 end.

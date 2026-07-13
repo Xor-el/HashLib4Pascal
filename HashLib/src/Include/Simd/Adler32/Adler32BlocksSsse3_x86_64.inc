@@ -1,11 +1,13 @@
-// SSSE3 implementation of Adler-32 block processing.
-// Expects MS x64 ABI: rcx = data ptr, edx = num_blocks, r8 = sums ptr, r9 = constants ptr.
-// ASums layout: [SumA: UInt32, SumB: UInt32].
-// Constants layout: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B].
-// Processes num_blocks x 32-byte blocks. Does NOT apply mod 65521 (caller does it).
-// Uses xmm0-xmm8; xmm6-xmm8 are MS x64 non-volatile (saved/restored).
+// SSSE3 implementation of Adler-32 block processing (num_blocks x 32-byte blocks).
+// Does NOT apply mod 65521 (the caller does).
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = data ptr, edx = num_blocks,
+//   r8 = sums ptr, r9 = constants ptr.
+//   Sums layout: [SumA: UInt32, SumB: UInt32].
+//   Constants layout: [weights_hi: 16B, weights_lo: 16B, ones_16: 16B].
+// Saves: xmm6-xmm8 (MS x64 non-volatile) in the local frame; uses xmm0-xmm8.
+// Reference: Chromium zlib adler32_simd.c.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Load constants
   movdqu xmm4, oword [r9]
@@ -76,4 +78,4 @@
   mov dword [r8], eax
   mov dword [r8 + 4], r10d
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

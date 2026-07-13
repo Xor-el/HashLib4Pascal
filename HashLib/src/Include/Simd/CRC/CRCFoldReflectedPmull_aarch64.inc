@@ -1,24 +1,124 @@
-// CRC folding (PMULL/PMULL2) + Barrett reduction for reflected (LSB-first)
-// CRCs with width 8..64. CRC-64 uses a special Barrett path for the 65-bit G.
-// Expects AAPCS64: x0 = AData, w1 = ALength (>= 16, multiple of 16),
-//   x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx; FoldConstants at +0).
-//   AState: [0..7] = initial CRC (reflected), [8..15] = 0.
+// PMULL implementation of CRC folding (PMULL/PMULL2) + Barrett reduction for
+// reflected (LSB-first) CRCs with width 8..64. CRC-64 uses a special Barrett
+// path for the 65-bit G.
+// ABI (after HlpSimdProc4Begin_aarch64.inc): x0 = AData, w1 = ALength (>= 16,
+//   multiple of 16), x2 = AState, x3 = AConstants (PCRCFoldRuntimeCtx;
+//   FoldConstants at +0).
+//   AState: pointer to the initial CRC (reflected) as one UInt64. Returns
+//   the final CRC in x0.
 //   AConstants: [+0] Fold_4x128, [+16] Fold_1x128, [+32] Barrett,
-//               [+80] CrcBits.  Returns final CRC in x0.
-// Leaf nostackframe; caller-saved GPR/vector only (v0-v7, v16-v18).
-// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers),
-//   HashLib CRCFoldReflectedPclmul_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+//               [+80] CrcBits.
 // Register map:
 //   v0-v3    = fold accumulators (xmm0-3)
 //   v4       = pmull-hi temp (xmm4)
 //   v5       = loaded 16-byte block (xmm5)
-//   v6       = Fold_4x128 then Barrett consts (xmm6)
+//   v6       = Fold_8x128 / Fold_4x128 then Barrett consts (xmm6)
 //   v7       = Fold_1x128 (xmm7)
 //   v16      = zeroed scratch (psrldq emulation via ext)
 //   v17      = dup staging for clmul lo*hi ($10) Barrett mixes
 //   v18      = saved Barrett q (CRC-64 x^0 correction)
+//   v19-v22  = fold-by-8 upper accumulators (xmm8-11)
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only: v0-v7,
+//   v16-v22).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Linux kernel crc-pclmul-template.S (Eric Biggers), HashLib
+//   CRCFoldReflectedPclmul_x86_64.inc.
+
   .long 0x3dc00467                    // ldr q7, [x3, #16]
+  .long 0x7102003f                    // cmp w1, #128
+  b.lo .Lcrc_refl_check64
+  .long 0x3dc00c66                    // ldr q6, [x3, #48]
+  .long 0x3dc00000                    // ldr q0, [x0, #0]
+  .long 0x3dc00401                    // ldr q1, [x0, #16]
+  .long 0x3dc00802                    // ldr q2, [x0, #32]
+  .long 0x3dc00c03                    // ldr q3, [x0, #48]
+  .long 0x3dc01013                    // ldr q19, [x0, #64]
+  .long 0x3dc01414                    // ldr q20, [x0, #80]
+  .long 0x3dc01815                    // ldr q21, [x0, #96]
+  .long 0x3dc01c16                    // ldr q22, [x0, #112]
+  .long 0xfd400044                    // ldr d4, [x2]
+  .long 0x6e241c00                    // eor v0.16b, v0.16b, v4.16b
+  .long 0x91020000                    // add x0, x0, #128
+  .long 0x51020021                    // sub w1, w1, #128
+  .long 0x7102003f                    // cmp w1, #128
+  b.lo .Lcrc_refl_fold8_reduce
+.Lcrc_refl_fold8_loop:
+  .long 0x4ea01c04                    // orr v4.16b, v0.16b, v0.16b
+  .long 0x0ee6e000                    // pmull v0.1q, v0.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c00                    // eor v0.16b, v0.16b, v4.16b
+  .long 0x3dc00005                    // ldr q5, [x0, #0]
+  .long 0x6e251c00                    // eor v0.16b, v0.16b, v5.16b
+  .long 0x4ea11c24                    // orr v4.16b, v1.16b, v1.16b
+  .long 0x0ee6e021                    // pmull v1.1q, v1.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c21                    // eor v1.16b, v1.16b, v4.16b
+  .long 0x3dc00405                    // ldr q5, [x0, #16]
+  .long 0x6e251c21                    // eor v1.16b, v1.16b, v5.16b
+  .long 0x4ea21c44                    // orr v4.16b, v2.16b, v2.16b
+  .long 0x0ee6e042                    // pmull v2.1q, v2.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
+  .long 0x3dc00805                    // ldr q5, [x0, #32]
+  .long 0x6e251c42                    // eor v2.16b, v2.16b, v5.16b
+  .long 0x4ea31c64                    // orr v4.16b, v3.16b, v3.16b
+  .long 0x0ee6e063                    // pmull v3.1q, v3.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c63                    // eor v3.16b, v3.16b, v4.16b
+  .long 0x3dc00c05                    // ldr q5, [x0, #48]
+  .long 0x6e251c63                    // eor v3.16b, v3.16b, v5.16b
+  .long 0x4eb31e64                    // orr v4.16b, v19.16b, v19.16b
+  .long 0x0ee6e273                    // pmull v19.1q, v19.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241e73                    // eor v19.16b, v19.16b, v4.16b
+  .long 0x3dc01005                    // ldr q5, [x0, #64]
+  .long 0x6e251e73                    // eor v19.16b, v19.16b, v5.16b
+  .long 0x4eb41e84                    // orr v4.16b, v20.16b, v20.16b
+  .long 0x0ee6e294                    // pmull v20.1q, v20.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241e94                    // eor v20.16b, v20.16b, v4.16b
+  .long 0x3dc01405                    // ldr q5, [x0, #80]
+  .long 0x6e251e94                    // eor v20.16b, v20.16b, v5.16b
+  .long 0x4eb51ea4                    // orr v4.16b, v21.16b, v21.16b
+  .long 0x0ee6e2b5                    // pmull v21.1q, v21.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241eb5                    // eor v21.16b, v21.16b, v4.16b
+  .long 0x3dc01805                    // ldr q5, [x0, #96]
+  .long 0x6e251eb5                    // eor v21.16b, v21.16b, v5.16b
+  .long 0x4eb61ec4                    // orr v4.16b, v22.16b, v22.16b
+  .long 0x0ee6e2d6                    // pmull v22.1q, v22.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241ed6                    // eor v22.16b, v22.16b, v4.16b
+  .long 0x3dc01c05                    // ldr q5, [x0, #112]
+  .long 0x6e251ed6                    // eor v22.16b, v22.16b, v5.16b
+  .long 0x91020000                    // add x0, x0, #128
+  .long 0x51020021                    // sub w1, w1, #128
+  .long 0x7102003f                    // cmp w1, #128
+  b.hs .Lcrc_refl_fold8_loop
+.Lcrc_refl_fold8_reduce:
+  .long 0x3dc00066                    // ldr q6, [x3]
+  .long 0x4ea01c04                    // orr v4.16b, v0.16b, v0.16b
+  .long 0x0ee6e000                    // pmull v0.1q, v0.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c00                    // eor v0.16b, v0.16b, v4.16b
+  .long 0x6e331c00                    // eor v0.16b, v0.16b, v19.16b
+  .long 0x4ea11c24                    // orr v4.16b, v1.16b, v1.16b
+  .long 0x0ee6e021                    // pmull v1.1q, v1.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c21                    // eor v1.16b, v1.16b, v4.16b
+  .long 0x6e341c21                    // eor v1.16b, v1.16b, v20.16b
+  .long 0x4ea21c44                    // orr v4.16b, v2.16b, v2.16b
+  .long 0x0ee6e042                    // pmull v2.1q, v2.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c42                    // eor v2.16b, v2.16b, v4.16b
+  .long 0x6e351c42                    // eor v2.16b, v2.16b, v21.16b
+  .long 0x4ea31c64                    // orr v4.16b, v3.16b, v3.16b
+  .long 0x0ee6e063                    // pmull v3.1q, v3.1d, v6.1d
+  .long 0x4ee6e084                    // pmull2 v4.1q, v4.2d, v6.2d
+  .long 0x6e241c63                    // eor v3.16b, v3.16b, v4.16b
+  .long 0x6e361c63                    // eor v3.16b, v3.16b, v22.16b
+  b .Lcrc_refl_fold4_done
+.Lcrc_refl_check64:
   .long 0x7101003f                    // cmp w1, #64
   b.hs .Lcrc_refl_large
   .long 0x3dc00000                    // ldr q0, [x0]

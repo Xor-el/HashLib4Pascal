@@ -30,6 +30,7 @@ type
     procedure TestCheckValue;
     procedure TestCheckValueWithIncrementalHash;
     procedure TestAnotherChunkedDataIncrementalHash;
+    procedure TestFoldBoundariesMatchByteTable;
     procedure TestHashCloneIsCorrect;
     procedure TestHashCloneIsUnique;
 
@@ -169,6 +170,54 @@ begin
 
   end;
 
+end;
+
+procedure TTestCRCModel.TestFoldBoundariesMatchByteTable;
+const
+  // Lengths straddling the SIMD fold-path boundaries: fold-by-1 entry (16B),
+  // fold-by-4 entry (64B), fold-by-8 entry (128B), their loop repeats and
+  // reduce/tail edges.
+  Lengths: array [0 .. 21] of Int32 = (16, 17, 31, 32, 33, 63, 64, 65, 79, 95,
+    96, 127, 128, 129, 143, 191, 192, 255, 256, 257, 512, 640);
+var
+  LIdx: TCRCStandard;
+  LBuffer: TBytes;
+  LI, LJ, LLen, LPos, LChunk: Int32;
+  LOneShot, LChunked: IHash;
+begin
+  System.SetLength(LBuffer, 640);
+  for LI := 0 to System.High(LBuffer) do
+    LBuffer[LI] := Byte((LI * 131) + 17);
+
+  for LIdx := System.Low(TCRCStandard) to System.High(TCRCStandard) do
+  begin
+    for LJ := 0 to System.High(Lengths) do
+    begin
+      LLen := Lengths[LJ];
+
+      LOneShot := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
+      ActualString := LOneShot.ComputeBytes(System.Copy(LBuffer, 0, LLen))
+        .ToString();
+
+      // Reference: sub-16-byte chunks keep everything on the byte-table path.
+      LChunked := THashFactory.TChecksum.TCRC.CreateCRC(LIdx);
+      LChunked.Initialize;
+      LPos := 0;
+      while LPos < LLen do
+      begin
+        LChunk := 15;
+        if LLen - LPos < LChunk then
+          LChunk := LLen - LPos;
+        LChunked.TransformBytes(LBuffer, LPos, LChunk);
+        System.Inc(LPos, LChunk);
+      end;
+      ExpectedString := LChunked.TransformFinal().ToString();
+
+      CheckEquals(ExpectedString, ActualString,
+        Format('Expected %s but got %s at length %d. %s',
+        [ExpectedString, ActualString, LLen, LOneShot.Name]));
+    end;
+  end;
 end;
 
 procedure TTestCRCModel.TestHashCloneIsCorrect;

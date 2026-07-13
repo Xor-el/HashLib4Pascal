@@ -1,8 +1,10 @@
-// AVX2 implementation of XXH3_accumulate_512 (fully unrolled, 2 x 32-byte chunks).
+// AVX2 implementation of XXH3_accumulate_512 (fully unrolled, 2 x 32-byte
+// chunks).
+// ABI (after HlpSimdProc3Begin_x86_64.inc): rcx = acc ptr, rdx = input ptr,
+//   r8 = secret ptr.
+// Saves: none (uses ymm0-ymm4 only; volatile under both ABIs).
 // AVX/AVX2 instructions are db-encoded for broad assembler compatibility.
-// Expects MS x64 ABI: rcx = acc ptr, rdx = input ptr, r8 = secret ptr.
-// Uses only volatile registers: ymm0-ymm4.
-// Reference: official xxHash C - XXH3_accumulate_512_avx2 in xxhash.h
+// Reference: official xxHash C - XXH3_accumulate_512_avx2 in xxhash.h.
 
   // --- Chunk 0: acc[0..3], input[0..31], secret[0..31] ---
   db $C5, $FE, $6F, $01                         // vmovdqu ymm0, yword [rcx]

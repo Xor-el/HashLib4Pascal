@@ -164,8 +164,13 @@ type
     EmptyData: String = '';
     DefaultData = 'HashLib4Pascal';
     OneToNine = '123456789';
+    // 299 bytes (13 x 23) so one-shot hashing crosses the SIMD wide-fold
+    // thresholds (>= 128 bytes) that the chunked passes then cross-validate.
     ChunkedData =
-      'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678';
+      'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678'
+      + 'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678'
+      + 'HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678HashLib4Pascal012345678'
+      + 'HashLib4Pascal012345678';
     EEAABEEF = 'EEAABEEF';
     ZeroToThreeInHex = '00010203';
     ZeroToFifteenInHex = '000102030405060708090A0B0C0D0E0F';

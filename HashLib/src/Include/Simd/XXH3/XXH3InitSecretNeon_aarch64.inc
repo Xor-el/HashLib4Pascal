@@ -1,13 +1,16 @@
-// XXH3 initCustomSecret AArch64 NEON implementation (192-byte custom secret).
-// Expects AAPCS64: x0 = customSecret ptr, x1 = defaultSecret ptr, x2 = seed (UInt64).
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Reference: HashLib XXH3InitSecretSse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of XXH3_initCustomSecret (192-byte custom secret).
+// ABI (after HlpSimdProc3Begin_aarch64.inc): x0 = customSecret ptr,
+//   x1 = defaultSecret ptr, x2 = seed ptr (PUInt64).
 // Register map:
 //   x3       = negated seed (-seed)
 //   v0       = vSeed broadcast vector [seed, -seed]
 //   v16-v17  = fmov staging for zip1 pack
 //   v2       = defaultSecret block load / add temp
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: HashLib XXH3InitSecretSse2_x86_64.inc.
+
+  ldr x2, [x2]
   neg x3, x2
   .long 0x9e670050                    // fmov d16, x2
   .long 0x9e670071                    // fmov d17, x3

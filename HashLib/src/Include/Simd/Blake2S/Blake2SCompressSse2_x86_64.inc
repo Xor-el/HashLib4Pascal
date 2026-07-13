@@ -1,14 +1,15 @@
 // SSE2 implementation of BLAKE2s compress (fully unrolled 10 rounds).
-// Expects MS x64 ABI: rcx = state ptr, rdx = msg ptr, r8 = counter+flags ptr, r9 = IV ptr.
-// Uses xmm0-xmm6; xmm6 is MS x64 non-volatile (saved/restored).
-// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11), xmm3 = d (v12-15),
-//   xmm4 = message buffer, xmm5 = temp, xmm6 = temp (msg load).
-// Rotations: ROT16/12/8/7 via psrld/pslld/por.
-// Diagonalize/Undiagonalize via pshufd.
-// Message loads via movd + punpcklqdq + shufps.
+// Rotations: rot16/12/8/7 via psrld/pslld/por. Diagonalize/Undiagonalize
+// via pshufd. Message loads via movd + punpcklqdq + shufps.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = state ptr, rdx = msg ptr,
+//   r8 = counter+flags ptr, r9 = IV ptr.
+// Register map: xmm0 = a (v0-3), xmm1 = b (v4-7), xmm2 = c (v8-11),
+//   xmm3 = d (v12-15), xmm4 = message buffer, xmm5 = temp,
+//   xmm6 = temp (msg load).
+// Saves: xmm6 (MS x64 non-volatile); uses xmm0-xmm6.
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   // Initialize working vector
   movdqu xmm0, oword [rcx]
@@ -1072,4 +1073,4 @@
   movdqu oword [rcx], xmm0
   movdqu oword [rcx + $10], xmm1
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}

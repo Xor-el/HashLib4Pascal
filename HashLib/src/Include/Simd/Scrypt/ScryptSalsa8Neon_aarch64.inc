@@ -1,11 +1,12 @@
-// Scrypt Salsa20/8 XOR AArch64 NEON implementation (Percival-permuted data).
-// Expects AAPCS64: x0 = State ptr, x1 = Input ptr.
-// Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
-//   v0 = {w0,w5,w10,w15}, v1 = {w4,w9,w14,w3}, v2 = {w8,w13,w2,w7}, v3 = {w12,w1,w6,w11}.
-// Leaf nostackframe; caller-saved GPR/vector only.
-// Column/row quarter-rounds via lane-parallel ext-based diagonalize (see Tarsnap scrypt-sse.c).
-// Reference: Tarsnap crypto_scrypt-sse.c, HashLib ScryptSalsa8Sse2_x86_64.inc.
-// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// NEON implementation of fused XOR + Salsa20/8 on Percival-permuted data.
+// The (i*5 mod 16) Percival data permutation arranges each 16-word Salsa20
+// state into role-based diagonal order, enabling lane-parallel column and
+// row quarter-rounds via ext-based diagonalize (see Tarsnap scrypt-sse.c).
+// Operation: State = Salsa20/8(State XOR Input).
+// ABI (after HlpSimdProc2Begin_aarch64.inc): x0 = State ptr, x1 = Input ptr.
+//   Each pointer addresses 16 UInt32 (64 bytes) in permuted order:
+//   v0 = {w0,w5,w10,w15}, v1 = {w4,w9,w14,w3}, v2 = {w8,w13,w2,w7},
+//   v3 = {w12,w1,w6,w11}.
 // Register map:
 //   w9       = double-round counter (4 iterations)
 //   v0       = A
@@ -14,6 +15,10 @@
 //   v3       = D
 //   v4-v5    = quarter-round temps (add + shl + sri)
 //   v16-v19  = saved XOR'd state (A,B,C,D) for the final addition
+// Saves: none (leaf nostackframe; caller-saved GPR/vector only).
+// AArch64 vector instructions are .long-encoded for broad assembler compatibility.
+// Reference: Tarsnap crypto_scrypt-sse.c, HashLib ScryptSalsa8Sse2_x86_64.inc.
+
   .long 0x3dc00000                    // ldr q0, [x0, #0x0]
   .long 0x3dc00024                    // ldr q4, [x1, #0x0]
   .long 0x6e241c00                    // eor v0.16b, v0.16b, v4.16b

@@ -1,10 +1,13 @@
-// SSE2 implementation of BLAKE2b compress (fully unrolled 12 rounds).
-// IA-32: after HlpSimdProc4Begin_i386 — ebx = state, esi = msg, edi = counter+flags, eax = IV
-//   (parallel to MS x64 ABI: rcx, rdx, r8, r9).
-// XMM8+ from x64 eliminated: xmm4 scratch + stack, xmm0/1 for diagonal work; uses xmm0–xmm7.
-// Non-volatile xmm6–xmm7 saved in stack frame (sub esp, 128).
-// Register map: xmm0-1 = row1 (v0-3), xmm2-3 = row2 (v4-7), xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15)
-//   with temps folded per IA-32 constraints.
+// SSE2 implementation of BLAKE2b compress (fully unrolled 12 rounds; IA-32).
+// XMM8+ from the x64 sibling eliminated: xmm4 scratch + stack, xmm0/xmm1 for
+// diagonal work.
+// ABI (after HlpSimdProc4Begin_i386.inc): ebx = state ptr, esi = msg ptr,
+//   edi = counter+flags ptr, eax = IV ptr.
+// Register map: xmm0-1 = row1 (v0-3), xmm2-3 = row2 (v4-7),
+//   xmm4-5 = row3 (v8-11), xmm6-7 = row4 (v12-15), temps folded per the
+//   IA-32 register budget.
+// Frame: sub esp, 128 (spill slots + xmm6-xmm7 save).
+// Saves: xmm6-xmm7 saved/restored defensively (volatile on IA-32).
 // Reference: BLAKE2/BLAKE2 sse/ by Samuel Neves.
 
   sub esp, 128

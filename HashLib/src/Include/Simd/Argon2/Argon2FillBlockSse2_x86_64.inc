@@ -1,22 +1,22 @@
-// SSE2 implementation of Argon2 FillBlock.
-// Expects MS x64 ABI: rcx = Left ptr, rdx = Right ptr, r8 = Current ptr, r9 = WithXor (0 or 1).
-// Each pointer addresses 128 QWords (1024 bytes).
-// Uses xmm0-xmm9; xmm6-xmm9 are MS x64 non-volatile (saved/restored).
-// Register map during G rounds: xmm0-1 = A(0..3), xmm2-3 = B(4..7),
-//   xmm4-5 = C(8..11), xmm6-7 = D(12..15), xmm8-9 = temps.
-// Stack layout (sub rsp, 2120):
-//   [rsp+0..63]     xmm6-9 save area
-//   [rsp+64..1087]  R_buf (1024 bytes)
-//   [rsp+1088..2111] Z_buf (1024 bytes)
-//   [rsp+2112..2119] alignment padding
-// r8 (Current) and r9 (WithXor) survive all loops (not clobbered).
-// ARight and ACurrent may alias; R_buf buffering handles this.
-//
+// SSE2 implementation of Argon2 FillBlock (BlaMka round function).
 // Diagonalize/Undiagonalize use shufpd to rotate QWord positions within
-// register pairs. Right-rotates require a 3-movdqa swap since shufpd
+// register pairs; right-rotates require a 3-movdqa swap since shufpd
 // naturally places results in the opposite register for that direction.
+// ABI (after HlpSimdProc4Begin_x86_64.inc): rcx = Left ptr, rdx = Right ptr,
+//   r8 = Current ptr, r9 = WithXor (0 or 1).
+//   Each pointer addresses 128 QWords (1024 bytes). ARight and ACurrent may
+//   alias; R_buf buffering handles this. r8/r9 survive all loops.
+// Register map (G rounds): xmm0-1 = A(0..3), xmm2-3 = B(4..7),
+//   xmm4-5 = C(8..11), xmm6-7 = D(12..15), xmm8-9 = temps.
+// Frame (sub rsp, 2120):
+//   [rsp+0..63]      = xmm6-xmm9 save area
+//   [rsp+64..1087]   = R_buf (1024 bytes)
+//   [rsp+1088..2111] = Z_buf (1024 bytes)
+//   [rsp+2112..2119] = alignment padding
+// Saves: xmm6-xmm9 (MS x64 non-volatile) in the frame; uses xmm0-xmm9.
+// Reference: official Argon2 SSE2 (blamka-round-ref/opt).
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileSave_x86_64.inc}
 
   sub rsp, 2056
 
@@ -523,7 +523,7 @@
   jb @row_loop
 
   // =========================================================================
-  // Step 5: Final XOR — Current = R_buf XOR Z_buf [XOR Current]
+  // Step 5: Final XOR - Current = R_buf XOR Z_buf [XOR Current]
   // =========================================================================
   test r9, r9
   jnz @final_with_xor
@@ -555,4 +555,4 @@
 @epilogue:
   add rsp, 2056
 
-  {$I ..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
+  {$I ..\..\Include\Simd\Common\HlpSimdNonVolatileRestore_x86_64.inc}
