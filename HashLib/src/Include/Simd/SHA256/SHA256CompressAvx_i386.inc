@@ -28,7 +28,7 @@
   mov    dword ptr [esp + $4], edi
   mov    dword ptr [esp + $8], eax
   mov    dword ptr [esp + $C], ebx
-  lea    esp, [esp - $60]
+  sub    esp, $60
   db $C5, $FC, $77                                // vzeroall
   mov    eax, dword ptr [esi]
   mov    ebx, dword ptr [esi + $4]

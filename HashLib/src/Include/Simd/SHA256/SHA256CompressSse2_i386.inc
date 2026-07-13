@@ -26,7 +26,7 @@
   mov    dword [esp + $4], edi
   mov    dword [esp + $8], eax
   mov    dword [esp + $C], ebx
-  lea    esp, [esp - $60]
+  sub    esp, $60
   mov    eax, dword [esi]
   mov    ebx, dword [esi + $4]
   mov    ecx, dword [esi + $8]
