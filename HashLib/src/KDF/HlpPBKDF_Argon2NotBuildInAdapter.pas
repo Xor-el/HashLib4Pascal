@@ -1,4 +1,4 @@
-unit HlpPBKDF_Argon2NotBuildInAdapter;
+﻿unit HlpPBKDF_Argon2NotBuildInAdapter;
 
 {$I ..\Include\HashLib.inc}
 

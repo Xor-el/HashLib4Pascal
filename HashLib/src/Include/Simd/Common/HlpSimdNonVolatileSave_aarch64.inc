@@ -13,6 +13,9 @@
 // Unlike x86-64 there is no ABI split: the d8..d15 rule is uniform across
 // Linux/macOS/Windows, so this always emits (no platform guard).
 // Save and restore MUST be paired within the same procedure.
+//
+// AArch64 vector instructions are .long-encoded for broad assembler
+// compatibility.
   .long 0x6dbc27e8                    // stp d8, d9, [sp, #-64]!
   .long 0x6d012fea                    // stp d10, d11, [sp, #16]
   .long 0x6d0237ec                    // stp d12, d13, [sp, #32]

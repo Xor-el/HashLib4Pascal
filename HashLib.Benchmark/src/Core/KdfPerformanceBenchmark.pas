@@ -1,4 +1,4 @@
-unit KdfPerformanceBenchmark;
+﻿unit KdfPerformanceBenchmark;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
