@@ -1,0 +1,40 @@
+scripts/maintenance/check-file-format.ps1
+  s_4439590f1f00be::t_9bd682cba73abd 8-10
+  s_4439590f1f00be::t_9e8514fa1abc98 25
+  s_4439590f1f00be::t_5a07dd5453b550 3,7
+  s_4439590f1f00be::t_d27b0ce1a5aabd 11-12,23-24
+HashLib.Benchmark/src/Core/KdfPerformanceBenchmark.pas
+  s_4439590f1f00be::t_6418b0a6a5d828 1
+HashLib.Tests/Delphi.Tests/Mobile/MobileTestHostFormUnit.pas
+  s_4439590f1f00be::t_5495e8cd2cbc1b 1
+HashLib/src/KDF/HlpPBKDF_Argon2NotBuildInAdapter.pas
+  s_4439590f1f00be::t_0c09c3fbcfaa9d 1
+HashLib/src/Include/Simd/Common/HlpSimdNonVolatileRestore_aarch64.inc
+  s_328ec6f81eb027::t_88f4fe1551e148 6-8
+HashLib/src/Include/Simd/Common/HlpSimdNonVolatileSave_aarch64.inc
+  s_328ec6f81eb027::t_6a0ecc435ad68f 16-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d42817baa719d51ef82601e9175be3db0283ac93",
+  "prompts": {},
+  "sessions": {
+    "s_328ec6f81eb027": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65474ab1-61e1-42dc-9e54-d32d6b513c77",
+        "model": "unknown"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_4439590f1f00be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "373b73cc-ff14-4e8d-a2c0-a35e070341c3",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
