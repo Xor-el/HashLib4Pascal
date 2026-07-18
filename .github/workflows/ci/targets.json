@@ -10,7 +10,7 @@
     { "id": "linux-powerpc64-be", "name": "QEMU: Linux PowerPC64 BE",              "kind": "qemu",   "default": true, "runner": "ubuntu-latest",    "fpc_target": "powerpc64-linux" },
     { "id": "freebsd",            "name": "VM: FreeBSD x86_64",                    "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-freebsd", "fpc_tarball_target": "x86_64-freebsd11" },
     { "id": "solaris",            "name": "VM: Solaris x86_64",                    "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-solaris" },
-    { "id": "netbsd",             "name": "VM: NetBSD x86_64",                     "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-netbsd" },
+    { "id": "netbsd",             "name": "VM: NetBSD x86_64",                     "kind": "vm",     "default": false,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-netbsd" },
     { "id": "dragonflybsd",       "name": "VM: DragonFlyBSD x86_64",               "kind": "vm",     "default": true,  "runner": "ubuntu-latest",    "fpc_target": "x86_64-dragonfly" }
   ]
 }
