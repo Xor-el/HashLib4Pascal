@@ -16,6 +16,7 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 type

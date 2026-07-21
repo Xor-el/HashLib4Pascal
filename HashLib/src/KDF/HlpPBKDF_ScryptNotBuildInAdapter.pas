@@ -16,6 +16,7 @@ uses
   HlpBinaryPrimitives,
   HlpPBKDF2_HMACNotBuildInAdapter,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 type

@@ -10,6 +10,7 @@ uses
 {$ENDIF}
   Classes,
   SysUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 resourcestring

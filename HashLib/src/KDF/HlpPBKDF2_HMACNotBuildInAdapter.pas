@@ -11,6 +11,7 @@ uses
   HlpIHashInfo,
   HlpHMACNotBuildInAdapter,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 resourcestring

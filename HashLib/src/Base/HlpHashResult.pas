@@ -9,6 +9,7 @@ uses
   HlpBinaryPrimitives,
   HlpBitOperations,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HlpIHashResult,
   HlpConverters,
   HlpArrayUtils;

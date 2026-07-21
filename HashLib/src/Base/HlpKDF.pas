@@ -6,6 +6,7 @@ interface
 
 uses
   HlpIKDF,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 type

@@ -8,6 +8,7 @@ uses
   Classes,
   SysUtils,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HlpConverters,
   HlpIHash,
   HlpIHashResult;

@@ -5,6 +5,7 @@ unit HlpIKDF;
 interface
 
 uses
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 type

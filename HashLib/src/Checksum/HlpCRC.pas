@@ -20,6 +20,7 @@ uses
   SyncObjs,
   Generics.Collections,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HlpHash,
   HlpIHash,
   HlpIHashInfo,

@@ -7,6 +7,7 @@ interface
 uses
   HlpBinaryPrimitives,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HlpHash,
   HlpIHash,
   HlpIHashInfo,
