@@ -1,0 +1,118 @@
+HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
+  s_10d6f45a4fb551::t_f14c8ea333d289 13
+  s_10d6f45a4fb551::t_993b8071765c88 32,338,342,346,350,442,494,498,502,506,510,613-616
+HashLib/src/Misc/HlpHashLibExceptions.pas
+  s_10d6f45a4fb551::t_ed746f8288d4bb 1-24
+HashLib/src/Crypto/HlpBlake2B.pas
+  s_6b1649def2e9b5::t_65a15513cca064 19
+HashLib/src/Crypto/HlpBlake2S.pas
+  s_6b1649def2e9b5::t_2fbb82ee3ea7ed 19
+HashLib/src/Crypto/HlpBlake3.pas
+  s_6b1649def2e9b5::t_22df528524dea5 18
+HashLib/src/Crypto/HlpSHA3.pas
+  s_6b1649def2e9b5::t_70976a15a90d34 19
+HashLib/src/Hash64/HlpXXHash3.pas
+  s_6b1649def2e9b5::t_f29f27f1d1ee53 10
+HashLib/src/KDF/HlpPBKDF_Argon2NotBuildInAdapter.pas
+  s_6b1649def2e9b5::t_ec4b961ae42e50 22
+HashLib/src/KDF/HlpPBKDF_ScryptNotBuildInAdapter.pas
+  s_6b1649def2e9b5::t_b63b9c563ee145 19
+HashLib.Benchmark/Delphi/HashLib.BenchmarkConsole.dpr
+  s_10d6f45a4fb551::t_536baffb50c5c9 144-154
+HashLib.Benchmark/Delphi/HashLib.BenchmarkFMX.dpr
+  s_10d6f45a4fb551::t_639b3cb56c449d 143-151
+HashLib.Tests/Delphi.Tests/HashLib.Tests.Mobile.dpr
+  s_10d6f45a4fb551::t_f355288e1ef836 145-155
+HashLib.Tests/Delphi.Tests/HashLib.Tests.Mobile.dproj
+  s_10d6f45a4fb551::t_f7a939e4d905cd 485-495
+HashLib.Tests/Delphi.Tests/HashLib.Tests.dpr
+  s_10d6f45a4fb551::t_3ee988f6ba568f 162-172
+HashLib.Tests/src/HashLibTestBase.pas
+  s_aa1fcfc5f6c773::t_e58b65d5e33c6f 24
+HashLib.Tests/src/PBKDF_ScryptTests.pas
+  s_10d6f45a4fb551::t_53766d33816241 21
+HashLib/src/Base/HlpHash.pas
+  s_10d6f45a4fb551::t_15a1e8fcc1a515 11
+HashLib/src/Base/HlpHashFactory.pas
+  s_aa1fcfc5f6c773::t_66bb98c8bb5b59 13
+HashLib/src/Base/HlpHashResult.pas
+  s_10d6f45a4fb551::t_86f59c7f7e42ed 12
+HashLib/src/Base/HlpKDF.pas
+  s_10d6f45a4fb551::t_d13c3968c305fc 9
+HashLib/src/Checksum/HlpCRC.pas
+  s_aa1fcfc5f6c773::t_fd60a72b20ed00 23
+HashLib/src/Crypto/Blake2BParams/HlpBlake2BParams.pas
+  s_10d6f45a4fb551::t_5171688147163f 12
+HashLib/src/Crypto/Blake2SParams/HlpBlake2SParams.pas
+  s_10d6f45a4fb551::t_13f675b1daa3b0 12
+HashLib/src/Crypto/HlpSnefru.pas
+  s_10d6f45a4fb551::t_52c6a63ffde819 11
+HashLib/src/Crypto/HlpTiger.pas
+  s_10d6f45a4fb551::t_fe97f54db846f0 11
+HashLib/src/Crypto/HlpTiger2.pas
+  s_10d6f45a4fb551::t_6652c388f02e1e 11
+HashLib/src/Hash128/HlpMurmurHash3_x64_128.pas
+  s_10d6f45a4fb551::t_da5dc6bed2520e 10
+HashLib/src/Hash128/HlpMurmurHash3_x86_128.pas
+  s_10d6f45a4fb551::t_23c157bcdb40a4 10
+HashLib/src/Hash128/HlpXXHash128.pas
+  s_10d6f45a4fb551::t_8662d511e630a0 10
+HashLib/src/Hash32/HlpMurmur2.pas
+  s_10d6f45a4fb551::t_2e753117757841 10
+HashLib/src/Hash32/HlpMurmurHash3_x86_32.pas
+  s_10d6f45a4fb551::t_a3369064fcce19 10
+HashLib/src/Hash32/HlpXXHash32.pas
+  s_10d6f45a4fb551::t_3a39920985f230 10
+HashLib/src/Hash64/HlpMurmur2_64.pas
+  s_10d6f45a4fb551::t_25f2d2ee6cf69f 10
+HashLib/src/Hash64/HlpSipHash.pas
+  s_10d6f45a4fb551::t_4faea82ab8a958 10
+HashLib/src/Hash64/HlpXXHash64.pas
+  s_10d6f45a4fb551::t_4b14e53a6b44b4 10
+HashLib/src/Interfaces/HlpIKDF.pas
+  s_10d6f45a4fb551::t_d999ad87fdd822 8
+HashLib/src/KDF/HlpPBKDF2_HMACNotBuildInAdapter.pas
+  s_10d6f45a4fb551::t_a69320038d3e0f 14
+HashLib/src/Misc/HlpConverters.pas
+  s_10d6f45a4fb551::t_002fc40cdd3af4 13
+HashLib/src/Misc/HlpHashLibTypes.pas
+  s_10d6f45a4fb551::t_e6a0ccc243c828 1-78
+HashLib/src/NullDigest/HlpNullDigest.pas
+  s_10d6f45a4fb551::t_2e9a8903ba4ac4 11
+HashLib/src/Packages/Delphi/HashLib4PascalPackage.dpk
+  s_10d6f45a4fb551::t_097b84983556cc 170-180
+HashLib/src/Packages/FPC/HashLib4PascalPackage.pas
+  s_aa1fcfc5f6c773::t_b10aff96828c13 13-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "bef90bc8e7bec6ac421752dbe7217fb18e8074d4",
+  "prompts": {},
+  "sessions": {
+    "s_10d6f45a4fb551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2683157c-66f3-4b32-8b1f-84b06c4acd4c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_6b1649def2e9b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ff005f7-baca-4e3d-b97e-954438916ffd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_aa1fcfc5f6c773": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1b750aa-3e2b-4561-9c92-1f6ea2a6349b",
+        "model": "unknown"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
