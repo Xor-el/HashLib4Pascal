@@ -10,6 +10,7 @@ uses
   HlpIHash,
   HlpIHashInfo,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   // NullDigest Unit //
   HlpNullDigest,
   // Checksum Unit //

@@ -18,6 +18,7 @@ uses
   HlpHashFactory,
   HlpConverters,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HashLibTestBase,
   ScryptVectors;
 

@@ -9,6 +9,7 @@ uses
   HlpIBlake2BParams,
   HlpHashSize,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 resourcestring

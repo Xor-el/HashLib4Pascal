@@ -19,6 +19,7 @@ uses
   HlpBinaryPrimitives,
   HlpArgon2TypeAndVersion,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 type

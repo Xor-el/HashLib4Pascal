@@ -10,7 +10,7 @@
       <PathDelim Value="\"/>
       <SearchPaths>
         <IncludeFiles Value="..\..\Include;..\..\Include\Simd\Common"/>
-        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams;..\..\Simd\Facade;..\..\Simd\Backend"/>
+        <OtherUnitFiles Value="..\..\Base;..\..\Checksum;..\..\Crypto;..\..\Hash128;..\..\Hash32;..\..\Hash64;..\..\Interfaces;..\..\Nullable;..\..\Utils;..\..\Misc;..\..\KDF;..\..\Crypto\Blake2BConfigurations;..\..\Crypto\Blake2SConfigurations;..\..\Interfaces\IBlake2BConfigurations;..\..\Interfaces\IBlake2SConfigurations;..\..\NullDigest;..\..\Crypto\Blake2SParams;..\..\Crypto\Blake2BParams;..\..\Interfaces\IBlake2SParams;..\..\Interfaces\IBlake2BParams;..\..\Simd\Facade;..\..\Simd\Backend"/>
         <UnitOutputDirectory Value="lib\HashLib4Pascal\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -29,7 +29,7 @@
 "/>
     <License Value="MIT License"/>
     <Version Major="4" Minor="3"/>
-    <Files Count="145">
+    <Files Count="146">
       <Item1>
         <Filename Value="..\..\Base\HlpHash.pas"/>
         <UnitName Value="HlpHash"/>
@@ -335,19 +335,19 @@
         <UnitName Value="HlpIHashResult"/>
       </Item76>
       <Item77>
-        <Filename Value="..\..\Utils\HlpConverters.pas"/>
+        <Filename Value="..\..\Misc\HlpConverters.pas"/>
         <UnitName Value="HlpConverters"/>
       </Item77>
       <Item78>
-        <Filename Value="..\..\Utils\HlpBitOperations.pas"/>
+        <Filename Value="..\..\Misc\HlpBitOperations.pas"/>
         <UnitName Value="HlpBitOperations"/>
       </Item78>
       <Item79>
-        <Filename Value="..\..\Utils\HlpBinaryPrimitives.pas"/>
+        <Filename Value="..\..\Misc\HlpBinaryPrimitives.pas"/>
         <UnitName Value="HlpBinaryPrimitives"/>
       </Item79>
       <Item80>
-        <Filename Value="..\..\Utils\HlpHashLibTypes.pas"/>
+        <Filename Value="..\..\Misc\HlpHashLibTypes.pas"/>
         <UnitName Value="HlpHashLibTypes"/>
       </Item80>
       <Item81>
@@ -439,7 +439,7 @@
         <UnitName Value="HlpXXHash128"/>
       </Item102>
       <Item103>
-        <Filename Value="..\..\Utils\HlpCpuFeatures.pas"/>
+        <Filename Value="..\..\Misc\HlpCpuFeatures.pas"/>
         <UnitName Value="HlpCpuFeatures"/>
       </Item103>
       <Item104>
@@ -491,23 +491,23 @@
         <UnitName Value="HlpSHA3Simd"/>
       </Item115>
       <Item116>
-        <Filename Value="..\..\Utils\HlpArmSimdFeatures.pas"/>
+        <Filename Value="..\..\Misc\HlpArmSimdFeatures.pas"/>
         <UnitName Value="HlpArmSimdFeatures"/>
       </Item116>
       <Item117>
-        <Filename Value="..\..\Utils\HlpSimdLevels.pas"/>
+        <Filename Value="..\..\Misc\HlpSimdLevels.pas"/>
         <UnitName Value="HlpSimdLevels"/>
       </Item117>
       <Item118>
-        <Filename Value="..\..\Utils\HlpX86SimdFeatures.pas"/>
+        <Filename Value="..\..\Misc\HlpX86SimdFeatures.pas"/>
         <UnitName Value="HlpX86SimdFeatures"/>
       </Item118>
       <Item119>
-        <Filename Value="..\..\Utils\HlpArmHwCapProvider.pas"/>
+        <Filename Value="..\..\Misc\HlpArmHwCapProvider.pas"/>
         <UnitName Value="HlpArmHwCapProvider"/>
       </Item119>
       <Item120>
-        <Filename Value="..\..\Utils\HlpDarwinSysCtl.pas"/>
+        <Filename Value="..\..\Misc\HlpDarwinSysCtl.pas"/>
         <UnitName Value="HlpDarwinSysCtl"/>
       </Item120>
       <Item121>
@@ -610,6 +610,10 @@
         <Filename Value="..\..\Simd\Backend\HlpCRCArmBackend.pas"/>
         <UnitName Value="HlpCRCArmBackend"/>
       </Item145>
+      <Item146>
+        <Filename Value="..\..\Misc\HlpHashLibExceptions.pas"/>
+        <UnitName Value="HlpHashLibExceptions"/>
+      </Item146>
     </Files>
     <CompatibilityMode Value="True"/>
     <LazDoc PackageName="(default)"/>

@@ -8,6 +8,7 @@ uses
   HlpBinaryPrimitives,
   SysUtils,
   HlpHashLibTypes,
+  HlpHashLibExceptions,
   HlpHashRounds,
   HlpIHash,
   HlpIHashInfo,

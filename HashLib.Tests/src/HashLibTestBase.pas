@@ -21,6 +21,7 @@ uses
   HlpConverters,
   HlpBinaryPrimitives,
   HlpArrayUtils,
+  HlpHashLibExceptions,
   HlpHashLibTypes;
 
 {$IFDEF FPC}
