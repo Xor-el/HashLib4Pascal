@@ -166,6 +166,19 @@ ci_run_make() {
   "$build_dir/make"
 }
 
+# The lazbuild backend builds LCL/GUI projects as a compile-check (the fpc
+# backend skips them). On Linux those link against the GTK2 widgetset, whose dev
+# libraries are not preinstalled on the GitHub runners, so the GUI link fails.
+# Install them here. No-op on the fpc backend and off Linux (macOS/Windows ship
+# their native widgetset). GUI projects are built but never run.
+ci_install_lcl_gui_deps() {
+  [ "${MAKE_BUILD_BACKEND:-}" = "lazbuild" ] || return 0
+  [ "$(uname -s)" = "Linux" ] || return 0
+  echo "installing GTK2 dev libraries for LCL GUI project build (lazbuild/Linux)" >&2
+  sudo apt-get update
+  sudo apt-get install -y libgtk2.0-dev
+}
+
 ci_build_standard() {
   ci_install_toolchain
   ci_export_toolchain_path

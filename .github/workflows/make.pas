@@ -91,11 +91,10 @@ type
       const AStubFileName, AUnitOutDir: string);
     class procedure AppendProjectBuildArgs(AArgs: TStrings;
       const AMainSource, AUnitOutDir, ATargetBinary: string);
-    // Conditional defines, formatted per backend: fpc takes -dNAME directly on
-    // the argv (must precede the source); lazbuild forwards them to the compiler
-    // via repeatable --opt=-dNAME (its own -d means --skip-dependencies).
+    // Conditional defines for the fpc backend: -dNAME on the argv (must precede
+    // the source). The lazbuild backend instead injects defines via fpc.cfg (see
+    // TMakeRunner.InjectDefinesIntoFpcConfig) so recursive package builds see them.
     class procedure AppendFpcDefineArgs(const ADefines: TStrings; AArgs: TStrings);
-    class procedure AppendLazbuildDefineArgs(const ADefines: TStrings; AArgs: TStrings);
   private
     class function IsAbsolutePath(const S: string): Boolean;
     class function ExpandMacros(const S, AProjDir, AUnitOutDir, APkgOutDir,
@@ -228,7 +227,16 @@ type
     // builds and runs console benchmark projects under BenchmarkTargetFolder
     // after the test suite completes.
     FRunBenchmark: Boolean;
+    // Selected via MAKE_LAZBUILD_GUI (defaults to True). Only meaningful under
+    // the lazbuild backend - the fpc backend never builds GUI projects (it has
+    // no widgetset). When False, LCL/GUI projects are skipped even under
+    // lazbuild, letting a run opt out of the per-platform widgetset toolchain
+    // the GUI link needs.
+    FBuildGuiProjects: Boolean;
     FGraph: TPackageGraph;
+    // Non-empty while a MAKE_DEFINES block is appended to this fpc.cfg (lazbuild
+    // backend only); RestoreFpcConfig strips it back out.
+    FInjectedFpcCfgPath: string;
     function ParseBackendEnv: TBuildBackend;
     function ParsePackageScopeEnv: TPackageScope;
     function ParseBoolEnv(const AName: string; ADefault: Boolean): Boolean;
@@ -243,6 +251,7 @@ type
     procedure BuildAllProjects;
     procedure RunBenchmarkProjects;
     procedure BuildGuiProject(const ALpiPath: string);
+    function TryHandleGuiProject(const ALpiPath, ASkipLabel: string): Boolean;
     function BuildProject(const ALpiPath: string): string;
     function BuildProjectWithLazbuild(const APath: string): string;
     function BuildProjectWithFpc(const APath: string): string;
@@ -284,6 +293,9 @@ type
     function RunFpcInfoProbeWithRetry(const AInfoFlag: string;
       out AValue: string): Boolean;
     procedure PrepareProjectBuild(Proj: TLpiProject);
+    function LocateFpcConfig: string;
+    procedure InjectDefinesIntoFpcConfig;
+    procedure RestoreFpcConfig;
   public
     constructor Create;
     destructor Destroy; override;
@@ -316,6 +328,12 @@ const
 
   OPMBaseUrl = 'https://packages.lazarus-ide.org/';
   GitHubArchiveBaseUrl = 'https://github.com/';
+
+  // Delimiters for the MAKE_DEFINES block appended to fpc.cfg under the lazbuild
+  // backend (see InjectDefinesIntoFpcConfig). '#'-prefixed lines are fpc.cfg
+  // comments, so a leftover block is inert.
+  FpcCfgMarkerBegin = '#--- make.pas MAKE_DEFINES begin (auto-generated) ---';
+  FpcCfgMarkerEnd   = '#--- make.pas MAKE_DEFINES end (auto-generated) ---';
 
   Dependencies: array of TDependency = (
     // Examples:
@@ -683,17 +701,6 @@ begin
     Exit;
   for I := 0 to ADefines.Count - 1 do
     AArgs.Add('-d' + ADefines[I]);
-end;
-
-class procedure TLazXml.AppendLazbuildDefineArgs(const ADefines: TStrings;
-  AArgs: TStrings);
-var
-  I: Integer;
-begin
-  if not Assigned(ADefines) then
-    Exit;
-  for I := 0 to ADefines.Count - 1 do
-    AArgs.Add('--opt=-d' + ADefines[I]);
 end;
 
 // ---------------------------------------------------------------------------
@@ -1354,6 +1361,7 @@ begin
   FPackageScope := TPackageScope.Required;
   FErrorCount := 0;
   FRunBenchmark := False;
+  FBuildGuiProjects := True;
   // Honor the NO_COLOR convention (https://no-color.org): any value disables
   // ANSI colors. GitHub Actions renders ANSI in its log viewer, so default on.
   FUseColor := GetEnvironmentVariable('NO_COLOR') = '';
@@ -1626,6 +1634,119 @@ begin
   Result := False;
 end;
 
+// Return the path of the main fpc.cfg the toolchain reads, by parsing the
+// config trace `fpc -va` prints (it echoes each config file as it reads it).
+// `fpc -va` exits non-zero here because no source is given, but RunCommandEx
+// still captures the trace. Returns '' if no config path can be found.
+function TMakeRunner.LocateFpcConfig: string;
+var
+  Output, Line, Low, Cand: string;
+  Lines: TStringList;
+  I, P: Integer;
+begin
+  Result := '';
+  RunCommandEx('fpc', ['-va'], '', False, Output);
+  Lines := TStringList.Create;
+  try
+    Lines.Text := Output;
+    for I := 0 to Lines.Count - 1 do
+    begin
+      Line := Lines[I];
+      Low := LowerCase(Line);
+      // Only trace lines that name a config file; skip option-echo lines.
+      if (Pos('config file', Low) = 0) and (Pos('options from file', Low) = 0) then
+        Continue;
+      P := Pos('file ', Low);
+      if P = 0 then
+        Continue;
+      Cand := Trim(Copy(Line, P + Length('file '), MaxInt));
+      if (Length(Cand) >= 4) and
+         (LowerCase(Copy(Cand, Length(Cand) - 3, 4)) = '.cfg') then
+        Exit(Cand); // first config read = the main fpc.cfg
+    end;
+  finally
+    Lines.Free;
+  end;
+end;
+
+// lazbuild applies `--opt` compiler options to the top-level project only; its
+// `--recursive` rebuild of required packages uses each package's own options,
+// so MAKE_DEFINES never reaches the dependency packages that way (the fpc
+// backend avoids this by compiling each package with -d directly). To match it,
+// append the defines to fpc.cfg so every fpc invocation lazbuild spawns - the
+// project and every recursive package build - inherits them. No-op on the fpc
+// backend (which already injects per compile) and when no defines are set.
+procedure TMakeRunner.InjectDefinesIntoFpcConfig;
+var
+  Cfg: string;
+  SL: TStringList;
+  I: Integer;
+begin
+  FInjectedFpcCfgPath := '';
+  if (not UsesLazbuild) or (FDefines.Count = 0) then
+    Exit;
+
+  Cfg := LocateFpcConfig;
+  if (Cfg = '') or (not FileExists(Cfg)) then
+    raise Exception.Create(
+      'lazbuild backend with MAKE_DEFINES set, but fpc.cfg could not be located ' +
+      'to propagate the defines to package builds. Refusing to continue, since ' +
+      'the defines would silently not reach the dependency packages. ' +
+      'Use MAKE_BUILD_BACKEND=fpc or make fpc.cfg discoverable via `fpc -va`.');
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile(Cfg);
+    SL.Add(FpcCfgMarkerBegin);
+    for I := 0 to FDefines.Count - 1 do
+      SL.Add('-d' + FDefines[I]);
+    SL.Add(FpcCfgMarkerEnd);
+    SL.SaveToFile(Cfg);
+  finally
+    SL.Free;
+  end;
+  FInjectedFpcCfgPath := Cfg;
+  Log(CSI_Yellow, Format('injected %d define(s) into %s (lazbuild package propagation)',
+    [FDefines.Count, Cfg]));
+end;
+
+// Strip the block InjectDefinesIntoFpcConfig appended, restoring fpc.cfg.
+procedure TMakeRunner.RestoreFpcConfig;
+var
+  SL, Kept: TStringList;
+  I: Integer;
+  InBlock: Boolean;
+begin
+  if (FInjectedFpcCfgPath = '') or (not FileExists(FInjectedFpcCfgPath)) then
+    Exit;
+  SL := TStringList.Create;
+  Kept := TStringList.Create;
+  try
+    SL.LoadFromFile(FInjectedFpcCfgPath);
+    InBlock := False;
+    for I := 0 to SL.Count - 1 do
+    begin
+      if SL[I] = FpcCfgMarkerBegin then
+      begin
+        InBlock := True;
+        Continue;
+      end;
+      if SL[I] = FpcCfgMarkerEnd then
+      begin
+        InBlock := False;
+        Continue;
+      end;
+      if not InBlock then
+        Kept.Add(SL[I]);
+    end;
+    Kept.SaveToFile(FInjectedFpcCfgPath);
+  finally
+    Kept.Free;
+    SL.Free;
+  end;
+  FInjectedFpcCfgPath := '';
+end;
+
 function TMakeRunner.RepoRoot: string;
 var
   Seeds: array[0..1] of string;
@@ -1739,6 +1860,12 @@ begin
     Log(CSI_Yellow, 'run benchmark: true')
   else
     Log(CSI_Yellow, 'run benchmark: false');
+
+  FBuildGuiProjects := ParseBoolEnv('MAKE_LAZBUILD_GUI', True);
+  if FBuildGuiProjects then
+    Log(CSI_Yellow, 'build GUI projects (lazbuild): true')
+  else
+    Log(CSI_Yellow, 'build GUI projects (lazbuild): false');
 end;
 
 procedure TMakeRunner.UpdateSubmodules;
@@ -1934,9 +2061,11 @@ begin
   ForEachLpkInDir(ASearchDir, @RegisterPackageLazbuild);
 end;
 
-// Assemble a lazbuild argv: base flags, then the configured defines as
-// --opt=-dNAME, then the target path. Centralizes define injection so project
-// and package builds stay consistent.
+// Assemble a lazbuild argv: base flags, then the target path. MAKE_DEFINES are
+// NOT passed here as --opt: lazbuild would apply them to the top-level target
+// only, not to the packages it rebuilds via --recursive. They are injected into
+// fpc.cfg instead (see InjectDefinesIntoFpcConfig) so every spawned fpc compile
+// - project and recursive package builds - picks them up.
 function TMakeRunner.LazbuildArgs(const ABaseFlags: array of string;
   const APath: string): TStringList;
 var
@@ -1945,7 +2074,6 @@ begin
   Result := TStringList.Create;
   for Flag in ABaseFlags do
     Result.Add(Flag);
-  TLazXml.AppendLazbuildDefineArgs(FDefines, Result);
   Result.Add(APath);
 end;
 
@@ -2318,6 +2446,23 @@ begin
     Log(CSI_Green, 'built GUI project (not run) ' + BinaryPath);
 end;
 
+// Handle a GUI (LCL) project: build it (compile-check only - GUI apps are never
+// run, they need a display) when the lazbuild backend is active AND GUI building
+// is enabled (MAKE_LAZBUILD_GUI); otherwise skip it - the fpc backend has no
+// widgetset, and MAKE_LAZBUILD_GUI=false opts lazbuild out too. Returns True if
+// ALpiPath was a GUI project, so the caller stops its normal processing for it.
+// ASkipLabel is the log prefix used when skipping (e.g. 'skip GUI project ').
+function TMakeRunner.TryHandleGuiProject(const ALpiPath, ASkipLabel: string): Boolean;
+begin
+  Result := IsGUIProject(ALpiPath);
+  if not Result then
+    Exit;
+  if LclSupported and FBuildGuiProjects then
+    BuildGuiProject(ALpiPath)
+  else
+    Log(CSI_Yellow, ASkipLabel + ALpiPath);
+end;
+
 procedure TMakeRunner.BuildAllProjects;
 var
   List: TStringList;
@@ -2327,18 +2472,8 @@ begin
   try
     for Each in List do
     begin
-      if IsGUIProject(Each) then
-      begin
-        if not LclSupported then
-        begin
-          Log(CSI_Yellow, 'skip GUI project ' + Each);
-          Continue;
-        end;
-        // lazbuild backend: the full LCL is present, so compile the GUI project
-        // to verify it builds. It is not run because GUI apps need a display.
-        BuildGuiProject(Each);
+      if TryHandleGuiProject(Each, 'skip GUI project ') then
         Continue;
-      end;
 
       if IsTestProject(Each) then
         RunTestProject(Each)
@@ -2373,16 +2508,8 @@ begin
   try
     for Each in List do
     begin
-      if IsGUIProject(Each) then
-      begin
-        if not LclSupported then
-        begin
-          Log(CSI_Yellow, 'skip GUI benchmark project ' + Each);
-          Continue;
-        end;
-        BuildGuiProject(Each);
+      if TryHandleGuiProject(Each, 'skip GUI benchmark project ') then
         Continue;
-      end;
 
       if not IsBenchmarkProject(Each) then
       begin
@@ -2414,9 +2541,14 @@ begin
   InitEnvironment;
   Log(CSI_Cyan, 'using target directory: ' + TargetDirectory);
   UpdateSubmodules;
-  InstallDependencies;
-  BuildAllProjects;
-  RunBenchmarkProjects;
+  InjectDefinesIntoFpcConfig;
+  try
+    InstallDependencies;
+    BuildAllProjects;
+    RunBenchmarkProjects;
+  finally
+    RestoreFpcConfig;
+  end;
   ReportSummary;
   Result := FErrorCount;
 end;
