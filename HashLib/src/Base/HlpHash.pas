@@ -7,6 +7,7 @@ interface
 uses
   Classes,
   SysUtils,
+  Math,
   HlpHashLibTypes,
   HlpHashLibExceptions,
   HlpConverters,
@@ -29,6 +30,9 @@ type
 
   const
     DefaultBufferSize = Int32(64 * 1024); // 64Kb
+
+  strict private
+    class function StagingSize(AMax: Int32; ATotal: Int64): Int32; static; inline;
 
   strict protected
 
@@ -100,6 +104,11 @@ begin
   Result := Self.ClassName;
 end;
 
+class function THash.StagingSize(AMax: Int32; ATotal: Int64): Int32;
+begin
+  Result := Int32(Min(Int64(AMax), Max(ATotal, Int64(0))));
+end;
+
 function THash.GetBufferSize: Int32;
 begin
   Result := FBufferSize;
@@ -158,14 +167,7 @@ var
 begin
   LPtrStart := @AData;
 
-  if BufferSize > ALength then // Sanity Check
-  begin
-    LBufferSize := BufferSize;
-  end
-  else
-  begin
-    LBufferSize := BufferSize;
-  end;
+  LBufferSize := StagingSize(BufferSize, ALength);
 
   if LPtrStart <> nil then
   begin
@@ -253,41 +255,35 @@ procedure THash.TransformStream(const AStream: TStream; ALength: Int64);
 var
   LData: THashLibByteArray;
   LRead, LBufferSize: Int32;
-  LTotal: Int64;
+  LTotal, LPosition, LSize: Int64;
 begin
 {$IFDEF DEBUG}
   System.Assert((ALength = -1) or (ALength > 0));
 {$ENDIF DEBUG}
   LTotal := 0;
-  if (AStream <> nil) then
-  begin
-    if (ALength > -1) then
-    begin
-      if ((AStream.Position + ALength) > AStream.Size) then
-      begin
-        raise EIndexOutOfRangeHashLibException.CreateRes(
-          @SReadBeyondStreamEndError);
-      end;
-    end;
-
-    if (AStream.Position >= AStream.Size) then
-    begin
-      Exit;
-    end;
-  end
-  else
+  if (AStream = nil) then
   begin
     raise EArgumentNilHashLibException.CreateRes(@SAStreamNilError);
   end;
 
-  if BufferSize > AStream.Size then // Sanity Check
+  LPosition := AStream.Position;
+  LSize := AStream.Size;
+
+  if (ALength > -1) then
   begin
-    LBufferSize := BufferSize;
-  end
-  else
-  begin
-    LBufferSize := BufferSize;
+    if ((LPosition + ALength) > LSize) then
+    begin
+      raise EIndexOutOfRangeHashLibException.CreateRes(
+        @SReadBeyondStreamEndError);
+    end;
   end;
+
+  if (LPosition >= LSize) then
+  begin
+    Exit;
+  end;
+
+  LBufferSize := StagingSize(BufferSize, LSize - LPosition);
 
   System.SetLength(LData, LBufferSize);
 

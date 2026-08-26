@@ -22,6 +22,7 @@ type
   var
     FHash: IHash;
     FOpad, FIpad, FKey: THashLibByteArray;
+    FPadsValid: Boolean;
 
     constructor Create(const AUnderlyingHash: IHash;
       const AHMACKey: THashLibByteArray);
@@ -60,6 +61,7 @@ implementation
 procedure THMACNotBuildInAdapter.Clear();
 begin
   TArrayUtils.ZeroFill(FKey);
+  FPadsValid := False;
 end;
 
 function THMACNotBuildInAdapter.Clone(): IHash;
@@ -69,6 +71,7 @@ begin
   LHmacInstance := THMACNotBuildInAdapter.Create(FHash.Clone(), FKey);
   LHmacInstance.FOpad := System.Copy(FOpad);
   LHmacInstance.FIpad := System.Copy(FIpad);
+  LHmacInstance.FPadsValid := FPadsValid;
   Result := LHmacInstance;
   Result.BufferSize := BufferSize;
 end;
@@ -104,6 +107,7 @@ begin
   begin
     FKey := System.Copy(AValue);
   end;
+  FPadsValid := False;
 end;
 
 procedure THMACNotBuildInAdapter.UpdatePads;
@@ -112,13 +116,13 @@ var
   LIdx, LBlockSize: Int32;
 begin
   LBlockSize := FHash.BlockSize;
-  if (System.Length(Key) > LBlockSize) then
+  if (System.Length(FKey) > LBlockSize) then
   begin
-    LKey := FHash.ComputeBytes(Key).GetBytes();
+    LKey := FHash.ComputeBytes(FKey).GetBytes();
   end
   else
   begin
-    LKey := Key;
+    LKey := FKey;
   end;
 
   TArrayUtils.Fill(FIpad, 0, LBlockSize, Byte($36));
@@ -137,7 +141,11 @@ end;
 procedure THMACNotBuildInAdapter.Initialize;
 begin
   FHash.Initialize();
-  UpdatePads();
+  if not FPadsValid then
+  begin
+    UpdatePads();
+    FPadsValid := True;
+  end;
   FHash.TransformBytes(FIpad);
 end;
 
