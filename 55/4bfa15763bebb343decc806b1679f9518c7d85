@@ -1,0 +1,32 @@
+HashLib/src/Base/HlpHash.pas
+  s_5e9312dc1422f7::t_1938b73e835077 264,266-267,269-270,272-274,276-277,281,283,286
+  s_5e9312dc1422f7::t_3fbfa0dfd14536 258
+  s_5e9312dc1422f7::t_5948aeefd81e31 35-36
+  s_5e9312dc1422f7::t_0e76dc5c29769c 34
+  s_5e9312dc1422f7::t_a9dec38422cb13 10,268,287
+  s_5e9312dc1422f7::t_09e3f74ffdf34f 107-111
+  s_5e9312dc1422f7::t_de41d35eccbf48 170
+HashLib/src/Base/HlpHMACNotBuildInAdapter.pas
+  s_5e9312dc1422f7::t_06b38e2def5ad3 64
+  s_5e9312dc1422f7::t_6a4288c3c408fb 119,121,125
+  s_5e9312dc1422f7::t_decabe51ca7994 25
+  s_5e9312dc1422f7::t_e7d78c6cb6c7f6 144-148
+  s_5e9312dc1422f7::t_2d42c3ab6593c0 74
+  s_5e9312dc1422f7::t_ae9cd90dbce030 110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "554bfa15763bebb343decc806b1679f9518c7d85",
+  "prompts": {},
+  "sessions": {
+    "s_5e9312dc1422f7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b29c589c-ed14-449b-8005-c9f68f77c10c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
