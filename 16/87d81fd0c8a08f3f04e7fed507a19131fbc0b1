@@ -1,0 +1,21 @@
+scripts/maintenance/sync-mobile-testdata.ps1
+  s_4adb7e2edc0c28::t_c9dac0aaeea86e 65
+  s_4adb7e2edc0c28::t_5d7debedf047f6 6
+  s_4adb7e2edc0c28::t_61b5526b057726 61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1687d81fd0c8a08f3f04e7fed507a19131fbc0b1",
+  "prompts": {},
+  "sessions": {
+    "s_4adb7e2edc0c28": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c581eaad-c17e-426b-bd6e-2854376cc3b7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
