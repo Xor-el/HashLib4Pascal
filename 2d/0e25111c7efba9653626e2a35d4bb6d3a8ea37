@@ -1,0 +1,21 @@
+.github/workflows/ci/ppc64-be-images.env
+  s_f2c9bd75607afc::t_a18c2599271b04 4-5,8-9
+.github/workflows/ci/ppc64-qemu-setup.sh
+  s_f2c9bd75607afc::t_75b12f60649286 8-14,19-23,29-32,39-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2d0e25111c7efba9653626e2a35d4bb6d3a8ea37",
+  "prompts": {},
+  "sessions": {
+    "s_f2c9bd75607afc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93bd4649-2a9e-4694-931c-623400c4649b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
