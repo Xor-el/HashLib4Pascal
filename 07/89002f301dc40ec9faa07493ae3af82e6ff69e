@@ -1,0 +1,62 @@
+HashLib.Tests/FreePascal.Tests/Mobile/Android/AndroidManifest.xml
+  s_f2c9bd75607afc::t_7ec32b98642610 1-22
+HashLib.Tests/FreePascal.Tests/Mobile/Android/src/org/fpctests/host/MainActivity.java
+  s_f2c9bd75607afc::t_2e2d7274aadbed 6
+  s_f2c9bd75607afc::t_89bb5fa55e6235 14
+  s_f2c9bd75607afc::t_8e2336cae20d7a 21-22
+  s_f2c9bd75607afc::t_04eb24d7675e24 33
+  s_f2c9bd75607afc::t_590cd4f3e0b36f 222
+  s_f2c9bd75607afc::t_c4e31207a55c86 91
+  s_f2c9bd75607afc::t_5fae15f692535a 115-116,118-119,126,129-131,134-135,137-139,142,145-147
+  s_f2c9bd75607afc::t_f0bccee39da8e5 34-35,37-42,46,51,57-61
+  s_f2c9bd75607afc::t_5aceca06f1b05f 62
+  s_f2c9bd75607afc::t_f8db131be8159c 47
+  s_f2c9bd75607afc::t_4c49238ef03871 117,120-125,127,133,141,143-144
+  s_f2c9bd75607afc::t_20683b6d9c7a7e 248-258
+  s_f2c9bd75607afc::t_cc0f68ff0eb2fc 1-5,7-13,15-20,23-32,36,43-45,48-50,52-56,63-90,92-114,128,132,136,140,148-181,183-187,192-193,196-198,200-201,203,205-214,216-221,223-247,259-273
+  s_f2c9bd75607afc::t_74ba4057a5ffe5 182,188-191,194-195,199,202,204,215
+HashLib.Tests/FreePascal.Tests/Mobile/Android/BuildApk.java
+  s_f2c9bd75607afc::t_71b0cdbea0f108 2,14,17,25,32,34,52-53,69-70,75,78-79,81-85,102-107,109,118,130-137,139,142,148,151,153,155,158-161,167,202-204,234-237,240-241,246,248,256,304,306-307,330,355-357
+  s_f2c9bd75607afc::t_e916015416cedf 1,3-13,15-16,18-24,26-31,33,35-51,54-68,71-74,76-77,80,86-101,108,110-117,119-129,138,140-141,143-147,149-150,152,154,156-157,162-166,168-201,205-233,238-239,242-245,247,249-255,257-303,305,308-312,325-329,331-354,358-360
+  s_f2c9bd75607afc::t_f8d19fda753a5b 313-324
+.gitignore
+  s_f2c9bd75607afc::t_471fe9234f412a 41
+HashLib.Tests/FreePascal.Tests/Mobile/Android/AndroidTestHost.pas
+  s_f2c9bd75607afc::t_b7734338460ba1 9,11,13-18
+  s_f2c9bd75607afc::t_f6fa9ad64c0fc9 2-8,19,33-37,39-42,47-71,73-74,76-85,91-94,97,100-103,106-109,111-128,131-151,153-154,156-188,192-202,204-205,207,213-253,257-261,263-268,272-274,276-279,281-293,297-302,304-319,321-324,326-332,334-337,339-342,344-352,354-356,358-366,372-382,384-388,390-391,393-396,400-401,405-408,414
+  s_f2c9bd75607afc::t_bc16f9a2637ee7 38
+  s_f2c9bd75607afc::t_972c796ea6d817 72
+  s_f2c9bd75607afc::t_d12ef46d5f0fb4 1,10,12,20-32,44-46,75,86-90,95-96,98-99,104-105,110,152,155,210-211,254-256,262,269-271,275,280,294-296,303,320,325,333,338,343,353,357,367-371,383,389,392,397-399,402-404
+  s_f2c9bd75607afc::t_b3a3b5b3c37368 43
+  s_f2c9bd75607afc::t_c66114021f2b30 129-130
+  s_f2c9bd75607afc::t_0809f4fe3956bd 409-413
+  s_f2c9bd75607afc::t_9eea2e95698625 189-191,203,206,208-209,212
+HashLib.Tests/FreePascal.Tests/HashLib.Tests.Android.lpi
+  s_f2c9bd75607afc::t_10d7d103e0214b 1-71
+.github/workflows/make.pas
+  s_f2c9bd75607afc::t_e49978233d9ab0 2395-2397,2399,2401-2402
+  s_f2c9bd75607afc::t_27bd4d7e2c79f3 2202
+  s_f2c9bd75607afc::t_3aaf059f89cceb 261
+  s_f2c9bd75607afc::t_1d303b220dde23 2398,2400
+  s_f2c9bd75607afc::t_d5578ff86202d1 2501-2506
+HashLib.Tests/FreePascal.Tests/HashLib.Tests.Android.lpr
+  s_f2c9bd75607afc::t_3bdc3fb247947a 1-8,10-33,35-41
+  s_f2c9bd75607afc::t_b4f45756a3db80 34
+  s_f2c9bd75607afc::t_73987eb771965b 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0789002f301dc40ec9faa07493ae3af82e6ff69e",
+  "prompts": {},
+  "sessions": {
+    "s_f2c9bd75607afc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93bd4649-2a9e-4694-931c-623400c4649b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
