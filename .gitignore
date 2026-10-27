@@ -38,6 +38,7 @@
 *.dcp
 *.so
 *.apk
+HashLib.Tests/FreePascal.Tests/Mobile/Android/build/
 *.drc
 *.map
 *.dres

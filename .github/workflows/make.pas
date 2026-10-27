@@ -258,6 +258,7 @@ type
     function ExtractBinaryFromBuildLog(const AOutput, AFallback: string): string;
     function IsGUIProject(const ALpiPath: string): Boolean;
     function IsTestProject(const ALpiPath: string): Boolean;
+    function IsLibraryProject(const ALpiPath: string): Boolean;
     function IsBenchmarkProject(const ALpiPath: string): Boolean;
     procedure RunTestProject(const APath: string);
     procedure RunSampleProject(const APath: string);
@@ -2198,7 +2199,7 @@ begin
   try
     for Each in List do
     begin
-      if IsGUIProject(Each) then
+      if IsGUIProject(Each) or IsLibraryProject(Each) then
         Continue;
       Proj := TLpiProject.CreateFromFile(Each, FTargetCpu, FTargetOs);
       try
@@ -2391,6 +2392,14 @@ begin
   Result := Pos('consoletestrunner', Content) > 0;
 end;
 
+function TMakeRunner.IsLibraryProject(const ALpiPath: string): Boolean;
+begin
+  Result := False;
+  if not FileExists(ALpiPath) then
+    Exit;
+  Result := Pos('<ExecutableType Value="Library"/>', TLazXml.ReadFile(ALpiPath)) > 0;
+end;
+
 function TMakeRunner.IsBenchmarkProject(const ALpiPath: string): Boolean;
 var
   LprPath, Content, ProjectBaseName: string;
@@ -2488,6 +2497,12 @@ begin
     begin
       if TryHandleGuiProject(Each, 'skip GUI project ') then
         Continue;
+
+      if IsLibraryProject(Each) then
+      begin
+        Log(CSI_Yellow, 'skip library project ' + Each);
+        Continue;
+      end;
 
       if IsTestProject(Each) then
         RunTestProject(Each)
