@@ -1,0 +1,19 @@
+HashLib/src/Packages/FPC/HashLib4PascalPackage.lpk
+  s_f2c9bd75607afc::t_33263f12da14c5 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "674346cb2e48e9d526cdb60deef80d85d2be5c35",
+  "prompts": {},
+  "sessions": {
+    "s_f2c9bd75607afc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93bd4649-2a9e-4694-931c-623400c4649b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
