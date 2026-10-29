@@ -1,0 +1,32 @@
+HashLib.Benchmark/src/Forms/FMX/fmxMainForm.pas
+  s_f2c9bd75607afc::t_808ad5610b07cb 49-51
+  s_f2c9bd75607afc::t_cd7d92174f79d3 13-15,18
+  s_f2c9bd75607afc::t_ac16ec12dec753 8
+  s_f2c9bd75607afc::t_4b0e85ffda10d3 52-53
+HashLib.Benchmark/src/Forms/FMX/fmxMainForm.fmx
+  s_3fa71795330dd9::t_af15a3f397a192 12,14-17,20-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "796ff84fdd8780bd8a6853c8a28ab268563be48e",
+  "prompts": {},
+  "sessions": {
+    "s_3fa71795330dd9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a5858d2b65b82cada",
+        "model": "unknown"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    },
+    "s_f2c9bd75607afc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93bd4649-2a9e-4694-931c-623400c4649b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Ugochukwu Mmaduekwe <ugo4brain@gmail.com>"
+    }
+  }
+}
