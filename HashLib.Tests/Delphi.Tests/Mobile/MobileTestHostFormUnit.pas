@@ -5,20 +5,24 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   System.IOUtils,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls, FMX.Layouts,
   FMX.Controls.Presentation, FMX.Edit, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
   HashLibTestResourceLoader, MobileTestRunner;
 
 type
   TMobileTestHostForm = class(TForm)
+    layRoot: TLayout;
+    layContent: TLayout;
     lblBaseUrl: TLabel;
     edtBaseUrl: TEdit;
+    grdButtons: TGridPanelLayout;
     btnSaveUrl: TButton;
     lblConnection: TLabel;
     btnRunTests: TButton;
     memLog: TMemo;
     procedure FormShow(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormSafeAreaChanged(Sender: TObject; const AInsets: TRectF);
     procedure edtBaseUrlChange(Sender: TObject);
     procedure btnSaveUrlClick(Sender: TObject);
     procedure btnRunTestsClick(Sender: TObject);
@@ -36,6 +40,11 @@ var
 implementation
 
 {$R *.fmx}
+
+procedure TMobileTestHostForm.FormSafeAreaChanged(Sender: TObject; const AInsets: TRectF);
+begin
+  layRoot.Padding.Rect := AInsets;
+end;
 
 procedure TMobileTestHostForm.AppendLog(const ALine: string);
 begin
