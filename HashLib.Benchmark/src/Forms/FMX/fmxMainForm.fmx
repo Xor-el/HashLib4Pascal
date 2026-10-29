@@ -9,27 +9,56 @@ object MainForm: TMainForm
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnSafeAreaChanged = FormSafeAreaChanged
   DesignerMasterStyle = 0
-  object mmoBenchmarkLog: TMemo
-    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-    DataDetectorTypes = []
-    Position.X = 24.000000000000000000
-    Position.Y = 24.000000000000000000
-    Size.Width = 585.000000000000000000
-    Size.Height = 393.000000000000000000
+  object layRoot: TLayout
+    Align = Client
+    Size.Width = 636.000000000000000000
+    Size.Height = 480.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
-    Viewport.Width = 581.000000000000000000
-    Viewport.Height = 389.000000000000000000
-  end
-  object DoBenchmark: TButton
-    Position.X = 136.000000000000000000
-    Position.Y = 432.000000000000000000
-    Size.Width = 353.000000000000000000
-    Size.Height = 41.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 1
-    Text = 'Do Benchmark'
-    OnClick = DoBenchmarkClick
+    object layContent: TLayout
+      Align = Client
+      Padding.Left = 16.000000000000000000
+      Padding.Top = 16.000000000000000000
+      Padding.Right = 16.000000000000000000
+      Padding.Bottom = 16.000000000000000000
+      Size.Width = 636.000000000000000000
+      Size.Height = 480.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object layFooter: TLayout
+        Align = Bottom
+        Margins.Top = 12.000000000000000000
+        Size.Width = 604.000000000000000000
+        Size.Height = 41.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object DoBenchmark: TButton
+          Align = Center
+          Size.Width = 240.000000000000000000
+          Size.Height = 41.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Do Benchmark'
+          OnClick = DoBenchmarkClick
+        end
+      end
+      object mmoBenchmarkLog: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        StyledSettings = [Style, FontColor]
+        TextSettings.Font.Family = 'monospace'
+        TextSettings.Font.Size = 13.000000000000000000
+        WordWrap = True
+        Align = Client
+        Size.Width = 604.000000000000000000
+        Size.Height = 391.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        Viewport.Width = 600.000000000000000000
+        Viewport.Height = 387.000000000000000000
+      end
+    end
   end
 end
