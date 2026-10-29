@@ -9,73 +9,123 @@ object MobileTestHostForm: TMobileTestHostForm
   FormFactor.Devices = [Desktop]
   OnShow = FormShow
   OnActivate = FormActivate
+  OnSafeAreaChanged = FormSafeAreaChanged
   DesignerMasterStyle = 3
-  object lblBaseUrl: TLabel
-    AutoSize = True
-    Position.X = 8.000000000000000000
-    Position.Y = 26.000000000000000000
-    Size.Width = 177.000000000000000000
-    Size.Height = 22.000000000000000000
+  object layRoot: TLayout
+    Align = Client
+    Size.Width = 360.000000000000000000
+    Size.Height = 606.000000000000000000
     Size.PlatformDefault = False
-    Text = 'TestInsight URL'
-    TabOrder = 4
-  end
-  object edtBaseUrl: TEdit
-    Touch.InteractiveGestures = [LongTap, DoubleTap]
-    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
-    Position.X = 8.000000000000000000
-    Position.Y = 56.000000000000000000
-    Size.Width = 344.000000000000000000
-    Size.Height = 32.000000000000000000
-    Size.PlatformDefault = False
-    TextPrompt = 'http://IP:PORT'
-    OnChange = edtBaseUrlChange
-    OnChangeTracking = edtBaseUrlChange
-  end
-  object btnSaveUrl: TButton
-    Enabled = False
-    Position.X = 8.000000000000000000
-    Position.Y = 114.000000000000000000
-    Size.Width = 89.000000000000000000
-    Size.Height = 44.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 1
-    Text = 'Save URL'
-    OnClick = btnSaveUrlClick
-  end
-  object lblConnection: TLabel
-    AutoSize = True
-    Position.X = 8.000000000000000000
-    Position.Y = 222.000000000000000000
-    Size.Width = 344.000000000000000000
-    Size.Height = 22.000000000000000000
-    Size.PlatformDefault = False
-    Text = 'IDE: (status)'
-    TabOrder = 5
-  end
-  object btnRunTests: TButton
-    Enabled = False
-    Position.X = 8.000000000000000000
-    Position.Y = 166.000000000000000000
-    Size.Width = 89.000000000000000000
-    Size.Height = 44.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 2
-    Text = 'Run Tests'
-    OnClick = btnRunTestsClick
-  end
-  object memLog: TMemo
-    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-    DataDetectorTypes = []
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Position.X = 8.000000000000000000
-    Position.Y = 264.000000000000000000
-    Size.Width = 344.000000000000000000
-    Size.Height = 334.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 3
-    Viewport.Width = 336.000000000000000000
-    Viewport.Height = 326.000000000000000000
+    object layContent: TLayout
+      Align = Client
+      Padding.Left = 16.000000000000000000
+      Padding.Top = 16.000000000000000000
+      Padding.Right = 16.000000000000000000
+      Padding.Bottom = 16.000000000000000000
+      Size.Width = 360.000000000000000000
+      Size.Height = 606.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object lblBaseUrl: TLabel
+        Align = Top
+        AutoSize = True
+        Margins.Bottom = 8.000000000000000000
+        Size.Width = 328.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'TestInsight URL'
+        TabOrder = 0
+      end
+      object edtBaseUrl: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Top
+        TabOrder = 1
+        Margins.Bottom = 12.000000000000000000
+        Size.Width = 328.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TextPrompt = 'http://IP:PORT'
+        OnChange = edtBaseUrlChange
+        OnChangeTracking = edtBaseUrlChange
+      end
+      object grdButtons: TGridPanelLayout
+        Align = Top
+        Margins.Bottom = 12.000000000000000000
+        Size.Width = 328.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        ColumnCollection = <
+          item
+            Value = 50.000000000000000000
+          end
+          item
+            Value = 50.000000000000000000
+          end>
+        ControlCollection = <
+          item
+            Column = 0
+            Control = btnSaveUrl
+            Row = 0
+          end
+          item
+            Column = 1
+            Control = btnRunTests
+            Row = 0
+          end>
+        RowCollection = <
+          item
+            Value = 100.000000000000000000
+          end>
+        object btnSaveUrl: TButton
+          Align = Client
+          Enabled = False
+          Margins.Right = 4.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 44.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Save URL'
+          OnClick = btnSaveUrlClick
+        end
+        object btnRunTests: TButton
+          Align = Client
+          Enabled = False
+          Margins.Left = 4.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 44.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          Text = 'Run Tests'
+          OnClick = btnRunTestsClick
+        end
+      end
+      object lblConnection: TLabel
+        Align = Top
+        AutoSize = True
+        Margins.Bottom = 12.000000000000000000
+        Size.Width = 328.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'IDE: (status)'
+        TabOrder = 3
+      end
+      object memLog: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        StyledSettings = [Style, FontColor]
+        TextSettings.Font.Family = 'monospace'
+        TextSettings.Font.Size = 13.000000000000000000
+        WordWrap = True
+        Align = Client
+        Size.Width = 328.000000000000000000
+        Size.Height = 398.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 4
+        Viewport.Width = 324.000000000000000000
+        Viewport.Height = 394.000000000000000000
+      end
+    end
   end
 end

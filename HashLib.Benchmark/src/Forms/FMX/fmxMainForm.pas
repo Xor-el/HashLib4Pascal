@@ -5,13 +5,17 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls, FMX.Layouts,
   FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, PerformanceBenchmark, FMX.Memo.Types;
 
 type
   TMainForm = class(TForm)
+    layRoot: TLayout;
+    layContent: TLayout;
+    layFooter: TLayout;
     mmoBenchmarkLog: TMemo;
     DoBenchmark: TButton;
+    procedure FormSafeAreaChanged(Sender: TObject; const AInsets: TRectF);
     procedure DoBenchmarkClick(Sender: TObject);
   private
     { Private declarations }
@@ -40,6 +44,11 @@ begin
       if Assigned(GMemoRef) then
         GMemoRef.Lines.Add(LMsg);
     end);
+end;
+
+procedure TMainForm.FormSafeAreaChanged(Sender: TObject; const AInsets: TRectF);
+begin
+  layRoot.Padding.Rect := AInsets;
 end;
 
 procedure TMainForm.DoBenchmarkClick(Sender: TObject);
